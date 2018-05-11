@@ -1,0 +1,22 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
+    <t:summary icon="graph.png">
+        <div><a href="coverage/">${%Coverage Reports}</a></div>
+        <j:set var="result" value="${it.target}" />
+        <j:if test="${result != null}">
+            <div style="margin: 1ex 0 0 1ex">
+            <j:forEach var="metric" items="${result.metrics}">
+                <b>${metric.name}</b>:
+                ${result.getCoverage(metric).percentage}%
+                &amp;nbsp;
+            </j:forEach>
+            </div>
+            <j:set var="failMessage" value="${it.failMessage}" />
+            <j:if test="${failMessage != null}">
+            <div style="margin: 0 0 0 1ex">
+                ${failMessage}
+            </div>
+            </j:if>
+        </j:if>
+    </t:summary>
+</j:jelly>
