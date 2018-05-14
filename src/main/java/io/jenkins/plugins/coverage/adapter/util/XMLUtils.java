@@ -30,6 +30,7 @@ public class XMLUtils {
      *
      * @param xsl    XSLT file
      * @param source Source xml file
+     * @return Converted document
      */
     public Document convertToDocumentWithXSL(File xsl, File source) {
         Node node = convertToDOMResultWithXSL(xsl, source).getNode();

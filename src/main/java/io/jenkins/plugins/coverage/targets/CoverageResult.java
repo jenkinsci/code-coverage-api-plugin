@@ -39,9 +39,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Coverage result for a specific programming element.
- * <p>
- * <p>
+ * <p>Coverage result for a specific programming element.</p>
  * Instances of {@link CoverageResult} form a tree structure to progressively represent smaller elements.
  *
  * @author Stephen Connolly

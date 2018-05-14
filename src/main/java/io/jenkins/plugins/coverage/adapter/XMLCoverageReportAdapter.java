@@ -53,6 +53,8 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
             File realXSL = new File(getClass().getResource(getXSL()).toURI());
             if(!realXSL.exists()) {
                 throw new FileNotFoundException("Cannot found xsl file");
+            } else {
+                return realXSL;
             }
         } catch (URISyntaxException e) {
             e.printStackTrace();

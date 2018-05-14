@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * parse Java standard format coverage report to {@link CoverageResult}. <br/>
+ * <p>parse Java standard format coverage report to {@link CoverageResult}.</p>
  *
  * The standard format should be like this
  * <pre>
