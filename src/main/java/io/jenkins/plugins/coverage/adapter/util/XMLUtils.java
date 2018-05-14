@@ -2,17 +2,22 @@ package io.jenkins.plugins.coverage.adapter.util;
 
 
 import io.jenkins.plugins.coverage.exception.ConversionException;
+import org.dom4j.io.DocumentSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 public class XMLUtils {
 
@@ -96,4 +101,14 @@ public class XMLUtils {
     }
 
 
+    public void writeToXMLFile(Document document, File target) {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer;
+        try {
+            transformer = transformerFactory.newTransformer();
+            transformer.transform(new DOMSource(document), new StreamResult(target));
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+    }
 }

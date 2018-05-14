@@ -6,13 +6,13 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,8 +20,15 @@ import java.util.Map;
 
 public class CoverageProcessor {
 
-    public List<CoverageResult> getCoverageResults(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
-        return convertToResults(run, workspace, listener, adapters);
+    private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
+
+    public CoverageResult getCoverageReport(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
+        List<CoverageResult> results = convertToResults(run, workspace, listener, adapters);
+        CoverageResult report = aggregatedToReport(results);
+
+        saveReport(run, report);
+
+        return report;
     }
 
     private List<CoverageResult> convertToResults(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
@@ -65,6 +72,15 @@ public class CoverageProcessor {
         return results;
     }
 
+    private CoverageResult aggregatedToReport(List<CoverageResult> results) {
+        CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
+        for (CoverageResult result : results) {
+            result.addParent(report);
+        }
+        return report;
+    }
+
+
     /**
      * check report file
      *
@@ -97,5 +113,19 @@ public class CoverageProcessor {
             }
             return r;
         }
+    }
+
+    public static void saveReport(Run<?, ?> run, CoverageResult report) throws IOException {
+        File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
+
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reportFile));
+        oos.writeObject(report);
+    }
+
+    public static CoverageResult recoverReport(Run<?, ?> run) throws IOException, ClassNotFoundException {
+        File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
+
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reportFile));
+        return (CoverageResult) ois.readObject();
     }
 }

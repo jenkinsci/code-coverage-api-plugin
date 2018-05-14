@@ -1,10 +1,9 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.model.Jenkins;
 import org.w3c.dom.Document;
 

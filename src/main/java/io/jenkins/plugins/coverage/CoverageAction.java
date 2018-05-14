@@ -8,8 +8,10 @@ import jenkins.tasks.SimpleBuildStep;
 import org.kohsuke.stapler.StaplerProxy;
 
 import javax.annotation.CheckForNull;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.Collections;
 
 public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2 {
 
@@ -28,7 +30,8 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
 
     @Override
     public Collection<? extends Action> getProjectActions() {
-        return null;
+        //TODO Only stable should be replaced by variable
+        return Collections.singleton(new CoverageProjectAction(owner, false));
     }
 
     @CheckForNull
@@ -62,9 +65,9 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
 
     private synchronized void setOwner(Run<?, ?> owner) {
         this.owner = owner;
-        if (report != null ) {
+        if (report != null) {
             CoverageResult r = report.get();
-            if(r != null) {
+            if (r != null) {
                 r.setOwner(owner);
             }
 
@@ -76,6 +79,24 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
     private CoverageResult getResult() {
-        return report.get();
+        if (report != null) {
+            CoverageResult r = report.get();
+            if (r != null) {
+                return r;
+            }
+        }
+
+        CoverageResult r = null;
+        try {
+            r = CoverageProcessor.recoverReport(owner);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (r != null) {
+            r.setOwner(owner);
+            report = new WeakReference<>(r);
+        }
+        return r;
     }
 }

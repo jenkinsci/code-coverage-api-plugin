@@ -13,7 +13,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -22,7 +21,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
@@ -36,14 +34,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         CoverageProcessor processor = new CoverageProcessor();
-        List<CoverageResult> results = processor.getCoverageResults(run, workspace, listener, adapters);
+        CoverageResult result = processor.getCoverageReport(run, workspace, listener, adapters);
 
-        CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
-        for (CoverageResult result : results) {
-            result.addParent(report);
-        }
-
-        CoverageAction action = new CoverageAction(report);
+        CoverageAction action = new CoverageAction(result);
         run.addAction(action);
     }
 
