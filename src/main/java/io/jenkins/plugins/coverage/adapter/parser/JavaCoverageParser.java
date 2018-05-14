@@ -1,6 +1,6 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
-import io.jenkins.plugins.coverage.Ratio;
+import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -10,11 +10,46 @@ import org.w3c.dom.Element;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * parse Java standard format coverage report to {@link CoverageResult}. <br/>
+ *
+ * The standard format should be like this
+ * <pre>
+ *
+ * {@code
+ * <report name="cobertura">
+ *     <group name="io.jenkins.plugins.coverage">
+ *         <package name="io.jenkins.plugins.coverage.adapter.parser">
+ *             <file name="JavaCoverageParser.java">
+ *                 <class name="io.jenkins.plugins.coverage.adapter.parser.JavaCoverageParser">
+ *                     <method name="processElement" signature="...">
+ *                         <line number="1" hits="1"/>
+ *                     </method>
+ *                     ...
+ *                     <line number="1" hits="1" branch="false"/>
+ *                     <line number="2" hits="11" branch="false"/>
+ *                     ...
+ *                 </class>
+ *                 ...
+ *             </file>
+ *             ...
+ *         </package>
+ *         ...
+ *     </group>
+ *     ...
+ * </report>
+ * }
+ * </pre>
+ *
+ */
 public class JavaCoverageParser extends CoverageParser {
 
     private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*\\%\\s*\\((\\d*)/(\\d*)\\)");
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected CoverageResult processElement(Element current, CoverageResult parentResult) {
         CoverageResult result = null;
@@ -85,6 +120,12 @@ public class JavaCoverageParser extends CoverageParser {
         return result;
     }
 
+    /**
+     * Get value of name attribute from a element, if name attribute not exist or is empty, return default name.
+     * @param e Element want to get name
+     * @param defaultName default name
+     * @return value of name attribute
+     */
     private String getNameAttribute(Element e, String defaultName) {
         String name = e.getAttribute("name");
         return StringUtils.isEmpty(name) ? defaultName : name;

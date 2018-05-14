@@ -13,8 +13,8 @@ import java.util.Collection;
 
 public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2 {
 
-    private Run<?, ?> owner;
-    private WeakReference<CoverageResult> report;
+    private transient Run<?, ?> owner;
+    private transient WeakReference<CoverageResult> report;
 
 
     public CoverageAction(CoverageResult result) {
@@ -40,7 +40,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     @CheckForNull
     @Override
     public String getDisplayName() {
-        return "coverage report";
+        return Messages.CoverageAction_displayName();
     }
 
     @CheckForNull

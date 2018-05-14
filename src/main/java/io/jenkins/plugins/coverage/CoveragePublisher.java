@@ -7,7 +7,10 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.*;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -33,7 +36,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         CoverageProcessor processor = new CoverageProcessor();
-        List<CoverageResult> results = processor.precess(run, workspace, listener, adapters);
+        List<CoverageResult> results = processor.getCoverageResults(run, workspace, listener, adapters);
 
         CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
         for (CoverageResult result : results) {
@@ -63,8 +66,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
          */
         @Override
         public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
+            super.configure(req, json);
             save();
-            return super.configure(req, json);
+            return true;
         }
 
         public DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
@@ -79,7 +83,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Publish Coverage Report";
+            return Messages.CoveragePublisher_displayName();
         }
     }
 

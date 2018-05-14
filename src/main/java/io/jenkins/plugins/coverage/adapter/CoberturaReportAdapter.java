@@ -3,7 +3,7 @@ package io.jenkins.plugins.coverage.adapter;
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
+public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @DataBoundConstructor
     public CoberturaReportAdapter(String path) {
