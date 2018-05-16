@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.exception;
 
-//TODO change it to non-runtime exception
-public class ConversionException extends RuntimeException {
+public class ConversionException extends Exception {
 
     public ConversionException() {
     }

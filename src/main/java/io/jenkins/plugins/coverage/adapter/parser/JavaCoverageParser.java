@@ -1,9 +1,9 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
-import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 /**
  * <p>parse Java standard format coverage report to {@link CoverageResult}.</p>
- *
+ * <p>
  * The standard format should be like this
  * <pre>
  *
@@ -40,11 +40,10 @@ import java.util.regex.Pattern;
  * </report>
  * }
  * </pre>
- *
  */
 public class JavaCoverageParser extends CoverageParser {
 
-    private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*\\%\\s*\\((\\d*)/(\\d*)\\)");
+    private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*%\\s*\\((\\d*)/(\\d*)\\)");
 
 
     /**
@@ -95,8 +94,7 @@ public class JavaCoverageParser extends CoverageParser {
                                 numerator = Integer.parseInt(numeratorStr);
                                 denominator = Integer.parseInt(denominatorStr);
                                 parentResult.updateMetric(CoverageMetric.CONDITIONAL, Ratio.create(numerator, denominator));
-                            } catch (NumberFormatException e) {
-                                // ignore
+                            } catch (NumberFormatException ignore) {
                             }
                         }
                     }
@@ -110,8 +108,7 @@ public class JavaCoverageParser extends CoverageParser {
                         parentResult.paint(number, hits, numerator, denominator);
                     }
                     parentResult.updateMetric(CoverageMetric.LINE, Ratio.create((hits == 0) ? 0 : 1, 1));
-                } catch (NumberFormatException e) {
-                    // ignore
+                } catch (NumberFormatException ignore) {
                 }
                 break;
             default:
@@ -122,7 +119,8 @@ public class JavaCoverageParser extends CoverageParser {
 
     /**
      * Get value of name attribute from a element, if name attribute not exist or is empty, return default name.
-     * @param e Element want to get name
+     *
+     * @param e           Element want to get name
      * @param defaultName default name
      * @return value of name attribute
      */

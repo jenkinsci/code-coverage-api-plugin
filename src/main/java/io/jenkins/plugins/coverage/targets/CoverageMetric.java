@@ -53,5 +53,16 @@ public enum CoverageMetric {
     public String getName() {
         return hasName.getName();
     }
+
+    public static CoverageMetric[] all() {
+        return new CoverageMetric[]{
+                CoverageMetric.GROUPS,
+                CoverageMetric.PACKAGES,
+                CoverageMetric.FILES,
+                CoverageMetric.CLASSES,
+                CoverageMetric.METHOD,
+                CoverageMetric.LINE,
+                CoverageMetric.CONDITIONAL};
+    }
 }
 

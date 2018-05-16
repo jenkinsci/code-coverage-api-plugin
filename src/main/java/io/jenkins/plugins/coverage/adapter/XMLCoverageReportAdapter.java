@@ -17,7 +17,6 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
     }
 
     /**
-     *
      * @return XSL file that convert report into standard format
      */
     @CheckForNull
@@ -25,6 +24,7 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
 
     /**
      * If return null, report will not be validate.
+     *
      * @return XSD file to validate report
      */
     @Nullable
@@ -36,7 +36,7 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
      * @param source source xml file
      */
     @Override
-    public Document convert(File source) {
+    public Document convert(File source) throws ConversionException {
         File xsl;
         try {
             xsl = getRealXSL();
@@ -44,14 +44,19 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
             e.printStackTrace();
             throw new ConversionException(e);
         }
-        return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
+        try {
+            return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new ConversionException(e);
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
-    protected File getRealXSL() throws FileNotFoundException {
+    protected File getRealXSL() throws ConversionException, FileNotFoundException {
         try {
             File realXSL = new File(getClass().getResource(getXSL()).toURI());
-            if(!realXSL.exists()) {
+            if (!realXSL.exists()) {
                 throw new FileNotFoundException("Cannot found xsl file");
             } else {
                 return realXSL;

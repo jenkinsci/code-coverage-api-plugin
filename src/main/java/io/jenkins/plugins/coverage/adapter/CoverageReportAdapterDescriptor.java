@@ -7,7 +7,8 @@ import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
 
-public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter> extends Descriptor<CoverageReportAdapter> {
+public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter>
+        extends Descriptor<CoverageReportAdapter> {
 
     private String toolName;
 
@@ -16,6 +17,9 @@ public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter> ex
         this.toolName = toolName;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Nonnull
     @Override
     public String getDisplayName() {

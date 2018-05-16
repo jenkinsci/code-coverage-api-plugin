@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.adapter;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import io.jenkins.plugins.coverage.exception.ConversionException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.model.Jenkins;
 import org.w3c.dom.Document;
@@ -13,11 +14,17 @@ import java.io.File;
 
 public abstract class CoverageReportAdapter implements ExtensionPoint, Describable<CoverageReportAdapter> {
 
-    // report file path
+    // path of report file
     private String path;
 
     public CoverageReportAdapter(String path) {
         this.path = path;
+    }
+
+
+    public CoverageResult getResult(File source) throws ConversionException {
+        Document document = convert(source);
+        return parseToResult(document);
     }
 
     /**
@@ -26,14 +33,16 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
      * @param source Report file
      * @return DOM document representation of standard format report
      */
-    protected abstract Document convert(File source);
+    protected abstract Document convert(File source) throws ConversionException;
 
     @CheckForNull
     protected abstract CoverageResult parseToResult(Document document);
 
-    public CoverageResult getResult(File source) {
-        Document document = convert(source);
-        return parseToResult(document);
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Descriptor<CoverageReportAdapter> getDescriptor() {
+        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     public String getPath() {
@@ -42,11 +51,5 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Descriptor<CoverageReportAdapter> getDescriptor() {
-        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 }

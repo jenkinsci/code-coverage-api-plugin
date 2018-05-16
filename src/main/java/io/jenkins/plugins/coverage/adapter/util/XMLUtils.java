@@ -2,14 +2,13 @@ package io.jenkins.plugins.coverage.adapter.util;
 
 
 import io.jenkins.plugins.coverage.exception.ConversionException;
-import org.dom4j.io.DocumentSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -17,7 +16,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 
 public class XMLUtils {
 
@@ -37,7 +35,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return Converted document
      */
-    public Document convertToDocumentWithXSL(File xsl, File source) {
+    public Document convertToDocumentWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
         Node node = convertToDOMResultWithXSL(xsl, source).getNode();
         if (node == null)
             return null;
@@ -51,13 +49,13 @@ public class XMLUtils {
      * @param source Source file
      * @param result Result that want to be written in
      */
-    private void convertWithXSL(File xsl, File source, Result result) {
+    private void convertWithXSL(File xsl, File source, Result result) throws FileNotFoundException, ConversionException {
         if (!xsl.exists()) {
-            throw new ConversionException("XSL File not exist!");
+            throw new FileNotFoundException("XSL File not exist!");
         }
 
         if (!source.exists()) {
-            throw new ConversionException("source File not exist!");
+            throw new FileNotFoundException("source File not exist!");
         }
 
 
@@ -81,7 +79,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return DOMResult
      */
-    public DOMResult convertToDOMResultWithXSL(File xsl, File source) {
+    public DOMResult convertToDOMResultWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
         DOMResult result = new DOMResult();
         convertWithXSL(xsl, source, result);
         return result;
@@ -94,7 +92,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return SAXResult
      */
-    public SAXResult convertToSAXResultWithXSL(File xsl, File source) {
+    public SAXResult convertToSAXResultWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
         SAXResult result = new SAXResult();
         convertWithXSL(xsl, source, result);
         return result;

@@ -29,7 +29,7 @@ package io.jenkins.plugins.coverage.targets;
  * @since 22-Aug-2007 18:36:01
  */
 public enum CoverageElement {
-    AGGREGATED_REPORT(()->"Aggregated Report"),
+    AGGREGATED_REPORT(() -> "Aggregated Report"),
     REPORT(() -> "Report", AGGREGATED_REPORT),
     JAVA_GROUP(() -> "Group", REPORT),
     JAVA_PACKAGE(() -> "Package", JAVA_GROUP),

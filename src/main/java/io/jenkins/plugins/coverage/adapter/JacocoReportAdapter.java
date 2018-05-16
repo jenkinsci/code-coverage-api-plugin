@@ -10,11 +10,17 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         super(path);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getXSL() {
         return "jacoco-to-standard.xsl";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getXSD() {
         return null;

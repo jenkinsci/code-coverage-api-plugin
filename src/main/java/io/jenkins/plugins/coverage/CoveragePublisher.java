@@ -13,22 +13,27 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.threshhold.ThreshHold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private CoverageReportAdapter[] adapters;
+    private ThreshHold[] globalThreshHolds;
 
     @DataBoundConstructor
-    public CoveragePublisher(CoverageReportAdapter[] adapters) {
+    public CoveragePublisher(CoverageReportAdapter[] adapters, ThreshHold[] globalThreshHolds) {
         this.adapters = adapters;
+        this.globalThreshHolds = globalThreshHolds;
     }
 
     @Override
@@ -68,6 +73,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             return CoverageReportAdapterDescriptor.all();
         }
 
+        public CoverageMetric[] getAllCoverageMetrics() {
+            return CoverageMetric.all();
+        }
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
@@ -78,7 +87,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         public String getDisplayName() {
             return Messages.CoveragePublisher_displayName();
         }
-    }
 
+        @Override
+        public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
+            return super.newInstance(req, formData);
+        }
+    }
 
 }

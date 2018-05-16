@@ -23,12 +23,12 @@ public abstract class CoverageParser {
     }
 
     /**
-     * Iterate the child elements of parent node, and parse the element to {@link CoverageResult}, then make the result
-     * as the child of parent coverage result.
+     * Iterate the child elements of parent node, and parse the element to {@link CoverageResult}, then make the CoverageResult
+     * be the child of parent CoverageResult.
      * @param parent Parent Node
      * @param parentResult Parent coverage result
      */
-    public void parse(Node parent, CoverageResult parentResult) {
+    public void parse(final Node parent, final CoverageResult parentResult) {
         NodeList nodeList = parent.getChildNodes();
         for (int i = 0, len = nodeList.getLength(); i < len; i++) {
             Node n = nodeList.item(i);
@@ -40,7 +40,7 @@ public abstract class CoverageParser {
     }
 
     /**
-     * Process DOM element and convert to {@link CoverageResult}
+     * Process DOM element and convert it to {@link CoverageResult}
      * @param current Current element
      * @param parentResult Parent coverage result
      * @return Coverage result

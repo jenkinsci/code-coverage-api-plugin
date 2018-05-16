@@ -10,11 +10,17 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
         super(path);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getXSL() {
         return "cobertura-to-standard.xsl";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getXSD() {
         return null;
@@ -22,7 +28,6 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @Extension
     public static final class CoverturaReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoberturaReportAdapter> {
-
 
         public CoverturaReportAdapterDescriptor() {
             super(CoberturaReportAdapter.class, "Cobertura");

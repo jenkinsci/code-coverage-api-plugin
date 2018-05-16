@@ -4,4 +4,61 @@
         <f:hetero-list name="adapters" descriptors="${descriptor.listCoverageReportAdapterDescriptors}"
                        items="${instance.adapters}" hasHeader="true"/>
     </f:block>
+
+    <f:advanced>
+        <f:entry title="${%Coverage Metric Targets}">
+            <f:repeatable var="threshHold" name="globalThreshHolds" items="${instance.globalThreshHolds}">
+                <table width="100%">
+                    <col width="25%"/>
+                    <col/>
+                    <col width="24px"/>
+                    <col width="15%"/>
+                    <col width="24px"/>
+                    <col width="15%"/>
+                    <col width="24px"/>
+                    <col width="15%"/>
+
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select class="setting-input" name="threshTarget">
+                                    <j:forEach var="i" items="${descriptor.allCoverageMetrics}">
+                                        <f:option selected="${i==threshHold.threshTarget}" value="${i}">${i.name}
+                                        </f:option>
+                                    </j:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <f:repeatableDeleteButton/>
+                            </td>
+                            <th>
+                                <img src="${rootURL}/images/16x16/health-80plus.gif" alt="100%"
+                                     title="${%Report is healthy as 100% when coverage is greater than}"/>
+                            </th>
+                            <td>
+                                <f:textbox name="healthyThresh"
+                                           value="${threshHold.healthyThresh}"/>
+                            </td>
+                            <th>
+                                <img src="${rootURL}/images/16x16/health-00to19.gif" alt="0%"
+                                     title="${%Report is unhealthy as 0% when coverage is less than}"/>
+                            </th>
+                            <td>
+                                <f:textbox name="unhealthyThresh"
+                                           value="${threshHold.unhealthyThresh}"/>
+                            </td>
+                            <th>
+                                <img src="${rootURL}/images/16x16/yellow.gif" alt="0%"
+                                     title="${%Mark the build as unstable when coverage is less than}"/>
+                            </th>
+                            <td>
+                                <f:textbox name="unstableThresh"
+                                           value="${threshHold.unstableThresh}"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </f:repeatable>
+        </f:entry>
+    </f:advanced>
 </j:jelly>

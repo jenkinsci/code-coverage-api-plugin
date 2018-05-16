@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
+import io.jenkins.plugins.coverage.exception.ConversionException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.MasterToSlaveFileCallable;
@@ -65,7 +66,13 @@ public class CoverageProcessor {
         for (Map.Entry<CoverageReportAdapter, File[]> adapterReports : copiedReportFile.entrySet()) {
             CoverageReportAdapter adapter = adapterReports.getKey();
             for (File s : adapterReports.getValue()) {
-                results.add(adapter.getResult(s));
+                try {
+                    results.add(adapter.getResult(s));
+                } catch (ConversionException e) {
+                    e.printStackTrace();
+                    listener.getLogger().printf("report for %s has met some errors: %s",
+                            adapter.getDescriptor().getDisplayName(), e.getMessage());
+                }
                 FileUtils.deleteQuietly(s);
             }
         }
@@ -78,18 +85,6 @@ public class CoverageProcessor {
             result.addParent(report);
         }
         return report;
-    }
-
-
-    /**
-     * check report file
-     *
-     * @param file
-     * @return
-     */
-    private boolean check(File file) {
-        //TODO write a schema file to validate report files
-        return true;
     }
 
 
@@ -109,7 +104,7 @@ public class CoverageProcessor {
             FilePath[] r = new FilePath(f).list(reportFilePath);
 
             for (FilePath filePath : r) {
-                //TODO use schema to validate xml file
+                //TODO check report file (it might should be implement by adapter)
             }
             return r;
         }
