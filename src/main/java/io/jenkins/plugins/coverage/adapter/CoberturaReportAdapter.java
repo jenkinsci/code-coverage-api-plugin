@@ -1,7 +1,13 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import hudson.Extension;
+import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.transform.TransformerException;
+import java.io.File;
 
 public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
@@ -27,10 +33,31 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
     }
 
     @Extension
-    public static final class CoverturaReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoberturaReportAdapter> {
+    public static final class CoverturaReportAdapterDescriptor
+            extends CoverageReportAdapterDescriptor<CoberturaReportAdapter> implements Detectable {
 
         public CoverturaReportAdapterDescriptor() {
             super(CoberturaReportAdapter.class, "Cobertura");
+        }
+
+
+        @Override
+        public boolean detect(File file) {
+            if (!file.exists())
+                return false;
+
+            Document d;
+            try {
+                d = XMLUtils.getInstance().readXMLtoDocument(file);
+            } catch (TransformerException ignore) {
+                return false;
+            }
+
+            Element e = d.getDocumentElement();
+            if (e == null)
+                return false;
+
+            return "coverage".equals(e.getLocalName());
         }
     }
 }

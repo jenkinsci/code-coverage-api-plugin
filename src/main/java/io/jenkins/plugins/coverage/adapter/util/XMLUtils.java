@@ -5,10 +5,7 @@ import io.jenkins.plugins.coverage.exception.ConversionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -36,10 +33,9 @@ public class XMLUtils {
      * @return Converted document
      */
     public Document convertToDocumentWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
-        Node node = convertToDOMResultWithXSL(xsl, source).getNode();
-        if (node == null)
-            return null;
-        return node.getNodeType() == Node.DOCUMENT_NODE ? ((Document) node) : node.getOwnerDocument();
+        DOMResult result = convertToDOMResultWithXSL(xsl, source);
+
+        return getDocumentFromDomResult(result);
     }
 
     /**
@@ -99,7 +95,7 @@ public class XMLUtils {
     }
 
 
-    public void writeToXMLFile(Document document, File target) {
+    public void writeDocumentToXML(Document document, File target) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -108,5 +104,22 @@ public class XMLUtils {
         } catch (TransformerException e) {
             e.printStackTrace();
         }
+    }
+
+    public Document readXMLtoDocument(File file) throws TransformerException {
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer();
+
+        DOMResult result = new DOMResult();
+        transformer.transform(new StreamSource(file), result);
+
+        return getDocumentFromDomResult(result);
+    }
+
+    private Document getDocumentFromDomResult(DOMResult domResult) {
+        Node node = domResult.getNode();
+        if (node == null)
+            return null;
+        return node.getNodeType() == Node.DOCUMENT_NODE ? ((Document) node) : node.getOwnerDocument();
     }
 }

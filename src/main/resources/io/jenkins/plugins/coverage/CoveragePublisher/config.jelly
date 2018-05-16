@@ -1,5 +1,15 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+    <f:block>
+        <f:optionalBlock name="autoDetectConfig" title="Auto Detect report"
+                         checked="${instance.autoDetectConfig != null}">
+            <f:entry title="Ant-Style path for detect" field="autoDetectPath">
+                <f:textbox name="autoDetectPath" optional=" true" default="*.xml"/>
+            </f:entry>
+        </f:optionalBlock>
+    </f:block>
+
     <f:block>
         <f:hetero-list name="adapters" descriptors="${descriptor.listCoverageReportAdapterDescriptors}"
                        items="${instance.adapters}" hasHeader="true"/>

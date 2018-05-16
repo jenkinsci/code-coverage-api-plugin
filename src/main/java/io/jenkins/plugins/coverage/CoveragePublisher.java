@@ -18,28 +18,38 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshhold.ThreshHold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
-    private CoverageReportAdapter[] adapters;
-    private ThreshHold[] globalThreshHolds;
+    private List<CoverageReportAdapter> adapters;
+    private List<ThreshHold> globalThreshHolds;
+
+    private AutoDetectConfig autoDetectConfig = null;
 
     @DataBoundConstructor
-    public CoveragePublisher(CoverageReportAdapter[] adapters, ThreshHold[] globalThreshHolds) {
+    public CoveragePublisher(List<CoverageReportAdapter> adapters, List<ThreshHold> globalThreshHolds) {
         this.adapters = adapters;
         this.globalThreshHolds = globalThreshHolds;
     }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        CoverageProcessor processor = new CoverageProcessor();
-        CoverageResult result = processor.getCoverageReport(run, workspace, listener, adapters);
+        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThreshHolds);
+
+        if (autoDetectConfig != null && !StringUtils.isEmpty(autoDetectConfig.getAutoDetectPath())) {
+            processor.enableAutoDetect(autoDetectConfig.getAutoDetectPath());
+        }
+
+        CoverageResult result = processor.processCoverageReport();
 
         CoverageAction action = new CoverageAction(result);
         run.addAction(action);
@@ -50,6 +60,22 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
+    public List<CoverageReportAdapter> getAdapters() {
+        return adapters;
+    }
+
+    public List<ThreshHold> getGlobalThreshHolds() {
+        return globalThreshHolds;
+    }
+
+    public AutoDetectConfig getAutoDetectConfig() {
+        return autoDetectConfig;
+    }
+
+    @DataBoundSetter
+    public void setAutoDetectConfig(AutoDetectConfig autoDetectConfig) {
+        this.autoDetectConfig = autoDetectConfig;
+    }
 
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
@@ -94,4 +120,21 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
+    public class AutoDetectConfig {
+        private String autoDetectPath;
+
+        @DataBoundConstructor
+        public AutoDetectConfig(String autoDetectPath) {
+            this.autoDetectPath = autoDetectPath;
+        }
+
+        public String getAutoDetectPath() {
+            return autoDetectPath;
+        }
+
+        @DataBoundSetter
+        public void setAutoDetectPath(String autoDetectPath) {
+            this.autoDetectPath = autoDetectPath;
+        }
+    }
 }

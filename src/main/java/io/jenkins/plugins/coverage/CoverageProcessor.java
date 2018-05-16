@@ -1,30 +1,54 @@
 package io.jenkins.plugins.coverage;
 
 
+import com.google.common.collect.Sets;
+import hudson.DescriptorExtensionList;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
+import io.jenkins.plugins.coverage.adapter.*;
 import io.jenkins.plugins.coverage.exception.ConversionException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.threshhold.ThreshHold;
 import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ClassUtils;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CoverageProcessor {
 
     private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
 
-    public CoverageResult getCoverageReport(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
-        List<CoverageResult> results = convertToResults(run, workspace, listener, adapters);
+    private Run<?, ?> run;
+    private FilePath workspace;
+    private TaskListener listener;
+    private List<CoverageReportAdapter> adapters;
+    private List<ThreshHold> globalThreshHolds;
+
+
+    private boolean enableAutoDetect;
+    private String autoDetectPath;
+
+    public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener,
+                             List<CoverageReportAdapter> adapters, List<ThreshHold> globalThreshHolds) {
+        this.run = run;
+        this.workspace = workspace;
+        this.listener = listener;
+        this.adapters = adapters;
+        this.globalThreshHolds = globalThreshHolds;
+    }
+
+
+    public CoverageResult processCoverageReport() throws IOException, InterruptedException {
+        List<CoverageResult> results = convertToResults(adapters);
         CoverageResult report = aggregatedToReport(results);
 
         saveReport(run, report);
@@ -32,38 +56,74 @@ public class CoverageProcessor {
         return report;
     }
 
-    private List<CoverageResult> convertToResults(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
-        Map<CoverageReportAdapter, FilePath[]> reports = new HashMap<>();
+    private List<CoverageResult> convertToResults(List<CoverageReportAdapter> adapters)
+            throws IOException, InterruptedException {
 
-        for (CoverageReportAdapter adapter : adapters) {
-            String path = adapter.getPath();
+        Map<CoverageReportAdapter, Set<FilePath>> reports = new HashMap<>();
+        Map<CoverageReportAdapter, List<File>> copiedReport = new HashMap<>();
 
-            FilePath[] r = workspace.act(new ParseReportCallable(path, adapter));
-            reports.put(adapter, r);
+        if (adapters != null) {
+            // find report according to the path of each adapter
+            for (CoverageReportAdapter adapter : adapters) {
+                String path = adapter.getPath();
+
+                FilePath[] r = workspace.act(new FindReportCallable(path, adapter));
+                reports.put(adapter, Sets.newHashSet(r));
+            }
+
+
+            // copy reports to build dir
+            File runRootDir = run.getRootDir();
+
+            for (Map.Entry<CoverageReportAdapter, Set<FilePath>> adapterReports : reports.entrySet()) {
+                Set<FilePath> r = adapterReports.getValue();
+                List<File> copies = new LinkedList<>();
+
+                int i = 0;
+                for (FilePath f : r) {
+                    File copy = new File(runRootDir, f.getName() + i);
+                    f.copyTo(new FilePath(copy));
+                    copies.add(copy);
+                    i++;
+                }
+
+                copiedReport.put(adapterReports.getKey(), copies);
+            }
         }
 
-        if (reports.size() == 0) {
+        if (isEnableAutoDetect()) {
+            List<FilePath> detectedFilePaths = Arrays.stream(workspace.act(new FindReportCallable(autoDetectPath, null)))
+                    .filter(filePath -> {
+                        for (Map.Entry<CoverageReportAdapter, Set<FilePath>> entry : reports.entrySet()) {
+                            if (entry.getValue().contains(filePath))
+                                return false;
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
+
+            try {
+                Map<CoverageReportAdapter, List<File>> detectedReportFiles = detectReports(detectedFilePaths);
+                for (Map.Entry<CoverageReportAdapter, List<File>> e : detectedReportFiles.entrySet()) {
+                    if (copiedReport.containsKey(e.getKey())) {
+                        copiedReport.get(e.getKey()).addAll(e.getValue());
+                    } else {
+                        copiedReport.put(e.getKey(), e.getValue());
+                    }
+                }
+            } catch (ReflectiveOperationException ignore) {
+            }
+
+        }
+
+        if (copiedReport.size() == 0) {
             listener.getLogger().println("No reports were found in this path");
         }
 
-        File runRootDir = run.getRootDir();
-        Map<CoverageReportAdapter, File[]> copiedReportFile = new HashMap<>();
-
-        for (Map.Entry<CoverageReportAdapter, FilePath[]> adapterReports : reports.entrySet()) {
-            FilePath[] r = adapterReports.getValue();
-            File[] copies = new File[r.length];
-
-            for (int i = 0; i < r.length; i++) {
-                File copy = new File(runRootDir, r[i].getName() + i);
-                r[i].copyTo(new FilePath(copy));
-                copies[i] = copy;
-            }
-            copiedReportFile.put(adapterReports.getKey(), copies);
-        }
         reports.clear();
 
+
         List<CoverageResult> results = new LinkedList<>();
-        for (Map.Entry<CoverageReportAdapter, File[]> adapterReports : copiedReportFile.entrySet()) {
+        for (Map.Entry<CoverageReportAdapter, List<File>> adapterReports : copiedReport.entrySet()) {
             CoverageReportAdapter adapter = adapterReports.getKey();
             for (File s : adapterReports.getValue()) {
                 try {
@@ -79,6 +139,34 @@ public class CoverageProcessor {
         return results;
     }
 
+    private Map<CoverageReportAdapter, List<File>> detectReports(List<FilePath> detectedFilePaths) throws IOException, InterruptedException, ReflectiveOperationException {
+        List<CoverageReportAdapterDescriptor> detectableReportDescriptors = findDetectableReportDescriptors();
+        Map<CoverageReportAdapter, List<File>> results = new HashMap<>();
+
+        File rootBuildDir = run.getRootDir();
+        for (FilePath fp : detectedFilePaths) {
+            File f = new File(rootBuildDir, fp.getName() + "detected");
+            fp.copyTo(new FilePath(f));
+
+            for (CoverageReportAdapterDescriptor d : detectableReportDescriptors) {
+                if (d instanceof Detectable) {
+                    Detectable detectable = ((Detectable) d);
+                    if (detectable.detect(f)) {
+                        Class clazz = d.clazz;
+                        Constructor c = clazz.getConstructor(String.class);
+                        if (c == null) continue;
+
+                        CoverageReportAdapter adapter = (CoverageReportAdapter) c.newInstance("");
+                        results.putIfAbsent(adapter, new LinkedList<>());
+                        results.get(adapter).add(f);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
     private CoverageResult aggregatedToReport(List<CoverageResult> results) {
         CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
         for (CoverageResult result : results) {
@@ -87,16 +175,50 @@ public class CoverageProcessor {
         return report;
     }
 
+    /**
+     * Find all detectable {@link CoverageReportAdapterDescriptor}
+     * @return Detectable CoverageReportAdapterDescriptors
+     */
+    @SuppressWarnings("unchecked")
+    private List<CoverageReportAdapterDescriptor> findDetectableReportDescriptors() {
+        DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>>
+                availableCoverageReportDescriptors = CoverageReportAdapterDescriptor.all();
 
-    private static class ParseReportCallable extends MasterToSlaveFileCallable<FilePath[]> {
+        List<CoverageReportAdapterDescriptor> results = new LinkedList<>();
+        Iterator<CoverageReportAdapterDescriptor<?>> i = availableCoverageReportDescriptors.iterator();
+        while (i.hasNext()) {
+            CoverageReportAdapterDescriptor c = i.next();
+            if(c instanceof Detectable) {
+                results.add(c);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Enable report auto-detect
+     * @param autoDetectPath Ant-Style path to specify coverage report
+     */
+    public void enableAutoDetect(String autoDetectPath) {
+        this.enableAutoDetect = true;
+        this.autoDetectPath = autoDetectPath;
+    }
+
+    public boolean isEnableAutoDetect() {
+        return enableAutoDetect;
+    }
+
+    private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {
 
         private final String reportFilePath;
         private final CoverageReportAdapter reportAdapter;
 
-        public ParseReportCallable(String reportFilePath, CoverageReportAdapter reportAdapter) {
+        public FindReportCallable(String reportFilePath, CoverageReportAdapter reportAdapter) {
             this.reportFilePath = reportFilePath;
             this.reportAdapter = reportAdapter;
         }
+
 
         @Override
         public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
@@ -109,6 +231,7 @@ public class CoverageProcessor {
             return r;
         }
     }
+
 
     public static void saveReport(Run<?, ?> run, CoverageResult report) throws IOException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
