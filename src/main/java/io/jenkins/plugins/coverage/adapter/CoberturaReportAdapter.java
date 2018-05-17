@@ -9,10 +9,13 @@ import org.w3c.dom.Element;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 
+/**
+ * Coverage report adapter for Cobertura.
+ */
 public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @DataBoundConstructor
-    public CoberturaReportAdapter(String path) {
+    public CoberturaReportAdapter(final String path) {
         super(path);
     }
 
@@ -34,7 +37,8 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @Extension
     public static final class CoverturaReportAdapterDescriptor
-            extends CoverageReportAdapterDescriptor<CoberturaReportAdapter> implements Detectable {
+            extends CoverageReportAdapterDescriptor<CoberturaReportAdapter>
+            implements Detectable {
 
         public CoverturaReportAdapterDescriptor() {
             super(CoberturaReportAdapter.class, "Cobertura");
@@ -42,9 +46,10 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
 
         @Override
-        public boolean detect(File file) {
-            if (!file.exists())
+        public boolean detect(final File file) {
+            if (!file.exists()) {
                 return false;
+            }
 
             Document d;
             try {
@@ -54,8 +59,9 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             }
 
             Element e = d.getDocumentElement();
-            if (e == null)
+            if (e == null) {
                 return false;
+            }
 
             return "coverage".equals(e.getLocalName());
         }

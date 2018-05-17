@@ -5,7 +5,10 @@ import io.jenkins.plugins.coverage.exception.ConversionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -32,7 +35,8 @@ public class XMLUtils {
      * @param source Source xml file
      * @return Converted document
      */
-    public Document convertToDocumentWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
+    public Document convertToDocumentWithXSL(File xsl, File source)
+            throws FileNotFoundException, ConversionException {
         DOMResult result = convertToDOMResultWithXSL(xsl, source);
 
         return getDocumentFromDomResult(result);
@@ -45,13 +49,14 @@ public class XMLUtils {
      * @param source Source file
      * @param result Result that want to be written in
      */
-    private void convertWithXSL(File xsl, File source, Result result) throws FileNotFoundException, ConversionException {
+    private void convertWithXSL(File xsl, File source, Result result)
+            throws FileNotFoundException, ConversionException {
         if (!xsl.exists()) {
-            throw new FileNotFoundException("XSL File not exist!");
+            throw new FileNotFoundException("XSL File does not exist!");
         }
 
         if (!source.exists()) {
-            throw new FileNotFoundException("source File not exist!");
+            throw new FileNotFoundException("source File does not exist!");
         }
 
 
@@ -75,7 +80,8 @@ public class XMLUtils {
      * @param source Source xml file
      * @return DOMResult
      */
-    public DOMResult convertToDOMResultWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
+    public DOMResult convertToDOMResultWithXSL(File xsl, File source)
+            throws FileNotFoundException, ConversionException {
         DOMResult result = new DOMResult();
         convertWithXSL(xsl, source, result);
         return result;
@@ -88,7 +94,8 @@ public class XMLUtils {
      * @param source Source xml file
      * @return SAXResult
      */
-    public SAXResult convertToSAXResultWithXSL(File xsl, File source) throws FileNotFoundException, ConversionException {
+    public SAXResult convertToSAXResultWithXSL(File xsl, File source)
+            throws FileNotFoundException, ConversionException {
         SAXResult result = new SAXResult();
         convertWithXSL(xsl, source, result);
         return result;
@@ -118,8 +125,10 @@ public class XMLUtils {
 
     private Document getDocumentFromDomResult(DOMResult domResult) {
         Node node = domResult.getNode();
-        if (node == null)
+        if (node == null) {
             return null;
+        }
+
         return node.getNodeType() == Node.DOCUMENT_NODE ? ((Document) node) : node.getOwnerDocument();
     }
 }

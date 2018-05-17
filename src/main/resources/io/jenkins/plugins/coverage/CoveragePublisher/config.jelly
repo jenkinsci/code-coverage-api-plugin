@@ -2,12 +2,9 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
     <f:block>
-        <f:optionalBlock name="autoDetectConfig" title="Auto Detect report"
-                         checked="${instance.autoDetectConfig != null}">
-            <f:entry title="Ant-Style path for detect" field="autoDetectPath">
-                <f:textbox name="autoDetectPath" optional=" true" default="*.xml"/>
-            </f:entry>
-        </f:optionalBlock>
+        <f:entry title="Ant-Style Path for Automatically Detect" field="autoDetectPath">
+            <f:textbox default="*.xml" value="${instance.autoDetectPath}"/>
+        </f:entry>
     </f:block>
 
     <f:block>
@@ -16,7 +13,7 @@
     </f:block>
 
     <f:advanced>
-        <f:entry title="${%Coverage Metric Targets}">
+        <f:entry title="Global Coverage Thresh Hold">
             <f:repeatable var="threshHold" name="globalThreshHolds" items="${instance.globalThreshHolds}">
                 <table width="100%">
                     <col width="25%"/>

@@ -7,15 +7,15 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import io.jenkins.plugins.coverage.adapter.*;
+import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
+import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.adapter.Detectable;
 import io.jenkins.plugins.coverage.exception.ConversionException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshhold.ThreshHold;
 import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ClassUtils;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -23,6 +23,9 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author Shenyu Zheng
+ */
 public class CoverageProcessor {
 
     private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
@@ -56,6 +59,12 @@ public class CoverageProcessor {
         return report;
     }
 
+    /**
+     * Convert report specified by {@link CoverageReportAdapter} into coverage results.
+     *
+     * @param adapters {@link CoverageReportAdapter} for each report
+     * @return {@link CoverageResult} for each report
+     */
     private List<CoverageResult> convertToResults(List<CoverageReportAdapter> adapters)
             throws IOException, InterruptedException {
 
@@ -91,6 +100,7 @@ public class CoverageProcessor {
             }
         }
 
+        // If enable automatically detecting, it will try to find report and correspond adapter.
         if (isEnableAutoDetect()) {
             List<FilePath> detectedFilePaths = Arrays.stream(workspace.act(new FindReportCallable(autoDetectPath, null)))
                     .filter(filePath -> {
@@ -177,6 +187,7 @@ public class CoverageProcessor {
 
     /**
      * Find all detectable {@link CoverageReportAdapterDescriptor}
+     *
      * @return Detectable CoverageReportAdapterDescriptors
      */
     @SuppressWarnings("unchecked")
@@ -188,7 +199,7 @@ public class CoverageProcessor {
         Iterator<CoverageReportAdapterDescriptor<?>> i = availableCoverageReportDescriptors.iterator();
         while (i.hasNext()) {
             CoverageReportAdapterDescriptor c = i.next();
-            if(c instanceof Detectable) {
+            if (c instanceof Detectable) {
                 results.add(c);
             }
         }
@@ -198,6 +209,7 @@ public class CoverageProcessor {
 
     /**
      * Enable report auto-detect
+     *
      * @param autoDetectPath Ant-Style path to specify coverage report
      */
     public void enableAutoDetect(String autoDetectPath) {
@@ -236,14 +248,16 @@ public class CoverageProcessor {
     public static void saveReport(Run<?, ?> run, CoverageResult report) throws IOException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reportFile));
-        oos.writeObject(report);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reportFile))) {
+            oos.writeObject(report);
+        }
     }
 
     public static CoverageResult recoverReport(Run<?, ?> run) throws IOException, ClassNotFoundException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
-        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reportFile));
-        return (CoverageResult) ois.readObject();
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reportFile))) {
+            return (CoverageResult) ois.readObject();
+        }
     }
 }

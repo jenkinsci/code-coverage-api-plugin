@@ -33,7 +33,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageReportAdapter> adapters;
     private List<ThreshHold> globalThreshHolds;
 
-    private AutoDetectConfig autoDetectConfig = null;
+    private String autoDetectPath;
 
     @DataBoundConstructor
     public CoveragePublisher(List<CoverageReportAdapter> adapters, List<ThreshHold> globalThreshHolds) {
@@ -45,8 +45,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThreshHolds);
 
-        if (autoDetectConfig != null && !StringUtils.isEmpty(autoDetectConfig.getAutoDetectPath())) {
-            processor.enableAutoDetect(autoDetectConfig.getAutoDetectPath());
+        if (StringUtils.isEmpty(autoDetectPath)) {
+            processor.enableAutoDetect(autoDetectPath);
         }
 
         CoverageResult result = processor.processCoverageReport();
@@ -68,13 +68,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return globalThreshHolds;
     }
 
-    public AutoDetectConfig getAutoDetectConfig() {
-        return autoDetectConfig;
+
+    public String getAutoDetectPath() {
+        return autoDetectPath;
     }
 
     @DataBoundSetter
-    public void setAutoDetectConfig(AutoDetectConfig autoDetectConfig) {
-        this.autoDetectConfig = autoDetectConfig;
+    public void setAutoDetectPath(String autoDetectPath) {
+        this.autoDetectPath = autoDetectPath;
     }
 
     @Extension
@@ -117,24 +118,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         @Override
         public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
             return super.newInstance(req, formData);
-        }
-    }
-
-    public class AutoDetectConfig {
-        private String autoDetectPath;
-
-        @DataBoundConstructor
-        public AutoDetectConfig(String autoDetectPath) {
-            this.autoDetectPath = autoDetectPath;
-        }
-
-        public String getAutoDetectPath() {
-            return autoDetectPath;
-        }
-
-        @DataBoundSetter
-        public void setAutoDetectPath(String autoDetectPath) {
-            this.autoDetectPath = autoDetectPath;
         }
     }
 }

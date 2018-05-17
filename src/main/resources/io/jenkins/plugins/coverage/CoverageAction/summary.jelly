@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
+<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
     <t:summary icon="graph.png">
         <div><a href="coverage/">${%Coverage Reports}</a></div>
         <j:set var="result" value="${it.target}" />

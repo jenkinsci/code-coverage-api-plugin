@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.adapter;
 
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
 import io.jenkins.plugins.coverage.exception.ConversionException;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.annotation.CheckForNull;
@@ -11,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 
 public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
+
 
     public XMLCoverageReportAdapter(String path) {
         super(path);
@@ -55,8 +57,13 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
     @SuppressWarnings("WeakerAccess")
     protected File getRealXSL() throws ConversionException, FileNotFoundException {
         try {
-            File realXSL = new File(getClass().getResource(getXSL()).toURI());
-            if (!realXSL.exists()) {
+            String xsl = getXSL();
+            if (StringUtils.isEmpty(xsl)) {
+                throw new FileNotFoundException("xsl path must be no-empty");
+            }
+
+            File realXSL = new File(getClass().getResource(xsl).toURI());
+            if (!realXSL.exists() || !realXSL.isFile()) {
                 throw new FileNotFoundException("Cannot found xsl file");
             } else {
                 return realXSL;

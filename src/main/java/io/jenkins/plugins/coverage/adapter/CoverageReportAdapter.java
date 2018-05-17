@@ -15,7 +15,7 @@ import java.io.File;
 public abstract class CoverageReportAdapter implements ExtensionPoint, Describable<CoverageReportAdapter> {
 
     // path of report file
-    private String path;
+    private final String path;
 
     public CoverageReportAdapter(String path) {
         this.path = path;
@@ -47,9 +47,5 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
     public String getPath() {
         return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 }

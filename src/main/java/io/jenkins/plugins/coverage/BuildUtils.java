@@ -19,11 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package io.jenkins.plugins.coverage;
 
 import hudson.model.Run;
 
-public class BuildUtils {
+
+public final class BuildUtils {
+
+    /**
+     * BuildUtils cannot be instantiated.
+     */
+    private BuildUtils() {
+    }
+
+    /**
+     * Get previous not failed completed build.
+     *
+     * @param b current build
+     * @return previous not failed completed build
+     */
     public static Run<?, ?> getPreviousNotFailedCompletedBuild(Run<?, ?> b) {
         while (true) {
             b = b.getPreviousNotFailedBuild();

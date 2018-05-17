@@ -6,6 +6,7 @@ import org.w3c.dom.Document;
 
 public abstract class JavaXMLCoverageReportAdapter extends XMLCoverageReportAdapter {
 
+
     public JavaXMLCoverageReportAdapter(String path) {
         super(path);
     }
