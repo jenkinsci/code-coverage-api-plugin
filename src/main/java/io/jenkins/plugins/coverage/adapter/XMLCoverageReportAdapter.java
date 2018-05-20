@@ -31,10 +31,14 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
     @SuppressWarnings("WeakerAccess")
     protected File getRealXSL() {
         try {
-            return new File(getClass().getResource(getXSL()).toURI());
+            return new File(getXSLResourceClass().getResource(getXSL()).toURI());
         } catch (URISyntaxException e) {
             e.printStackTrace();
             throw new ConversionException(e);
         }
+    }
+
+    private Class<? extends CoverageReportAdapter> getXSLResourceClass() {
+        return this.getClass();
     }
 }
