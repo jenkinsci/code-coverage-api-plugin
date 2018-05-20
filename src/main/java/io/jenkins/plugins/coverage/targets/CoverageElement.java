@@ -8,26 +8,27 @@ package io.jenkins.plugins.coverage.targets;
  * @since 22-Aug-2007 18:36:01
  */
 public enum CoverageElement {
-    AGGREGATED_REPORT(()->"Aggregated Report"),
-    REPORT(() -> "Report", AGGREGATED_REPORT),
-    JAVA_GROUP(() -> "Group", REPORT),
-    JAVA_PACKAGE(() -> "Package", JAVA_GROUP),
-    JAVA_FILE(() -> "File", JAVA_PACKAGE),
-    JAVA_CLASS(() -> "Class", JAVA_FILE),
-    JAVA_METHOD(() -> "Method", JAVA_CLASS);
+    AGGREGATED_REPORT("Aggregated Report"),
+    REPORT("Report", AGGREGATED_REPORT),
+    JAVA_GROUP("Group", REPORT),
+    JAVA_PACKAGE("Package", JAVA_GROUP),
+    JAVA_FILE("File", JAVA_PACKAGE),
+    JAVA_CLASS("Class", JAVA_FILE),
+    JAVA_METHOD("Method", JAVA_CLASS);
 
     private final CoverageElement parent;
-    private final HasName hasName;
+    private final String name;
 
-    private CoverageElement(HasName hasName) {
+    CoverageElement(String name) {
         this.parent = null;
-        this.hasName = hasName;
+        this.name = name;
     }
 
-    private CoverageElement(HasName hasName, CoverageElement parent) {
+    CoverageElement(String name, CoverageElement parent) {
         this.parent = parent;
-        this.hasName = hasName;
+        this.name = name;
     }
+
 
     /**
      * Getter for property 'parent'.
@@ -47,6 +48,6 @@ public enum CoverageElement {
      * @return Value for property 'displayName'.
      */
     public String getDisplayName() {
-        return hasName.getName();
+        return name;
     }
 }

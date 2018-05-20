@@ -20,11 +20,11 @@ import java.util.Map;
 
 public class CoverageProcessor {
 
-    public List<CoverageResult> precess(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
+    public List<CoverageResult> precess(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, List<CoverageReportAdapter> adapters) throws IOException, InterruptedException {
         return convertToResult(run, workspace, listener, adapters);
     }
 
-    private List<CoverageResult> convertToResult(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, CoverageReportAdapter[] adapters) throws IOException, InterruptedException {
+    private List<CoverageResult> convertToResult(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener, List<CoverageReportAdapter> adapters) throws IOException, InterruptedException {
         Map<CoverageReportAdapter, FilePath[]> reports = new HashMap<>();
 
         for (CoverageReportAdapter adapter : adapters) {

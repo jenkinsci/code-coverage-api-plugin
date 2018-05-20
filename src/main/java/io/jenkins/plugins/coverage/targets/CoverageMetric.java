@@ -6,19 +6,19 @@ package io.jenkins.plugins.coverage.targets;
  * @since 10-Jul-2007 14:59:50
  */
 public enum CoverageMetric {
-    REPORTS(() -> "Reports"),
-    GROUPS(() -> "Groups"),
-    PACKAGES(() -> "Packages"),
-    FILES(() -> "Files"),
-    CLASSES(() -> "Classes"),
-    METHOD(() -> "Methods"),
-    LINE(() -> "Lines"),
-    CONDITIONAL(() -> "Conditionals");
+    REPORTS("Reports"),
+    GROUPS("Groups"),
+    PACKAGES("Packages"),
+    FILES("Files"),
+    CLASSES("Classes"),
+    METHOD("Methods"),
+    LINE("Lines"),
+    CONDITIONAL("Conditionals");
 
-    private final HasName hasName;
+    private final String name;
 
-    private CoverageMetric(HasName hasName) {
-        this.hasName = hasName;
+    CoverageMetric(String name) {
+        this.name = name;
     }
 
     /**
@@ -30,7 +30,7 @@ public enum CoverageMetric {
      * @return Value for property 'displayName'.
      */
     public String getName() {
-        return hasName.getName();
+        return name;
     }
 }
 

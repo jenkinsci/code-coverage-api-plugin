@@ -23,10 +23,10 @@ import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
-    private CoverageReportAdapter[] adapters;
+    private List<CoverageReportAdapter> adapters;
 
     @DataBoundConstructor
-    public CoveragePublisher(CoverageReportAdapter[] adapters) {
+    public CoveragePublisher(List<CoverageReportAdapter> adapters) {
         this.adapters = adapters;
     }
 
