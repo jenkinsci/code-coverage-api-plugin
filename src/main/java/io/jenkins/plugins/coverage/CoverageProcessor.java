@@ -13,7 +13,7 @@ import io.jenkins.plugins.coverage.adapter.Detectable;
 import io.jenkins.plugins.coverage.exception.ConversionException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.threshhold.ThreshHold;
+import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 
@@ -34,19 +34,19 @@ public class CoverageProcessor {
     private FilePath workspace;
     private TaskListener listener;
     private List<CoverageReportAdapter> adapters;
-    private List<ThreshHold> globalThreshHolds;
+    private List<Threshold> globalThresholds;
 
 
     private boolean enableAutoDetect;
     private String autoDetectPath;
 
     public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener,
-                             List<CoverageReportAdapter> adapters, List<ThreshHold> globalThreshHolds) {
+                             List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) {
         this.run = run;
         this.workspace = workspace;
         this.listener = listener;
         this.adapters = adapters;
-        this.globalThreshHolds = globalThreshHolds;
+        this.globalThresholds = globalThresholds;
     }
 
 

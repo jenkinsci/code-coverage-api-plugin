@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.threshhold;
+package io.jenkins.plugins.coverage.threshold;
 
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
@@ -7,7 +7,7 @@ import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class ThreshHold implements ExtensionPoint, Describable<ThreshHold> {
+public class Threshold implements ExtensionPoint, Describable<Threshold> {
     private final CoverageMetric threshTarget;
 
     private final float healthyThresh;
@@ -15,7 +15,7 @@ public class ThreshHold implements ExtensionPoint, Describable<ThreshHold> {
     private final float unhealthyThresh;
 
     @DataBoundConstructor
-    public ThreshHold(CoverageMetric threshTarget, float healthyThresh, float unstableThresh, float unhealthyThresh) {
+    public Threshold(CoverageMetric threshTarget, float healthyThresh, float unstableThresh, float unhealthyThresh) {
         this.threshTarget = threshTarget;
         this.healthyThresh = healthyThresh;
         this.unstableThresh = unstableThresh;
@@ -40,14 +40,14 @@ public class ThreshHold implements ExtensionPoint, Describable<ThreshHold> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Descriptor<ThreshHold> getDescriptor() {
+    public Descriptor<Threshold> getDescriptor() {
         return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
-    public static final class ThreshHoldDescriptor<T extends ThreshHold> extends Descriptor<ThreshHold> {
+    public static final class ThreshHoldDescriptor<T extends Threshold> extends Descriptor<Threshold> {
 
         public ThreshHoldDescriptor() {
-            super(ThreshHold.class);
+            super(Threshold.class);
         }
     }
 }

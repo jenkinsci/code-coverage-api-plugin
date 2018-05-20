@@ -15,7 +15,7 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.threshhold.ThreshHold;
+import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -31,19 +31,19 @@ import java.util.List;
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private List<CoverageReportAdapter> adapters;
-    private List<ThreshHold> globalThreshHolds;
+    private List<Threshold> globalThresholds;
 
     private String autoDetectPath;
 
     @DataBoundConstructor
-    public CoveragePublisher(List<CoverageReportAdapter> adapters, List<ThreshHold> globalThreshHolds) {
+    public CoveragePublisher(List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) {
         this.adapters = adapters;
-        this.globalThreshHolds = globalThreshHolds;
+        this.globalThresholds = globalThresholds;
     }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThreshHolds);
+        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThresholds);
 
         if (!StringUtils.isEmpty(autoDetectPath)) {
             processor.enableAutoDetect(autoDetectPath);
@@ -64,8 +64,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return adapters;
     }
 
-    public List<ThreshHold> getGlobalThreshHolds() {
-        return globalThreshHolds;
+    public List<Threshold> getGlobalThresholds() {
+        return globalThresholds;
     }
 
 

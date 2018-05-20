@@ -14,7 +14,7 @@
 
     <f:advanced>
         <f:entry title="Global Coverage Thresh Hold">
-            <f:repeatable var="threshHold" name="globalThreshHolds" items="${instance.globalThreshHolds}">
+            <f:repeatable var="threshHold" name="globalThresholds" items="${instance.globalThresholds}">
                 <table width="100%">
                     <col width="25%"/>
                     <col/>
