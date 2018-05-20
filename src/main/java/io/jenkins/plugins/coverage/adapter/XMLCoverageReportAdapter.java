@@ -62,7 +62,7 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
                 throw new FileNotFoundException("xsl path must be no-empty");
             }
 
-            File realXSL = new File(getClass().getResource(xsl).toURI());
+            File realXSL = new File(getXSLResourceClass().getResource(xsl).toURI());
             if (!realXSL.exists() || !realXSL.isFile()) {
                 throw new FileNotFoundException("Cannot found xsl file");
             } else {
@@ -72,5 +72,9 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
             e.printStackTrace();
             throw new ConversionException(e);
         }
+    }
+
+    private Class getXSLResourceClass() {
+        return this.getClass();
     }
 }
