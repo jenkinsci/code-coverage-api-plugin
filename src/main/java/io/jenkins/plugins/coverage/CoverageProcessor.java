@@ -88,12 +88,17 @@ public class CoverageProcessor {
                 Set<FilePath> r = adapterReports.getValue();
                 List<File> copies = new LinkedList<>();
 
-                int i = 0;
                 for (FilePath f : r) {
-                    File copy = new File(runRootDir, f.getName() + i);
+                    File copy = new File(runRootDir, f.getBaseName());
+
+                    //if copy exist, it means there have reports have same name.
+                    int i = 1;
+                    while (copy.exists()) {
+                        copy = new File(copy.getName() + i++);
+                    }
+
                     f.copyTo(new FilePath(copy));
                     copies.add(copy);
-                    i++;
                 }
 
                 copiedReport.put(adapterReports.getKey(), copies);
@@ -149,26 +154,41 @@ public class CoverageProcessor {
         return results;
     }
 
+    /**
+     * Find all file that can match report adapter
+     *
+     * @param detectedFilePaths path of detected files
+     * @return {@link CoverageReportAdapter} and matched file.
+     */
     private Map<CoverageReportAdapter, List<File>> detectReports(List<FilePath> detectedFilePaths) throws IOException, InterruptedException, ReflectiveOperationException {
         List<CoverageReportAdapterDescriptor> detectableReportDescriptors = findDetectableReportDescriptors();
         Map<CoverageReportAdapter, List<File>> results = new HashMap<>();
 
         File rootBuildDir = run.getRootDir();
         for (FilePath fp : detectedFilePaths) {
-            File f = new File(rootBuildDir, fp.getName() + "detected");
-            fp.copyTo(new FilePath(f));
+            // The suffix (D) means the report is found by auto detect
+            File copy = new File(rootBuildDir, fp.getBaseName() + "(D)");
+
+
+            //if copy exist, it means there have reports have same name.
+            int i = 0;
+            while (copy.exists()) {
+                copy = new File(copy.getName() + i++);
+            }
+
+            fp.copyTo(new FilePath(copy));
 
             for (CoverageReportAdapterDescriptor d : detectableReportDescriptors) {
                 if (d instanceof Detectable) {
                     Detectable detectable = ((Detectable) d);
-                    if (detectable.detect(f)) {
+                    if (detectable.detect(copy)) {
                         Class clazz = d.clazz;
                         Constructor c = clazz.getConstructor(String.class);
                         if (c == null) continue;
 
                         CoverageReportAdapter adapter = (CoverageReportAdapter) c.newInstance("");
                         results.putIfAbsent(adapter, new LinkedList<>());
-                        results.get(adapter).add(f);
+                        results.get(adapter).add(copy);
                     }
                 }
             }

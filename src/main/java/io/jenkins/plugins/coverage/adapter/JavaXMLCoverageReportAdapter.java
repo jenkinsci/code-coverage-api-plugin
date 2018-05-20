@@ -12,7 +12,7 @@ public abstract class JavaXMLCoverageReportAdapter extends XMLCoverageReportAdap
     }
 
     @Override
-    public CoverageResult parseToResult(Document document) {
-        return new JavaCoverageParser().parse(document);
+    public CoverageResult parseToResult(Document document, String reportName) {
+        return new JavaCoverageParser(reportName).parse(document);
     }
 }

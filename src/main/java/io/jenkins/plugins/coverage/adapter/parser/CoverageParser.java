@@ -11,6 +11,12 @@ import org.w3c.dom.NodeList;
  */
 public abstract class CoverageParser {
 
+    private String reportName;
+
+    public CoverageParser(String reportName) {
+        this.reportName = reportName;
+    }
+
     /**
      * Parse coverage report to {@link CoverageResult}
      * @param document DOM document of coverage report
@@ -47,4 +53,12 @@ public abstract class CoverageParser {
      */
     protected abstract CoverageResult processElement(Element current, CoverageResult parentResult);
 
+
+    public String getReportName() {
+        return reportName;
+    }
+
+    public void setReportName(String reportName) {
+        this.reportName = reportName;
+    }
 }

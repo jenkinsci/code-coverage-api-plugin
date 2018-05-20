@@ -17,6 +17,8 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
     // path of report file
     private final String path;
 
+    private String name;
+
     public CoverageReportAdapter(String path) {
         this.path = path;
     }
@@ -24,7 +26,7 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
     public CoverageResult getResult(File source) throws ConversionException {
         Document document = convert(source);
-        return parseToResult(document);
+        return parseToResult(document, source.getName());
     }
 
     /**
@@ -36,7 +38,7 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
     protected abstract Document convert(File source) throws ConversionException;
 
     @CheckForNull
-    protected abstract CoverageResult parseToResult(Document document);
+    protected abstract CoverageResult parseToResult(Document document, String reportName);
 
 
     @SuppressWarnings("unchecked")
@@ -47,5 +49,13 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
     public String getPath() {
         return path;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

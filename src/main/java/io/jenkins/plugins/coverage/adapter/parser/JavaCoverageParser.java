@@ -45,6 +45,9 @@ public class JavaCoverageParser extends CoverageParser {
 
     private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*%\\s*\\((\\d*)/(\\d*)\\)");
 
+    public JavaCoverageParser(String reportName) {
+        super(reportName);
+    }
 
     /**
      * {@inheritDoc}
@@ -54,22 +57,28 @@ public class JavaCoverageParser extends CoverageParser {
         CoverageResult result = null;
         switch (current.getLocalName()) {
             case "report":
-                result = new CoverageResult(CoverageElement.REPORT, null, getNameAttribute(current, "report"));
+                result = new CoverageResult(CoverageElement.REPORT, null,
+                        getNameAttribute(current, "") + ": " + getReportName());
                 break;
             case "group":
-                result = new CoverageResult(CoverageElement.JAVA_GROUP, parentResult, getNameAttribute(current, "project"));
+                result = new CoverageResult(CoverageElement.JAVA_GROUP, parentResult,
+                        getNameAttribute(current, "project"));
                 break;
             case "package":
-                result = new CoverageResult(CoverageElement.JAVA_PACKAGE, parentResult, getNameAttribute(current, "<default>"));
+                result = new CoverageResult(CoverageElement.JAVA_PACKAGE, parentResult,
+                        getNameAttribute(current, "<default>"));
                 break;
             case "file":
-                result = new CoverageResult(CoverageElement.JAVA_FILE, parentResult, getNameAttribute(current, ""));
+                result = new CoverageResult(CoverageElement.JAVA_FILE, parentResult,
+                        getNameAttribute(current, ""));
                 break;
             case "class":
-                result = new CoverageResult(CoverageElement.JAVA_CLASS, parentResult, getNameAttribute(current, ""));
+                result = new CoverageResult(CoverageElement.JAVA_CLASS, parentResult,
+                        getNameAttribute(current, ""));
                 break;
             case "method":
-                result = new CoverageResult(CoverageElement.JAVA_METHOD, parentResult, getNameAttribute(current, ""));
+                result = new CoverageResult(CoverageElement.JAVA_METHOD, parentResult,
+                        getNameAttribute(current, ""));
                 break;
             case "line":
                 String hitsString = current.getAttribute("hits");

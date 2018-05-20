@@ -45,7 +45,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThreshHolds);
 
-        if (StringUtils.isEmpty(autoDetectPath)) {
+        if (!StringUtils.isEmpty(autoDetectPath)) {
             processor.enableAutoDetect(autoDetectPath);
         }
 
