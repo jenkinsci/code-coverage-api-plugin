@@ -45,7 +45,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
      *
      * @return coverage result
      */
-    private CoverageResult getResult() {
+    public CoverageResult getResult() {
         if (report != null) {
             CoverageResult r = report.get();
             if (r != null) {
