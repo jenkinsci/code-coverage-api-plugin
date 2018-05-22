@@ -188,6 +188,15 @@ var generateHeatMapCoverageChart = function (instance, metric) {
                     return '<b>' + childName + '</b>:' + obj.name + '<br/>' + obj.value[2] + '% (' + coveredString + ')<br/> ';
                 }
             },
+            toolbox: {
+                show: true,
+                feature: {
+                    saveAsImage: {
+                        title: 'Save as image'
+                    }
+                },
+                bottom: 0
+            },
             animation: false,
             grid: {
                 top: '40',
