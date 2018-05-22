@@ -1,6 +1,8 @@
 package io.jenkins.plugins.coverage;
 
 import hudson.model.Action;
+import hudson.model.HealthReport;
+import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import jenkins.model.RunAction2;
@@ -13,7 +15,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 
-public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2 {
+public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2, HealthReportingAction {
 
     private transient Run<?, ?> owner;
     private transient WeakReference<CoverageResult> report;
@@ -23,61 +25,26 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
         this.report = new WeakReference<>(result);
     }
 
-    @Override
-    public Object getTarget() {
-        return getResult();
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<? extends Action> getProjectActions() {
         //TODO Only stable should be replaced by variable
         return Collections.singleton(new CoverageProjectAction(owner, false));
     }
 
-    @CheckForNull
+
     @Override
-    public String getIconFileName() {
+    public HealthReport getBuildHealth() {
         return null;
     }
 
-    @CheckForNull
-    @Override
-    public String getDisplayName() {
-        return Messages.CoverageAction_displayName();
-    }
-
-    @CheckForNull
-    @Override
-    public String getUrlName() {
-        return "coverage";
-    }
-
-    @Override
-    public void onAttached(Run<?, ?> r) {
-        setOwner(r);
-    }
-
-    @Override
-    public void onLoad(Run<?, ?> r) {
-        setOwner(r);
-    }
-
-
-    private synchronized void setOwner(Run<?, ?> owner) {
-        this.owner = owner;
-        if (report != null) {
-            CoverageResult r = report.get();
-            if (r != null) {
-                r.setOwner(owner);
-            }
-
-        }
-    }
-
-    public Run<?, ?> getOwner() {
-        return owner;
-    }
-
+    /**
+     * Get coverage result. If not exist, try to find it in build dir.
+     *
+     * @return coverage result
+     */
     private CoverageResult getResult() {
         if (report != null) {
             CoverageResult r = report.get();
@@ -99,4 +66,74 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
         }
         return r;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getTarget() {
+        return getResult();
+    }
+
+
+    private synchronized void setOwner(Run<?, ?> owner) {
+        this.owner = owner;
+        if (report != null) {
+            CoverageResult r = report.get();
+            if (r != null) {
+                r.setOwner(owner);
+            }
+
+        }
+    }
+
+    public Run<?, ?> getOwner() {
+        return owner;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @CheckForNull
+    @Override
+    public String getIconFileName() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @CheckForNull
+    @Override
+    public String getDisplayName() {
+        return Messages.CoverageAction_displayName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @CheckForNull
+    @Override
+    public String getUrlName() {
+        return "coverage";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttached(Run<?, ?> r) {
+        setOwner(r);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onLoad(Run<?, ?> r) {
+        setOwner(r);
+    }
+
+
 }

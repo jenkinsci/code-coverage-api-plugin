@@ -43,8 +43,8 @@ public class CoveragePaintRule implements Serializable {
     }
 
     private static final CoveragePaintRule[] INITIAL_RULESET = {
-        new CoveragePaintRule(CoverageElement.JAVA_METHOD, CoverageAggregationMode.NONE),
-        new CoveragePaintRule(CoverageElement.JAVA_CLASS, CoverageAggregationMode.SUM),};
+            new CoveragePaintRule(CoverageElement.JAVA_METHOD, CoverageAggregationMode.NONE),
+            new CoveragePaintRule(CoverageElement.JAVA_CLASS, CoverageAggregationMode.SUM),};
 
     public static CoveragePaint makePaint(CoverageElement element) {
         for (CoveragePaintRule rule : INITIAL_RULESET) {

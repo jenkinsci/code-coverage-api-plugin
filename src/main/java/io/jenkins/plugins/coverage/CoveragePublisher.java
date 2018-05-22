@@ -13,28 +13,43 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
-    private CoverageReportAdapter[] adapters;
+    private List<CoverageReportAdapter> adapters;
+    private List<Threshold> globalThresholds;
+
+    private String autoDetectPath;
 
     @DataBoundConstructor
-    public CoveragePublisher(CoverageReportAdapter[] adapters) {
+    public CoveragePublisher(List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) {
         this.adapters = adapters;
+        this.globalThresholds = globalThresholds;
     }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-        CoverageProcessor processor = new CoverageProcessor();
-        CoverageResult result = processor.getCoverageReport(run, workspace, listener, adapters);
+        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThresholds);
+
+        if (!StringUtils.isEmpty(autoDetectPath)) {
+            processor.enableAutoDetect(autoDetectPath);
+        }
+
+        CoverageResult result = processor.processCoverageReport();
 
         CoverageAction action = new CoverageAction(result);
         run.addAction(action);
@@ -45,6 +60,23 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
+    public List<CoverageReportAdapter> getAdapters() {
+        return adapters;
+    }
+
+    public List<Threshold> getGlobalThresholds() {
+        return globalThresholds;
+    }
+
+
+    public String getAutoDetectPath() {
+        return autoDetectPath;
+    }
+
+    @DataBoundSetter
+    public void setAutoDetectPath(String autoDetectPath) {
+        this.autoDetectPath = autoDetectPath;
+    }
 
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
@@ -68,6 +100,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             return CoverageReportAdapterDescriptor.all();
         }
 
+        public CoverageMetric[] getAllCoverageMetrics() {
+            return CoverageMetric.all();
+        }
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
@@ -78,7 +114,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         public String getDisplayName() {
             return Messages.CoveragePublisher_displayName();
         }
+
+        @Override
+        public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
+            return super.newInstance(req, formData);
+        }
     }
-
-
 }

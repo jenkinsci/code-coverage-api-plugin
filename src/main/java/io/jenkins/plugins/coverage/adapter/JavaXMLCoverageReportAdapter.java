@@ -6,12 +6,13 @@ import org.w3c.dom.Document;
 
 public abstract class JavaXMLCoverageReportAdapter extends XMLCoverageReportAdapter {
 
+
     public JavaXMLCoverageReportAdapter(String path) {
         super(path);
     }
 
     @Override
-    public CoverageResult parseToResult(Document document) {
-        return new JavaCoverageParser().parse(document);
+    public CoverageResult parseToResult(Document document, String reportName) {
+        return new JavaCoverageParser(reportName).parse(document);
     }
 }

@@ -41,11 +41,11 @@ public enum CoverageAggregationMode {
 
     /**
      * Adds up numerator and denominator separately.
-     *
+     * <p>
      * Say if you want to count the ratio of male among the population in a state from
      * a series of those ratios per county, this is how you add them up.
      */
-    SUM(Ratio.create(0,0)) {
+    SUM(Ratio.create(0, 0)) {
         public Ratio aggregate(Ratio a, Ratio b) {
             return Ratio.create(a.numerator + b.numerator, a.denominator + b.denominator);
         }
@@ -54,7 +54,7 @@ public enum CoverageAggregationMode {
     /**
      * x_1 * x_2 * x_3 + ...
      */
-    PRODUCT(Ratio.create(1,1)) {
+    PRODUCT(Ratio.create(1, 1)) {
         public Ratio aggregate(Ratio a, Ratio b) {
             return Ratio.create(a.numerator * b.numerator, a.denominator * b.denominator);
         }
@@ -63,12 +63,13 @@ public enum CoverageAggregationMode {
     /**
      * Treat (0/0) as "no data", then compute "# of non-zero data/# of data."
      */
-    COUNT_NON_ZERO(Ratio.create(0,0)) {
+    COUNT_NON_ZERO(Ratio.create(0, 0)) {
         public Ratio aggregate(Ratio a, Ratio b) {
             if (Math.abs(b.denominator) < 1e-7)
                 return a;       // 0/0 is treated as "no data"
-            return Ratio.create(a.numerator + (Math.abs(b.numerator) > 1e-7 ? 1:0),    a.denominator + 1);
-        }};
+            return Ratio.create(a.numerator + (Math.abs(b.numerator) > 1e-7 ? 1 : 0), a.denominator + 1);
+        }
+    };
 
     /**
      * Initial value of this aggregation mode, which is the output of the aggregation when

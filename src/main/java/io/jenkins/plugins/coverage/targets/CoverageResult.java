@@ -68,7 +68,7 @@ public class CoverageResult implements Serializable, Chartable {
 
     private final Map<String, CoverageResult> children = new TreeMap<>();
 
-    private transient final Map<CoverageMetric, Ratio> aggregateResults = new EnumMap<>(CoverageMetric.class);
+    private final Map<CoverageMetric, Ratio> aggregateResults = new EnumMap<>(CoverageMetric.class);
 
     private final Map<CoverageMetric, Ratio> localResults = new EnumMap<>(CoverageMetric.class);
 

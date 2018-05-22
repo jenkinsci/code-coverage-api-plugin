@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.adapter;
 
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
 import io.jenkins.plugins.coverage.exception.ConversionException;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.annotation.CheckForNull;
@@ -12,12 +13,12 @@ import java.net.URISyntaxException;
 
 public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
 
+
     public XMLCoverageReportAdapter(String path) {
         super(path);
     }
 
     /**
-     *
      * @return XSL file that convert report into standard format
      */
     @CheckForNull
@@ -25,6 +26,7 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
 
     /**
      * If return null, report will not be validate.
+     *
      * @return XSD file to validate report
      */
     @Nullable
@@ -36,7 +38,7 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
      * @param source source xml file
      */
     @Override
-    public Document convert(File source) {
+    public Document convert(File source) throws ConversionException {
         File xsl;
         try {
             xsl = getRealXSL();
@@ -44,14 +46,24 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
             e.printStackTrace();
             throw new ConversionException(e);
         }
-        return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
+        try {
+            return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new ConversionException(e);
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
-    protected File getRealXSL() throws FileNotFoundException {
+    protected File getRealXSL() throws ConversionException, FileNotFoundException {
         try {
-            File realXSL = new File(getClass().getResource(getXSL()).toURI());
-            if(!realXSL.exists()) {
+            String xsl = getXSL();
+            if (StringUtils.isEmpty(xsl)) {
+                throw new FileNotFoundException("xsl path must be no-empty");
+            }
+
+            File realXSL = new File(getXSLResourceClass().getResource(xsl).toURI());
+            if (!realXSL.exists() || !realXSL.isFile()) {
                 throw new FileNotFoundException("Cannot found xsl file");
             } else {
                 return realXSL;
@@ -61,4 +73,9 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
             throw new ConversionException(e);
         }
     }
+
+    private Class getXSLResourceClass() {
+        return this.getClass();
+    }
+
 }
