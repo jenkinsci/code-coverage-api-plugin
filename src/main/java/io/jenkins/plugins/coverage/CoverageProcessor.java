@@ -265,6 +265,10 @@ public class CoverageProcessor {
     }
 
 
+    public List<Threshold> getGlobalThresholds() {
+        return globalThresholds;
+    }
+
     public static void saveReport(Run<?, ?> run, CoverageResult report) throws IOException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
