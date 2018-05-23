@@ -25,13 +25,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.Api;
 import hudson.model.Item;
 import hudson.model.Run;
+import hudson.util.ChartUtil;
 import hudson.util.Graph;
 import hudson.util.TextFile;
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.collections.Transformer;
 import org.jfree.chart.JFreeChart;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -60,6 +58,8 @@ public class CoverageResult implements Serializable, Chartable {
      * Generated
      */
     private static final long serialVersionUID = -3524882671364156445L;
+
+    private static final int DEFAULT_MAX_BUILDS_SHOW_IN_TREND = 6;
 
     /**
      * The type of the programming element.
@@ -191,7 +191,7 @@ public class CoverageResult implements Serializable, Chartable {
      * Getter for property 'sourceFileAvailable'.
      *
      * @return Value for property 'sourceFileAvailable'.
-     `*/
+     */
     public boolean isSourceFileAvailable() {
         if (hasPermission()) {
             return owner == owner.getParent().getLastSuccessfulBuild() && getSourceFile().exists();
@@ -529,6 +529,11 @@ public class CoverageResult implements Serializable, Chartable {
         }
     }
 
+    /**
+     * Interface for javascript code to get code coverage result.
+     *
+     * @return aggregated coverage results
+     */
     @JavaScriptMethod
     public List<JSCoverageResult> jsGetResults() {
         List<JSCoverageResult> results = new LinkedList<>();
@@ -536,7 +541,6 @@ public class CoverageResult implements Serializable, Chartable {
         for (Map.Entry<CoverageMetric, Ratio> c : aggregateResults.entrySet()) {
             results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
         }
-
         return results;
     }
 
@@ -547,6 +551,29 @@ public class CoverageResult implements Serializable, Chartable {
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().jsGetResults()));
+    }
+
+
+    @JavaScriptMethod
+    public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
+        Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
+
+        if (getPreviousResult() == null) {
+            return results;
+        }
+
+        int i = 0;
+        for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
+
+            List<JSCoverageResult> r = c.getResults().entrySet().stream()
+                    .map(e -> new JSCoverageResult(e.getKey().getName(), e.getValue()))
+                    .collect(Collectors.toList());
+
+            results.put(label.toString(), r);
+        }
+        return results;
+
     }
 
     public static class JSCoverageResult {

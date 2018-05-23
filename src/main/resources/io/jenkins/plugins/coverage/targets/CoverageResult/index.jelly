@@ -14,52 +14,29 @@
                 &gt;
             </j:forEach>
             <j:set var="metrics" value="${it.metrics}"/>
-            <!--<h3>${%Trend}</h3>-->
-            <!--<j:if test="${it.previousResult != null}">-->
-            <!--<img src="graph" width="500px" height="200px"/>-->
-            <!--</j:if>-->
-            <!--<j:if test="${it.previousResult == null}">-->
-            <!--<div style="border: 1px solid #eee; width:500px; ">-->
-            <!--<j:forEach var="metric" items="${it.metrics}">-->
-            <!--<table style="padding: 0 10px; padding-top: 5px; width:480px;">-->
-            <!--<tr>-->
-            <!--<th align="left">${metric.name}</th>-->
-            <!--<td align="right">${it.getCoverage(metric).percentage}%</td>-->
-            <!--</tr>-->
-            <!--</table>-->
-            <!--<table style="height: 3px; padding: 0 10px; width:480px;">-->
-            <!--<tr>-->
-            <!--<j:if test="${it.getCoverage(metric).percentage &gt; 0}">-->
-            <!--<td width="${it.getCoverage(metric).percentage}%"-->
-            <!--style="background-color:#bfb;">-->
-            <!--&amp;nbsp;-->
-            <!--</td>-->
-            <!--</j:if>-->
-            <!--<j:if test="${it.getCoverage(metric).percentage &lt; 100}">-->
-            <!--<td width="${100-it.getCoverage(metric).percentage}%"-->
-            <!--style="background-color:#fdd;">-->
-            <!--&amp;nbsp;-->
-            <!--</td>-->
-            <!--</j:if>-->
-            <!--</tr>-->
-            <!--</table>-->
-            <!--</j:forEach>-->
-            <!--</div>-->
-            <!--</j:if>-->
             <br/>
             <br/>
             <br/>
-            <div id="summaryChart" style="width:800px;height:400px;">
+            <j:if test="${it.previousResult != null}">
+                <div id="trendChart" style="width:800px;height:100%;">
+                </div>
+            </j:if>
+            <br/>
+            <div id="summaryChart" style="width:800px;height:100%;">
             </div>
             <br/>
-            <div id="childSummaryChart" style="width:800px;height:400px;">
+            <div id="childSummaryChart" style="width:800px;height:100%;">
             </div>
             <script>
                 var instance =<st:bind value="${it}"/>;
+
+                var coverageChartGenerator = new CoverageChartGenerator(instance)
                 var name = "${it.xmlTransform(it.name)}";
-                generateStackedCoverageChart(instance, name);
+                coverageChartGenerator.generateSummaryChart('summaryChart', name);
                 var metric = '${it.childElement.displayName}';
-                generateHeatMapCoverageChart(instance, metric);
+                coverageChartGenerator.generateChildSummaryChart('childSummaryChart', metric);
+
+                coverageChartGenerator.generateTrendChart('trendChart');
             </script>
 
             <j:if test="${it.sourceCodeLevel}">
