@@ -19,6 +19,7 @@ import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -33,12 +34,12 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageReportAdapter> adapters;
     private List<Threshold> globalThresholds;
 
-    private String autoDetectPath;
+    @Nonnull
+    private String autoDetectPath = CoveragePublisherDescriptor.AUTO_DETACT_PATH;
 
     @DataBoundConstructor
-    public CoveragePublisher(List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) {
-        this.adapters = adapters;
-        this.globalThresholds = globalThresholds;
+    public CoveragePublisher(@Nonnull String autoDetectPath) {
+        this.autoDetectPath = autoDetectPath;
     }
 
     @Override
@@ -64,22 +65,35 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return adapters;
     }
 
+    @DataBoundSetter
+    public void setAdapters(List<CoverageReportAdapter> adapters) {
+        this.adapters = adapters;
+    }
+
     public List<Threshold> getGlobalThresholds() {
         return globalThresholds;
     }
 
+    @DataBoundSetter
+    public void setGlobalThresholds(List<Threshold> globalThresholds) {
+        this.globalThresholds = globalThresholds;
+    }
 
+    @Nonnull
     public String getAutoDetectPath() {
         return autoDetectPath;
     }
 
     @DataBoundSetter
-    public void setAutoDetectPath(String autoDetectPath) {
+    public void setAutoDetectPath(@Nonnull String autoDetectPath) {
         this.autoDetectPath = autoDetectPath;
     }
 
+    @Symbol("coverage")
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
+
+        public static final String AUTO_DETACT_PATH = "*.xml";
 
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);
@@ -100,6 +114,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             return CoverageReportAdapterDescriptor.all();
         }
 
+        @Nonnull
         public CoverageMetric[] getAllCoverageMetrics() {
             return CoverageMetric.all();
         }
