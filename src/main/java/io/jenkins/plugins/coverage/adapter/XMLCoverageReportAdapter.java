@@ -39,14 +39,8 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
      */
     @Override
     public Document convert(File source) throws ConversionException {
-        StreamSource xsl = null;
         try {
-            xsl = getRealXSL();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
+            StreamSource xsl = getRealXSL();
             return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
