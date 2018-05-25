@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.adapter;
 
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
+import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 
@@ -29,6 +30,11 @@ public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter>
 
     public static DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> all() {
         return Jenkins.getInstance().getDescriptorList(CoverageReportAdapter.class);
+    }
+
+    @Nonnull
+    public CoverageMetric[] getAllCoverageMetrics() {
+        return CoverageMetric.all();
     }
 
 }

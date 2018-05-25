@@ -14,8 +14,8 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -35,7 +35,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageReportAdapter> adapters;
     private List<Threshold> globalThresholds;
 
-    private String autoDetectPath = CoveragePublisherDescriptor.AUTO_DETACT_PATH;
+    private boolean failedUnhealthy;
+    private boolean failedUnstable;
+
+    @Nonnull
+    private String autoDetectPath;
 
     @DataBoundConstructor
     public CoveragePublisher(String autoDetectPath) {
@@ -46,16 +50,18 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Publishing Coverage report....");
 
-        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThresholds);
+        CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
 
         if (!StringUtils.isEmpty(autoDetectPath)) {
             processor.enableAutoDetect(autoDetectPath);
         }
 
-        CoverageResult result = processor.processCoverageReport();
-
-        CoverageAction action = new CoverageAction(result);
-        run.addAction(action);
+        try {
+            processor.performCoverageReport(getAdapters(), globalThresholds);
+        } catch (CoverageException e) {
+            listener.getLogger().println(e.getMessage());
+            run.setResult(Result.FAILURE);
+        }
     }
 
     @Override
@@ -93,8 +99,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Symbol("publishCoverage")
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
-
-        public static final String AUTO_DETACT_PATH = "*.xml";
 
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);

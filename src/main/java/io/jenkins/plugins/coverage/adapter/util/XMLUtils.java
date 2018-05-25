@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage.adapter.util;
 
 
-import io.jenkins.plugins.coverage.exception.ConversionException;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -36,7 +36,7 @@ public class XMLUtils {
      * @return Converted document
      */
     public Document convertToDocumentWithXSL(StreamSource xsl, File source)
-            throws FileNotFoundException, ConversionException {
+            throws FileNotFoundException, CoverageException {
         DOMResult result = convertToDOMResultWithXSL(xsl, source);
 
         return getDocumentFromDomResult(result);
@@ -50,7 +50,7 @@ public class XMLUtils {
      * @param result Result that want to be written in
      */
     private void convertWithXSL(StreamSource xsl, File source, Result result)
-            throws FileNotFoundException, ConversionException {
+            throws FileNotFoundException, CoverageException {
 
         if (!source.exists()) {
             throw new FileNotFoundException("source File does not exist!");
@@ -65,7 +65,7 @@ public class XMLUtils {
             transformer.transform(new StreamSource(source), result);
         } catch (TransformerException e) {
             e.printStackTrace();
-            throw new ConversionException(e);
+            throw new CoverageException(e);
         }
     }
 
@@ -78,7 +78,7 @@ public class XMLUtils {
      * @return DOMResult
      */
     public DOMResult convertToDOMResultWithXSL(StreamSource xsl, File source)
-            throws FileNotFoundException, ConversionException {
+            throws FileNotFoundException, CoverageException {
         DOMResult result = new DOMResult();
         convertWithXSL(xsl, source, result);
         return result;
@@ -92,7 +92,7 @@ public class XMLUtils {
      * @return SAXResult
      */
     public SAXResult convertToSAXResultWithXSL(StreamSource xsl, File source)
-            throws FileNotFoundException, ConversionException {
+            throws FileNotFoundException, CoverageException {
         SAXResult result = new SAXResult();
         convertWithXSL(xsl, source, result);
         return result;

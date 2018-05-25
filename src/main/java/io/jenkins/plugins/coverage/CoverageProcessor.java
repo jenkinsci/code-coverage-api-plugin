@@ -4,24 +4,30 @@ package io.jenkins.plugins.coverage;
 import com.google.common.collect.Sets;
 import hudson.DescriptorExtensionList;
 import hudson.FilePath;
+import hudson.model.HealthReport;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.Detectable;
-import io.jenkins.plugins.coverage.exception.ConversionException;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
+import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Shenyu Zheng
@@ -33,30 +39,31 @@ public class CoverageProcessor {
     private Run<?, ?> run;
     private FilePath workspace;
     private TaskListener listener;
-    private List<CoverageReportAdapter> adapters;
-    private List<Threshold> globalThresholds;
 
 
     private boolean enableAutoDetect;
     private String autoDetectPath;
 
-    public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener,
-                             List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) {
+    public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener) {
         this.run = run;
         this.workspace = workspace;
         this.listener = listener;
-        this.adapters = adapters;
-        this.globalThresholds = globalThresholds;
     }
 
 
-    public CoverageResult processCoverageReport() throws IOException, InterruptedException {
-        List<CoverageResult> results = convertToResults(adapters);
-        CoverageResult report = aggregatedToReport(results);
+    public void performCoverageReport(List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) throws IOException, InterruptedException, CoverageException {
+        Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(adapters);
+        CoverageResult coverageReport = aggregatedResults(results);
 
-        saveReport(run, report);
+        coverageReport.setOwner(run);
+        HealthReport healthReport = processThresholds(results, globalThresholds);
 
-        return report;
+        saveCoverageResult(run, coverageReport);
+
+        CoverageAction action = new CoverageAction(coverageReport);
+        action.setHealthReport(healthReport);
+        run.addAction(action);
+
     }
 
     /**
@@ -65,7 +72,7 @@ public class CoverageProcessor {
      * @param adapters {@link CoverageReportAdapter} for each report
      * @return {@link CoverageResult} for each report
      */
-    private List<CoverageResult> convertToResults(List<CoverageReportAdapter> adapters)
+    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(List<CoverageReportAdapter> adapters)
             throws IOException, InterruptedException {
 
         Map<CoverageReportAdapter, Set<FilePath>> reports = new HashMap<>();
@@ -141,13 +148,14 @@ public class CoverageProcessor {
         reports.clear();
 
 
-        List<CoverageResult> results = new LinkedList<>();
+        Map<CoverageReportAdapter, List<CoverageResult>> results = new HashMap<>();
         for (Map.Entry<CoverageReportAdapter, List<File>> adapterReports : copiedReport.entrySet()) {
             CoverageReportAdapter adapter = adapterReports.getKey();
             for (File s : adapterReports.getValue()) {
                 try {
-                    results.add(adapter.getResult(s));
-                } catch (ConversionException e) {
+                    results.putIfAbsent(adapter, new LinkedList<>());
+                    results.get(adapter).add(adapter.getResult(s));
+                } catch (CoverageException e) {
                     e.printStackTrace();
                     listener.getLogger().printf("report for %s has met some errors: %s",
                             adapter.getDescriptor().getDisplayName(), e.getMessage());
@@ -156,6 +164,87 @@ public class CoverageProcessor {
             }
         }
         return results;
+    }
+
+    /**
+     * Process threshold
+     *
+     * @param adapterWithResults Coverage report adapter and its correspond Coverage results.
+     * @param globalThresholds   global threshold
+     * @return Health report
+     */
+    private HealthReport processThresholds(Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
+                                           List<Threshold> globalThresholds) throws CoverageException {
+
+        int healthy = 0;
+        int unhealthy = 0;
+
+        LinkedList<CoverageResult> resultTask = new LinkedList<>();
+
+        for (Map.Entry<CoverageReportAdapter, List<CoverageResult>> results : adapterWithResults.entrySet()) {
+
+            // make local threshold over global threshold
+            List<Threshold> thresholds = results.getKey().getThresholds();
+            if (thresholds != null) {
+                for (Threshold t : globalThresholds) {
+                    if (!thresholds.contains(t)) {
+                        thresholds.add(t);
+                    }
+                }
+            } else {
+                thresholds = globalThresholds;
+            }
+
+            for (CoverageResult coverageResult : results.getValue()) {
+                resultTask.push(coverageResult);
+
+                while (!resultTask.isEmpty()) {
+                    CoverageResult r = resultTask.pollFirst();
+                    assert r != null;
+
+                    resultTask.addAll(r.getChildrenReal().values());
+                    for (Threshold threshold : thresholds) {
+                        Ratio ratio = r.getCoverage(threshold.getThreshTarget());
+                        if (ratio == null) {
+                            continue;
+                        }
+
+                        float percentage = ratio.getPercentageFloat();
+                        if (percentage < threshold.getUnhealthyThresh()) {
+                            if (threshold.isFailUnhealthy()) {
+                                throw new CoverageException(String.format("Publish Coverage Failed: %s coverage in %s is lower than %.2f",
+                                        threshold.getThreshTarget().getName(),
+                                        r.getName(), threshold.getUnhealthyThresh()));
+                            } else {
+                                unhealthy++;
+                            }
+                        } else {
+                            healthy++;
+                        }
+
+                        if (percentage < threshold.getUnstableThresh()) {
+                            run.setResult(Result.UNSTABLE);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        resultTask.addAll(
+                adapterWithResults.values().stream()
+                        .flatMap((Function<List<CoverageResult>, Stream<CoverageResult>>) Collection::stream)
+                        .collect(Collectors.toList()));
+
+        int score;
+        if (healthy == 0 && unhealthy == 0) {
+            score = 100;
+        } else {
+            score = healthy * 100 / (healthy + unhealthy);
+        }
+        Localizable localizeDescription = Messages._CoverageProcessor_healthReportDescriptionTemplate(score);
+
+        return new HealthReport(score, localizeDescription);
     }
 
     /**
@@ -201,10 +290,18 @@ public class CoverageProcessor {
         return results;
     }
 
-    private CoverageResult aggregatedToReport(List<CoverageResult> results) {
+    /**
+     * Aggregate results to aggregated report
+     *
+     * @param results results will be aggregated
+     * @return aggregated report
+     */
+    private CoverageResult aggregatedResults(Map<CoverageReportAdapter, List<CoverageResult>> results) {
         CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
-        for (CoverageResult result : results) {
-            result.addParent(report);
+        for (List<CoverageResult> resultList : results.values()) {
+            for (CoverageResult result : resultList) {
+                result.addParent(report);
+            }
         }
         return report;
     }
@@ -241,6 +338,11 @@ public class CoverageProcessor {
         this.autoDetectPath = autoDetectPath;
     }
 
+    /**
+     * Getter for property 'enableAutoDetect'
+     *
+     * @return isEnableAutoDetect
+     */
     public boolean isEnableAutoDetect() {
         return enableAutoDetect;
     }
@@ -268,12 +370,13 @@ public class CoverageProcessor {
         }
     }
 
-
-    public List<Threshold> getGlobalThresholds() {
-        return globalThresholds;
-    }
-
-    public static void saveReport(Run<?, ?> run, CoverageResult report) throws IOException {
+    /**
+     * Save {@link CoverageResult} in build directory.
+     *
+     * @param run    build
+     * @param report report
+     */
+    public static void saveCoverageResult(Run<?, ?> run, CoverageResult report) throws IOException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reportFile))) {
@@ -281,7 +384,13 @@ public class CoverageProcessor {
         }
     }
 
-    public static CoverageResult recoverReport(Run<?, ?> run) throws IOException, ClassNotFoundException {
+    /**
+     * Recover {@link CoverageResult} from build directory.
+     *
+     * @param run build
+     * @return Coverage result
+     */
+    public static CoverageResult recoverCoverageResult(Run<?, ?> run) throws IOException, ClassNotFoundException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reportFile))) {

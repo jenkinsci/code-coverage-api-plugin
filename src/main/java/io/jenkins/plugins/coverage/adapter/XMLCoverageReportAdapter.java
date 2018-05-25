@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
-import io.jenkins.plugins.coverage.exception.ConversionException;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 
@@ -38,13 +38,13 @@ public abstract class XMLCoverageReportAdapter extends CoverageReportAdapter {
      * @param source source xml file
      */
     @Override
-    public Document convert(File source) throws ConversionException {
+    public Document convert(File source) throws CoverageException {
         try {
             StreamSource xsl = getRealXSL();
             return XMLUtils.getInstance().convertToDocumentWithXSL(xsl, source);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new ConversionException(e);
+            throw new CoverageException(e);
         }
     }
 

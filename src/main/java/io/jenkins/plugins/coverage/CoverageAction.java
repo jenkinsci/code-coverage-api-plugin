@@ -1,12 +1,12 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.model.Action;
-import hudson.model.HealthReport;
-import hudson.model.HealthReportingAction;
-import hudson.model.Run;
+import hudson.model.*;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
+import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerProxy;
 
 import javax.annotation.CheckForNull;
@@ -14,12 +14,14 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2, HealthReportingAction {
 
     private transient Run<?, ?> owner;
     private transient WeakReference<CoverageResult> report;
-
+    private HealthReport healthReport;
 
     public CoverageAction(CoverageResult result) {
         this.report = new WeakReference<>(result);
@@ -35,9 +37,12 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
 
+    /**
+     * @return Health report
+     */
     @Override
     public HealthReport getBuildHealth() {
-        return null;
+        return getHealthReport();
     }
 
     /**
@@ -55,7 +60,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
 
         CoverageResult r = null;
         try {
-            r = CoverageProcessor.recoverReport(owner);
+            r = CoverageProcessor.recoverCoverageResult(owner);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -76,6 +81,14 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
 
+    public HealthReport getHealthReport() {
+        return healthReport;
+    }
+
+    public void setHealthReport(HealthReport healthReport) {
+        this.healthReport = healthReport;
+    }
+
     private synchronized void setOwner(Run<?, ?> owner) {
         this.owner = owner;
         if (report != null) {
@@ -90,7 +103,6 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     public Run<?, ?> getOwner() {
         return owner;
     }
-
 
     /**
      * {@inheritDoc}

@@ -1,18 +1,14 @@
 table.source {
-    border-style: solid;
-    border-color: #bbb;
     border-spacing: 0;
     border-collapse: collapse;
-    border-width: 1px;
+    border: 1px solid #bbb;
     width: 100%;
 }
 
 table.source td {
-    border-style: solid;
-    border-color: #bbb;
     border-spacing: 0;
     border-collapse: collapse;
-    border-width: 0px 0px 0px 0px;
+    border: 0 solid #bbb;
     padding-left: 0.2em;
     padding-right: 0.2em;
     font-family: monospace;
@@ -24,7 +20,7 @@ table.source .text {
 
 table.source td.line {
     text-align: right;
-    border-width: 0px 1px 0px 0px;
+    border-width: 0 1px 0 0;
 }
 
 table.source td.hits {

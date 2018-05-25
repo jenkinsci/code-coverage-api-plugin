@@ -9,19 +9,19 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.util.Objects;
+
 public class Threshold implements ExtensionPoint, Describable<Threshold> {
 
     private final CoverageMetric threshTarget;
 
-
-    // healthy when coverage large than healthy thresh
-    private float healthyThresh = 80.0f;
-
-    // unstable when coverage less than unstable thresh
+    // mark build as unstable when coverage is less than this
     private float unstableThresh = 0.0f;
 
-    // unhealthy when coverage less than unhealthy thresh
+    // used for calculate healthy scores
     private float unhealthyThresh = 0.0f;
+
+    private boolean failUnhealthy = false;
 
     @DataBoundConstructor
     public Threshold(CoverageMetric threshTarget) {
@@ -31,15 +31,6 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
 
     public CoverageMetric getThreshTarget() {
         return threshTarget;
-    }
-
-    public float getHealthyThresh() {
-        return healthyThresh;
-    }
-
-    @DataBoundSetter
-    public void setHealthyThresh(float healthyThresh) {
-        this.healthyThresh = healthyThresh;
     }
 
     public float getUnstableThresh() {
@@ -58,6 +49,28 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
     @DataBoundSetter
     public void setUnhealthyThresh(float unhealthyThresh) {
         this.unhealthyThresh = unhealthyThresh;
+    }
+
+    public boolean isFailUnhealthy() {
+        return failUnhealthy;
+    }
+
+    @DataBoundSetter
+    public void setFailUnhealthy(boolean failUnhealthy) {
+        this.failUnhealthy = failUnhealthy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Threshold threshold = (Threshold) o;
+        return getThreshTarget() == threshold.getThreshTarget();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getThreshTarget());
     }
 
     @SuppressWarnings("unchecked")
