@@ -116,7 +116,7 @@ public class CoverageProcessor {
                         }
                         return true;
                     }).collect(Collectors.toList());
-            listener.getLogger().printf("Auto Detect was ended: Found %d report\n", detectedFilePaths.size());
+            listener.getLogger().printf("Auto Detect was ended: Found %d report%n", detectedFilePaths.size());
 
             try {
                 Map<CoverageReportAdapter, List<File>> detectedReportFiles = detectReports(detectedFilePaths);
@@ -135,7 +135,7 @@ public class CoverageProcessor {
         if (copiedReport.size() == 0) {
             listener.getLogger().println("No reports were found in this path");
         } else {
-            listener.getLogger().printf("A total of %d reports were found\n", copiedReport.size());
+            listener.getLogger().printf("A total of %d reports were found%n", copiedReport.size());
         }
 
         reports.clear();
