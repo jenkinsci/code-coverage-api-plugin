@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -34,16 +35,17 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageReportAdapter> adapters;
     private List<Threshold> globalThresholds;
 
-    @Nonnull
     private String autoDetectPath = CoveragePublisherDescriptor.AUTO_DETACT_PATH;
 
     @DataBoundConstructor
-    public CoveragePublisher(@Nonnull String autoDetectPath) {
+    public CoveragePublisher(String autoDetectPath) {
         this.autoDetectPath = autoDetectPath;
     }
 
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+        listener.getLogger().println("Publishing Coverage report....");
+
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener, adapters, globalThresholds);
 
         if (!StringUtils.isEmpty(autoDetectPath)) {
@@ -79,7 +81,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.globalThresholds = globalThresholds;
     }
 
-    @Nonnull
     public String getAutoDetectPath() {
         return autoDetectPath;
     }
@@ -89,7 +90,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.autoDetectPath = autoDetectPath;
     }
 
-    @Symbol("coverage")
+    @Symbol("publishCoverage")
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
