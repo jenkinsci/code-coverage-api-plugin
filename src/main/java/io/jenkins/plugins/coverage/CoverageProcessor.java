@@ -67,7 +67,7 @@ public class CoverageProcessor {
     }
 
     /**
-     * Convert report specified by {@link CoverageReportAdapter} into coverage results.
+     * Convert reports that specified by {@link CoverageReportAdapter} and found by auto detect mechanism to coverage results.
      *
      * @param adapters {@link CoverageReportAdapter} for each report
      * @return {@link CoverageResult} for each report
@@ -147,7 +147,7 @@ public class CoverageProcessor {
 
         reports.clear();
 
-
+        // convert report to results
         Map<CoverageReportAdapter, List<CoverageResult>> results = new HashMap<>();
         for (Map.Entry<CoverageReportAdapter, List<File>> adapterReports : copiedReport.entrySet()) {
             CoverageReportAdapter adapter = adapterReports.getKey();
@@ -167,7 +167,7 @@ public class CoverageProcessor {
     }
 
     /**
-     * Process threshold
+     * Process threshold and return health report.
      *
      * @param adapterWithResults Coverage report adapter and its correspond Coverage results.
      * @param globalThresholds   global threshold
@@ -248,7 +248,7 @@ public class CoverageProcessor {
     }
 
     /**
-     * Find all file that can match report adapter
+     * Find all file that can be matched by detectable report adapter.
      *
      * @param detectedFilePaths path of detected files
      * @return {@link CoverageReportAdapter} and matched file.
@@ -291,7 +291,7 @@ public class CoverageProcessor {
     }
 
     /**
-     * Aggregate results to aggregated report
+     * Aggregate results to a aggregated report.
      *
      * @param results results will be aggregated
      * @return aggregated report
@@ -307,7 +307,7 @@ public class CoverageProcessor {
     }
 
     /**
-     * Find all detectable {@link CoverageReportAdapterDescriptor}
+     * Find all detectable {@link CoverageReportAdapterDescriptor}.
      *
      * @return Detectable CoverageReportAdapterDescriptors
      */
