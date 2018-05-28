@@ -36,7 +36,7 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
         return null;
     }
 
-    @Symbol("coberturaAdapter")
+    @Symbol("cobertura")
     @Extension
     public static final class CoverturaReportAdapterDescriptor
             extends CoverageReportAdapterDescriptor<CoberturaReportAdapter>
@@ -45,7 +45,6 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
         public CoverturaReportAdapterDescriptor() {
             super(CoberturaReportAdapter.class, "Cobertura");
         }
-
 
         @Override
         public boolean detect(final File file) {

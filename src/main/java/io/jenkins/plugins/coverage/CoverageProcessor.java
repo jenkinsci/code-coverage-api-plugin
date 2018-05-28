@@ -107,7 +107,7 @@ public class CoverageProcessor {
 
         // If enable automatically detecting, it will try to find report and correspond adapter.
         if (isEnableAutoDetect()) {
-            listener.getLogger().println("Auto Detect is enable: Start to detect report");
+            listener.getLogger().println("Auto Detect is enabled: Looking for reports...");
             List<FilePath> detectedFilePaths = Arrays.stream(workspace.act(new FindReportCallable(autoDetectPath, null)))
                     .filter(filePath -> {
                         for (Map.Entry<CoverageReportAdapter, Set<FilePath>> entry : reports.entrySet()) {
