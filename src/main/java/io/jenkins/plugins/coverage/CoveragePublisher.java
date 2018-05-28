@@ -15,11 +15,9 @@ import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -36,8 +34,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageReportAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
 
-    private boolean failedUnhealthy;
-    private boolean failedUnstable;
+    private boolean failUnhealthy;
+    private boolean failUnstable;
 
     private String autoDetectPath;
 
@@ -52,9 +50,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
 
-        if (!StringUtils.isEmpty(autoDetectPath)) {
-            processor.enableAutoDetect(autoDetectPath);
-        }
+        processor.setAutoDetectPath(autoDetectPath);
+
+        processor.setFailUnhealthy(failUnhealthy);
+        processor.setFailUnstable(failUnstable);
 
         try {
             processor.performCoverageReport(getAdapters(), globalThresholds);
@@ -94,6 +93,24 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setAutoDetectPath(@Nonnull String autoDetectPath) {
         this.autoDetectPath = autoDetectPath;
+    }
+
+    public boolean isFailUnhealthy() {
+        return failUnhealthy;
+    }
+
+    @DataBoundSetter
+    public void setFailUnhealthy(boolean failUnhealthy) {
+        this.failUnhealthy = failUnhealthy;
+    }
+
+    public boolean isFailUnstable() {
+        return failUnstable;
+    }
+
+    @DataBoundSetter
+    public void setFailUnstable(boolean failUnstable) {
+        this.failUnstable = failUnstable;
     }
 
     @Symbol("publishCoverage")

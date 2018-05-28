@@ -19,6 +19,7 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
@@ -40,9 +41,11 @@ public class CoverageProcessor {
     private FilePath workspace;
     private TaskListener listener;
 
+    private boolean failUnhealthy;
+    private boolean failUnstable;
 
-    private boolean enableAutoDetect;
     private String autoDetectPath;
+
 
     public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener) {
         this.run = run;
@@ -211,8 +214,9 @@ public class CoverageProcessor {
 
                         float percentage = ratio.getPercentageFloat();
                         if (percentage < threshold.getUnhealthyThreshold()) {
-                            if (threshold.isFailUnhealthy()) {
-                                throw new CoverageException(String.format("Publish Coverage Failed: %s coverage in %s is lower than %.2f",
+                            if (isFailUnhealthy() || threshold.isFailUnhealthy()) {
+                                throw new CoverageException(
+                                        String.format("Publish Coverage Failed (Unhealthy): %s coverage in %s is lower than %.2f",
                                         threshold.getThresholdTarget().getName(),
                                         r.getName(), threshold.getUnhealthyThreshold()));
                             } else {
@@ -223,7 +227,15 @@ public class CoverageProcessor {
                         }
 
                         if (percentage < threshold.getUnstableThreshold()) {
-                            run.setResult(Result.UNSTABLE);
+
+                            if (isFailUnstable()) {
+                                throw new CoverageException(
+                                        String.format("Publish Coverage Failed (Unstable): %s coverage in %s is lower than %.2f",
+                                        threshold.getThresholdTarget().getName(),
+                                        r.getName(), threshold.getUnstableThreshold()));
+                            } else {
+                                run.setResult(Result.UNSTABLE);
+                            }
                         }
                     }
                 }
@@ -333,18 +345,28 @@ public class CoverageProcessor {
      *
      * @param autoDetectPath Ant-Style path to specify coverage report
      */
-    public void enableAutoDetect(String autoDetectPath) {
-        this.enableAutoDetect = true;
+    public void setAutoDetectPath(String autoDetectPath) {
         this.autoDetectPath = autoDetectPath;
     }
 
-    /**
-     * Getter for property 'enableAutoDetect'
-     *
-     * @return isEnableAutoDetect
-     */
     public boolean isEnableAutoDetect() {
-        return enableAutoDetect;
+        return !StringUtils.isEmpty(autoDetectPath);
+    }
+
+    public boolean isFailUnhealthy() {
+        return failUnhealthy;
+    }
+
+    public void setFailUnhealthy(boolean failUnhealthy) {
+        this.failUnhealthy = failUnhealthy;
+    }
+
+    public boolean isFailUnstable() {
+        return failUnstable;
+    }
+
+    public void setFailUnstable(boolean failUnstable) {
+        this.failUnstable = failUnstable;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

@@ -13,7 +13,18 @@
     </f:block>
 
     <f:advanced>
+        <f:entry title="Global Option">
+            <div>
+                <f:checkbox field="failUnhealthy" title="Failed if Unhealthy"/>
+            </div>
+            <div>
+                <f:checkbox field="failUnstable" title="Failed if Unstable"/>
+            </div>
+            <br/>
+        </f:entry>
         <f:entry title="Global Thresholds">
+
+
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
         </f:entry>
