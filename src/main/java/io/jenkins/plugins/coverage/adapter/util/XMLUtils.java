@@ -35,7 +35,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return Converted document
      */
-    public Document convertToDocumentWithXSL(File xsl, File source)
+    public Document convertToDocumentWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, ConversionException {
         DOMResult result = convertToDOMResultWithXSL(xsl, source);
 
@@ -49,11 +49,8 @@ public class XMLUtils {
      * @param source Source file
      * @param result Result that want to be written in
      */
-    private void convertWithXSL(File xsl, File source, Result result)
+    private void convertWithXSL(StreamSource xsl, File source, Result result)
             throws FileNotFoundException, ConversionException {
-        if (!xsl.exists()) {
-            throw new FileNotFoundException("XSL File does not exist!");
-        }
 
         if (!source.exists()) {
             throw new FileNotFoundException("source File does not exist!");
@@ -64,7 +61,7 @@ public class XMLUtils {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
-            transformer = transformerFactory.newTransformer(new StreamSource(xsl));
+            transformer = transformerFactory.newTransformer(xsl);
             transformer.transform(new StreamSource(source), result);
         } catch (TransformerException e) {
             e.printStackTrace();
@@ -80,7 +77,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return DOMResult
      */
-    public DOMResult convertToDOMResultWithXSL(File xsl, File source)
+    public DOMResult convertToDOMResultWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, ConversionException {
         DOMResult result = new DOMResult();
         convertWithXSL(xsl, source, result);
@@ -94,7 +91,7 @@ public class XMLUtils {
      * @param source Source xml file
      * @return SAXResult
      */
-    public SAXResult convertToSAXResultWithXSL(File xsl, File source)
+    public SAXResult convertToSAXResultWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, ConversionException {
         SAXResult result = new SAXResult();
         convertWithXSL(xsl, source, result);

@@ -4,6 +4,7 @@ package io.jenkins.plugins.coverage.adapter;
 import hudson.DescriptorExtensionList;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 
 import javax.annotation.Nonnull;
 

@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import hudson.Extension;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
@@ -26,6 +27,7 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         return null;
     }
 
+    @Symbol("jacoco")
     @Extension
     public static final class JacocoReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoverageReportAdapter> {
 
