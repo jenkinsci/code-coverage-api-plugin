@@ -1,10 +1,13 @@
 package io.jenkins.plugins.coverage;
 
+import com.google.common.collect.Lists;
 import hudson.FilePath;
 import hudson.model.Descriptor;
+import hudson.model.Result;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -70,6 +73,120 @@ public class CoveragePublisherPipelineTest {
 
     }
 
+    @Test
+    public void testGlobalFailUnhealthy() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .setFailUnhealthy(true);
+
+        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        lineThreshold.setUnhealthyThreshold(20);
+
+        builder.addGlobalThreshold(lineThreshold);
+
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+    }
+
+    @Test
+    public void testGlobalFailUnstable() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .setFailUnstable(true);
+
+        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        lineThreshold.setUnstableThreshold(20);
+
+        builder.addGlobalThreshold(lineThreshold);
+
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Publish Coverage Failed (Unstable):", r);
+    }
+
+    @Test
+    public void testGlobalThresholdFailUnhealthy() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"));
+
+        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        lineThreshold.setUnhealthyThreshold(20);
+        lineThreshold.setFailUnhealthy(true);
+
+        builder.addGlobalThreshold(lineThreshold);
+
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+    }
+
+    @Test
+    public void testAdapterThresholdFailUnhealthy() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
+
+        JacocoReportAdapter adapter = new JacocoReportAdapter("jacoco.xml");
+
+        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        lineThreshold.setUnhealthyThreshold(20);
+        lineThreshold.setFailUnhealthy(true);
+
+        adapter.setThresholds(Lists.newArrayList(lineThreshold));
+
+        builder.addAdapter(adapter);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+    }
+
     public static class CoverageScriptedPipelineScriptBuilder {
 
         private String autoDetectPath = "*.xml";
@@ -77,6 +194,9 @@ public class CoveragePublisherPipelineTest {
         private List<CoverageReportAdapter> adapters = new LinkedList<>();
 
         private List<Threshold> globalThresholds = new LinkedList<>();
+
+        private boolean failUnhealthy;
+        private boolean failUnstable;
 
         private CoverageScriptedPipelineScriptBuilder() {
         }
@@ -113,6 +233,9 @@ public class CoveragePublisherPipelineTest {
 
             sb.append("autoDetectPath:'").append(autoDetectPath).append("'");
 
+            sb.append(",failUnhealthy:").append(failUnhealthy);
+            sb.append(",failUnstable:").append(failUnstable);
+
             if (adapters.size() > 0) {
                 sb.append(",adapters:[");
                 for (int i = 0; i < adapters.size(); i++) {
@@ -125,6 +248,7 @@ public class CoveragePublisherPipelineTest {
             }
 
             sb.append(",globalThresholds: ").append(generateSnippetForThresholds(globalThresholds));
+
             sb.append(")").append("}");
 
             return sb.toString();
@@ -158,7 +282,7 @@ public class CoveragePublisherPipelineTest {
                 if (i > 0) sb.append(",");
 
                 Threshold threshold = thresholds.get(i);
-                sb.append("[thresholdTarget: '").append(threshold.getThresholdTarget().getName())
+                sb.append("[thresholdTarget: '").append(threshold.getThresholdTarget())
                         .append("', unhealthyThreshold: ").append(threshold.getUnhealthyThreshold())
                         .append(", unstableThreshold: ").append(threshold.getUnstableThreshold())
                         .append(", failUnhealthy: ").append(threshold.isFailUnhealthy())
@@ -167,6 +291,17 @@ public class CoveragePublisherPipelineTest {
             sb.append("]");
 
             return sb.toString();
+        }
+
+
+        public CoverageScriptedPipelineScriptBuilder setFailUnhealthy(boolean failUnhealthy) {
+            this.failUnhealthy = failUnhealthy;
+            return this;
+        }
+
+        public CoverageScriptedPipelineScriptBuilder setFailUnstable(boolean failUnstable) {
+            this.failUnstable = failUnstable;
+            return this;
         }
 
         @Override
