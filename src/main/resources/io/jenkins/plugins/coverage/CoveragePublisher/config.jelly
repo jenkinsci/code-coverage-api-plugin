@@ -13,44 +13,9 @@
     </f:block>
 
     <f:advanced>
-        <f:entry title="Global Coverage Threshold">
-            <f:repeatable var="threshHold" name="globalThresholds" items="${instance.globalThresholds}">
-                <table>
-                    <tr>
-                        <td>
-                            <select class="setting-input" name="threshTarget">
-                                <j:forEach var="i" items="${descriptor.allCoverageMetrics}">
-                                    <f:option selected="${i==threshHold.threshTarget}" value="${i}">${i.name}
-                                    </f:option>
-                                </j:forEach>
-                            </select>
-                        </td>
-                        <td>
-                            <f:repeatableDeleteButton/>
-                        </td>
-                        <th>
-                            <img src="${rootURL}/images/16x16/health-00to19.gif" alt="0%"
-                                 title="${%Mark the build as unhealthy when coverage is less than}"/>
-                        </th>
-                        <td>
-                            <f:textbox name="unhealthyThresh"
-                                       value="${threshHold.unhealthyThresh}"/>
-                        </td>
-                        <th>
-                            <img src="${rootURL}/images/16x16/yellow.gif" alt="0%"
-                                 title="${%Mark the build as unstable when coverage is less than}"/>
-                        </th>
-                        <td>
-                            <f:textbox name="unstableThresh"
-                                       value="${threshHold.unstableThresh}"/>
-                        </td>
-                        <td>
-                            <f:checkbox name="failUnhealthy" checked="${threshHold.failUnhealthy}"
-                                        title="Fail Unhealthy"/>
-                        </td>
-                    </tr>
-                </table>
-            </f:repeatable>
+        <f:entry title="Global Thresholds">
+            <f:repeatableProperty field="globalThresholds">
+            </f:repeatableProperty>
         </f:entry>
     </f:advanced>
 </j:jelly>

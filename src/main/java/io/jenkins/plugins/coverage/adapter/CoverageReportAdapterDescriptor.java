@@ -31,10 +31,4 @@ public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter>
     public static DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> all() {
         return Jenkins.getInstance().getDescriptorList(CoverageReportAdapter.class);
     }
-
-    @Nonnull
-    public CoverageMetric[] getAllCoverageMetrics() {
-        return CoverageMetric.all();
-    }
-
 }

@@ -204,17 +204,17 @@ public class CoverageProcessor {
 
                     resultTask.addAll(r.getChildrenReal().values());
                     for (Threshold threshold : thresholds) {
-                        Ratio ratio = r.getCoverage(threshold.getThreshTarget());
+                        Ratio ratio = r.getCoverage(threshold.getThresholdTarget());
                         if (ratio == null) {
                             continue;
                         }
 
                         float percentage = ratio.getPercentageFloat();
-                        if (percentage < threshold.getUnhealthyThresh()) {
+                        if (percentage < threshold.getUnhealthyThreshold()) {
                             if (threshold.isFailUnhealthy()) {
                                 throw new CoverageException(String.format("Publish Coverage Failed: %s coverage in %s is lower than %.2f",
-                                        threshold.getThreshTarget().getName(),
-                                        r.getName(), threshold.getUnhealthyThresh()));
+                                        threshold.getThresholdTarget().getName(),
+                                        r.getName(), threshold.getUnhealthyThreshold()));
                             } else {
                                 unhealthy++;
                             }
@@ -222,7 +222,7 @@ public class CoverageProcessor {
                             healthy++;
                         }
 
-                        if (percentage < threshold.getUnstableThresh()) {
+                        if (percentage < threshold.getUnstableThreshold()) {
                             run.setResult(Result.UNSTABLE);
                         }
                     }

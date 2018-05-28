@@ -28,17 +28,17 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
-    private List<CoverageReportAdapter> adapters;
-    private List<Threshold> globalThresholds;
+    private List<CoverageReportAdapter> adapters = new LinkedList<>();
+    private List<Threshold> globalThresholds = new LinkedList<>();
 
     private boolean failedUnhealthy;
     private boolean failedUnstable;
 
-    @Nonnull
     private String autoDetectPath;
 
     @DataBoundConstructor
@@ -117,11 +117,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         public DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
             return CoverageReportAdapterDescriptor.all();
-        }
-
-        @Nonnull
-        public CoverageMetric[] getAllCoverageMetrics() {
-            return CoverageMetric.all();
         }
 
         @Override

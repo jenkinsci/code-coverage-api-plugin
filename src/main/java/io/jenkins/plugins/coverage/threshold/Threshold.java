@@ -13,42 +13,42 @@ import java.util.Objects;
 
 public class Threshold implements ExtensionPoint, Describable<Threshold> {
 
-    private final CoverageMetric threshTarget;
+    private final CoverageMetric thresholdTarget;
 
     // mark build as unstable when coverage is less than this
-    private float unstableThresh = 0.0f;
+    private float unstableThreshold = 0.0f;
 
     // used for calculate healthy scores
-    private float unhealthyThresh = 0.0f;
+    private float unhealthyThreshold = 0.0f;
 
     private boolean failUnhealthy = false;
 
     @DataBoundConstructor
-    public Threshold(CoverageMetric threshTarget) {
-        this.threshTarget = threshTarget;
+    public Threshold(CoverageMetric thresholdTarget) {
+        this.thresholdTarget = thresholdTarget;
     }
 
 
-    public CoverageMetric getThreshTarget() {
-        return threshTarget;
+    public CoverageMetric getThresholdTarget() {
+        return thresholdTarget;
     }
 
-    public float getUnstableThresh() {
-        return unstableThresh;
-    }
-
-    @DataBoundSetter
-    public void setUnstableThresh(float unstableThresh) {
-        this.unstableThresh = unstableThresh;
-    }
-
-    public float getUnhealthyThresh() {
-        return unhealthyThresh;
+    public float getUnstableThreshold() {
+        return unstableThreshold;
     }
 
     @DataBoundSetter
-    public void setUnhealthyThresh(float unhealthyThresh) {
-        this.unhealthyThresh = unhealthyThresh;
+    public void setUnstableThreshold(float unstableThreshold) {
+        this.unstableThreshold = unstableThreshold;
+    }
+
+    public float getUnhealthyThreshold() {
+        return unhealthyThreshold;
+    }
+
+    @DataBoundSetter
+    public void setUnhealthyThreshold(float unhealthyThreshold) {
+        this.unhealthyThreshold = unhealthyThreshold;
     }
 
     public boolean isFailUnhealthy() {
@@ -65,12 +65,12 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Threshold threshold = (Threshold) o;
-        return getThreshTarget() == threshold.getThreshTarget();
+        return getThresholdTarget() == threshold.getThresholdTarget();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getThreshTarget());
+        return Objects.hash(getThresholdTarget());
     }
 
     @SuppressWarnings("unchecked")
@@ -85,5 +85,10 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
         public ThreshHoldDescriptor() {
             super(Threshold.class);
         }
+
+        public CoverageMetric[] getAllCoverageMetrics() {
+            return CoverageMetric.all();
+        }
+
     }
 }

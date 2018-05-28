@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 
 import javax.annotation.CheckForNull;
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -19,7 +20,7 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
     // path of report file
     private final String path;
-    private List<Threshold> thresholds;
+    private List<Threshold> thresholds = new LinkedList<>();
 
     private String name;
 

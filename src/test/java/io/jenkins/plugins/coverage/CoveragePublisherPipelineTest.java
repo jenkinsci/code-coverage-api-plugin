@@ -17,6 +17,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class CoveragePublisherPipelineTest {
 
@@ -31,30 +32,36 @@ public class CoveragePublisherPipelineTest {
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
-        workspace.child("cobertura-coverage.xml").copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
 
         project.setDefinition(new CpsFlowDefinition(builder.build(), true));
-        WorkflowRun r = project.scheduleBuild2(0).waitForStart();
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
         Assert.assertNotNull(r);
 
         j.assertBuildStatusSuccess(j.waitForCompletion(r));
         j.assertLogContains("Auto Detect was ended: Found 1 report", r);
     }
 
+    @Test
     public void testAdapters() throws Exception {
-        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder().
-                addAdapter(new CoberturaReportAdapter("cobertura-coverage.xml"))
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new CoberturaReportAdapter("cobertura-coverage.xml"))
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"));
 
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
-        workspace.child("cobertura-coverage.xml").copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
-        workspace.child("jacoco.xml").copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+        workspace.child("jacoco.xml").copyFrom(getClass()
+                .getResourceAsStream("jacoco.xml"));
 
         project.setDefinition(new CpsFlowDefinition(builder.build(), true));
-        WorkflowRun r = project.scheduleBuild2(0).waitForStart();
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
 
         Assert.assertNotNull(r);
 
@@ -117,19 +124,9 @@ public class CoveragePublisherPipelineTest {
                 sb.append(']');
             }
 
-            if (globalThresholds.size() > 0) {
-                sb.append(",globalThresholds: [");
-                for (int i = 0; i < globalThresholds.size(); i++) {
-                    if (i > 0) sb.append(",");
+            sb.append(",globalThresholds: ").append(generateSnippetForThresholds(globalThresholds));
+            sb.append(")").append("}");
 
-                    Threshold threshold = globalThresholds.get(i);
-                    sb.append(generateSnippetForThreshold(threshold));
-                }
-                sb.append("]");
-            }
-
-            sb.append(")")
-                    .append("}");
             return sb.toString();
         }
 
@@ -144,7 +141,8 @@ public class CoveragePublisherPipelineTest {
                 if (symbolValues.length > 0) {
                     String symbol = symbolValues[0];
 
-                    return symbol + "(path:'" + adapter.getPath() + "')";
+                    return symbol + "(path:'" + adapter.getPath()
+                            + "', thresholds: " + generateSnippetForThresholds(adapter.getThresholds()) + ")";
                 }
             }
 
@@ -152,12 +150,23 @@ public class CoveragePublisherPipelineTest {
             return "";
         }
 
-        private String generateSnippetForThreshold(Threshold threshold) {
+        private String generateSnippetForThresholds(List<Threshold> thresholds) {
+            StringBuilder sb = new StringBuilder();
 
-            return "[healthyThresh:" + threshold.getHealthyThresh()
-                    + ", threshTarget: '" + threshold.getThreshTarget().getName()
-                    + "', unhealthyThresh: " + threshold.getUnhealthyThresh()
-                    + ", unstableThresh: " + threshold.getUnstableThresh() + "]";
+            sb.append("[");
+            for (int i = 0; i < thresholds.size(); i++) {
+                if (i > 0) sb.append(",");
+
+                Threshold threshold = thresholds.get(i);
+                sb.append("[thresholdTarget: '").append(threshold.getThresholdTarget().getName())
+                        .append("', unhealthyThreshold: ").append(threshold.getUnhealthyThreshold())
+                        .append(", unstableThreshold: ").append(threshold.getUnstableThreshold())
+                        .append(", failUnhealthy: ").append(threshold.isFailUnhealthy())
+                        .append("]");
+            }
+            sb.append("]");
+
+            return sb.toString();
         }
 
         @Override
