@@ -20,11 +20,12 @@
             <div>
                 <f:checkbox field="failUnstable" title="Failed if Unstable"/>
             </div>
+            <div>
+                <f:checkbox field="failNoReports" title="Failed if No Reports Found"/>
+            </div>
             <br/>
         </f:entry>
         <f:entry title="Global Thresholds">
-
-
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
         </f:entry>

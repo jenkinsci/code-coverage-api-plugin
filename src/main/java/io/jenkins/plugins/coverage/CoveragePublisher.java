@@ -36,6 +36,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private boolean failUnhealthy;
     private boolean failUnstable;
+    private boolean failNoReports;
 
     private String autoDetectPath;
 
@@ -54,6 +55,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
+        processor.setFailNoReports(failNoReports);
 
         try {
             processor.performCoverageReport(getAdapters(), globalThresholds);
@@ -111,6 +113,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setFailUnstable(boolean failUnstable) {
         this.failUnstable = failUnstable;
+    }
+
+    public boolean isFailNoReports() {
+        return failNoReports;
+    }
+
+    @DataBoundSetter
+    public void setFailNoReports(boolean failNoReports) {
+        this.failNoReports = failNoReports;
     }
 
     @Symbol("publishCoverage")

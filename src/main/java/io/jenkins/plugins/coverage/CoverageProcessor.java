@@ -43,6 +43,7 @@ public class CoverageProcessor {
 
     private boolean failUnhealthy;
     private boolean failUnstable;
+    private boolean failNoReports;
 
     private String autoDetectPath;
 
@@ -76,7 +77,7 @@ public class CoverageProcessor {
      * @return {@link CoverageResult} for each report
      */
     private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(List<CoverageReportAdapter> adapters)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException, CoverageException {
 
         Map<CoverageReportAdapter, Set<FilePath>> reports = new HashMap<>();
         Map<CoverageReportAdapter, List<File>> copiedReport = new HashMap<>();
@@ -144,6 +145,9 @@ public class CoverageProcessor {
 
         if (copiedReport.size() == 0) {
             listener.getLogger().println("No reports were found in this path");
+            if (failNoReports) {
+                throw new CoverageException("Publish Coverage Failed : No Reports were found");
+            }
         } else {
             listener.getLogger().printf("A total of %d reports were found%n", copiedReport.size());
         }
@@ -217,8 +221,8 @@ public class CoverageProcessor {
                             if (isFailUnhealthy() || threshold.isFailUnhealthy()) {
                                 throw new CoverageException(
                                         String.format("Publish Coverage Failed (Unhealthy): %s coverage in %s is lower than %.2f",
-                                        threshold.getThresholdTarget().getName(),
-                                        r.getName(), threshold.getUnhealthyThreshold()));
+                                                threshold.getThresholdTarget().getName(),
+                                                r.getName(), threshold.getUnhealthyThreshold()));
                             } else {
                                 unhealthy++;
                             }
@@ -227,12 +231,11 @@ public class CoverageProcessor {
                         }
 
                         if (percentage < threshold.getUnstableThreshold()) {
-
                             if (isFailUnstable()) {
                                 throw new CoverageException(
                                         String.format("Publish Coverage Failed (Unstable): %s coverage in %s is lower than %.2f",
-                                        threshold.getThresholdTarget().getName(),
-                                        r.getName(), threshold.getUnstableThreshold()));
+                                                threshold.getThresholdTarget().getName(),
+                                                r.getName(), threshold.getUnstableThreshold()));
                             } else {
                                 run.setResult(Result.UNSTABLE);
                             }
@@ -367,6 +370,14 @@ public class CoverageProcessor {
 
     public void setFailUnstable(boolean failUnstable) {
         this.failUnstable = failUnstable;
+    }
+
+    public boolean isFailNoReports() {
+        return failNoReports;
+    }
+
+    public void setFailNoReports(boolean failNoReports) {
+        this.failNoReports = failNoReports;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

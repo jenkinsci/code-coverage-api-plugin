@@ -74,7 +74,7 @@ public class CoveragePublisherPipelineTest {
     }
 
     @Test
-    public void testGlobalFailUnhealthy() throws Exception {
+    public void testFailUnhealthy() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
                 .setFailUnhealthy(true);
@@ -102,7 +102,7 @@ public class CoveragePublisherPipelineTest {
     }
 
     @Test
-    public void testGlobalFailUnstable() throws Exception {
+    public void testFailUnstable() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
                 .setFailUnstable(true);
@@ -127,6 +127,24 @@ public class CoveragePublisherPipelineTest {
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
         j.assertLogContains("Publish Coverage Failed (Unstable):", r);
+    }
+
+    @Test
+    public void testFailNoReports() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .setFailNoReports(true);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("No reports were found in this path", r);
+        j.assertLogContains("Publish Coverage Failed : No Reports were found", r);
     }
 
     @Test
@@ -197,6 +215,7 @@ public class CoveragePublisherPipelineTest {
 
         private boolean failUnhealthy;
         private boolean failUnstable;
+        private boolean failNoReports;
 
         private CoverageScriptedPipelineScriptBuilder() {
         }
@@ -235,6 +254,7 @@ public class CoveragePublisherPipelineTest {
 
             sb.append(",failUnhealthy:").append(failUnhealthy);
             sb.append(",failUnstable:").append(failUnstable);
+            sb.append(",failNoReports:").append(failNoReports);
 
             if (adapters.size() > 0) {
                 sb.append(",adapters:[");
@@ -301,6 +321,11 @@ public class CoveragePublisherPipelineTest {
 
         public CoverageScriptedPipelineScriptBuilder setFailUnstable(boolean failUnstable) {
             this.failUnstable = failUnstable;
+            return this;
+        }
+
+        public CoverageScriptedPipelineScriptBuilder setFailNoReports(boolean failNoReports) {
+            this.failNoReports = failNoReports;
             return this;
         }
 
