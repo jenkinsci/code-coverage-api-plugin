@@ -135,7 +135,6 @@ public class CoveragePublisherPipelineTest {
                 .setFailNoReports(true);
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-        FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
         project.setDefinition(new CpsFlowDefinition(builder.build(), true));
         WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();

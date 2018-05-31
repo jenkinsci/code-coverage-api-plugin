@@ -167,7 +167,7 @@ public class CoverageProcessor {
 
         if (copiedReport.size() == 0) {
             logger.println("No reports were found in this path");
-            if (getFailUnstable()) {
+            if (getFailNoReports()) {
                 throw new CoverageException("Publish Coverage Failed : No Reports were found");
             }
         } else {
