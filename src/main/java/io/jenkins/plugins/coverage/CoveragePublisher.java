@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.FilePath;
@@ -18,6 +19,7 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -45,6 +47,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.autoDetectPath = autoDetectPath;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Publishing Coverage report....");
@@ -60,11 +66,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         try {
             processor.performCoverageReport(getAdapters(), globalThresholds);
         } catch (CoverageException e) {
-            listener.getLogger().println(e.getMessage());
+            listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
             run.setResult(Result.FAILURE);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;

@@ -23,16 +23,26 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Shenyu Zheng
- */
 public class CoverageProcessor {
 
     private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
@@ -48,13 +58,24 @@ public class CoverageProcessor {
     private String autoDetectPath;
 
 
+    /**
+     * @param run       a build this is running as a part of
+     * @param workspace a workspace to use for any file operations
+     * @param listener  a place to send output
+     */
     public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener) {
         this.run = run;
         this.workspace = workspace;
         this.listener = listener;
     }
 
-
+    /**
+     * Convert all reports specified by adapters and detected by processor to {@link CoverageResult},
+     * and generate health report from CoverageResult. Add them to {@link CoverageAction} and add Action to {@link Run}.
+     *
+     * @param adapters         adapters specified by user
+     * @param globalThresholds global threshold specified by user
+     */
     public void performCoverageReport(List<CoverageReportAdapter> adapters, List<Threshold> globalThresholds) throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(adapters);
         CoverageResult coverageReport = aggregatedResults(results);
@@ -71,13 +92,14 @@ public class CoverageProcessor {
     }
 
     /**
-     * Convert reports that specified by {@link CoverageReportAdapter} and found by auto detect mechanism to coverage results.
+     * Convert reports that specified by {@link CoverageReportAdapter} and detected by processor to {@link CoverageResult}.
      *
      * @param adapters {@link CoverageReportAdapter} for each report
      * @return {@link CoverageResult} for each report
      */
     private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(List<CoverageReportAdapter> adapters)
             throws IOException, InterruptedException, CoverageException {
+        PrintStream logger = listener.getLogger();
 
         Map<CoverageReportAdapter, Set<FilePath>> reports = new HashMap<>();
         Map<CoverageReportAdapter, List<File>> copiedReport = new HashMap<>();
@@ -118,7 +140,7 @@ public class CoverageProcessor {
 
         // If enable automatically detecting, it will try to find report and correspond adapter.
         if (isEnableAutoDetect()) {
-            listener.getLogger().println("Auto Detect is enabled: Looking for reports...");
+            logger.println("Auto Detect is enabled: Looking for reports...");
             List<FilePath> detectedFilePaths = Arrays.stream(workspace.act(new FindReportCallable(autoDetectPath, null)))
                     .filter(filePath -> {
                         for (Map.Entry<CoverageReportAdapter, Set<FilePath>> entry : reports.entrySet()) {
@@ -127,7 +149,7 @@ public class CoverageProcessor {
                         }
                         return true;
                     }).collect(Collectors.toList());
-            listener.getLogger().printf("Auto Detect was ended: Found %d report%n", detectedFilePaths.size());
+            logger.printf("Auto Detect was ended: Found %d report%n", detectedFilePaths.size());
 
             try {
                 Map<CoverageReportAdapter, List<File>> detectedReportFiles = detectReports(detectedFilePaths);
@@ -144,12 +166,12 @@ public class CoverageProcessor {
         }
 
         if (copiedReport.size() == 0) {
-            listener.getLogger().println("No reports were found in this path");
-            if (failNoReports) {
+            logger.println("No reports were found in this path");
+            if (getFailUnstable()) {
                 throw new CoverageException("Publish Coverage Failed : No Reports were found");
             }
         } else {
-            listener.getLogger().printf("A total of %d reports were found%n", copiedReport.size());
+            logger.printf("A total of %d reports were found%n", copiedReport.size());
         }
 
         reports.clear();
@@ -164,7 +186,7 @@ public class CoverageProcessor {
                     results.get(adapter).add(adapter.getResult(s));
                 } catch (CoverageException e) {
                     e.printStackTrace();
-                    listener.getLogger().printf("report for %s has met some errors: %s",
+                    logger.printf("report for %s has met some errors: %s",
                             adapter.getDescriptor().getDisplayName(), e.getMessage());
                 }
                 FileUtils.deleteQuietly(s);
@@ -183,8 +205,8 @@ public class CoverageProcessor {
     private HealthReport processThresholds(Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
                                            List<Threshold> globalThresholds) throws CoverageException {
 
-        int healthy = 0;
-        int unhealthy = 0;
+        int healthyCount = 0;
+        int unhealthyCount = 0;
 
         LinkedList<CoverageResult> resultTask = new LinkedList<>();
 
@@ -218,20 +240,20 @@ public class CoverageProcessor {
 
                         float percentage = ratio.getPercentageFloat();
                         if (percentage < threshold.getUnhealthyThreshold()) {
-                            if (isFailUnhealthy() || threshold.isFailUnhealthy()) {
+                            if (getFailUnhealthy() || threshold.isFailUnhealthy()) {
                                 throw new CoverageException(
                                         String.format("Publish Coverage Failed (Unhealthy): %s coverage in %s is lower than %.2f",
                                                 threshold.getThresholdTarget().getName(),
                                                 r.getName(), threshold.getUnhealthyThreshold()));
                             } else {
-                                unhealthy++;
+                                unhealthyCount++;
                             }
                         } else {
-                            healthy++;
+                            healthyCount++;
                         }
 
                         if (percentage < threshold.getUnstableThreshold()) {
-                            if (isFailUnstable()) {
+                            if (getFailUnstable()) {
                                 throw new CoverageException(
                                         String.format("Publish Coverage Failed (Unstable): %s coverage in %s is lower than %.2f",
                                                 threshold.getThresholdTarget().getName(),
@@ -252,10 +274,10 @@ public class CoverageProcessor {
                         .collect(Collectors.toList()));
 
         int score;
-        if (healthy == 0 && unhealthy == 0) {
+        if (healthyCount == 0 && unhealthyCount == 0) {
             score = 100;
         } else {
-            score = healthy * 100 / (healthy + unhealthy);
+            score = healthyCount * 100 / (healthyCount + unhealthyCount);
         }
         Localizable localizeDescription = Messages._CoverageProcessor_healthReportDescriptionTemplate(score);
 
@@ -352,30 +374,57 @@ public class CoverageProcessor {
         this.autoDetectPath = autoDetectPath;
     }
 
+    /**
+     * @return <code>true</code> if auto detect is enable
+     */
     public boolean isEnableAutoDetect() {
         return !StringUtils.isEmpty(autoDetectPath);
     }
 
-    public boolean isFailUnhealthy() {
+    /**
+     * Getter for property 'failUnhealthy'
+     * @return value for property 'failUnhealthy'
+     */
+    public boolean getFailUnhealthy() {
         return failUnhealthy;
     }
 
+    /**
+     * Setter for property 'failUnhealthy'
+     * @param failUnhealthy value to set for property 'failUnhealthy'
+     */
     public void setFailUnhealthy(boolean failUnhealthy) {
         this.failUnhealthy = failUnhealthy;
     }
 
-    public boolean isFailUnstable() {
+    /**
+     * Getter for property 'failUnstable'
+     * @return value for property 'failUnstable'
+     */
+    public boolean getFailUnstable() {
         return failUnstable;
     }
 
+    /**
+     * Setter for property 'failUnstable'
+     * @param failUnstable value to set for property 'failUnstable'
+     */
     public void setFailUnstable(boolean failUnstable) {
         this.failUnstable = failUnstable;
     }
 
-    public boolean isFailNoReports() {
+    /**
+     * Getter for property 'failNoReports'
+     * @return value for property 'failNoReports'
+     */
+    public boolean getFailNoReports() {
         return failNoReports;
     }
 
+    /**
+     * Setter for property 'failNoReports'
+     * @param failNoReports value to set for property 'failNoReports'
+     */
     public void setFailNoReports(boolean failNoReports) {
         this.failNoReports = failNoReports;
     }

@@ -15,10 +15,10 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
 
     private final CoverageMetric thresholdTarget;
 
-    // mark build as unstable when coverage is less than this
+    // mark build as unstable when coverage is less than this.
     private float unstableThreshold = 0.0f;
 
-    // used for calculate healthy scores
+    // used for calculating healthy scores.
     private float unhealthyThreshold = 0.0f;
 
     private boolean failUnhealthy = false;
@@ -65,7 +65,7 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Threshold threshold = (Threshold) o;
-        return getThresholdTarget() == threshold.getThresholdTarget();
+        return Objects.equals(getThresholdTarget(), threshold.getThresholdTarget());
     }
 
     @Override

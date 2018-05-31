@@ -17,6 +17,9 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+/**
+ * Utils class used for XML related operations.
+ */
 public class XMLUtils {
 
     private static XMLUtils converter = new XMLUtils();
@@ -29,11 +32,11 @@ public class XMLUtils {
     }
 
     /**
-     * Converting source xml file to target file according the XSLT file
+     * Use XSL to transform source xml file to {@link Document}.
      *
-     * @param xsl    XSLT file
-     * @param source Source xml file
-     * @return Converted document
+     * @param xsl    XSL source
+     * @param source source xml file
+     * @return document transformed from source file
      */
     public Document convertToDocumentWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, CoverageException {
@@ -43,11 +46,11 @@ public class XMLUtils {
     }
 
     /**
-     * Converting source xml file to target result according the XSLT file
+     * Use XSL to transform source xml file to {@link Result}.
      *
-     * @param xsl    XSLT file
-     * @param source Source file
-     * @param result Result that want to be written in
+     * @param xsl    XSL source
+     * @param source source xml file
+     * @param result result transformed from source file
      */
     private void convertWithXSL(StreamSource xsl, File source, Result result)
             throws FileNotFoundException, CoverageException {
@@ -71,11 +74,11 @@ public class XMLUtils {
 
 
     /**
-     * Converting source xml file to {@link DOMResult}
+     * Use XSL to transform source xml file to {@link DOMResult}.
      *
-     * @param xsl    XSLT file
-     * @param source Source xml file
-     * @return DOMResult
+     * @param xsl    XSL source
+     * @param source source xml file
+     * @return DOMResult transformed from source file
      */
     public DOMResult convertToDOMResultWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, CoverageException {
@@ -85,11 +88,11 @@ public class XMLUtils {
     }
 
     /**
-     * Converting source xml file to {@link SAXResult}
+     * Use XSL to transform source xml file to {@link SAXResult}.
      *
-     * @param xsl    XSLT file
-     * @param source Source xml file
-     * @return SAXResult
+     * @param xsl    XSL source
+     * @param source source xml file
+     * @return SAXResult transformed from source file
      */
     public SAXResult convertToSAXResultWithXSL(StreamSource xsl, File source)
             throws FileNotFoundException, CoverageException {
@@ -99,6 +102,12 @@ public class XMLUtils {
     }
 
 
+    /**
+     * Write {@link Document} to target file.
+     *
+     * @param document document be written
+     * @param target   target file written to
+     */
     public void writeDocumentToXML(Document document, File target) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
@@ -110,6 +119,13 @@ public class XMLUtils {
         }
     }
 
+    /**
+     * Read xml file and return it as {@link Document} format.
+     *
+     * @param file xml file be read
+     * @return document converted by xml
+     * @throws TransformerException file cannot be convert to {@link Document}
+     */
     public Document readXMLtoDocument(File file) throws TransformerException {
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
@@ -120,6 +136,12 @@ public class XMLUtils {
         return getDocumentFromDomResult(result);
     }
 
+    /**
+     * Get document from {@link DOMResult}.
+     *
+     * @param domResult DOMResult
+     * @return Document from {@link DOMResult}
+     */
     private Document getDocumentFromDomResult(DOMResult domResult) {
         Node node = domResult.getNode();
         if (node == null) {

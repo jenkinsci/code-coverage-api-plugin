@@ -1,12 +1,12 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.HealthReport;
+import hudson.model.HealthReportingAction;
+import hudson.model.Run;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.Ratio;
-import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
-import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerProxy;
 
 import javax.annotation.CheckForNull;
@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2, HealthReportingAction {
 
@@ -52,24 +50,24 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
      */
     private CoverageResult getResult() {
         if (report != null) {
-            CoverageResult r = report.get();
-            if (r != null) {
-                return r;
+            CoverageResult coverageResult = report.get();
+            if (coverageResult != null) {
+                return coverageResult;
             }
         }
 
-        CoverageResult r = null;
+        CoverageResult coverageResult = null;
         try {
-            r = CoverageProcessor.recoverCoverageResult(owner);
+            coverageResult = CoverageProcessor.recoverCoverageResult(owner);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        if (r != null) {
-            r.setOwner(owner);
-            report = new WeakReference<>(r);
+        if (coverageResult != null) {
+            coverageResult.setOwner(owner);
+            report = new WeakReference<>(coverageResult);
         }
-        return r;
+        return coverageResult;
     }
 
     /**
@@ -92,9 +90,9 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     private synchronized void setOwner(Run<?, ?> owner) {
         this.owner = owner;
         if (report != null) {
-            CoverageResult r = report.get();
-            if (r != null) {
-                r.setOwner(owner);
+            CoverageResult coverageResult = report.get();
+            if (coverageResult != null) {
+                coverageResult.setOwner(owner);
             }
 
         }

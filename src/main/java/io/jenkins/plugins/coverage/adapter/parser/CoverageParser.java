@@ -7,20 +7,26 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Parse the standard format coverage report and convert it into {@link CoverageResult}
+ * Parse the standard format coverage report and convert it into {@link CoverageResult}.
  */
 public abstract class CoverageParser {
 
     private String reportName;
 
+    /**
+     * Report name will show in the UI, to differentiate different report.
+     *
+     * @param reportName name of the report
+     */
     public CoverageParser(String reportName) {
         this.reportName = reportName;
     }
 
     /**
-     * Parse coverage report to {@link CoverageResult}
+     * Parse coverage report {@link Document} to {@link CoverageResult}.
+     *
      * @param document DOM document of coverage report
-     * @return Coverage result
+     * @return Coverage result of specified report
      */
     public CoverageResult parse(Document document) {
         CoverageResult result = processElement(document.getDocumentElement(), null);
@@ -29,10 +35,11 @@ public abstract class CoverageParser {
     }
 
     /**
-     * Iterate the child elements of parent node, and parse the element to {@link CoverageResult}, then make the CoverageResult
+     * Iterate the child elements of parent node, and parse the element to {@link CoverageResult}, then make the CoverageResult.
      * be the child of parent CoverageResult.
-     * @param parent Parent Node
-     * @param parentResult Parent coverage result
+     *
+     * @param parent       parent Node
+     * @param parentResult parent coverage result
      */
     public void parse(final Node parent, final CoverageResult parentResult) {
         NodeList nodeList = parent.getChildNodes();
@@ -46,18 +53,29 @@ public abstract class CoverageParser {
     }
 
     /**
-     * Process DOM element and convert it to {@link CoverageResult}
-     * @param current Current element
-     * @param parentResult Parent coverage result
-     * @return Coverage result
+     * Process DOM {@link Element} and convert it to {@link CoverageResult}.
+     *
+     * @param current      current element
+     * @param parentResult parent coverage result
+     * @return coverage result converted from Element
      */
     protected abstract CoverageResult processElement(Element current, CoverageResult parentResult);
 
 
+    /**
+     * Getter for property 'reportName'.
+     *
+     * @return value for property 'reportName'
+     */
     public String getReportName() {
         return reportName;
     }
 
+    /**
+     * Setter for property 'reportName'.
+     *
+     * @param reportName value to set for property 'reportName'
+     */
     public void setReportName(String reportName) {
         this.reportName = reportName;
     }
