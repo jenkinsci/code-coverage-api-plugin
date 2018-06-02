@@ -176,21 +176,17 @@ var CoverageChartGenerator = function (instance) {
                 return;
             }
 
-            var metrics = [];
-            var children = [];
+            var defaultRange = [0, 75];
 
-            var data = [];
 
-            Object.keys(results).forEach(function (childName, childIndex) {
-                children.push(childName);
-                results[childName].forEach(function (coverage, metricIndex) {
-                    var ratio = coverage.ratio;
-
-                    metrics[metricIndex] = coverage.name;
-
-                    data.push([metricIndex, childIndex, parseFloat(ratio.percentageString)]);
-                })
-            });
+            var r = filterChildren(results, defaultRange);
+            if (r.children.length === 0) {
+                defaultRange = [0, 100];
+                r = filterChildren(results, defaultRange);
+            }
+            var metrics = r.metrics;
+            var children = r.children;
+            var data = r.data;
 
 
             var height = children.length * 32 + 100;
@@ -199,7 +195,6 @@ var CoverageChartGenerator = function (instance) {
             }
             childSummaryChartDiv.style.height = height + "px";
             var childSummaryChart = echarts.init(childSummaryChartDiv);
-
 
             var childSummaryChartOption = {
                 title: {
@@ -265,17 +260,20 @@ var CoverageChartGenerator = function (instance) {
                     },
                     triggerEvent: true,
                     axisLabel: {
+                        interval: 0,
                         fontSize: 13
                     }
                 },
                 visualMap: {
                     min: 0,
                     max: 100,
+                    range: defaultRange,
                     calculable: true,
                     orient: 'horizontal',
-                    left: 'center',
+                    left: 'right',
+                    top: 'top',
                     inRange: {
-                        color: ['#d55e00', '#009e73'],
+                        color: ['#d55e00', '#009e73']
                     }
                 },
                 series: [{
@@ -304,6 +302,35 @@ var CoverageChartGenerator = function (instance) {
                 if (params.componentType === 'yAxis') {
                     window.location.href = transformURL(params.value);
                 }
+            });
+
+            childSummaryChart.on('datarangeselected', function (params) {
+
+
+                var r = filterChildren(results, params.selected);
+                var children = r.children;
+                var data = r.data;
+
+
+                if (children.length !== 0) {
+                    childSummaryChartOption.series[0].data = data;
+                } else {
+                    childSummaryChartOption.series[0].data = null;
+                }
+
+                childSummaryChartOption.visualMap.range = [params.selected[0], params.selected[1]];
+                childSummaryChartOption.yAxis.data = children;
+
+                var height = children.length * 32 + 100;
+                if (height < 150) {
+                    height = 150;
+                }
+                childSummaryChartDiv.style.height = height + "px";
+
+                var childSummaryChart = echarts.init(childSummaryChartDiv);
+
+                childSummaryChart.setOption(childSummaryChartOption);
+                childSummaryChart.resize();
             });
 
             window.onresize = function () {
@@ -393,6 +420,34 @@ var CoverageChartGenerator = function (instance) {
 
         })
     }
+
+    function filterChildren(results, range) {
+        var metrics = [];
+        var children = [];
+
+        var data = [];
+
+        Object.keys(results).filter(function (childName, childIndex) {
+            return results[childName].find(function (element) {
+                var p = parseFloat(element.ratio.percentageString);
+
+                return p >= range[0] && p <= range[1];
+            });
+        }).forEach(function (childName, childIndex) {
+            children.push(childName);
+            results[childName].forEach(function (coverage, metricIndex) {
+                var ratio = coverage.ratio;
+
+                metrics[metricIndex] = coverage.name;
+
+                data.push([metricIndex, childIndex, parseFloat(ratio.percentageString)]);
+            })
+        });
+
+        return {
+            metrics: metrics,
+            children: children,
+            data: data
+        }
+    }
 };
-
-

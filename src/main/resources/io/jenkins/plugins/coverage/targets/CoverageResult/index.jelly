@@ -1,6 +1,5 @@
 <?jelly escape-by-default='false'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
     <l:layout css="/plugin/code-coverage-api/css/style.css" norefresh="true">
         <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
         </script>
