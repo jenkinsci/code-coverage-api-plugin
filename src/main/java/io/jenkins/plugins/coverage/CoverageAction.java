@@ -19,7 +19,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
 
     private transient Run<?, ?> owner;
     private transient WeakReference<CoverageResult> report;
-
+    private HealthReport healthReport;
 
     public CoverageAction(CoverageResult result) {
         this.report = new WeakReference<>(result);
@@ -35,9 +35,12 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
 
+    /**
+     * @return Health report
+     */
     @Override
     public HealthReport getBuildHealth() {
-        return null;
+        return getHealthReport();
     }
 
     /**
@@ -47,24 +50,24 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
      */
     private CoverageResult getResult() {
         if (report != null) {
-            CoverageResult r = report.get();
-            if (r != null) {
-                return r;
+            CoverageResult coverageResult = report.get();
+            if (coverageResult != null) {
+                return coverageResult;
             }
         }
 
-        CoverageResult r = null;
+        CoverageResult coverageResult = null;
         try {
-            r = CoverageProcessor.recoverReport(owner);
+            coverageResult = CoverageProcessor.recoverCoverageResult(owner);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        if (r != null) {
-            r.setOwner(owner);
-            report = new WeakReference<>(r);
+        if (coverageResult != null) {
+            coverageResult.setOwner(owner);
+            report = new WeakReference<>(coverageResult);
         }
-        return r;
+        return coverageResult;
     }
 
     /**
@@ -76,12 +79,20 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
 
+    public HealthReport getHealthReport() {
+        return healthReport;
+    }
+
+    public void setHealthReport(HealthReport healthReport) {
+        this.healthReport = healthReport;
+    }
+
     private synchronized void setOwner(Run<?, ?> owner) {
         this.owner = owner;
         if (report != null) {
-            CoverageResult r = report.get();
-            if (r != null) {
-                r.setOwner(owner);
+            CoverageResult coverageResult = report.get();
+            if (coverageResult != null) {
+                coverageResult.setOwner(owner);
             }
 
         }
@@ -90,7 +101,6 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     public Run<?, ?> getOwner() {
         return owner;
     }
-
 
     /**
      * {@inheritDoc}

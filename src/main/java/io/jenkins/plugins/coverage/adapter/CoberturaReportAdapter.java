@@ -46,6 +46,10 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             super(CoberturaReportAdapter.class, "Cobertura");
         }
 
+        /**
+         * @param file file be detect
+         * @return <code>true</code> is file is a cobertura report
+         */
         @Override
         public boolean detect(final File file) {
             if (!file.exists()) {

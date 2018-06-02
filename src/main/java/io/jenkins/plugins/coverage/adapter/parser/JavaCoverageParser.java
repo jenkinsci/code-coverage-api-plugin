@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 public class JavaCoverageParser extends CoverageParser {
 
     private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*%\\s*\\((\\d*)/(\\d*)\\)");
-
+    
     public JavaCoverageParser(String reportName) {
         super(reportName);
     }
@@ -129,7 +129,7 @@ public class JavaCoverageParser extends CoverageParser {
     /**
      * Get value of name attribute from a element, if name attribute not exist or is empty, return default name.
      *
-     * @param e           Element want to get name
+     * @param e           element want to get value of name attribute
      * @param defaultName default name
      * @return value of name attribute
      */

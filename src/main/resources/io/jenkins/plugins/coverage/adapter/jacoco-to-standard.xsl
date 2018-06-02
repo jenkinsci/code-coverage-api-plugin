@@ -64,7 +64,6 @@
                                     <xsl:choose>
                                         <xsl:when test="number(./@mb) + number(./@cb) > 0 ">
                                             <xsl:attribute name="branch">true</xsl:attribute>
-                                            <!--cline.set('condition-coverage', percentage + ' (' + str(cb) + '/' + str(cb + mb) + ')')-->
                                             <xsl:variable name="percentage"
                                                           select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
                                             <xsl:attribute name="condition-coverage">
@@ -117,7 +116,6 @@
                         <xsl:choose>
                             <xsl:when test="number(./@mb) + number(./@cb) > 0 ">
                                 <xsl:attribute name="branch">true</xsl:attribute>
-                                <!--cline.set('condition-coverage', percentage + ' (' + str(cb) + '/' + str(cb + mb) + ')')-->
                                 <xsl:variable name="percentage"
                                               select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
                                 <xsl:attribute name="condition-coverage">
