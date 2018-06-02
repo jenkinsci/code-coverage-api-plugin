@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.adapter;
 
 import hudson.Extension;
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,6 +36,7 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
         return null;
     }
 
+    @Symbol("cobertura")
     @Extension
     public static final class CoverturaReportAdapterDescriptor
             extends CoverageReportAdapterDescriptor<CoberturaReportAdapter>
@@ -44,7 +46,10 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             super(CoberturaReportAdapter.class, "Cobertura");
         }
 
-
+        /**
+         * @param file file be detect
+         * @return <code>true</code> is file is a cobertura report
+         */
         @Override
         public boolean detect(final File file) {
             if (!file.exists()) {
