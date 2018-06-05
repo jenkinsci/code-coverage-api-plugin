@@ -19,6 +19,7 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
@@ -31,6 +32,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -165,33 +168,52 @@ public class CoverageProcessor {
 
         }
 
-        if (copiedReport.size() == 0) {
-            logger.println("No reports were found in this path");
-            if (getFailNoReports()) {
-                throw new CoverageException("Publish Coverage Failed : No Reports were found");
-            }
-        } else {
-            logger.printf("A total of %d reports were found%n", copiedReport.size());
-        }
-
         reports.clear();
 
         // convert report to results
         Map<CoverageReportAdapter, List<CoverageResult>> results = new HashMap<>();
         for (Map.Entry<CoverageReportAdapter, List<File>> adapterReports : copiedReport.entrySet()) {
             CoverageReportAdapter adapter = adapterReports.getKey();
-            for (File s : adapterReports.getValue()) {
+            CoverageReportAdapterDescriptor descriptor = (CoverageReportAdapterDescriptor) adapter.getDescriptor();
+            for (File foundedFile : adapterReports.getValue()) {
                 try {
-                    results.putIfAbsent(adapter, new LinkedList<>());
-                    results.get(adapter).add(adapter.getResult(s));
+                    boolean isValidate;
+
+                    // If is Detectable, then use detect to validate file, else simply use file length
+                    if (descriptor instanceof Detectable) {
+                        isValidate = ((Detectable) descriptor).detect(foundedFile);
+                    } else {
+                        // skip file if file is empty
+                        isValidate = Files.size(Paths.get(foundedFile.toURI())) > 0;
+                    }
+
+                    if (isValidate) {
+                        results.putIfAbsent(adapter, new LinkedList<>());
+                        results.get(adapter).add(adapter.getResult(foundedFile));
+                    }
                 } catch (CoverageException e) {
                     e.printStackTrace();
                     logger.printf("report for %s has met some errors: %s",
                             adapter.getDescriptor().getDisplayName(), e.getMessage());
                 }
-                FileUtils.deleteQuietly(s);
+                FileUtils.deleteQuietly(foundedFile);
             }
         }
+
+
+        if (results.size() == 0) {
+            logger.println("No reports were found");
+            if (getFailNoReports()) {
+                throw new CoverageException("Publish Coverage Failed : No Reports were found");
+            }
+        } else {
+            logger.printf("A total of %d reports were found%n",
+                    results.values()
+                            .stream()
+                            .mapToLong(Collection::size)
+                            .sum());
+        }
+
         return results;
     }
 
@@ -383,6 +405,7 @@ public class CoverageProcessor {
 
     /**
      * Getter for property 'failUnhealthy'
+     *
      * @return value for property 'failUnhealthy'
      */
     public boolean getFailUnhealthy() {
@@ -391,6 +414,7 @@ public class CoverageProcessor {
 
     /**
      * Setter for property 'failUnhealthy'
+     *
      * @param failUnhealthy value to set for property 'failUnhealthy'
      */
     public void setFailUnhealthy(boolean failUnhealthy) {
@@ -399,6 +423,7 @@ public class CoverageProcessor {
 
     /**
      * Getter for property 'failUnstable'
+     *
      * @return value for property 'failUnstable'
      */
     public boolean getFailUnstable() {
@@ -407,6 +432,7 @@ public class CoverageProcessor {
 
     /**
      * Setter for property 'failUnstable'
+     *
      * @param failUnstable value to set for property 'failUnstable'
      */
     public void setFailUnstable(boolean failUnstable) {
@@ -415,6 +441,7 @@ public class CoverageProcessor {
 
     /**
      * Getter for property 'failNoReports'
+     *
      * @return value for property 'failNoReports'
      */
     public boolean getFailNoReports() {
@@ -423,6 +450,7 @@ public class CoverageProcessor {
 
     /**
      * Setter for property 'failNoReports'
+     *
      * @param failNoReports value to set for property 'failNoReports'
      */
     public void setFailNoReports(boolean failNoReports) {
