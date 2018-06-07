@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Kohsuke Kawaguchi, Michael Barrientos, Jeff Pearce, Shenyu Zheng and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
  * Represents <tt>x/y</tt> where x={@link #numerator} and y={@link #denominator}.
