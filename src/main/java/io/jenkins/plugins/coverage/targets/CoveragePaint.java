@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2018 Stephen Connolly, Steven Christou, Jeff Pearce, Shenyu Cheng, and Jenkins contributors
+ * Copyright (c) 2007-2018 Stephen Connolly, Jesse Glick, Kohsuke Kawaguchi, Seiji Sogabe and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
+
 /**
  * Line-by-line coverage information.
  *

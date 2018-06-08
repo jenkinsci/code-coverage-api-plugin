@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Stephen Connolly, Stephen Connolly and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
 package io.jenkins.plugins.coverage.targets;
 
 import java.io.Serializable;
+
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
  * Describes how {@link CoveragePaint} can be aggregated up a {@link CoverageResult} tree.

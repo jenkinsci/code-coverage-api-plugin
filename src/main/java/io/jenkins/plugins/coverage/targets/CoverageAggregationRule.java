@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Stephen Connolly, Seiji Sogabe, Shenyu Zheng and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import static io.jenkins.plugins.coverage.targets.CoverageAggregationMode.SUM;
 import static io.jenkins.plugins.coverage.targets.CoverageElement.*;
 import static io.jenkins.plugins.coverage.targets.CoverageMetric.*;
 
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
  * Rules that determines how coverage ratio of children are aggregated into that of the parent.
