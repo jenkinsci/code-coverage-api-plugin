@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Stephen Connolly, Michael Barrientos, Jeff Pearce, Shenyu Zheng and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
  * <p>Coverage result for a specific programming element.</p>

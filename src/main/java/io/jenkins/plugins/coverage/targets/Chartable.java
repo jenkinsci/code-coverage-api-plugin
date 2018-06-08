@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Michael Barrientos, Seiji Sogabe and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ import hudson.model.Run;
 
 import java.util.Map;
 
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 public interface Chartable {
 
     Chartable getPreviousResult();

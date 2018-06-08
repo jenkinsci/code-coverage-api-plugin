@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Seiji Sogabe, Michael Barrientos, Balázs Póka, Jeff Pearce and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ import org.jfree.ui.RectangleInsets;
 import java.awt.*;
 import java.util.Map;
 
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 public class CoverageChart {
     private CategoryDataset dataset;
     private int lowerBound;

@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 manolo, Seiji Sogabe, Michael Barrientos and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 /**
  * Interface for elements which have a display name
  *

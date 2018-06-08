@@ -1,5 +1,5 @@
 /*
- * The MIT License
+ * Copyright (c) 2007-2018 Stephen Connolly, Michael Barrientos, Jeff Pearce and Jenkins contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,8 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+
+// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
  * Different ways of aggregating data series {x_1,x_2,x_3,...}, which can be represented as
