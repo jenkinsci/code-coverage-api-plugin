@@ -43,7 +43,7 @@ public class AntPathDetector extends Detector {
     }
 
 
-    @Symbol("ant-detector")
+    @Symbol("antDetector")
     @Extension
     public static final class AntPathDetectorDescriptor extends DetectorDescriptor<Detector> {
 
