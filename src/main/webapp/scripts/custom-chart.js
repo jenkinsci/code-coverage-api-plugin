@@ -176,7 +176,7 @@ var CoverageChartGenerator = function (instance) {
                 return;
             }
 
-            var defaultRange = [0, 75];
+            var defaultRange = [0, 100];
 
 
             var r = filterChildren(results, defaultRange);
