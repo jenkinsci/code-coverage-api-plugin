@@ -4,9 +4,14 @@ package io.jenkins.plugins.coverage.adapter.util;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
@@ -16,6 +21,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Utils class used for XML related operations.
@@ -65,10 +71,27 @@ public class XMLUtils {
         Transformer transformer;
         try {
             transformer = transformerFactory.newTransformer(xsl);
-            transformer.transform(new StreamSource(source), result);
-        } catch (TransformerException e) {
+        } catch (TransformerConfigurationException e) {
             e.printStackTrace();
             throw new CoverageException(e);
+        }
+
+        try {
+            transformer.transform(new StreamSource(source), result);
+        } catch (TransformerException e) {
+            // disable dtd validation then parse it again
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+
+            try {
+                documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+                Document document = builder.parse(source);
+
+                transformer.transform(new DOMSource(document), result);
+
+            }  catch (ParserConfigurationException | TransformerException | IOException | SAXException ignore) {
+                throw new CoverageException(e);
+            }
         }
     }
 
