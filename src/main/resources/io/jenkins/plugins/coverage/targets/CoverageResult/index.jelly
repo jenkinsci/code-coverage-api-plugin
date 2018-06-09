@@ -1,7 +1,10 @@
-<?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<?jelly escape-by-default='false'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
     <l:layout css="/plugin/code-coverage-api/css/style.css" norefresh="true">
+        <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
+        </script>
+        <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
+        </script>
         <st:include it="${it.owner}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1>${%Code Coverage}</h1>
@@ -9,101 +12,31 @@
                 <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>
                 &gt;
             </j:forEach>
-            <h2>${it.xmlTransform(it.name)}</h2>
             <j:set var="metrics" value="${it.metrics}"/>
-            <h3>${%Trend}</h3>
-            <!--<j:if test="${it.previousResult != null}">-->
-                <!--<img src="graph" width="500px" height="200px"/>-->
-            <!--</j:if>-->
-            <!--<j:if test="${it.previousResult == null}">-->
-                <!--<div style="border: 1px solid #eee; width:500px; ">-->
-                    <!--<j:forEach var="metric" items="${it.metrics}">-->
-                        <!--<table style="padding: 0 10px; padding-top: 5px; width:480px;">-->
-                            <!--<tr>-->
-                                <!--<th align="left">${metric.name}</th>-->
-                                <!--<td align="right">${it.getCoverage(metric).percentage}%</td>-->
-                            <!--</tr>-->
-                        <!--</table>-->
-                        <!--<table style="height: 3px; padding: 0 10px; width:480px;">-->
-                            <!--<tr>-->
-                                <!--<j:if test="${it.getCoverage(metric).percentage &gt; 0}">-->
-                                    <!--<td width="${it.getCoverage(metric).percentage}%"-->
-                                        <!--style="background-color:#bfb;">-->
-                                        <!--&amp;nbsp;-->
-                                    <!--</td>-->
-                                <!--</j:if>-->
-                                <!--<j:if test="${it.getCoverage(metric).percentage &lt; 100}">-->
-                                    <!--<td width="${100-it.getCoverage(metric).percentage}%"-->
-                                        <!--style="background-color:#fdd;">-->
-                                        <!--&amp;nbsp;-->
-                                    <!--</td>-->
-                                <!--</j:if>-->
-                            <!--</tr>-->
-                        <!--</table>-->
-                    <!--</j:forEach>-->
-                <!--</div>-->
-            <!--</j:if>-->
+            <br/>
+            <br/>
+            <br/>
+            <j:if test="${it.previousResult != null}">
+                <div id="trendChart" style="width:800px;height:100%;">
+                </div>
+            </j:if>
+            <br/>
+            <div id="summaryChart" style="width:800px;height:100%;">
+            </div>
+            <br/>
+            <div id="childSummaryChart" style="width:800px;height:100%;">
+            </div>
+            <script>
+                var instance =<st:bind value="${it}"/>;
 
-            <h3>${%coverage.summary.by(it.element.displayName)}</h3>
-            <table border="1px" class="pane">
-                <tr>
-                    <th>${%Name}</th>
-                    <j:forEach var="metric" items="${metrics}">
-                        <th class="center">${metric.name}</th>
-                    </j:forEach>
-                </tr>
-                <tr>
-                    <td>${it.name}</td>
-                    <j:forEach var="metric" items="${metrics}">
-                        <td data="${it.getCoverage(metric).percentageString}">
-                            <table class="percentgraph" cellpadding="0px" cellspacing="0px">
-                                <tr class="percentgraph">
-                                    <td width="40" class="data">${it.getCoverage(metric).percentage}%</td>
-                                    <td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width: ${it.getCoverage(metric).percentageFloat}px;"><span class="text">${it.getCoverage(metric)}</span></div></div></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </j:forEach>
-                </tr>
-            </table>
+                var coverageChartGenerator = new CoverageChartGenerator(instance)
+                var name = "${it.xmlTransform(it.name)}";
+                coverageChartGenerator.generateSummaryChart('summaryChart', name);
+                var metric = '${it.childElement.displayName}';
+                coverageChartGenerator.generateChildSummaryChart('childSummaryChart', metric);
 
-            <j:forEach var="element" items="${it.childElements}">
-                <j:set var="childMetrics" value="${it.getChildMetrics(element)}"/>
-                <h3>${%coverage.breakdown.by(element.displayName)}</h3>
-                <table border="1px" class="pane sortable">
-                    <tr>
-                        <th>${%Name}</th>
-                        <j:forEach var="metric" items="${childMetrics}">
-                            <th class="center">${metric.name}</th>
-                        </j:forEach>
-                    </tr>
-                    <j:forEach var="c" items="${it.children}">
-                        <j:set var="child" value="${it.getChild(c)}"/>
-                        <tr>
-
-                            <td>
-                                <a href="${child.urlTransform(child.name)}/">${child.xmlTransform(child.name)}</a>
-                            </td>
-                            <j:forEach var="metric" items="${childMetrics}">
-                                <j:set var="childResult" value="${child.getCoverage(metric)}"/>
-                                <j:choose>
-                                    <j:when test="${childResult!=null and childResult.denominator != 0}">
-                                        <td  data="${childResult.percentageString}">
-                                            <table class="percentgraph" cellpadding="0px" cellspacing="0px"><tr class="percentgraph">
-                                                <td width="40" class="data">${childResult.percentage}%</td>
-                                                <td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width: ${childResult.percentageFloat}px;"><span class="text">${childResult}</span></div></div></td>
-                                            </tr></table>
-                                        </td>
-                                    </j:when>
-                                    <j:otherwise>
-                                        <td data="101" class="center">${%N/A}</td>
-                                    </j:otherwise>
-                                </j:choose>
-                            </j:forEach>
-                        </tr>
-                    </j:forEach>
-                </table>
-            </j:forEach>
+                coverageChartGenerator.generateTrendChart('trendChart');
+            </script>
 
             <j:if test="${it.sourceCodeLevel}">
                 <h3>${%Source}</h3>
@@ -112,18 +45,21 @@
                         <div style="overflow-x:scroll;">
                             <table class="source">
                                 <thead>
-                                <tr>
-                                    <th colspan="3">${it.relativeSourcePath}</th>
-                                </tr>
+                                    <tr>
+                                        <th colspan="3">${it.relativeSourcePath}</th>
+                                    </tr>
                                 </thead>
-                                <pre><j:out value="${it.sourceFileContent}"/></pre>
+                                <pre>
+                                    <j:out value="${it.sourceFileContent}"/>
+                                </pre>
 
                             </table>
                         </div>
                     </j:when>
                     <j:otherwise>
                         <p>
-                            <i>${%Source code is unavailable.}</i> ${%Some possible reasons are:}
+                            <i>${%Source code is unavailable.}</i>
+                            ${%Some possible reasons are:}
                             <ul>
                                 <li>${%reason.1}</li>
                                 <li>${%reason.2}</li>

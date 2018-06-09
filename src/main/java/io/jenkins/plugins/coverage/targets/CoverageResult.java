@@ -25,11 +25,15 @@ import hudson.model.AbstractBuild;
 import hudson.model.Api;
 import hudson.model.Item;
 import hudson.model.Run;
+import hudson.util.ChartUtil;
 import hudson.util.Graph;
 import hudson.util.TextFile;
+import io.jenkins.plugins.coverage.BuildUtils;
+import io.jenkins.plugins.coverage.CoverageAction;
 import org.jfree.chart.JFreeChart;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -42,12 +46,15 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
@@ -65,6 +72,8 @@ public class CoverageResult implements Serializable, Chartable {
      * Generated
      */
     private static final long serialVersionUID = -3524882671364156445L;
+
+    private static final int DEFAULT_MAX_BUILDS_SHOW_IN_TREND = 6;
 
     /**
      * The type of the programming element.
@@ -252,6 +261,11 @@ public class CoverageResult implements Serializable, Chartable {
         }
         return result;
     }
+
+    public CoverageElement getChildElement() {
+        return getChildElements().stream().findAny().orElse(null);
+    }
+
 
     public Set<String> getChildren(CoverageElement element) {
         Set<String> result = new TreeSet<String>();
@@ -448,22 +462,20 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'previousResult'.
      */
     public CoverageResult getPreviousResult() {
-//        if (parent == null) {
-//            if (owner == null) {
-//                return null;
-//            }
-//            Run<?, ?> prevBuild = BuildUtils.getPreviousNotFailedCompletedBuild(owner);
-//            CoberturaBuildAction action = null;
-//            while ((prevBuild != null) && (null == (action = prevBuild.getAction(CoberturaBuildAction.class)))) {
-//                prevBuild = BuildUtils.getPreviousNotFailedCompletedBuild(prevBuild);
-//            }
-//            return action == null ? null : action.getResult();
-//        } else {
-//            CoverageResult prevParent = parent.getPreviousResult();
-//            return prevParent == null ? null : prevParent.getChild(name);
-//        }
-        //TODO replace the CoberturaBuildAction to CoverageAction
-        return null;
+        if (parent == null) {
+            if (owner == null) {
+                return null;
+            }
+            Run<?, ?> prevBuild = BuildUtils.getPreviousNotFailedCompletedBuild(owner);
+            CoverageAction action = null;
+            while ((prevBuild != null) && (null == (action = prevBuild.getAction(CoverageAction.class)))) {
+                prevBuild = BuildUtils.getPreviousNotFailedCompletedBuild(prevBuild);
+            }
+            return action == null ? null : action.getResult();
+        } else {
+            CoverageResult prevParent = parent.getPreviousResult();
+            return prevParent == null ? null : prevParent.getChild(name);
+        }
     }
 
     public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
@@ -528,6 +540,79 @@ public class CoverageResult implements Serializable, Chartable {
             if (this.parent != null) {
                 this.parent.children.put(name, this);
             }
+        }
+    }
+
+    /**
+     * Interface for javascript code to get code coverage result.
+     *
+     * @return aggregated coverage results
+     */
+    @JavaScriptMethod
+    public List<JSCoverageResult> jsGetResults() {
+        List<JSCoverageResult> results = new LinkedList<>();
+
+        for (Map.Entry<CoverageMetric, Ratio> c : aggregateResults.entrySet()) {
+            results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
+        }
+        return results;
+    }
+
+
+    @JavaScriptMethod
+    public Map<String, List<JSCoverageResult>> jsGetChildResults() {
+        return getChildrenReal()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().jsGetResults()));
+    }
+
+
+    @JavaScriptMethod
+    public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
+        Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
+
+        if (getPreviousResult() == null) {
+            return results;
+        }
+
+        int i = 0;
+        for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
+
+            List<JSCoverageResult> r = c.getResults().entrySet().stream()
+                    .map(e -> new JSCoverageResult(e.getKey().getName(), e.getValue()))
+                    .collect(Collectors.toList());
+
+            results.put(label.toString(), r);
+        }
+        return results;
+
+    }
+
+    public static class JSCoverageResult {
+        private String name;
+        private Ratio ratio;
+
+        public JSCoverageResult(String name, Ratio ratio) {
+            this.name = name;
+            this.ratio = ratio;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Ratio getRatio() {
+            return ratio;
+        }
+
+        public void setRatio(Ratio ratio) {
+            this.ratio = ratio;
         }
     }
 }
