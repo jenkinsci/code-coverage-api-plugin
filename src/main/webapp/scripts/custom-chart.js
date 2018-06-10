@@ -73,7 +73,12 @@ var CoverageChartGenerator = function (instance) {
                     },
                     formatter: function (obj) {
                         if (Array.isArray(obj)) {
-                            return "<b>" + obj[0].name + "</b><br/>" + obj[0].seriesName + ":" + covered[obj[0].dataIndex] + "<br/>" + obj[1].seriesName + ":" + missed[obj[1].dataIndex];
+                            if (obj.length === 2) {
+                                return '<b>' + obj[0].name + '</b><br/>' + obj[0].seriesName + ':' + covered[obj[0].dataIndex] + '<br/>' + obj[1].seriesName + ':' + missed[obj[1].dataIndex];
+                            } else if (obj.length === 1) {
+                                return '<b>' + obj[0].name + '</b><br/>' + obj[0].seriesName + ':' + (obj[0].seriesName === 'Covered'? covered[obj[0].dataIndex] : missed[obj[0].dataIndex]);
+                            }
+
                         }
                     }
                 },
