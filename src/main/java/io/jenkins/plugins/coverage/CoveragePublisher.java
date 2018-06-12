@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.FilePath;
@@ -15,6 +14,8 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.detector.Detector;
+import io.jenkins.plugins.coverage.detector.DetectorDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
@@ -40,11 +41,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failUnstable;
     private boolean failNoReports;
 
-    private String autoDetectPath;
+    private Detector reportDetector;
 
     @DataBoundConstructor
-    public CoveragePublisher(String autoDetectPath) {
-        this.autoDetectPath = autoDetectPath;
+    public CoveragePublisher(Detector reportDetector) {
+        this.reportDetector = reportDetector;
     }
 
 
@@ -57,7 +58,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
 
-        processor.setAutoDetectPath(autoDetectPath);
+        processor.setReportDetector(reportDetector);
 
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
@@ -97,13 +98,13 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.globalThresholds = globalThresholds;
     }
 
-    public String getAutoDetectPath() {
-        return autoDetectPath;
+    public Detector getReportDetector() {
+        return reportDetector;
     }
 
     @DataBoundSetter
-    public void setAutoDetectPath(@Nonnull String autoDetectPath) {
-        this.autoDetectPath = autoDetectPath;
+    public void setReportDetector(Detector reportDetector) {
+        this.reportDetector = reportDetector;
     }
 
     public boolean isFailUnhealthy() {
@@ -154,6 +155,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         public DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
             return CoverageReportAdapterDescriptor.all();
+        }
+
+        public DescriptorExtensionList<Detector, DetectorDescriptor<?>> getListDetectorDescriptors() {
+            return DetectorDescriptor.all();
         }
 
         @Override

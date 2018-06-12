@@ -12,6 +12,7 @@ import hudson.remoting.VirtualChannel;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.Detectable;
+import io.jenkins.plugins.coverage.detector.Detector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -19,8 +20,6 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
@@ -34,7 +33,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,7 +56,7 @@ public class CoverageProcessor {
     private boolean failUnstable;
     private boolean failNoReports;
 
-    private String autoDetectPath;
+    private Detector reportDetector;
 
 
     /**
@@ -141,10 +139,11 @@ public class CoverageProcessor {
             }
         }
 
-        // If enable automatically detecting, it will try to find report and correspond adapter.
-        if (isEnableAutoDetect()) {
-            logger.println("Auto Detect is enabled: Looking for reports...");
-            List<FilePath> detectedFilePaths = Arrays.stream(workspace.act(new FindReportCallable(autoDetectPath, null)))
+        // if have report detector, start detect report and its correspond adapter
+        if (getReportDetector() != null) {
+            logger.println("Detector is enabled: Looking for reports automatically...");
+            List<FilePath> detectedFilePaths = reportDetector.findFiles(workspace)
+                    .stream()
                     .filter(filePath -> {
                         for (Map.Entry<CoverageReportAdapter, Set<FilePath>> entry : reports.entrySet()) {
                             if (entry.getValue().contains(filePath))
@@ -388,19 +387,21 @@ public class CoverageProcessor {
     }
 
     /**
-     * Enable report auto-detect
+     * Setter for property 'reportDetector'.
      *
-     * @param autoDetectPath Ant-Style path to specify coverage report
+     * @param reportDetector report detector
      */
-    public void setAutoDetectPath(String autoDetectPath) {
-        this.autoDetectPath = autoDetectPath;
+    public void setReportDetector(Detector reportDetector) {
+        this.reportDetector = reportDetector;
     }
 
     /**
-     * @return <code>true</code> if auto detect is enable
+     * Getter for property 'reportDetector'.
+     *
+     * @return value for property 'reportDetector'
      */
-    public boolean isEnableAutoDetect() {
-        return !StringUtils.isEmpty(autoDetectPath);
+    public Detector getReportDetector() {
+        return reportDetector;
     }
 
     /**

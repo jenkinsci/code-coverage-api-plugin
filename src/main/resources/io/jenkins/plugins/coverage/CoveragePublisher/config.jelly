@@ -2,9 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
     <f:block>
-        <f:entry title="Ant-Style Path for Automatically Detect" field="autoDetectPath">
-            <f:textbox default="*.xml" value="${instance.autoDetectPath}"/>
-        </f:entry>
+        <f:dropdownDescriptorSelector field="reportDetector" title="Report Detector" descriptors="${descriptor.listDetectorDescriptors}" />
     </f:block>
 
     <f:block>
