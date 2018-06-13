@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    TODO
+    This plugin serves as API to integrate and publish multiple coverage report types.
 </div>
