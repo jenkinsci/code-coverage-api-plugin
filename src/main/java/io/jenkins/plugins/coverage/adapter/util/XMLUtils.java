@@ -169,7 +169,7 @@ public class XMLUtils {
     }
 
     /**
-     * Read xml file with out loading external dtd.
+     * Read xml file without loading external dtd.
      *
      * @param file xml file be read
      * @return document converted by xml
