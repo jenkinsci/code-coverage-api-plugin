@@ -26,6 +26,7 @@ public class CoveragePublisherPipelineTest {
     @Test
     public void testAutoDetect() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
+        builder.setAutoDetectPath("**/*.xml");
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);

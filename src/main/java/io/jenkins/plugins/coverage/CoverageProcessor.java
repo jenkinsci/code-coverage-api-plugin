@@ -115,7 +115,6 @@ public class CoverageProcessor {
                 reports.put(adapter, Sets.newHashSet(r));
             }
 
-
             // copy reports to build dir
             File runRootDir = run.getRootDir();
 
@@ -192,7 +191,7 @@ public class CoverageProcessor {
                     }
                 } catch (CoverageException e) {
                     e.printStackTrace();
-                    logger.printf("report for %s has met some errors: %s",
+                    logger.printf("report for %s has met some errors: %s%n",
                             adapter.getDescriptor().getDisplayName(), e.getMessage());
                 }
                 FileUtils.deleteQuietly(foundedFile);
