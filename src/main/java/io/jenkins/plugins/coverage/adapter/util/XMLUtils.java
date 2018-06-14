@@ -78,18 +78,20 @@ public class XMLUtils {
 
         try {
             transformer.transform(new StreamSource(source), result);
+
+            // xml parser implementation sometimes may not throw exception, so we manually check it.
+            // TODO replace it by transformer ErrorListener
+            if (result instanceof DOMResult) {
+                Document d = getDocumentFromDomResult((DOMResult) result);
+                if (d == null || d.getDocumentElement() == null) {
+                    throw new TransformerException("Transform failed");
+                }
+            }
         } catch (TransformerException e) {
             // disable dtd validation then parse it again
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
             try {
-                documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-                DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
-                Document document = builder.parse(source);
-
-                transformer.transform(new DOMSource(document), result);
-
-            }  catch (ParserConfigurationException | TransformerException | IOException | SAXException ignore) {
+                transformer.transform(new DOMSource(readXMLtoDocumentWithoutXSD(source)), result);
+            } catch (TransformerException | ParserConfigurationException | IOException | SAXException ignore) {
                 throw new CoverageException(e);
             }
         }
@@ -154,9 +156,31 @@ public class XMLUtils {
         Transformer transformer = factory.newTransformer();
 
         DOMResult result = new DOMResult();
-        transformer.transform(new StreamSource(file), result);
-
+        try {
+            transformer.transform(new StreamSource(file), result);
+        } catch (TransformerException e) {
+            try {
+                transformer.transform(new DOMSource(readXMLtoDocumentWithoutXSD(file)), result);
+            } catch (ParserConfigurationException | IOException | SAXException ignore) {
+                throw e;
+            }
+        }
         return getDocumentFromDomResult(result);
+    }
+
+    /**
+     * Read xml file without loading external dtd.
+     *
+     * @param file xml file be read
+     * @return document converted by xml
+     */
+    private Document readXMLtoDocumentWithoutXSD(File file) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+
+        return builder.parse(file);
     }
 
     /**

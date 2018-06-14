@@ -8,7 +8,17 @@
     <xsl:template match="/">
         <report>
             <xsl:attribute name="name">jacoco</xsl:attribute>
-            <xsl:apply-templates select="report/group"/>
+            <xsl:choose>
+                <xsl:when test="/report/group">
+                    <xsl:apply-templates select="report/group"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <group>
+                        <xsl:attribute name="name">project</xsl:attribute>
+                        <xsl:apply-templates select="report/package"/>
+                    </group>
+                </xsl:otherwise>
+            </xsl:choose>
         </report>
     </xsl:template>
 

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!--<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN""report.dtd">-->
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN"
+        "report.dtd">
 <report name="JaCoCo">
     <sessioninfo id="org.jacoco.core.test" start="1521625492369" dump="1521625494809"/>
     <sessioninfo id="org.jacoco.report.test" start="1521625497654" dump="1521625500129"/>
