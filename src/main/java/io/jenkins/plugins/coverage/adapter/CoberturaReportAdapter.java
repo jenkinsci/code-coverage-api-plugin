@@ -2,11 +2,13 @@ package io.jenkins.plugins.coverage.adapter;
 
 import hudson.Extension;
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
+import io.jenkins.plugins.coverage.detector.Detectable;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 
@@ -43,7 +45,7 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             implements Detectable {
 
         public CoverturaReportAdapterDescriptor() {
-            super(CoberturaReportAdapter.class, "Cobertura");
+            super(CoberturaReportAdapter.class);
         }
 
         /**
@@ -69,6 +71,12 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             }
 
             return "coverage".equals(e.getLocalName());
+        }
+
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return Messages.CoberturaReportAdapter_displayName();
         }
     }
 }

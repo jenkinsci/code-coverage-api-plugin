@@ -1,12 +1,8 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import hudson.ExtensionPoint;
-import hudson.model.Describable;
-import hudson.model.Descriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.w3c.dom.Document;
 
@@ -16,14 +12,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public abstract class CoverageReportAdapter implements ExtensionPoint, Describable<CoverageReportAdapter> {
+public abstract class CoverageReportAdapter extends CoverageAdapter {
 
-    // path of report file
+    // ant path of report files
     private final String path;
     private List<Threshold> thresholds = new LinkedList<>();
 
     /**
-     * @param path report file Ant-style path
+     * @param path Ant-style path of report files.
      */
     public CoverageReportAdapter(String path) {
         this.path = path;
@@ -59,13 +55,6 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
      */
     @CheckForNull
     protected abstract CoverageResult parseToResult(Document document, String reportName);
-
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Descriptor<CoverageReportAdapter> getDescriptor() {
-        return Jenkins.getInstance().getDescriptorOrDie(getClass());
-    }
 
 
     /**
