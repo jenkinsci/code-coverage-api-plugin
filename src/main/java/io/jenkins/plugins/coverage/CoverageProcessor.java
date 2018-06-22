@@ -13,6 +13,7 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.Detectable;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
@@ -58,6 +59,7 @@ public class CoverageProcessor {
     private boolean failNoReports;
 
     private String autoDetectPath;
+    private SourceFileResolver sourceFileResolver;
 
 
     /**
@@ -83,6 +85,10 @@ public class CoverageProcessor {
         CoverageResult coverageReport = aggregatedResults(results);
 
         coverageReport.setOwner(run);
+
+        if (sourceFileResolver != null)
+            sourceFileResolver.resolveSourceFiles(coverageReport.getPaintedSources());
+
         HealthReport healthReport = processThresholds(results, globalThresholds);
 
         saveCoverageResult(run, coverageReport);
@@ -187,7 +193,10 @@ public class CoverageProcessor {
 
                     if (isValidate) {
                         results.putIfAbsent(adapter, new LinkedList<>());
-                        results.get(adapter).add(adapter.getResult(foundedFile));
+                        CoverageResult result = adapter.getResult(foundedFile);
+
+                        results.get(adapter).add(result);
+
                     }
                 } catch (CoverageException e) {
                     e.printStackTrace();
@@ -453,6 +462,10 @@ public class CoverageProcessor {
      */
     public void setFailNoReports(boolean failNoReports) {
         this.failNoReports = failNoReports;
+    }
+
+    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
+        this.sourceFileResolver = sourceFileResolver;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

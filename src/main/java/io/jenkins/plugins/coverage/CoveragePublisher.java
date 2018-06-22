@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.FilePath;
@@ -16,6 +15,7 @@ import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -41,6 +41,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failNoReports;
 
     private String autoDetectPath;
+    private SourceFileResolver sourceFileResolver;
 
     @DataBoundConstructor
     public CoveragePublisher(String autoDetectPath) {
@@ -58,6 +59,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
 
         processor.setAutoDetectPath(autoDetectPath);
+
+        if (sourceFileResolver != null) {
+            sourceFileResolver.setOwnerBuild(run, workspace, listener);
+            processor.setSourceFileResolver(sourceFileResolver);
+        }
 
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
@@ -131,6 +137,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setFailNoReports(boolean failNoReports) {
         this.failNoReports = failNoReports;
+    }
+
+    public SourceFileResolver getSourceFileResolver() {
+        return sourceFileResolver;
+    }
+
+    @DataBoundSetter
+    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
+        this.sourceFileResolver = sourceFileResolver;
     }
 
     @Symbol("publishCoverage")

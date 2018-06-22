@@ -31,15 +31,15 @@ public abstract class CoverageReportAdapter implements ExtensionPoint, Describab
 
 
     /**
-     * Get {@link CoverageResult} from source file.
+     * Get {@link CoverageResult} from report file.
      *
-     * @param source source file
+     * @param report report file
      * @return CoverageResult
-     * @throws CoverageException cannot convert source file to CoverageResult
+     * @throws CoverageException cannot convert report file to CoverageResult
      */
-    public CoverageResult getResult(File source) throws CoverageException {
-        Document document = convert(source);
-        return parseToResult(document, source.getName());
+    public CoverageResult getResult(File report) throws CoverageException {
+        Document document = convert(report);
+        return parseToResult(document, report.getName());
     }
 
     /**
