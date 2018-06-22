@@ -1,4 +1,6 @@
-package io.jenkins.plugins.coverage.adapter;
+package io.jenkins.plugins.coverage.detector;
+
+import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 
 import java.io.File;
 

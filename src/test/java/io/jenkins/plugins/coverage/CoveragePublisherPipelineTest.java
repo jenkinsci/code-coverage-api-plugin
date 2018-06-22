@@ -5,6 +5,7 @@ import hudson.FilePath;
 import hudson.model.Result;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -25,8 +26,8 @@ public class CoveragePublisherPipelineTest {
 
     @Test
     public void testAutoDetect() throws Exception {
-        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
-        builder.setAutoDetectPath("**/*.xml");
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new AntPathReportDetector("**/*.xml"));
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);

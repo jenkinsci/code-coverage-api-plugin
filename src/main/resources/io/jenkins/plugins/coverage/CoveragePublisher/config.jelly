@@ -2,12 +2,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
     <f:block>
-        <f:entry title="Ant-Style Path for Automatically Detect" field="autoDetectPath">
-            <f:textbox default="*.xml" value="${instance.autoDetectPath}"/>
-        </f:entry>
-    </f:block>
-
-    <f:block>
         <f:hetero-list name="adapters" descriptors="${descriptor.listCoverageReportAdapterDescriptors}"
                        items="${instance.adapters}" hasHeader="true"/>
     </f:block>
