@@ -13,6 +13,7 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.Detectable;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -86,8 +87,9 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
-        if (sourceFileResolver != null)
-            sourceFileResolver.resolveSourceFiles(coverageReport.getPaintedSources());
+        if (sourceFileResolver != null) {
+            sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
+        }
 
         HealthReport healthReport = processThresholds(results, globalThresholds);
 

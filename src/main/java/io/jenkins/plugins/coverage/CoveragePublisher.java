@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -15,6 +16,7 @@ import hudson.tasks.Recorder;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
@@ -61,7 +63,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         processor.setAutoDetectPath(autoDetectPath);
 
         if (sourceFileResolver != null) {
-            sourceFileResolver.setOwnerBuild(run, workspace, listener);
             processor.setSourceFileResolver(sourceFileResolver);
         }
 
@@ -144,7 +145,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
+    public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
     }
 
@@ -169,6 +170,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         public DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
             return CoverageReportAdapterDescriptor.all();
+        }
+
+        @SuppressWarnings("unchecked")
+        public Descriptor<SourceFileResolver> getSourceFileResolverDescriptor() {
+            return new DefaultSourceFileResolver.DefaultSourceFileResolverDescriptor();
         }
 
         @Override

@@ -64,7 +64,6 @@
                                 <li>${%reason.1}</li>
                                 <li>${%reason.2}</li>
                                 <li>${%reason.3}</li>
-                                <li>${%reason.4}</li>
                             </ul>
                         </p>
                     </j:otherwise>
