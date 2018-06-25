@@ -8,6 +8,8 @@
 
     <f:advanced>
         <f:entry title="Global Option">
+
+            <br/>
             <div>
                 <f:checkbox field="failUnhealthy" title="Failed if Unhealthy"/>
             </div>
@@ -23,5 +25,7 @@
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
         </f:entry>
+        <f:property field="sourceFileResolver" propertyDescriptor="${descriptor.getSourceFileResolverDescriptor()}"/>
+
     </f:advanced>
 </j:jelly>

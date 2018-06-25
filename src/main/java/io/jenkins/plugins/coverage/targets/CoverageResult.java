@@ -30,6 +30,7 @@ import hudson.util.Graph;
 import hudson.util.TextFile;
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import org.jfree.chart.JFreeChart;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -78,7 +79,7 @@ public class CoverageResult implements Serializable, Chartable {
     /**
      * The type of the programming element.
      */
-    private final CoverageElement element;
+    private final CoverageElement   element;
 
     /**
      * Name of the programming element that this result object represent, such as package name, class name, method name, etc.
@@ -196,7 +197,7 @@ public class CoverageResult implements Serializable, Chartable {
      */
     private File getSourceFile() {
         if (hasPermission()) {
-            return new File(owner.getParent().getRootDir(), "coverage/" + relativeSourcePath);
+            return new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
         }
         return null;
     }
@@ -208,7 +209,7 @@ public class CoverageResult implements Serializable, Chartable {
      */
     public boolean isSourceFileAvailable() {
         if (hasPermission()) {
-            return owner == owner.getParent().getLastSuccessfulBuild() && getSourceFile().exists();
+            return getSourceFile().exists();
         }
         return false;
     }

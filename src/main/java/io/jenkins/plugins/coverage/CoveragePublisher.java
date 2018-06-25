@@ -1,11 +1,11 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -20,6 +20,8 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -43,6 +45,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failUnhealthy;
     private boolean failUnstable;
     private boolean failNoReports;
+  
+    private SourceFileResolver sourceFileResolver;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -67,6 +71,10 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             } else if (adapter instanceof ReportDetector) {
                 reportDetectors.add((ReportDetector) adapter);
             }
+        }
+
+        if (sourceFileResolver != null) {
+            processor.setSourceFileResolver(sourceFileResolver);
         }
 
         processor.setFailUnhealthy(failUnhealthy);
@@ -135,6 +143,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.failNoReports = failNoReports;
     }
 
+    public SourceFileResolver getSourceFileResolver() {
+        return sourceFileResolver;
+    }
+
+    @DataBoundSetter
+    public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
+        this.sourceFileResolver = sourceFileResolver;
+    }
+
     @Symbol("publishCoverage")
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
@@ -156,6 +173,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         public DescriptorExtensionList<CoverageAdapter, CoverageAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
             return CoverageAdapterDescriptor.all();
+        }
+
+        @SuppressWarnings("unchecked")
+        public Descriptor<SourceFileResolver> getSourceFileResolverDescriptor() {
+            return new DefaultSourceFileResolver.DefaultSourceFileResolverDescriptor();
         }
 
         @Override

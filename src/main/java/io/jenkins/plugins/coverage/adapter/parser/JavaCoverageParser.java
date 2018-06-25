@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 public class JavaCoverageParser extends CoverageParser {
 
     private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*%\\s*\\((\\d*)/(\\d*)\\)");
-    
+
     public JavaCoverageParser(String reportName) {
         super(reportName);
     }
@@ -58,27 +58,33 @@ public class JavaCoverageParser extends CoverageParser {
         switch (current.getLocalName()) {
             case "report":
                 result = new CoverageResult(CoverageElement.REPORT, null,
-                        getNameAttribute(current, "") + ": " + getReportName());
+                        getAttribute(current, "name", "") + ": " + getReportName());
                 break;
             case "group":
                 result = new CoverageResult(CoverageElement.JAVA_GROUP, parentResult,
-                        getNameAttribute(current, "project"));
+                        getAttribute(current, "name", "project"));
                 break;
             case "package":
                 result = new CoverageResult(CoverageElement.JAVA_PACKAGE, parentResult,
-                        getNameAttribute(current, "<default>"));
+                        getAttribute(current, "name", "<default>"));
                 break;
             case "file":
                 result = new CoverageResult(CoverageElement.JAVA_FILE, parentResult,
-                        getNameAttribute(current, ""));
+                        getAttribute(current, "name", ""));
+
+                result.setRelativeSourcePath(getAttribute(current, "name", null));
                 break;
             case "class":
                 result = new CoverageResult(CoverageElement.JAVA_CLASS, parentResult,
-                        getNameAttribute(current, ""));
+                        getAttribute(current, "name", ""));
+
+//                result.setRelativeSourcePath(parentResult.getName());
                 break;
             case "method":
                 result = new CoverageResult(CoverageElement.JAVA_METHOD, parentResult,
-                        getNameAttribute(current, ""));
+                        getAttribute(current, "name", ""));
+
+//                result.setRelativeSourcePath(parentResult.getRelativeSourcePath());
                 break;
             case "line":
                 String hitsString = current.getAttribute("hits");
@@ -126,16 +132,9 @@ public class JavaCoverageParser extends CoverageParser {
         return result;
     }
 
-    /**
-     * Get value of name attribute from a element, if name attribute not exist or is empty, return default name.
-     *
-     * @param e           element want to get value of name attribute
-     * @param defaultName default name
-     * @return value of name attribute
-     */
-    private String getNameAttribute(Element e, String defaultName) {
-        String name = e.getAttribute("name");
-        return StringUtils.isEmpty(name) ? defaultName : name;
+    private String getAttribute(Element e, String attributeName, String defaultValue) {
+        String value = e.getAttribute(attributeName);
+        return StringUtils.isEmpty(value) ? defaultValue : value;
     }
 
 }
