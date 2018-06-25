@@ -13,8 +13,12 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
+import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
+import io.jenkins.plugins.coverage.adapter.CoverageAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
@@ -35,19 +39,17 @@ import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
-    private List<CoverageReportAdapter> adapters = new LinkedList<>();
+    private List<CoverageAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
 
     private boolean failUnhealthy;
     private boolean failUnstable;
     private boolean failNoReports;
-
-    private String autoDetectPath;
+  
     private SourceFileResolver sourceFileResolver;
 
     @DataBoundConstructor
-    public CoveragePublisher(String autoDetectPath) {
-        this.autoDetectPath = autoDetectPath;
+    public CoveragePublisher() {
     }
 
 
@@ -60,7 +62,16 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
 
-        processor.setAutoDetectPath(autoDetectPath);
+        List<CoverageReportAdapter> reportAdapters = new LinkedList<>();
+        List<ReportDetector> reportDetectors = new LinkedList<>();
+
+        for (CoverageAdapter adapter : getAdapters()) {
+            if (adapter instanceof CoverageReportAdapter) {
+                reportAdapters.add((CoverageReportAdapter) adapter);
+            } else if (adapter instanceof ReportDetector) {
+                reportDetectors.add((ReportDetector) adapter);
+            }
+        }
 
         if (sourceFileResolver != null) {
             processor.setSourceFileResolver(sourceFileResolver);
@@ -71,7 +82,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         processor.setFailNoReports(failNoReports);
 
         try {
-            processor.performCoverageReport(getAdapters(), globalThresholds);
+            processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
         } catch (CoverageException e) {
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
             run.setResult(Result.FAILURE);
@@ -86,12 +97,12 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return BuildStepMonitor.NONE;
     }
 
-    public List<CoverageReportAdapter> getAdapters() {
+    public List<CoverageAdapter> getAdapters() {
         return adapters;
     }
 
     @DataBoundSetter
-    public void setAdapters(List<CoverageReportAdapter> adapters) {
+    public void setAdapters(List<CoverageAdapter> adapters) {
         this.adapters = adapters;
     }
 
@@ -104,14 +115,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.globalThresholds = globalThresholds;
     }
 
-    public String getAutoDetectPath() {
-        return autoDetectPath;
-    }
-
-    @DataBoundSetter
-    public void setAutoDetectPath(@Nonnull String autoDetectPath) {
-        this.autoDetectPath = autoDetectPath;
-    }
 
     public boolean isFailUnhealthy() {
         return failUnhealthy;
@@ -168,8 +171,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             return true;
         }
 
-        public DescriptorExtensionList<CoverageReportAdapter, CoverageReportAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
-            return CoverageReportAdapterDescriptor.all();
+        public DescriptorExtensionList<CoverageAdapter, CoverageAdapterDescriptor<?>> getListCoverageReportAdapterDescriptors() {
+            return CoverageAdapterDescriptor.all();
         }
 
         @SuppressWarnings("unchecked")

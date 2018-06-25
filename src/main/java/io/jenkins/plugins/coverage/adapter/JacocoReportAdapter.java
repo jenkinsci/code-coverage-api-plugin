@@ -4,6 +4,8 @@ import hudson.Extension;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
+
 public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @DataBoundConstructor
@@ -32,7 +34,13 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
     public static final class JacocoReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoverageReportAdapter> {
 
         public JacocoReportAdapterDescriptor() {
-            super(JacocoReportAdapter.class, "jacoco");
+            super(JacocoReportAdapter.class);
+        }
+
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return Messages.JacocoReportAdapter_displayName();
         }
     }
 }
