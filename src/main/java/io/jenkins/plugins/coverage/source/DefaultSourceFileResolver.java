@@ -13,6 +13,7 @@ import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -127,6 +128,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
 
 
+    @Symbol("sourceFiles")
     @Extension
     public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver> extends Descriptor<SourceFileResolver> {
 
