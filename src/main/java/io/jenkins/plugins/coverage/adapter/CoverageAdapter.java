@@ -13,4 +13,8 @@ public abstract class CoverageAdapter implements ExtensionPoint, Describable<Cov
     public Descriptor<CoverageAdapter> getDescriptor() {
         return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
+
+    public boolean isCompatible() {
+        return false;
+    }
 }
