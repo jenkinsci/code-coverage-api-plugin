@@ -94,15 +94,6 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
         return path;
     }
 
-    public Descriptor getCompatiblePluginDescriptor() {
-        return null;
-    }
-
-    @Override
-    public boolean isCompatible() {
-        return getCompatiblePluginDescriptor() != null;
-    }
-
     public void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
         CoveragePublisher publisher = new CoveragePublisher();
         publisher.setAdapters(Lists.newArrayList(this));
