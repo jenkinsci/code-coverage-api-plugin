@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 
 public class CoverageProcessor {
 
-    private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
+    private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report";
 
     private Run<?, ?> run;
     private FilePath workspace;
