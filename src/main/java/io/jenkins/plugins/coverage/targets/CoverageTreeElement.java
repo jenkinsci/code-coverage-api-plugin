@@ -27,7 +27,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.Serializable;
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
-@ExportedBean
+@ExportedBean(defaultVisibility = 2)
 public class CoverageTreeElement implements Serializable {
 
     /**
@@ -62,5 +62,9 @@ public class CoverageTreeElement implements Serializable {
     @Exported
     public float getDenominator() {
         return ratio.denominator;
+    }
+
+    public Ratio getRealRatio() {
+        return ratio;
     }
 }

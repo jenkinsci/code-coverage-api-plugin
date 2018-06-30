@@ -322,8 +322,29 @@ public class CoverageResult implements Serializable, Chartable {
      */
     @Exported(name = "results")
     public CoverageTree getResultsAPI() {
-        return new CoverageTree(name, aggregateResults, children);
+        return new CoverageTree(name, aggregateResults, children, getCoverageTrends());
     }
+
+    public CoverageTrend[] getCoverageTrends() {
+        if (getPreviousResult() == null) {
+            return null;
+        }
+
+        List<CoverageTrend> coverageTrends = new LinkedList<>();
+        int i = 0;
+        for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
+
+            CoverageTreeElement[] elements = c.getResults().entrySet().stream()
+                    .map(e -> new CoverageTreeElement(e.getKey(), e.getValue()))
+                    .toArray(CoverageTreeElement[]::new);
+
+            CoverageTrend trend = new CoverageTrend(label.toString(), elements);
+            coverageTrends.add(trend);
+        }
+        return coverageTrends.toArray(new CoverageTrend[0]);
+    }
+
 
     public String urlTransform(String name) {
         StringBuilder buf = new StringBuilder(name.length());
