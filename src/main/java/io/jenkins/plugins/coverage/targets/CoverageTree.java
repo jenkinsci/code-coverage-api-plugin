@@ -41,6 +41,7 @@ public class CoverageTree implements Serializable {
 
     private Map<String, CoverageResult> children;
 
+
     private String name;
 
     public CoverageTree(String name, Map<CoverageMetric, Ratio> aggregateResults,

@@ -22,7 +22,6 @@
 package io.jenkins.plugins.coverage.targets;
 
 import hudson.model.AbstractBuild;
-import hudson.model.Api;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
@@ -79,7 +78,7 @@ public class CoverageResult implements Serializable, Chartable {
     /**
      * The type of the programming element.
      */
-    private final CoverageElement   element;
+    private final CoverageElement element;
 
     /**
      * Name of the programming element that this result object represent, such as package name, class name, method name, etc.
@@ -325,6 +324,28 @@ public class CoverageResult implements Serializable, Chartable {
         return new CoverageTree(name, aggregateResults, children);
     }
 
+    public List<CoverageTrend> getCoverageTrends() {
+
+        if (getPreviousResult() == null) {
+            return null;
+        }
+
+        List<CoverageTrend> coverageTrends = new LinkedList<>();
+        int i = 0;
+        for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
+
+            List<CoverageTreeElement> elements = c.getResults().entrySet().stream()
+                    .map(e -> new CoverageTreeElement(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+
+            CoverageTrend trend = new CoverageTrend(label.toString(), elements);
+            coverageTrends.add(trend);
+        }
+        return coverageTrends;
+    }
+
+
     public String urlTransform(String name) {
         StringBuilder buf = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
@@ -526,8 +547,8 @@ public class CoverageResult implements Serializable, Chartable {
         return result;
     }
 
-    public Api getApi() {
-        return new Api(this);
+    public RestfulCoverageResultWrapper getApi() {
+        return new RestfulCoverageResultWrapper(this);
     }
 
     /**

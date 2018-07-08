@@ -27,7 +27,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.Serializable;
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
-@ExportedBean
+@ExportedBean(defaultVisibility = 2)
 public class CoverageTreeElement implements Serializable {
 
     /**
