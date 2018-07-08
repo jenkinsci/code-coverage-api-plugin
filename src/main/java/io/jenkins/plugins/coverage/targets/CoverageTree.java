@@ -41,16 +41,14 @@ public class CoverageTree implements Serializable {
 
     private Map<String, CoverageResult> children;
 
-    private CoverageTrend[] trends;
 
     private String name;
 
     public CoverageTree(String name, Map<CoverageMetric, Ratio> aggregateResults,
-                        Map<String, CoverageResult> children, CoverageTrend[] trends) {
+                        Map<String, CoverageResult> children) {
         this.name = name;
         this.aggregateResults = aggregateResults;
         this.children = children;
-        this.trends = trends;
     }
 
     @Exported
@@ -74,14 +72,9 @@ public class CoverageTree implements Serializable {
         CoverageTree[] ct = new CoverageTree[children.size()];
         int current = 0;
         for (Entry<String, CoverageResult> e : children.entrySet()) {
-            ct[current] = new CoverageTree(e.getKey(), e.getValue().getResults(), e.getValue().getChildrenReal(), e.getValue().getCoverageTrends());
+            ct[current] = new CoverageTree(e.getKey(), e.getValue().getResults(), e.getValue().getChildrenReal());
             current++;
         }
         return ct;
-    }
-
-    @Exported
-    public CoverageTrend[] getTrends() {
-        return trends;
     }
 }

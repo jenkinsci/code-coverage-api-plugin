@@ -63,8 +63,4 @@ public class CoverageTreeElement implements Serializable {
     public float getDenominator() {
         return ratio.denominator;
     }
-
-    public Ratio getRealRatio() {
-        return ratio;
-    }
 }

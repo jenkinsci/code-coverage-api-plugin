@@ -4,15 +4,16 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ExportedBean
 public class CoverageTrend implements Serializable {
 
     private String buildName;
-    private CoverageTreeElement[] elements;
+    private List<CoverageTreeElement> elements;
 
 
-    public CoverageTrend(String buildName, CoverageTreeElement[] elements) {
+    public CoverageTrend(String buildName, List<CoverageTreeElement> elements) {
         this.buildName = buildName;
         this.elements = elements;
     }
@@ -23,7 +24,7 @@ public class CoverageTrend implements Serializable {
     }
 
     @Exported
-    public CoverageTreeElement[] getElements() {
+    public List<CoverageTreeElement> getElements() {
         return elements;
     }
 
