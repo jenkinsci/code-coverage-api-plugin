@@ -94,7 +94,7 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
         return path;
     }
 
-    public void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+    public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
         CoveragePublisher publisher = new CoveragePublisher();
         publisher.setAdapters(Lists.newArrayList(this));
 
