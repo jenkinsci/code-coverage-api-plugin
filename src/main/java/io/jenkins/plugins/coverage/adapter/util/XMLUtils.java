@@ -28,6 +28,7 @@ import java.io.IOException;
  */
 public class XMLUtils {
 
+    // TODO delete the single-instance pattern
     private static XMLUtils converter = new XMLUtils();
 
     public static XMLUtils getInstance() {

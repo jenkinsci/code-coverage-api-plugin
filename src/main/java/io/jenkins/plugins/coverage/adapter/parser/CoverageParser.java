@@ -1,15 +1,23 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
+import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Parse the standard format coverage report and convert it into {@link CoverageResult}.
  */
 public abstract class CoverageParser {
+
+    private static final Pattern CONDITION_COVERAGE_PATTERN = Pattern.compile("(\\d*)\\s*%\\s*\\((\\d*)/(\\d*)\\)");
 
     private String reportName;
 
@@ -79,4 +87,51 @@ public abstract class CoverageParser {
     public void setReportName(String reportName) {
         this.reportName = reportName;
     }
+
+    protected String getAttribute(Element e, String attributeName, String defaultValue) {
+        String value = e.getAttribute(attributeName);
+        return StringUtils.isEmpty(value) ? defaultValue : value;
+    }
+
+    protected void processLine(Element current, CoverageResult parentResult) {
+        String hitsString = current.getAttribute("hits");
+        String lineNumber = current.getAttribute("number");
+        int denominator = 0;
+        int numerator = 0;
+        if (Boolean.parseBoolean(current.getAttribute("branch"))) {
+            final String conditionCoverage = current.getAttribute("condition-coverage");
+            if (conditionCoverage != null) {
+                // some cases in the wild have branch = true but no condition-coverage attribute
+
+                // should be of the format xxx% (yyy/zzz),
+                // or xxx % (yyy/zzz) for French,
+                // because cobertura uses the default locale as said in
+                // http://sourceforge.net/tracker/?func=detail&aid=3296149&group_id=130558&atid=720015
+                Matcher matcher = CONDITION_COVERAGE_PATTERN.matcher(conditionCoverage);
+                if (matcher.matches()) {
+                    assert matcher.groupCount() == 3;
+                    final String numeratorStr = matcher.group(2);
+                    final String denominatorStr = matcher.group(3);
+                    try {
+                        numerator = Integer.parseInt(numeratorStr);
+                        denominator = Integer.parseInt(denominatorStr);
+                        parentResult.updateMetric(CoverageMetric.CONDITIONAL, Ratio.create(numerator, denominator));
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+        }
+        try {
+            int hits = Integer.parseInt(hitsString);
+            int number = Integer.parseInt(lineNumber);
+            if (denominator == 0) {
+                parentResult.paint(number, hits);
+            } else {
+                parentResult.paint(number, hits, numerator, denominator);
+            }
+            parentResult.updateMetric(CoverageMetric.LINE, Ratio.create((hits == 0) ? 0 : 1, 1));
+        } catch (NumberFormatException ignore) {
+        }
+    }
+
 }

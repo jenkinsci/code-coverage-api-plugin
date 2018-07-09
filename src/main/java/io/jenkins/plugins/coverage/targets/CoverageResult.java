@@ -414,7 +414,7 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
     private List<CoverageMetric> findEmptyMetrics(Map<CoverageMetric, Ratio> currMetricSet) {
-        List<CoverageMetric> allMetrics = new LinkedList<CoverageMetric>(Arrays.asList(CoverageMetric.PACKAGES, CoverageMetric.FILES, CoverageMetric.CLASSES, CoverageMetric.METHOD, CoverageMetric.LINE, CoverageMetric.CONDITIONAL));
+        List<CoverageMetric> allMetrics = new LinkedList<CoverageMetric>(Arrays.asList(CoverageMetric.JAVA_PACKAGES, CoverageMetric.JAVA_FILES, CoverageMetric.JAVA_CLASSES, CoverageMetric.JAVA_METHODS, CoverageMetric.LINE, CoverageMetric.CONDITIONAL));
         List<CoverageMetric> missingMetrics = new LinkedList<CoverageMetric>();
         for (CoverageMetric currMetric : allMetrics) {
             if (!currMetricSet.containsKey(currMetric)) {
