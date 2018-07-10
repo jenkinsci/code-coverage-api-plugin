@@ -3,7 +3,7 @@ package io.jenkins.plugins.coverage.adapter;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import hudson.Extension;
-import io.jenkins.plugins.coverage.adapter.convert.JSONToDocumentConverter;
+import io.jenkins.plugins.coverage.adapter.converter.JSONDocumentConverter;
 import io.jenkins.plugins.coverage.adapter.parser.LLVMCoverageParser;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -16,6 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -34,8 +35,8 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
     }
 
     @Override
-    protected JSONToDocumentConverter getConverter() {
-        return new LLVMCovToDocumentConverter();
+    protected JSONDocumentConverter getConverter() {
+        return new LLVMCovDocumentConverter();
     }
 
     @CheckForNull
@@ -52,14 +53,21 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
         public LLVMCovReportAdapterDescriptor() {
             super(LLVMCovReportAdapter.class);
         }
+
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return Messages.LLVMCovReportAdapter_displayName();
+        }
     }
 
 
-    public static class LLVMCovToDocumentConverter extends JSONToDocumentConverter {
+    public static class LLVMCovDocumentConverter extends JSONDocumentConverter {
 
         @Override
-        protected Document convert(JSONObject jsonObject, Document document) throws CoverageException {
-            if (!jsonObject.getString("version").equals("2.0.0") || !jsonObject.getString("type").equals("llvm.coverage.json.export")) {
+        protected Document convert(JSONObject report, Document document) throws CoverageException {
+            // only support 2.0.0 version now
+            if (!report.getString("version").equals("2.0.0") || !report.getString("type").equals("llvm.coverage.json.export")) {
                 throw new CoverageException("Unsupported Json file");
             }
 
@@ -67,7 +75,7 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
             reportEle.setAttribute("name", "llvm-cov");
             document.appendChild(reportEle);
 
-            JSONArray dataArr = jsonObject.getJSONArray("data");
+            JSONArray dataArr = report.getJSONArray("data");
 
             for (int i = 0; i < dataArr.size(); i++) {
                 Element dataEle = document.createElement("data");
@@ -82,12 +90,20 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
             return document;
         }
 
+        /**
+         * parse each data object in JSON, and convert it to data element and them to document.
+         *
+         * @param dataObj  data object in JSON
+         * @param dataEle  data element added to document
+         * @param document document
+         */
         private void processDataObj(JSONObject dataObj, Element dataEle, Document document) {
             JSONArray files = dataObj.getJSONArray("files");
             JSONArray functions = dataObj.getJSONArray("functions");
 
             List<Element> fileElements = processFiles(files, document);
 
+            // group file elements by its parent path
             fileElements.stream().collect(Collectors.groupingBy(f -> {
                 String filename = f.getAttribute("filename");
 
@@ -97,7 +113,6 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
                 } else {
                     return path.getParent();
                 }
-
             })).forEach((parentPath, fileEles) -> {
                 Element directoryEle = document.createElement("directory");
                 directoryEle.setAttribute("name", parentPath);
@@ -106,6 +121,50 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
             });
 
 
+            processFunctions(functions, fileElements, document);
+
+        }
+
+        /**
+         * parse file objects in JSON format report, and convert them to file element.
+         *
+         * @param files    files array
+         * @param document document
+         * @return list of file elements
+         */
+        private List<Element> processFiles(JSONArray files, Document document) {
+            List<Element> fileElements = new LinkedList<>();
+            for (int i = 0; i < files.size(); i++) {
+                JSONObject file = files.getJSONObject(i);
+
+                Element fileEle = document.createElement("file");
+                fileEle.setAttribute("filename", file.getString("filename"));
+
+                JSONArray segments = file.getJSONArray("segments");
+
+                Arrays.stream(segments.toArray())
+                        .map(o -> (JSONArray) o)
+                        .filter(s ->
+                                s.getInteger(4) != 1) // if segment is a region, skip it.
+                        .collect(Collectors.groupingBy(s -> s.getInteger(0))) // group by segment's line number
+                        .forEach((line, segs) -> {
+                            processLine(segs, line, fileEle, document);
+                        });
+
+                fileElements.add(fileEle);
+            }
+            return fileElements;
+        }
+
+
+        /**
+         * parse function objects in JSON, and parse them and them to its correspond file element.
+         *
+         * @param functions    functions array
+         * @param fileElements file elements
+         * @param document     document
+         */
+        private void processFunctions(JSONArray functions, List<Element> fileElements, Document document) {
             for (int i = 0; i < functions.size(); i++) {
                 Element functionEle = document.createElement("function");
 
@@ -137,7 +196,9 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
 
                                 for (int k = 0; k < lines.getLength(); k++) {
                                     Element lineEleInFile = (Element) lines.item(k);
-                                    if (Integer.parseInt(lineEleInFile.getAttribute("number")) == r.getInteger(0)) {
+                                    int line = Integer.parseInt(lineEleInFile.getAttribute("number"));
+
+                                    if (line >= r.getInteger(0) && line <= r.getInteger(2)) {
                                         Node n = lineEleInFile.cloneNode(true);
                                         functionEle.appendChild(n);
                                         break;
@@ -147,33 +208,16 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
                 }
 
             }
-
         }
 
-        private List<Element> processFiles(JSONArray files, Document document) {
-            List<Element> fileElements = new LinkedList<>();
-            for (int i = 0; i < files.size(); i++) {
-                JSONObject file = files.getJSONObject(i);
-
-                Element fileEle = document.createElement("file");
-                fileEle.setAttribute("filename", file.getString("filename"));
-
-                JSONArray segments = file.getJSONArray("segments");
-
-                Arrays.stream(segments.toArray())
-                        .map(o -> (JSONArray) o)
-                        .filter(s ->
-                                s.getInteger(4) != 1) // if segment is a region, skip it.
-                        .collect(Collectors.groupingBy(s -> s.getInteger(0))) // group by segment's line number
-                        .forEach((line, segs) -> {
-                            processLine(segs, line, fileEle, document);
-                        });
-
-                fileElements.add(fileEle);
-            }
-            return fileElements;
-        }
-
+        /**
+         * parse segments to lines, and add them to file element.
+         *
+         * @param segments segments
+         * @param line     line number of segments
+         * @param fileEle  file element that segments belong to
+         * @param document document
+         */
         private void processLine(List<JSONArray> segments, Integer line, Element fileEle, Document document) {
             if (segments.size() == 0) return;
 

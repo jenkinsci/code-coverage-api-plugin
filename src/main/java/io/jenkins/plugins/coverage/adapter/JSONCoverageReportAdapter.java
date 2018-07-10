@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import com.alibaba.fastjson.JSONObject;
-import io.jenkins.plugins.coverage.adapter.convert.JSONToDocumentConverter;
+import io.jenkins.plugins.coverage.adapter.converter.JSONDocumentConverter;
 import io.jenkins.plugins.coverage.adapter.util.JSONUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
@@ -23,6 +22,9 @@ public abstract class JSONCoverageReportAdapter extends CoverageReportAdapter {
     }
 
 
-    protected abstract JSONToDocumentConverter getConverter();
+    /**
+     * @return converter which convert JSONObject to DOM Document.
+     */
+    protected abstract JSONDocumentConverter getConverter();
 
 }

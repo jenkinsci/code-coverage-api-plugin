@@ -1,0 +1,44 @@
+package io.jenkins.plugins.coverage.adapter.converter;
+
+import io.jenkins.plugins.coverage.exception.CoverageException;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+public abstract class DocumentConverter<T> {
+
+    /**
+     * Convert other format report to standard format Document.
+     *
+     * @param report other format report
+     * @return document converted by other report
+     */
+    public Document convert(T report) throws CoverageException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new CoverageException(e);
+        }
+
+        Document document = builder.newDocument();
+
+        convert(report, document);
+
+        return document;
+    }
+
+    /**
+     * Convert other format report to standard format Document.
+     * @param report other format report
+     * @param document document that the report will convert to
+     * @return document converted by other report
+     */
+    protected abstract Document convert(T report, Document document) throws CoverageException;
+
+
+}
