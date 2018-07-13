@@ -56,7 +56,7 @@ public class AntPathReportDetector extends ReportDetector {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return super.getDisplayName();
+            return Messages.AntPathDetector_displayName();
         }
     }
 }

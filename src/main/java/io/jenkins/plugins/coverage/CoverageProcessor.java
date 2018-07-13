@@ -13,7 +13,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -45,7 +44,7 @@ import java.util.stream.Stream;
 
 public class CoverageProcessor {
 
-    private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report.xml";
+    private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report";
 
     private Run<?, ?> run;
     private FilePath workspace;

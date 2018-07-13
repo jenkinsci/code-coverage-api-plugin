@@ -1,5 +1,12 @@
 package io.jenkins.plugins.coverage.adapter;
 
+import com.google.common.collect.Lists;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.Descriptor;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshold.Threshold;
@@ -8,6 +15,7 @@ import org.w3c.dom.Document;
 
 import javax.annotation.CheckForNull;
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,5 +92,12 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
      */
     public String getPath() {
         return path;
+    }
+
+    public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+        CoveragePublisher publisher = new CoveragePublisher();
+        publisher.setAdapters(Lists.newArrayList(this));
+
+        publisher.perform(run, workspace, launcher, listener);
     }
 }
