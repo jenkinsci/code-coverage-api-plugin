@@ -168,6 +168,10 @@ public class CoverageResult implements Serializable, Chartable {
         return relativeSourcePath != null;
     }
 
+    public boolean isAggregatedLevel() {
+        return element.equals(CoverageElement.AGGREGATED_REPORT);
+    }
+
     /**
      * Getter for property 'paint'.
      *
@@ -581,6 +585,11 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
 
+    /**
+     * Interface for javascript code to get child coverage result.
+     *
+     * @return aggregated child coverage results
+     */
     @JavaScriptMethod
     public Map<String, List<JSCoverageResult>> jsGetChildResults() {
         return getChildrenReal()
@@ -590,6 +599,11 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
 
+    /**
+     * Interface for javascript code to get code coverage trend.
+     *
+     * @return coverage trend
+     */
     @JavaScriptMethod
     public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
         Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
@@ -603,14 +617,23 @@ public class CoverageResult implements Serializable, Chartable {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
 
             List<JSCoverageResult> r = c.getResults().entrySet().stream()
+                    .filter(e -> {
+                        if (isAggregatedLevel()) {
+                            return e.getKey().equals(CoverageMetric.LINE) || e.getKey().equals(CoverageMetric.REPORTS);
+                        } else {
+                            return true;
+                        }
+                    })
                     .map(e -> new JSCoverageResult(e.getKey().getName(), e.getValue()))
                     .collect(Collectors.toList());
 
-            results.put(label.toString(), r);
+            if (r.size() != 0) {
+                results.put(label.toString(), r);
+            }
         }
         return results;
-
     }
+
 
     public static class JSCoverageResult {
         private String name;

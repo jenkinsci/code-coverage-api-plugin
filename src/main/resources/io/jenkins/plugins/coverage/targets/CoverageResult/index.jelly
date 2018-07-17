@@ -21,22 +21,63 @@
                 </div>
             </j:if>
             <br/>
-            <div id="summaryChart" style="width:800px;height:100%;">
-            </div>
-            <br/>
-            <div id="childSummaryChart" style="width:800px;height:100%;">
-            </div>
-            <script>
-                var instance =<st:bind value="${it}"/>;
+            <j:choose>
+                <j:when test="${it.aggregatedLevel}">
+                    <script>
+                        var instance =<st:bind value="${it}"/>;
+                        var coverageChartGenerator = new CoverageChartGenerator();
 
-                var coverageChartGenerator = new CoverageChartGenerator(instance)
-                var name = "${it.xmlTransform(it.name)}";
-                coverageChartGenerator.generateSummaryChart('summaryChart', name);
-                var metric = '${it.childElement.displayName}';
-                coverageChartGenerator.generateChildSummaryChart('childSummaryChart', metric);
+                        instance.getTrendResults(function(t) {
+                        var results = t.responseObject();
+                        coverageChartGenerator.generateTrendChart(results, 'trendChart');
+                        });
+                    </script>
+                    <j:forEach var="child" items="${it.children}">
+                        <div id="${it.urlTransform(it.xmlTransform(child))}" style="width:800px;height:100%;">
+                        </div>
+                        <script>
+                            <st:bind value="${it.getChild(child)}"/>.getResults(function(t) {
+                            var results = t.responseObject();
+                                coverageChartGenerator.generateSummaryChart(results, "${it.urlTransform(it.xmlTransform(child))}", "${it.xmlTransform(child)}", true)
+                            });
+                        </script>
+                    </j:forEach>
+                </j:when>
+                <j:otherwise>
+                    <div id="summaryChart" style="width:800px;height:100%;">
+                    </div>
+                    <br/>
+                    <j:if test="${it.getChildren().size() != 0}">
+                        <div id="childSummaryChart" style="width:800px;height:100%;">
+                        </div>
+                    </j:if>
+                    <script>
+                        var instance =<st:bind value="${it}"/>;
 
-                coverageChartGenerator.generateTrendChart('trendChart');
-            </script>
+                        var coverageChartGenerator = new CoverageChartGenerator()
+                        var name = "${it.xmlTransform(it.name)}";
+
+                        instance.getResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
+                        });
+
+                        var metric = '${it.childElement.displayName}';
+                        instance.getChildResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateChildSummaryChart(results, 'childSummaryChart', metric)
+                        });
+
+                        instance.getTrendResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateTrendChart(results, 'trendChart');
+                        });
+
+
+                    </script>
+                </j:otherwise>
+            </j:choose>
+
 
             <j:if test="${it.sourceCodeLevel}">
                 <h3>${%Source}</h3>

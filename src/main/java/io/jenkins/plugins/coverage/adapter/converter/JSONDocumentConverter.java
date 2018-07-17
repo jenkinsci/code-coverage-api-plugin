@@ -1,10 +1,10 @@
 package io.jenkins.plugins.coverage.adapter.converter;
 
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 
-public abstract class JSONDocumentConverter extends DocumentConverter<JSONObject> {
+public abstract class JSONDocumentConverter extends DocumentConverter<JsonNode> {
 
 
     /**
@@ -14,6 +14,6 @@ public abstract class JSONDocumentConverter extends DocumentConverter<JSONObject
      * @return standard format document converted by JSON format report
      */
     @Override
-    protected abstract Document convert(JSONObject report, Document document) throws CoverageException;
+    protected abstract Document convert(JsonNode report, Document document) throws CoverageException;
 
 }

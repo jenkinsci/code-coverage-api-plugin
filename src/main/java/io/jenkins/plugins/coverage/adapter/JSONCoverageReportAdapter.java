@@ -1,11 +1,12 @@
 package io.jenkins.plugins.coverage.adapter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jenkins.plugins.coverage.adapter.converter.JSONDocumentConverter;
-import io.jenkins.plugins.coverage.adapter.util.JSONUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 
 import java.io.File;
+import java.io.IOException;
 
 public abstract class JSONCoverageReportAdapter extends CoverageReportAdapter {
 
@@ -18,7 +19,12 @@ public abstract class JSONCoverageReportAdapter extends CoverageReportAdapter {
 
     @Override
     protected Document convert(File source) throws CoverageException {
-        return getConverter().convert(JSONUtils.readToJSONObject(source));
+        try {
+            return getConverter().convert(new ObjectMapper().readTree(source));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new CoverageException(e);
+        }
     }
 
 

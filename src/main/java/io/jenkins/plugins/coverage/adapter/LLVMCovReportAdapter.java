@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.Extension;
 import io.jenkins.plugins.coverage.adapter.converter.JSONDocumentConverter;
 import io.jenkins.plugins.coverage.adapter.parser.LLVMCoverageParser;
@@ -18,11 +17,13 @@ import org.w3c.dom.NodeList;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
 
@@ -65,24 +66,28 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
     public static class LLVMCovDocumentConverter extends JSONDocumentConverter {
 
         @Override
-        protected Document convert(JSONObject report, Document document) throws CoverageException {
+        protected Document convert(JsonNode report, Document document) throws CoverageException {
             // only support 2.0.0 version now
-            if (!report.getString("version").equals("2.0.0") || !report.getString("type").equals("llvm.coverage.json.export")) {
-                throw new CoverageException("Unsupported Json file");
+            if (!report.get("version").asText().equals("2.0.0")) {
+                throw new CoverageException("Unsupported Json file - version must be 2.0.0");
+            }
+
+            if (!report.get("type").asText().equals("llvm.coverage.json.export")) {
+                throw new CoverageException("Unsupported Json file - type must be llvm.coverage.json.export");
             }
 
             Element reportEle = document.createElement("report");
             reportEle.setAttribute("name", "llvm-cov");
             document.appendChild(reportEle);
 
-            JSONArray dataArr = report.getJSONArray("data");
+            JsonNode dataArr = report.get("data");
 
             for (int i = 0; i < dataArr.size(); i++) {
                 Element dataEle = document.createElement("data");
                 dataEle.setAttribute("name", "data" + i);
                 reportEle.appendChild(dataEle);
 
-                JSONObject dataObj = dataArr.getJSONObject(i);
+                JsonNode dataObj = dataArr.get(i);
 
                 processDataObj(dataObj, dataEle, document);
             }
@@ -97,9 +102,9 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
          * @param dataEle  data element added to document
          * @param document document
          */
-        private void processDataObj(JSONObject dataObj, Element dataEle, Document document) {
-            JSONArray files = dataObj.getJSONArray("files");
-            JSONArray functions = dataObj.getJSONArray("functions");
+        private void processDataObj(JsonNode dataObj, Element dataEle, Document document) {
+            JsonNode files = dataObj.get("files");
+            JsonNode functions = dataObj.get("functions");
 
             List<Element> fileElements = processFiles(files, document);
 
@@ -132,21 +137,21 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
          * @param document document
          * @return list of file elements
          */
-        private List<Element> processFiles(JSONArray files, Document document) {
+        private List<Element> processFiles(JsonNode files, Document document) {
             List<Element> fileElements = new LinkedList<>();
             for (int i = 0; i < files.size(); i++) {
-                JSONObject file = files.getJSONObject(i);
+                JsonNode file = files.get(i);
 
                 Element fileEle = document.createElement("file");
-                fileEle.setAttribute("filename", file.getString("filename"));
+                fileEle.setAttribute("filename", file.get("filename").asText());
 
-                JSONArray segments = file.getJSONArray("segments");
+                JsonNode segments = file.get("segments");
 
-                Arrays.stream(segments.toArray())
-                        .map(o -> (JSONArray) o)
+
+                StreamSupport.stream(Spliterators.spliteratorUnknownSize(segments.iterator(), Spliterator.ORDERED), false)
                         .filter(s ->
-                                s.getInteger(4) != 1) // if segment is a region, skip it.
-                        .collect(Collectors.groupingBy(s -> s.getInteger(0))) // group by segment's line number
+                                s.get(4).asInt() != 1) // if segment is a region, skip it.
+                        .collect(Collectors.groupingBy(s -> s.get(0).asInt())) // group by segment's line number
                         .forEach((line, segs) -> {
                             processLine(segs, line, fileEle, document);
                         });
@@ -164,19 +169,19 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
          * @param fileElements file elements
          * @param document     document
          */
-        private void processFunctions(JSONArray functions, List<Element> fileElements, Document document) {
+        private void processFunctions(JsonNode functions, List<Element> fileElements, Document document) {
             for (int i = 0; i < functions.size(); i++) {
                 Element functionEle = document.createElement("function");
 
-                JSONObject function = functions.getJSONObject(i);
-                String name = function.getString("name");
-                JSONArray regions = function.getJSONArray("regions");
-                JSONArray filenames = function.getJSONArray("filenames");
+                JsonNode function = functions.get(i);
+                String name = function.get("name").asText();
+                JsonNode regions = function.get("regions");
+                JsonNode filenames = function.get("filenames");
 
                 functionEle.setAttribute("name", name);
 
                 for (int j = 0; j < filenames.size(); j++) {
-                    String filename = filenames.getString(j);
+                    String filename = filenames.get(j).asText();
 
                     Optional<Element> correspondFileOptional = fileElements.stream()
                             .filter(f -> f.getAttribute("filename").equals(filename))
@@ -189,8 +194,7 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
                     Element correspondFile = correspondFileOptional.get();
 
                     correspondFile.appendChild(functionEle);
-                    Arrays.stream(regions.toArray())
-                            .map(o -> (JSONArray) o)
+                    StreamSupport.stream(Spliterators.spliteratorUnknownSize(regions.iterator(), Spliterator.ORDERED), false)
                             .forEach(r -> {
                                 NodeList lines = correspondFile.getElementsByTagName("line");
 
@@ -198,7 +202,7 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
                                     Element lineEleInFile = (Element) lines.item(k);
                                     int line = Integer.parseInt(lineEleInFile.getAttribute("number"));
 
-                                    if (line >= r.getInteger(0) && line <= r.getInteger(2)) {
+                                    if (line >= r.get(0).asInt() && line <= r.get(2).asInt()) {
                                         Node n = lineEleInFile.cloneNode(true);
                                         functionEle.appendChild(n);
                                         break;
@@ -218,15 +222,15 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
          * @param fileEle  file element that segments belong to
          * @param document document
          */
-        private void processLine(List<JSONArray> segments, Integer line, Element fileEle, Document document) {
+        private void processLine(List<JsonNode> segments, Integer line, Element fileEle, Document document) {
             if (segments.size() == 0) return;
 
             Element lineEle = document.createElement("line");
 
             if (segments.size() == 1) {
-                JSONArray seg = segments.get(0);
-                int count = seg.getInteger(2);
-                int hasCount = seg.getInteger(3);
+                JsonNode seg = segments.get(0);
+                int count = seg.get(2).asInt();
+                int hasCount = seg.get(3).asInt();
 
                 if (hasCount == 0) {
                     count = 1;
@@ -242,9 +246,9 @@ public class LLVMCovReportAdapter extends JSONCoverageReportAdapter {
                 int uncovered = 0;
                 int maxCount = 0;
 
-                for (JSONArray segment : segments) {
-                    int count = segment.getInteger(2);
-                    int hasCount = segment.getInteger(3);
+                for (JsonNode segment : segments) {
+                    int count = segment.get(2).asInt();
+                    int hasCount = segment.get(3).asInt();
 
                     if (hasCount == 0) {
                         count = 1;
