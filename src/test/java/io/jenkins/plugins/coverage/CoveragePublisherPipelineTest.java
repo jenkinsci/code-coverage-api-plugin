@@ -48,9 +48,9 @@ public class CoveragePublisherPipelineTest {
     @Test
     public void testAdapters() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
-//                .addAdapter(new CoberturaReportAdapter("cobertura-coverage.xml"))
-//                .addAdapter(new JacocoReportAdapter("jacoco.xml"));
-        .addAdapter(new LLVMCovReportAdapter("llvm-cov.json"));
+                .addAdapter(new CoberturaReportAdapter("cobertura-coverage.xml"))
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .addAdapter(new LLVMCovReportAdapter("llvm-cov.json"));
 
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
@@ -59,11 +59,11 @@ public class CoveragePublisherPipelineTest {
         Objects.requireNonNull(workspace)
                 .child("llvm-cov.json")
                 .copyFrom(getClass().getResourceAsStream("llvm-cov.json"));
-//        Objects.requireNonNull(workspace)
-//                .child("cobertura-coverage.xml")
-//                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
-//        workspace.child("jacoco.xml").copyFrom(getClass()
-//                .getResourceAsStream("jacoco.xml"));
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+        workspace.child("jacoco.xml").copyFrom(getClass()
+                .getResourceAsStream("jacoco.xml"));
 
         project.setDefinition(new CpsFlowDefinition(builder.build(), true));
         WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
@@ -71,7 +71,7 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatusSuccess(j.waitForCompletion(r));
-        j.assertLogContains("A total of 1 reports were found", r);
+        j.assertLogContains("A total of 3 reports were found", r);
 
     }
 
