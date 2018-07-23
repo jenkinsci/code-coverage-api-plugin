@@ -37,7 +37,12 @@ public enum CoverageElement {
     JAVA_PACKAGE("Package", JAVA_GROUP),
     JAVA_FILE("File", JAVA_PACKAGE),
     JAVA_CLASS("Class", JAVA_FILE),
-    JAVA_METHOD("Method", JAVA_CLASS);
+    JAVA_METHOD("Method", JAVA_CLASS),
+
+    LLVM_DATA("Data", REPORT),
+    LLVM_DIRECTORY("Directory", LLVM_DATA),
+    LLVM_FILE("File", LLVM_DIRECTORY),
+    LLVM_FUNCTION("Function", LLVM_FILE);
 
     private final CoverageElement parent;
     private final String name;

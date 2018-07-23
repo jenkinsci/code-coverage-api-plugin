@@ -65,7 +65,7 @@ public class CoverageAggregationRule implements Serializable {
                                                        CoverageMetric input,
                                                        Ratio inputResult,
                                                        Map<CoverageMetric, Ratio> runningTotal) {
-        Map<CoverageMetric, Ratio> result = new EnumMap<CoverageMetric, Ratio>(CoverageMetric.class);
+        Map<CoverageMetric, Ratio> result = new EnumMap<>(CoverageMetric.class);
         result.putAll(runningTotal);
         for (CoverageAggregationRule rule : INITIAL_RULESET) {
             if (rule.source == source && rule.input == input) {
@@ -85,37 +85,73 @@ public class CoverageAggregationRule implements Serializable {
     // the method coverage of a Java class is # of methods that have some coverage among # of methods that have any code (3rd line.)
     // and so on.
     private static final CoverageAggregationRule INITIAL_RULESET[] = {
+            //java rule
             new CoverageAggregationRule(JAVA_METHOD, LINE, SUM, LINE),
             new CoverageAggregationRule(JAVA_METHOD, CONDITIONAL, SUM, CONDITIONAL),
-            new CoverageAggregationRule(JAVA_METHOD, LINE, COUNT_NON_ZERO, METHOD),
+            new CoverageAggregationRule(JAVA_METHOD, LINE, COUNT_NON_ZERO, JAVA_METHODS),
             new CoverageAggregationRule(JAVA_CLASS, LINE, SUM, LINE),
             new CoverageAggregationRule(JAVA_CLASS, CONDITIONAL, SUM, CONDITIONAL),
-            new CoverageAggregationRule(JAVA_CLASS, METHOD, SUM, METHOD),
-            new CoverageAggregationRule(JAVA_CLASS, LINE, COUNT_NON_ZERO, CLASSES),
+            new CoverageAggregationRule(JAVA_CLASS, JAVA_METHODS, SUM, JAVA_METHODS),
+            new CoverageAggregationRule(JAVA_CLASS, LINE, COUNT_NON_ZERO, JAVA_CLASSES),
             new CoverageAggregationRule(JAVA_FILE, LINE, SUM, LINE),
             new CoverageAggregationRule(JAVA_FILE, CONDITIONAL, SUM, CONDITIONAL),
-            new CoverageAggregationRule(JAVA_FILE, METHOD, SUM, METHOD),
-            new CoverageAggregationRule(JAVA_FILE, CLASSES, SUM, CLASSES),
-            new CoverageAggregationRule(JAVA_FILE, LINE, COUNT_NON_ZERO, FILES),
+            new CoverageAggregationRule(JAVA_FILE, JAVA_METHODS, SUM, JAVA_METHODS),
+            new CoverageAggregationRule(JAVA_FILE, JAVA_CLASSES, SUM, JAVA_CLASSES),
+            new CoverageAggregationRule(JAVA_FILE, LINE, COUNT_NON_ZERO, JAVA_FILES),
             new CoverageAggregationRule(JAVA_PACKAGE, LINE, SUM, LINE),
             new CoverageAggregationRule(JAVA_PACKAGE, CONDITIONAL, SUM, CONDITIONAL),
-            new CoverageAggregationRule(JAVA_PACKAGE, METHOD, SUM, METHOD),
-            new CoverageAggregationRule(JAVA_PACKAGE, CLASSES, SUM, CLASSES),
-            new CoverageAggregationRule(JAVA_PACKAGE, FILES, SUM, FILES),
-            new CoverageAggregationRule(JAVA_PACKAGE, LINE, COUNT_NON_ZERO, PACKAGES),
+            new CoverageAggregationRule(JAVA_PACKAGE, JAVA_METHODS, SUM, JAVA_METHODS),
+            new CoverageAggregationRule(JAVA_PACKAGE, JAVA_CLASSES, SUM, JAVA_CLASSES),
+            new CoverageAggregationRule(JAVA_PACKAGE, JAVA_FILES, SUM, JAVA_FILES),
+            new CoverageAggregationRule(JAVA_PACKAGE, LINE, COUNT_NON_ZERO, JAVA_PACKAGES),
             new CoverageAggregationRule(JAVA_GROUP, LINE, SUM, LINE),
-            new CoverageAggregationRule(JAVA_GROUP, METHOD, SUM, METHOD),
-            new CoverageAggregationRule(JAVA_GROUP, CLASSES, SUM, CLASSES),
-            new CoverageAggregationRule(JAVA_GROUP, FILES, SUM, FILES),
-            new CoverageAggregationRule(JAVA_GROUP, PACKAGES, SUM, PACKAGES),
-            new CoverageAggregationRule(JAVA_GROUP, LINE, COUNT_NON_ZERO, GROUPS),
+            new CoverageAggregationRule(JAVA_GROUP, JAVA_METHODS, SUM, JAVA_METHODS),
+            new CoverageAggregationRule(JAVA_GROUP, JAVA_CLASSES, SUM, JAVA_CLASSES),
+            new CoverageAggregationRule(JAVA_GROUP, JAVA_FILES, SUM, JAVA_FILES),
+            new CoverageAggregationRule(JAVA_GROUP, JAVA_PACKAGES, SUM, JAVA_PACKAGES),
+            new CoverageAggregationRule(JAVA_GROUP, LINE, COUNT_NON_ZERO, JAVA_GROUPS),
+
+            // llvm-cov rule
+            new CoverageAggregationRule(LLVM_FUNCTION, LINE, SUM, LINE),
+            new CoverageAggregationRule(LLVM_FUNCTION, CONDITIONAL, SUM, CONDITIONAL),
+            new CoverageAggregationRule(LLVM_FUNCTION, LINE, COUNT_NON_ZERO, LLVM_FUNCTIONS),
+            new CoverageAggregationRule(LLVM_FILE, LINE, SUM, LINE),
+            new CoverageAggregationRule(LLVM_FILE, CONDITIONAL, SUM, CONDITIONAL),
+            new CoverageAggregationRule(LLVM_FILE, LLVM_FUNCTIONS, SUM, LLVM_FUNCTIONS),
+            new CoverageAggregationRule(LLVM_FILE, LINE, COUNT_NON_ZERO, LLVM_FILES),
+            new CoverageAggregationRule(LLVM_DIRECTORY, LINE, SUM, LINE),
+            new CoverageAggregationRule(LLVM_DIRECTORY, CONDITIONAL, SUM, CONDITIONAL),
+            new CoverageAggregationRule(LLVM_DIRECTORY, LLVM_FUNCTIONS, SUM, LLVM_FUNCTIONS),
+            new CoverageAggregationRule(LLVM_DIRECTORY, LLVM_FILES, SUM, LLVM_FILES),
+            new CoverageAggregationRule(LLVM_DIRECTORY, LINE, COUNT_NON_ZERO, LLVM_DIRECTORIES),
+
+            new CoverageAggregationRule(LLVM_DATA, LINE, SUM, LINE),
+            new CoverageAggregationRule(LLVM_DATA, CONDITIONAL, SUM, CONDITIONAL),
+            new CoverageAggregationRule(LLVM_DATA, LLVM_FUNCTIONS, SUM, LLVM_FUNCTIONS),
+            new CoverageAggregationRule(LLVM_DATA, LLVM_FILES, SUM, LLVM_FILES),
+            new CoverageAggregationRule(LLVM_DATA, LLVM_DIRECTORIES, SUM, LLVM_DIRECTORIES),
+            new CoverageAggregationRule(LLVM_DATA, LINE, COUNT_NON_ZERO, LLVM_DATALIST),
+
+
             new CoverageAggregationRule(REPORT, LINE, SUM, LINE),
-            new CoverageAggregationRule(REPORT, METHOD, SUM, METHOD),
-            new CoverageAggregationRule(REPORT, CLASSES, SUM, CLASSES),
-            new CoverageAggregationRule(REPORT, FILES, SUM, FILES),
-            new CoverageAggregationRule(REPORT, PACKAGES, SUM, PACKAGES),
-            new CoverageAggregationRule(REPORT, GROUPS, SUM, GROUPS),
+
+            new CoverageAggregationRule(REPORT, JAVA_METHODS, SUM, JAVA_METHODS),
+            new CoverageAggregationRule(REPORT, JAVA_CLASSES, SUM, JAVA_CLASSES),
+            new CoverageAggregationRule(REPORT, JAVA_FILES, SUM, JAVA_FILES),
+            new CoverageAggregationRule(REPORT, JAVA_PACKAGES, SUM, JAVA_PACKAGES),
+            new CoverageAggregationRule(REPORT, JAVA_GROUPS, SUM, JAVA_GROUPS),
+
+            new CoverageAggregationRule(REPORT, LLVM_FUNCTIONS, SUM, LLVM_FUNCTIONS),
+            new CoverageAggregationRule(REPORT, LLVM_FILES, SUM, LLVM_FILES),
+            new CoverageAggregationRule(REPORT, LLVM_DIRECTORIES, SUM, LLVM_DIRECTORIES),
+            new CoverageAggregationRule(REPORT, LLVM_DATALIST, SUM, LLVM_DATALIST),
+
             new CoverageAggregationRule(REPORT, LINE, COUNT_NON_ZERO, REPORTS),
+
+
+
+
+
     };
 
     public static Ratio combine(CoverageMetric metric, Ratio existingResult, Ratio additionalResult) {

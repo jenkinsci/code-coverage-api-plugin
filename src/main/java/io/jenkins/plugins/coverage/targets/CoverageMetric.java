@@ -30,11 +30,18 @@ package io.jenkins.plugins.coverage.targets;
  */
 public enum CoverageMetric {
     REPORTS("Reports"),
-    GROUPS("Groups"),
-    PACKAGES("Packages"),
-    FILES("Files"),
-    CLASSES("Classes"),
-    METHOD("Methods"),
+
+    JAVA_GROUPS("JAVA Groups"),
+    JAVA_PACKAGES("JAVA Packages"),
+    JAVA_FILES("JAVA Files"),
+    JAVA_CLASSES("JAVA Classes"),
+    JAVA_METHODS("JAVA Methods"),
+
+    LLVM_DATALIST("LLVM Data"),
+    LLVM_DIRECTORIES("LLVM Directories"),
+    LLVM_FILES("LLVM Files"),
+    LLVM_FUNCTIONS("LLVM Functions"),
+
     LINE("Lines"),
     CONDITIONAL("Conditionals");
 
@@ -58,11 +65,15 @@ public enum CoverageMetric {
 
     public static CoverageMetric[] all() {
         return new CoverageMetric[]{
-                CoverageMetric.GROUPS,
-                CoverageMetric.PACKAGES,
-                CoverageMetric.FILES,
-                CoverageMetric.CLASSES,
-                CoverageMetric.METHOD,
+                CoverageMetric.JAVA_GROUPS,
+                CoverageMetric.JAVA_PACKAGES,
+                CoverageMetric.JAVA_FILES,
+                CoverageMetric.JAVA_CLASSES,
+                CoverageMetric.JAVA_METHODS,
+                CoverageMetric.LLVM_DATALIST,
+                CoverageMetric.LLVM_DIRECTORIES,
+                CoverageMetric.LLVM_FILES,
+                CoverageMetric.LLVM_FUNCTIONS,
                 CoverageMetric.LINE,
                 CoverageMetric.CONDITIONAL};
     }
