@@ -5,7 +5,6 @@ import hudson.FilePath;
 import hudson.model.Result;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.coverage.adapter.LLVMCovReportAdapter;
 import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
 import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.threshold.Threshold;
@@ -49,16 +48,12 @@ public class CoveragePublisherPipelineTest {
     public void testAdapters() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new CoberturaReportAdapter("cobertura-coverage.xml"))
-                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
-                .addAdapter(new LLVMCovReportAdapter("llvm-cov.json"));
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"));
 
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
-        Objects.requireNonNull(workspace)
-                .child("llvm-cov.json")
-                .copyFrom(getClass().getResourceAsStream("llvm-cov.json"));
         Objects.requireNonNull(workspace)
                 .child("cobertura-coverage.xml")
                 .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
@@ -71,7 +66,7 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatusSuccess(j.waitForCompletion(r));
-        j.assertLogContains("A total of 3 reports were found", r);
+        j.assertLogContains("A total of 2 reports were found", r);
 
     }
 
