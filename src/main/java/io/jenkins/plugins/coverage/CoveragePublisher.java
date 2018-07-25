@@ -146,7 +146,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
+    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
     }
 
