@@ -5,7 +5,7 @@
     <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
     </script>
     <j:set var="lastResult" value="${from.getLastResult().getResult()}"/>
-    <!--<j:if test="${lastResult != null}">-->
+    <j:if test="${lastResult != null}">
         <div align="bottom">
             <div class="test-trend-caption">
                 Code Coverage
@@ -24,5 +24,5 @@
                 });
             </script>
         </div>
-    <!--</j:if>-->
+    </j:if>
 </j:jelly>
