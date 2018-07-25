@@ -19,22 +19,16 @@ import java.io.IOException;
 public class CoverageProjectAction extends Actionable implements ProminentProjectAction {
 
     private transient Run<?, ?> run;
-    private boolean onlyStable;
-
-    public CoverageProjectAction(Run<?, ?> run, boolean onlyStable) {
-        this.run = run;
-        this.onlyStable = onlyStable;
-    }
 
     public CoverageProjectAction(Run<?, ?> run) {
-        this(run, false);
+        this.run = run;
     }
 
     /**
      * {@inheritDoc}
      */
     public String getIconFileName() {
-        return null;
+        return "graph.gif";
     }
 
     /**
@@ -48,7 +42,7 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
      * {@inheritDoc}
      */
     public String getUrlName() {
-        return "cobertura";
+        return "coverage";
     }
 
     /**
@@ -57,8 +51,8 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
      * @return Value for property 'lastResult'.
      */
     public CoverageAction getLastResult() {
-        for (Run<?, ?> b = getLastBuildToBeConsidered(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
-            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS && onlyStable))
+        for (Run<?, ?> b = run.getParent().getLastSuccessfulBuild(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
+            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS))
                 continue;
             CoverageAction r = b.getAction(CoverageAction.class);
             if (r != null)
@@ -66,17 +60,15 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
         }
         return null;
     }
-    private Run<?, ?> getLastBuildToBeConsidered(){
-        return onlyStable ? run.getParent().getLastStableBuild() : run.getParent().getLastSuccessfulBuild();
-    }
-     /**
+
+    /**
      * Getter for property 'lastResult'.
      *
      * @return Value for property 'lastResult'.
      */
     public Integer getLastResultBuild() {
-        for (Run<?, ?> b = getLastBuildToBeConsidered(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
-            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS && onlyStable))
+        for (Run<?, ?> b = run.getParent().getLastSuccessfulBuild(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
+            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS))
                 continue;
             CoverageAction r = b.getAction(CoverageAction.class);
             if (r != null)
@@ -84,11 +76,6 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
         }
         return null;
     }
-
-//    public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
-//        if (getLastResult() != null)
-//            getLastResult().doGraph(req, rsp);
-//    }
 
     public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
         Integer buildNumber = getLastResultBuild();

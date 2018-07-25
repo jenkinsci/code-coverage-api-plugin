@@ -28,8 +28,8 @@
                         var coverageChartGenerator = new CoverageChartGenerator();
 
                         instance.getTrendResults(function(t) {
-                        var results = t.responseObject();
-                        coverageChartGenerator.generateTrendChart(results, 'trendChart');
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateTrendChart(results, 'trendChart');
                         });
                     </script>
                     <j:forEach var="child" items="${it.children}">
