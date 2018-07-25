@@ -1,0 +1,28 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+    <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
+    </script>
+    <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
+    </script>
+    <j:set var="lastResult" value="${from.getLastResult().getResult()}"/>
+    <!--<j:if test="${lastResult != null}">-->
+        <div align="bottom">
+            <div class="test-trend-caption">
+                Code Coverage
+            </div>
+            <div id="summaryChart" style="width:600px;height:100%;">
+            </div>
+            <script>
+                var instance =<st:bind value="${lastResult}"/>;
+
+                var coverageChartGenerator = new CoverageChartGenerator()
+                var name = "${it.xmlTransform(it.name)}";
+
+                instance.getResults(function(t) {
+                var results = t.responseObject();
+                coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
+                });
+            </script>
+        </div>
+    <!--</j:if>-->
+</j:jelly>

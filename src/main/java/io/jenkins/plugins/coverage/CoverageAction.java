@@ -30,8 +30,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
      */
     @Override
     public Collection<? extends Action> getProjectActions() {
-        //TODO Only stable should be replaced by variable
-        return Collections.singleton(new CoverageProjectAction(owner, false));
+        return Collections.singleton(new CoverageProjectAction(owner));
     }
 
 
