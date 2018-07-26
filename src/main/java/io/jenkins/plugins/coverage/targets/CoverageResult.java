@@ -22,6 +22,7 @@
 package io.jenkins.plugins.coverage.targets;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Api;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
@@ -506,6 +507,17 @@ public class CoverageResult implements Serializable, Chartable {
 
     public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
         token = token.toLowerCase();
+        String restPath = req.getRestOfPath();
+
+        // prevent name conflict
+        if (restPath.startsWith("/api/")) {
+            if (token.equals("trend")) {
+                return new RestResultWrapper(new CoverageTrendTree(getName(), getCoverageTrends(), getChildrenReal()));
+            } else if (token.equals("result")) {
+                return new RestResultWrapper(this);
+            }
+        }
+
         for (String name : children.keySet()) {
             if (urlTransform(name).toLowerCase().equals(token)) {
                 return getChild(name);
@@ -551,8 +563,8 @@ public class CoverageResult implements Serializable, Chartable {
         return result;
     }
 
-    public RestfulCoverageResultWrapper getApi() {
-        return new RestfulCoverageResultWrapper(this);
+    public Object getLast() {
+        return getPreviousResult();
     }
 
     /**
