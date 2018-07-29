@@ -9,6 +9,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshold.Threshold;
@@ -121,7 +122,7 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
      * @throws InterruptedException if the step is interrupted
      * @throws IOException if something goes wrong; use {@link AbortException} for a polite error
      */
-    public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, SourceFileResolver sourceFileResolver) throws IOException, InterruptedException {
+    public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, DefaultSourceFileResolver sourceFileResolver) throws IOException, InterruptedException {
         CoveragePublisher publisher = new CoveragePublisher();
         publisher.setAdapters(Lists.newArrayList(this));
         publisher.setSourceFileResolver(sourceFileResolver);

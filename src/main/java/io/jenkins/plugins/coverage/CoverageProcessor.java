@@ -164,9 +164,9 @@ public class CoverageProcessor {
                     }
                 }
             }
+            logger.printf("Auto Detect was ended: Found %d report%n", detectCount);
         }
 
-        logger.printf("Auto Detect was ended: Found %d report%n", detectCount);
         reports.clear();
 
         // convert report to results

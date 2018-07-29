@@ -43,8 +43,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failUnhealthy;
     private boolean failUnstable;
     private boolean failNoReports;
-  
-    private SourceFileResolver sourceFileResolver;
+
+    // TODO make sourceFileResolver more generic
+    private DefaultSourceFileResolver sourceFileResolver;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -141,12 +142,12 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.failNoReports = failNoReports;
     }
 
-    public SourceFileResolver getSourceFileResolver() {
+    public DefaultSourceFileResolver getSourceFileResolver() {
         return sourceFileResolver;
     }
 
     @DataBoundSetter
-    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
+    public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
     }
 
