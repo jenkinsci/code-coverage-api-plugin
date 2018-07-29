@@ -78,7 +78,11 @@ public class CoverageProcessor {
     public void performCoverageReport(List<CoverageReportAdapter> reportAdapters, List<ReportDetector> reportDetectors, List<Threshold> globalThresholds)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
+
         CoverageResult coverageReport = aggregatedResults(results);
+        if (coverageReport == null) {
+            return;
+        }
 
         coverageReport.setOwner(run);
 
@@ -316,6 +320,10 @@ public class CoverageProcessor {
      * @return aggregated report
      */
     private CoverageResult aggregatedResults(Map<CoverageReportAdapter, List<CoverageResult>> results) {
+        if (results.size() == 0) {
+            return null;
+        }
+
         CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
         for (List<CoverageResult> resultList : results.values()) {
             for (CoverageResult result : resultList) {
