@@ -30,7 +30,7 @@ See the [CHANGELOG](CHANGELOG.md).
 
 #####  1. Config coverage tool to generate reports.
 
-Config maven to generate Cobertura coverage report:
+Config maven to generate Cobertura coverage reports:
 ```xml
 <build>
     <plugins>
@@ -56,7 +56,7 @@ Config maven to generate Cobertura coverage report:
     </plugins>
 </build>
 ```
-More information about [Cobertura]().
+More information about [Cobertura](http://cobertura.github.io/cobertura/).
 
 Config maven to generate Jacoco coverage reports:
 
@@ -85,13 +85,16 @@ Config maven to generate Jacoco coverage reports:
     </plugins>
 </build>
 ```
+More Information about [Jacoco](https://www.jacoco.org/jacoco/trunk/doc/).
+
 Use llvm-cov to generate JSON format report:
 ```
 $ llvm-cov export -instr-profile /path/to/foo.profdata /path/to/foo
 ```
+More Information - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst#exporting-coverage-data).
 
 ##### 2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
-##### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions
+##### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions.
 ##### 4. Add your coverage tool adapter and specify reports path.
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
 ##### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
