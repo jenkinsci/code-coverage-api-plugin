@@ -24,7 +24,7 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst) ([llvm-cov plugin](https://github.com/jenkinsci/llvm-cov-plugin))
 ## How to use it
 
-######1. Config coverage tool to generate reports.
+######  1. Config coverage tool to generate reports.
 
 Config maven to generate Cobertura coverage report:
 ```xml
@@ -86,10 +86,10 @@ Use llvm-cov to generate JSON format report:
 $ llvm-cov export -instr-profile /path/to/foo.profdata /path/to/foo
 ```
 
-######2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
-######3. Enable "Publish Coverage Report" publisher in the Post-build Actions
-######4. Add your coverage tool adapter and specify reports path.
+###### 2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
+###### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions
+###### 4. Add your coverage tool adapter and specify reports path.
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
-######5. (Optional) Specify Thresholds of each metrics in global or adapter level.
-######6. (Optional) Specify Source code storing level to enable source code navigation.
+###### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
+###### 6. (Optional) Specify Source code storing level to enable source code navigation.
 ![alt text](./images/config.png "Config")
