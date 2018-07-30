@@ -8,23 +8,88 @@ This plugin serves as API to integrate and publish multiple coverage report type
 More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
 ## Features
-- Pipeline support.
-- Modernized coverage chart.
-- Coverage trend support.
-- Multi-report aggregated.
-- Rest API.
-- Auto detect report.
-- Easy to implement.
+- Pipeline support
+- Modernized coverage chart
+- Coverage trend support
+- Multi-report aggregated
+- Rest API
+- Auto detect report
+- Easy to implement
 
+## Supported Tools
+#### Embedded tools
+- [Jacoco](https://www.jacoco.org/jacoco/trunk/doc/)
+#### Other plugins as an Extension of Code Coverage API plugin
+- [Cobertura](http://cobertura.github.io/cobertura/) ([Cobertura Plugin](https://github.com/jenkinsci/cobertura-plugin))
+- [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst) ([llvm-cov plugin](https://github.com/jenkinsci/llvm-cov-plugin))
 ## How to use it
 
-Code Coverage API plugin now supports Cobertura, Jacoco and llvm-cov.
+######1. Config coverage tool to generate reports.
 
-1. Config coverage tool to generate reports.
-2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
-3. Enable "Publish Coverage Report" publisher in the Post-build Actions
-4. Add your coverage tool adapter and specify reports path.
+Config maven to generate Cobertura coverage report:
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>cobertura-maven-plugin</artifactId>
+            <version>2.7</version>
+            <configuration>
+                <formats>
+                    <format>xml</format>
+                </formats>
+                <check/>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>cobertura</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+More information about [Cobertura]().
+
+Config maven to generate Jacoco coverage reports:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.1</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+Use llvm-cov to generate JSON format report:
+```
+$ llvm-cov export -instr-profile /path/to/foo.profdata /path/to/foo
+```
+
+######2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
+######3. Enable "Publish Coverage Report" publisher in the Post-build Actions
+######4. Add your coverage tool adapter and specify reports path.
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
-5. (Optional) Specify Thresholds of each metrics in global or adapter level.
-6. (Optional) Specify Source code storing level to enable source code navigation.
+######5. (Optional) Specify Thresholds of each metrics in global or adapter level.
+######6. (Optional) Specify Source code storing level to enable source code navigation.
 ![alt text](./images/config.png "Config")
