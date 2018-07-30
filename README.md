@@ -7,6 +7,15 @@
 This plugin serves as API to integrate and publish multiple coverage report types. 
 More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
+## Feature
+- Pipeline support.
+- Modernized coverage chart.
+- Coverage trend.
+- Multi-report aggregated.
+- Rest API.
+- Auto detect report.
+- Easy to implement.
+
 ## How to use it
 
 Code Coverage API plugin now supports Cobertura, Jacoco and llvm-cov.
@@ -15,5 +24,7 @@ Code Coverage API plugin now supports Cobertura, Jacoco and llvm-cov.
 2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
 3. Enable "Publish Coverage Report" publisher in the Post-build Actions
 4. Add your coverage tool adapter and specify reports path.
-5. (Optional) Specify Thresholds of each metrics.
+![alt text](./images/config-add-adapter.png "Add coverage adapter")
+5. (Optional) Specify Thresholds of each metrics in global or adapter level.
 6. (Optional) Specify Source code storing level to enable source code navigation.
+![alt text](./images/config.png "Config")
