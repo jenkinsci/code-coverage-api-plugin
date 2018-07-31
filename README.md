@@ -91,7 +91,7 @@ Use llvm-cov to generate JSON format report:
 ```
 $ llvm-cov export -instr-profile /path/to/foo.profdata /path/to/foo
 ```
-More Information - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst#exporting-coverage-data).
+More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst#exporting-coverage-data).
 
 ##### 2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
 ##### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions.
