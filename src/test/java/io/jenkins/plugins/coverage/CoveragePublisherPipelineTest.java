@@ -6,7 +6,6 @@ import hudson.model.Result;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
-import io.jenkins.plugins.coverage.targets.CoverageMetric;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -76,7 +75,7 @@ public class CoveragePublisherPipelineTest {
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
                 .setFailUnhealthy(true);
 
-        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
 
         builder.addGlobalThreshold(lineThreshold);
@@ -104,7 +103,7 @@ public class CoveragePublisherPipelineTest {
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
                 .setFailUnstable(true);
 
-        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnstableThreshold(20);
 
         builder.addGlobalThreshold(lineThreshold);
@@ -148,7 +147,7 @@ public class CoveragePublisherPipelineTest {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"));
 
-        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
         lineThreshold.setFailUnhealthy(true);
 
@@ -177,7 +176,7 @@ public class CoveragePublisherPipelineTest {
 
         JacocoReportAdapter adapter = new JacocoReportAdapter("jacoco.xml");
 
-        Threshold lineThreshold = new Threshold(CoverageMetric.LINE);
+        Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
         lineThreshold.setFailUnhealthy(true);
 
