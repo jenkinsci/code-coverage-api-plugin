@@ -1,6 +1,6 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
-import io.jenkins.plugins.coverage.targets.CoverageMetric;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import org.apache.commons.lang.StringUtils;
@@ -115,7 +115,7 @@ public abstract class CoverageParser {
                     try {
                         numerator = Integer.parseInt(numeratorStr);
                         denominator = Integer.parseInt(denominatorStr);
-                        parentResult.updateMetric(CoverageMetric.CONDITIONAL, Ratio.create(numerator, denominator));
+                        parentResult.updateCoverage(CoverageElement.CONDITIONAL, Ratio.create(numerator, denominator));
                     } catch (NumberFormatException ignore) {
                     }
                 }
@@ -129,7 +129,7 @@ public abstract class CoverageParser {
             } else {
                 parentResult.paint(number, hits, numerator, denominator);
             }
-            parentResult.updateMetric(CoverageMetric.LINE, Ratio.create((hits == 0) ? 0 : 1, 1));
+            parentResult.updateCoverage(CoverageElement.LINE, Ratio.create((hits == 0) ? 0 : 1, 1));
         } catch (NumberFormatException ignore) {
         }
     }

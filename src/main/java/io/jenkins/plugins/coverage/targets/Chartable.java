@@ -31,7 +31,7 @@ public interface Chartable {
 
     Chartable getPreviousResult();
 
-    Map<CoverageMetric, Ratio> getResults();
+    Map<CoverageElement, Ratio> getResults();
 
     Run<?, ?> getOwner();
 

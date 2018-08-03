@@ -53,25 +53,24 @@ public class JavaCoverageParser extends CoverageParser {
                         getAttribute(current, "name", "") + ": " + getReportName());
                 break;
             case "group":
-                result = new CoverageResult(CoverageElement.JAVA_GROUP, parentResult,
+                result = new CoverageResult(CoverageElement.get("Java Group"), parentResult,
                         getAttribute(current, "name", "project"));
                 break;
             case "package":
-                result = new CoverageResult(CoverageElement.JAVA_PACKAGE, parentResult,
+                result = new CoverageResult(CoverageElement.get("Java Package"), parentResult,
                         getAttribute(current, "name", "<default>"));
                 break;
             case "file":
-                result = new CoverageResult(CoverageElement.JAVA_FILE, parentResult,
+                result = new CoverageResult(CoverageElement.get("Java File"), parentResult,
                         getAttribute(current, "name", ""));
-
                 result.setRelativeSourcePath(getAttribute(current, "name", null));
                 break;
             case "class":
-                result = new CoverageResult(CoverageElement.JAVA_CLASS, parentResult,
+                result = new CoverageResult(CoverageElement.get("Java Class"), parentResult,
                         getAttribute(current, "name", ""));
                 break;
             case "method":
-                result = new CoverageResult(CoverageElement.JAVA_METHOD, parentResult,
+                result = new CoverageResult(CoverageElement.get("Java Method"), parentResult,
                         getAttribute(current, "name", ""));
                 break;
             case "line":

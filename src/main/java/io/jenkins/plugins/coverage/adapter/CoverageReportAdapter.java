@@ -4,13 +4,11 @@ import com.google.common.collect.Lists;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -105,8 +103,9 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
      * @param launcher  a way to start processes
      * @param listener  a place to send output
      * @throws InterruptedException if the step is interrupted
-     * @throws IOException if something goes wrong; use {@link AbortException} for a polite error
+     * @throws IOException          if something goes wrong; use {@link AbortException} for a polite error
      */
+    @SuppressWarnings("unused")
     public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
         performCoveragePlugin(run, workspace, launcher, listener, null);
     }
@@ -114,13 +113,13 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
     /**
      * Perform publish coverage reports step with the adapter called this method.
      *
-     * @param run       a build this is running as a part of
-     * @param workspace a workspace to use for any file operations
-     * @param launcher  a way to start processes
-     * @param listener  a place to send output
+     * @param run                a build this is running as a part of
+     * @param workspace          a workspace to use for any file operations
+     * @param launcher           a way to start processes
+     * @param listener           a place to send output
      * @param sourceFileResolver source file resolver
      * @throws InterruptedException if the step is interrupted
-     * @throws IOException if something goes wrong; use {@link AbortException} for a polite error
+     * @throws IOException          if something goes wrong; use {@link AbortException} for a polite error
      */
     public final void performCoveragePlugin(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, DefaultSourceFileResolver sourceFileResolver) throws IOException, InterruptedException {
         CoveragePublisher publisher = new CoveragePublisher();
