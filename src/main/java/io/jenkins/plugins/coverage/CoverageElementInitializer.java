@@ -17,8 +17,8 @@ public class CoverageElementInitializer {
 
         reportDescriptors.stream()
                 .filter(d -> d instanceof CoverageReportAdapterDescriptor)
-                .map(d -> (CoverageReportAdapterDescriptor) d).
-                forEach(d -> CoverageElementRegister.addCoverageElements(d.getCoverageElements()));
+                .map(d -> (CoverageReportAdapterDescriptor) d)
+                .forEach(d -> CoverageElementRegister.addCoverageElements(d.getCoverageElements()));
 
     }
 }

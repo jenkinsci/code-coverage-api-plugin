@@ -40,10 +40,10 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
 
     @Symbol("cobertura")
     @Extension
-    public static final class CoverturaReportAdapterDescriptor extends JavaCoverageReportAdapterDescriptor
+    public static final class CoberturaReportAdapterDescriptor extends JavaCoverageReportAdapterDescriptor
             implements Detectable {
 
-        public CoverturaReportAdapterDescriptor() {
+        public CoberturaReportAdapterDescriptor() {
             super(CoberturaReportAdapter.class);
         }
 

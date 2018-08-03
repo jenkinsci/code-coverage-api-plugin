@@ -522,9 +522,6 @@ public class CoverageResult implements Serializable, Chartable {
         List<JSCoverageResult> results = new LinkedList<>();
 
         for (Map.Entry<CoverageElement, Ratio> c : aggregateResults.entrySet()) {
-            if (parent != null && parent.isAggregatedLevel() && c.getKey().equals(CoverageElement.CONDITIONAL)) {
-                continue;
-            }
             results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
         }
 

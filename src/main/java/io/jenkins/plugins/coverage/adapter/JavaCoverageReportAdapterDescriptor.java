@@ -13,10 +13,10 @@ public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDe
 
     @Override
     public List<CoverageElement> getCoverageElements() {
-        return Arrays.asList(new CoverageElement("Java Group", 0),
-                new CoverageElement("Java Package", 1),
-                new CoverageElement("Java File", 2),
-                new CoverageElement("Java Class", 3),
-                new CoverageElement("Java Method", 4));
+        return Arrays.asList(new CoverageElement("Group", 0),
+                new CoverageElement("Package", 1),
+                new CoverageElement("File", 2),
+                new CoverageElement("Class", 3),
+                new CoverageElement("Method", 4));
     }
 }
