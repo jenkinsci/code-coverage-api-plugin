@@ -65,7 +65,7 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
      * @return CoverageResult
      */
     @CheckForNull
-    protected abstract CoverageResult parseToResult(Document document, String reportName);
+    protected abstract CoverageResult parseToResult(Document document, String reportName) throws CoverageException;
 
 
     /**
