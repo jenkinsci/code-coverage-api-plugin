@@ -199,8 +199,10 @@ public class CoverageProcessor {
                     }
                 } catch (CoverageException e) {
                     e.printStackTrace();
-                    logger.printf("report for %s has met some errors: %s%n",
-                            adapter.getDescriptor().getDisplayName(), e.getMessage());
+                    logger.printf("report %s for %s has met some errors: %s%n",
+                            foundedFile.getAbsolutePath(),
+                            adapter.getDescriptor().getDisplayName(),
+                            e.getMessage());
                 } finally {
                     FileUtils.deleteQuietly(foundedFile);
                 }

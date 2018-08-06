@@ -6,20 +6,22 @@
 
 
     <xsl:template match="/">
-        <report>
-            <xsl:attribute name="name">jacoco</xsl:attribute>
-            <xsl:choose>
-                <xsl:when test="/report/group">
-                    <xsl:apply-templates select="report/group"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <group>
-                        <xsl:attribute name="name">project</xsl:attribute>
-                        <xsl:apply-templates select="report/package"/>
-                    </group>
-                </xsl:otherwise>
-            </xsl:choose>
-        </report>
+        <xsl:if test="/report">
+            <report>
+                <xsl:attribute name="name">jacoco</xsl:attribute>
+                <xsl:choose>
+                    <xsl:when test="/report/group">
+                        <xsl:apply-templates select="report/group"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <group>
+                            <xsl:attribute name="name">project</xsl:attribute>
+                            <xsl:apply-templates select="report/package"/>
+                        </group>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </report>
+        </xsl:if>
     </xsl:template>
 
     <xsl:template match="/report/group">

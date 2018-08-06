@@ -1,6 +1,8 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
+
 import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import org.apache.commons.lang.StringUtils;
@@ -36,8 +38,14 @@ public abstract class CoverageParser {
      * @param document DOM document of coverage report
      * @return Coverage result of specified report
      */
-    public CoverageResult parse(Document document) {
-        CoverageResult result = processElement(document.getDocumentElement(), null);
+    public CoverageResult parse(Document document) throws CoverageException {
+        Element documentElement = document.getDocumentElement();
+
+        if (documentElement == null) {
+            throw new CoverageException("Unable to parse report");
+        }
+
+        CoverageResult result = processElement(documentElement, null);
         parse(document.getDocumentElement(), result);
         return result;
     }
