@@ -62,10 +62,10 @@
                             coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
                         });
 
-                        var metric = '${it.childElement.displayName}';
+                        var element = '${it.childElement.displayName}';
                         instance.getChildResults(function(t) {
                             var results = t.responseObject();
-                            coverageChartGenerator.generateChildSummaryChart(results, 'childSummaryChart', metric)
+                            coverageChartGenerator.generateChildSummaryChart(results, 'childSummaryChart', element)
                         });
 
                         instance.getTrendResults(function(t) {

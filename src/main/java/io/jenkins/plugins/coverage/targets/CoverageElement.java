@@ -1,81 +1,65 @@
-/*
- * Copyright (c) 2007-2018 Stephen Connolly, manolo, Michael Barrientos, Shenyu Zheng and Jenkins contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package io.jenkins.plugins.coverage.targets;
 
-// Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Objects;
 
-/**
- * Type of program construct being covered.
- *
- * @author Stephen Connolly
- * @author manolo
- * @since 22-Aug-2007 18:36:01
- */
-public enum CoverageElement {
-    AGGREGATED_REPORT("Aggregated Report"),
-    REPORT("Report", AGGREGATED_REPORT),
-    JAVA_GROUP("Group", REPORT),
-    JAVA_PACKAGE("Package", JAVA_GROUP),
-    JAVA_FILE("File", JAVA_PACKAGE),
-    JAVA_CLASS("Class", JAVA_FILE),
-    JAVA_METHOD("Method", JAVA_CLASS),
+public class CoverageElement implements Comparable<CoverageElement>, Serializable {
 
-    LLVM_DATA("Data", REPORT),
-    LLVM_DIRECTORY("Directory", LLVM_DATA),
-    LLVM_FILE("File", LLVM_DIRECTORY),
-    LLVM_FUNCTION("Function", LLVM_FILE);
+    public final static CoverageElement AGGREGATED_REPORT = new CoverageElement("Aggregated Report", Integer.MIN_VALUE);
+    public final static CoverageElement REPORT = new CoverageElement("Report", Integer.MIN_VALUE + 1);
+    public final static CoverageElement LINE = new CoverageElement("Line", Integer.MAX_VALUE - 1, true);
+    public final static CoverageElement CONDITIONAL = new CoverageElement("Conditional", Integer.MAX_VALUE, true);
 
-    private final CoverageElement parent;
     private final String name;
+    private final int order;
+    private final boolean isBasicBlock;
 
-    CoverageElement(String name) {
-        this.parent = null;
+    public CoverageElement(String name, int order) {
+        this(name, order, false);
+    }
+
+    public CoverageElement(String name, int order, boolean isBasicBlock) {
         this.name = name;
+        this.order = order;
+        this.isBasicBlock = isBasicBlock;
     }
 
-    CoverageElement(String name, CoverageElement parent) {
-        this.parent = parent;
-        this.name = name;
-    }
-
-
-    /**
-     * Getter for property 'parent'.
-     *
-     * @return Value for property 'parent'.
-     */
-    public CoverageElement getParent() {
-        return parent;
-    }
-
-    /**
-     * Return displayName of this coverage element.
-     * <p>
-     * Note: This getter has to be evaluated each time in a non static
-     * way because the user could change its language
-     *
-     * @return Value for property 'displayName'.
-     */
-    public String getDisplayName() {
+    public String getName() {
         return name;
+    }
+
+    public boolean isBasicBlock() {
+        return isBasicBlock;
+    }
+
+    public boolean is(String name) {
+        return this.name.equals(name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CoverageElement that = (CoverageElement) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(@Nonnull CoverageElement coverageElement) {
+        if(this.order == coverageElement.order) {
+            return 0;
+        }
+
+        return this.order < coverageElement.order ? -1 : 1;
+    }
+
+    public static CoverageElement get(String name) {
+        return CoverageElementRegister.get(name);
     }
 }

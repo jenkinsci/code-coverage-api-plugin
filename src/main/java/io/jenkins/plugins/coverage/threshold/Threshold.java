@@ -4,7 +4,8 @@ import hudson.Extension;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
-import io.jenkins.plugins.coverage.targets.CoverageMetric;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -13,7 +14,7 @@ import java.util.Objects;
 
 public class Threshold implements ExtensionPoint, Describable<Threshold> {
 
-    private final CoverageMetric thresholdTarget;
+    private final String thresholdTarget;
 
     // mark build as unstable when coverage is less than this.
     private float unstableThreshold = 0.0f;
@@ -24,13 +25,17 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
     private boolean failUnhealthy = false;
 
     @DataBoundConstructor
-    public Threshold(CoverageMetric thresholdTarget) {
+    public Threshold(String thresholdTarget) {
         this.thresholdTarget = thresholdTarget;
     }
 
 
-    public CoverageMetric getThresholdTarget() {
+    public String getThresholdTarget() {
         return thresholdTarget;
+    }
+
+    public CoverageElement getThresholdTargetElement() {
+        return CoverageElement.get(getThresholdTarget());
     }
 
     public float getUnstableThreshold() {
@@ -86,8 +91,8 @@ public class Threshold implements ExtensionPoint, Describable<Threshold> {
             super(Threshold.class);
         }
 
-        public CoverageMetric[] getAllCoverageMetrics() {
-            return CoverageMetric.all();
+        public CoverageElement[] getAllCoverageMetrics() {
+            return CoverageElementRegister.all();
         }
 
     }

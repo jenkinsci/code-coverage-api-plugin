@@ -131,7 +131,7 @@
                                 <xsl:variable name="percentage"
                                               select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
                                 <xsl:attribute name="condition-coverage">
-                                    <xsl:value-of select="concat($percentage, ' (')"/><xsl:value-of
+                                    <xsl:value-of select="concat($percentage * 100, '% (')"/><xsl:value-of
                                         select="concat(./@cb, '/', ./@mb,')')"/>
                                 </xsl:attribute>
 

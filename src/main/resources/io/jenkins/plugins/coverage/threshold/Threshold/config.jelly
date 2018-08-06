@@ -24,7 +24,7 @@
         <td>
             <select class="setting-input" name="thresholdTarget">
                 <j:forEach var="i" items="${descriptor.allCoverageMetrics}">
-                    <f:option selected="${i==instance.thresholdTarget}" value="${i}">${i.name}
+                    <f:option selected="${i.name==instance.thresholdTarget}" value="${i.name}">${i.name}
                     </f:option>
                 </j:forEach>
             </select>

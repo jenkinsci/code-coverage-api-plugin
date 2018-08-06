@@ -37,14 +37,14 @@ public class CoverageTree implements Serializable {
      */
     private static final long serialVersionUID = 5112467356061418891L;
 
-    private Map<CoverageMetric, Ratio> aggregateResults;
+    private Map<CoverageElement, Ratio> aggregateResults;
 
     private Map<String, CoverageResult> children;
 
 
     private String name;
 
-    public CoverageTree(String name, Map<CoverageMetric, Ratio> aggregateResults,
+    public CoverageTree(String name, Map<CoverageElement, Ratio> aggregateResults,
                         Map<String, CoverageResult> children) {
         this.name = name;
         this.aggregateResults = aggregateResults;
@@ -60,7 +60,7 @@ public class CoverageTree implements Serializable {
     public CoverageTreeElement[] getElements() {
         CoverageTreeElement[] cte = new CoverageTreeElement[aggregateResults.size()];
         int current = 0;
-        for (Entry<CoverageMetric, Ratio> e : aggregateResults.entrySet()) {
+        for (Entry<CoverageElement, Ratio> e : aggregateResults.entrySet()) {
             cte[current] = new CoverageTreeElement(e.getKey(), e.getValue());
             current++;
         }

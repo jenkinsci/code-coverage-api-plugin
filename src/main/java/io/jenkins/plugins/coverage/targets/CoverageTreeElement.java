@@ -37,16 +37,16 @@ public class CoverageTreeElement implements Serializable {
 
     private Ratio ratio;
 
-    private CoverageMetric metric;
+    private CoverageElement element;
 
-    public CoverageTreeElement(CoverageMetric metric, Ratio ratio) {
-        this.metric = metric;
+    public CoverageTreeElement(CoverageElement element, Ratio ratio) {
+        this.element = element;
         this.ratio = ratio;
     }
 
     @Exported
     public String getName() {
-        return metric.getName();
+        return element.getName();
     }
 
     @Exported

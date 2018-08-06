@@ -25,9 +25,8 @@ import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-
 import java.io.Serializable;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
@@ -223,10 +222,10 @@ public class CoveragePaint implements Serializable {
      *
      * @return Value for property 'results'.
      */
-    public Map<CoverageMetric, Ratio> getResults() {
-        Map<CoverageMetric, Ratio> result = new EnumMap<CoverageMetric, Ratio>(CoverageMetric.class);
-        result.put(CoverageMetric.LINE, getLineCoverage());
-        result.put(CoverageMetric.CONDITIONAL, getConditionalCoverage());
+    public Map<CoverageElement, Ratio> getResults() {
+        Map<CoverageElement, Ratio> result = new HashMap<>();
+        result.put(CoverageElement.LINE, getLineCoverage());
+        result.put(CoverageElement.CONDITIONAL, getConditionalCoverage());
         return result;
     }
 

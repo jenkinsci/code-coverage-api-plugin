@@ -22,16 +22,14 @@
 package io.jenkins.plugins.coverage.targets;
 
 import hudson.model.AbstractBuild;
-import hudson.model.Api;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
-import hudson.util.Graph;
 import hudson.util.TextFile;
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import org.jfree.chart.JFreeChart;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -42,10 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -91,14 +86,14 @@ public class CoverageResult implements Serializable, Chartable {
 
     private final Map<String, CoverageResult> children = new TreeMap<>();
 
-    private final Map<CoverageMetric, Ratio> aggregateResults = new EnumMap<>(CoverageMetric.class);
+    private final Map<CoverageElement, Ratio> aggregateResults = new TreeMap<>();
 
-    private final Map<CoverageMetric, Ratio> localResults = new EnumMap<>(CoverageMetric.class);
+    private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
 
     /**
      * Line-by-line coverage information. Computed lazily, since it's memory intensive.
      */
-    private final CoveragePaint paint;
+    private CoveragePaint paint;
 
     private String relativeSourcePath;
 
@@ -106,8 +101,10 @@ public class CoverageResult implements Serializable, Chartable {
 
     public CoverageResult(CoverageElement elementType, CoverageResult parent, String name) {
         this.element = elementType;
-        this.paint = CoveragePaintRule.makePaint(element);
         this.parent = parent;
+        if (parent != null && parent.getPaint() != null) {
+            this.paint = new CoveragePaint(element);
+        }
         this.name = name;
         this.relativeSourcePath = null;
         if (this.parent != null) {
@@ -131,6 +128,10 @@ public class CoverageResult implements Serializable, Chartable {
      */
     public void setRelativeSourcePath(String relativeSourcePath) {
         this.relativeSourcePath = relativeSourcePath;
+
+        if (!StringUtils.isEmpty(relativeSourcePath)) {
+            paint = new CoveragePaint(element);
+        }
     }
 
     /**
@@ -212,7 +213,7 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'sourceFileAvailable'.
      */
     public boolean isSourceFileAvailable() {
-        if (hasPermission()) {
+        if (hasPermission() && getSourceFile() != null) {
             return getSourceFile().exists();
         }
         return false;
@@ -244,7 +245,7 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'parents'.
      */
     public List<CoverageResult> getParents() {
-        List<CoverageResult> result = new ArrayList<CoverageResult>();
+        List<CoverageResult> result = new ArrayList<>();
         CoverageResult p = getParent();
         while (p != null) {
             result.add(p);
@@ -260,7 +261,7 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'childElements'.
      */
     public Set<CoverageElement> getChildElements() {
-        Set<CoverageElement> result = EnumSet.noneOf(CoverageElement.class);
+        Set<CoverageElement> result = new TreeSet<>();
         for (CoverageResult child : children.values()) {
             result.add(child.element);
         }
@@ -273,20 +274,10 @@ public class CoverageResult implements Serializable, Chartable {
 
 
     public Set<String> getChildren(CoverageElement element) {
-        Set<String> result = new TreeSet<String>();
+        Set<String> result = new TreeSet<>();
         for (CoverageResult child : children.values()) {
             if (child.element.equals(element)) {
                 result.add(child.name);
-            }
-        }
-        return result;
-    }
-
-    public Set<CoverageMetric> getChildMetrics(CoverageElement element) {
-        Set<CoverageMetric> result = new TreeSet<CoverageMetric>();
-        for (CoverageResult child : children.values()) {
-            if (child.element.equals(element)) {
-                result.addAll(child.getMetrics());
             }
         }
         return result;
@@ -315,7 +306,7 @@ public class CoverageResult implements Serializable, Chartable {
      *
      * @return Value for property 'results'.
      */
-    public Map<CoverageMetric, Ratio> getResults() {
+    public Map<CoverageElement, Ratio> getResults() {
         return Collections.unmodifiableMap(aggregateResults);
     }
 
@@ -367,11 +358,11 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
     public String xmlTransform(String name) {
-        return name.replaceAll("\\&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;");
+        return name.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
     public String relativeUrl(CoverageResult parent) {
-        StringBuffer url = new StringBuffer("..");
+        StringBuilder url = new StringBuilder("..");
         CoverageResult p = getParent();
         while (p != null && p != parent) {
             url.append("/..");
@@ -384,63 +375,23 @@ public class CoverageResult implements Serializable, Chartable {
         return children.get(name);
     }
 
-    public Ratio getCoverage(CoverageMetric metric) {
-
-        return aggregateResults.get(metric);
+    public Ratio getCoverage(CoverageElement element) {
+        return aggregateResults.get(element);
     }
 
-    public Ratio getCoverageWithEmpty(CoverageMetric metric) {
-        if (aggregateResults.containsKey(metric))
-            return aggregateResults.get(metric);
-        Map<CoverageMetric, Ratio> currMetricSet = new EnumMap<CoverageMetric, Ratio>(CoverageMetric.class);
-        currMetricSet.putAll(aggregateResults);
-        if (!currMetricSet.containsKey(metric)) {
-            return null;
-        }
-        return currMetricSet.get(metric);
-    }
 
-    /**
-     * Getter for property 'metrics'.
-     *
-     * @return Value for property 'metrics'.
-     */
-    public Set<CoverageMetric> getMetrics() {
+    public Set<CoverageElement> getElements() {
         return Collections.unmodifiableSet(
-                aggregateResults.isEmpty() ? EnumSet.noneOf(CoverageMetric.class) : EnumSet.copyOf(aggregateResults.keySet()));
+                aggregateResults.isEmpty() ? Collections.emptySet() : aggregateResults.keySet());
     }
 
-    public Set<CoverageMetric> getMetricsWithEmpty() {
-        Map<CoverageMetric, Ratio> currMetricSet = new EnumMap<CoverageMetric, Ratio>(CoverageMetric.class);
-        currMetricSet.putAll(aggregateResults);
-        fixEmptyMetrics(findEmptyMetrics(currMetricSet), currMetricSet);
-        return Collections.unmodifiableSet(
-                currMetricSet.isEmpty() ? EnumSet.noneOf(CoverageMetric.class) : EnumSet.copyOf(currMetricSet.keySet()));
-    }
 
-    private List<CoverageMetric> findEmptyMetrics(Map<CoverageMetric, Ratio> currMetricSet) {
-        List<CoverageMetric> allMetrics = new LinkedList<CoverageMetric>(Arrays.asList(CoverageMetric.JAVA_PACKAGES, CoverageMetric.JAVA_FILES, CoverageMetric.JAVA_CLASSES, CoverageMetric.JAVA_METHODS, CoverageMetric.LINE, CoverageMetric.CONDITIONAL));
-        List<CoverageMetric> missingMetrics = new LinkedList<CoverageMetric>();
-        for (CoverageMetric currMetric : allMetrics) {
-            if (!currMetricSet.containsKey(currMetric)) {
-                missingMetrics.add(currMetric);
-            }
-        }
-        return missingMetrics;
-    }
-
-    private void fixEmptyMetrics(List<CoverageMetric> missingMetrics, Map<CoverageMetric, Ratio> currMetricSet) {
-        for (CoverageMetric missing : missingMetrics) {
-            currMetricSet.put(missing, Ratio.create(1, 1));
-        }
-    }
-
-    public void updateMetric(CoverageMetric metric, Ratio additionalResult) {
-        if (localResults.containsKey(metric)) {
-            Ratio existingResult = localResults.get(metric);
-            localResults.put(metric, CoverageAggregationRule.combine(metric, existingResult, additionalResult));
+    public void updateCoverage(CoverageElement element, Ratio additionalResult) {
+        if (localResults.containsKey(element)) {
+            Ratio existingResult = localResults.get(element);
+            localResults.put(element, CoverageAggregationRule.combine(element, existingResult, additionalResult));
         } else {
-            localResults.put(metric, additionalResult);
+            localResults.put(element, additionalResult);
         }
     }
 
@@ -463,10 +414,10 @@ public class CoverageResult implements Serializable, Chartable {
         aggregateResults.clear();
         for (CoverageResult child : children.values()) {
             child.setOwner(owner);
-            if (paint != null && child.paint != null && CoveragePaintRule.propagatePaintToParent(child.element)) {
+            if (paint != null && child.paint != null) {
                 paint.add(child.paint);
             }
-            for (Map.Entry<CoverageMetric, Ratio> childResult : child.aggregateResults.entrySet()) {
+            for (Map.Entry<CoverageElement, Ratio> childResult : child.aggregateResults.entrySet()) {
                 aggregateResults.putAll(CoverageAggregationRule.aggregate(child.getElement(),
                         childResult.getKey(), childResult.getValue(), aggregateResults));
             }
@@ -526,33 +477,13 @@ public class CoverageResult implements Serializable, Chartable {
         return null;
     }
 
-    public void doCoverageHighlightedSource(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        // TODO
-    }
-
-    /**
-     * Generates the graph that shows the coverage trend up to this report.
-     *
-     * @param req the stapler request
-     * @param rsp the stapler response
-     * @throws IOException from StaplerResponse.sendRedirect2
-     */
-    public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        new Graph(owner.getTimestamp(), 500, 200) {
-            @Override
-            protected JFreeChart createGraph() {
-                return new CoverageChart(CoverageResult.this).createChart();
-            }
-        }.doPng(req, rsp);
-    }
-
     /**
      * Getter for property 'paintedSources'.
      *
      * @return Value for property 'paintedSources'.
      */
     public Map<String, CoveragePaint> getPaintedSources() {
-        Map<String, CoveragePaint> result = new HashMap<String, CoveragePaint>();
+        Map<String, CoveragePaint> result = new HashMap<>();
         // check the children
         for (CoverageResult child : children.values()) {
             result.putAll(child.getPaintedSources());
@@ -590,9 +521,10 @@ public class CoverageResult implements Serializable, Chartable {
     public List<JSCoverageResult> jsGetResults() {
         List<JSCoverageResult> results = new LinkedList<>();
 
-        for (Map.Entry<CoverageMetric, Ratio> c : aggregateResults.entrySet()) {
+        for (Map.Entry<CoverageElement, Ratio> c : aggregateResults.entrySet()) {
             results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
         }
+
         return results;
     }
 
@@ -603,6 +535,7 @@ public class CoverageResult implements Serializable, Chartable {
      * @return aggregated child coverage results
      */
     @JavaScriptMethod
+    @SuppressWarnings("unused")
     public Map<String, List<JSCoverageResult>> jsGetChildResults() {
         return getChildrenReal()
                 .entrySet()
@@ -617,6 +550,7 @@ public class CoverageResult implements Serializable, Chartable {
      * @return coverage trend
      */
     @JavaScriptMethod
+    @SuppressWarnings("unused")
     public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
         Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
 
@@ -631,7 +565,7 @@ public class CoverageResult implements Serializable, Chartable {
             List<JSCoverageResult> r = c.getResults().entrySet().stream()
                     .filter(e -> {
                         if (isAggregatedLevel()) {
-                            return e.getKey().equals(CoverageMetric.LINE) || e.getKey().equals(CoverageMetric.REPORTS);
+                            return e.getKey().equals(CoverageElement.LINE) || e.getKey().equals(CoverageElement.REPORT);
                         } else {
                             return true;
                         }
