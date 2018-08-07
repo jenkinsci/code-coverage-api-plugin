@@ -18,15 +18,20 @@ public class CoverageAggregationRule {
             prevTotal = Ratio.create(0, 0);
         }
 
+        Ratio r = Ratio.create(inputResult.numerator + prevTotal.numerator, inputResult.denominator + prevTotal.denominator);
+        result.put(input, r);
+
         if (input.equals(CoverageElement.LINE)) {
+            prevTotal = result.get(source);
+            if (prevTotal == null) {
+                prevTotal = Ratio.create(0, 0);
+            }
+
             if (Math.abs(inputResult.denominator) >= 1e-7) {
-                Ratio r = Ratio.create(prevTotal.numerator + (Math.abs(inputResult.numerator) > 1e-7 ? 1 : 0), prevTotal.denominator + 1);
+                r = Ratio.create(prevTotal.numerator + (Math.abs(inputResult.numerator) > 1e-7 ? 1 : 0), prevTotal.denominator + 1);
                 result.put(source, r);
             }
         }
-
-        Ratio r = Ratio.create(inputResult.numerator + prevTotal.numerator, inputResult.denominator + prevTotal.denominator);
-        result.put(input, r);
 
         return result;
     }
