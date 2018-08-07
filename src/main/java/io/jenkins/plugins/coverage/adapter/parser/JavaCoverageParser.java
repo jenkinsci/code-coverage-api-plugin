@@ -141,7 +141,7 @@ public class JavaCoverageParser extends CoverageParser {
             case 'F':
                 return "float";
             case 'J':
-                return "";
+                return "long";
             case 'D':
                 return "double";
             case 'V':
