@@ -79,7 +79,7 @@ public class CoverageResult implements Serializable, Chartable {
     /**
      * Name of the programming element that this result object represent, such as package name, class name, method name, etc.
      */
-    private final String name;
+    private String name;
 
     // these two pointers form a tree structure where edges are names.
     private CoverageResult parent;
@@ -141,6 +141,10 @@ public class CoverageResult implements Serializable, Chartable {
      */
     public String getName() {
         return name == null || name.trim().length() == 0 ? "Project" : name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -510,6 +514,11 @@ public class CoverageResult implements Serializable, Chartable {
                 this.parent.children.put(name, this);
             }
         }
+    }
+
+    public void resetParent(CoverageResult p) {
+        parent = null;
+        addParent(p);
     }
 
     /**

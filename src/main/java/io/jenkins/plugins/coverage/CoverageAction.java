@@ -21,6 +21,9 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     private transient WeakReference<CoverageResult> report;
     private HealthReport healthReport;
 
+    private String cacheBranchName;
+    private int branchCount = 1;
+
     public CoverageAction(CoverageResult result) {
         this.report = new WeakReference<>(result);
     }
@@ -145,4 +148,19 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
 
+    public String getCacheBranchName() {
+        return cacheBranchName;
+    }
+
+    public void setCacheBranchName(String cacheBranchName) {
+        this.cacheBranchName = cacheBranchName;
+    }
+
+    public int getBranchCount() {
+        return branchCount;
+    }
+
+    public void setBranchCount(int branchCount) {
+        this.branchCount = branchCount;
+    }
 }
