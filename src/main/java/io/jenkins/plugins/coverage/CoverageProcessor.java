@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage;
 
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import hudson.FilePath;
 import hudson.model.HealthReport;
@@ -20,6 +21,7 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
@@ -327,7 +329,7 @@ public class CoverageProcessor {
                     if (branchNameOfFirstCall == null) {
                         String defaultBranchName = "Branch " + branchCount;
 
-                        List<CoverageResult> renamedReport = new ArrayList<>(previousResult
+                        List<CoverageResult> renamedReport = Lists.newArrayList(previousResult
                                 .getChildrenReal()
                                 .values());
 
