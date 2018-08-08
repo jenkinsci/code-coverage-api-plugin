@@ -95,6 +95,15 @@ public class JavaCoverageParser extends CoverageParser {
     }
 
 
+    /**
+     * convert method type signature and name to Java method name.
+     * <p>
+     * For example, signature (ILjava/lang/String;[I)J with name test will be converted to Java method <code>long test (int, String, int[]);</code>
+     *
+     * @param name      method name
+     * @param signature method type signature
+     * @return Java method name
+     */
     private String buildMethodName(String name, String signature) {
         Matcher signatureMatcher = METHOD_SIGNATURE_PATTERN.matcher(signature);
         StringBuilder methodName = new StringBuilder();
@@ -124,6 +133,14 @@ public class JavaCoverageParser extends CoverageParser {
         return methodName.toString();
     }
 
+    /**
+     * Convert type signature to Java type.
+     * <p>
+     * The type signature is Java VM's representation, more details see Java JNI document.
+     *
+     * @param s type signature
+     * @return Java type
+     */
     private String parseMethodArg(String s) {
         char c = s.charAt(0);
         int end;
