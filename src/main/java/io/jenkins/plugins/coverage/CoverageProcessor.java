@@ -21,7 +21,6 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
@@ -34,7 +33,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -96,7 +94,7 @@ public class CoverageProcessor {
 
         HealthReport healthReport = processThresholds(results, globalThresholds);
 
-        covertResultsToAction(coverageReport, healthReport);
+        convertResultsToAction(coverageReport, healthReport);
     }
 
     /**
@@ -315,7 +313,7 @@ public class CoverageProcessor {
     }
 
 
-    private void covertResultsToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
+    private void convertResultsToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
         synchronized (CoverageProcessor.class) {
             CoverageAction previousAction = run.getAction(CoverageAction.class);
 
