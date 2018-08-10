@@ -60,7 +60,6 @@ public class CoverageProcessor {
     private String globalTag;
 
     private SourceFileResolver sourceFileResolver;
-    private String branchName;
 
     /**
      * @param run       a build this is running as a part of
@@ -361,56 +360,6 @@ public class CoverageProcessor {
     }
 
 
-    private void convertResultsToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
-        synchronized (CoverageProcessor.class) {
-            CoverageAction previousAction = run.getAction(CoverageAction.class);
-
-            if (previousAction != null) {
-                CoverageResult previousResult = previousAction.getResult();
-
-                int branchCount = previousAction.getBranchCount();
-                if (branchCount == 1) {
-                    String branchNameOfFirstCall = previousAction.getCacheBranchName();
-                    // if null, we need to generate a suffix to differentiate them.
-                    if (branchNameOfFirstCall == null) {
-                        String defaultBranchName = "Branch " + branchCount;
-
-                        List<CoverageResult> renamedReport = Lists.newArrayList(previousResult
-                                .getChildrenReal()
-                                .values());
-
-                        previousResult.getChildrenReal().clear();
-                        renamedReport.forEach(result -> {
-                            result.setName(result.getName() + "-" + defaultBranchName);
-                            result.resetParent(previousResult);
-                        });
-                    }
-                    branchCount++;
-                }
-
-                for (CoverageResult child : coverageReport.getChildrenReal().values()) {
-                    if(branchName == null) {
-                        child.setName(child.getName() + "-" + "Branch" + branchCount);
-                    }
-                    child.resetParent(previousResult);
-                }
-
-                previousAction.setBranchCount(branchCount + 1);
-                previousResult.setOwner(run);
-
-                saveCoverageResult(run, previousResult);
-            } else {
-                saveCoverageResult(run, coverageReport);
-
-                CoverageAction action = new CoverageAction(coverageReport);
-                action.setCacheBranchName(branchName);
-                action.setHealthReport(healthReport);
-
-                run.addAction(action);
-            }
-        }
-    }
-
     /**
      * Aggregate results to a aggregated report.
      *
@@ -425,10 +374,6 @@ public class CoverageProcessor {
         CoverageResult report = new CoverageResult(CoverageElement.AGGREGATED_REPORT, null, "All reports");
         for (List<CoverageResult> resultList : results.values()) {
             for (CoverageResult result : resultList) {
-                if(branchName != null) {
-                    result.setName(result.getName() + "-" + branchName);
-                }
-
                 result.addParent(report);
             }
         }
@@ -488,14 +433,6 @@ public class CoverageProcessor {
      */
     public void setFailNoReports(boolean failNoReports) {
         this.failNoReports = failNoReports;
-    }
-
-    public String getBranchName() {
-        return branchName;
-    }
-
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
     }
 
     public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
