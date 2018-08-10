@@ -20,7 +20,6 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     private transient Run<?, ?> owner;
     private transient WeakReference<CoverageResult> report;
     private HealthReport healthReport;
-    private int callTimes;
 
     private String cacheBranchName;
     private int branchCount = 1;
@@ -99,14 +98,6 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
             }
 
         }
-    }
-
-    public int getCallTimes() {
-        return callTimes;
-    }
-
-    public void setCallTimes(int callTimes) {
-        this.callTimes = callTimes;
     }
 
     public Run<?, ?> getOwner() {
