@@ -21,6 +21,7 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -54,6 +56,8 @@ public class CoverageProcessor {
     private boolean failUnhealthy;
     private boolean failUnstable;
     private boolean failNoReports;
+
+    private String globalTag;
 
     private SourceFileResolver sourceFileResolver;
     private String branchName;
@@ -94,7 +98,47 @@ public class CoverageProcessor {
 
         HealthReport healthReport = processThresholds(results, globalThresholds);
 
-        convertResultsToAction(coverageReport, healthReport);
+
+        convertResultToAction(coverageReport, healthReport);
+    }
+
+    private void convertResultToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
+        CoverageAction previousAction = run.getAction(CoverageAction.class);
+
+        if (previousAction == null) {
+            CoverageAction action = new CoverageAction(coverageReport);
+            action.setHealthReport(healthReport);
+            run.addAction(action);
+
+            saveCoverageResult(run, coverageReport);
+        } else {
+            CoverageResult previousResult = previousAction.getResult();
+            Collection<CoverageResult> previousReports = previousResult.getChildrenReal().values();
+
+            for (CoverageResult report : coverageReport.getChildrenReal().values()) {
+                if (StringUtils.isEmpty(report.getTag())) {
+                    report.resetParent(previousResult);
+                    continue;
+                }
+
+                Optional<CoverageResult> matchedTagReport;
+                if ((matchedTagReport = previousReports.stream()
+                        .filter(r -> r.getTag().equals(report.getTag()))
+                        .findAny()).isPresent()) {
+                    try {
+                        matchedTagReport.get().merge(report);
+                    } catch (CoverageException e) {
+                        e.printStackTrace();
+                        report.resetParent(previousResult);
+                    }
+                } else {
+                    report.resetParent(previousResult);
+                }
+            }
+
+            previousResult.setOwner(run);
+            saveCoverageResult(run, previousResult);
+        }
     }
 
     /**
@@ -190,6 +234,10 @@ public class CoverageProcessor {
                     if (isValidate) {
                         results.putIfAbsent(adapter, new LinkedList<>());
                         CoverageResult result = adapter.getResult(foundedFile);
+
+                        if (!StringUtils.isEmpty(globalTag)) {
+                            result.setTag(globalTag);
+                        }
 
                         results.get(adapter).add(result);
 
@@ -452,6 +500,14 @@ public class CoverageProcessor {
 
     public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
+    }
+
+    public String getGlobalTag() {
+        return globalTag;
+    }
+
+    public void setGlobalTag(String globalTag) {
+        this.globalTag = globalTag;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

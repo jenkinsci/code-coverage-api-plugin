@@ -47,7 +47,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     // TODO make sourceFileResolver more generic
     private DefaultSourceFileResolver sourceFileResolver;
 
-    private String branchName;
+    private String tag;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -78,7 +78,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             processor.setSourceFileResolver(sourceFileResolver);
         }
 
-        processor.setBranchName(branchName);
+
+        processor.setGlobalTag(tag);
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
         processor.setFailNoReports(failNoReports);
@@ -154,13 +155,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.sourceFileResolver = sourceFileResolver;
     }
 
-    public String getBranchName() {
-        return branchName;
+
+    public String getTag() {
+        return tag;
     }
 
     @DataBoundSetter
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Symbol("publishCoverage")
