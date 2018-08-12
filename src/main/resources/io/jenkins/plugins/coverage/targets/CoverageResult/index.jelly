@@ -12,7 +12,6 @@
                 <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>
                 &gt;
             </j:forEach>
-            <j:set var="metrics" value="${it.metrics}"/>
             <br/>
             <br/>
             <br/>
@@ -62,7 +61,7 @@
                             coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
                         });
 
-                        var element = '${it.childElement.displayName}';
+                        var element = '${it.childElement.name}';
                         instance.getChildResults(function(t) {
                             var results = t.responseObject();
                             coverageChartGenerator.generateChildSummaryChart(results, 'childSummaryChart', element)

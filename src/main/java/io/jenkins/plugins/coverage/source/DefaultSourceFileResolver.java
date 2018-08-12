@@ -98,7 +98,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 }
             } else {
-                listener.getLogger().printf("Cannot found source file for %s", sourceFilePath);
+                listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
             }
         });
 
