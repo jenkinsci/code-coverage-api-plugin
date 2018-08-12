@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage;
 
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import hudson.FilePath;
 import hudson.model.HealthReport;
@@ -102,41 +101,45 @@ public class CoverageProcessor {
     }
 
     private void convertResultToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
-        CoverageAction previousAction = run.getAction(CoverageAction.class);
+        synchronized (CoverageProcessor.class) {
 
-        if (previousAction == null) {
-            CoverageAction action = new CoverageAction(coverageReport);
-            action.setHealthReport(healthReport);
-            run.addAction(action);
+            CoverageAction previousAction = run.getAction(CoverageAction.class);
 
-            saveCoverageResult(run, coverageReport);
-        } else {
-            CoverageResult previousResult = previousAction.getResult();
-            Collection<CoverageResult> previousReports = previousResult.getChildrenReal().values();
+            if (previousAction == null) {
+                saveCoverageResult(run, coverageReport);
 
-            for (CoverageResult report : coverageReport.getChildrenReal().values()) {
-                if (StringUtils.isEmpty(report.getTag())) {
-                    report.resetParent(previousResult);
-                    continue;
-                }
+                CoverageAction action = new CoverageAction(coverageReport);
+                action.setHealthReport(healthReport);
+                run.addAction(action);
 
-                Optional<CoverageResult> matchedTagReport;
-                if ((matchedTagReport = previousReports.stream()
-                        .filter(r -> r.getTag().equals(report.getTag()))
-                        .findAny()).isPresent()) {
-                    try {
-                        matchedTagReport.get().merge(report);
-                    } catch (CoverageException e) {
-                        e.printStackTrace();
+            } else {
+                CoverageResult previousResult = previousAction.getResult();
+                Collection<CoverageResult> previousReports = previousResult.getChildrenReal().values();
+
+                for (CoverageResult report : coverageReport.getChildrenReal().values()) {
+                    if (StringUtils.isEmpty(report.getTag())) {
+                        report.resetParent(previousResult);
+                        continue;
+                    }
+
+                    Optional<CoverageResult> matchedTagReport;
+                    if ((matchedTagReport = previousReports.stream()
+                            .filter(r -> r.getTag().equals(report.getTag()))
+                            .findAny()).isPresent()) {
+                        try {
+                            matchedTagReport.get().merge(report);
+                        } catch (CoverageException e) {
+                            e.printStackTrace();
+                            report.resetParent(previousResult);
+                        }
+                    } else {
                         report.resetParent(previousResult);
                     }
-                } else {
-                    report.resetParent(previousResult);
                 }
-            }
 
-            previousResult.setOwner(run);
-            saveCoverageResult(run, previousResult);
+                previousResult.setOwner(run);
+                saveCoverageResult(run, previousResult);
+            }
         }
     }
 
