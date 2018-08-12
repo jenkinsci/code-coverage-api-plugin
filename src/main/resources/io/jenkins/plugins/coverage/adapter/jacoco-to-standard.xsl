@@ -62,11 +62,8 @@
 
     <xsl:template match="method">
         <method>
-            <xsl:variable name="LINE" select="'LINE'"/>
-            <xsl:variable name="lines"
-                          select="number(counter[@type = $LINE]/@missed)  + number(counter[@type = $LINE]/@covered)"/>
             <xsl:attribute name="name">
-                <xsl:value-of select="@name"/> <xsl:value-of select="$lines"/>
+                <xsl:value-of select="@name"/>
             </xsl:attribute>
             <xsl:attribute name="signature">
                 <xsl:value-of select="@desc"/>
@@ -76,7 +73,9 @@
 
 
             <xsl:variable name="start" select="@line"/>
-
+            <xsl:variable name="LINE" select="'LINE'"/>
+            <xsl:variable name="lines"
+                          select="number(counter[@type = $LINE]/@missed)  + number(counter[@type = $LINE]/@covered)"/>
             <xsl:for-each select="../../sourcefile[@name = $filename]/line[@nr >= $start]">
                 <xsl:if test="not(position() > $lines)">
                     <line>
