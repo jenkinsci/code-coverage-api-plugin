@@ -21,6 +21,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     private transient WeakReference<CoverageResult> report;
     private HealthReport healthReport;
 
+
     public CoverageAction(CoverageResult result) {
         this.report = new WeakReference<>(result);
     }
@@ -143,6 +144,5 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     public void onLoad(Run<?, ?> r) {
         setOwner(r);
     }
-
 
 }

@@ -47,6 +47,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     // TODO make sourceFileResolver more generic
     private DefaultSourceFileResolver sourceFileResolver;
 
+    private String tag;
+
     @DataBoundConstructor
     public CoveragePublisher() {
     }
@@ -76,6 +78,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             processor.setSourceFileResolver(sourceFileResolver);
         }
 
+
+        processor.setGlobalTag(tag);
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
         processor.setFailNoReports(failNoReports);
@@ -149,6 +153,16 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
+    }
+
+
+    public String getTag() {
+        return tag;
+    }
+
+    @DataBoundSetter
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Symbol("publishCoverage")

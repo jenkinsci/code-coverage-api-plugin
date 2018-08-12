@@ -28,6 +28,7 @@ import hudson.util.ChartUtil;
 import hudson.util.TextFile;
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
@@ -79,7 +80,9 @@ public class CoverageResult implements Serializable, Chartable {
     /**
      * Name of the programming element that this result object represent, such as package name, class name, method name, etc.
      */
-    private final String name;
+    private String name;
+    private String tag;
+
 
     // these two pointers form a tree structure where edges are names.
     private CoverageResult parent;
@@ -102,12 +105,12 @@ public class CoverageResult implements Serializable, Chartable {
     public CoverageResult(CoverageElement elementType, CoverageResult parent, String name) {
         this.element = elementType;
         this.parent = parent;
-        if (parent != null && parent.getPaint() != null) {
-            this.paint = new CoveragePaint(element);
-        }
         this.name = name;
         this.relativeSourcePath = null;
         if (this.parent != null) {
+            if (parent.getPaint() != null) {
+                this.paint = new CoveragePaint(element);
+            }
             this.parent.children.put(name, this);
         }
     }
@@ -141,6 +144,10 @@ public class CoverageResult implements Serializable, Chartable {
      */
     public String getName() {
         return name == null || name.trim().length() == 0 ? "Project" : name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -434,6 +441,32 @@ public class CoverageResult implements Serializable, Chartable {
         setOwner((Run<?, ?>) owner);
     }
 
+
+    public void merge(CoverageResult another) throws CoverageException {
+        if (!element.equals(another.element)) {
+            throw new CoverageException(String.format("Unable to merge reports: Unmatched element %s and %s", element.getName(), another.getElement().getName()));
+        }
+
+        for (Map.Entry<String, CoverageResult> childBeMerged : another.getChildrenReal().entrySet()) {
+            if (getChild(childBeMerged.getKey()) == null) {
+                childBeMerged.getValue().resetParent(this);
+            } else {
+                getChild(childBeMerged.getKey()).merge(childBeMerged.getValue());
+            }
+        }
+
+
+    }
+
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     /**
      * Getter for property 'previousResult'.
      *
@@ -510,6 +543,11 @@ public class CoverageResult implements Serializable, Chartable {
                 this.parent.children.put(name, this);
             }
         }
+    }
+
+    public void resetParent(CoverageResult p) {
+        parent = null;
+        addParent(p);
     }
 
     /**
