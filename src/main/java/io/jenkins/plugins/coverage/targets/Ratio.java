@@ -150,7 +150,7 @@ final public class Ratio implements Serializable {
      * @return the ratio
      */
     public static Ratio create(float x, float y) {
-        // TODO
+        // TODO COMMON_INSTANCES seems broken and return the wrong cached ratio, need to be fix.
 //        int xx = (int) x;
 //        int yy = (int) y;
 //
