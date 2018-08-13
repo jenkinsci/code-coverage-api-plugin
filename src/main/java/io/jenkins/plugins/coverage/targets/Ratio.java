@@ -150,18 +150,19 @@ final public class Ratio implements Serializable {
      * @return the ratio
      */
     public static Ratio create(float x, float y) {
-        int xx = (int) x;
-        int yy = (int) y;
-
-        if (xx == x && yy == y) {
-            int idx = yy * (yy + 1) / 2 + xx;
-            if (0 <= idx && idx < COMMON_INSTANCES.length) {
-                Ratio r = COMMON_INSTANCES[idx];
-                if (r == null)
-                    COMMON_INSTANCES[idx] = r = new Ratio(x, y);
-                return r;
-            }
-        }
+        // TODO COMMON_INSTANCES seems broken and return the wrong cached ratio, need to be fix.
+//        int xx = (int) x;
+//        int yy = (int) y;
+//
+//        if (xx == x && yy == y) {
+//            int idx = yy * (yy + 1) / 2 + xx;
+//            if (0 <= idx && idx < COMMON_INSTANCES.length) {
+//                Ratio r = COMMON_INSTANCES[idx];
+//                if (r == null)
+//                    COMMON_INSTANCES[idx] = r = new Ratio(x, y);
+//                return r;
+//            }
+//        }
 
         return new Ratio(x, y);
     }
