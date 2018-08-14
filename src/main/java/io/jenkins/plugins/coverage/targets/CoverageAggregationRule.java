@@ -27,10 +27,9 @@ public class CoverageAggregationRule {
                 prevTotal = Ratio.create(0, 0);
             }
 
-            if (Math.abs(inputResult.denominator) >= 1e-7) {
-                r = Ratio.create(prevTotal.numerator + (Math.abs(inputResult.numerator) > 1e-7 ? 1 : 0), prevTotal.denominator + 1);
-                result.put(source, r);
-            }
+            r = Ratio.create(prevTotal.numerator + (Math.abs(inputResult.numerator) > 1e-7 ? 1 : 0), prevTotal.denominator + 1);
+            result.put(source, r);
+
         }
 
         return result;

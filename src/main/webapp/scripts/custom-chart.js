@@ -36,7 +36,7 @@ var CoverageChartGenerator = function () {
             missedPercentage[i] = 100 - coveredPercentage[i];
 
             if (results[i].ratio.denominator === 0) {
-                coveredPercentage[i] = 100;
+                coveredPercentage[i] = 0;
             }
 
         }
@@ -262,7 +262,13 @@ var CoverageChartGenerator = function () {
                 triggerEvent: true,
                 axisLabel: {
                     interval: 0,
-                    fontSize: 13
+                    fontSize: 13,
+                    formatter: function (value) {
+                        if(value.length > 70) {
+                            return value.substring(0, 70)+'...';
+                        }
+                        return value;
+                    }
                 }
             },
             visualMap: {
@@ -426,6 +432,10 @@ var CoverageChartGenerator = function () {
             return results[childName].find(function (element) {
                 var p = parseFloat(element.ratio.percentageString);
 
+                if(element.ratio.denominator === 0) {
+                    p = 0;
+                }
+
                 return p >= range[0] && p <= range[1];
             });
         }).forEach(function (childName, childIndex) {
@@ -435,7 +445,9 @@ var CoverageChartGenerator = function () {
 
                 metrics[metricIndex] = coverage.name;
 
-                data.push([metricIndex, childIndex, parseFloat(ratio.percentageString)]);
+                if(ratio.denominator !== 0) {
+                    data.push([metricIndex, childIndex, parseFloat(ratio.percentageString)]);
+                }
             })
         });
 
