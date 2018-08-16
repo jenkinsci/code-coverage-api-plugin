@@ -8,7 +8,7 @@ This plugin serves as API to integrate and publish multiple coverage report type
 More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
 ## Features
-- Pipeline support
+* Pipeline support
 * Modernized coverage chart
 * Coverage trend
 * Source code navigation
