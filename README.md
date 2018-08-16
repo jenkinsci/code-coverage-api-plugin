@@ -9,15 +9,17 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 
 ## Features
 - Pipeline support
-- Modernized coverage chart
-- Coverage trend support
-- Multi-report aggregated
-- Rest API
-- Auto detect report
-- Easy to implement
+* Modernized coverage chart
+* Coverage trend
+* Source code navigation
+* Parallel execution in pipeline support
+* Reports combining
+* REST API
+* Failed conditions and flexible threshold setting
+* Other small features
 
-## Supported Tools
-#### Embedded tools
+## Supported Coverage Formats
+#### Embedded
 - [Jacoco](https://www.jacoco.org/jacoco/trunk/doc/)
 #### Other plugins as an Extension of Code Coverage API plugin
 - [Cobertura](http://cobertura.github.io/cobertura/) ([Cobertura Plugin](https://github.com/jenkinsci/cobertura-plugin))
@@ -25,6 +27,8 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 
 ## Release Notes
 See the [CHANGELOG](CHANGELOG.md).
+
+## How to Implement It
 
 ## How to use it
 
