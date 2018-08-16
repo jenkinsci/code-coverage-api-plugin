@@ -29,7 +29,7 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 See the [CHANGELOG](CHANGELOG.md).
 
 ## How to Implement It
-
+see [wiki](https://github.com/jenkinsci/code-coverage-api-plugin/wiki).
 ## How to use it
 
 #####  1. Config coverage tool to generate reports.
