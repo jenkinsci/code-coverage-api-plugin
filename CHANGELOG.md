@@ -1,6 +1,25 @@
 Changelog
 ===
 
+# 1.0.0
+
+Release data: Aug 16, 2018
+
+Features: 
+
+* [JENKINS-51926](https://issues.jenkins-ci.org/browse/JENKINS-51926) - Supporting combining reports within a build(e.g. after parallel() execution in Pipeline).
+* [JENKINS-52666](https://issues.jenkins-ci.org/browse/JENKINS-52666) - Show coverage at the top of the project page.
+
+Enhancements:
+
+* [JENKINS-52839](https://issues.jenkins-ci.org/browse/JENKINS-52839) - Make Code Coverage API plugin more generic.
+
+Fix issues:
+
+* [JENKINS-53023](https://issues.jenkins-ci.org/browse/JENKINS-53023) - Fix incorrect coverage calculating. 
+* [JENKINS-52809](https://issues.jenkins-ci.org/browse/JENKINS-52809) - Invalid Jacoco report files also be parsed and add to aggregated report.
+* Other trivial bugs.
+
 # 1.0.0-rc-1
 
 Release date: Jul 30, 2018
