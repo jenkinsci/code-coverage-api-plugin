@@ -63,6 +63,9 @@ public abstract class CoverageParser {
             Node n = nodeList.item(i);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 CoverageResult r = processElement((Element) n, parentResult);
+                if(r == null) {
+                    continue;
+                }
                 parse(n, r);
             }
         }
