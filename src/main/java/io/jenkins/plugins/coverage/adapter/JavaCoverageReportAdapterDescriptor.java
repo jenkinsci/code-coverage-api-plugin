@@ -1,8 +1,8 @@
 package io.jenkins.plugins.coverage.adapter;
 
+import com.google.common.collect.Lists;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoverageReportAdapter> {
@@ -13,7 +13,7 @@ public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDe
 
     @Override
     public List<CoverageElement> getCoverageElements() {
-        return Arrays.asList(new CoverageElement("Group", 0),
+        return Lists.newArrayList(new CoverageElement("Group", 0),
                 new CoverageElement("Package", 1),
                 new CoverageElement("File", 2),
                 new CoverageElement("Class", 3),

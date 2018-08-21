@@ -63,6 +63,9 @@ public abstract class CoverageParser {
             Node n = nodeList.item(i);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 CoverageResult r = processElement((Element) n, parentResult);
+                if (r == null) {
+                    continue;
+                }
                 parse(n, r);
             }
         }
@@ -99,6 +102,15 @@ public abstract class CoverageParser {
     protected String getAttribute(Element e, String attributeName, String defaultValue) {
         String value = e.getAttribute(attributeName);
         return StringUtils.isEmpty(value) ? defaultValue : value;
+    }
+
+    /**
+     * @param e             element
+     * @param attributeName attribute name
+     * @return value of attribute, or <code>null</code> if attribute not exists.
+     */
+    protected String getAttribute(Element e, String attributeName) {
+        return getAttribute(e, attributeName, null);
     }
 
     protected void processLine(Element current, CoverageResult parentResult) {

@@ -428,13 +428,24 @@ public class CoverageResult implements Serializable, Chartable {
                 aggregateResults.putAll(CoverageAggregationRule.aggregate(child.getElement(),
                         childResult.getKey(), childResult.getValue(), aggregateResults));
             }
+
+            Ratio prevTotal = aggregateResults.get(child.getElement());
+            if (prevTotal == null) {
+                prevTotal = Ratio.create(0, 0);
+            }
+
+            boolean isChildCovered = false;
+
+            if (child.aggregateResults.entrySet().stream().anyMatch(coverageElementRatioEntry ->
+                    coverageElementRatioEntry.getValue().numerator > 0)) {
+                isChildCovered = true;
+            }
+
+            aggregateResults.put(child.getElement(), Ratio.create(prevTotal.numerator + (isChildCovered ? 1 : 0), prevTotal.denominator + 1));
         }
-        // override any local results (as they should be more accurate than the aggregated ones)
+
+        // override any local results
         aggregateResults.putAll(localResults);
-        // now inject any results from CoveragePaint as they should be most accurate.
-        if (paint != null) {
-            aggregateResults.putAll(paint.getResults());
-        }
     }
 
     public void setOwner(AbstractBuild<?, ?> owner) {
