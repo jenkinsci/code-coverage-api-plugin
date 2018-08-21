@@ -1,6 +1,15 @@
 Changelog
 ===
 
+# 1.0.1
+
+Fix issues:
+* [JENKINS-53130](https://issues.jenkins-ci.org/browse/JENKINS-53130) - Code coverage 0% in jenkins with Jacoco.
+
+Enhancements:
+* Add INSTRUCTION metric in JaCoCo adapter.
+* Improve coverage calculating to make it more accurate.
+
 # 1.0.0
 
 Release data: Aug 16, 2018
