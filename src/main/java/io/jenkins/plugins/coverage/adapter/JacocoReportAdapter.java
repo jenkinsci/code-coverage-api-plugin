@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
 
@@ -57,6 +58,13 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         public String getDisplayName() {
             return Messages.JacocoReportAdapter_displayName();
         }
+
+        @Override
+        public List<CoverageElement> getCoverageElements() {
+            List<CoverageElement> registerCoverageElements = super.getCoverageElements();
+            registerCoverageElements.add(new CoverageElement("Instruction", 5));
+            return registerCoverageElements;
+        }
     }
 
 
@@ -71,40 +79,39 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         protected CoverageResult processElement(Element current, CoverageResult parentResult) {
             CoverageResult result = super.processElement(current, parentResult);
 
-            if (current.getLocalName().equals("method")) {
+            if (getAttribute(current, "attr-mode", null) != null) {
+                String lineCoveredAttr = getAttribute(current, "line-covered", null);
+                String lineMissedAttr = getAttribute(current, "line-missed", null);
 
-                if (getAttribute(current, "attr-mode", null) != null) {
-                    String lineCoveredAttr = getAttribute(current, "line-covered", null);
-                    String lineMissedAttr = getAttribute(current, "line-missed", null);
+                String branchCoveredAttr = getAttribute(current, "br-covered", null);
+                String branchMissedAttr = getAttribute(current, "br-missed", null);
 
-                    String branchCoveredAttr = getAttribute(current, "br-covered", null);
-                    String branchMissedAttr = getAttribute(current, "br-missed", null);
+                String instructionCoveredAttr = getAttribute(current, "instruction-covered", null);
+                String instructionMissedAttr = getAttribute(current, "instruction-missed", null);
 
-                    if (StringUtils.isNumeric(lineCoveredAttr) && StringUtils.isNumeric(lineMissedAttr)) {
-                        int covered = Integer.parseInt(lineCoveredAttr);
-                        int missed = Integer.parseInt(lineMissedAttr);
+                if (StringUtils.isNumeric(lineCoveredAttr) && StringUtils.isNumeric(lineMissedAttr)) {
+                    int covered = Integer.parseInt(lineCoveredAttr);
+                    int missed = Integer.parseInt(lineMissedAttr);
 
-                        result.updateCoverage(CoverageElement.LINE, Ratio.create(covered, covered + missed));
-                    }
-
-                    if (StringUtils.isNumeric(branchCoveredAttr) && StringUtils.isNumeric(branchMissedAttr)) {
-                        int covered = Integer.parseInt(branchCoveredAttr);
-                        int missed = Integer.parseInt(branchMissedAttr);
-
-                        result.updateCoverage(CoverageElement.CONDITIONAL, Ratio.create(covered, covered + missed));
-                    }
-
-                    if (BooleanUtils.toBoolean(getAttribute(current, "covered", "false"))) {
-                        if (result.getResults().size() == 0) {
-                            parentResult.updateCoverage(CoverageElement.get("Method"), Ratio.create(1, 1));
-                        }
-                    }
-
-                    // return null to skip parsing children
-                    return null;
-
+                    result.updateCoverage(CoverageElement.LINE, Ratio.create(covered, covered + missed));
                 }
+
+                if (StringUtils.isNumeric(branchCoveredAttr) && StringUtils.isNumeric(branchMissedAttr)) {
+                    int covered = Integer.parseInt(branchCoveredAttr);
+                    int missed = Integer.parseInt(branchMissedAttr);
+
+                    result.updateCoverage(CoverageElement.CONDITIONAL, Ratio.create(covered, covered + missed));
+                }
+
+                if(StringUtils.isNumeric(instructionCoveredAttr) && StringUtils.isNumeric(instructionMissedAttr)) {
+                    int covered = Integer.parseInt(instructionCoveredAttr);
+                    int missed = Integer.parseInt(instructionMissedAttr);
+
+                    result.updateCoverage(CoverageElement.get("Instruction"), Ratio.create(covered, covered + missed));
+                }
+
             }
+
             return result;
         }
     }
