@@ -80,14 +80,14 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
             CoverageResult result = super.processElement(current, parentResult);
 
             if (getAttribute(current, "attr-mode", null) != null) {
-                String lineCoveredAttr = getAttribute(current, "line-covered", null);
-                String lineMissedAttr = getAttribute(current, "line-missed", null);
+                String lineCoveredAttr = getAttribute(current, "line-covered");
+                String lineMissedAttr = getAttribute(current, "line-missed");
 
-                String branchCoveredAttr = getAttribute(current, "br-covered", null);
-                String branchMissedAttr = getAttribute(current, "br-missed", null);
+                String branchCoveredAttr = getAttribute(current, "br-covered");
+                String branchMissedAttr = getAttribute(current, "br-missed");
 
-                String instructionCoveredAttr = getAttribute(current, "instruction-covered", null);
-                String instructionMissedAttr = getAttribute(current, "instruction-missed", null);
+                String instructionCoveredAttr = getAttribute(current, "instruction-covered");
+                String instructionMissedAttr = getAttribute(current, "instruction-missed");
 
                 if (StringUtils.isNumeric(lineCoveredAttr) && StringUtils.isNumeric(lineMissedAttr)) {
                     int covered = Integer.parseInt(lineCoveredAttr);
