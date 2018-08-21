@@ -1,6 +1,10 @@
 Changelog
 ===
 
+# 1.0.2
+Fix issues:
+* Fix incorrect JaCoCo Branch calculating.
+
 # 1.0.1
 
 Fix issues:
