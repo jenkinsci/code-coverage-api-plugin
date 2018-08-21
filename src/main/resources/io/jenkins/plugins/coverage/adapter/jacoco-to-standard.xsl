@@ -124,9 +124,8 @@
                                                   select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
                                     <xsl:attribute name="condition-coverage">
                                         <xsl:value-of select="concat($percentage * 100, '% (')"/><xsl:value-of
-                                            select="concat(./@cb, '/', ./@mb,')')"/>
+                                            select="concat(./@cb, '/', number(./@mb) + number(./@cb),')')"/>
                                     </xsl:attribute>
-
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <xsl:attribute name="branch">false</xsl:attribute>
@@ -198,7 +197,7 @@
                                                           select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
                                             <xsl:attribute name="condition-coverage">
                                                 <xsl:value-of select="concat($percentage * 100, '% (')"/><xsl:value-of
-                                                    select="concat(./@cb, '/', ./@mb,')')"/>
+                                                    select="concat(./@cb, '/', number(./@mb) + number(./@cb),')')"/>
                                             </xsl:attribute>
                                         </xsl:when>
                                         <xsl:otherwise>
