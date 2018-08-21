@@ -106,7 +106,34 @@
                         </class>
                     </xsl:for-each>
 
-                    <xsl:copy-of select="../sourcefile[@name = $sourcefilename]/line"/>
+                    <xsl:for-each select="../sourcefile[@name = $sourcefilename]/line">
+                        <line>
+                            <xsl:attribute name="number">
+                                <xsl:value-of select="./@nr"/>
+                            </xsl:attribute>
+                            <xsl:attribute name="hits">
+                                <xsl:choose>
+                                    <xsl:when test="./@ci > 0">1</xsl:when>
+                                    <xsl:otherwise>0</xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:attribute>
+                            <xsl:choose>
+                                <xsl:when test="number(./@mb) + number(./@cb) > 0 ">
+                                    <xsl:attribute name="branch">true</xsl:attribute>
+                                    <xsl:variable name="percentage"
+                                                  select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
+                                    <xsl:attribute name="condition-coverage">
+                                        <xsl:value-of select="concat($percentage * 100, '% (')"/><xsl:value-of
+                                            select="concat(./@cb, '/', ./@mb,')')"/>
+                                    </xsl:attribute>
+
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:attribute name="branch">false</xsl:attribute>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </line>
+                    </xsl:for-each>
                 </file>
             </xsl:when>
             <xsl:otherwise>
@@ -153,7 +180,33 @@
                                 </class>
                             </xsl:for-each>
 
-                            <xsl:copy-of select="$sourcefile/line"/>
+                            <xsl:for-each select="$sourcefile/line">
+                                <line>
+                                    <xsl:attribute name="number">
+                                        <xsl:value-of select="./@nr"/>
+                                    </xsl:attribute>
+                                    <xsl:attribute name="hits">
+                                        <xsl:choose>
+                                            <xsl:when test="./@ci > 0">1</xsl:when>
+                                            <xsl:otherwise>0</xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:attribute>
+                                    <xsl:choose>
+                                        <xsl:when test="number(./@mb) + number(./@cb) > 0 ">
+                                            <xsl:attribute name="branch">true</xsl:attribute>
+                                            <xsl:variable name="percentage"
+                                                          select="number(./@cb) div (number(./@cb) + number(./@mb))"/>
+                                            <xsl:attribute name="condition-coverage">
+                                                <xsl:value-of select="concat($percentage * 100, '% (')"/><xsl:value-of
+                                                    select="concat(./@cb, '/', ./@mb,')')"/>
+                                            </xsl:attribute>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:attribute name="branch">false</xsl:attribute>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </line>
+                            </xsl:for-each>
                         </file>
                     </xsl:when>
                     <xsl:otherwise>
