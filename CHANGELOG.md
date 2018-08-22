@@ -5,7 +5,7 @@ Release data: Aug 22, 2018
 
 Fix issues:
 * [JENKINS-53183](https://issues.jenkins-ci.org/browse/JENKINS-53183) - Throw NotSerializableException when used in master/slave set up
-* [SECURITY-1119] - potential xss vulnerability
+* SECURITY-1119 - potential xss vulnerability
 
 # 1.0.2
 Release data: Aug 21, 2018
