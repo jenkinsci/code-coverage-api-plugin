@@ -5,7 +5,9 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
-public abstract class CoverageAdapter implements ExtensionPoint, Describable<CoverageAdapter> {
+import java.io.Serializable;
+
+public abstract class CoverageAdapter implements ExtensionPoint, Describable<CoverageAdapter>, Serializable {
 
 
     @SuppressWarnings("unchecked")
