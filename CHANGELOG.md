@@ -1,15 +1,20 @@
 Changelog
 ===
 # 1.0.3
+Release data: Aug 22, 2018
+
 Fix issues:
 * [JENKINS-53183](https://issues.jenkins-ci.org/browse/JENKINS-53183) - Throw NotSerializableException when used in master/slave set up
 * [SECURITY-1119] - potential xss vulnerability
 
 # 1.0.2
+Release data: Aug 21, 2018
+
 Fix issues:
 * Fix incorrect JaCoCo Branch calculating.
 
 # 1.0.1
+Release data: Aug 21, 2018
 
 Fix issues:
 * [JENKINS-53130](https://issues.jenkins-ci.org/browse/JENKINS-53130) - Code coverage 0% in jenkins with Jacoco.
