@@ -1,4 +1,4 @@
-<?jelly escape-by-default='false'?>
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
     <l:layout css="/plugin/code-coverage-api/css/style.css" norefresh="true">
         <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
