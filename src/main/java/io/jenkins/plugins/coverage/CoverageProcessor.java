@@ -178,7 +178,7 @@ public class CoverageProcessor {
                     //if copy exist, it means there have reports have same name.
                     int i = 1;
                     while (copy.exists()) {
-                        copy = new File(copy.getName() + i++);
+                        copy = new File(runRootDir, f.getBaseName() + i++);
                     }
 
                     f.copyTo(new FilePath(copy));
