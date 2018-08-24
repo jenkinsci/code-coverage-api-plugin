@@ -104,3 +104,11 @@ More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/do
 ##### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
 ##### 6. (Optional) Specify Source code storing level to enable source code navigation.
 ![alt text](./images/config.png "Config")
+
+## Pipeline example
+```groovy
+
+publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')]
+
+```
+You can also use `jacoco` instead of `jacocoAdapter` if you didn't install Jacoco-Plugin.
