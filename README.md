@@ -103,9 +103,11 @@ More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/do
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
 ##### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
 ##### 6. (Optional) Specify Source code storing level to enable source code navigation.
-![alt text](./images/config.png "Config")
+![alt text](./images/config.png "Config") 
 
 ## Pipeline example
+We also support pipeline configuration, you can generate pipeline code in Jenkins Snippet Generator.
+
 ```groovy
 
 publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')]
