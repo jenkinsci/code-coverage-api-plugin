@@ -1,20 +1,27 @@
 Changelog
 ===
+# 1.0.4
+
+Release date: Aug 24, 2018
+Fix issues:
+* [#49](https://github.com/jenkinsci/code-coverage-api-plugin/pull/49) - Fixed support for multiple coverage files.
+* [JENKINS-53181](https://issues.jenkins-ci.org/browse/JENKINS-53181) - Jacoco adapter does not work if Jacoco plugin is installed too.
+
 # 1.0.3
-Release data: Aug 22, 2018
+Release date: Aug 22, 2018
 
 Fix issues:
 * [JENKINS-53183](https://issues.jenkins-ci.org/browse/JENKINS-53183) - Throw NotSerializableException when used in master/slave set up
 * SECURITY-1119 - potential xss vulnerability
 
 # 1.0.2
-Release data: Aug 21, 2018
+Release date: Aug 21, 2018
 
 Fix issues:
 * Fix incorrect JaCoCo Branch calculating.
 
 # 1.0.1
-Release data: Aug 21, 2018
+Release date: Aug 21, 2018
 
 Fix issues:
 * [JENKINS-53130](https://issues.jenkins-ci.org/browse/JENKINS-53130) - Code coverage 0% in jenkins with Jacoco.
@@ -25,7 +32,7 @@ Enhancements:
 
 # 1.0.0
 
-Release data: Aug 16, 2018
+Release date: Aug 16, 2018
 
 Features: 
 
