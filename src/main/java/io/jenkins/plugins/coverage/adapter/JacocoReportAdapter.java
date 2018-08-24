@@ -45,7 +45,7 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
     }
 
 
-    @Symbol("jacocoAdapter")
+    @Symbol(value = {"jacocoAdapter", "jacoco"})
     @Extension
     public static final class JacocoReportAdapterDescriptor extends JavaCoverageReportAdapterDescriptor {
 
