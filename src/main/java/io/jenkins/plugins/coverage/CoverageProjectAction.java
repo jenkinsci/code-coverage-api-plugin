@@ -86,6 +86,10 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
         }
     }
 
+    public Run<?, ?> getRun() {
+        return run;
+    }
+
     /**
      * {@inheritDoc}
      */
