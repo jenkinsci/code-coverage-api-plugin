@@ -59,6 +59,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             return;
         }
 
+        listener.getLogger().printf("Source File Navigation is enabled - Current level: %s%n", getLevel());
+
         if (getLevel().equals(SourceFileResolverLevel.STORE_LAST_BUILD)) {
             Run<?, ?> lastBuild = BuildUtils.getPreviousNotFailedCompletedBuild(run);
 
@@ -74,6 +76,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
         }
+
+        listener.getLogger().printf("%d source files need to be copied%n", paints.size());
 
         paints.forEach((sourceFilePath, paint) -> {
             FilePath[] possibleFiles;
