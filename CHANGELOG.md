@@ -1,8 +1,15 @@
 Changelog
 ===
-# 1.0.4
+# 1.0.5
+Release date: Aug 28, 2018
 
+Fix issues:
+* [JENKINS-53242](https://issues.jenkins-ci.org/browse/JENKINS-53242) - Can't open "Coverage Report" of multibranch pipeline job because of a JellyTagException
+
+
+# 1.0.4
 Release date: Aug 24, 2018
+
 Fix issues:
 * [#49](https://github.com/jenkinsci/code-coverage-api-plugin/pull/49) - Fixed support for multiple coverage files.
 * [JENKINS-53181](https://issues.jenkins-ci.org/browse/JENKINS-53181) - Jacoco adapter does not work if Jacoco plugin is installed too.
