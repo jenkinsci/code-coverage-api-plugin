@@ -7,7 +7,7 @@
     </f:block>
 
     <f:advanced>
-        <f:entry title="Global Option">
+        <f:entry title="${%Global Option}">
 
             <br/>
             <div>
@@ -21,7 +21,7 @@
             </div>
             <br/>
         </f:entry>
-        <f:entry title="Global Thresholds">
+        <f:entry title="${%Global Thresholds}">
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
         </f:entry>

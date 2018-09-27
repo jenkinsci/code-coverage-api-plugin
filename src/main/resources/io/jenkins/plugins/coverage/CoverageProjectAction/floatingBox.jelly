@@ -8,7 +8,7 @@
     <j:if test="${lastResult != null}">
         <div align="bottom">
             <div class="test-trend-caption">
-                Code Coverage
+                ${%Code Coverage}
             </div>
             <div id="summaryChart" style="width:600px;height:100%;">
             </div>
