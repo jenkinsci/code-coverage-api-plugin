@@ -3,6 +3,7 @@
 package io.jenkins.plugins.coverage;
 
 import hudson.model.Actionable;
+import hudson.model.Job;
 import hudson.model.ProminentProjectAction;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -86,8 +87,8 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
         }
     }
 
-    public Run<?, ?> getRun() {
-        return run;
+    public Job<?, ?> getProject() {
+        return run.getParent();
     }
 
     /**
