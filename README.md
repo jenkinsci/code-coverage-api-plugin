@@ -20,7 +20,7 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 
 ## Supported Coverage Formats
 #### Embedded
-- [Jacoco](https://www.jacoco.org/jacoco/trunk/doc/)
+- [JaCoCo](https://www.jacoco.org/jacoco/trunk/doc/)
 #### Other plugins as an Extension of Code Coverage API plugin
 - [Cobertura](http://cobertura.github.io/cobertura/) ([Cobertura Plugin](https://github.com/jenkinsci/cobertura-plugin))
 - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst) ([llvm-cov plugin](https://github.com/jenkinsci/llvm-cov-plugin))
@@ -62,7 +62,7 @@ Config maven to generate Cobertura coverage reports:
 ```
 More information about [Cobertura](http://cobertura.github.io/cobertura/).
 
-Config maven to generate Jacoco coverage reports:
+Config maven to generate JaCoCo coverage reports:
 
 ```xml
 <build>
@@ -89,7 +89,7 @@ Config maven to generate Jacoco coverage reports:
     </plugins>
 </build>
 ```
-More Information about [Jacoco](https://www.jacoco.org/jacoco/trunk/doc/).
+More Information about [JaCoCo](https://www.jacoco.org/jacoco/trunk/doc/).
 
 Use llvm-cov to generate JSON format report:
 ```
