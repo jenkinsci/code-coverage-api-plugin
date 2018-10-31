@@ -33,6 +33,7 @@
         </group>
     </xsl:template>
 
+    <!--template apply in package element -->
     <xsl:template match="package">
         <package>
             <xsl:attribute name="name">
@@ -67,8 +68,10 @@
     </xsl:template>
 
 
+    <!--template apply in class element -->
     <xsl:template match="class">
         <xsl:choose>
+            <!--if element has sourcefilename attribute, they will be grouped by this attribute-->
             <xsl:when test="@sourcefilename">
                 <xsl:variable name="sourcefilename" select="@sourcefilename"/>
 
@@ -135,6 +138,7 @@
                     </xsl:for-each>
                 </file>
             </xsl:when>
+            <!--otherwise they will be grouped by their class name-->
             <xsl:otherwise>
                 <xsl:variable name="classname"
                               select="substring-after(substring-before(concat(@name, '$'), '$'), concat(../@name, '/'))"/>
@@ -248,7 +252,7 @@
         </xsl:choose>
     </xsl:template>
 
-
+    <!--template apply in method element -->
     <xsl:template match="method">
         <method>
             <xsl:attribute name="name">
