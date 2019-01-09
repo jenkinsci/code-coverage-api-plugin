@@ -32,6 +32,7 @@ import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import jenkins.MasterToSlaveFileCallable;
+import jenkins.SlaveToMasterFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.Symbol;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
@@ -58,6 +60,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         if (getLevel() == null || getLevel().equals(SourceFileResolverLevel.NEVER_STORE)) {
             return;
         }
+        File runRootDir = run.getRootDir();
 
         listener.getLogger().printf("Source File Navigation is enabled - Current level: %s%n", getLevel());
 
@@ -82,22 +85,25 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         paints.forEach((sourceFilePath, paint) -> {
             FilePath[] possibleFiles;
             try {
-                possibleFiles = workspace.act(new MasterToSlaveFileCallable<FilePath[]>() {
-                    @Override
-                    public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                        return new FilePath(f).list("**/" + sourceFilePath); // husond/io/aa/DD.java
-                    }
-                });
+                possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath));
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+                listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 return;
             }
             if (possibleFiles != null && possibleFiles.length > 0) {
                 FilePath source = possibleFiles[0];
-                FilePath buildDirSourceFile = new FilePath(new File(run.getRootDir(), DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
+                FilePath copiedSource = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath + "_copied"));
+                try {
+                    source.copyTo(copiedSource);
+                } catch (IOException | InterruptedException e) {
+                    listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                    return;
+                }
+
+                FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
 
                 try {
-                    paintSourceCode(source, paint, buildDirSourceFile);
+                    paintSourceCode(copiedSource, paint, buildDirSourceFile);
                 } catch (CoverageException e) {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 }
@@ -110,8 +116,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
 
     private void paintSourceCode(FilePath source, CoveragePaint paint, FilePath canvas) throws CoverageException {
-        try (BufferedWriter output = new BufferedWriter(new OutputStreamWriter(canvas.write(), "UTF-8"));
-             BufferedReader input = new BufferedReader(new InputStreamReader(source.read(), "UTF-8"))) {
+        try (BufferedWriter output = new BufferedWriter(new OutputStreamWriter(canvas.write(), StandardCharsets.UTF_8));
+             BufferedReader input = new BufferedReader(new InputStreamReader(source.read(), StandardCharsets.UTF_8))) {
             int line = 0;
             String content;
             while ((content = input.readLine()) != null) {
@@ -167,6 +173,19 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         public ListBoxModel doFillLevelItems() {
             return LEVELS;
+        }
+    }
+
+    private static class FindSourceFileCallable extends MasterToSlaveFileCallable<FilePath[]> {
+        private String sourceFilePath;
+
+        public FindSourceFileCallable(String sourceFilePath) {
+            this.sourceFilePath = sourceFilePath;
+        }
+
+        @Override
+        public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+            return new FilePath(f).list("**/" + sourceFilePath);
         }
     }
 }
