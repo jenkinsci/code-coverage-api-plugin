@@ -32,18 +32,12 @@ import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.SlaveToMasterFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -107,6 +101,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 } catch (CoverageException e) {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 }
+
+                deleteFilePathQuietly(copiedSource);
             } else {
                 listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
             }
@@ -154,6 +150,13 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             paint.setTotalLines(line);
         } catch (IOException | InterruptedException e) {
             throw new CoverageException(e);
+        }
+    }
+
+    private void deleteFilePathQuietly(FilePath file) {
+        try {
+            file.delete();
+        } catch (IOException | InterruptedException ignore) {
         }
     }
 
