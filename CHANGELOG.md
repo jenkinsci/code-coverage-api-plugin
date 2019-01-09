@@ -1,5 +1,19 @@
 Changelog
 ===
+# 1.0.6
+Release date: Jan 9, 2019
+
+Features:
+* [PR #62](https://github.com/jenkinsci/code-coverage-api-plugin/pull/62) - Add Istanbul (Cobertura reporter) support.
+
+Enhancements:
+* Add Chinese localization.
+* Add more console logs.
+
+Fix issues:
+* [PR #63](https://github.com/jenkinsci/code-coverage-api-plugin/pull/63) - Fixed source files not visible for jobs build on slaves.
+
+
 # 1.0.5
 Release date: Aug 28, 2018
 
@@ -11,7 +25,7 @@ Fix issues:
 Release date: Aug 24, 2018
 
 Fix issues:
-* [#49](https://github.com/jenkinsci/code-coverage-api-plugin/pull/49) - Fixed support for multiple coverage files.
+* [PR #49](https://github.com/jenkinsci/code-coverage-api-plugin/pull/49) - Fixed support for multiple coverage files.
 * [JENKINS-53181](https://issues.jenkins-ci.org/browse/JENKINS-53181) - Jacoco adapter does not work if Jacoco plugin is installed too.
 
 # 1.0.3
