@@ -44,7 +44,6 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         return new JacocoCoverageParser(reportName).parse(document);
     }
 
-
     @Symbol(value = {"jacocoAdapter", "jacoco"})
     @Extension
     public static final class JacocoReportAdapterDescriptor extends JavaCoverageReportAdapterDescriptor {
@@ -67,13 +66,11 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         }
     }
 
-
     public static final class JacocoCoverageParser extends JavaCoverageParser {
 
         public JacocoCoverageParser(String reportName) {
             super(reportName);
         }
-
 
         @Override
         protected CoverageResult processElement(Element current, CoverageResult parentResult) {
