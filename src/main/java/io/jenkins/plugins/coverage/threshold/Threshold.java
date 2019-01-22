@@ -10,9 +10,10 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Threshold implements ExtensionPoint, Describable<Threshold> {
+public class Threshold implements ExtensionPoint, Describable<Threshold>, Serializable {
 
     private final String thresholdTarget;
 
