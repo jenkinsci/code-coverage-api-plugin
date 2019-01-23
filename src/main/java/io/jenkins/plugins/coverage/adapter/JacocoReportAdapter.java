@@ -6,7 +6,6 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
