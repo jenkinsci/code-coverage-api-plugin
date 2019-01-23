@@ -33,6 +33,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -289,10 +290,10 @@ public class CoverageProcessor {
         LinkedList<CoverageResult> resultTask = new LinkedList<>();
 
         for (Map.Entry<CoverageReportAdapter, List<CoverageResult>> results : adapterWithResults.entrySet()) {
-
             // make local threshold over global threshold
             List<Threshold> thresholds = results.getKey().getThresholds();
             if (thresholds != null) {
+                thresholds = new ArrayList<>(thresholds);
                 for (Threshold t : globalThresholds) {
                     if (!thresholds.contains(t)) {
                         thresholds.add(t);
