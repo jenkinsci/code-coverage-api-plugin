@@ -220,8 +220,9 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'sourceFileAvailable'.
      */
     public boolean isSourceFileAvailable() {
-        if (hasPermission() && getSourceFile() != null) {
-            return getSourceFile().exists();
+        if (hasPermission()) {
+            File sourceFile = getSourceFile();
+            return sourceFile != null && sourceFile.exists();
         }
         return false;
     }
@@ -236,14 +237,18 @@ public class CoverageResult implements Serializable, Chartable {
      * @return Value for property 'sourceFileContent'.
      */
     public String getSourceFileContent() {
-        if (hasPermission()) {
-            try {
-                return new TextFile(getSourceFile()).read();
-            } catch (IOException e) {
-                return null;
-            }
+        if (!hasPermission()) {
+            return null;
         }
-        return null;
+        File sourceFile = getSourceFile();
+        if (sourceFile == null) {
+            return null;
+        }
+        try {
+            return new TextFile(sourceFile).read();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**

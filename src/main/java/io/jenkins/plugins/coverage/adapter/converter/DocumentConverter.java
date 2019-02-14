@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.adapter.converter;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +18,12 @@ public abstract class DocumentConverter<T> {
      */
     public Document convert(T report) throws CoverageException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+
         factory.setNamespaceAware(true);
         DocumentBuilder builder;
         try {

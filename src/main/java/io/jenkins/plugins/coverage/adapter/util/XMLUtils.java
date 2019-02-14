@@ -6,6 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -68,7 +69,7 @@ public class XMLUtils {
 
 
         //TODO solve the xslt 2.0 support
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        TransformerFactory transformerFactory = newSecureTransformerFactory();
         Transformer transformer;
         try {
             transformer = transformerFactory.newTransformer(xsl);
@@ -135,7 +136,7 @@ public class XMLUtils {
      * @param target   target file written to
      */
     public void writeDocumentToXML(Document document, File target) {
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        TransformerFactory transformerFactory = newSecureTransformerFactory();
         Transformer transformer;
         try {
             transformer = transformerFactory.newTransformer();
@@ -153,7 +154,7 @@ public class XMLUtils {
      * @throws TransformerException file cannot be convert to {@link Document}
      */
     public Document readXMLtoDocument(File file) throws TransformerException {
-        TransformerFactory factory = TransformerFactory.newInstance();
+        TransformerFactory factory = newSecureTransformerFactory();
         Transformer transformer = factory.newTransformer();
 
         DOMResult result = new DOMResult();
@@ -177,7 +178,7 @@ public class XMLUtils {
      */
     private Document readXMLtoDocumentWithoutXSD(File file) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
+        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
 
@@ -197,5 +198,17 @@ public class XMLUtils {
         }
 
         return node.getNodeType() == Node.DOCUMENT_NODE ? ((Document) node) : node.getOwnerDocument();
+    }
+
+    private TransformerFactory newSecureTransformerFactory() {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        try {
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        }
+        return transformerFactory;
     }
 }

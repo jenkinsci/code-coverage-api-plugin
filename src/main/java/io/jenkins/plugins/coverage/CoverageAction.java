@@ -98,7 +98,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
         }
     }
 
-    public Run<?, ?> getOwner() {
+    public synchronized Run<?, ?> getOwner() {
         return owner;
     }
 
