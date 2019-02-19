@@ -1,5 +1,12 @@
 Changelog
 ===
+# 1.0.7
+Release date: Jan 22, 2019
+
+Fix issues:
+* [PR #66](https://github.com/jenkinsci/code-coverage-api-plugin/pull/66) - Fixed Threshold cannot be serialized.
+* [PR #67](https://github.com/jenkinsci/code-coverage-api-plugin/pull/67) - Fixed Threhsold set in global level will be copied to adapter level.
+
 # 1.0.6
 Release date: Jan 9, 2019
 
