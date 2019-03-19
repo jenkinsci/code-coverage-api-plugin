@@ -19,4 +19,9 @@ public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDe
                 new CoverageElement("Class", 3),
                 new CoverageElement("Method", 4));
     }
+
+    @Override
+    public String getCoverageElementType() {
+        return CoverageElement.COVERAGE_ELEMENT_TYPE_JAVA;
+    }
 }

@@ -7,10 +7,12 @@ import hudson.model.Descriptor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Threshold implements ExtensionPoint, Describable<Threshold>, Serializable {
@@ -96,5 +98,12 @@ public class Threshold implements ExtensionPoint, Describable<Threshold>, Serial
             return CoverageElementRegister.all();
         }
 
+        public CoverageElement[] getCoverageMetricsByType(String coverageElementType) {
+            if (StringUtils.isEmpty(coverageElementType)) {
+                return getAllCoverageMetrics();
+            }
+
+            return CoverageElementRegister.listCommonsAndSpecificType(coverageElementType);
+        }
     }
 }

@@ -23,7 +23,7 @@
     <tr>
         <td>
             <select class="setting-input" name="thresholdTarget">
-                <j:forEach var="i" items="${descriptor.allCoverageMetrics}">
+                <j:forEach var="i" items="${descriptor.getCoverageMetricsByType(coverageElementType)}">
                     <f:option selected="${i.name==instance.thresholdTarget}" value="${i.name}">${i.name}
                     </f:option>
                 </j:forEach>

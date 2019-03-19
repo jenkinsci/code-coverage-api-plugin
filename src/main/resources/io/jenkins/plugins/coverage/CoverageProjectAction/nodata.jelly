@@ -4,6 +4,12 @@
         <st:include it="${it.project}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1>No valid coverage data available</h1>
+            Some Reasons are there:
+            <ol>
+                <li>Only coverage data of last succeed build will be shown in there.
+                    If you previous builds are all unstable or failed, you won't be able to see any coverage data.
+                    You can enter the build's page to see coverage data for each build.</li>
+            </ol>
         </l:main-panel>
     </l:layout>
 </j:jelly>

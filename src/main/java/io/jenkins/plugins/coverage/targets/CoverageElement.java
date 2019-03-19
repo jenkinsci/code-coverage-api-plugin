@@ -11,6 +11,10 @@ public class CoverageElement implements Comparable<CoverageElement>, Serializabl
     public final static CoverageElement LINE = new CoverageElement("Line", Integer.MAX_VALUE - 1, true);
     public final static CoverageElement CONDITIONAL = new CoverageElement("Conditional", Integer.MAX_VALUE, true);
 
+    public final static String COVERAGE_ELEMENT_TYPE_NONE = "None";
+    public final static String COVERAGE_ELEMENT_TYPE_JAVA = "Java";
+    public final static String COVERAGE_ELEMENT_TYPE_JAVASCRIPT = "JavaScript";
+
     private final String name;
     private final int order;
     private final boolean isBasicBlock;
@@ -60,6 +64,12 @@ public class CoverageElement implements Comparable<CoverageElement>, Serializabl
     }
 
     public static CoverageElement get(String name) {
-        return CoverageElementRegister.get(name);
+        // Type element are equal when their names are equal,
+        // so we can get CoverageElement just by name to keep the code simpler
+        return CoverageElementRegister.getDespiteType(name);
+    }
+
+    public static CoverageElement get(String type, String name) {
+        return CoverageElementRegister.get(type, name);
     }
 }

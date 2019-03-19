@@ -59,6 +59,11 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
             );
         }
 
+        @Override
+        public String getCoverageElementType() {
+            return CoverageElement.COVERAGE_ELEMENT_TYPE_JAVASCRIPT;
+        }
+
         @Nonnull
         @Override
         public String getDisplayName() {

@@ -10,12 +10,15 @@ import java.util.List;
 public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter>
         extends CoverageAdapterDescriptor<CoverageReportAdapter> {
 
-
     public CoverageReportAdapterDescriptor(Class<? extends CoverageReportAdapter> clazz) {
         super(clazz);
     }
 
-    public  List<CoverageElement> getCoverageElements() {
+    public List<CoverageElement> getCoverageElements() {
         return Collections.emptyList();
+    }
+
+    public String getCoverageElementType() {
+        return CoverageElement.COVERAGE_ELEMENT_TYPE_NONE;
     }
 }
