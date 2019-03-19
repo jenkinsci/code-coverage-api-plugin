@@ -1,5 +1,14 @@
 Changelog
 ===
+# 1.0.8
+Release date: Mar 19, 2019
+
+Features:
+* Add filter for each Threshold type.
+
+Fix issues:
+* Fixed JellyTagException.
+
 # 1.0.7
 Release date: Jan 22, 2019
 
