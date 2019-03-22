@@ -115,3 +115,39 @@ publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')]
 
 ```
 You can also use `jacoco` instead of `jacocoAdapter` if you didn't install Jacoco-Plugin.
+
+##### Parallel Pipeline Support
+We support parallel pipeline. You can call the Code Coverage API plugin in different branches like this:
+```groovy
+node {
+    parallel firstBranch: {
+        publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')]
+}, secondBranch: {
+        publishCoverage adapters: [jacocoAdapter('jacoco.xml')]
+    }
+}
+```
+##### Reports Combining Support
+You can add tag on publishCoverage and Code Coverage API plugin will combine reports have same tag:
+
+```
+node {
+    parallel firstBranch: {
+        publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')], tag: ‘t’
+}, secondBranch: {
+        publishCoverage adapters: [jacocoAdapter('jacoco.xml')], tag: ‘t’
+    }
+}
+```
+## REST API
+REST API
+We provide a REST API to retrieve coverage data:
+
+- Coverage result: `…​/{buildNumber}/coverage/…​/result/api/\{json|xml\}?depth={number}`
+- Trend result: `…​/{buildNumber}/coverage/…​/trend/api/\{json|xml\}?depth={number}`
+- Coverage result of last build: `…​/{buildNumber}/coverage/…​/last/result/api/\{json|xml\}?depth={number}`
+- Trend result of last build: `…​/{buildNumber}/coverage/…​/last/trend/api/\{json|xml\}?depth={number}`
+
+Note: The larger the number, the deeper of coverage information can be retrieved.
+
+
