@@ -428,7 +428,7 @@ var CoverageChartGenerator = function () {
 
         var data = [];
 
-        Object.keys(results).filter(function (childName, childIndex) {
+        Object.keys(results).sort().filter(function (childName, childIndex) {
             return results[childName].find(function (element) {
                 var p = parseFloat(element.ratio.percentageString);
 
