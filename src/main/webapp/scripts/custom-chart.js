@@ -190,16 +190,17 @@ var CoverageChartGenerator = function () {
         var data = r.data;
 
 
-        var height = children.length * 32 + 100;
-        if (height < 150) {
-            height = 150;
+        var height = children.length * 32 + 120;
+        if (height < 180) {
+            height = 180;
         }
         childSummaryChartDiv.style.height = height + "px";
         var childSummaryChart = echarts.init(childSummaryChartDiv);
 
         var childSummaryChartOption = {
             title: {
-                text: 'Divided by ' + (metric ? metric + ' Name' : '')
+                text: 'Divided by ' + (metric ? metric + ' Name' : ''),
+                subtext: "click item name to see more details"
             },
 
             tooltip: {
@@ -222,7 +223,7 @@ var CoverageChartGenerator = function () {
             },
             animation: false,
             grid: {
-                top: '40',
+                top: '60',
                 left: '0%',
                 y: '10%',
                 containLabel: true
@@ -328,9 +329,9 @@ var CoverageChartGenerator = function () {
             childSummaryChartOption.visualMap.range = [params.selected[0], params.selected[1]];
             childSummaryChartOption.yAxis.data = children;
 
-            var height = children.length * 32 + 100;
-            if (height < 150) {
-                height = 150;
+            var height = children.length * 32 + 120;
+            if (height < 180) {
+                height = 180;
             }
             childSummaryChartDiv.style.height = height + "px";
 
