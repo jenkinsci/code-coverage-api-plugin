@@ -174,12 +174,12 @@ public class CoverageProcessor {
                 List<File> copies = new LinkedList<>();
 
                 for (FilePath f : r) {
-                    File copy = new File(runRootDir, f.getBaseName());
+                    File copy = new File(runRootDir, f.getName());
 
                     //if copy exist, it means there have reports have same name.
                     int i = 1;
                     while (copy.exists()) {
-                        copy = new File(runRootDir, f.getBaseName() + i++);
+                        copy = new File(runRootDir, String.format("%s(%d)", f.getName() , i++));
                     }
 
                     f.copyTo(new FilePath(copy));

@@ -8,7 +8,9 @@
     <xsl:template match="/">
         <xsl:if test="/report">
             <report>
-                <xsl:attribute name="name">jacoco</xsl:attribute>
+                <xsl:attribute name="name">
+                    <xsl:value-of select="report/@name"/>
+                </xsl:attribute>
                 <xsl:choose>
                     <xsl:when test="/report/group">
                         <xsl:apply-templates select="report/group"/>
