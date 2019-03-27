@@ -1,9 +1,17 @@
 Changelog
 ===
+# 1.0.9
+Release date: Mar 27, 2019
+
+Enhancements:
+* Make the chart sorted.
+* Other trivial improvements.
+
+
 # 1.0.8
 Release date: Mar 19, 2019
 
-Features:
+Enhancements:
 * Add filter for each Threshold type.
 
 Fix issues:
