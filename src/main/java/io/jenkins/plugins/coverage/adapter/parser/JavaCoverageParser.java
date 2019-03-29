@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.adapter.parser;
 
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 
 import java.util.regex.Matcher;
@@ -88,6 +89,14 @@ public class JavaCoverageParser extends CoverageParser {
             case "line":
                 processLine(current, parentResult);
                 break;
+            case "additionalProperty":
+                String propertyName = getAttribute(current, "name", "");
+                if (StringUtils.isEmpty(propertyName)) {
+                    break;
+                }
+
+                String propertyValue = getAttribute(current, "value", "");
+                parentResult.addAdditionalProperty(propertyName, propertyValue);
             default:
                 break;
         }

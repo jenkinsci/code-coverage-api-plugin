@@ -24,23 +24,10 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,6 +79,18 @@ public class CoverageProcessor {
         coverageReport.setOwner(run);
 
         if (sourceFileResolver != null) {
+            Set<String> possiblePaths = new HashSet<>();
+            coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
+                Set<String> paths = coverageResult.getAdditionalProperty(CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH);
+                if (paths != null) {
+                    possiblePaths.addAll(paths);
+                }
+            });
+
+            if (possiblePaths.size() > 0) {
+                sourceFileResolver.setPossiblePaths(possiblePaths);
+            }
+
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
