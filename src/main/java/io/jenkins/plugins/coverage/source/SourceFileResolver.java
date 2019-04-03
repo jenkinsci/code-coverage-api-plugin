@@ -11,10 +11,12 @@ import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class SourceFileResolver implements ExtensionPoint, Describable<SourceFileResolver> {
 
     private DefaultSourceFileResolver.SourceFileResolverLevel level;
+    private Set<String> possiblePaths;
 
 
     public SourceFileResolver(DefaultSourceFileResolver.SourceFileResolverLevel level) {
@@ -22,6 +24,14 @@ public abstract class SourceFileResolver implements ExtensionPoint, Describable<
     }
 
     public abstract void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener, Map<String, CoveragePaint> paints) throws IOException;
+
+    public void setPossiblePaths(Set<String> possiblePaths) {
+        this.possiblePaths = possiblePaths;
+    }
+
+    public Set<String> getPossiblePaths() {
+        return possiblePaths;
+    }
 
     @SuppressWarnings("unchecked")
     @Override

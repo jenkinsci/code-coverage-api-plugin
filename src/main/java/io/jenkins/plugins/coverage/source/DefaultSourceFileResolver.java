@@ -39,7 +39,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.*;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -79,7 +79,11 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         paints.forEach((sourceFilePath, paint) -> {
             FilePath[] possibleFiles;
             try {
-                possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath));
+                if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
+                    possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
+                } else{
+                    possibleFiles =  workspace.act(new FindSourceFileCallable(sourceFilePath));
+                }
             } catch (IOException | InterruptedException e) {
                 listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 return;
@@ -181,13 +185,46 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     private static class FindSourceFileCallable extends MasterToSlaveFileCallable<FilePath[]> {
         private String sourceFilePath;
+        private Set<String> possiblePaths;
 
         public FindSourceFileCallable(String sourceFilePath) {
+            this(sourceFilePath, Collections.emptySet());
+        }
+
+        public FindSourceFileCallable(String sourceFilePath, Set<String> possiblePaths) {
             this.sourceFilePath = sourceFilePath;
+            this.possiblePaths = possiblePaths;
         }
 
         @Override
         public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+            List<File> possibleDirectories = new LinkedList<>();
+
+            for (String directory : possiblePaths) {
+                File pathFromRoot = new File(directory);
+                if (pathFromRoot.exists() && pathFromRoot.isDirectory()) {
+                    possibleDirectories.add(pathFromRoot);
+                }
+
+                File pathFromWorkDir = new File(f, directory);
+                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory() && !pathFromWorkDir.equals(pathFromRoot)) {
+                    possibleDirectories.add(pathFromWorkDir);
+                }
+            }
+
+
+            File sourceFile = new File(f, sourceFilePath);
+            if (sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead()) {
+                return new FilePath[]{new FilePath(sourceFile)};
+            }
+
+            for (File directory : possibleDirectories) {
+                sourceFile = new File(directory, sourceFilePath);
+                if (sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead()) {
+                    return new FilePath[]{new FilePath(sourceFile)};
+                }
+            }
+
             return new FilePath(f).list("**/" + sourceFilePath);
         }
     }

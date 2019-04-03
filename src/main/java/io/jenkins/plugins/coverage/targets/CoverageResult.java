@@ -40,16 +40,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -99,6 +90,8 @@ public class CoverageResult implements Serializable, Chartable {
     private CoveragePaint paint;
 
     private String relativeSourcePath;
+
+    private Map<String, Set<String>> additionalProperties = new HashMap<>();
 
     public transient Run<?, ?> owner = null;
 
@@ -564,6 +557,15 @@ public class CoverageResult implements Serializable, Chartable {
     public void resetParent(CoverageResult p) {
         parent = null;
         addParent(p);
+    }
+
+    public void addAdditionalProperty(String propertyName, String value) {
+        additionalProperties.putIfAbsent(propertyName, new HashSet<>());
+        additionalProperties.get(propertyName).add(value);
+    }
+
+    public Set<String> getAdditionalProperty(String propertyName) {
+        return additionalProperties.get(propertyName);
     }
 
     /**
