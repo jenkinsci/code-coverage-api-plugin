@@ -97,6 +97,7 @@ public class JavaCoverageParser extends CoverageParser {
 
                 String propertyValue = getAttribute(current, "value", "");
                 parentResult.addAdditionalProperty(propertyName, propertyValue);
+                break;
             default:
                 break;
         }
