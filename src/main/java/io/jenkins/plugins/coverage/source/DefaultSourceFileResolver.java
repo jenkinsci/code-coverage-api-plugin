@@ -40,6 +40,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -76,40 +78,44 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         listener.getLogger().printf("%d source files need to be copied%n", paints.size());
 
+        ExecutorService service = Executors.newFixedThreadPool(5);
+
         paints.forEach((sourceFilePath, paint) -> {
-            FilePath[] possibleFiles;
-            try {
-                if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
-                    possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
-                } else{
-                    possibleFiles =  workspace.act(new FindSourceFileCallable(sourceFilePath));
-                }
-            } catch (IOException | InterruptedException e) {
-                listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
-                return;
-            }
-            if (possibleFiles != null && possibleFiles.length > 0) {
-                FilePath source = possibleFiles[0];
-                FilePath copiedSource = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath + "_copied"));
+            service.submit(() -> {
+                FilePath[] possibleFiles;
                 try {
-                    source.copyTo(copiedSource);
+                    if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
+                        possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
+                    } else{
+                        possibleFiles =  workspace.act(new FindSourceFileCallable(sourceFilePath));
+                    }
                 } catch (IOException | InterruptedException e) {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                     return;
                 }
+                if (possibleFiles != null && possibleFiles.length > 0) {
+                    FilePath source = possibleFiles[0];
+                    FilePath copiedSource = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath + "_copied"));
+                    try {
+                        source.copyTo(copiedSource);
+                    } catch (IOException | InterruptedException e) {
+                        listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                        return;
+                    }
 
-                FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
+                    FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
 
-                try {
-                    paintSourceCode(copiedSource, paint, buildDirSourceFile);
-                } catch (CoverageException e) {
-                    listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                    try {
+                        paintSourceCode(copiedSource, paint, buildDirSourceFile);
+                    } catch (CoverageException e) {
+                        listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                    }
+
+                    deleteFilePathQuietly(copiedSource);
+                } else {
+                    listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
                 }
-
-                deleteFilePathQuietly(copiedSource);
-            } else {
-                listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
-            }
+            });
         });
 
     }
