@@ -18,10 +18,6 @@ public class CompatibleObjectInputStream extends ObjectInputStream {
     protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
         ObjectStreamClass resultClassDescriptor = super.readClassDescriptor(); // initially streams descriptor
         Class localClass = Class.forName(resultClassDescriptor.getName()); // the class in the local JVM that this descriptor represents.
-        if (localClass == null) {
-            System.out.println("No local class for " + resultClassDescriptor.getName());
-            return resultClassDescriptor;
-        }
         ObjectStreamClass localClassDescriptor = ObjectStreamClass.lookup(localClass);
         if (localClassDescriptor != null) { // only if class implements serializable
             final long localSUID = localClassDescriptor.getSerialVersionUID();
