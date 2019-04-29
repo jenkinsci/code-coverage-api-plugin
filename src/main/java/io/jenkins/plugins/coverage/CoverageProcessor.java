@@ -496,7 +496,7 @@ public class CoverageProcessor {
     public static CoverageResult recoverCoverageResult(Run<?, ?> run) throws IOException, ClassNotFoundException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reportFile))) {
+        try (ObjectInputStream ois = new CompatibleObjectInputStream(new FileInputStream(reportFile))) {
             return (CoverageResult) ois.readObject();
         }
     }
