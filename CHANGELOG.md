@@ -2,9 +2,11 @@ Changelog
 ===
 # 1.0.10
 Release date: Apr 29, 2019
+
 Enhancements:
 * Add source file path support
 * Improve performance of copying source files
+
 Fix Issues:
 * Add serialVersionUID to CoverageElement and use custom ObjectInputStream to keep backwards compatibility.
 
