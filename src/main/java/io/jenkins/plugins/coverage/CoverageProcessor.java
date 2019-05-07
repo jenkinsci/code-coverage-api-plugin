@@ -2,23 +2,31 @@ package io.jenkins.plugins.coverage;
 
 
 import com.google.common.collect.Sets;
+
 import hudson.FilePath;
 import hudson.model.HealthReport;
+import hudson.model.Job;
+import hudson.model.ItemGroup;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import hudson.util.RunList;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.Ratio;
+import io.jenkins.plugins.coverage.targets.*;
 import io.jenkins.plugins.coverage.threshold.Threshold;
+import jenkins.branch.MultiBranchProject;
 import jenkins.MasterToSlaveFileCallable;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMRevision;
+import jenkins.scm.api.SCMRevisionAction;
+import jenkins.scm.api.mixin.ChangeRequestSCMHead;
+import jenkins.scm.api.mixin.ChangeRequestSCMRevision;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
@@ -45,6 +53,8 @@ public class CoverageProcessor {
     private boolean failNoReports;
 
     private String globalTag;
+
+    private boolean calculateDiffForChangeRequests;
 
     private SourceFileResolver sourceFileResolver;
 
@@ -96,7 +106,9 @@ public class CoverageProcessor {
 
         HealthReport healthReport = processThresholds(results, globalThresholds);
 
-
+        if (calculateDiffForChangeRequests) {
+            setDiffInCoverageForChangeRequest(coverageReport);
+        }
         convertResultToAction(coverageReport, healthReport);
     }
 
@@ -141,6 +153,86 @@ public class CoverageProcessor {
                 saveCoverageResult(run, previousResult);
             }
         }
+    }
+
+    private void setDiffInCoverageForChangeRequest(CoverageResult coverageReport) {
+        // Use limited number of builds to don't search too long
+        final int numberOfBuildsFromTargetBranch = 50;
+        // Calculate diff only for line coverage
+        Ratio changeRequestLinesCoverage = coverageReport.getCoverage(CoverageElement.LINE);
+
+        ItemGroup parent = null;
+        SCMRevision currentBuildSCMRevision = null;
+        SCMHead currentBuildSCMHead = null;
+
+        Job targetBranchJob = null;
+        int targetBranchSCMHash = 0;
+        Run buildToTakeCoverageFrom = null;
+        Ratio targetBranchLinesCoverage = null;
+
+
+        if (changeRequestLinesCoverage == null) {
+            return;
+        }
+        Job job = run.getParent();
+        parent = job.getParent();
+
+        if (!(parent instanceof MultiBranchProject)) {
+            return;
+        }
+        currentBuildSCMHead = SCMHead.HeadByItem.findHead(job);
+
+        if (!(currentBuildSCMHead instanceof ChangeRequestSCMHead)) {
+            return;
+        }
+        SCMRevisionAction scmRevisionAction = run.getAction(SCMRevisionAction.class);
+        if (scmRevisionAction == null) {
+            return;
+        }
+        currentBuildSCMRevision = scmRevisionAction.getRevision();
+
+        if (!(currentBuildSCMRevision instanceof ChangeRequestSCMRevision)) {
+            return;
+        }
+        // Get target branch revision to compare coverage with
+        targetBranchSCMHash = ((ChangeRequestSCMRevision) currentBuildSCMRevision).getTarget().hashCode();
+        SCMHead targetBranchSCMHead = ((ChangeRequestSCMHead) currentBuildSCMHead).getTarget();
+        String targetBranchName = targetBranchSCMHead.getName();
+
+        targetBranchJob = ((MultiBranchProject) parent).getItemByBranchName(targetBranchName);
+        if (targetBranchJob == null) {
+            return;
+        }
+        // Search for a build from the target branch job to compare coverage with
+        RunList<Run> buildsFromTargetBranchJob = ((RunList<Run>)targetBranchJob.getBuilds()).limit(numberOfBuildsFromTargetBranch);
+        for (Run targetBranchBuild: buildsFromTargetBranchJob){
+            SCMRevisionAction targetBranchBuildRevision = targetBranchBuild.getAction(SCMRevisionAction.class);
+            if (targetBranchBuildRevision != null) {
+                if (targetBranchBuildRevision.getRevision().hashCode() == targetBranchSCMHash) {
+                    buildToTakeCoverageFrom = targetBranchBuild;
+                    break;
+                }
+            }
+        }
+        if (buildToTakeCoverageFrom == null) {
+            return;
+        }
+        CoverageAction targetBranchCoverageAction = buildToTakeCoverageFrom.getAction(CoverageAction.class);
+        if (targetBranchCoverageAction == null) {
+            return;
+        }
+        CoverageResult targetBranchCoverageResult = targetBranchCoverageAction.getResult();
+        if (targetBranchCoverageResult == null) {
+            return;
+        }
+        targetBranchLinesCoverage = targetBranchCoverageResult.getCoverage(CoverageElement.LINE);
+        if (targetBranchLinesCoverage == null) {
+            return;
+        }
+        float percentageDiff =
+                changeRequestLinesCoverage.getPercentageFloat() - targetBranchLinesCoverage.getPercentageFloat();
+        coverageReport.setChangeRequestCoverageDiffWithTargetBranch(percentageDiff);
+        coverageReport.setLinkToBuildThatWasUsedForComparison(buildToTakeCoverageFrom.getUrl());
     }
 
     /**
@@ -448,6 +540,24 @@ public class CoverageProcessor {
 
     public void setGlobalTag(String globalTag) {
         this.globalTag = globalTag;
+    }
+
+    /**
+     * Getter for property 'calculateDiffForChangeRequests'
+     *
+     * @return value for property 'calculateDiffForChangeRequests'
+     */
+    public boolean getCalculateDiffForChangeRequests() {
+        return this.calculateDiffForChangeRequests;
+    }
+
+    /**
+     * Setter for property 'calculateDiffForChangeRequests'
+     *
+     * @param calculateDiffForChangeRequests value to set for property 'calculateDiffForChangeRequests'
+     */
+    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
+        this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

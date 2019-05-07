@@ -74,6 +74,11 @@ public class CoverageResult implements Serializable, Chartable {
     private String name;
     private String tag;
 
+    /**
+     * Properties to store a change request coverage diff with the latest successful build from the target branch
+     */
+    private float changeRequestCoverageDiffWithTargetBranch = 0;
+    private String linkToBuildThatWasUsedForComparison = null;
 
     // these two pointers form a tree structure where edges are names.
     private CoverageResult parent;
@@ -205,6 +210,42 @@ public class CoverageResult implements Serializable, Chartable {
             return new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
         }
         return null;
+    }
+
+    /**
+     * Getter for property 'changeRequestCoverageDiffWithTargetBranch'.
+     *
+     * @return Value for property 'changeRequestCoverageDiffWithTargetBranch'.
+     */
+    public float getChangeRequestCoverageDiffWithTargetBranch() {
+        return changeRequestCoverageDiffWithTargetBranch;
+    }
+
+    /**
+     * Setter for property 'changeRequestCoverageDiffWithTargetBranch'.
+     *
+     * @param changeRequestCoverageDiffWithTargetBranch Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
+     */
+    public void setChangeRequestCoverageDiffWithTargetBranch(float changeRequestCoverageDiffWithTargetBranch) {
+        this.changeRequestCoverageDiffWithTargetBranch = changeRequestCoverageDiffWithTargetBranch;
+    }
+
+    /**
+     * Getter for property 'linkToBuildThatWasUsedForComparison'.
+     *
+     * @return Value for property 'linkToBuildThatWasUsedForComparison'.
+     */
+    public String getLinkToBuildThatWasUsedForComparison() {
+        return linkToBuildThatWasUsedForComparison;
+    }
+
+    /**
+     * Setter for property 'linkToBuildThatWasUsedForComparison'.
+     *
+     * @param linkToBuildThatWasUsedForComparison Value to set for property 'linkToBuildThatWasUsedForComparison'.
+     */
+    public void setLinkToBuildThatWasUsedForComparison(String linkToBuildThatWasUsedForComparison) {
+        this.linkToBuildThatWasUsedForComparison = linkToBuildThatWasUsedForComparison;
     }
 
     /**

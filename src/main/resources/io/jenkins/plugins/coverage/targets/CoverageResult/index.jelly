@@ -8,6 +8,29 @@
         <st:include it="${it.owner}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1>${%Code Coverage}</h1>
+            <j:set var="targetBranchBuild" value="${it.getLinkToBuildThatWasUsedForComparison()}" />
+            <j:if test="${targetBranchBuild != null}">
+                <div class="changeRequestInformation" style="width:800px;height:100%;">
+                    <j:set var="coverageDiff" value="${it.getChangeRequestCoverageDiffWithTargetBranch()}" />
+                    <j:choose>
+                        <j:when test="${coverageDiff gt 0}">
+                            <h3>
+                                Code coverage increased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: green"> +${coverageDiff}%</span>
+                            </h3>
+                        </j:when>
+                        <j:when test="${coverageDiff lt 0}">
+                            <h3>
+                                Code coverage decreased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: red"> ${coverageDiff}%</span>
+                            </h3>
+                        </j:when>
+                        <j:otherwise>
+                            <h3>Code coverage hasn't changed in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a></h3>
+                        </j:otherwise>
+                    </j:choose>
+                </div>
+            </j:if>
             <j:forEach var="parent" items="${it.parents}">
                 <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>
                 &gt;

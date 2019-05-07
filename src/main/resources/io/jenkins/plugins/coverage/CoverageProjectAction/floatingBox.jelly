@@ -10,6 +10,29 @@
             <div class="test-trend-caption">
                 ${%Code Coverage}
             </div>
+            <j:set var="targetBranchBuild" value="${lastResult.getLinkToBuildThatWasUsedForComparison()}" />
+            <j:if test="${targetBranchBuild != null}">
+                <div class="changeRequestInformation" style="width:600px; height:100%; text-align:center;">
+                    <j:set var="coverageDiff" value="${lastResult.getChangeRequestCoverageDiffWithTargetBranch()}" />
+                    <j:choose>
+                        <j:when test="${coverageDiff gt 0}">
+                            <p>
+                                Code coverage increased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: green"> +${coverageDiff}%</span>
+                            </p>
+                        </j:when>
+                        <j:when test="${coverageDiff lt 0}">
+                            <p>
+                                Code coverage decreased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: red"> ${coverageDiff}%</span>
+                            </p>
+                        </j:when>
+                        <j:otherwise>
+                            <p>Code coverage hasn't changed in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a></p>
+                        </j:otherwise>
+                    </j:choose>
+                </div>
+            </j:if>
             <div id="summaryChart" style="width:600px;height:100%;">
             </div>
             <script>

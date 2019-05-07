@@ -19,6 +19,9 @@
             <div>
                 <f:checkbox field="failNoReports" title="Failed if No Reports Found"/>
             </div>
+            <div>
+                <f:checkbox field="calculateDiffForChangeRequests" title="If it is a change request build, calculate code coverage diff with a target branch build"/>
+            </div>
             <br/>
         </f:entry>
         <f:entry title="${%Global Thresholds}">
