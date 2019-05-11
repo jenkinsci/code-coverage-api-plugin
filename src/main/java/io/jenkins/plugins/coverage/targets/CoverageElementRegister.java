@@ -60,6 +60,7 @@ public class CoverageElementRegister {
         CoverageElement[] elements =  typedRegisteredElements.entrySet().stream()
                 .filter(e -> e.getKey().equals(CoverageElement.COVERAGE_ELEMENT_TYPE_NONE) || e.getKey().equals(type))
                 .flatMap(e -> e.getValue().stream())
+                .distinct()
                 .collect(Collectors.toList())
                 .toArray(new CoverageElement[]{});
 
