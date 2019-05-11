@@ -47,6 +47,8 @@ public class CoverageElementRegister {
     public static CoverageElement[] all() {
         return typedRegisteredElements.values().stream()
                 .flatMap(Collection::stream)
+                .distinct()
+                .sorted()
                 .collect(Collectors.toList())
                 .toArray(new CoverageElement[]{});
     }
