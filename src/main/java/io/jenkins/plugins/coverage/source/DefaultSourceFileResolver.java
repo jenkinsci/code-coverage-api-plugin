@@ -40,8 +40,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -79,15 +81,17 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         listener.getLogger().printf("%d source files need to be copied%n", paints.size());
 
         ExecutorService service = Executors.newFixedThreadPool(5);
+        // wait until all tasks completed
+        CountDownLatch latch = new CountDownLatch(paints.entrySet().size());
 
-        paints.forEach((sourceFilePath, paint) -> {
-            service.submit(() -> {
+        paints.forEach((sourceFilePath, paint) -> service.submit(() -> {
+            try {
                 FilePath[] possibleFiles;
                 try {
                     if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
                         possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
-                    } else{
-                        possibleFiles =  workspace.act(new FindSourceFileCallable(sourceFilePath));
+                    } else {
+                        possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath));
                     }
                 } catch (IOException | InterruptedException e) {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
@@ -115,9 +119,19 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 } else {
                     listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
                 }
-            });
-        });
+            } finally {
+                // ensure latch will count down
+                latch.countDown();
+            }
+        }));
 
+
+        try {
+            latch.await(1, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new IOException("Unable to copy source files", e);
+        }
     }
 
 
