@@ -18,6 +18,21 @@
             <j:if test="${it.previousResult != null}">
                 <div id="trendChart" style="width:800px;height:100%;">
                 </div>
+                <j:if test="${it.aggregatedLevel}">
+                    <j:if test="${it.coverageRelativeResultElement.size() != 0}">
+                        <div id="relativeSummaryChart" style="width:800px;height:100%;">
+                        </div>
+                        <script>
+                            var instance =<st:bind value="${it}"/>;
+
+                            var coverageChartGenerator = new CoverageChartGenerator()
+                            instance.getCoverageRelativeResult(function(t) {
+                                var results = t.responseObject();
+                                coverageChartGenerator.generateSummaryChart(results, 'relativeSummaryChart', "Relative Summary")
+                            });
+                        </script>
+                    </j:if>
+                </j:if>
             </j:if>
             <br/>
             <j:choose>

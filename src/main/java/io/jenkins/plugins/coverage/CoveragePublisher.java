@@ -49,6 +49,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private String tag;
 
+    private String vcsRootPath;
+
     @DataBoundConstructor
     public CoveragePublisher() {
     }
@@ -83,6 +85,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
         processor.setFailNoReports(failNoReports);
+        processor.setVcsRootPath(vcsRootPath);
 
         try {
             processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
@@ -163,6 +166,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getVcsRootPath() {
+        return this.vcsRootPath;
+    }
+
+    @DataBoundSetter
+    public void setVcsRootPath(String vcsRootPath) {
+        this.vcsRootPath = vcsRootPath;
     }
 
     @Symbol("publishCoverage")

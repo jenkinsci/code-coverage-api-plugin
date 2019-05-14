@@ -47,6 +47,10 @@ public class CoverageProcessor {
     private String globalTag;
 
     private SourceFileResolver sourceFileResolver;
+    /**
+     * the version control system root path.
+     */
+    private String vcsRootPath;
 
     /**
      * @param run       a build this is running as a part of
@@ -92,6 +96,16 @@ public class CoverageProcessor {
             }
 
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
+        }
+
+        if (this.vcsRootPath != null
+                && !this.vcsRootPath.isEmpty()) {
+            FilePath vcsRootPath = workspace.child(getVcsRootPath());
+            if (!vcsRootPath.exists()) {
+                listener.getLogger().printf("VCS root path not exists. path: %s", vcsRootPath.getRemote());
+            } else {
+                coverageReport.resolveVcsLastCommit(vcsRootPath.getRemote());
+            }
         }
 
         HealthReport healthReport = processThresholds(results, globalThresholds);
@@ -448,6 +462,24 @@ public class CoverageProcessor {
 
     public void setGlobalTag(String globalTag) {
         this.globalTag = globalTag;
+    }
+
+    /**
+     * Getter for vcsRootPath.
+     *
+     * @return vcsRootPath
+     */
+    public String getVcsRootPath() {
+        return this.vcsRootPath;
+    }
+
+    /**
+     * Setter for vcsRootPath.
+     *
+     * @param vcsRootPath value to set for vcsRootPath
+     */
+    public void setVcsRootPath(String vcsRootPath) {
+        this.vcsRootPath = vcsRootPath;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {

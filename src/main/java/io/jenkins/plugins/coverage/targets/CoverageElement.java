@@ -13,6 +13,7 @@ public class CoverageElement implements Comparable<CoverageElement>, Serializabl
     public final static CoverageElement REPORT = new CoverageElement("Report", Integer.MIN_VALUE + 1);
     public final static CoverageElement LINE = new CoverageElement("Line", Integer.MAX_VALUE - 1, true);
     public final static CoverageElement CONDITIONAL = new CoverageElement("Conditional", Integer.MAX_VALUE, true);
+    public final static CoverageElement FILE = new CoverageElement("File", Integer.MAX_VALUE, true);
 
     public final static String COVERAGE_ELEMENT_TYPE_NONE = "None";
     public final static String COVERAGE_ELEMENT_TYPE_JAVA = "Java";

@@ -21,6 +21,15 @@
             </div>
             <br/>
         </f:entry>
+        <f:entry title="${%VCS Root Path}">
+            <table width="100%" border='0' cellspacing='0' padding="0">
+                <tr>
+                    <td>
+                        <f:textbox field="vcsRootPath"/>
+                    </td>
+                </tr>
+            </table>
+        </f:entry>
         <f:entry title="${%Global Thresholds}">
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
