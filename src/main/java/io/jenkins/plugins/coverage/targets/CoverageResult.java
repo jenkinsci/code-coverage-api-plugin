@@ -662,7 +662,10 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
     public CoverageRelativeResult getCoverageRelativeResult() {
-        return new CoverageRelativeResult(this.name, this.coverageSourceFileAnalysis.getCoverageRelativeResultElement(this));
+        List<CoverageRelativeResultElement> list = null == coverageSourceFileAnalysis
+                ? Collections.emptyList()
+                : this.coverageSourceFileAnalysis.getCoverageRelativeResultElement(this);
+        return new CoverageRelativeResult(this.name, list);
     }
 
     @JavaScriptMethod
