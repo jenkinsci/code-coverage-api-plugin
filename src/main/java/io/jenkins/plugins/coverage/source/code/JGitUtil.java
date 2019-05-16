@@ -1,10 +1,12 @@
 package io.jenkins.plugins.coverage.source.code;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
@@ -41,10 +43,25 @@ public abstract class JGitUtil {
      */
     public static String getCurrentBranchName(String gitRepoPath) {
         try (Git git = Git.open(new File(gitRepoPath)); Repository repo = git.getRepository()) {
-            return repo.getBranch();
+            try {
+                Ref head = repo.exactRef(Constants.HEAD);
+                if (head.getLeaf().getName().equals(Constants.HEAD)) {
+                    //  if detached head, resolve the branch name by HEAD
+                    List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).setContains(Constants.HEAD).call();
+                    return list.stream()
+                            .filter(ref -> !ref.equals(head))
+                            .findAny()
+                            .map(ref -> Repository.shortenRefName(ref.getName()))
+                            .orElse(Constants.HEAD + " detached at " + repo.getBranch().substring(0, 7));
+                } else {
+                    return repo.getBranch();
+                }
+            } catch (Exception e) {
+                return "";
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return "*";
+            return "";
         }
     }
 
