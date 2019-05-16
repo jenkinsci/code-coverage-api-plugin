@@ -46,11 +46,6 @@ public class CoverageSourceFileAnalysis implements Serializable {
         this.lastCommitName = lastCommitName;
     }
 
-    public CoverageSourceFileAnalysis(String branchName, String lastCommitName) {
-        this.branchName = branchName;
-        this.lastCommitName = lastCommitName;
-    }
-
     @Exported
     public String getRootPath() {
         return rootPath;
