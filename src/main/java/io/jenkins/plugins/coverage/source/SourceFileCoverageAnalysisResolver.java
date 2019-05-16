@@ -43,7 +43,7 @@ public class SourceFileCoverageAnalysisResolver implements ExtensionPoint, Descr
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<SourceFileCoverageAnalysisResolver> getDescriptor() {
-        return Jenkins.get().getDescriptorOrDie(getClass());
+        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     public String getRootPath() {
