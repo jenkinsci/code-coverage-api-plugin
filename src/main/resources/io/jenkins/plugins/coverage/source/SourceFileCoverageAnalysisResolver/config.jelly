@@ -10,7 +10,7 @@
         <f:entry title="${% Coverage Analysis Level}" field="level">
             <select class="setting-input" name="level">
                 <j:forEach var="i" items="${descriptor.doItems()}">
-                    <f:option selected="${i.value==instance.level}" value="${i.name}">${i.value}</f:option>
+                    <f:option selected="${i.name==instance.level}" value="${i.name}">${i.value}</f:option>
                 </j:forEach>
             </select>
         </f:entry>
