@@ -30,8 +30,6 @@ import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import io.jenkins.plugins.coverage.source.util.JGitUtil;
-import io.jenkins.plugins.coverage.source.util.SourceCodeFile;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -42,11 +40,18 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
@@ -98,9 +103,7 @@ public class CoverageResult implements Serializable, Chartable {
 
     private Map<String, Set<String>> additionalProperties = new HashMap<>();
 
-    private String vcsRootPath = null;
-
-    private String lastCvsCommitName = null;
+    private CoverageSourceFileAnalysis coverageSourceFileAnalysis;
 
     public transient Run<?, ?> owner = null;
 
@@ -267,6 +270,17 @@ public class CoverageResult implements Serializable, Chartable {
         }
         Collections.reverse(result);
         return result;
+    }
+
+    /**
+     * @return collect all children result and sub node's children result.
+     */
+    public List<CoverageResult> getChildrenResults() {
+        List<CoverageResult> list = new LinkedList<>(this.children.values());
+        for (CoverageResult sub : this.children.values()) {
+            list.addAll(sub.getChildrenResults());
+        }
+        return list;
     }
 
     /**
@@ -648,103 +662,73 @@ public class CoverageResult implements Serializable, Chartable {
     }
 
     public CoverageRelativeResult getCoverageRelativeResult() {
-        return new CoverageRelativeResult(this.name, this.getCoverageRelativeResultElement());
+        return new CoverageRelativeResult(this.name, this.coverageSourceFileAnalysis.getCoverageRelativeResultElement(this));
     }
 
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public List<JSCoverageResult> jsGetCoverageRelativeResult() {
-        return getCoverageRelativeResultElement()
+    public JSRelativeCoverageResult jsGetCoverageRelativeResult() {
+        final CoverageSourceFileAnalysis csfa = this.coverageSourceFileAnalysis;
+        if (null == csfa)
+            return null;
+        List<JSCoverageResult> results = this.coverageSourceFileAnalysis.getCoverageRelativeResultElement(this)
                 .stream()
                 .map(element -> new JSCoverageResult(element.getFilePath(), element.getRatioBean()))
                 .collect(Collectors.toList());
+        return new JSRelativeCoverageResult(csfa, csfa.resolveTargetVCS(this), results);
     }
 
-    /**
-     * Getter for property 'lastCvsCommitName'.
-     *
-     * @return Value for property 'lastCvsCommitName'.
-     */
-    public String getLastCvsCommitName() {
-        if (parent == null)
-            return this.lastCvsCommitName;
-        return parent.getLastCvsCommitName();
+    public CoverageSourceFileAnalysis getCoverageSourceFileAnalysis() {
+        return coverageSourceFileAnalysis;
     }
 
-    /**
-     * Setter for property 'lastCvsCommitName'.
-     *
-     * @param lastCvsCommitName Value to set for property 'lastCvsCommitName'.
-     */
-    public void setLastCvsCommitName(String lastCvsCommitName) {
-        this.lastCvsCommitName = lastCvsCommitName;
+    public void setCoverageSourceFileAnalysis(CoverageSourceFileAnalysis coverageSourceFileAnalysis) {
+        this.coverageSourceFileAnalysis = coverageSourceFileAnalysis;
     }
 
-    public String getPreviousLastCvsCommitName() {
-        if (parent == null) {
-            //  root node
-            CoverageResult previousResult = getPreviousResult();
-            if (previousResult == null)
-                return null;
-            return previousResult.getLastCvsCommitName();
-        }
-        return parent.getPreviousLastCvsCommitName();
-    }
+    public static class JSRelativeCoverageResult {
 
-    public void setVcsRootPath(String vcsRootPath) {
-        this.vcsRootPath = vcsRootPath;
-    }
+        private String branch;
+        private String commit;
+        private String targetBranch;
+        private String targetCommit;
+        private List<CoverageResult.JSCoverageResult> results;
 
-    public String getVcsRootPath() {
-        if (parent == null)
-            return this.vcsRootPath;
-        return parent.getVcsRootPath();
-    }
-
-    /**
-     * @see io.jenkins.plugins.coverage.CoverageProcessor#performCoverageReport(List, List, List)
-     */
-    public void resolveVcsLastCommit(String vcsRootPath) {
-        this.vcsRootPath = vcsRootPath;
-
-        String lastCommitName = JGitUtil.getLastCommit(vcsRootPath);
-        if (null != lastCommitName) {
-            this.setLastCvsCommitName(lastCommitName);
-        }
-    }
-
-    public List<CoverageRelativeResultElement> getCoverageRelativeResultElement() {
-        List<CoverageRelativeResultElement> relativeResults = new ArrayList<>();
-
-        if (CoverageElement.FILE.equals(this.getElement())) {
-            //  diff between two commit.
-            List<SourceCodeFile> scbInfo = JGitUtil.analysisAddCodeBlock(getVcsRootPath(), getPreviousLastCvsCommitName(), getLastCvsCommitName());
-            if (scbInfo == null || scbInfo.isEmpty())
-                return relativeResults;
-
-            scbInfo.stream()
-                    .filter(p -> p.getPath().endsWith(this.relativeSourcePath))
-                    .findFirst()
-                    .ifPresent(scf -> {
-                        int[] lines = scf.getBlocks()
-                                .stream()
-                                .flatMapToInt(block -> IntStream.rangeClosed((int) (block.getStartLine() + 1), (int) block.getEndLine())
-                                        .filter(line -> paint.isPainted(line))
-                                ).toArray();
-                        long missed = Arrays.stream(lines).filter(line -> paint.getHits(line) <= 0).count();
-                        long covered = Arrays.stream(lines).filter(line -> paint.getHits(line) > 0).count();
-                        relativeResults.add(new CoverageRelativeResultElement(this.relativeSourcePath, Ratio.create(covered, missed + covered)));
-                    });
+        public JSRelativeCoverageResult(CoverageSourceFileAnalysis current, CoverageSourceFileAnalysis target, List<CoverageResult.JSCoverageResult> results) {
+            if (current != null) {
+                this.branch = current.getBranchName();
+                this.commit = current.getLastCommitName().substring(0, 8);
+            }
+            if (target != null) {
+                this.targetBranch = target.getBranchName();
+                if (target.getLastCommitName() == null || target.getLastCommitName().length() <= 8) {
+                    this.targetCommit = target.getLastCommitName();
+                } else {
+                    this.targetCommit = target.getLastCommitName().substring(0, 8);
+                }
+            }
+            this.results = results;
         }
 
-        //  collect children
-        List<CoverageRelativeResultElement> childList = this.children.entrySet()
-                .parallelStream()
-                .flatMap((Function<Map.Entry<String, CoverageResult>, Stream<CoverageRelativeResultElement>>) entry -> entry.getValue().getCoverageRelativeResultElement().parallelStream())
-                .collect(Collectors.toList());
-        relativeResults.addAll(childList);
+        public String getBranch() {
+            return branch;
+        }
 
-        return relativeResults;
+        public String getCommit() {
+            return commit;
+        }
+
+        public String getTargetBranch() {
+            return targetBranch;
+        }
+
+        public String getTargetCommit() {
+            return targetCommit;
+        }
+
+        public List<CoverageResult.JSCoverageResult> getResults() {
+            return results;
+        }
     }
 
     public static class JSCoverageResult {

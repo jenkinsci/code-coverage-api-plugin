@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.source.util;
+package io.jenkins.plugins.coverage.source.code;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -7,6 +7,7 @@ import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.patch.HunkHeader;
@@ -34,6 +35,18 @@ public abstract class JGitUtil {
     }
 
     private static final WeakHashMap<String, List<SourceCodeFile>> CACHE_MAP = new WeakHashMap<>();
+
+    /**
+     * @return the branch's name
+     */
+    public static String getCurrentBranchName(String gitRepoPath) {
+        try (Git git = Git.open(new File(gitRepoPath)); Repository repo = git.getRepository()) {
+            return repo.getBranch();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "*";
+        }
+    }
 
     /**
      * Get the last commit's SHA-1

@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.source.util;
+package io.jenkins.plugins.coverage.source.code;
 
 import java.io.Serializable;
 

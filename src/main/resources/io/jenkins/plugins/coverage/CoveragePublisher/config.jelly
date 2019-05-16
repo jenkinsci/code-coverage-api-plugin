@@ -21,20 +21,12 @@
             </div>
             <br/>
         </f:entry>
-        <f:entry title="${%VCS Root Path}">
-            <table width="100%" border='0' cellspacing='0' padding="0">
-                <tr>
-                    <td>
-                        <f:textbox field="vcsRootPath"/>
-                    </td>
-                </tr>
-            </table>
-        </f:entry>
         <f:entry title="${%Global Thresholds}">
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
         </f:entry>
         <f:property field="sourceFileResolver" propertyDescriptor="${descriptor.getSourceFileResolverDescriptor()}"/>
+        <f:property field="sourceFileCoverageAnalysisResolver" propertyDescriptor="${descriptor.getRelativeCoverageSummaryLevelDescriptor()}"/>
 
     </f:advanced>
 </j:jelly>

@@ -19,7 +19,7 @@
                 <div id="trendChart" style="width:800px;height:100%;">
                 </div>
                 <j:if test="${it.aggregatedLevel}">
-                    <j:if test="${it.coverageRelativeResultElement.size() != 0}">
+                    <j:if test="${it.coverageRelativeResult.getElements().size() != 0}">
                         <div id="relativeSummaryChart" style="width:800px;height:100%;">
                         </div>
                         <script>
@@ -27,8 +27,9 @@
 
                             var coverageChartGenerator = new CoverageChartGenerator()
                             instance.getCoverageRelativeResult(function(t) {
-                                var results = t.responseObject();
-                                coverageChartGenerator.generateSummaryChart(results, 'relativeSummaryChart', "Relative Summary")
+                                var rd = t.responseObject();
+                                var title = "Compare [" + rd.branch + ":" + rd.commit + "] With [" + rd.targetBranch + ":" + rd.targetCommit + "]";
+                                coverageChartGenerator.generateSummaryChart(rd.results, 'relativeSummaryChart', title)
                             });
                         </script>
                     </j:if>

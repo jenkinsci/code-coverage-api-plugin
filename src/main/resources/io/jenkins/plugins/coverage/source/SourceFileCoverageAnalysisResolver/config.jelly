@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry title="${%Source Code Coverage Analysis}">
+        <f:entry title="${%VCS Root Path}" field="level">
+            <f:textbox field="rootPath"/>
+        </f:entry>
+        <f:entry title="${%VCS Branch Name Match RegEx}" field="level">
+            <f:textbox field="branchNameMatchRegex"/>
+        </f:entry>
+        <f:entry title="${% Coverage Analysis Level}" field="level">
+            <select class="setting-input" name="level">
+                <j:forEach var="i" items="${descriptor.doItems()}">
+                    <f:option selected="${i.value==instance.level}" value="${i.name}">${i.value}</f:option>
+                </j:forEach>
+            </select>
+        </f:entry>
+    </f:entry>
+</j:jelly>

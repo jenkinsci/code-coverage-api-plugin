@@ -13,9 +13,11 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.source.SourceFileCoverageAnalysisResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.CoverageSourceFileAnalysis;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import jenkins.MasterToSlaveFileCallable;
@@ -47,10 +49,8 @@ public class CoverageProcessor {
     private String globalTag;
 
     private SourceFileResolver sourceFileResolver;
-    /**
-     * the version control system root path.
-     */
-    private String vcsRootPath;
+
+    private SourceFileCoverageAnalysisResolver sourceFileCoverageAnalysisResolver;
 
     /**
      * @param run       a build this is running as a part of
@@ -98,13 +98,13 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
-        if (this.vcsRootPath != null
-                && !this.vcsRootPath.isEmpty()) {
-            FilePath vcsRootPath = workspace.child(getVcsRootPath());
-            if (!vcsRootPath.exists()) {
-                listener.getLogger().printf("VCS root path not exists. path: %s", vcsRootPath.getRemote());
+        if (this.sourceFileCoverageAnalysisResolver != null) {
+            FilePath rootFilePath = workspace.child(sourceFileCoverageAnalysisResolver.getRootPath());
+            if (!rootFilePath.exists()) {
+                listener.getLogger().printf("VCS root path not exists. path: %s", rootFilePath.getRemote());
             } else {
-                coverageReport.resolveVcsLastCommit(vcsRootPath.getRemote());
+                CoverageSourceFileAnalysis sourceAnalysis = this.sourceFileCoverageAnalysisResolver.resolveCoverageSourceFileVCS(run, workspace, listener, rootFilePath.getRemote(), sourceFileCoverageAnalysisResolver);
+                coverageReport.setCoverageSourceFileAnalysis(sourceAnalysis);
             }
         }
 
@@ -464,22 +464,12 @@ public class CoverageProcessor {
         this.globalTag = globalTag;
     }
 
-    /**
-     * Getter for vcsRootPath.
-     *
-     * @return vcsRootPath
-     */
-    public String getVcsRootPath() {
-        return this.vcsRootPath;
+    public SourceFileCoverageAnalysisResolver getSourceFileCoverageAnalysisResolver() {
+        return sourceFileCoverageAnalysisResolver;
     }
 
-    /**
-     * Setter for vcsRootPath.
-     *
-     * @param vcsRootPath value to set for vcsRootPath
-     */
-    public void setVcsRootPath(String vcsRootPath) {
-        this.vcsRootPath = vcsRootPath;
+    public void setSourceFileCoverageAnalysisResolver(SourceFileCoverageAnalysisResolver sourceFileCoverageAnalysisResolver) {
+        this.sourceFileCoverageAnalysisResolver = sourceFileCoverageAnalysisResolver;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {
