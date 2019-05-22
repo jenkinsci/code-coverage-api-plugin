@@ -158,51 +158,51 @@ public class CoverageProcessor {
     private void setDiffInCoverageForChangeRequest(CoverageResult coverageReport) {
         // Use limited number of builds to don't search too long
         final int numberOfBuildsFromTargetBranch = 50;
+
         // Calculate diff only for line coverage
         Ratio changeRequestLinesCoverage = coverageReport.getCoverage(CoverageElement.LINE);
-
-        ItemGroup parent = null;
-        SCMRevision currentBuildSCMRevision = null;
-        SCMHead currentBuildSCMHead = null;
-
-        Job targetBranchJob = null;
-        int targetBranchSCMHash = 0;
-        Run buildToTakeCoverageFrom = null;
-        Ratio targetBranchLinesCoverage = null;
-
-
         if (changeRequestLinesCoverage == null) {
             return;
         }
-        Job job = run.getParent();
-        parent = job.getParent();
 
+        Job job = run.getParent();
+        ItemGroup parent = job.getParent();
         if (!(parent instanceof MultiBranchProject)) {
             return;
         }
-        currentBuildSCMHead = SCMHead.HeadByItem.findHead(job);
 
+        SCMHead currentBuildSCMHead = SCMHead.HeadByItem.findHead(job);
         if (!(currentBuildSCMHead instanceof ChangeRequestSCMHead)) {
+            listener.getLogger().println(
+                    "Current build is not change request build, won't calculate coverage diff");
             return;
         }
+
         SCMRevisionAction scmRevisionAction = run.getAction(SCMRevisionAction.class);
         if (scmRevisionAction == null) {
             return;
         }
-        currentBuildSCMRevision = scmRevisionAction.getRevision();
 
+        SCMRevision currentBuildSCMRevision = scmRevisionAction.getRevision();
         if (!(currentBuildSCMRevision instanceof ChangeRequestSCMRevision)) {
             return;
         }
+
         // Get target branch revision to compare coverage with
-        targetBranchSCMHash = ((ChangeRequestSCMRevision) currentBuildSCMRevision).getTarget().hashCode();
+        int targetBranchSCMHash = ((ChangeRequestSCMRevision) currentBuildSCMRevision).getTarget().hashCode();
         SCMHead targetBranchSCMHead = ((ChangeRequestSCMHead) currentBuildSCMHead).getTarget();
         String targetBranchName = targetBranchSCMHead.getName();
 
-        targetBranchJob = ((MultiBranchProject) parent).getItemByBranchName(targetBranchName);
+        listener.getLogger().println(
+                String.format("Calculating coverage change for change request build is enabled, target branch %s", targetBranchName));
+
+        Job targetBranchJob = ((MultiBranchProject) parent).getItemByBranchName(targetBranchName);
         if (targetBranchJob == null) {
             return;
         }
+
+        Run buildToTakeCoverageFrom = null;
+
         // Search for a build from the target branch job to compare coverage with
         RunList<Run> buildsFromTargetBranchJob = ((RunList<Run>)targetBranchJob.getBuilds()).limit(numberOfBuildsFromTargetBranch);
         for (Run targetBranchBuild: buildsFromTargetBranchJob){
@@ -214,6 +214,7 @@ public class CoverageProcessor {
                 }
             }
         }
+
         if (buildToTakeCoverageFrom == null) {
             return;
         }
@@ -225,7 +226,7 @@ public class CoverageProcessor {
         if (targetBranchCoverageResult == null) {
             return;
         }
-        targetBranchLinesCoverage = targetBranchCoverageResult.getCoverage(CoverageElement.LINE);
+        Ratio targetBranchLinesCoverage = targetBranchCoverageResult.getCoverage(CoverageElement.LINE);
         if (targetBranchLinesCoverage == null) {
             return;
         }
