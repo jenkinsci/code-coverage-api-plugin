@@ -2,6 +2,7 @@ Changelog
 ===
 # 1.0.11
 Release date: May 22, 2019
+
 Features:
 * [PR #83](https://github.com/jenkinsci/code-coverage-api-plugin/pull/83) - Show diff in coverage for change request builds.
 
