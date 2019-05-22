@@ -1,5 +1,14 @@
 Changelog
 ===
+# 1.0.11
+Release date: May 22, 2019
+Features:
+* [PR #83](https://github.com/jenkinsci/code-coverage-api-plugin/pull/83) - Show diff in coverage for change request builds.
+
+Fix issues:
+* [PR #85](https://github.com/jenkinsci/code-coverage-api-plugin/pull/85) - Globals Thresholds show repeated optional value.
+* [PR #86](https://github.com/jenkinsci/code-coverage-api-plugin/pull/86) - Source files partially copied when transient agent is destroyed.
+
 # 1.0.10
 Release date: Apr 29, 2019
 
@@ -7,7 +16,7 @@ Enhancements:
 * Add source file path support
 * Improve performance of copying source files
 
-Fix Issues:
+Fix issues:
 * Add serialVersionUID to CoverageElement and use custom ObjectInputStream to keep backwards compatibility.
 
 # 1.0.9
