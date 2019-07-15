@@ -17,16 +17,16 @@ import org.w3c.dom.Document;
 import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 
 public abstract class CoverageReportAdapter extends CoverageAdapter {
 
     // ant path of report files
     private final String path;
+    private boolean mergeToOneReport = false;
+
     private List<Threshold> thresholds = new LinkedList<>();
 
     /**
@@ -36,6 +36,15 @@ public abstract class CoverageReportAdapter extends CoverageAdapter {
         this.path = path;
     }
 
+
+    @DataBoundSetter
+    public void setMergeToOneReport(boolean mergeToOneReport) {
+        this.mergeToOneReport = mergeToOneReport;
+    }
+
+    public boolean isMergeToOneReport() {
+        return mergeToOneReport;
+    }
 
     /**
      * Get {@link CoverageResult} from report file.
