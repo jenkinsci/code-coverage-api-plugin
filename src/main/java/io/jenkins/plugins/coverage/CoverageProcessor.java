@@ -348,7 +348,7 @@ public class CoverageProcessor {
             }
             if (adapter.isMergeToOneReport()) {
                 List<CoverageResult> resultOfAdapter = results.get(adapter);
-                if (resultOfAdapter == null || resultOfAdapter.size() == 0) {
+                if (resultOfAdapter == null || resultOfAdapter.size() <= 1) {
                     continue;
                 }
                 CoverageResult report = aggregateToOneReport(adapter, resultOfAdapter);
