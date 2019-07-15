@@ -14,6 +14,9 @@
     <f:advanced>
         <j:set var="coverageElementType" value="${descriptor.coverageElementType}"/>
 
+        <f:entry title="Merge to one report" decription="merge all reports found by this adapter into one report">
+            <f:checkbox field="mergeToOneReport"/>
+        </f:entry>
         <f:entry title="Thresholds">
             <f:repeatableProperty field="thresholds">
             </f:repeatableProperty>

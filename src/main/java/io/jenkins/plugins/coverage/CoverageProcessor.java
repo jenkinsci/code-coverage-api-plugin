@@ -81,7 +81,7 @@ public class CoverageProcessor {
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
-        CoverageResult coverageReport = aggregatedResults(results);
+        CoverageResult coverageReport = aggregateReports(results);
         if (coverageReport == null) {
             return;
         }
@@ -335,7 +335,6 @@ public class CoverageProcessor {
                         }
 
                         results.get(adapter).add(result);
-
                     }
                 } catch (CoverageException e) {
                     e.printStackTrace();
@@ -347,6 +346,16 @@ public class CoverageProcessor {
                     FileUtils.deleteQuietly(foundedFile);
                 }
             }
+            if (adapter.isMergeToOneReport()) {
+                List<CoverageResult> resultOfAdapter = results.get(adapter);
+                if (resultOfAdapter == null || resultOfAdapter.size() == 0) {
+                    continue;
+                }
+                CoverageResult report = aggregateToOneReport(adapter, resultOfAdapter);
+                resultOfAdapter.clear();
+                resultOfAdapter.add(report);
+            }
+
         }
 
 
@@ -457,12 +466,35 @@ public class CoverageProcessor {
 
 
     /**
+     * aggregate coverage results into one report
+     * @param adapter CoverageAdapter
+     * @param results CoverageResults converted by adapter
+     * @return Coverage report that have all coverage results
+     */
+    private CoverageResult aggregateToOneReport(CoverageReportAdapter adapter, List<CoverageResult> results) {
+        CoverageResult report = new CoverageResult(CoverageElement.REPORT, null, adapter.getDescriptor().getDisplayName() + ": " + adapter.getPath());
+
+        results.forEach(r -> {
+            if (r.getElement().equals(CoverageElement.REPORT)) {
+                try {
+                    report.merge(r);
+                } catch (CoverageException e) {
+                    listener.getLogger().printf("Failed to aggregate coverage report %s into one report, reason %s", r.getName(), e.getMessage());
+                }
+            } else {
+                r.resetParent(report);
+            }
+        });
+        return report;
+    }
+
+    /**
      * Aggregate results to a aggregated report.
      *
      * @param results results will be aggregated
      * @return aggregated report
      */
-    private CoverageResult aggregatedResults(Map<CoverageReportAdapter, List<CoverageResult>> results) {
+    private CoverageResult aggregateReports(Map<CoverageReportAdapter, List<CoverageResult>> results) {
         if (results.size() == 0) {
             return null;
         }
