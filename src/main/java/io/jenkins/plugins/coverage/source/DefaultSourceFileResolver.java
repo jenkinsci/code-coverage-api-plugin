@@ -127,6 +127,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
 
         try {
+            //TODO make this configurable
             latch.await(1, TimeUnit.HOURS);
         } catch (InterruptedException e) {
             e.printStackTrace();
