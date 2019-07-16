@@ -1,5 +1,12 @@
 Changelog
 ===
+# 1.0.13
+Release date: Jul 15, 2019
+
+Features:
+* [PR #95](https://github.com/jenkinsci/code-coverage-api-plugin/pull/95) - Support view columu for coverage.
+* [PR #98](https://github.com/jenkinsci/code-coverage-api-plugin/pull/98) - Support merge report in adapter level.
+
 # 1.0.11
 Release date: May 22, 2019
 
