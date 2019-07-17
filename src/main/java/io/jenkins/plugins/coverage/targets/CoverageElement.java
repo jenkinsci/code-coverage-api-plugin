@@ -17,6 +17,7 @@ public class CoverageElement implements Comparable<CoverageElement>, Serializabl
     public final static String COVERAGE_ELEMENT_TYPE_NONE = "None";
     public final static String COVERAGE_ELEMENT_TYPE_JAVA = "Java";
     public final static String COVERAGE_ELEMENT_TYPE_JAVASCRIPT = "JavaScript";
+    public final static String COVERAGE_ELEMENT_TYPE_D = "D";
 
     private final String name;
     private final int order;
