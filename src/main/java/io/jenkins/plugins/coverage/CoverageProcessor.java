@@ -136,7 +136,7 @@ public class CoverageProcessor {
 
                     Optional<CoverageResult> matchedTagReport;
                     if ((matchedTagReport = previousReports.stream()
-                            .filter(r -> r.getTag().equals(report.getTag()))
+                            .filter(r -> !StringUtils.isEmpty(r.getTag()) && r.getTag().equals(report.getTag()))
                             .findAny()).isPresent()) {
                         try {
                             matchedTagReport.get().merge(report);
