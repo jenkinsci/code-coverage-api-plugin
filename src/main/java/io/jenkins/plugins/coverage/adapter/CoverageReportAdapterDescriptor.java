@@ -21,4 +21,8 @@ public class CoverageReportAdapterDescriptor<T extends CoverageReportAdapter>
     public String getCoverageElementType() {
         return CoverageElement.COVERAGE_ELEMENT_TYPE_NONE;
     }
+
+    public boolean defaultMergeToOneReport() {
+        return false;
+    }
 }
