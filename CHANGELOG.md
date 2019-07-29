@@ -1,5 +1,14 @@
 Changelog
 ===
+# 1.0.13
+Release date: Jul 29, 2019
+
+Enhancemens:
+* [PR #104](https://github.com/jenkinsci/code-coverage-api-plugin/pull/104) - add a interface to provide default value for MergeToOneReport for adapter.
+
+Fix issues:
+* [PR #103](https://github.com/jenkinsci/code-coverage-api-plugin/pull/103) - NullPointerException when merge report between action.
+
 # 1.0.12
 Release date: Jul 15, 2019
 
