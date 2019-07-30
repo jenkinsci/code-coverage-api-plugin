@@ -48,7 +48,7 @@ var CoverageChartGenerator = function () {
         var stackedBarOption = {
 
             title: {
-                text: name + (isTitleHasLink?'(click to see more details)':'')
+                text: name + (isTitleHasLink?' (click to see more details)':'')
             },
 
             toolbox: {
