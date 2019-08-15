@@ -4,12 +4,7 @@ package io.jenkins.plugins.coverage;
 import com.google.common.collect.Sets;
 
 import hudson.FilePath;
-import hudson.model.HealthReport;
-import hudson.model.Job;
-import hudson.model.ItemGroup;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.remoting.VirtualChannel;
 import hudson.util.RunList;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
@@ -32,10 +27,24 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,26 +113,25 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
-        HealthReport healthReport = processThresholds(results, globalThresholds);
-
         if (calculateDiffForChangeRequests) {
             setDiffInCoverageForChangeRequest(coverageReport);
         }
-        convertResultToAction(coverageReport, healthReport);
+        CoverageAction action = convertResultToAction(coverageReport);
+
+        HealthReport healthReport = processThresholds(results, globalThresholds, action);
+        action.setHealthReport(healthReport);
     }
 
-    private void convertResultToAction(CoverageResult coverageReport, HealthReport healthReport) throws IOException {
+    private CoverageAction convertResultToAction(CoverageResult coverageReport) throws IOException {
         synchronized (CoverageProcessor.class) {
-
             CoverageAction previousAction = run.getAction(CoverageAction.class);
-
             if (previousAction == null) {
                 saveCoverageResult(run, coverageReport);
 
                 CoverageAction action = new CoverageAction(coverageReport);
-                action.setHealthReport(healthReport);
                 run.addAction(action);
 
+                return action;
             } else {
                 CoverageResult previousResult = previousAction.getResult();
                 Collection<CoverageResult> previousReports = previousResult.getChildrenReal().values();
@@ -151,6 +159,7 @@ public class CoverageProcessor {
 
                 previousResult.setOwner(run);
                 saveCoverageResult(run, previousResult);
+                return previousAction;
             }
         }
     }
@@ -204,8 +213,8 @@ public class CoverageProcessor {
         Run buildToTakeCoverageFrom = null;
 
         // Search for a build from the target branch job to compare coverage with
-        RunList<Run> buildsFromTargetBranchJob = ((RunList<Run>)targetBranchJob.getBuilds()).limit(numberOfBuildsFromTargetBranch);
-        for (Run targetBranchBuild: buildsFromTargetBranchJob){
+        RunList<Run> buildsFromTargetBranchJob = ((RunList<Run>) targetBranchJob.getBuilds()).limit(numberOfBuildsFromTargetBranch);
+        for (Run targetBranchBuild : buildsFromTargetBranchJob) {
             SCMRevisionAction targetBranchBuildRevision = targetBranchBuild.getAction(SCMRevisionAction.class);
             if (targetBranchBuildRevision != null) {
                 if (targetBranchBuildRevision.getRevision().hashCode() == targetBranchSCMHash) {
@@ -271,7 +280,7 @@ public class CoverageProcessor {
                     //if copy exist, it means there have reports have same name.
                     int i = 1;
                     while (copy.exists()) {
-                        copy = new File(runRootDir, String.format("%s(%d)", f.getName() , i++));
+                        copy = new File(runRootDir, String.format("%s(%d)", f.getName(), i++));
                     }
 
                     f.copyTo(new FilePath(copy));
@@ -380,13 +389,18 @@ public class CoverageProcessor {
      *
      * @param adapterWithResults Coverage report adapter and its correspond Coverage results.
      * @param globalThresholds   global threshold
+     * @param action             coverage action
      * @return Health report
      */
     private HealthReport processThresholds(Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
-                                           List<Threshold> globalThresholds) throws CoverageException {
+                                           List<Threshold> globalThresholds, CoverageAction action) throws CoverageException {
 
         int healthyCount = 0;
         int unhealthyCount = 0;
+        int unstableCount = 0;
+
+        Set<Threshold> unstableThresholds = new HashSet<>();
+        Set<Threshold> unhealthyThresholds = new HashSet<>();
 
         LinkedList<CoverageResult> resultTask = new LinkedList<>();
 
@@ -419,45 +433,56 @@ public class CoverageProcessor {
                         }
 
                         float percentage = ratio.getPercentageFloat();
-                        if (percentage < threshold.getUnhealthyThreshold()) {
-                            if (getFailUnhealthy() || threshold.isFailUnhealthy()) {
-                                throw new CoverageException(
-                                        String.format("Publish Coverage Failed (Unhealthy): %s coverage in %s is lower than %.2f",
-                                                threshold.getThresholdTarget(),
-                                                r.getName(), threshold.getUnhealthyThreshold()));
-                            } else {
-                                unhealthyCount++;
-                            }
+                        if (percentage < threshold.getUnstableThreshold()) {
+                            unstableCount++;
+                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f stable threshold\n",
+                                    threshold.getThresholdTarget(),
+                                    r.getElement().getName(),
+                                    r.getName(), threshold.getUnstableThreshold());
+                            unstableThresholds.add(threshold);
+                        } else if (percentage < threshold.getUnhealthyThreshold()) {
+                            unhealthyCount++;
+                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f healthy threshold\n",
+                                    threshold.getThresholdTarget(),
+                                    r.getElement().getName(),
+                                    r.getName(), threshold.getUnhealthyThreshold());
+                            unhealthyThresholds.add(threshold);
                         } else {
                             healthyCount++;
-                        }
-
-                        if (percentage < threshold.getUnstableThreshold()) {
-                            if (getFailUnstable()) {
-                                throw new CoverageException(
-                                        String.format("Publish Coverage Failed (Unstable): %s coverage in %s is lower than %.2f",
-                                                threshold.getThresholdTarget(),
-                                                r.getName(), threshold.getUnstableThreshold()));
-                            } else {
-                                run.setResult(Result.UNSTABLE);
-                            }
                         }
                     }
                 }
             }
         }
 
+        if (unstableCount > 0) {
+            if (getFailUnstable()) {
+                action.setFailMessage(String.format("Build failed because following metrics did not meet stability target: %s.", unstableThresholds.toString()));
+                throw new CoverageException(action.getFailMessage());
+            } else {
+                run.setResult(Result.UNSTABLE);
+            }
+        }
 
-        resultTask.addAll(
-                adapterWithResults.values().stream()
-                        .flatMap((Function<List<CoverageResult>, Stream<CoverageResult>>) Collection::stream)
-                        .collect(Collectors.toList()));
+        if (unhealthyCount > 0) {
+            if (getFailUnhealthy()) {
+                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.", unhealthyThresholds.toString()));
+                throw new CoverageException(action.getFailMessage());
+            }
+
+            unhealthyThresholds = unhealthyThresholds.stream().filter(Threshold::isFailUnhealthy)
+                    .collect(Collectors.toSet());
+            if (unhealthyThresholds.size() > 0) {
+                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.", unhealthyThresholds.toString()));
+                throw new CoverageException(action.getFailMessage());
+            }
+        }
 
         int score;
-        if (healthyCount == 0 && unhealthyCount == 0) {
+        if (healthyCount == 0 && unhealthyCount == 0 && unstableCount == 0) {
             score = 100;
         } else {
-            score = healthyCount * 100 / (healthyCount + unhealthyCount);
+            score = healthyCount * 100 / (healthyCount + unhealthyCount + unstableCount);
         }
         Localizable localizeDescription = Messages._CoverageProcessor_healthReportDescriptionTemplate(score);
 
@@ -467,6 +492,7 @@ public class CoverageProcessor {
 
     /**
      * aggregate coverage results into one report
+     *
      * @param adapter CoverageAdapter
      * @param results CoverageResults converted by adapter
      * @return Coverage report that have all coverage results
