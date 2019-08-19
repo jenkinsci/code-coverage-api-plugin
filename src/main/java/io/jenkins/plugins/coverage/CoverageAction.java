@@ -20,6 +20,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     private transient Run<?, ?> owner;
     private transient WeakReference<CoverageResult> report;
     private HealthReport healthReport;
+    private String failMessage;
 
 
     public CoverageAction(CoverageResult result) {
@@ -85,6 +86,14 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
 
     public void setHealthReport(HealthReport healthReport) {
         this.healthReport = healthReport;
+    }
+
+    public String getFailMessage() {
+        return failMessage;
+    }
+
+    public void setFailMessage(String failMessage) {
+        this.failMessage = failMessage;
     }
 
     private synchronized void setOwner(Run<?, ?> owner) {

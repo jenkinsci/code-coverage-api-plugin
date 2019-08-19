@@ -81,6 +81,14 @@ public class Threshold implements ExtensionPoint, Describable<Threshold>, Serial
         return Objects.hash(getThresholdTarget());
     }
 
+    @Override
+    public String toString() {
+        return thresholdTarget + " {" +
+                "unstableThreshold=" + unstableThreshold +
+                ", unhealthyThreshold=" + unhealthyThreshold +
+                "}";
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<Threshold> getDescriptor() {
