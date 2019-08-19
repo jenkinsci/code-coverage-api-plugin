@@ -94,7 +94,37 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
-        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+        j.assertLogContains("Build failed because following metrics did not meet health target", r);
+    }
+
+    @Test
+    public void testFailUnhealthyGracefully() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .setFailUnhealthy(true);
+
+        Threshold lineThreshold = new Threshold("Line");
+        lineThreshold.setUnhealthyThreshold(20);
+
+        builder.addGlobalThreshold(lineThreshold);
+
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Build failed because following metrics did not meet health target", r);
+        Assert.assertNotNull(r.getAction(CoverageAction.class));
+        Assert.assertNotNull(r.getAction(CoverageAction.class).getResult());
     }
 
     @Test
@@ -122,7 +152,37 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
-        j.assertLogContains("Publish Coverage Failed (Unstable):", r);
+        j.assertLogContains("Build failed because following metrics did not meet stability target", r);
+    }
+
+    @Test
+    public void testFailUnstableGracefully() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .setFailUnstable(true);
+
+        Threshold lineThreshold = new Threshold("Line");
+        lineThreshold.setUnstableThreshold(20);
+
+        builder.addGlobalThreshold(lineThreshold);
+
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("jacoco.xml")
+                .copyFrom(getClass().getResourceAsStream("jacoco.xml"));
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
+        j.assertLogContains("Build failed because following metrics did not meet stability target", r);
+        Assert.assertNotNull(r.getAction(CoverageAction.class));
+        Assert.assertNotNull(r.getAction(CoverageAction.class).getResult());
     }
 
     @Test
@@ -167,7 +227,7 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
-        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+        j.assertLogContains("Build failed because following metrics did not meet health target", r);
     }
 
     @Test
@@ -197,7 +257,7 @@ public class CoveragePublisherPipelineTest {
         Assert.assertNotNull(r);
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
-        j.assertLogContains("Publish Coverage Failed (Unhealthy):", r);
+        j.assertLogContains("Build failed because following metrics did not meet health target", r);
     }
 
 }
