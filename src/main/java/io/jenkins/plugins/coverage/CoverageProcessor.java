@@ -435,14 +435,14 @@ public class CoverageProcessor {
                         float percentage = ratio.getPercentageFloat();
                         if (percentage < threshold.getUnstableThreshold()) {
                             unstableCount++;
-                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f stable threshold\n",
+                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f stable threshold%n",
                                     threshold.getThresholdTarget(),
                                     r.getElement().getName(),
                                     r.getName(), threshold.getUnstableThreshold());
                             unstableThresholds.add(threshold);
                         } else if (percentage < threshold.getUnhealthyThreshold()) {
                             unhealthyCount++;
-                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f healthy threshold\n",
+                            listener.getLogger().printf("Code coverage enforcement failed: %s coverage in %s level '%s' is lower than %.2f healthy threshold%n",
                                     threshold.getThresholdTarget(),
                                     r.getElement().getName(),
                                     r.getName(), threshold.getUnhealthyThreshold());
