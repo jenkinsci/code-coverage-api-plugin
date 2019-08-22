@@ -61,6 +61,8 @@ public class CoverageProcessor {
     private boolean failUnstable;
     private boolean failNoReports;
 
+    private boolean applyThresholdRecursively;
+
     private String globalTag;
 
     private boolean calculateDiffForChangeRequests;
@@ -425,7 +427,10 @@ public class CoverageProcessor {
                     CoverageResult r = resultTask.pollFirst();
                     assert r != null;
 
-                    resultTask.addAll(r.getChildrenReal().values());
+                    // if apply threshold recursively is true, we will add all children to queue
+                    if (isApplyThresholdRecursively()) {
+                        resultTask.addAll(r.getChildrenReal().values());
+                    }
                     for (Threshold threshold : thresholds) {
                         Ratio ratio = r.getCoverage(threshold.getThresholdTargetElement());
                         if (ratio == null) {
@@ -599,6 +604,14 @@ public class CoverageProcessor {
 
     public void setGlobalTag(String globalTag) {
         this.globalTag = globalTag;
+    }
+
+    public boolean isApplyThresholdRecursively() {
+        return applyThresholdRecursively;
+    }
+
+    public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+        this.applyThresholdRecursively = applyThresholdRecursively;
     }
 
     /**

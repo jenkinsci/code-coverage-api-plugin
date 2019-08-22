@@ -73,7 +73,8 @@ public class CoveragePublisherPipelineTest {
     public void testFailUnhealthy() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
-                .setFailUnhealthy(true);
+                .setFailUnhealthy(true)
+                .setApplyThresholdRecursively(true);
 
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
@@ -101,7 +102,8 @@ public class CoveragePublisherPipelineTest {
     public void testFailUnhealthyGracefully() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
-                .setFailUnhealthy(true);
+                .setFailUnhealthy(true)
+                .setApplyThresholdRecursively(true);
 
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
@@ -131,7 +133,8 @@ public class CoveragePublisherPipelineTest {
     public void testFailUnstable() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
-                .setFailUnstable(true);
+                .setFailUnstable(true)
+                .setApplyThresholdRecursively(true);
 
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnstableThreshold(20);
@@ -159,7 +162,8 @@ public class CoveragePublisherPipelineTest {
     public void testFailUnstableGracefully() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
                 .addAdapter(new JacocoReportAdapter("jacoco.xml"))
-                .setFailUnstable(true);
+                .setFailUnstable(true)
+                .setApplyThresholdRecursively(true);
 
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnstableThreshold(20);
@@ -205,7 +209,8 @@ public class CoveragePublisherPipelineTest {
     @Test
     public void testGlobalThresholdFailUnhealthy() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
-                .addAdapter(new JacocoReportAdapter("jacoco.xml"));
+                .addAdapter(new JacocoReportAdapter("jacoco.xml"))
+                .setApplyThresholdRecursively(true);
 
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(20);
@@ -232,7 +237,8 @@ public class CoveragePublisherPipelineTest {
 
     @Test
     public void testAdapterThresholdFailUnhealthy() throws Exception {
-        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .setApplyThresholdRecursively(true);
 
         JacocoReportAdapter adapter = new JacocoReportAdapter("jacoco.xml");
 
