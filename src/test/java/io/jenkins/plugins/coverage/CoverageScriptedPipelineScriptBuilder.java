@@ -18,6 +18,7 @@ public class CoverageScriptedPipelineScriptBuilder {
     private boolean failUnhealthy;
     private boolean failUnstable;
     private boolean failNoReports;
+    private boolean applyThresholdRecursively;
 
     private CoverageScriptedPipelineScriptBuilder() {
     }
@@ -46,6 +47,7 @@ public class CoverageScriptedPipelineScriptBuilder {
         sb.append("failUnhealthy:").append(failUnhealthy);
         sb.append(",failUnstable:").append(failUnstable);
         sb.append(",failNoReports:").append(failNoReports);
+        sb.append(",applyThresholdRecursively:").append(applyThresholdRecursively);
 
         if (adapters.size() > 0) {
             sb.append(",adapters:[");
@@ -121,6 +123,11 @@ public class CoverageScriptedPipelineScriptBuilder {
 
     public CoverageScriptedPipelineScriptBuilder setFailNoReports(boolean failNoReports) {
         this.failNoReports = failNoReports;
+        return this;
+    }
+
+    public CoverageScriptedPipelineScriptBuilder setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+        this.applyThresholdRecursively = applyThresholdRecursively;
         return this;
     }
 

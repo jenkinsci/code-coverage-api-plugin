@@ -44,6 +44,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failUnstable;
     private boolean failNoReports;
 
+    private boolean applyThresholdRecursively;
+
     // TODO make sourceFileResolver more generic
     private DefaultSourceFileResolver sourceFileResolver;
 
@@ -86,6 +88,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
         processor.setFailNoReports(failNoReports);
+        processor.setApplyThresholdRecursively(applyThresholdRecursively);
 
         try {
             processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
@@ -175,6 +178,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
         this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
+    }
+
+    public boolean isApplyThresholdRecursively() {
+        return applyThresholdRecursively;
+    }
+
+    @DataBoundSetter
+    public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+        this.applyThresholdRecursively = applyThresholdRecursively;
     }
 
     @Symbol("publishCoverage")

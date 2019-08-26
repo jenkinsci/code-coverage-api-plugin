@@ -7,22 +7,20 @@
     </f:block>
 
     <f:advanced>
-        <f:entry title="${%Global Option}">
-
-            <br/>
-            <div>
-                <f:checkbox field="failUnhealthy" title="Failed if Unhealthy"/>
-            </div>
-            <div>
-                <f:checkbox field="failUnstable" title="Failed if Unstable"/>
-            </div>
-            <div>
-                <f:checkbox field="failNoReports" title="Failed if No Reports Found"/>
-            </div>
-            <div>
-                <f:checkbox field="calculateDiffForChangeRequests" title="If it is a change request build, calculate code coverage diff with a target branch build"/>
-            </div>
-            <br/>
+        <f:entry title="Apply threshold recursively" field="applyThresholdRecursively">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry title="Failed if Unhealthy" field="failUnhealthy">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry title="Failed if Unstable" field="failUnstable">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry field="failNoReports" title="Failed if No Reports Found">
+            <f:checkbox/>
+        </f:entry>
+        <f:entry field="calculateDiffForChangeRequests" title="Calculate diff from change requests">
+            <f:checkbox/>
         </f:entry>
         <f:entry title="${%Global Thresholds}">
             <f:repeatableProperty field="globalThresholds">
