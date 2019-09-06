@@ -5,6 +5,7 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import net.sf.saxon.TransformerFactoryImpl;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -67,8 +68,6 @@ public class XMLUtils {
             throw new FileNotFoundException("source File does not exist!");
         }
 
-
-        //TODO solve the xslt 2.0 support
         TransformerFactory transformerFactory = newSecureTransformerFactory();
         Transformer transformer;
         try {
@@ -201,7 +200,7 @@ public class XMLUtils {
     }
 
     private TransformerFactory newSecureTransformerFactory() {
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        TransformerFactory transformerFactory = new TransformerFactoryImpl();
         try {
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         } catch (TransformerConfigurationException e) {
