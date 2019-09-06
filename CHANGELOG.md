@@ -1,10 +1,23 @@
 Changelog
 ===
+# 1.1.0
+Release date: Sept 6, 2019
+
+Enhancements:
+* [PR #115](https://github.com/jenkinsci/code-coverage-api-plugin/pull/115) - Change the default applying strategy of threshold.
+  * This plugin now will only apply thresholds at top level. If you want to apply thresholds recurisively(the previous behaviour), you need to set the `applyThresholdRecursively` to true.
+* [PR #116](https://github.com/jenkinsci/code-coverage-api-plugin/pull/116) - Add support of XSLT 2.0.
+
+Fix issues:
+* [PR #108](https://github.com/jenkinsci/code-coverage-api-plugin/pull/108) - Change code coverage trend to use float format for coverage percentage.
+* [PR #113](https://github.com/jenkinsci/code-coverage-api-plugin/pull/113) - Failed the build gracefully when coverage enforcement is failed.
+* [PR #117](https://github.com/jenkinsci/code-coverage-api-plugin/pull/117) - Change the width of the chart in job page.
+
 # 1.0.13
 Release date: Jul 29, 2019
 
-Enhancemens:
-* [PR #104](https://github.com/jenkinsci/code-coverage-api-plugin/pull/104) - add a interface to provide default value for MergeToOneReport for adapter.
+Enhancements:
+* [PR #104](https://github.com/jenkinsci/code-coverage-api-plugin/pull/104) - Add a interface to provide default value for MergeToOneReport for adapter.
 
 Fix issues:
 * [PR #103](https://github.com/jenkinsci/code-coverage-api-plugin/pull/103) - NullPointerException when merge report between action.
