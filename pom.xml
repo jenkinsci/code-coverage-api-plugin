@@ -23,6 +23,8 @@
     </properties>
     <name>Code Coverage API Plugin</name>
     <description>Code Coverage API Plugin</description>
+    <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
+    
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
         <license>
@@ -139,13 +141,12 @@
         </plugins>
     </build>
 
-    <!--<url>https://wiki.jenkins.io/display/JENKINS/TODO+Plugin</url>-->
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <repositories>
         <repository>
