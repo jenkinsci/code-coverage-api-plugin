@@ -1,0 +1,4 @@
+_extends: .github
+tag-template: code-coverage-api-$NEXT_PATCH_VERSION
+name-template: Code Coverage API Plugin $NEXT_PATCH_VERSION
+version-template: $MAJOR.$MINOR.$PATCH
