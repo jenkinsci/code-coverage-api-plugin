@@ -12,7 +12,7 @@
             </div>
             <j:set var="targetBranchBuild" value="${lastResult.getLinkToBuildThatWasUsedForComparison()}" />
             <j:if test="${targetBranchBuild != null}">
-                <div class="changeRequestInformation" style="width:600px; height:100%; text-align:center;">
+                <div class="changeRequestInformation" style="width:500px; height:100%; text-align:center;">
                     <j:set var="coverageDiff" value="${lastResult.getChangeRequestCoverageDiffWithTargetBranch()}" />
                     <j:choose>
                         <j:when test="${coverageDiff gt 0}">
@@ -33,7 +33,7 @@
                     </j:choose>
                 </div>
             </j:if>
-            <div id="summaryChart" style="width:600px;height:100%;">
+            <div id="summaryChart" style="width:500px;height:100%;">
             </div>
             <script>
                 var instance =<st:bind value="${lastResult}"/>;
