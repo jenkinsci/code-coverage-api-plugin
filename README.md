@@ -4,7 +4,7 @@
 [![Gitter](https://badges.gitter.im/jenkinsci/code-coverage-api-plugin.svg)](https://gitter.im/jenkinsci/code-coverage-api-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
-This plugin serves as API to integrate and publish multiple coverage report types. 
+This plugin serves as API to integrate and publish multiple coverage report types.
 More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
 ## Features
@@ -104,7 +104,7 @@ More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/do
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
 ##### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
 ##### 6. (Optional) Specify Source code storing level to enable source code navigation.
-![alt text](./images/config.png "Config") 
+![alt text](./images/config.png "Config")
 
 ## Pipeline example
 We also support pipeline configuration, you can generate pipeline code in Jenkins Snippet Generator.
@@ -139,10 +139,15 @@ node {
     }
 }
 ```
-## REST API
-REST API
-We provide a REST API to retrieve coverage data:
+##### Merging Reports
+There is also a possibility to merge multiple reports (e.g. from multiple xml files) into one using the `mergeToOneReport` option with an ant-style path pattern.
+All reports found by the adapter will then be combined into a single report:
 
+```
+publishCoverage adapters: [jacocoAdapter(mergeToOneReport: true, path: '**/*.xml')]
+```
+## REST API
+We provide a REST API to retrieve coverage data:
 - Coverage result: `…​/{buildNumber}/coverage/…​/result/api/\{json|xml\}?depth={number}`
 - Trend result: `…​/{buildNumber}/coverage/…​/trend/api/\{json|xml\}?depth={number}`
 - Coverage result of last build: `…​/{buildNumber}/coverage/…​/last/result/api/\{json|xml\}?depth={number}`
