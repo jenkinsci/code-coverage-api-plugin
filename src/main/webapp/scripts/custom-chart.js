@@ -79,7 +79,8 @@ var CoverageChartGenerator = function () {
             },
             legend: {
                 data: ['Covered', 'Missed'],
-                right: 10
+                right: 10,
+                top: 25
             },
             grid: {
                 left: '3%',
