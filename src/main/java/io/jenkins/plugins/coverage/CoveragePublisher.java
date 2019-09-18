@@ -52,6 +52,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private String tag;
 
     private boolean calculateDiffForChangeRequests = false;
+    private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -85,6 +86,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         processor.setGlobalTag(tag);
         processor.setCalculateDiffForChangeRequests(calculateDiffForChangeRequests);
+        processor.setFailBuildIfCoverageDecreasedInChangeRequest(failBuildIfCoverageDecreasedInChangeRequest);
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
         processor.setFailNoReports(failNoReports);
@@ -178,6 +180,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
         this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
+    }
+
+    public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
+        return failBuildIfCoverageDecreasedInChangeRequest;
+    }
+
+    @DataBoundSetter
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failBuildIfCoverageDecreasedInChangeRequest) {
+        this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 
     public boolean isApplyThresholdRecursively() {

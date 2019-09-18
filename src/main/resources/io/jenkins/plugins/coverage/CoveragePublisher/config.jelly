@@ -19,9 +19,11 @@
         <f:entry field="failNoReports" title="Failed if No Reports Found">
             <f:checkbox/>
         </f:entry>
-        <f:entry field="calculateDiffForChangeRequests" title="Calculate diff from change requests">
-            <f:checkbox/>
-        </f:entry>
+        <f:optionalBlock field="calculateDiffForChangeRequests" title="Calculate diff from change requests" inline="true">
+            <f:entry field="failBuildIfCoverageDecreasedInChangeRequest" title="Fail the build in case of decrease">
+                <f:checkbox/>
+            </f:entry>
+        </f:optionalBlock>
         <f:entry title="${%Global Thresholds}">
             <f:repeatableProperty field="globalThresholds">
             </f:repeatableProperty>
