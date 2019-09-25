@@ -67,6 +67,8 @@ public class CoverageProcessor {
 
     private boolean calculateDiffForChangeRequests;
 
+    private boolean failBuildIfCoverageDecreasedInChangeRequest;
+
     private SourceFileResolver sourceFileResolver;
 
     /**
@@ -122,6 +124,9 @@ public class CoverageProcessor {
 
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
+        if (calculateDiffForChangeRequests && failBuildIfCoverageDecreasedInChangeRequest) {
+            failBuildIfChangeRequestDecreasedCoverage(coverageReport);
+        }
     }
 
     private CoverageAction convertResultToAction(CoverageResult coverageReport) throws IOException {
@@ -245,6 +250,12 @@ public class CoverageProcessor {
                 changeRequestLinesCoverage.getPercentageFloat() - targetBranchLinesCoverage.getPercentageFloat();
         coverageReport.setChangeRequestCoverageDiffWithTargetBranch(percentageDiff);
         coverageReport.setLinkToBuildThatWasUsedForComparison(buildToTakeCoverageFrom.getUrl());
+    }
+
+    private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
+        if (coverageResult.getChangeRequestCoverageDiffWithTargetBranch() < 0) {
+            throw new CoverageException("Fail build because this change request decreases code coverage");
+        }
     }
 
     /**
@@ -630,6 +641,15 @@ public class CoverageProcessor {
      */
     public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
         this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
+    }
+
+
+    public boolean isFailBuildIfCoverageDecreasedInChangeRequest() {
+        return failBuildIfCoverageDecreasedInChangeRequest;
+    }
+
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failBuildIfCoverageDecreasedInChangeRequest) {
+        this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 
     private static class FindReportCallable extends MasterToSlaveFileCallable<FilePath[]> {
