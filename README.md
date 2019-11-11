@@ -25,6 +25,7 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 #### Other plugins as an Extension of Code Coverage API plugin
 - [Cobertura](http://cobertura.github.io/cobertura/) ([Cobertura Plugin](https://github.com/jenkinsci/cobertura-plugin))
 - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst) ([llvm-cov plugin](https://github.com/jenkinsci/llvm-cov-plugin))
+- [OpenCover](https://github.com/OpenCover/opencover) ([OpenCover Plugin](https://github.com/jenkinsci/opencover-plugin))
 
 ## Release Notes
 See the [CHANGELOG](CHANGELOG.md).
