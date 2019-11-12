@@ -32,6 +32,7 @@ import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import jenkins.MasterToSlaveFileCallable;
+import jenkins.util.Timer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.Symbol;
@@ -41,8 +42,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
@@ -80,11 +79,10 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         listener.getLogger().printf("%d source files need to be copied%n", paints.size());
 
-        ExecutorService service = Executors.newFixedThreadPool(5);
         // wait until all tasks completed
         CountDownLatch latch = new CountDownLatch(paints.entrySet().size());
 
-        paints.forEach((sourceFilePath, paint) -> service.submit(() -> {
+        paints.forEach((sourceFilePath, paint) -> Timer.get().submit(() -> {
             try {
                 FilePath[] possibleFiles;
                 try {
