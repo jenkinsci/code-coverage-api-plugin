@@ -40,10 +40,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -80,59 +76,42 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         listener.getLogger().printf("%d source files need to be copied%n", paints.size());
 
-        ExecutorService service = Executors.newFixedThreadPool(5);
-        // wait until all tasks completed
-        CountDownLatch latch = new CountDownLatch(paints.entrySet().size());
-
-        paints.forEach((sourceFilePath, paint) -> service.submit(() -> {
+        paints.forEach((sourceFilePath, paint) -> {
+            FilePath[] possibleFiles;
             try {
-                FilePath[] possibleFiles;
+                if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
+                    possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
+                } else {
+                    possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath));
+                }
+            } catch (IOException | InterruptedException e) {
+                listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                return;
+            }
+            if (possibleFiles != null && possibleFiles.length > 0) {
+                FilePath source = possibleFiles[0];
+                FilePath copiedSource = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath + "_copied"));
                 try {
-                    if (getPossiblePaths() != null && getPossiblePaths().size() > 0) {
-                        possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath, getPossiblePaths()));
-                    } else {
-                        possibleFiles = workspace.act(new FindSourceFileCallable(sourceFilePath));
-                    }
+                    source.copyTo(copiedSource);
                 } catch (IOException | InterruptedException e) {
                     listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                     return;
                 }
-                if (possibleFiles != null && possibleFiles.length > 0) {
-                    FilePath source = possibleFiles[0];
-                    FilePath copiedSource = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath + "_copied"));
-                    try {
-                        source.copyTo(copiedSource);
-                    } catch (IOException | InterruptedException e) {
-                        listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
-                        return;
-                    }
 
-                    FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
+                FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sourceFilePath));
 
-                    try {
-                        paintSourceCode(copiedSource, paint, buildDirSourceFile);
-                    } catch (CoverageException e) {
-                        listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
-                    }
-
-                    deleteFilePathQuietly(copiedSource);
-                } else {
-                    listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
+                try {
+                    paintSourceCode(copiedSource, paint, buildDirSourceFile);
+                } catch (CoverageException e) {
+                    listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
                 }
-            } finally {
-                // ensure latch will count down
-                latch.countDown();
+
+                deleteFilePathQuietly(copiedSource);
+            } else {
+                listener.getLogger().printf("Cannot found source file for %s%n", sourceFilePath);
             }
-        }));
 
-
-        try {
-            //TODO make this configurable
-            latch.await(1, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new IOException("Unable to copy source files", e);
-        }
+        });
     }
 
 
