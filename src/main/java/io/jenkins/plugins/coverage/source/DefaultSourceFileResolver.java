@@ -225,6 +225,17 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
+            // if sourceFilePath is a absolute path check if it is under the workspace directory
+            if (sourceFilePath.startsWith(File.separator)) {
+                if (sourceFilePath.startsWith(f.getAbsolutePath())) {
+                    sourceFile = new File(sourceFilePath);
+                    if (sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead()) {
+                        return new FilePath[]{new FilePath(sourceFile)};
+                    }
+                }
+            }
+
+
             return new FilePath(f).list("**/" + sourceFilePath);
         }
     }
