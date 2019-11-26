@@ -112,10 +112,7 @@
                                         <th colspan="3">${it.relativeSourcePath}</th>
                                     </tr>
                                 </thead>
-                                <pre>
-                                    <j:out value="${it.sourceFileContent}"/>
-                                </pre>
-
+                                <j:out value="${it.sourceFileContent}"/>
                             </table>
                         </div>
                     </j:when>
