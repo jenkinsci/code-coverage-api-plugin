@@ -286,7 +286,7 @@ public class CoveragePublisherPipelineTest {
         workspace.child("cc.js")
                 .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
 
-        String absoluteSourceFilePath = workspace.toURI().getPath() + "cc.js";
+        String absoluteSourceFilePath = workspace.child("cc.js").getRemote();
 
         String sourceFileContent = workspace
                 .child("cobertura-coverage.xml")
@@ -304,7 +304,7 @@ public class CoveragePublisherPipelineTest {
 
         File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + absoluteSourceFilePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
 
-        Assert.assertTrue(sourceFile.exists());
+        Assert.assertTrue(String.format("Source file path %s", absoluteSourceFilePath), sourceFile.exists());
     }
 
     @Test
