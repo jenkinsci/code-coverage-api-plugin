@@ -6,6 +6,7 @@ import hudson.model.Result;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -15,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.io.File;
 import java.util.Objects;
 
 public class CoveragePublisherPipelineTest {
@@ -264,6 +266,84 @@ public class CoveragePublisherPipelineTest {
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
         j.assertLogContains("Build failed because following metrics did not meet health target", r);
+    }
+
+    @Test
+    public void testAbsolutePathSourceFile() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .setEnableSourceFileResolver(true);
+
+        CoberturaReportAdapter adapter = new CoberturaReportAdapter("cobertura-coverage.xml");
+        builder.addAdapter(adapter);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        workspace.child("cc.js")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        String absoluteSourceFilePath = workspace.toURI().getPath() + "cc.js";
+
+        String sourceFileContent = workspace
+                .child("cobertura-coverage.xml")
+                .readToString()
+                .replaceAll("cc.js", absoluteSourceFilePath);
+
+        workspace.child("cobertura-coverage.xml")
+                .write(sourceFileContent, "utf-8");
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
+
+        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + absoluteSourceFilePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
+
+        Assert.assertTrue(sourceFile.exists());
+    }
+
+    @Test
+    public void testRelativePathSourceFile() throws Exception {
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .setEnableSourceFileResolver(true);
+
+        CoberturaReportAdapter adapter = new CoberturaReportAdapter("cobertura-coverage.xml");
+        builder.addAdapter(adapter);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        workspace.child("cc.js")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        String relativeSourcePath = "cc.js";
+
+        String sourceFileContent = workspace
+                .child("cobertura-coverage.xml")
+                .readToString()
+                .replaceAll("cc.js", relativeSourcePath);
+
+        workspace.child("cobertura-coverage.xml")
+                .write(sourceFileContent, "utf-8");
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
+
+        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
+
+        Assert.assertTrue(sourceFile.exists());
     }
 
 }

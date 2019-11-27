@@ -207,9 +207,19 @@ public class CoverageResult implements Serializable, Chartable {
      */
     private File getSourceFile() {
         if (hasPermission()) {
-            return new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            File sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(relativeSourcePath));
+            if (sourceFile.exists()) {
+                return sourceFile;
+            } else {
+                // keep compatibility
+                new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            }
         }
         return null;
+    }
+
+    private String sanitizeFilename(String inputName) {
+        return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
     /**
