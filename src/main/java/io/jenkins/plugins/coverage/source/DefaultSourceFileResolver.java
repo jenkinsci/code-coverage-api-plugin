@@ -40,6 +40,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
@@ -186,12 +187,11 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             }
 
             // if sourceFilePath is a absolute path check if it is under the workspace directory
-            if (sourceFilePath.startsWith(File.separator)) {
-                if (sourceFilePath.startsWith(workspace.getAbsolutePath())) {
-                    sourceFile = new File(sourceFilePath);
-                    if (sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead()) {
-                        return new FilePath(sourceFile);
-                    }
+            if (Paths.get(sourceFilePath).isAbsolute()
+                    && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
+                sourceFile = new File(sourceFilePath);
+                if (isValidSourceFile(sourceFile)) {
+                    return new FilePath(sourceFile);
                 }
             }
 
@@ -225,12 +225,12 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                         } else {
                             output.write("<tr class=\"coverNone\">\n");
                         }
-                        output.write("<td class=\"line\"><a name='" + line + "'/>" + line + "</td>\n");
+                        output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
                         output.write("<td class=\"hits\">" + hits + "</td>\n");
                     } else {
                         output.write("<tr class=\"noCover\">\n");
-                        output.write("<td class=\"line\"><a name='" + line + "'/>" + line + "</td>\n");
-                        output.write("<td class=\"hits\"/>\n");
+                        output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
+                        output.write("<td class=\"hits\"></td>\n");
                     }
                     output.write("<td class=\"code\">"
                             + content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "").replace("\r", "").replace(" ",

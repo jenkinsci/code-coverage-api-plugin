@@ -291,7 +291,7 @@ public class CoveragePublisherPipelineTest {
         String sourceFileContent = workspace
                 .child("cobertura-coverage.xml")
                 .readToString()
-                .replaceAll("cc.js", absoluteSourceFilePath);
+                .replace("filename=\"cc.js\"", "filename=\"" + absoluteSourceFilePath + "\"");
 
         workspace.child("cobertura-coverage.xml")
                 .write(sourceFileContent, "utf-8");
@@ -304,7 +304,12 @@ public class CoveragePublisherPipelineTest {
 
         File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + absoluteSourceFilePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
 
-        Assert.assertTrue(String.format("Source file path %s", absoluteSourceFilePath), sourceFile.exists());
+        System.out.println("Listing file below source files directory");
+        for (File file : Objects.requireNonNull(sourceFile.getParentFile().listFiles())) {
+            System.out.println(file.getAbsolutePath());
+        }
+
+        Assert.assertTrue(String.format("Source file path %s .%nDestination file path %s", absoluteSourceFilePath, sourceFile), sourceFile.exists());
     }
 
     @Test
