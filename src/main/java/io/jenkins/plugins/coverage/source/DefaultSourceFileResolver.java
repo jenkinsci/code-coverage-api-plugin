@@ -138,12 +138,12 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     } else {
                         output.write("<tr class=\"coverNone\">\n");
                     }
-                    output.write("<td class=\"line\"><a name='" + line + "'/>" + line + "</td>\n");
+                    output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
                     output.write("<td class=\"hits\">" + hits + "</td>\n");
                 } else {
                     output.write("<tr class=\"noCover\">\n");
-                    output.write("<td class=\"line\"><a name='" + line + "'/>" + line + "</td>\n");
-                    output.write("<td class=\"hits\"/>\n");
+                    output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
+                    output.write("<td class=\"hits\"></td>\n");
                 }
                 output.write("<td class=\"code\">"
                         + content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "").replace("\r", "").replace(" ",
