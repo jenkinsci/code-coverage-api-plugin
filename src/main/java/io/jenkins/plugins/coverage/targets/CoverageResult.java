@@ -21,6 +21,7 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -40,6 +41,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -210,10 +212,15 @@ public class CoverageResult implements Serializable, Chartable {
             File sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(relativeSourcePath));
             if (sourceFile.exists()) {
                 return sourceFile;
-            } else {
-                // keep compatibility
-                new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
             }
+            // keep compatibility
+            sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            if (sourceFile.exists()) {
+                return sourceFile;
+            }
+
+            // try to normalize file path
+            return Paths.get(sourceFile.getPath()).normalize().toFile();
         }
         return null;
     }
