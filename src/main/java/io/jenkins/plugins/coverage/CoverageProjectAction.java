@@ -53,7 +53,7 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
      */
     public CoverageAction getLastResult() {
         for (Run<?, ?> b = run.getParent().getLastSuccessfulBuild(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
-            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS))
+            if (b.getResult() != Result.SUCCESS && b.getResult() != Result.UNSTABLE)
                 continue;
             CoverageAction r = b.getAction(CoverageAction.class);
             if (r != null)
@@ -69,7 +69,7 @@ public class CoverageProjectAction extends Actionable implements ProminentProjec
      */
     public Integer getLastResultBuild() {
         for (Run<?, ?> b = run.getParent().getLastSuccessfulBuild(); b != null; b = BuildUtils.getPreviousNotFailedCompletedBuild(b)) {
-            if (b.getResult() == Result.FAILURE || (b.getResult() != Result.SUCCESS))
+            if (b.getResult() != Result.SUCCESS && b.getResult() != Result.UNSTABLE)
                 continue;
             CoverageAction r = b.getAction(CoverageAction.class);
             if (r != null)
