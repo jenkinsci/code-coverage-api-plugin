@@ -39,11 +39,10 @@
                 var instance =<st:bind value="${lastResult}"/>;
 
                 var coverageChartGenerator = new CoverageChartGenerator()
-                var name = "${it.xmlTransform(it.name)}";
 
                 instance.getResults(function(t) {
                 var results = t.responseObject();
-                coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
+                coverageChartGenerator.generateSummaryChart(results, 'summaryChart', "")
                 });
             </script>
         </div>

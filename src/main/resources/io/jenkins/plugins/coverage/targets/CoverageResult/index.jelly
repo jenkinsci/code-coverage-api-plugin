@@ -55,18 +55,18 @@
                         });
                     </script>
                     <j:forEach var="child" items="${it.children}">
-                        <div id="${it.urlTransform(it.xmlTransform(child))}" style="width:800px;height:100%;">
+                        <div id="${it.urlTransform(it.xmlTransform(child))}" data-filename="${it.xmlTransform(child)}" style="width:800px;height:100%;">
                         </div>
                         <script>
                             <st:bind value="${it.getChild(child)}"/>.getResults(function(t) {
                             var results = t.responseObject();
-                                coverageChartGenerator.generateSummaryChart(results, "${it.urlTransform(it.xmlTransform(child))}", "${it.xmlTransform(child)}", true)
+                                coverageChartGenerator.generateSummaryChart(results, "${it.urlTransform(it.xmlTransform(child))}", document.querySelector("#${it.urlTransform(it.xmlTransform(child))}").getAttribute('data-filename'), true)
                             });
                         </script>
                     </j:forEach>
                 </j:when>
                 <j:otherwise>
-                    <div id="summaryChart" style="width:800px;height:100%;">
+                    <div id="summaryChart" style="width:800px;height:100%;" data-summary-chart-name="${it.xmlTransform(it.name)}">
                     </div>
                     <br/>
                     <j:if test="${it.getChildren().size() != 0}">
@@ -77,7 +77,7 @@
                         var instance =<st:bind value="${it}"/>;
 
                         var coverageChartGenerator = new CoverageChartGenerator()
-                        var name = "${it.xmlTransform(it.name)}";
+                        var name = document.querySelector('#summaryChart').getAttribute("data-summary-chart-name")
 
                         instance.getResults(function(t) {
                             var results = t.responseObject();
