@@ -6,6 +6,7 @@ import io.jenkins.plugins.coverage.adapter.parser.CoverageParser;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
@@ -111,6 +112,15 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
                     break;
                 case "line":
                     processLine(current, parentResult);
+                    break;
+                case "additionalProperty":
+                    String propertyName = getAttribute(current, "name", "");
+                    if (StringUtils.isEmpty(propertyName)) {
+                        break;
+                    }
+
+                    String propertyValue = getAttribute(current, "value", "");
+                    parentResult.addAdditionalProperty(propertyName, propertyValue);
                     break;
                 default:
                     break;
