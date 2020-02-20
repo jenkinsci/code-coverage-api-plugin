@@ -31,10 +31,11 @@
                     </j:choose>
                 </div>
             </j:if>
-            <j:forEach var="parent" items="${it.parents}">
-                <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>
-                &gt;
-            </j:forEach>
+            <!-- See https://issues.jenkins-ci.org/browse/JENKINS-60359 -->
+            <!--<j:forEach var="parent" items="${it.parents}">-->
+            <!--    <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>-->
+            <!--    &gt;-->
+            <!--</j:forEach>-->
             <br/>
             <br/>
             <br/>
