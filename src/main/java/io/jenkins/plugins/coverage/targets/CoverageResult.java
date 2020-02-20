@@ -24,6 +24,7 @@ package io.jenkins.plugins.coverage.targets;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
+import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.TextFile;
@@ -56,7 +57,7 @@ import java.util.stream.Collectors;
  * @since 22-Aug-2007 18:47:10
  */
 @ExportedBean(defaultVisibility = 2)
-public class CoverageResult implements Serializable, Chartable {
+public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     /**
      * Generated
@@ -692,6 +693,12 @@ public class CoverageResult implements Serializable, Chartable {
             }
         }
         return results;
+    }
+
+    // see https://issues.jenkins-ci.org/browse/JENKINS-60359
+    @Override
+    public String getDisplayName() {
+        return getName();
     }
 
 
