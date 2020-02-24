@@ -118,7 +118,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
     private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
         try {
             return Arrays
-                    .stream(workspace.list("**/*.java"))
+                    .stream(workspace.list("**/*"))
                     .collect(Collectors.toMap(
                             FilePath::getName,
                             Function.identity(),
