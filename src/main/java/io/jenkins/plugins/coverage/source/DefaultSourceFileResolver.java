@@ -42,6 +42,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -78,8 +80,10 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         listener.getLogger().printf("%d source files need to be copied.%n", paints.size());
 
+        final Map<String, FilePath> sourceFileMapping = createSourceFileMapping(workspace, listener);
+
         paints.forEach((sourceFilePath, paint) -> {
-            FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
+            final FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
 
             try {
                 listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
@@ -89,7 +93,13 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     possibleParentPaths = Collections.emptySet();
                 }
 
-                boolean copiedSucceed = workspace.act(new SourceFilePainter(sourceFilePath, paint, buildDirSourceFile, possibleParentPaths));
+                final boolean copiedSucceed = workspace.act(new SourceFilePainter(
+                        sourceFilePath,
+                        paint,
+                        buildDirSourceFile,
+                        possibleParentPaths,
+                        sourceFileMapping
+                ));
                 if (copiedSucceed) {
                     listener.getLogger().printf("Copied %s. %n", sourceFilePath);
 
@@ -105,9 +115,28 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
+    private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
+        try {
+            return Arrays
+                    .stream(workspace.list("**/*"))
+                    .collect(Collectors.toMap(
+                            FilePath::getName,
+                            Function.identity(),
+                            (path1, path2) -> {
+                                listener.getLogger().println("WARNING: Duplicate filename found: " + path1.getName());
+                                return path1;
+                            }
+                    ));
+        } catch (IOException | InterruptedException e) {
+            listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+        }
+
+        return Collections.emptyMap();
+    }
 
     @Symbol("sourceFiles")
     @Extension
+    //FIXME - Why is this parametrized? T is never used.
     public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver> extends Descriptor<SourceFileResolver> {
 
         private static final ListBoxModel LEVELS = new ListBoxModel(
@@ -119,6 +148,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             super(DefaultSourceFileResolver.class);
         }
 
+        //FIXME - This method is never used. Can we delete it?
         public ListBoxModel doFillLevelItems() {
             return LEVELS;
         }
@@ -127,20 +157,28 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
     private static class SourceFilePainter extends MasterToSlaveFileCallable<Boolean> {
         private static final long serialVersionUID = 6548573019315830249L;
 
-        private String sourceFilePath;
-        private Set<String> possiblePaths;
-        private CoveragePaint paint;
-        private FilePath destination;
+        private final String sourceFilePath;
+        private final Set<String> possiblePaths;
+        private final CoveragePaint paint;
+        private final FilePath destination;
+        private final Map<String, FilePath> sourceFileMapping;
 
-        SourceFilePainter(@Nonnull String sourceFilePath, @Nonnull CoveragePaint paint, @Nonnull FilePath destination, @Nonnull Set<String> possiblePaths) {
+        SourceFilePainter(
+                @Nonnull String sourceFilePath,
+                @Nonnull CoveragePaint paint,
+                @Nonnull FilePath destination,
+                @Nonnull Set<String> possiblePaths,
+                @Nonnull Map<String, FilePath> sourceFileMapping
+        ) {
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;
             this.possiblePaths = possiblePaths;
+            this.sourceFileMapping = sourceFileMapping;
         }
 
         @Override
-        public Boolean invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
+        public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
             FilePath sourceFile = tryFindSourceFile(workspace);
             if (sourceFile == null) {
                 throw new IOException(
@@ -195,7 +233,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
-            return null;
+            // fallback to use the pre-scanned workspace to see if there's a file that matches
+            return sourceFileMapping.get(sourceFilePath);
         }
 
         private boolean isValidSourceFile(File sourceFile) {
