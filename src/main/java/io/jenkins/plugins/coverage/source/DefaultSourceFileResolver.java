@@ -127,7 +127,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                             }
                     ));
         } catch (IOException | InterruptedException e) {
-            listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+            listener.getLogger().println(e);
         }
 
         return Collections.emptyMap();
