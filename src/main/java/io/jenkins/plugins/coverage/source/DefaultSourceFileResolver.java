@@ -33,7 +33,6 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -106,7 +105,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
             } catch (IOException | InterruptedException e) {
-                listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+                listener.getLogger().println(e.getMessage());
             }
         });
     }
