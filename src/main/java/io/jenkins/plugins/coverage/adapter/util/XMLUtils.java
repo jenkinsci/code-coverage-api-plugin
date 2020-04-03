@@ -179,6 +179,10 @@ public class XMLUtils {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+
         DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
 
         return builder.parse(file);
@@ -203,10 +207,12 @@ public class XMLUtils {
         TransformerFactory transformerFactory = new TransformerFactoryImpl();
         try {
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformerFactory.setAttribute("http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/disallow-doctype-decl", true);
+            transformerFactory.setAttribute("http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            transformerFactory.setAttribute("http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-general-entities", false);
+            transformerFactory.setAttribute("http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-parameter-entities", false);
         } catch (TransformerConfigurationException e) {
             e.printStackTrace();
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         }
         return transformerFactory;
     }

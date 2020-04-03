@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<!DOCTYPE test [ 
+  <!ENTITY xxe SYSTEM "foobar://this.will.except">
+]>
+<coverage branch-rate="0.363636877551020408" line-rate="0.7036379769299024" timestamp="1571654451" version="gcovr 3.3">
+<sources>
+<source>fedepell</source>
+</sources>
+<packages>
+<package branch-rate="0.7142857142857143" complexity="0.0" line-rate="0.9207547169811321" name="...fedepell">
+<classes>
+<class branch-rate="0.36" complexity="0.0" filename="ooops.c" line-rate="0.48484848484848486" name="ooops.c">
+<methods/>
+<lines>
+<line branch="false" hits="5" number="1"/>
+&xxe;
+</lines>
+</class>
+</classes>
+</package>
+</packages>
+</coverage>

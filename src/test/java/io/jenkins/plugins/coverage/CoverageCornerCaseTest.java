@@ -15,6 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
+import java.io.File;
+import org.w3c.dom.Document;
+
 public class CoverageCornerCaseTest {
 
     @Rule
@@ -63,5 +67,17 @@ public class CoverageCornerCaseTest {
         j.assertLogContains("No reports were found", r);
     }
 
+
+    @Test
+    public void testPreventXXE() throws Exception {
+        /*
+          Test for SECURITY-1699: if external entities are executed an exception will be thrown
+          as an invalid external entity (unknown protocol foobar) is defined in the supplied XML
+          test file
+       */
+        Document d;
+        File file = new File(getClass().getResource("sec1699.xml").toURI());
+        d = XMLUtils.getInstance().readXMLtoDocument(file);
+    }
 
 }
