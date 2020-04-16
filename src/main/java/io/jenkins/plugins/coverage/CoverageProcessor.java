@@ -253,8 +253,9 @@ public class CoverageProcessor {
     }
 
     private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
-        if (coverageResult.getChangeRequestCoverageDiffWithTargetBranch() < 0) {
-            throw new CoverageException("Fail build because this change request decreases code coverage");
+        float coverageDiff = coverageResult.getChangeRequestCoverageDiffWithTargetBranch();
+        if (coverageDiff < 0) {
+            throw new CoverageException("Fail build because this change request decreases code coverage by " + coverageDiff);
         }
     }
 
