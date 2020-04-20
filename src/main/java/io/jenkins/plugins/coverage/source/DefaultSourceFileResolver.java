@@ -122,7 +122,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                             FilePath::getName,
                             Function.identity(),
                             (path1, path2) -> {
-                                listener.getLogger().println("WARNING: Duplicate filename found: " + path1.getName());
                                 return path1;
                             }
                     ));
