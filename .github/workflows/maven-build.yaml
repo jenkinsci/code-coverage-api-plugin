@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v2
-    - name: Set up JDK 1.8
+    - name: Set up JDK 1.8 64bit
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
@@ -25,4 +25,11 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
-      run: mvn verify
+      run: mvn -B package
+    - name: Create Artifact Directory
+      run: mkdir package && cp target/*.hpi package
+    - name: Keep Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: CodeCoveragePlugin
+        path: package
