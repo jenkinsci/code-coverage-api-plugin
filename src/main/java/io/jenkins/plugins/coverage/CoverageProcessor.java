@@ -214,6 +214,7 @@ public class CoverageProcessor {
 
         Job targetBranchJob = ((MultiBranchProject) parent).getItemByBranchName(targetBranchName);
         if (targetBranchJob == null) {
+            listener.getLogger().println("Target branch job not found, won't calculate coverage diff");
             return;
         }
 
@@ -232,18 +233,22 @@ public class CoverageProcessor {
         }
 
         if (buildToTakeCoverageFrom == null) {
+            listener.getLogger().println("Build not found on target branch job, won't calculate coverage diff");
             return;
         }
         CoverageAction targetBranchCoverageAction = buildToTakeCoverageFrom.getAction(CoverageAction.class);
         if (targetBranchCoverageAction == null) {
+            listener.getLogger().println("Coverage action not found on target branch build, won't calculate coverage diff");
             return;
         }
         CoverageResult targetBranchCoverageResult = targetBranchCoverageAction.getResult();
         if (targetBranchCoverageResult == null) {
+            listener.getLogger().println("Coverage result not found on target branch coverage action, won't calculate coverage diff");
             return;
         }
         Ratio targetBranchLinesCoverage = targetBranchCoverageResult.getCoverage(CoverageElement.LINE);
         if (targetBranchLinesCoverage == null) {
+            listener.getLogger().println("Lines coverage not found on target branch, won't calculate coverage diff");
             return;
         }
         float percentageDiff =
