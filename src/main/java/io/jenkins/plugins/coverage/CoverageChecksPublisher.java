@@ -28,9 +28,11 @@ class CoverageChecksPublisher {
     private ChecksDetails extractChecksDetails() {
         CoverageResult result = action.getResult();
         ChecksOutputBuilder outputBuilder = new ChecksOutputBuilder()
-                .withTitle("Code Coverage")
-                .withSummary("## Generated " + result.getResults().size() + " types of coverage.")
-                .withText(extractChecksText(result)); // TODO: improve summary
+                .withTitle(extractChecksTitle(result))
+                .withSummary("")
+                .withText(extractChecksText(result));
+
+
 
         return new ChecksDetailsBuilder()
                 .withName("Code Coverage")
@@ -49,35 +51,58 @@ class CoverageChecksPublisher {
         for (Map.Entry<CoverageElement, Ratio> singleRatio : ratios.entrySet()) {
             text.append("## ")
                     .append(singleRatio.getKey().getName())
-                    .append(": \n* Coverage: ")
-                    .append(singleRatio.getValue())
-                    .append(" :white_check_mark:");
+                    .append("\n* :white_check_mark: Coverage: ")
+                    .append(singleRatio.getValue().getPercentage())
+                    .append("%");
 
             if (!lastRatios.isEmpty()) {
-                text.append("\n* Trend: ");
+                text.append("\n* ");
 
                 float delta = singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey().getName());
                 int compare = Float.compare(delta, (float) 0);
                 if (compare > 0) {
-                    text.append(Math.abs(delta))
-                            .append("%")
-                            .append(" :arrow_up:");
+                    text.append(":arrow_up: ");
                 } else if (compare < 0) {
-                    text.append(Math.abs(delta))
-                            .append("%")
-                            .append(" :arrow_down:");
+                    text.append(":arrow_down: ");
                 } else {
-                    text.append(Math.abs(delta))
-                            .append("%")
-                            .append(" :arrow_right:");
+                    text.append(":arrow_right: ");
                 }
 
+                text.append("Trend: ")
+                        .append(Math.abs(delta))
+                        .append("%");
             }
 
             text.append("\n");
         }
 
         return text.toString();
+    }
+
+    private String extractChecksTitle(CoverageResult result) {
+        int lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentage();
+        int lastLineCoverage = getLastRatios(result).getOrDefault("Line", (float)-1.0).intValue();
+
+        StringBuilder title = new StringBuilder()
+                .append("Line coverage of ")
+                .append(result.getCoverage(CoverageElement.LINE).getPercentage())
+                .append("%");
+
+        if (lastLineCoverage == -1) {
+            return title.append(".")
+                    .toString();
+        }
+
+        if (lineCoverage < lastLineCoverage) {
+            title.append(" is less than ");
+        } else if (lineCoverage > lastLineCoverage) {
+            title.append(" is greater than ");
+        } else {
+            title.append(" is the same as ");
+        }
+
+        return title.append(String.format("the last successful build (%d%%).", lastLineCoverage))
+                .toString();
     }
 
     private Map<String, Float> getLastRatios(CoverageResult result) {
