@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage;
 
 import edu.hm.hafner.util.VisibleForTesting;
-import hudson.model.Run;
 import io.jenkins.plugins.checks.api.*;
 import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
@@ -46,7 +45,7 @@ class CoverageChecksPublisher {
 
     private String extractChecksText(final CoverageResult result) {
         Map<CoverageElement, Ratio> ratios = result.getResults();
-        Map<String, Float> lastRatios = getLastRatios(result);
+        Map<CoverageElement, Ratio> lastRatios = getLastRatios(result);
 
         StringBuilder text = new StringBuilder();
         for (Map.Entry<CoverageElement, Ratio> singleRatio : ratios.entrySet()) {
@@ -59,7 +58,7 @@ class CoverageChecksPublisher {
             if (!lastRatios.isEmpty()) {
                 text.append("\n* ");
 
-                int delta = (int)(singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey().getName()));
+                int delta = (int)(singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey()).getPercentage());
                 if (delta > 0) {
                     text.append(":arrow_up: ");
                 } else if (delta < 0) {
@@ -81,7 +80,7 @@ class CoverageChecksPublisher {
 
     private String extractChecksTitle(final CoverageResult result) {
         int lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentage();
-        int lastLineCoverage = getLastRatios(result).getOrDefault("Line", (float)-1.0).intValue();
+        int lastLineCoverage = getLastRatios(result).getOrDefault(CoverageElement.LINE, Ratio.create(-1, 100)).getPercentage();
 
         StringBuilder title = new StringBuilder()
                 .append("Line coverage of ")
@@ -105,25 +104,12 @@ class CoverageChecksPublisher {
                 .toString();
     }
 
-    private Map<String, Float> getLastRatios(final CoverageResult result) {
-        List<CoverageTrend> trends = result.getCoverageTrends();
-        if (trends == null) {
+    private Map<CoverageElement, Ratio> getLastRatios(final CoverageResult result) {
+        CoverageResult previousResult = result.getPreviousResult();
+        if (previousResult == null) {
             return Collections.emptyMap();
         }
 
-        Map<String, Float> ratioByType = new HashMap<>(trends.size());
-
-        Run<?, ?> previousSuccess = result.getOwner().getPreviousSuccessfulBuild();
-        if (previousSuccess != null) {
-            trends.stream()
-                    .filter(t -> t.getBuildName().equals("#" + previousSuccess.getId()))
-                    .findFirst()
-                    .ifPresent(
-                            trend -> trend.getElements()
-                                    .forEach(element -> ratioByType.put(element.getName(), element.getRatio()))
-            );
-        }
-
-        return ratioByType;
+        return previousResult.getResults();
     }
 }

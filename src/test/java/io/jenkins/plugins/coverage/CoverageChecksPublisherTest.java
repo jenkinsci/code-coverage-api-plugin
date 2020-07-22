@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-import hudson.model.Run;
 import io.jenkins.plugins.checks.api.ChecksConclusion;
 import io.jenkins.plugins.checks.api.ChecksDetails;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
@@ -17,8 +16,10 @@ import static org.mockito.Mockito.when;
 
 public class CoverageChecksPublisherTest {
     @Test
-    public void shouldConstructChecksDetailsWithLineAndMethodCoverage() throws Exception {
+    public void shouldConstructChecksDetailsWithLineAndMethodCoverage() {
         CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        when(result.getPreviousResult()).thenReturn(null);
+
         CoverageAction action = mock(CoverageAction.class);
         when(action.getResult()).thenReturn(result);
         when(action.getAbsoluteUrl()).thenReturn("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage");
@@ -42,14 +43,38 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndIncreasedConditionalCoverage() {
-        Run build = mock(Run.class);
-        Run lastBuild = mock(Run.class);
-        when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
-        when(lastBuild.getId()).thenReturn("1");
+    public void shouldConstructChecksDetailsWithIncreasedLineCoverageDecreasedConditionalCoverage() {
+        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        CoverageResult lastResult = createCoverageResult((float)0.5, (float)0.5);
+        when(result.getPreviousResult()).thenReturn(lastResult);
 
-        CoverageResult result = createCoverageResultWithTrend((float)0.4, (float)0.6, (float)0.5, (float)0.5, "#1");
-        when(result.getOwner()).thenReturn(build);
+        CoverageAction action = mock(CoverageAction.class);
+        when(action.getResult()).thenReturn(result);
+        when(action.getAbsoluteUrl()).thenReturn("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage");
+
+        ChecksDetails expectedDetails = new ChecksDetailsBuilder()
+                .withName("Code Coverage")
+                .withStatus(ChecksStatus.COMPLETED)
+                .withConclusion(ChecksConclusion.SUCCESS)
+                .withDetailsURL("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage")
+                .withOutput(new ChecksOutputBuilder()
+                        .withTitle("Line coverage of 60% is greater than the last successful build (50%).")
+                        .withSummary("")
+                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_down: Trend: 10%\n"
+                                + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n")
+                        .build())
+                .build();
+
+        assertThat(new CoverageChecksPublisher(action).extractChecksDetails())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedDetails);
+    }
+
+    @Test
+    public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndIncreasedConditionalCoverage() {
+        CoverageResult result = createCoverageResult((float)0.4, (float)0.6);
+        CoverageResult lastResult = createCoverageResult((float)0.5, (float)0.5);
+        when(result.getPreviousResult()).thenReturn(lastResult);
 
         CoverageAction action = mock(CoverageAction.class);
         when(action.getResult()).thenReturn(result);
@@ -75,13 +100,9 @@ public class CoverageChecksPublisherTest {
 
     @Test
     public void shouldConstructChecksDetailsWithUnchangedLineAndConditionalCoverage() {
-        Run build = mock(Run.class);
-        Run lastBuild = mock(Run.class);
-        when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
-        when(lastBuild.getId()).thenReturn("1");
-
-        CoverageResult result = createCoverageResultWithTrend((float)0.6, (float)0.4, (float)0.6, (float)0.4, "#1");
-        when(result.getOwner()).thenReturn(build);
+        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        CoverageResult lastResult = createCoverageResult((float)0.6, (float)0.4);
+        when(result.getPreviousResult()).thenReturn(lastResult);
 
         CoverageAction action = mock(CoverageAction.class);
         when(action.getResult()).thenReturn(result);
@@ -115,18 +136,6 @@ public class CoverageChecksPublisherTest {
         when(result.getResults()).thenReturn(ratios);
         when(result.getCoverage(CoverageElement.LINE)).thenReturn(Ratio.create(lineCoverage, 1));
         when(result.getCoverageTrends()).thenReturn(null);
-
-        return result;
-    }
-
-    private CoverageResult createCoverageResultWithTrend(final float lineCoverage, final float conditionalCoverage,
-                                                         final float lastLineCoverage, final float lastConditionalCoverage,
-                                                         final String lastBuildName) {
-        CoverageResult result = createCoverageResult(lineCoverage, conditionalCoverage);
-        CoverageTrend trend = new CoverageTrend(lastBuildName, Arrays.asList(
-                new CoverageTreeElement(CoverageElement.LINE, Ratio.create(lastLineCoverage, 1)),
-                new CoverageTreeElement(CoverageElement.CONDITIONAL, Ratio.create(lastConditionalCoverage, 1))));
-        when(result.getCoverageTrends()).thenReturn(Collections.singletonList(trend));
 
         return result;
     }
