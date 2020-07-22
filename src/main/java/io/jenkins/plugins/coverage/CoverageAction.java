@@ -139,6 +139,17 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
     /**
+     * Gets the absolute url to the coverage action page. Run#getAbsoluteUrl()} cannot be mocked since its a final
+     * method.
+     *
+     * @return the absolute url to the coverage page
+     */
+    @SuppressWarnings("deprecation") // the only access point for remote API calls to access the absolute url
+    public String getAbsoluteUrl() {
+        return getOwner().getAbsoluteUrl() + getUrlName();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

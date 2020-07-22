@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import edu.hm.hafner.util.VisibleForTesting;
 import hudson.model.Run;
 import io.jenkins.plugins.checks.api.*;
 import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
@@ -25,25 +26,25 @@ class CoverageChecksPublisher {
         publisher.publish(extractChecksDetails());
     }
 
-    private ChecksDetails extractChecksDetails() {
+    @VisibleForTesting
+    ChecksDetails extractChecksDetails() {
         CoverageResult result = action.getResult();
-        ChecksOutputBuilder outputBuilder = new ChecksOutputBuilder()
+        ChecksOutput output = new ChecksOutputBuilder()
                 .withTitle(extractChecksTitle(result))
                 .withSummary("")
-                .withText(extractChecksText(result));
-
-
+                .withText(extractChecksText(result))
+                .build();
 
         return new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
-                .withDetailsURL(action.getOwner().getAbsoluteUrl() + "coverage/")
-                .withOutput(outputBuilder.build())
+                .withDetailsURL(action.getAbsoluteUrl())
+                .withOutput(output)
                 .build();
     }
 
-    private String extractChecksText(CoverageResult result) {
+    private String extractChecksText(final CoverageResult result) {
         Map<CoverageElement, Ratio> ratios = result.getResults();
         Map<String, Float> lastRatios = getLastRatios(result);
 
@@ -58,11 +59,10 @@ class CoverageChecksPublisher {
             if (!lastRatios.isEmpty()) {
                 text.append("\n* ");
 
-                float delta = singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey().getName());
-                int compare = Float.compare(delta, (float) 0);
-                if (compare > 0) {
+                int delta = (int)(singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey().getName()));
+                if (delta > 0) {
                     text.append(":arrow_up: ");
-                } else if (compare < 0) {
+                } else if (delta < 0) {
                     text.append(":arrow_down: ");
                 } else {
                     text.append(":arrow_right: ");
@@ -79,7 +79,7 @@ class CoverageChecksPublisher {
         return text.toString();
     }
 
-    private String extractChecksTitle(CoverageResult result) {
+    private String extractChecksTitle(final CoverageResult result) {
         int lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentage();
         int lastLineCoverage = getLastRatios(result).getOrDefault("Line", (float)-1.0).intValue();
 
@@ -105,7 +105,7 @@ class CoverageChecksPublisher {
                 .toString();
     }
 
-    private Map<String, Float> getLastRatios(CoverageResult result) {
+    private Map<String, Float> getLastRatios(final CoverageResult result) {
         List<CoverageTrend> trends = result.getCoverageTrends();
         if (trends == null) {
             return Collections.emptyMap();
