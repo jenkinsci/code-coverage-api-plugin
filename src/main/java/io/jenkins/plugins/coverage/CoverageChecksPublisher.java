@@ -80,28 +80,42 @@ class CoverageChecksPublisher {
 
     private String extractChecksTitle(final CoverageResult result) {
         int lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentage();
-        int lastLineCoverage = getLastRatios(result).getOrDefault(CoverageElement.LINE, Ratio.create(-1, 100)).getPercentage();
+        int branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentage();
 
+        Map<CoverageElement, Ratio> lastRatios = getLastRatios(result);
+        int lastLineCoverage = lastRatios.getOrDefault(CoverageElement.LINE, Ratio.create(-1, 100)).getPercentage();
+        int lastBranchCoverage = lastRatios.getOrDefault(CoverageElement.CONDITIONAL, Ratio.create(-1, 100)).getPercentage();
+
+        return extractChecksTitle("Line", lineCoverage, lastLineCoverage)
+                + " "
+                + extractChecksTitle("Branch", branchCoverage, lastBranchCoverage);
+    }
+
+    private String extractChecksTitle(final String name, final int coverage, final int lastCoverage) {
         StringBuilder title = new StringBuilder()
-                .append("Line coverage of ")
-                .append(result.getCoverage(CoverageElement.LINE).getPercentage())
+                .append(name)
+                .append(" coverage: ")
+                .append(coverage)
                 .append("%");
 
-        if (lastLineCoverage == -1) {
+        if (lastCoverage == -1) {
             return title.append(".")
                     .toString();
         }
 
-        if (lineCoverage < lastLineCoverage) {
-            title.append(" is less than ");
-        } else if (lineCoverage > lastLineCoverage) {
-            title.append(" is greater than ");
+        if (coverage < lastCoverage) {
+            title.append(" (decreased ")
+                    .append(lastCoverage - coverage)
+                    .append("%).");
+        } else if (coverage > lastCoverage) {
+            title.append(" (increased ")
+                    .append(coverage - lastCoverage)
+                    .append("%).");
         } else {
-            title.append(" is the same as ");
+            title.append(" (unchanged).");
         }
 
-        return title.append(String.format("the last successful build (%d%%).", lastLineCoverage))
-                .toString();
+        return title.toString();
     }
 
     private Map<CoverageElement, Ratio> getLastRatios(final CoverageResult result) {

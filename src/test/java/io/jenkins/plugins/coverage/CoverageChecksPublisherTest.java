@@ -30,7 +30,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage of 60%.")
+                        .withTitle("Line coverage: 60%. Branch coverage: 40%.")
                         .withSummary("")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n")
@@ -43,9 +43,9 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithIncreasedLineCoverageDecreasedConditionalCoverage() {
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
-        CoverageResult lastResult = createCoverageResult((float)0.5, (float)0.5);
+    public void shouldConstructChecksDetailsWithIncreasedLineCoverageAndConditionalCoverage() {
+        CoverageResult lastResult = createCoverageResult((float)0.4, (float)0.3);
+        CoverageResult result = createCoverageResult((float)0.5, (float)0.5);
         when(result.getPreviousResult()).thenReturn(lastResult);
 
         CoverageAction action = mock(CoverageAction.class);
@@ -58,10 +58,10 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage of 60% is greater than the last successful build (50%).")
+                        .withTitle("Line coverage: 50% (increased 10%). Branch coverage: 50% (increased 20%).")
                         .withSummary("")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_down: Trend: 10%\n"
-                                + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n")
+                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 20%\n"
+                                + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 10%\n")
                         .build())
                 .build();
 
@@ -71,9 +71,9 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndIncreasedConditionalCoverage() {
-        CoverageResult result = createCoverageResult((float)0.4, (float)0.6);
-        CoverageResult lastResult = createCoverageResult((float)0.5, (float)0.5);
+    public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndConditionalCoverage() {
+        CoverageResult lastResult = createCoverageResult((float)0.6, (float)0.7);
+        CoverageResult result = createCoverageResult((float)0.5, (float)0.5);
         when(result.getPreviousResult()).thenReturn(lastResult);
 
         CoverageAction action = mock(CoverageAction.class);
@@ -86,10 +86,10 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage of 40% is less than the last successful build (50%).")
+                        .withTitle("Line coverage: 50% (decreased 10%). Branch coverage: 50% (decreased 20%).")
                         .withSummary("")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n"
-                                + "## Line\n* :white_check_mark: Coverage: 40%\n* :arrow_down: Trend: 10%\n")
+                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 20%\n"
+                                + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 10%\n")
                         .build())
                 .build();
 
@@ -114,7 +114,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL("http://127.0.0.1:8080/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage of 60% is the same as the last successful build (60%).")
+                        .withTitle("Line coverage: 60% (unchanged). Branch coverage: 40% (unchanged).")
                         .withSummary("")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_right: Trend: 0%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_right: Trend: 0%\n")
@@ -135,6 +135,7 @@ public class CoverageChecksPublisherTest {
 
         when(result.getResults()).thenReturn(ratios);
         when(result.getCoverage(CoverageElement.LINE)).thenReturn(Ratio.create(lineCoverage, 1));
+        when(result.getCoverage(CoverageElement.CONDITIONAL)).thenReturn(Ratio.create(conditionCoverage, 1));
         when(result.getCoverageTrends()).thenReturn(null);
 
         return result;
