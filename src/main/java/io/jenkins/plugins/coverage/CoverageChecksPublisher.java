@@ -19,7 +19,7 @@ import java.util.*;
 class CoverageChecksPublisher {
     private final CoverageAction action;
     private final JenkinsFacade jenkinsFacade;
-    private final List<String> allTypes =
+    private static final List<String> COVERAGE_TYPES =
             Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Conditional", "Line", "Instruction");
 
     CoverageChecksPublisher(final CoverageAction action) {
@@ -59,10 +59,10 @@ class CoverageChecksPublisher {
         Map<String, Float> ratios = convertRatios(result.getResults());
         Map<String, Float> lastRatios = convertRatios(getLastRatios(result));
 
-        List<String> containedTypes = new ArrayList<>(allTypes.size());
+        List<String> containedTypes = new ArrayList<>(COVERAGE_TYPES.size());
         StringBuilder coverages = new StringBuilder("|:white_check_mark: **Coverage**|");
         StringBuilder trends = new StringBuilder("|:chart_with_upwards_trend: **Trend**|");
-        for (String singleType : allTypes) {
+        for (String singleType : COVERAGE_TYPES) {
             if (ratios.containsKey(singleType)) {
                 containedTypes.add(singleType);
 
@@ -103,10 +103,10 @@ class CoverageChecksPublisher {
         String lineTitle;
         float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
         if (result.getLinkToBuildThatWasUsedForComparison() != null) {
-            lineTitle = extractChecksTitle("Line", "Target branch build", lineCoverage,
+            lineTitle = extractChecksTitle("Line", "target branch build", lineCoverage,
                     result.getChangeRequestCoverageDiffWithTargetBranch());
         } else if (lastRatios.containsKey(CoverageElement.LINE)) {
-            lineTitle = extractChecksTitle("Line", "Last successful build", lineCoverage,
+            lineTitle = extractChecksTitle("Line", "last successful build", lineCoverage,
                     lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat());
         } else {
             lineTitle = extractChecksTitle("Line", "", lineCoverage, 0);
@@ -148,14 +148,14 @@ class CoverageChecksPublisher {
     private String extractSummary(final CoverageResult result) {
         StringBuilder summary = new StringBuilder();
         if (result.getLinkToBuildThatWasUsedForComparison() != null) {
-            summary.append("* ### [target branch build](")
+            summary.append("* ### [Target branch build](")
                     .append(jenkinsFacade.getAbsoluteUrl(result.getLinkToBuildThatWasUsedForComparison()))
                     .append(")\n");
         }
 
         Run<?, ?> lastSuccessfulBuild = result.getOwner().getPreviousSuccessfulBuild();
         if (lastSuccessfulBuild != null) {
-            summary.append("* ### [last successful build](")
+            summary.append("* ### [Last successful build](")
                     .append(jenkinsFacade.getAbsoluteUrl(lastSuccessfulBuild.getUrl()))
                     .append(")\n");
         }

@@ -64,8 +64,8 @@ public class CoverageChecksPublisherTest {
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line coverage: 50.00% (+10.00% against target branch build). " +
                                 "Branch coverage: 50.00% (+20.00% against last successful build).")
-                        .withSummary("* ### [target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
+                        .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 10%\n")
                         .withText("||Conditional|Line|\n" +
@@ -92,8 +92,8 @@ public class CoverageChecksPublisherTest {
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line coverage: 50.00% (-10.00% against target branch build). " +
                                 "Branch coverage: 50.00% (-20.00% against last successful build).")
-                        .withSummary("* ### [target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
+                        .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 10%\n")
                         .withText("||Conditional|Line|\n" +
@@ -120,8 +120,8 @@ public class CoverageChecksPublisherTest {
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line coverage: 60.00% (+0.00% against target branch build). " +
                                 "Branch coverage: 40.00% (+0.00% against last successful build).")
-                        .withSummary("* ### [target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
+                        .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("||Conditional|Line|\n" +
                                 "|:-:|:-:|:-:|\n" +
                                 "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
@@ -146,7 +146,7 @@ public class CoverageChecksPublisherTest {
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line coverage: 60.00% (+10.00% against last successful build). " +
                                 "Branch coverage: 40.00% (+10.00% against last successful build).")
-                        .withSummary("* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
+                        .withSummary("* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_up: Trend: 10%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n")
                         .withText("||Conditional|Line|\n" +
