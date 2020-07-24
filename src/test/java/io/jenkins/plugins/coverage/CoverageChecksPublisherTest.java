@@ -35,6 +35,10 @@ public class CoverageChecksPublisherTest {
                         .withSummary("")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n")
+                        .withText("||Conditional|Line|\n" +
+                                "|:-:|:-:|:-:|\n" +
+                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
+                                "|:chart_with_upwards_trend: **Trend**|-|-|")
                         .build())
                 .build();
 
@@ -64,6 +68,10 @@ public class CoverageChecksPublisherTest {
                                 + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 10%\n")
+                        .withText("||Conditional|Line|\n" +
+                                "|:-:|:-:|:-:|\n" +
+                                "|:white_check_mark: **Coverage**|50.00%|50.00%|\n" +
+                                "|:chart_with_upwards_trend: **Trend**|+20.00% :arrow_up:|+10.00% :arrow_up:|")
                         .build())
                 .build();
 
@@ -88,6 +96,10 @@ public class CoverageChecksPublisherTest {
                                 + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 10%\n")
+                        .withText("||Conditional|Line|\n" +
+                                "|:-:|:-:|:-:|\n" +
+                                "|:white_check_mark: **Coverage**|50.00%|50.00%|\n" +
+                                "|:chart_with_upwards_trend: **Trend**|-20.00% :arrow_down:|-10.00% :arrow_down:|")
                         .build())
                 .build();
 
@@ -110,8 +122,10 @@ public class CoverageChecksPublisherTest {
                                 "Branch coverage: 40.00% (+0.00% against last successful build).")
                         .withSummary("* ### [target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_right: Trend: 0%\n"
-                                + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_right: Trend: 0%\n")
+                        .withText("||Conditional|Line|\n" +
+                                "|:-:|:-:|:-:|\n" +
+                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
+                                "|:chart_with_upwards_trend: **Trend**|+0.00% :arrow_right:|+0.00% :arrow_right:|")
                         .build())
                 .build();
 
@@ -135,6 +149,10 @@ public class CoverageChecksPublisherTest {
                         .withSummary("* ### [last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_up: Trend: 10%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n")
+                        .withText("||Conditional|Line|\n" +
+                                "|:-:|:-:|:-:|\n" +
+                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
+                                "|:chart_with_upwards_trend: **Trend**|+10.00% :arrow_up:|+10.00% :arrow_up:|")
                         .build())
                 .build();
 

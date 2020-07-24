@@ -19,6 +19,8 @@ import java.util.*;
 class CoverageChecksPublisher {
     private final CoverageAction action;
     private final JenkinsFacade jenkinsFacade;
+    private final List<String> allTypes =
+            Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Conditional", "Line", "Instruction");
 
     CoverageChecksPublisher(final CoverageAction action) {
         this(action, new JenkinsFacade());
@@ -54,38 +56,45 @@ class CoverageChecksPublisher {
     }
 
     private String extractChecksText(final CoverageResult result) {
-        Map<CoverageElement, Ratio> ratios = result.getResults();
-        Map<CoverageElement, Ratio> lastRatios = getLastRatios(result);
+        Map<String, Float> ratios = convertRatios(result.getResults());
+        Map<String, Float> lastRatios = convertRatios(getLastRatios(result));
 
-        StringBuilder text = new StringBuilder();
-        for (Map.Entry<CoverageElement, Ratio> singleRatio : ratios.entrySet()) {
-            text.append("## ")
-                    .append(singleRatio.getKey().getName())
-                    .append("\n* :white_check_mark: Coverage: ")
-                    .append(singleRatio.getValue().getPercentage())
-                    .append("%");
+        List<String> containedTypes = new ArrayList<>(allTypes.size());
+        StringBuilder coverages = new StringBuilder("|:white_check_mark: **Coverage**|");
+        StringBuilder trends = new StringBuilder("|:chart_with_upwards_trend: **Trend**|");
+        for (String singleType : allTypes) {
+            if (ratios.containsKey(singleType)) {
+                containedTypes.add(singleType);
 
-            if (!lastRatios.isEmpty()) {
-                text.append("\n* ");
+                float percentage = ratios.get(singleType);
+                coverages.append(String.format("%.2f%%|", percentage));
 
-                int delta = (int)(singleRatio.getValue().getPercentageFloat() - lastRatios.get(singleRatio.getKey()).getPercentage());
-                if (delta > 0) {
-                    text.append(":arrow_up: ");
-                } else if (delta < 0) {
-                    text.append(":arrow_down: ");
+                if (lastRatios.containsKey(singleType)) {
+                    float diff = percentage - lastRatios.get(singleType);
+                    trends.append(String.format("%+.2f%%", diff));
+
+                    if (Float.compare(diff, 0) > 0) {
+                        trends.append(" :arrow_up:|");
+                    } else if (Float.compare(diff, 0) < 0) {
+                        trends.append(" :arrow_down:|");
+                    } else {
+                        trends.append(" :arrow_right:|");
+                    }
                 } else {
-                    text.append(":arrow_right: ");
+                    trends.append("-|");
                 }
-
-                text.append("Trend: ")
-                        .append(Math.abs(delta))
-                        .append("%");
             }
-
-            text.append("\n");
         }
 
-        return text.toString();
+        return new StringBuilder("||")
+                .append(String.join("|", containedTypes))
+                .append("|\n|")
+                .append(String.join("", Collections.nCopies(containedTypes.size() + 1, ":-:|")))
+                .append("\n")
+                .append(coverages)
+                .append("\n")
+                .append(trends)
+                .toString();
     }
 
     private String extractChecksTitle(final CoverageResult result) {
@@ -94,10 +103,10 @@ class CoverageChecksPublisher {
         String lineTitle;
         float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
         if (result.getLinkToBuildThatWasUsedForComparison() != null) {
-            lineTitle = extractChecksTitle("Line", "target branch build", lineCoverage,
+            lineTitle = extractChecksTitle("Line", "Target branch build", lineCoverage,
                     result.getChangeRequestCoverageDiffWithTargetBranch());
         } else if (lastRatios.containsKey(CoverageElement.LINE)) {
-            lineTitle = extractChecksTitle("Line", "last successful build", lineCoverage,
+            lineTitle = extractChecksTitle("Line", "Last successful build", lineCoverage,
                     lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat());
         } else {
             lineTitle = extractChecksTitle("Line", "", lineCoverage, 0);
@@ -161,5 +170,14 @@ class CoverageChecksPublisher {
         }
 
         return previousResult.getResults();
+    }
+
+    private Map<String, Float> convertRatios(final Map<CoverageElement, Ratio> ratios) {
+        Map<String, Float> converted = new HashMap<String, Float>(ratios.size());
+        for (Map.Entry<CoverageElement, Ratio> singleRatio : ratios.entrySet()) {
+            converted.put(singleRatio.getKey().getName(), singleRatio.getValue().getPercentageFloat());
+        }
+
+        return converted;
     }
 }
