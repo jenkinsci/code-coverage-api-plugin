@@ -1,10 +1,13 @@
 package io.jenkins.plugins.coverage;
 
 import edu.hm.hafner.util.VisibleForTesting;
+import hudson.model.Run;
 import io.jenkins.plugins.checks.api.*;
 import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
 import io.jenkins.plugins.coverage.targets.*;
+import io.jenkins.plugins.util.JenkinsFacade;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -15,8 +18,15 @@ import java.util.*;
  */
 class CoverageChecksPublisher {
     private final CoverageAction action;
+    private final JenkinsFacade jenkinsFacade;
 
     CoverageChecksPublisher(final CoverageAction action) {
+        this(action, new JenkinsFacade());
+    }
+
+    @VisibleForTesting
+    CoverageChecksPublisher(final CoverageAction action, final JenkinsFacade jenkinsFacade) {
+        this.jenkinsFacade = jenkinsFacade;
         this.action = action;
     }
 
@@ -30,7 +40,7 @@ class CoverageChecksPublisher {
         CoverageResult result = action.getResult();
         ChecksOutput output = new ChecksOutputBuilder()
                 .withTitle(extractChecksTitle(result))
-                .withSummary("")
+                .withSummary(extractSummary(result))
                 .withText(extractChecksText(result))
                 .build();
 
@@ -38,7 +48,7 @@ class CoverageChecksPublisher {
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
-                .withDetailsURL(action.getAbsoluteUrl())
+                .withDetailsURL(jenkinsFacade.getAbsoluteUrl(action.getUrlName()))
                 .withOutput(output)
                 .build();
     }
@@ -79,43 +89,69 @@ class CoverageChecksPublisher {
     }
 
     private String extractChecksTitle(final CoverageResult result) {
-        int lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentage();
-        int branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentage();
-
         Map<CoverageElement, Ratio> lastRatios = getLastRatios(result);
-        int lastLineCoverage = lastRatios.getOrDefault(CoverageElement.LINE, Ratio.create(-1, 100)).getPercentage();
-        int lastBranchCoverage = lastRatios.getOrDefault(CoverageElement.CONDITIONAL, Ratio.create(-1, 100)).getPercentage();
 
-        return extractChecksTitle("Line", lineCoverage, lastLineCoverage)
-                + " "
-                + extractChecksTitle("Branch", branchCoverage, lastBranchCoverage);
-    }
-
-    private String extractChecksTitle(final String name, final int coverage, final int lastCoverage) {
-        StringBuilder title = new StringBuilder()
-                .append(name)
-                .append(" coverage: ")
-                .append(coverage)
-                .append("%");
-
-        if (lastCoverage == -1) {
-            return title.append(".")
-                    .toString();
+        String lineTitle;
+        float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
+        if (result.getLinkToBuildThatWasUsedForComparison() != null) {
+            lineTitle = extractChecksTitle("Line", "target branch build", lineCoverage,
+                    result.getChangeRequestCoverageDiffWithTargetBranch());
+        } else if (lastRatios.containsKey(CoverageElement.LINE)) {
+            lineTitle = extractChecksTitle("Line", "last successful build", lineCoverage,
+                    lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat());
+        } else {
+            lineTitle = extractChecksTitle("Line", "", lineCoverage, 0);
         }
 
-        if (coverage < lastCoverage) {
-            title.append(" (decreased ")
-                    .append(lastCoverage - coverage)
-                    .append("%).");
-        } else if (coverage > lastCoverage) {
-            title.append(" (increased ")
-                    .append(coverage - lastCoverage)
-                    .append("%).");
+        String branchTitle;
+        float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
+        if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+            branchTitle = extractChecksTitle("Branch", "last successful build", branchCoverage,
+                    branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat());
         } else {
-            title.append(" (unchanged).");
+            branchTitle = extractChecksTitle("Branch", "", branchCoverage, 0);
+        }
+
+        return lineTitle + " " + branchTitle;
+    }
+
+    private String extractChecksTitle(final String elementName, final String targetBuildName,
+                                      final float coverage, final float coverageDiff) {
+        StringBuilder title = new StringBuilder()
+                .append(elementName)
+                .append(" coverage: ")
+                .append(String.format("%.2f", coverage))
+                .append("%");
+
+        if (StringUtils.isBlank(targetBuildName)) {
+            title.append(".");
+        } else {
+            title.append(" (")
+                    .append(String.format("%+.2f%%", coverageDiff))
+                    .append(" against ")
+                    .append(targetBuildName)
+                    .append(").");
         }
 
         return title.toString();
+    }
+
+    private String extractSummary(final CoverageResult result) {
+        StringBuilder summary = new StringBuilder();
+        if (result.getLinkToBuildThatWasUsedForComparison() != null) {
+            summary.append("* ### [target branch build](")
+                    .append(jenkinsFacade.getAbsoluteUrl(result.getLinkToBuildThatWasUsedForComparison()))
+                    .append(")\n");
+        }
+
+        Run<?, ?> lastSuccessfulBuild = result.getOwner().getPreviousSuccessfulBuild();
+        if (lastSuccessfulBuild != null) {
+            summary.append("* ### [last successful build](")
+                    .append(jenkinsFacade.getAbsoluteUrl(lastSuccessfulBuild.getUrl()))
+                    .append(")\n");
+        }
+
+        return summary.toString();
     }
 
     private Map<CoverageElement, Ratio> getLastRatios(final CoverageResult result) {

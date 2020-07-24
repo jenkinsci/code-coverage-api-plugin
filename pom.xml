@@ -111,8 +111,8 @@
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
-            <artifactId>github-checks</artifactId>
-            <version>0.1.0-rc148.efa7f48759e1</version>
+            <artifactId>checks-api</artifactId>
+            <version>0.1.0-rc4.fc43ef9447c7</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
