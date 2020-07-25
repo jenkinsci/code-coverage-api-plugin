@@ -34,7 +34,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 60.00%. Branch coverage: 40.00%.")
+                        .withTitle("Line: 60.00%. Branch: 40.00%.")
                         .withSummary("## " + HEALTH_REPORT + ".")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n")
@@ -66,8 +66,8 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 50.00% (+10.00% against target branch build). " +
-                                "Branch coverage: 50.00% (+20.00% against last successful build).")
+                        .withTitle("Line: 50.00% (+10.00% against target branch build). " +
+                                "Branch: 50.00% (+20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
@@ -101,8 +101,8 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 50.00% (-10.00% against target branch build). " +
-                                "Branch coverage: 50.00% (-20.00% against last successful build).")
+                        .withTitle("Line: 50.00% (-10.00% against target branch build). " +
+                                "Branch: 50.00% (-20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
@@ -136,8 +136,8 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 60.00% (+0.00% against target branch build). " +
-                                "Branch coverage: 40.00% (+0.00% against last successful build).")
+                        .withTitle("Line: 60.00% (+0.00% against target branch build). " +
+                                "Branch: 40.00% (+0.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
@@ -169,8 +169,8 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 60.00% (+10.00% against last successful build). " +
-                                "Branch coverage: 40.00% (+10.00% against last successful build).")
+                        .withTitle("Line: 60.00% (+10.00% against last successful build). " +
+                                "Branch: 40.00% (+10.00% against last successful build).")
                         .withSummary("* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_up: Trend: 10%\n"
@@ -203,7 +203,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.FAILURE)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line coverage: 60.00%. Branch coverage: 40.00%.")
+                        .withTitle("Line: 60.00%. Branch: 40.00%.")
                         .withSummary("## Coverage Healthy score is 10%.\n"
                                 + "## Failed because coverage is unhealthy.")
                         .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"

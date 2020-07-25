@@ -123,8 +123,7 @@ class CoverageChecksPublisher {
                                       final float coverage, final float coverageDiff) {
         StringBuilder title = new StringBuilder()
                 .append(elementName)
-                .append(" coverage: ")
-                .append(String.format("%.2f", coverage))
+                .append(String.format(": %.2f", coverage))
                 .append("%");
 
         if (StringUtils.isBlank(targetBuildName)) {
