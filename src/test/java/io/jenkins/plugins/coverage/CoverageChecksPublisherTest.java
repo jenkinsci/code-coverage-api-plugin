@@ -66,7 +66,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 50.00% (+10.00% against target branch build). " +
+                        .withTitle("Line: 50.00% (+10.00% against target branch). " +
                                 "Branch: 50.00% (+20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
@@ -101,7 +101,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 50.00% (-10.00% against target branch build). " +
+                        .withTitle("Line: 50.00% (-10.00% against target branch). " +
                                 "Branch: 50.00% (-20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
@@ -136,7 +136,7 @@ public class CoverageChecksPublisherTest {
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 60.00% (+0.00% against target branch build). " +
+                        .withTitle("Line: 60.00% (+0.00% against target branch). " +
                                 "Branch: 40.00% (+0.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"

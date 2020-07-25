@@ -98,7 +98,7 @@ class CoverageChecksPublisher {
         String lineTitle;
         float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
         if (result.getLinkToBuildThatWasUsedForComparison() != null) {
-            lineTitle = extractChecksTitle("Line", "target branch build", lineCoverage,
+            lineTitle = extractChecksTitle("Line", "target branch", lineCoverage,
                     result.getChangeRequestCoverageDiffWithTargetBranch());
         } else if (lastRatios.containsKey(CoverageElement.LINE)) {
             lineTitle = extractChecksTitle("Line", "last successful build", lineCoverage,
