@@ -86,15 +86,10 @@ class CoverageChecksPublisher {
             }
         }
 
-        return new StringBuilder("||")
-                .append(String.join("|", containedTypes))
-                .append("|\n|")
-                .append(String.join("", Collections.nCopies(containedTypes.size() + 1, ":-:|")))
-                .append("\n")
-                .append(coverages)
-                .append("\n")
-                .append(trends)
-                .toString();
+        return "||" + String.join("|", containedTypes) + "|\n"
+                + "|" + String.join("", Collections.nCopies(containedTypes.size() + 1, ":-:|")) + "\n"
+                + coverages + "\n"
+                + trends;
     }
 
     private String extractChecksTitle(final CoverageResult result) {
