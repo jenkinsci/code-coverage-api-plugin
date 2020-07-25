@@ -89,15 +89,14 @@ public class CoverageProcessor {
      * @param reportAdapters   reportAdapters specified by user
      * @param reportDetectors  reportDetectors specified by user
      * @param globalThresholds global threshold specified by user
-     * @return coverage action containing aggregated reports from adaptors or null
      */
-    public CoverageAction performCoverageReport(List<CoverageReportAdapter> reportAdapters, List<ReportDetector> reportDetectors, List<Threshold> globalThresholds)
+    public void performCoverageReport(List<CoverageReportAdapter> reportAdapters, List<ReportDetector> reportDetectors, List<Threshold> globalThresholds)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
         CoverageResult coverageReport = aggregateReports(results);
         if (coverageReport == null) {
-            return null;
+            return;
         }
 
         coverageReport.setOwner(run);
@@ -128,8 +127,6 @@ public class CoverageProcessor {
         if (calculateDiffForChangeRequests && failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
-
-        return action;
     }
 
     private CoverageAction convertResultToAction(CoverageResult coverageReport) throws IOException {

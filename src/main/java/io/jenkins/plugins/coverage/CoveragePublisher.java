@@ -92,16 +92,16 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         processor.setFailNoReports(failNoReports);
         processor.setApplyThresholdRecursively(applyThresholdRecursively);
 
-        CoverageAction action = null;
         try {
-            action = processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
+            processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
         } catch (CoverageException e) {
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
             run.setResult(Result.FAILURE);
         }
 
-        if (action != null) {
-            CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(action);
+        CoverageAction coverageAction = run.getAction(CoverageAction.class);
+        if (coverageAction != null) {
+            CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
             checksPublisher.publishChecks();
         }
     }
