@@ -42,14 +42,14 @@ class CoverageChecksPublisher {
         CoverageResult result = action.getResult();
         ChecksOutput output = new ChecksOutputBuilder()
                 .withTitle(extractChecksTitle(result))
-                .withSummary(extractSummary(result))
+                .withSummary(extractComparedBuildsSummary(result) + extractHealthSummary(action))
                 .withText(extractChecksText(result))
                 .build();
 
         return new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
-                .withConclusion(ChecksConclusion.SUCCESS)
+                .withConclusion(StringUtils.isBlank(action.getFailMessage()) ? ChecksConclusion.SUCCESS : ChecksConclusion.FAILURE)
                 .withDetailsURL(jenkinsFacade.getAbsoluteUrl(result.getOwner().getUrl(), action.getUrlName()))
                 .withOutput(output)
                 .build();
@@ -140,7 +140,7 @@ class CoverageChecksPublisher {
         return title.toString();
     }
 
-    private String extractSummary(final CoverageResult result) {
+    private String extractComparedBuildsSummary(final CoverageResult result) {
         StringBuilder summary = new StringBuilder();
         if (result.getLinkToBuildThatWasUsedForComparison() != null) {
             summary.append("* ### [Target branch build](")
@@ -153,6 +153,18 @@ class CoverageChecksPublisher {
             summary.append("* ### [Last successful build](")
                     .append(jenkinsFacade.getAbsoluteUrl(lastSuccessfulBuild.getUrl()))
                     .append(")\n");
+        }
+
+        return summary.toString();
+    }
+
+    private String extractHealthSummary(final CoverageAction action) {
+        StringBuilder summary = new StringBuilder("## ")
+                .append(action.getHealthReport().getLocalizableDescription().toString())
+                .append(".");
+        if (!StringUtils.isBlank(action.getFailMessage())) {
+            summary.append("\n## ")
+                    .append(action.getFailMessage());
         }
 
         return summary.toString();
