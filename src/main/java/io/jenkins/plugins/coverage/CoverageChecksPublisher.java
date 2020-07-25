@@ -50,7 +50,7 @@ class CoverageChecksPublisher {
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
-                .withDetailsURL(jenkinsFacade.getAbsoluteUrl(action.getUrlName()))
+                .withDetailsURL(jenkinsFacade.getAbsoluteUrl(result.getOwner().getUrl(), action.getUrlName()))
                 .withOutput(output)
                 .build();
     }

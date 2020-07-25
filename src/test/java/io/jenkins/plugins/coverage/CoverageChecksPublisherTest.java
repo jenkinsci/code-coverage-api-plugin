@@ -46,6 +46,7 @@ public class CoverageChecksPublisherTest {
         CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
         when(result.getPreviousResult()).thenReturn(null);
         when(result.getOwner()).thenReturn(build);
+        when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
         CoverageAction action = new CoverageAction(result);
@@ -170,10 +171,12 @@ public class CoverageChecksPublisherTest {
         Run lastBuild = mock(Run.class);
         CoverageResult lastResult = createCoverageResult(lastLineCoverage, lastConditionCoverage);
         CoverageResult result = createCoverageResult(lineCoverage, conditionCoverage);
+
         when(result.getPreviousResult()).thenReturn(lastResult);
         when(result.getLinkToBuildThatWasUsedForComparison()).thenReturn(targetBuildLink);
         when(result.getChangeRequestCoverageDiffWithTargetBranch()).thenReturn(targetBuildDiff);
         when(result.getOwner()).thenReturn(build);
+        when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
         when(lastBuild.getUrl()).thenReturn(LAST_SUCCESSFUL_BUILD_LINK);
 
@@ -197,7 +200,7 @@ public class CoverageChecksPublisherTest {
 
     private JenkinsFacade createJenkins() {
         JenkinsFacade jenkinsFacade = mock(JenkinsFacade.class);
-        when(jenkinsFacade.getAbsoluteUrl(COVERAGE_URL_NAME)).thenReturn(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME);
+        when(jenkinsFacade.getAbsoluteUrl(BUILD_LINK, COVERAGE_URL_NAME)).thenReturn(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME);
         when(jenkinsFacade.getAbsoluteUrl(TARGET_BUILD_LINK)).thenReturn(JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK);
         when(jenkinsFacade.getAbsoluteUrl(LAST_SUCCESSFUL_BUILD_LINK)).thenReturn(JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK);
 
