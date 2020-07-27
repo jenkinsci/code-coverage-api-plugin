@@ -54,7 +54,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean calculateDiffForChangeRequests = false;
     private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
-    private boolean publishChecks = false;
+    private boolean skipPublishingChecks = false;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -101,7 +101,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             run.setResult(Result.FAILURE);
         }
 
-        if (publishChecks) {
+        if (!skipPublishingChecks) {
             CoverageAction coverageAction = run.getAction(CoverageAction.class);
             if (coverageAction != null) {
                 CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
@@ -197,12 +197,12 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setPublishChecks(boolean publishChecks) {
-        this.publishChecks = publishChecks;
+    public void setSkipPublishingChecks(boolean skipPublishingChecks) {
+        this.skipPublishingChecks = skipPublishingChecks;
     }
 
-    public boolean isPublishChecks() {
-        return publishChecks;
+    public boolean isSkipPublishingChecks() {
+        return skipPublishingChecks;
     }
 
     @DataBoundSetter
