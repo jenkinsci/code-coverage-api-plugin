@@ -235,6 +235,32 @@ public class CoverageChecksPublisherTest {
                 .isEqualTo(expectedDetails);
     }
 
+    @Test
+    public void shouldReportNoLineOrBranchCoverageInChecksTitle() {
+        Run build = mock(Run.class);
+        CoverageResult result = mock(CoverageResult.class);
+        when(result.getOwner()).thenReturn(build);
+        when(build.getPreviousSuccessfulBuild()).thenReturn(null);
+        when(build.getUrl()).thenReturn(BUILD_LINK);
+
+        Map<CoverageElement, Ratio> ratios = new HashMap<>();
+        when(result.getResults()).thenReturn(ratios);
+        when(result.getCoverage(CoverageElement.LINE)).thenReturn(null);
+        when(result.getCoverage(CoverageElement.CONDITIONAL)).thenReturn(null);
+        when(result.getCoverageTrends()).thenReturn(null);
+
+        CoverageAction action = new CoverageAction(result);
+        Localizable localizable = mock(Localizable.class);
+        when(localizable.toString()).thenReturn(HEALTH_REPORT);
+        action.setHealthReport(new HealthReport(100, localizable));
+
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+                .extractChecksDetails().getOutput())
+                .isPresent()
+                .get()
+                .hasFieldOrPropertyWithValue("title", Optional.of("No line or branch coverage has been computed."));
+    }
+
     private CoverageResult createCoverageResult(final float lastLineCoverage, final float lastConditionCoverage,
                                                 final float lineCoverage, final float conditionCoverage,
                                                 final String targetBuildLink, final float targetBuildDiff) {

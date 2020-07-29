@@ -7,6 +7,7 @@ import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
 import io.jenkins.plugins.coverage.targets.*;
 import io.jenkins.plugins.util.JenkinsFacade;
+import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -93,30 +94,39 @@ class CoverageChecksPublisher {
     }
 
     private String extractChecksTitle(final CoverageResult result) {
+        StringBuilder title = new StringBuilder();
         Map<CoverageElement, Ratio> lastRatios = getLastRatios(result);
 
-        String lineTitle;
-        float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
-        if (result.getLinkToBuildThatWasUsedForComparison() != null) {
-            lineTitle = extractChecksTitle("Line", "target branch", lineCoverage,
-                    result.getChangeRequestCoverageDiffWithTargetBranch());
-        } else if (lastRatios.containsKey(CoverageElement.LINE)) {
-            lineTitle = extractChecksTitle("Line", "last successful build", lineCoverage,
-                    lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat());
-        } else {
-            lineTitle = extractChecksTitle("Line", "", lineCoverage, 0);
+        if (result.getCoverage(CoverageElement.LINE) != null) {
+            float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
+            if (result.getLinkToBuildThatWasUsedForComparison() != null) {
+                title.append(extractChecksTitle("Line", "target branch", lineCoverage,
+                        result.getChangeRequestCoverageDiffWithTargetBranch()));
+            } else if (lastRatios.containsKey(CoverageElement.LINE)) {
+                 title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
+                        lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat()));
+            } else {
+                title.append(extractChecksTitle("Line", "", lineCoverage, 0));
+            }
+
+            title.append(" ");
         }
 
-        String branchTitle;
-        float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
-        if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
-            branchTitle = extractChecksTitle("Branch", "last successful build", branchCoverage,
-                    branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat());
-        } else {
-            branchTitle = extractChecksTitle("Branch", "", branchCoverage, 0);
+        if (result.getCoverage(CoverageElement.CONDITIONAL) != null) {
+            float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
+            if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+                title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
+                        branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
+            } else {
+                title.append(extractChecksTitle("Branch", "", branchCoverage, 0));
+            }
         }
 
-        return lineTitle + " " + branchTitle;
+        if (title.length() == 0) {
+            title.append("No line or branch coverage has been computed.");
+        }
+
+        return title.toString();
     }
 
     private String extractChecksTitle(final String elementName, final String targetBuildName,
