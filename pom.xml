@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.0</version>
+        <version>4.3</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
@@ -182,10 +182,6 @@
         <repository>
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-        <repository>
-            <id>incrementals.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/incrementals/</url>
         </repository>
     </repositories>
     <pluginRepositories>
