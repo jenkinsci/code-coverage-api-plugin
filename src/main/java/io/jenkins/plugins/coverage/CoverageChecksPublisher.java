@@ -7,7 +7,6 @@ import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
 import io.jenkins.plugins.coverage.targets.*;
 import io.jenkins.plugins.util.JenkinsFacade;
-import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
