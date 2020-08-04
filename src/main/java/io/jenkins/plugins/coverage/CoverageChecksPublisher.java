@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage;
 
 import edu.hm.hafner.util.VisibleForTesting;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import io.jenkins.plugins.checks.api.*;
 import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
@@ -32,8 +33,8 @@ class CoverageChecksPublisher {
         this.action = action;
     }
 
-    void publishChecks() {
-        ChecksPublisher publisher = ChecksPublisherFactory.fromRun(action.getOwner());
+    void publishChecks(TaskListener listener) {
+        ChecksPublisher publisher = ChecksPublisherFactory.fromRun(action.getOwner(), listener);
         publisher.publish(extractChecksDetails());
     }
 

@@ -105,7 +105,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
             CoverageAction coverageAction = run.getAction(CoverageAction.class);
             if (coverageAction != null) {
                 CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
-                checksPublisher.publishChecks();
+                checksPublisher.publishChecks(listener);
             }
         }
     }
