@@ -1,5 +1,10 @@
 Changelog
 ===
+
+# Moved to GitHub releases
+
+Newers version changelogs are hosted on GitHub releases: https://github.com/jenkinsci/code-coverage-api-plugin/releases
+
 # 1.1.2
 Release date: Dec 16, 2019
 
