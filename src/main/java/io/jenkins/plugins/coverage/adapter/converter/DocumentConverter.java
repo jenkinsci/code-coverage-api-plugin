@@ -20,6 +20,10 @@ public abstract class DocumentConverter<T> {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }

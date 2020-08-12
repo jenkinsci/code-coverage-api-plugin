@@ -21,8 +21,10 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
+import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.TextFile;
@@ -40,6 +42,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +57,7 @@ import java.util.stream.Collectors;
  * @since 22-Aug-2007 18:47:10
  */
 @ExportedBean(defaultVisibility = 2)
-public class CoverageResult implements Serializable, Chartable {
+public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     /**
      * Generated
@@ -207,9 +210,24 @@ public class CoverageResult implements Serializable, Chartable {
      */
     private File getSourceFile() {
         if (hasPermission()) {
-            return new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            File sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(relativeSourcePath));
+            if (sourceFile.exists()) {
+                return sourceFile;
+            }
+            // keep compatibility
+            sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            if (sourceFile.exists()) {
+                return sourceFile;
+            }
+
+            // try to normalize file path
+            return Paths.get(sourceFile.getPath()).normalize().toFile();
         }
         return null;
+    }
+
+    private String sanitizeFilename(String inputName) {
+        return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
     /**
@@ -675,6 +693,12 @@ public class CoverageResult implements Serializable, Chartable {
             }
         }
         return results;
+    }
+
+    // see https://issues.jenkins-ci.org/browse/JENKINS-60359
+    @Override
+    public String getDisplayName() {
+        return getName();
     }
 
 

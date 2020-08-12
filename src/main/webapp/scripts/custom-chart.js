@@ -15,6 +15,13 @@ var CoverageChartGenerator = function () {
         return s;
     }
 
+    /**
+     * To display name like "&lt;init&gt;" or "&amp;lt;init&amp;gt;" as "<init>".
+     */
+    function transformXML(name) {
+        return name.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    }
+
     this.generateSummaryChart = function (results, id, name, isTitleHasLink) {
 
         var summaryChartDiv = document.getElementById(id);
@@ -47,8 +54,15 @@ var CoverageChartGenerator = function () {
 
         var stackedBarOption = {
 
+            // Configuration like below won't lead to injection attack, because the text is displayed "as is".
+            // So the transformation is all right, and it does help displaying name like "&lt;init&gt;" or "&amp;lt;init&amp;gt;" as "<init>".
+            //
+            // title: {
+            //     text: "<script>alert(\"inject test\")</script>>"
+            // },
+
             title: {
-                text: name + (isTitleHasLink?' (click to see more details)':'')
+                text: transformXML(name) + (isTitleHasLink?' (click to see more details)':'')
             },
 
             toolbox: {

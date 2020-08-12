@@ -1,5 +1,28 @@
 Changelog
 ===
+
+# Moved to GitHub releases
+
+Newers version changelogs are hosted on GitHub releases: https://github.com/jenkinsci/code-coverage-api-plugin/releases
+
+# 1.1.2
+Release date: Dec 16, 2019
+
+Fix issues:
+* [PR #133](https://github.com/jenkinsci/code-coverage-api-plugin/pull/133) - Fix small HTML tags errors in painted source code files.
+* [PR #132](https://github.com/jenkinsci/code-coverage-api-plugin/pull/132) - When calculating link to last coverage data consider both SUCCESS or UNSTABLE.
+* [PR #131](https://github.com/jenkinsci/code-coverage-api-plugin/pull/131) - Cannot get the source file properly when path caontains `..` or is absolute.
+* [PR #130](https://github.com/jenkinsci/code-coverage-api-plugin/pull/130) - Avoid thread leak by copying files synchronously.
+ 
+# 1.1.1
+Release date: Oct 18, 2019
+
+Enhancements:
+* [PR #122](https://github.com/jenkinsci/code-coverage-api-plugin/pull/122) - Add the ability to fail builds in case if code coverage was decreased in a change request build.
+
+Fix issues:
+* [PR #121](https://github.com/jenkinsci/code-coverage-api-plugin/pull/121) - Fix overlapping in case a coverage result has some really long name.
+
 # 1.1.0
 Release date: Sept 6, 2019
 

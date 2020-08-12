@@ -20,6 +20,8 @@ public class CoverageScriptedPipelineScriptBuilder {
     private boolean failNoReports;
     private boolean applyThresholdRecursively;
 
+    private boolean enableSourceFileResolver;
+
     private CoverageScriptedPipelineScriptBuilder() {
     }
 
@@ -48,6 +50,10 @@ public class CoverageScriptedPipelineScriptBuilder {
         sb.append(",failUnstable:").append(failUnstable);
         sb.append(",failNoReports:").append(failNoReports);
         sb.append(",applyThresholdRecursively:").append(applyThresholdRecursively);
+
+        if (enableSourceFileResolver) {
+            sb.append(",sourceFileResolver: sourceFiles('STORE_LAST_BUILD')");
+        }
 
         if (adapters.size() > 0) {
             sb.append(",adapters:[");
@@ -128,6 +134,11 @@ public class CoverageScriptedPipelineScriptBuilder {
 
     public CoverageScriptedPipelineScriptBuilder setApplyThresholdRecursively(boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
+        return this;
+    }
+
+    public CoverageScriptedPipelineScriptBuilder setEnableSourceFileResolver(boolean enableSourceFileResolver) {
+        this.enableSourceFileResolver = enableSourceFileResolver;
         return this;
     }
 
