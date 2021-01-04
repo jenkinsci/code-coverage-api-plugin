@@ -54,6 +54,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean calculateDiffForChangeRequests = false;
     private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
+    private boolean skipPublishingChecks = false;
+
     @DataBoundConstructor
     public CoveragePublisher() {
     }
@@ -97,6 +99,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         } catch (CoverageException e) {
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
             run.setResult(Result.FAILURE);
+        }
+
+        if (!skipPublishingChecks) {
+            CoverageAction coverageAction = run.getAction(CoverageAction.class);
+            if (coverageAction != null) {
+                CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
+                checksPublisher.publishChecks(listener);
+            }
         }
     }
 
@@ -184,6 +194,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
         return failBuildIfCoverageDecreasedInChangeRequest;
+    }
+
+    @DataBoundSetter
+    public void setSkipPublishingChecks(boolean skipPublishingChecks) {
+        this.skipPublishingChecks = skipPublishingChecks;
+    }
+
+    public boolean isSkipPublishingChecks() {
+        return skipPublishingChecks;
     }
 
     @DataBoundSetter
