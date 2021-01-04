@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>4.6</version>
         <relativePath />
     </parent>
+
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>code-coverage-api</artifactId>
     <version>1.2.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
+    
+    <name>Code Coverage API Plugin</name>
+    <description>Code Coverage API Plugin</description>
+    <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
+
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.204.6</jenkins.version>
@@ -19,14 +28,11 @@
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
           ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
           ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
-     -->
+        -->
 
         <!-- GitHub Checks plugin is still in beta version-->
         <useBeta>true</useBeta>
     </properties>
-    <name>Code Coverage API Plugin</name>
-    <description>Code Coverage API Plugin</description>
-    <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
