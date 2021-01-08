@@ -39,9 +39,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
@@ -53,7 +55,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         super(level);
     }
 
-    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener, Map<String, CoveragePaint> paints) throws IOException {
+    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener,
+            Map<String, CoveragePaint> paints) throws IOException {
         if (getLevel() == null || getLevel().equals(SourceFileResolverLevel.NEVER_STORE)) {
             return;
         }
@@ -64,7 +67,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         if (getLevel().equals(SourceFileResolverLevel.STORE_LAST_BUILD)) {
             Run<?, ?> lastBuild = BuildUtils.getPreviousNotFailedCompletedBuild(run);
 
-            // only store source files in this build and the last not failed completed build.
+            // only store source files in this build and the last not failed completed
+            // build.
             if (lastBuild != null) {
                 Run<?, ?> b = BuildUtils.getPreviousNotFailedCompletedBuild(lastBuild);
                 if (b != null) {
@@ -82,7 +86,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         final Map<String, FilePath> sourceFileMapping = createSourceFileMapping(workspace, listener);
 
         paints.forEach((sourceFilePath, paint) -> {
-            final FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
+            final FilePath buildDirSourceFile = new FilePath(
+                    new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
 
             try {
                 listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
@@ -92,13 +97,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     possibleParentPaths = Collections.emptySet();
                 }
 
-                final boolean copiedSucceed = workspace.act(new SourceFilePainter(
-                        sourceFilePath,
-                        paint,
-                        buildDirSourceFile,
-                        possibleParentPaths,
-                        sourceFileMapping
-                ));
+                final boolean copiedSucceed = workspace.act(new SourceFilePainter(sourceFilePath, paint,
+                        buildDirSourceFile, possibleParentPaths, sourceFileMapping));
                 if (copiedSucceed) {
                     listener.getLogger().printf("Copied %s. %n", sourceFilePath);
 
@@ -116,15 +116,10 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
         try {
-            return Arrays
-                    .stream(workspace.list("**/*"))
-                    .collect(Collectors.toMap(
-                            FilePath::getName,
-                            Function.identity(),
-                            (path1, path2) -> {
-                                return path1;
-                            }
-                    ));
+            return Arrays.stream(workspace.list("**/*"))
+                    .collect(Collectors.toMap(FilePath::getName, Function.identity(), (path1, path2) -> {
+                        return path1;
+                    }));
         } catch (IOException | InterruptedException e) {
             listener.getLogger().println(e);
         }
@@ -134,19 +129,23 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     @Symbol("sourceFiles")
     @Extension
-    //FIXME - Why is this parametrized? T is never used.
-    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver> extends Descriptor<SourceFileResolver> {
+    // FIXME - Why is this parametrized? T is never used.
+    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver>
+            extends Descriptor<SourceFileResolver> {
 
         private static final ListBoxModel LEVELS = new ListBoxModel(
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(), SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
 
         public DefaultSourceFileResolverDescriptor() {
             super(DefaultSourceFileResolver.class);
         }
 
-        //FIXME - This method is never used. Can we delete it?
+        // FIXME - This method is never used. Can we delete it?
         public ListBoxModel doFillLevelItems() {
             return LEVELS;
         }
@@ -161,13 +160,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private final FilePath destination;
         private final Map<String, FilePath> sourceFileMapping;
 
-        SourceFilePainter(
-                @Nonnull String sourceFilePath,
-                @Nonnull CoveragePaint paint,
-                @Nonnull FilePath destination,
-                @Nonnull Set<String> possiblePaths,
-                @Nonnull Map<String, FilePath> sourceFileMapping
-        ) {
+        SourceFilePainter(@Nonnull String sourceFilePath, @Nonnull CoveragePaint paint, @Nonnull FilePath destination,
+                @Nonnull Set<String> possiblePaths, @Nonnull Map<String, FilePath> sourceFileMapping) {
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;
@@ -179,8 +173,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
             FilePath sourceFile = tryFindSourceFile(workspace);
             if (sourceFile == null) {
-                throw new IOException(
-                        String.format("Unable to find source file %s in workspace %s", sourceFilePath, workspace.getAbsolutePath()));
+                throw new IOException(String.format("Unable to find source file %s in workspace %s", sourceFilePath,
+                        workspace.getAbsolutePath()));
             }
 
             try {
@@ -203,7 +197,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 File pathFromWorkDir = new File(workspace, directory);
-                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory() && !pathFromWorkDir.equals(pathFromRoot)) {
+                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory()
+                        && !pathFromWorkDir.equals(pathFromRoot)) {
                     possibleDirectories.add(pathFromWorkDir);
                 }
             }
@@ -222,13 +217,31 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
-            // if sourceFilePath is a absolute path check if it is under the workspace directory
-            if (Paths.get(sourceFilePath).isAbsolute()
-                    && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
+            // if sourceFilePath is a absolute path check if it is under the workspace
+            // directory
+            if (Paths.get(sourceFilePath).isAbsolute() && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
                 sourceFile = new File(sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
                     return new FilePath(sourceFile);
                 }
+            }
+
+            // last but not least, search for the sourceFilePath
+            try {
+                sourceFile = new File(Files.walk(Paths.get(workspace.getPath()))
+                .filter(Files::isRegularFile)
+                .filter(x -> {
+                    // use regex and check if file name is according to our requirement
+                    return Pattern.compile(sourceFilePath)
+                    .matcher(x.getFileName().toString())
+                    .find();
+                }).map(x -> x.getFileName().toString())
+                .collect(Collectors.toList()).get(0));
+                if (isValidSourceFile(sourceFile)) {
+                    return new FilePath(sourceFile);
+                }
+            } catch (IOException e) { // do nothing
+                //e.printStackTrace();
             }
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches

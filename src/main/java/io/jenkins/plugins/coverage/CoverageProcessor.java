@@ -383,9 +383,7 @@ public class CoverageProcessor {
                 resultOfAdapter.clear();
                 resultOfAdapter.add(report);
             }
-
         }
-
 
         if (results.size() == 0) {
             logger.println("No reports were found");
