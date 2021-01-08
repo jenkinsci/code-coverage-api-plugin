@@ -13,7 +13,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>code-coverage-api</artifactId>
-    <version>1.1.6-1</version>
+    <version>1.1.6-MISSING_SOURCE-1</version>
     <packaging>hpi</packaging>
     
     <name>Code Coverage API Plugin</name>

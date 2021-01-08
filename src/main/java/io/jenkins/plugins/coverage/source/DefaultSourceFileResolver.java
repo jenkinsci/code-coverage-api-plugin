@@ -228,6 +228,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
             // last but not least, search for the sourceFilePath
             try {
+                // TODO: don't use [0], check size, if 0 then pass, if 1+ then forEach (?) or at least log out the paths
                 sourceFile = new File(Files.walk(Paths.get(workspace.getPath()))
                 .filter(Files::isRegularFile)
                 .filter(x -> {
