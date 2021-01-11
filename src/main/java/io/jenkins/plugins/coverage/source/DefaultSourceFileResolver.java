@@ -37,14 +37,27 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -114,12 +127,11 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
+    // creates a map of file_name: file_path, thus key is the file_name
     private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
         try {
             return Arrays.stream(workspace.list("**/*"))
-                    .collect(Collectors.toMap(FilePath::getName, Function.identity(), (path1, path2) -> {
-                        return path1;
-                    }));
+                    .collect(Collectors.toMap(FilePath::getName, Function.identity(), (path1, path2) -> { return path1; }));
         } catch (IOException | InterruptedException e) {
             listener.getLogger().println(e);
         }
@@ -226,26 +238,28 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
-            // last but not least, search for the sourceFilePath
-            try {
-                // TODO: don't use [0], check size, if 0 then pass, if 1+ then forEach (?) or at least log out the paths
-                sourceFile = new File(Files.walk(Paths.get(workspace.getPath()))
+            // last but not least, search for the sourceFilePath within the entire workspace
+            // for Cobertura, this step attempts to ignore CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH
+            // or 'source-file-path':'coverage/sources/source' as set in Cobertura output XML files
+            try (Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()))) {
+                List<Path> results = walk
                 .filter(Files::isRegularFile)
-                .filter(x -> {
-                    // use regex and check if file name is according to our requirement
-                    return Pattern.compile(sourceFilePath)
-                    .matcher(x.getFileName().toString())
-                    .find();
-                }).map(x -> x.getFileName().toString())
-                .collect(Collectors.toList()).get(0));
-                if (isValidSourceFile(sourceFile)) {
-                    return new FilePath(sourceFile);
+                .filter(x -> x.endsWith(sourceFilePath))
+                .collect(Collectors.toList());
+
+                // what if two files have the same sourceFilePath, but are in different parent directories?
+                if (results.size() > 0) {
+                    sourceFile = new File(results.get(0).toString());
+                    if (isValidSourceFile(sourceFile)) {
+                        return new FilePath(sourceFile);
+                    }
                 }
             } catch (IOException e) { // do nothing
                 //e.printStackTrace();
             }
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches
+            // this would only work in the instance that sourceFilePath is the file's name, since the keys are 'FilePath::getName'
             return sourceFileMapping.get(sourceFilePath);
         }
 

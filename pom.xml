@@ -13,7 +13,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>code-coverage-api</artifactId>
-    <version>1.1.6-MISSING_SOURCE-1</version>
+    <version>1.2.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
     
     <name>Code Coverage API Plugin</name>
@@ -22,7 +22,7 @@
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.204.6</jenkins.version>
+        <jenkins.version>2.263.1</jenkins.version>
         <java.level>8</java.level>
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
