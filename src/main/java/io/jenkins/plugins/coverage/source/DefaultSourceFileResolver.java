@@ -79,8 +79,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         if (getLevel().equals(SourceFileResolverLevel.STORE_LAST_BUILD)) {
             Run<?, ?> lastBuild = BuildUtils.getPreviousNotFailedCompletedBuild(run);
 
-            // only store source files in this build and the last not failed completed
-            // build.
+            // only store source files in this build and the last not failed completed build.
             if (lastBuild != null) {
                 Run<?, ?> b = BuildUtils.getPreviousNotFailedCompletedBuild(lastBuild);
                 if (b != null) {
@@ -109,11 +108,15 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     possibleParentPaths = Collections.emptySet();
                 }
 
-                final boolean copiedSucceed = workspace.act(new SourceFilePainter(sourceFilePath, paint,
-                        buildDirSourceFile, possibleParentPaths, sourceFileMapping));
+                final boolean copiedSucceed = workspace.act(new SourceFilePainter(
+                    sourceFilePath,
+                    paint,
+                    buildDirSourceFile,
+                    possibleParentPaths,
+                    sourceFileMapping
+                ));
                 if (copiedSucceed) {
                     listener.getLogger().printf("Copied %s. %n", sourceFilePath);
-
                 }
 
             } catch (IOException | InterruptedException e) {
@@ -228,9 +231,9 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
-            // if sourceFilePath is a absolute path check if it is under the workspace
-            // directory
-            if (Paths.get(sourceFilePath).isAbsolute() && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
+            // if sourceFilePath is a absolute path check if it is under the workspace directory
+            if (Paths.get(sourceFilePath).isAbsolute()
+                && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
                 sourceFile = new File(sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
                     return new FilePath(sourceFile);
