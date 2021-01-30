@@ -482,6 +482,7 @@ public class CoverageProcessor {
                 action.setFailMessage(String.format("Build failed because following metrics did not meet stability target: %s.", unstableThresholds.toString()));
                 throw new CoverageException(action.getFailMessage());
             } else {
+                action.setFailMessage(String.format("Build unstable because following metrics did not meet stability target: %s.", unstableThresholds.toString()));
                 run.setResult(Result.UNSTABLE);
             }
         }
