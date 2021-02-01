@@ -29,7 +29,7 @@ import java.text.NumberFormat;
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
 /**
- * Represents <tt>x/y</tt> where x={@link #numerator} and y={@link #denominator}.
+ * Represents <code>x/y</code> where x={@link #numerator} and y={@link #denominator}.
  *
  * @author Kohsuke Kawaguchi
  */
