@@ -51,6 +51,7 @@ var CoverageChartGenerator = function () {
         summaryChartDiv.style.height = metrics.length * 31 + 200 + "px";
         var summaryChart = echarts.init(summaryChartDiv);
 
+        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
 
         var stackedBarOption = {
 
@@ -62,7 +63,10 @@ var CoverageChartGenerator = function () {
             // },
 
             title: {
-                text: transformXML(name) + (isTitleHasLink?' (click to see more details)':'')
+                text: transformXML(name) + (isTitleHasLink?' (click to see more details)':''),
+                textStyle: {
+                    color: textColor
+                }
             },
 
             toolbox: {
@@ -94,7 +98,10 @@ var CoverageChartGenerator = function () {
             legend: {
                 data: ['Covered', 'Missed'],
                 right: 10,
-                top: 25
+                top: 25,
+                textStyle: {
+                    color: textColor
+                }
             },
             grid: {
                 left: '3%',
@@ -103,8 +110,10 @@ var CoverageChartGenerator = function () {
                 containLabel: true
             },
             xAxis: {
-                type: 'value'
-
+                type: 'value',
+                axisLabel: {
+                    color: textColor
+                }
             },
             yAxis: [{
                 type: 'category',
@@ -114,6 +123,9 @@ var CoverageChartGenerator = function () {
                 },
                 axisTick: {
                     show: false
+                },
+                axisLabel: {
+                    color: textColor
                 }
             }, {
                 type: 'category',
@@ -122,7 +134,8 @@ var CoverageChartGenerator = function () {
                 axisLabel: {
                     formatter: function (value, index) {
                         return coveredPercentage[index].toFixed(2) + "%";
-                    }
+                    },
+                    color: textColor
                 },
                 axisLine: {
                     show: false
@@ -212,10 +225,15 @@ var CoverageChartGenerator = function () {
         childSummaryChartDiv.style.height = height + "px";
         var childSummaryChart = echarts.init(childSummaryChartDiv);
 
+        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
+
         var childSummaryChartOption = {
             title: {
                 text: 'Divided by ' + (metric ? metric + ' Name' : ''),
-                subtext: "click item name to see more details"
+                subtext: "click item name to see more details",
+                textStyle: {
+                    color: textColor
+                }
             },
 
             tooltip: {
@@ -258,7 +276,8 @@ var CoverageChartGenerator = function () {
                 },
                 axisLabel: {
                     interval: 0,
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    color: textColor
                 }
             },
             yAxis: {
@@ -284,7 +303,8 @@ var CoverageChartGenerator = function () {
                             return value.substring(0, 70)+'...';
                         }
                         return value;
-                    }
+                    },
+                    color: textColor
                 }
             },
             visualMap: {
@@ -395,10 +415,14 @@ var CoverageChartGenerator = function () {
 
         });
 
+        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
 
         var option = {
             title: {
-                text: 'Trend'
+                text: 'Trend',
+                textStyle: {
+                    color: textColor
+                }
             },
             tooltip: {
                 trigger: 'item',
@@ -407,7 +431,10 @@ var CoverageChartGenerator = function () {
                 }
             },
             legend: {
-                data: metrics
+                data: metrics,
+                textStyle: {
+                    color: textColor
+                }
             },
             toolbox: {
                 feature: {
@@ -421,15 +448,24 @@ var CoverageChartGenerator = function () {
             dataZoom: {
                 type: 'inside',
                 yAxisIndex: [0],
-                orient: 'vertical'
+                orient: 'vertical',
+                textStyle: {
+                    color: textColor
+                }
             },
             xAxis: {
                 type: 'category',
                 boundaryGap: false,
-                data: builds
+                data: builds,
+                axisLabel: {
+                    color: textColor
+                }
             },
             yAxis: {
-                type: 'value'
+                type: 'value',
+                axisLabel: {
+                    color: textColor
+                }
             },
             series: series
         };
