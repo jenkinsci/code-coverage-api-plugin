@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
     <t:summary icon="graph.png">
-        <div><a href="coverage/">${%Coverage Reports}</a></div>
+        <a href="coverage/">${%Coverage Reports}</a>
         <j:set var="result" value="${it.target}" />
         <j:if test="${result != null}">
             <div style="margin: 1ex 0 0 1ex">
