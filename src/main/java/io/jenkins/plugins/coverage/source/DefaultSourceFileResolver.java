@@ -243,6 +243,12 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             // last but not least, search for the sourceFilePath within the entire workspace
             // for Cobertura, this step attempts to ignore CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH
             // or 'source-file-path':'coverage/sources/source' as set in Cobertura output XML files
+            /* NOTES:
+                https://issues.jenkins.io/browse/JENKINS-5235
+                https://github.com/jenkinsci/cobertura-plugin/issues/103
+                https://github.com/jenkinsci/cobertura-plugin/issues/61
+                
+            */
             try (Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()))) {
                 List<Path> results = walk
                 .filter(Files::isRegularFile)

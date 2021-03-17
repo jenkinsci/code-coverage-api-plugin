@@ -1,10 +1,17 @@
 .classpath
 .project
 .settings
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+**/.vscode
 build/
 target/
+**/target/
 temp/
 work/
 *.iml
 .idea/
+**/.idea/
 bin/
