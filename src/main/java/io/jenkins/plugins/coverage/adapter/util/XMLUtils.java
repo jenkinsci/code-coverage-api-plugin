@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.adapter.util;
 
-
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

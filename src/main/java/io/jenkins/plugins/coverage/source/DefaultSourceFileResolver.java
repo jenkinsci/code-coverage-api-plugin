@@ -37,12 +37,26 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -53,7 +67,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         super(level);
     }
 
-    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener, Map<String, CoveragePaint> paints) throws IOException {
+    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener,
+            Map<String, CoveragePaint> paints) throws IOException {
         if (getLevel() == null || getLevel().equals(SourceFileResolverLevel.NEVER_STORE)) {
             return;
         }
@@ -82,7 +97,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         final Map<String, FilePath> sourceFileMapping = createSourceFileMapping(workspace, listener);
 
         paints.forEach((sourceFilePath, paint) -> {
-            final FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
+            final FilePath buildDirSourceFile = new FilePath(
+                    new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
 
             try {
                 listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
@@ -93,15 +109,14 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 final boolean copiedSucceed = workspace.act(new SourceFilePainter(
-                        sourceFilePath,
-                        paint,
-                        buildDirSourceFile,
-                        possibleParentPaths,
-                        sourceFileMapping
+                    sourceFilePath,
+                    paint,
+                    buildDirSourceFile,
+                    possibleParentPaths,
+                    sourceFileMapping
                 ));
                 if (copiedSucceed) {
                     listener.getLogger().printf("Copied %s. %n", sourceFilePath);
-
                 }
 
             } catch (IOException | InterruptedException e) {
@@ -114,17 +129,11 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
+    // creates a map of file_name: file_path, thus key is the file_name
     private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
         try {
-            return Arrays
-                    .stream(workspace.list("**/*"))
-                    .collect(Collectors.toMap(
-                            FilePath::getName,
-                            Function.identity(),
-                            (path1, path2) -> {
-                                return path1;
-                            }
-                    ));
+            return Arrays.stream(workspace.list("**/*"))
+                    .collect(Collectors.toMap(FilePath::getName, Function.identity(), (path1, path2) -> { return path1; }));
         } catch (IOException | InterruptedException e) {
             listener.getLogger().println(e);
         }
@@ -134,19 +143,23 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     @Symbol("sourceFiles")
     @Extension
-    //FIXME - Why is this parametrized? T is never used.
-    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver> extends Descriptor<SourceFileResolver> {
+    // FIXME - Why is this parametrized? T is never used.
+    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver>
+            extends Descriptor<SourceFileResolver> {
 
         private static final ListBoxModel LEVELS = new ListBoxModel(
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(), SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
 
         public DefaultSourceFileResolverDescriptor() {
             super(DefaultSourceFileResolver.class);
         }
 
-        //FIXME - This method is never used. Can we delete it?
+        // FIXME - This method is never used. Can we delete it?
         public ListBoxModel doFillLevelItems() {
             return LEVELS;
         }
@@ -161,13 +174,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private final FilePath destination;
         private final Map<String, FilePath> sourceFileMapping;
 
-        SourceFilePainter(
-                @Nonnull String sourceFilePath,
-                @Nonnull CoveragePaint paint,
-                @Nonnull FilePath destination,
-                @Nonnull Set<String> possiblePaths,
-                @Nonnull Map<String, FilePath> sourceFileMapping
-        ) {
+        SourceFilePainter(@Nonnull String sourceFilePath, @Nonnull CoveragePaint paint, @Nonnull FilePath destination,
+                @Nonnull Set<String> possiblePaths, @Nonnull Map<String, FilePath> sourceFileMapping) {
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;
@@ -179,8 +187,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
             FilePath sourceFile = tryFindSourceFile(workspace);
             if (sourceFile == null) {
-                throw new IOException(
-                        String.format("Unable to find source file %s in workspace %s", sourceFilePath, workspace.getAbsolutePath()));
+                throw new IOException(String.format("Unable to find source file %s in workspace %s", sourceFilePath,
+                        workspace.getAbsolutePath()));
             }
 
             try {
@@ -203,7 +211,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 File pathFromWorkDir = new File(workspace, directory);
-                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory() && !pathFromWorkDir.equals(pathFromRoot)) {
+                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory()
+                        && !pathFromWorkDir.equals(pathFromRoot)) {
                     possibleDirectories.add(pathFromWorkDir);
                 }
             }
@@ -224,14 +233,41 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
             // if sourceFilePath is a absolute path check if it is under the workspace directory
             if (Paths.get(sourceFilePath).isAbsolute()
-                    && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
+                && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
                 sourceFile = new File(sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
                     return new FilePath(sourceFile);
                 }
             }
 
+            // last but not least, search for the sourceFilePath within the entire workspace
+            // for Cobertura, this step attempts to ignore CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH
+            // or 'source-file-path':'coverage/sources/source' as set in Cobertura output XML files
+            /* NOTES:
+                https://issues.jenkins.io/browse/JENKINS-5235
+                https://github.com/jenkinsci/cobertura-plugin/issues/103
+                https://github.com/jenkinsci/cobertura-plugin/issues/61
+                
+            */
+            try (Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()))) {
+                List<Path> results = walk
+                .filter(Files::isRegularFile)
+                .filter(x -> x.endsWith(sourceFilePath))
+                .collect(Collectors.toList());
+
+                // what if two files have the same sourceFilePath, but are in different parent directories?
+                if (results.size() > 0) {
+                    sourceFile = new File(results.get(0).toString());
+                    if (isValidSourceFile(sourceFile)) {
+                        return new FilePath(sourceFile);
+                    }
+                }
+            } catch (IOException e) { // do nothing
+                //e.printStackTrace();
+            }
+
             // fallback to use the pre-scanned workspace to see if there's a file that matches
+            // this would only work in the instance that sourceFilePath is the file's name, since the keys are 'FilePath::getName'
             return sourceFileMapping.get(sourceFilePath);
         }
 
