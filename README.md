@@ -1,6 +1,5 @@
 # code-coverage-api-plugin
 
-[![Build Status](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/dev/badge/icon)](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/dev/)
 [![Gitter](https://badges.gitter.im/jenkinsci/code-coverage-api-plugin.svg)](https://gitter.im/jenkinsci/code-coverage-api-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
@@ -155,5 +154,3 @@ We provide a REST API to retrieve coverage data:
 - Trend result of last build: `…​/{buildNumber}/coverage/…​/last/trend/api/\{json|xml\}?depth={number}`
 
 Note: The larger the number, the deeper of coverage information can be retrieved.
-
-
