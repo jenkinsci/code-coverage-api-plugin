@@ -113,6 +113,12 @@
             <artifactId>display-url-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>pull-request-monitoring</artifactId>
+            <version>1.4.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
