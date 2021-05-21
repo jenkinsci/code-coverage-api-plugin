@@ -13,8 +13,13 @@
     <packaging>hpi</packaging>
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.222.4</jenkins.version>
+        <jenkins.baseline>2.249</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.1</jenkins.version>
         <java.level>8</java.level>
+
+        <trove4j.version>3.0.3</trove4j.version>
+        <saxon-he.version>9.9.1-4</saxon-he.version>
+        <assertj-core.version>3.16.1</assertj-core.version>
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
           ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
@@ -37,8 +42,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.222.x</artifactId>
-                <version>21</version>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>807.v6d348e44c987</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -46,6 +51,32 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>${trove4j.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>${saxon-he.version}</version>
+        </dependency>
+
+        <!-- Plugin Dependencies -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>jackson2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>checks-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>display-url-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
@@ -54,6 +85,8 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>branch-api</artifactId>
         </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
@@ -90,29 +123,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <version>3.0.3</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.saxon</groupId>
-            <artifactId>Saxon-HE</artifactId>
-            <version>9.9.1-4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jackson2-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>checks-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>display-url-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
@@ -120,11 +130,10 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.16.1</version>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <developers>
         <developer>
@@ -161,7 +170,7 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
@@ -176,4 +185,5 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+
 </project>
