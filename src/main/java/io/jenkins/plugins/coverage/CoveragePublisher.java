@@ -51,7 +51,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private String tag;
 
-    private boolean calculateDiffForChangeRequests = false;
     private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
     private boolean skipPublishingChecks = false;
@@ -87,7 +86,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
 
         processor.setGlobalTag(tag);
-        processor.setCalculateDiffForChangeRequests(calculateDiffForChangeRequests);
         processor.setFailBuildIfCoverageDecreasedInChangeRequest(failBuildIfCoverageDecreasedInChangeRequest);
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
@@ -173,7 +171,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.sourceFileResolver = sourceFileResolver;
     }
 
-
     public String getTag() {
         return tag;
     }
@@ -181,15 +178,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setTag(String tag) {
         this.tag = tag;
-    }
-
-    public boolean getCalculateDiffForChangeRequests() {
-        return calculateDiffForChangeRequests;
-    }
-
-    @DataBoundSetter
-    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
-        this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
     }
 
     public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
