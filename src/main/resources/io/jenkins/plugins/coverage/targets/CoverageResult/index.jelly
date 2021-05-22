@@ -8,10 +8,10 @@
         <st:include it="${it.owner}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1>${%Code Coverage}</h1>
-            <j:set var="targetBranchBuild" value="${it.getLinkToBuildThatWasUsedForComparison()}" />
+            <j:set var="targetBranchBuild" value="${it.getReferenceBuildUrl()}" />
             <j:if test="${targetBranchBuild != null}">
                 <div class="changeRequestInformation" style="width:800px;height:100%;">
-                    <j:set var="coverageDiff" value="${it.getChangeRequestCoverageDiffWithTargetBranch()}" />
+                    <j:set var="coverageDiff" value="${it.getLineCoverageDelta()}" />
                     <j:choose>
                         <j:when test="${coverageDiff gt 0}">
                             <h3>

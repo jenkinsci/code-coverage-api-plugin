@@ -10,10 +10,10 @@
             <div class="test-trend-caption">
                 ${%Code Coverage}
             </div>
-            <j:set var="targetBranchBuild" value="${lastResult.getLinkToBuildThatWasUsedForComparison()}" />
+            <j:set var="targetBranchBuild" value="${lastResult.getReferenceBuildUrl()}" />
             <j:if test="${targetBranchBuild != null}">
                 <div class="changeRequestInformation" style="width:500px; height:100%; text-align:center;">
-                    <j:set var="coverageDiff" value="${lastResult.getChangeRequestCoverageDiffWithTargetBranch()}" />
+                    <j:set var="coverageDiff" value="${lastResult.getLineCoverageDelta()}" />
                     <j:choose>
                         <j:when test="${coverageDiff gt 0}">
                             <p>
