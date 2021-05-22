@@ -21,6 +21,7 @@
         <saxon-he.version>9.9.1-4</saxon-he.version>
         <assertj-core.version>3.16.1</assertj-core.version>
         <echarts-api.version>5.1.0-2</echarts-api.version>
+        <forensics-api.version>1.0.0</forensics-api.version>
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
           ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
@@ -90,6 +91,11 @@
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>echarts-api</artifactId>
             <version>${echarts-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>forensics-api</artifactId>
+            <version>${forensics-api.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
