@@ -1,9 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
-    <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
-    </script>
-    <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
-    </script>
+
+    <st:adjunct includes="io.jenkins.plugins.echarts"/>
+    <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js"/>
+
     <j:set var="lastResult" value="${from.getLastResult().getResult()}"/>
     <j:if test="${lastResult != null}">
         <div align="bottom">

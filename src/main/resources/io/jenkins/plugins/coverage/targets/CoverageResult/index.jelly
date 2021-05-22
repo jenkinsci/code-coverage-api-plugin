@@ -1,10 +1,10 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
     <l:layout css="/plugin/code-coverage-api/css/style.css" norefresh="true">
-        <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
-        </script>
-        <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
-        </script>
+
+        <st:adjunct includes="io.jenkins.plugins.echarts"/>
+        <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js"/>
+
         <st:include it="${it.owner}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1>${%Code Coverage}</h1>
