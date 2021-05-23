@@ -51,6 +51,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private String tag;
 
+    private boolean calculateDiffForChangeRequests = false;
     private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
     private boolean skipPublishingChecks = false;
@@ -182,6 +183,19 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
         return failBuildIfCoverageDecreasedInChangeRequest;
+    }
+
+    public boolean getCalculateDiffForChangeRequests() {
+        return calculateDiffForChangeRequests;
+    }
+
+    /**
+     * @deprecated not needed anymore. Diff is calculated automatically if reference build found.
+     */
+    @Deprecated
+    @DataBoundSetter
+    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
+        this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
     }
 
     @DataBoundSetter
