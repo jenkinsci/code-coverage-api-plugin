@@ -101,7 +101,7 @@ class CoverageChecksPublisher {
             float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
             if (result.getReferenceBuildUrl() != null) {
                 title.append(extractChecksTitle("Line", "target branch", lineCoverage,
-                        result.getLineCoverageDelta()));
+                        result.getCoverageDelta(CoverageElement.LINE)));
             } else if (lastRatios.containsKey(CoverageElement.LINE)) {
                  title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
                         lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat()));

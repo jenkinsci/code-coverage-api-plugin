@@ -229,19 +229,22 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     }
 
     /**
-     * Getter for property 'lineCoverageDelta'.
+     * Get delta coverage from {@link #deltaResults} for a specific {@link CoverageElement}.
      *
-     * @return Value for property 'lineCoverageDelta'.
+     * @param element
+     *          the element to get the diff coverage for.
+     * @return
+     *          the diff coverage or 0, if diff coverage for element is not available.
      */
-    public float getLineCoverageDelta() {
-        return deltaResults.get(CoverageElement.LINE);
+    public float getCoverageDelta(CoverageElement element) {
+        return deltaResults.getOrDefault(element, 0.0F);
     }
 
     /**
      * Getter for property 'changeRequestCoverageDiffWithTargetBranch'.
      *
      * @return Value for property 'changeRequestCoverageDiffWithTargetBranch'.
-     * @deprecated use {@link #getLineCoverageDelta()} instead.
+     * @deprecated use {@link #getCoverageDelta(CoverageElement)} instead.
      */
     public float getChangeRequestCoverageDiffWithTargetBranch() {
         return changeRequestCoverageDiffWithTargetBranch;

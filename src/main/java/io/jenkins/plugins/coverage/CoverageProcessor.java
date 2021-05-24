@@ -210,9 +210,9 @@ public class CoverageProcessor {
     }
 
     private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
-        float coverageDiff = coverageResult.getLineCoverageDelta();
+        float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
-            throw new CoverageException("Fail build because this change request decreases code coverage by " + coverageDiff);
+            throw new CoverageException("Fail build because this change request decreases line coverage by " + coverageDiff);
         }
     }
 

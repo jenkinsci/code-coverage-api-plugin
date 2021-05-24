@@ -271,7 +271,7 @@ public class CoverageChecksPublisherTest {
 
         when(result.getPreviousResult()).thenReturn(lastResult);
         when(result.getReferenceBuildUrl()).thenReturn(targetBuildLink);
-        when(result.getLineCoverageDelta()).thenReturn(targetBuildDiff);
+        when(result.getCoverageDelta(CoverageElement.LINE)).thenReturn(targetBuildDiff);
         when(result.getOwner()).thenReturn(build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
