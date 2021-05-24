@@ -246,6 +246,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @return Value for property 'changeRequestCoverageDiffWithTargetBranch'.
      * @deprecated use {@link #getCoverageDelta(CoverageElement)} instead.
      */
+    @Deprecated
     public float getChangeRequestCoverageDiffWithTargetBranch() {
         return changeRequestCoverageDiffWithTargetBranch;
     }
@@ -256,6 +257,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @param changeRequestCoverageDiffWithTargetBranch Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
      * @deprecated diff coverage is stored in {@link #deltaResults}.
      */
+    @Deprecated
     public void setChangeRequestCoverageDiffWithTargetBranch(float changeRequestCoverageDiffWithTargetBranch) {
         this.changeRequestCoverageDiffWithTargetBranch = changeRequestCoverageDiffWithTargetBranch;
     }
