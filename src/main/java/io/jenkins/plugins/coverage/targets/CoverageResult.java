@@ -77,6 +77,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private String tag;
 
     private String referenceBuildUrl = null;
+    private float changeRequestCoverageDiffWithTargetBranch = 0;
 
     // these two pointers form a tree structure where edges are names.
     private CoverageResult parent;
@@ -87,7 +88,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
 
-    private Map<CoverageElement, Float> deltaResults = new TreeMap<>();
+    private final Map<CoverageElement, Float> deltaResults = new TreeMap<>();
 
     /**
      * Line-by-line coverage information. Computed lazily, since it's memory intensive.
@@ -236,6 +237,25 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return deltaResults.get(CoverageElement.LINE);
     }
 
+    /**
+     * Getter for property 'changeRequestCoverageDiffWithTargetBranch'.
+     *
+     * @return Value for property 'changeRequestCoverageDiffWithTargetBranch'.
+     * @deprecated use {@link #getLineCoverageDelta()} instead.
+     */
+    public float getChangeRequestCoverageDiffWithTargetBranch() {
+        return changeRequestCoverageDiffWithTargetBranch;
+    }
+
+    /**
+     * Setter for property 'changeRequestCoverageDiffWithTargetBranch'.
+     *
+     * @param changeRequestCoverageDiffWithTargetBranch Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
+     * @deprecated diff coverage is stored in {@link #deltaResults}.
+     */
+    public void setChangeRequestCoverageDiffWithTargetBranch(float changeRequestCoverageDiffWithTargetBranch) {
+        this.changeRequestCoverageDiffWithTargetBranch = changeRequestCoverageDiffWithTargetBranch;
+    }
 
     /**
      * Getter for property 'referenceBuildUrl'.
@@ -378,7 +398,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @param deltaResults Value to set for property 'deltaResults'.
      */
     public void setDeltaResults(Map<CoverageElement, Float> deltaResults) {
-        this.deltaResults = deltaResults;
+        this.deltaResults.clear();
+        this.deltaResults.putAll(deltaResults);
     }
 
     /**
