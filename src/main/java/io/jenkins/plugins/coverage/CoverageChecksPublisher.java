@@ -118,7 +118,7 @@ class CoverageChecksPublisher {
                 title.append(extractChecksTitle("Line", "target branch", lineCoverage,
                         result.getCoverageDelta(CoverageElement.LINE)));
             } else if (lastRatios.containsKey(CoverageElement.LINE)) {
-                 title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
+                title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
                         lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat()));
             } else {
                 title.append(extractChecksTitle("Line", "", lineCoverage, 0));
@@ -129,7 +129,10 @@ class CoverageChecksPublisher {
 
         if (result.getCoverage(CoverageElement.CONDITIONAL) != null) {
             float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
-            if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+            if (result.getReferenceBuildUrl() != null) {
+                title.append(extractChecksTitle("Branch", "target branch", branchCoverage,
+                        result.getCoverageDelta(CoverageElement.CONDITIONAL)));
+            } else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
                 title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
                         branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
             } else {
@@ -145,7 +148,7 @@ class CoverageChecksPublisher {
     }
 
     private String extractChecksTitle(final String elementName, final String targetBuildName,
-                                      final float coverage, final float coverageDiff) {
+            final float coverage, final float coverageDiff) {
         StringBuilder title = new StringBuilder()
                 .append(elementName)
                 .append(String.format(": %.2f", coverage))
