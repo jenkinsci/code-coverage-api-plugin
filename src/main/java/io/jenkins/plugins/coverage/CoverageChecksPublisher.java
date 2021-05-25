@@ -1,16 +1,31 @@
 package io.jenkins.plugins.coverage;
 
-import edu.hm.hafner.util.VisibleForTesting;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import io.jenkins.plugins.checks.api.*;
-import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
-import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
-import io.jenkins.plugins.coverage.targets.*;
-import io.jenkins.plugins.util.JenkinsFacade;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import edu.hm.hafner.util.VisibleForTesting;
+
+import hudson.model.Run;
+import hudson.model.TaskListener;
+
+import io.jenkins.plugins.checks.api.ChecksConclusion;
+import io.jenkins.plugins.checks.api.ChecksDetails;
+import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
+import io.jenkins.plugins.checks.api.ChecksOutput;
+import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
+import io.jenkins.plugins.checks.api.ChecksPublisher;
+import io.jenkins.plugins.checks.api.ChecksPublisherFactory;
+import io.jenkins.plugins.checks.api.ChecksStatus;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
+import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
  * Publishes coverage as checks to scm platforms.
@@ -33,7 +48,7 @@ class CoverageChecksPublisher {
         this.action = action;
     }
 
-    void publishChecks(TaskListener listener) {
+    void publishChecks(final TaskListener listener) {
         ChecksPublisher publisher = ChecksPublisherFactory.fromRun(action.getOwner(), listener);
         publisher.publish(extractChecksDetails());
     }
@@ -114,7 +129,10 @@ class CoverageChecksPublisher {
 
         if (result.getCoverage(CoverageElement.CONDITIONAL) != null) {
             float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
-            if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+            if (result.getReferenceBuildUrl() != null) {
+                title.append(extractChecksTitle("Branch", "target branch", branchCoverage,
+                        result.getCoverageDelta(CoverageElement.CONDITIONAL)));
+            } else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
                 title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
                         branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
             } else {
