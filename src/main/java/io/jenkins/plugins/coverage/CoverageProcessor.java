@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class CoverageProcessor {
@@ -193,22 +194,25 @@ public class CoverageProcessor {
             return;
         }
 
-        // Calculate diff only for line coverage
-        Ratio changeRequestLinesCoverage = coverageReport.getCoverage(CoverageElement.LINE);
-        if (changeRequestLinesCoverage == null) {
-            return;
-        }
+        Map<CoverageElement, Float> deltaCoverage = new TreeMap<>();
+        referenceCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
+            Ratio buildRatio = coverageReport.getCoverage(coverageElement);
 
-        float percentageDiff =
-                changeRequestLinesCoverage.getPercentageFloat() - referenceLineCoverage.getPercentageFloat();
-        coverageReport.setChangeRequestCoverageDiffWithTargetBranch(percentageDiff);
-        coverageReport.setLinkToBuildThatWasUsedForComparison(referenceBuild.getUrl());
+            if (buildRatio != null) {
+                float diff = buildRatio.getPercentageFloat() - referenceRatio.getPercentageFloat();
+                listener.getLogger().println(coverageElement.getName() + " coverage diff: " + diff + "%. Add to CoverageResult.");
+                deltaCoverage.put(coverageElement, diff);
+            }
+        });
+
+        coverageReport.setReferenceBuildUrl(referenceBuild.getUrl());
+        coverageReport.setDeltaResults(deltaCoverage);
     }
 
     private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
-        float coverageDiff = coverageResult.getChangeRequestCoverageDiffWithTargetBranch();
+        float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
-            throw new CoverageException("Fail build because this change request decreases code coverage by " + coverageDiff);
+            throw new CoverageException("Fail build because this change request decreases line coverage by " + coverageDiff);
         }
     }
 

@@ -21,7 +21,6 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
 import hudson.model.ModelObject;
@@ -77,11 +76,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private String name;
     private String tag;
 
-    /**
-     * Properties to store a change request coverage diff with the latest successful build from the target branch
-     */
+    private String referenceBuildUrl = null;
     private float changeRequestCoverageDiffWithTargetBranch = 0;
-    private String linkToBuildThatWasUsedForComparison = null;
 
     // these two pointers form a tree structure where edges are names.
     private CoverageResult parent;
@@ -91,6 +87,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private final Map<CoverageElement, Ratio> aggregateResults = new TreeMap<>();
 
     private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
+
+    private final Map<CoverageElement, Float> deltaResults = new TreeMap<>();
 
     /**
      * Line-by-line coverage information. Computed lazily, since it's memory intensive.
@@ -231,10 +229,24 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     }
 
     /**
+     * Get delta coverage from {@link #deltaResults} for a specific {@link CoverageElement}.
+     *
+     * @param element
+     *          the element to get the diff coverage for.
+     * @return
+     *          the diff coverage or 0, if diff coverage for element is not available.
+     */
+    public float getCoverageDelta(CoverageElement element) {
+        return deltaResults.getOrDefault(element, 0.0F);
+    }
+
+    /**
      * Getter for property 'changeRequestCoverageDiffWithTargetBranch'.
      *
      * @return Value for property 'changeRequestCoverageDiffWithTargetBranch'.
+     * @deprecated use {@link #getCoverageDelta(CoverageElement)} instead.
      */
+    @Deprecated
     public float getChangeRequestCoverageDiffWithTargetBranch() {
         return changeRequestCoverageDiffWithTargetBranch;
     }
@@ -243,27 +255,29 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * Setter for property 'changeRequestCoverageDiffWithTargetBranch'.
      *
      * @param changeRequestCoverageDiffWithTargetBranch Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
+     * @deprecated diff coverage is stored in {@link #deltaResults}.
      */
+    @Deprecated
     public void setChangeRequestCoverageDiffWithTargetBranch(float changeRequestCoverageDiffWithTargetBranch) {
         this.changeRequestCoverageDiffWithTargetBranch = changeRequestCoverageDiffWithTargetBranch;
     }
 
     /**
-     * Getter for property 'linkToBuildThatWasUsedForComparison'.
+     * Getter for property 'referenceBuildUrl'.
      *
-     * @return Value for property 'linkToBuildThatWasUsedForComparison'.
+     * @return Value for property 'referenceBuildUrl'.
      */
-    public String getLinkToBuildThatWasUsedForComparison() {
-        return linkToBuildThatWasUsedForComparison;
+    public String getReferenceBuildUrl() {
+        return referenceBuildUrl;
     }
 
     /**
-     * Setter for property 'linkToBuildThatWasUsedForComparison'.
+     * Setter for property 'referenceBuildUrl'.
      *
-     * @param linkToBuildThatWasUsedForComparison Value to set for property 'linkToBuildThatWasUsedForComparison'.
+     * @param referenceBuildUrl Value to set for property 'referenceBuildUrl'.
      */
-    public void setLinkToBuildThatWasUsedForComparison(String linkToBuildThatWasUsedForComparison) {
-        this.linkToBuildThatWasUsedForComparison = linkToBuildThatWasUsedForComparison;
+    public void setReferenceBuildUrl(String referenceBuildUrl) {
+        this.referenceBuildUrl = referenceBuildUrl;
     }
 
     /**
@@ -372,6 +386,25 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     public Map<CoverageElement, Ratio> getResults() {
         return Collections.unmodifiableMap(aggregateResults);
+    }
+
+    /**
+     * Getter for property 'deltaResults'.
+     *
+     * @return Value for property 'deltaResults'.
+     */
+    public Map<CoverageElement, Float> getDeltaResults() {
+        return Collections.unmodifiableMap(deltaResults);
+    }
+
+    /**
+     * Setter for property 'deltaResults'.
+     *
+     * @param deltaResults Value to set for property 'deltaResults'.
+     */
+    public void setDeltaResults(Map<CoverageElement, Float> deltaResults) {
+        this.deltaResults.clear();
+        this.deltaResults.putAll(deltaResults);
     }
 
     /**
