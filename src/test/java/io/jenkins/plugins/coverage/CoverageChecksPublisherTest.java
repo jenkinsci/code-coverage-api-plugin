@@ -1,11 +1,9 @@
 package io.jenkins.plugins.coverage;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.jvnet.localizer.Localizable;
@@ -32,11 +30,6 @@ public class CoverageChecksPublisherTest {
     private static final String TARGET_BUILD_LINK = "job/pipeline-coding-style/job/master/3/";
     private static final String LAST_SUCCESSFUL_BUILD_LINK = "http://127.0.0.1:8080/job/pipeline-coding-style/view/change-requests/job/PR-3/110/";
     private static final String HEALTH_REPORT = "Coverage Healthy score is 100%";
-
-    @BeforeClass
-    public static void enforceEnglishLocale() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
 
     @Test
     public void shouldConstructChecksDetailsWithLineAndMethodCoverage() {
@@ -79,7 +72,7 @@ public class CoverageChecksPublisherTest {
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line: 50.00% (+10.00% against target branch). " +
-                                "Branch: 50.00% (+15.00% against target branch).")
+                                "Branch: 50.00% (+20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
@@ -92,8 +85,7 @@ public class CoverageChecksPublisherTest {
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.4, (float)0.3, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
-                +10, +15);
+        CoverageResult result = createCoverageResult((float)0.4, (float)0.3, (float)0.5, (float)0.5, TARGET_BUILD_LINK, +10);
         CoverageAction action = new CoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -115,11 +107,11 @@ public class CoverageChecksPublisherTest {
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line: 50.00% (-10.00% against target branch). " +
-                                "Branch: 50.00% (-15.00% against target branch).")
+                                "Branch: 50.00% (-20.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 15%\n"
+                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 10%\n")
                         .withText("||Conditional|Line|\n" +
                                 "|:-:|:-:|:-:|\n" +
@@ -128,8 +120,7 @@ public class CoverageChecksPublisherTest {
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.7, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
-                -10, -15);
+        CoverageResult result = createCoverageResult((float)0.6, (float)0.7, (float)0.5, (float)0.5, TARGET_BUILD_LINK, -10);
         CoverageAction action = new CoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -151,7 +142,7 @@ public class CoverageChecksPublisherTest {
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line: 60.00% (+0.00% against target branch). " +
-                                "Branch: 40.00% (+0.00% against target branch).")
+                                "Branch: 40.00% (+0.00% against last successful build).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
                                 + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
@@ -162,8 +153,7 @@ public class CoverageChecksPublisherTest {
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4, (float)0.6, (float)0.4, TARGET_BUILD_LINK, 0,
-                0);
+        CoverageResult result = createCoverageResult((float)0.6, (float)0.4, (float)0.6, (float)0.4, TARGET_BUILD_LINK, 0);
         CoverageAction action = new CoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -197,7 +187,7 @@ public class CoverageChecksPublisherTest {
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.5, (float)0.3, (float)0.6, (float)0.4, null, 0, -10);
+        CoverageResult result = createCoverageResult((float)0.5, (float)0.3, (float)0.6, (float)0.4, null, 0);
         CoverageAction action = new CoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -277,8 +267,8 @@ public class CoverageChecksPublisherTest {
     }
 
     private CoverageResult createCoverageResult(final float lastLineCoverage, final float lastConditionCoverage,
-            final float lineCoverage, final float conditionCoverage,
-            final String targetBuildLink, final float targetLineDiff, final float targetBranchDiff) {
+                                                final float lineCoverage, final float conditionCoverage,
+                                                final String targetBuildLink, final float targetBuildDiff) {
         Run build = mock(Run.class);
         Run lastBuild = mock(Run.class);
         CoverageResult lastResult = createCoverageResult(lastLineCoverage, lastConditionCoverage);
@@ -286,8 +276,7 @@ public class CoverageChecksPublisherTest {
 
         when(result.getPreviousResult()).thenReturn(lastResult);
         when(result.getReferenceBuildUrl()).thenReturn(targetBuildLink);
-        when(result.getCoverageDelta(CoverageElement.LINE)).thenReturn(targetLineDiff);
-        when(result.getCoverageDelta(CoverageElement.CONDITIONAL)).thenReturn(targetBranchDiff);
+        when(result.getCoverageDelta(CoverageElement.LINE)).thenReturn(targetBuildDiff);
         when(result.getOwner()).thenReturn(build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);

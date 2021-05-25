@@ -129,10 +129,7 @@ class CoverageChecksPublisher {
 
         if (result.getCoverage(CoverageElement.CONDITIONAL) != null) {
             float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
-            if (result.getReferenceBuildUrl() != null) {
-                title.append(extractChecksTitle("Branch", "target branch", branchCoverage,
-                        result.getCoverageDelta(CoverageElement.CONDITIONAL)));
-            } else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+            if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
                 title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
                         branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
             } else {
