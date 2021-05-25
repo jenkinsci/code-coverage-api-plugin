@@ -58,8 +58,6 @@ public class CoverageProcessor {
 
     private String globalTag;
 
-    private boolean calculateDiffForChangeRequests;
-
     private boolean failBuildIfCoverageDecreasedInChangeRequest;
 
     private SourceFileResolver sourceFileResolver;
@@ -110,14 +108,14 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
-        if (calculateDiffForChangeRequests) {
-            setDiffInCoverageForChangeRequest(coverageReport);
-        }
+        setDiffInCoverageForChangeRequest(coverageReport);
+
         CoverageAction action = convertResultToAction(coverageReport);
 
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
-        if (calculateDiffForChangeRequests && failBuildIfCoverageDecreasedInChangeRequest) {
+
+        if (failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
     }
@@ -581,25 +579,6 @@ public class CoverageProcessor {
     public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
     }
-
-    /**
-     * Getter for property 'calculateDiffForChangeRequests'
-     *
-     * @return value for property 'calculateDiffForChangeRequests'
-     */
-    public boolean getCalculateDiffForChangeRequests() {
-        return this.calculateDiffForChangeRequests;
-    }
-
-    /**
-     * Setter for property 'calculateDiffForChangeRequests'
-     *
-     * @param calculateDiffForChangeRequests value to set for property 'calculateDiffForChangeRequests'
-     */
-    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
-        this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
-    }
-
 
     public boolean isFailBuildIfCoverageDecreasedInChangeRequest() {
         return failBuildIfCoverageDecreasedInChangeRequest;

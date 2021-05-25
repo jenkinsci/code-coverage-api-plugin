@@ -87,7 +87,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
 
         processor.setGlobalTag(tag);
-        processor.setCalculateDiffForChangeRequests(calculateDiffForChangeRequests);
         processor.setFailBuildIfCoverageDecreasedInChangeRequest(failBuildIfCoverageDecreasedInChangeRequest);
         processor.setFailUnhealthy(failUnhealthy);
         processor.setFailUnstable(failUnstable);
@@ -173,7 +172,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.sourceFileResolver = sourceFileResolver;
     }
 
-
     public String getTag() {
         return tag;
     }
@@ -183,17 +181,21 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         this.tag = tag;
     }
 
+    public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
+        return failBuildIfCoverageDecreasedInChangeRequest;
+    }
+
     public boolean getCalculateDiffForChangeRequests() {
         return calculateDiffForChangeRequests;
     }
 
+    /**
+     * @deprecated not needed anymore. Diff is calculated automatically if reference build found.
+     */
+    @Deprecated
     @DataBoundSetter
     public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
         this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
-    }
-
-    public boolean getFailBuildIfCoverageDecreasedInChangeRequest() {
-        return failBuildIfCoverageDecreasedInChangeRequest;
     }
 
     @DataBoundSetter

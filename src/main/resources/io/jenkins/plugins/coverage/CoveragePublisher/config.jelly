@@ -19,11 +19,9 @@
         <f:entry field="failNoReports" title="Failed if No Reports Found">
             <f:checkbox/>
         </f:entry>
-        <f:optionalBlock field="calculateDiffForChangeRequests" title="Calculate diff from change requests" inline="true">
-            <f:entry field="failBuildIfCoverageDecreasedInChangeRequest" title="Fail the build in case of decrease">
-                <f:checkbox/>
-            </f:entry>
-        </f:optionalBlock>
+        <f:entry field="failBuildIfCoverageDecreasedInChangeRequest" title="Fail the build in case of decrease">
+            <f:checkbox/>
+        </f:entry>
         <f:entry title="Disable Publish Checks" field="skipPublishingChecks">
             <f:checkbox/>
         </f:entry>
