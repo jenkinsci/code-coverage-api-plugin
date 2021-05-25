@@ -195,7 +195,7 @@ public class CoverageProcessor {
         }
 
         Map<CoverageElement, Float> deltaCoverage = new TreeMap<>();
-        targetBranchCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
+        referenceCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
             Ratio buildRatio = coverageReport.getCoverage(coverageElement);
 
             if (buildRatio != null) {
@@ -205,7 +205,7 @@ public class CoverageProcessor {
             }
         });
 
-        coverageReport.setReferenceBuildUrl(buildToTakeCoverageFrom.getUrl());
+        coverageReport.setReferenceBuildUrl(referenceBuild.getUrl());
         coverageReport.setDeltaResults(deltaCoverage);
     }
 
