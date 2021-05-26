@@ -3,10 +3,10 @@ package io.jenkins.plugins.coverage;
 
 import com.google.common.collect.Sets;
 
+import edu.hm.hafner.util.FilteredLog;
 import hudson.FilePath;
 import hudson.model.*;
 import hudson.remoting.VirtualChannel;
-import hudson.util.RunList;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
@@ -15,13 +15,8 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.*;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import jenkins.branch.MultiBranchProject;
+import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMRevision;
-import jenkins.scm.api.SCMRevisionAction;
-import jenkins.scm.api.mixin.ChangeRequestSCMHead;
-import jenkins.scm.api.mixin.ChangeRequestSCMRevision;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
@@ -45,9 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CoverageProcessor {
 
@@ -64,8 +58,6 @@ public class CoverageProcessor {
     private boolean applyThresholdRecursively;
 
     private String globalTag;
-
-    private boolean calculateDiffForChangeRequests;
 
     private boolean failBuildIfCoverageDecreasedInChangeRequest;
 
@@ -117,14 +109,14 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
-        if (calculateDiffForChangeRequests) {
-            setDiffInCoverageForChangeRequest(coverageReport);
-        }
+        setDiffInCoverageForChangeRequest(coverageReport);
+
         CoverageAction action = convertResultToAction(coverageReport);
 
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
-        if (calculateDiffForChangeRequests && failBuildIfCoverageDecreasedInChangeRequest) {
+
+        if (failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
     }
@@ -172,95 +164,55 @@ public class CoverageProcessor {
     }
 
     private void setDiffInCoverageForChangeRequest(CoverageResult coverageReport) {
-        // Use limited number of builds to don't search too long
-        final int numberOfBuildsFromTargetBranch = 50;
 
-        // Calculate diff only for line coverage
-        Ratio changeRequestLinesCoverage = coverageReport.getCoverage(CoverageElement.LINE);
-        if (changeRequestLinesCoverage == null) {
+        ReferenceFinder referenceFinder = new ReferenceFinder();
+        FilteredLog log = new FilteredLog("Errors while resolving the reference build:");
+
+        Optional<Run<?, ?>> reference = referenceFinder.findReference(run, log);
+
+        if (!reference.isPresent()) {
+            listener.getLogger().println("Found no reference build, won't calculate coverage diff.");
             return;
         }
 
-        Job job = run.getParent();
-        ItemGroup parent = job.getParent();
-        if (!(parent instanceof MultiBranchProject)) {
-            return;
-        }
-
-        SCMHead currentBuildSCMHead = SCMHead.HeadByItem.findHead(job);
-        if (!(currentBuildSCMHead instanceof ChangeRequestSCMHead)) {
-            listener.getLogger().println(
-                    "Current build is not change request build, won't calculate coverage diff");
-            return;
-        }
-
-        SCMRevisionAction scmRevisionAction = run.getAction(SCMRevisionAction.class);
-        if (scmRevisionAction == null) {
-            return;
-        }
-
-        SCMRevision currentBuildSCMRevision = scmRevisionAction.getRevision();
-        if (!(currentBuildSCMRevision instanceof ChangeRequestSCMRevision)) {
-            return;
-        }
-
-        // Get target branch revision to compare coverage with
-        int targetBranchSCMHash = ((ChangeRequestSCMRevision) currentBuildSCMRevision).getTarget().hashCode();
-        SCMHead targetBranchSCMHead = ((ChangeRequestSCMHead) currentBuildSCMHead).getTarget();
-        String targetBranchName = targetBranchSCMHead.getName();
-
-        listener.getLogger().println(
-                String.format("Calculating coverage change for change request build is enabled, target branch %s", targetBranchName));
-
-        Job targetBranchJob = ((MultiBranchProject) parent).getItemByBranchName(targetBranchName);
-        if (targetBranchJob == null) {
-            listener.getLogger().println("Target branch job not found, won't calculate coverage diff");
-            return;
-        }
-
-        Run buildToTakeCoverageFrom = null;
-
-        // Search for a build from the target branch job to compare coverage with
-        RunList<Run> buildsFromTargetBranchJob = ((RunList<Run>) targetBranchJob.getBuilds()).limit(numberOfBuildsFromTargetBranch);
-        for (Run targetBranchBuild : buildsFromTargetBranchJob) {
-            SCMRevisionAction targetBranchBuildRevision = targetBranchBuild.getAction(SCMRevisionAction.class);
-            if (targetBranchBuildRevision != null) {
-                if (targetBranchBuildRevision.getRevision().hashCode() == targetBranchSCMHash) {
-                    buildToTakeCoverageFrom = targetBranchBuild;
-                    break;
-                }
-            }
-        }
-
-        if (buildToTakeCoverageFrom == null) {
-            listener.getLogger().println("Build not found on target branch job, won't calculate coverage diff");
-            return;
-        }
-        CoverageAction targetBranchCoverageAction = buildToTakeCoverageFrom.getAction(CoverageAction.class);
-        if (targetBranchCoverageAction == null) {
+        Run<?, ?> referenceBuild = reference.get();
+        CoverageAction referenceCoverageAction = referenceBuild.getAction(CoverageAction.class);
+        if (referenceCoverageAction == null) {
             listener.getLogger().println("Coverage action not found on target branch build, won't calculate coverage diff");
             return;
         }
-        CoverageResult targetBranchCoverageResult = targetBranchCoverageAction.getResult();
-        if (targetBranchCoverageResult == null) {
+
+        CoverageResult referenceCoverageResult = referenceCoverageAction.getResult();
+        if (referenceCoverageResult == null) {
             listener.getLogger().println("Coverage result not found on target branch coverage action, won't calculate coverage diff");
             return;
         }
-        Ratio targetBranchLinesCoverage = targetBranchCoverageResult.getCoverage(CoverageElement.LINE);
-        if (targetBranchLinesCoverage == null) {
-            listener.getLogger().println("Lines coverage not found on target branch, won't calculate coverage diff");
+
+        Ratio referenceLineCoverage = referenceCoverageResult.getCoverage(CoverageElement.LINE);
+        if (referenceLineCoverage == null) {
+            listener.getLogger().println("Line coverage not found on target branch, won't calculate coverage diff");
             return;
         }
-        float percentageDiff =
-                changeRequestLinesCoverage.getPercentageFloat() - targetBranchLinesCoverage.getPercentageFloat();
-        coverageReport.setChangeRequestCoverageDiffWithTargetBranch(percentageDiff);
-        coverageReport.setLinkToBuildThatWasUsedForComparison(buildToTakeCoverageFrom.getUrl());
+
+        Map<CoverageElement, Float> deltaCoverage = new TreeMap<>();
+        referenceCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
+            Ratio buildRatio = coverageReport.getCoverage(coverageElement);
+
+            if (buildRatio != null) {
+                float diff = buildRatio.getPercentageFloat() - referenceRatio.getPercentageFloat();
+                listener.getLogger().println(coverageElement.getName() + " coverage diff: " + diff + "%. Add to CoverageResult.");
+                deltaCoverage.put(coverageElement, diff);
+            }
+        });
+
+        coverageReport.setReferenceBuildUrl(referenceBuild.getUrl());
+        coverageReport.setDeltaResults(deltaCoverage);
     }
 
     private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
-        float coverageDiff = coverageResult.getChangeRequestCoverageDiffWithTargetBranch();
+        float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
-            throw new CoverageException("Fail build because this change request decreases code coverage by " + coverageDiff);
+            throw new CoverageException("Fail build because this change request decreases line coverage by " + coverageDiff);
         }
     }
 
@@ -631,25 +583,6 @@ public class CoverageProcessor {
     public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
     }
-
-    /**
-     * Getter for property 'calculateDiffForChangeRequests'
-     *
-     * @return value for property 'calculateDiffForChangeRequests'
-     */
-    public boolean getCalculateDiffForChangeRequests() {
-        return this.calculateDiffForChangeRequests;
-    }
-
-    /**
-     * Setter for property 'calculateDiffForChangeRequests'
-     *
-     * @param calculateDiffForChangeRequests value to set for property 'calculateDiffForChangeRequests'
-     */
-    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
-        this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
-    }
-
 
     public boolean isFailBuildIfCoverageDecreasedInChangeRequest() {
         return failBuildIfCoverageDecreasedInChangeRequest;

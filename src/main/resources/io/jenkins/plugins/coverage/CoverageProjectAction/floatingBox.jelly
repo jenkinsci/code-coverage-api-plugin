@@ -1,19 +1,19 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
-    <script src="${rootURL}/plugin/code-coverage-api/scripts/echarts.min.js">
-    </script>
-    <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js">
-    </script>
+
+    <st:adjunct includes="io.jenkins.plugins.echarts"/>
+    <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js"/>
+
     <j:set var="lastResult" value="${from.getLastResult().getResult()}"/>
     <j:if test="${lastResult != null}">
         <div align="bottom">
             <div class="test-trend-caption">
                 ${%Code Coverage}
             </div>
-            <j:set var="targetBranchBuild" value="${lastResult.getLinkToBuildThatWasUsedForComparison()}" />
+            <j:set var="targetBranchBuild" value="${lastResult.getReferenceBuildUrl()}" />
             <j:if test="${targetBranchBuild != null}">
                 <div class="changeRequestInformation" style="width:500px; height:100%; text-align:center;">
-                    <j:set var="coverageDiff" value="${lastResult.getChangeRequestCoverageDiffWithTargetBranch()}" />
+                    <j:set var="coverageDiff" value="${lastResult.getLineCoverageDelta()}" />
                     <j:choose>
                         <j:when test="${coverageDiff gt 0}">
                             <p>

@@ -102,8 +102,9 @@ More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/do
 ##### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions.
 ##### 4. Add your coverage tool adapter and specify reports path.
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
-##### 5. (Optional) Specify Thresholds of each metrics in global or adapter level.
-##### 6. (Optional) Specify Source code storing level to enable source code navigation.
+##### 5. (Optional) Use the [forensics-api](https://github.com/jenkinsci/forensics-api-plugin) plugin to discover the reference build that is used to compute a delta report of the coverage results. 
+##### 6. (Optional) Specify Thresholds of each metrics in global or adapter level.
+##### 7. (Optional) Specify Source code storing level to enable source code navigation.
 ![alt text](./images/config.png "Config")
 
 ## Pipeline example

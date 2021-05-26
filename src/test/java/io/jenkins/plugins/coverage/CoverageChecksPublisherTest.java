@@ -1,22 +1,27 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.Test;
+
+import org.jvnet.localizer.Localizable;
 import hudson.model.HealthReport;
 import hudson.model.Run;
+
 import io.jenkins.plugins.checks.api.ChecksConclusion;
 import io.jenkins.plugins.checks.api.ChecksDetails;
 import io.jenkins.plugins.checks.api.ChecksDetails.ChecksDetailsBuilder;
 import io.jenkins.plugins.checks.api.ChecksOutput.ChecksOutputBuilder;
 import io.jenkins.plugins.checks.api.ChecksStatus;
-import io.jenkins.plugins.coverage.targets.*;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.util.JenkinsFacade;
-import org.junit.Test;
-import org.jvnet.localizer.Localizable;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class CoverageChecksPublisherTest {
     private static final String JENKINS_BASE_URL = "http://127.0.0.1:8080";
@@ -270,8 +275,8 @@ public class CoverageChecksPublisherTest {
         CoverageResult result = createCoverageResult(lineCoverage, conditionCoverage);
 
         when(result.getPreviousResult()).thenReturn(lastResult);
-        when(result.getLinkToBuildThatWasUsedForComparison()).thenReturn(targetBuildLink);
-        when(result.getChangeRequestCoverageDiffWithTargetBranch()).thenReturn(targetBuildDiff);
+        when(result.getReferenceBuildUrl()).thenReturn(targetBuildLink);
+        when(result.getCoverageDelta(CoverageElement.LINE)).thenReturn(targetBuildDiff);
         when(result.getOwner()).thenReturn(build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
