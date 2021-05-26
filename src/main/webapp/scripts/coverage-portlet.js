@@ -1,27 +1,12 @@
 
-var CoveragePortletChart = function (results, id) {
-
-    var metrics = [];
-    var covered = [];
-    var missed = [];
-    var coveredPercentage = [];
-    var missedPercentage = [];
-    for (var i = 0; i < results.length; i++) {
-        metrics[i] = results[i].name;
-        covered[i] = results[i].ratio.numerator;
-        missed[i] = results[i].ratio.denominator - covered[i];
-
-        coveredPercentage[i] = 100 * (covered[i] / results[i].ratio.denominator);
-        missedPercentage[i] = 100 - coveredPercentage[i];
-
-        if (results[i].ratio.denominator === 0) {
-            coveredPercentage[i] = 0;
-        }
-
-    }
+var CoveragePortletChart = function (id) {
 
     const chartDom = document.getElementById(id);
     const portletChart = echarts.init(chartDom);
+    const data = JSON.parse(chartDom.getAttribute('data'));
+
+    const covered = data.covered;
+    const missed = data.missed;
 
     const option = {
         tooltip: {
@@ -58,9 +43,8 @@ var CoveragePortletChart = function (results, id) {
             name: 'in %',
         },
         yAxis: [{
-            name: 'Metric',
             type: 'category',
-            data: metrics,
+            data: data.metrics,
             axisLine: {
                 show: false
             },
@@ -69,13 +53,8 @@ var CoveragePortletChart = function (results, id) {
             }
         }, {
             type: 'category',
-            data: coveredPercentage,
+            data: data.coveredPercentageLabels,
             position: 'right',
-            axisLabel: {
-                formatter: function (value, index) {
-                    return coveredPercentage[index].toFixed(2) + "%";
-                }
-            },
             axisLine: {
                 show: false
             },
@@ -96,7 +75,7 @@ var CoveragePortletChart = function (results, id) {
                 emphasis: {
                     focus: 'series'
                 },
-                data: coveredPercentage
+                data: data.coveredPercentage
             },
             {
                 name: 'Missed',
@@ -110,7 +89,7 @@ var CoveragePortletChart = function (results, id) {
                 emphasis: {
                     focus: 'series'
                 },
-                data: missedPercentage
+                data: data.missedPercentage
             }
         ]
     };

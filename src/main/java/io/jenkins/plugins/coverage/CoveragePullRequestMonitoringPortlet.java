@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import hudson.Extension;
 import hudson.model.Run;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -53,8 +55,8 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
     }
 
     @Override
-    public String getIconUrl() {
-        return null;
+    public Optional<String> getIconUrl() {
+        return Optional.empty();
     }
 
     @Override
@@ -63,23 +65,58 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
     }
 
     /**
-     * Transform the result map of {@link CoverageResult} to a list of {@link CoverageResult.JSCoverageResult}.
+     * Get the json data for the stacked bar chart. (used by jelly view)
      *
      * @return
-     *          the transformed list.
+     *          the data as json string.
      */
-    @JavaScriptMethod
-    public List<CoverageResult.JSCoverageResult> getResults() {
-        List<CoverageResult.JSCoverageResult> results = new LinkedList<>();
+    public String getCoverageResultsAsJsonModel() {
+        Ratio line = action.getResult().getResults().get(CoverageElement.LINE);
+        Ratio conditional = action.getResult().getResults().get(CoverageElement.CONDITIONAL);
 
-        for (Map.Entry<CoverageElement, Ratio> c : action.getResult().getResults().entrySet()) {
-            String name = c.getKey().getName();
-            if ("Conditional".equals(name) || "Line".equals(name) || "Instruction".equals(name)) {
-                results.add(new CoverageResult.JSCoverageResult(c.getKey().getName(), c.getValue()));
-            }
-        }
+        JsonObject data = new JsonObject();
 
-        return results;
+        JsonArray metrics = new JsonArray();
+        metrics.add(CoverageElement.LINE.getName());
+        metrics.add(CoverageElement.CONDITIONAL.getName());
+        data.add("metrics", metrics);
+
+        JsonArray covered = new JsonArray();
+        covered.add(line.numerator);
+        covered.add(conditional.numerator);
+        data.add("covered", covered);
+
+        JsonArray missed = new JsonArray();
+        missed.add(line.denominator - line.numerator);
+        missed.add(conditional.denominator - conditional.numerator);
+        data.add("missed", missed);
+
+        JsonArray coveredPercentage = new JsonArray();
+        coveredPercentage.add(line.denominator == 0 ? 0 : (double) (100 * (covered.get(0).getAsInt() / line.denominator)));
+        coveredPercentage.add(conditional.denominator == 0 ? 0 : (double) (100 * (covered.get(1).getAsInt() / conditional.denominator)));
+        data.add("coveredPercentage", coveredPercentage);
+
+        JsonArray missedPercentage = new JsonArray();
+        missedPercentage.add(100 - coveredPercentage.get(0).getAsDouble());
+        missedPercentage.add(100 - coveredPercentage.get(1).getAsDouble());
+        data.add("missedPercentage", missedPercentage);
+
+        String deltaLineLabel = getReferenceBuildUrl().isPresent()
+                ? String.format("%.2f%% (%s %.2f%%)", coveredPercentage.get(0).getAsDouble(), (char) 0x0394,
+                action.getResult().getCoverageDelta(CoverageElement.LINE))
+                : String.format("%.2f%% (%s unknown)", coveredPercentage.get(0).getAsDouble(), (char) 0x0394);
+
+        String deltaConditionalLabel = getReferenceBuildUrl().isPresent()
+                ? String.format("%.2f%% (%s %.2f%%)", coveredPercentage.get(1).getAsDouble(), (char) 0x0394,
+                action.getResult().getCoverageDelta(CoverageElement.CONDITIONAL))
+                : String.format("%.2f%% (%s unknown)", coveredPercentage.get(1).getAsDouble(), (char) 0x0394);
+
+        JsonArray coveredPercentageLabels = new JsonArray();
+        coveredPercentageLabels.add(deltaLineLabel);
+        coveredPercentageLabels.add(deltaConditionalLabel);
+        data.add("coveredPercentageLabels", coveredPercentageLabels);
+
+        return data.toString();
     }
 
     /**
@@ -88,18 +125,8 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
      * @return
      *          optional of the link to the build or empty optional.
      */
-    public Optional<String> getComparedBuildLink() {
-        return Optional.ofNullable(action.getResult().getLinkToBuildThatWasUsedForComparison());
-    }
-
-    /**
-     * Get the diff to the target branch.
-     *
-     * @return
-     *          the diff as float.
-     */
-    public float getDiff() {
-        return action.getResult().getChangeRequestCoverageDiffWithTargetBranch();
+    public Optional<String> getReferenceBuildUrl() {
+        return Optional.ofNullable(action.getResult().getReferenceBuildUrl());
     }
 
     /**
@@ -111,6 +138,11 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
         @Override
         public Collection<MonitorPortlet> getPortlets(Run<?, ?> build) {
             CoverageAction action = build.getAction(CoverageAction.class);
+
+            if (action == null) {
+                return Collections.emptyList();
+            }
+
             return Collections.singleton(new CoveragePullRequestMonitoringPortlet(action));
         }
 
@@ -119,4 +151,5 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
             return "Code Coverage API";
         }
     }
+
 }

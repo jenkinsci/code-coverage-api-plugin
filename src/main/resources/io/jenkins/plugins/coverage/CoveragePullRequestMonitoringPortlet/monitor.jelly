@@ -5,44 +5,13 @@
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.bootstrap5"/>
 
-    <j:set var="targetBranchBuild" value="${it.getComparedBuildLink()}" />
-    <j:if test="${targetBranchBuild.isPresent()}">
-        <j:set var="coverageDiff" value="${it.getDiff()}" />
-        <j:choose>
-            <j:when test="${coverageDiff gt 0}">
-                <p>
-                    🎉 Code coverage compared to <a href="${rootURL}/${targetBranchBuild.get()}">reference build</a> increased!
-                    <h4><span style="color: #A5D6A7"> +${coverageDiff}%</span></h4>
-                </p>
-            </j:when>
-            <j:when test="${coverageDiff lt 0}">
-                <p>
-                    🚫 Code coverage compared to <a href="${rootURL}/${targetBranchBuild.get()}">reference build</a> decreased!
-                    <h4><span style="color: #EF9A9A">-${coverageDiff}%</span></h4>
-                </p>
-            </j:when>
-            <j:otherwise>
-                <p>
-                    👍 Code coverage compared to <a href="${rootURL}/${targetBranchBuild.get()}">reference build</a> has not changed!
-                </p>
-            </j:otherwise>
-        </j:choose>
-    </j:if>
-    <j:if test="${targetBranchBuild.isEmpty()}">
-        <p>❓Calculate diff for change request is not enabled!</p>
-    </j:if>
-
-    <div id="coverage-pr-portlet"
+    <div id="coverage-pr-portlet" data="${it.getCoverageResultsAsJsonModel()}"
          style="width: ${it.preferredWidth}px; height: ${it.preferredHeight - 100}px;"/>
 
     <script type="text/javascript" src="${rootURL}/plugin/code-coverage-api/scripts/coverage-portlet.js"/>
 
     <script type="text/javascript">
-        var portlet =<st:bind value="${it}"/>
-
-        portlet.getResults(function(t) {
-            new CoveragePortletChart(t.responseObject(), 'coverage-pr-portlet');
-        });
+        new CoveragePortletChart('coverage-pr-portlet');
     </script>
 
 </j:jelly>
