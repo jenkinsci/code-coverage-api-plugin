@@ -5,23 +5,22 @@ import com.google.gson.JsonObject;
 import hudson.Extension;
 import hudson.model.Run;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.monitoring.MonitorPortlet;
 import io.jenkins.plugins.monitoring.MonitorPortletFactory;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import java.util.*;
 
 /**
- * A portlet that can be used for the pull-request-monitoring dashboard
- * (https://github.com/jenkinsci/pull-request-monitoring-plugin).
+ * A portlet that can be used for the
+ * <a href="https://github.com/jenkinsci/pull-request-monitoring-plugin">pull-request-monitoring</a> dashboard.
  *
- * It renders the aggregated line, method and instruction coverage in a stacked bar chart.
+ * It renders the aggregated line and conditional coverage in a stacked bar chart and displays the delta,
+ * if a reference build is found.
  *
  * @author Simon Symhoven
  */
-public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
+public class CoveragePullRequestMonitoringPortlet extends MonitorPortlet {
     private final CoverageAction action;
 
     /**
@@ -45,6 +44,11 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
     }
 
     @Override
+    public boolean isDefault() {
+        return true;
+    }
+
+    @Override
     public int getPreferredWidth() {
         return 600;
     }
@@ -56,7 +60,7 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
 
     @Override
     public Optional<String> getIconUrl() {
-        return Optional.empty();
+        return Optional.of("/images/48x48/graph.png");
     }
 
     @Override
@@ -133,7 +137,7 @@ public class CoveragePullRequestMonitoringPortlet implements MonitorPortlet {
      * The factory for the {@link CoveragePullRequestMonitoringPortlet}.
      */
     @Extension(optional = true)
-    public static class PortletFactory implements MonitorPortletFactory {
+    public static class PortletFactory extends MonitorPortletFactory {
 
         @Override
         public Collection<MonitorPortlet> getPortlets(Run<?, ?> build) {
