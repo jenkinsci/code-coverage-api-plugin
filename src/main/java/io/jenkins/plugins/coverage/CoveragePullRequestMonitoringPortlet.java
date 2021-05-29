@@ -30,6 +30,7 @@ public class CoveragePullRequestMonitoringPortlet extends MonitorPortlet {
      *          the {@link CoverageAction} of corresponding run.
      */
     public CoveragePullRequestMonitoringPortlet(final CoverageAction action) {
+        super();
         this.action = action;
     }
 
