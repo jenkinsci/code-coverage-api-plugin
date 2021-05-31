@@ -56,7 +56,7 @@ public class CoveragePullRequestMonitoringPortlet extends MonitorPortlet {
 
     @Override
     public int getPreferredHeight() {
-        return 400;
+        return 350;
     }
 
     @Override
