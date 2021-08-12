@@ -1,23 +1,27 @@
 package io.jenkins.plugins.coverage;
 
-import com.google.common.collect.Lists;
-import hudson.FilePath;
-import hudson.model.Result;
-import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import io.jenkins.plugins.coverage.threshold.Threshold;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import java.io.File;
+import java.util.Objects;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import java.io.File;
-import java.util.Objects;
+import com.google.common.collect.Lists;
+
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import hudson.FilePath;
+import hudson.model.Result;
+
+import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
+import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
+import io.jenkins.plugins.coverage.threshold.Threshold;
 
 public class CoveragePublisherPipelineTest {
 
@@ -127,8 +131,8 @@ public class CoveragePublisherPipelineTest {
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
         j.assertLogContains("Build failed because following metrics did not meet health target", r);
-        Assert.assertNotNull(r.getAction(CoverageAction.class));
-        Assert.assertNotNull(r.getAction(CoverageAction.class).getResult());
+        Assert.assertNotNull(r.getAction(CoverageBuildAction.class));
+        Assert.assertNotNull(r.getAction(CoverageBuildAction.class).getResult());
     }
 
     @Test
@@ -187,8 +191,8 @@ public class CoveragePublisherPipelineTest {
 
         j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(r));
         j.assertLogContains("Build failed because following metrics did not meet stability target", r);
-        Assert.assertNotNull(r.getAction(CoverageAction.class));
-        Assert.assertNotNull(r.getAction(CoverageAction.class).getResult());
+        Assert.assertNotNull(r.getAction(CoverageBuildAction.class));
+        Assert.assertNotNull(r.getAction(CoverageBuildAction.class).getResult());
     }
 
     @Test

@@ -1,10 +1,11 @@
-package io.jenkins.plugins.coverage;
+package io.jenkins.plugins.coverage.model;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -64,7 +65,7 @@ public class CoverageChecksPublisherTest {
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        Assertions.assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -94,7 +95,7 @@ public class CoverageChecksPublisherTest {
 
         CoverageResult result = createCoverageResult((float)0.4, (float)0.3, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
                 +10, +15);
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
@@ -130,7 +131,7 @@ public class CoverageChecksPublisherTest {
 
         CoverageResult result = createCoverageResult((float)0.6, (float)0.7, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
                 -10, -15);
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
@@ -140,6 +141,10 @@ public class CoverageChecksPublisherTest {
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
+    }
+
+    private CoverageBuildAction createAction(final CoverageResult result) {
+        return new CoverageBuildAction(mock(Run.class), result, false);
     }
 
     @Test
@@ -164,7 +169,7 @@ public class CoverageChecksPublisherTest {
 
         CoverageResult result = createCoverageResult((float)0.6, (float)0.4, (float)0.6, (float)0.4, TARGET_BUILD_LINK, 0,
                 0);
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
@@ -198,7 +203,7 @@ public class CoverageChecksPublisherTest {
                 .build();
 
         CoverageResult result = createCoverageResult((float)0.5, (float)0.3, (float)0.6, (float)0.4, null, 0, -10);
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
@@ -237,7 +242,7 @@ public class CoverageChecksPublisherTest {
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn("Coverage Healthy score is 10%");
@@ -264,7 +269,7 @@ public class CoverageChecksPublisherTest {
         when(result.getCoverage(CoverageElement.CONDITIONAL)).thenReturn(null);
         when(result.getCoverageTrends()).thenReturn(null);
 
-        CoverageAction action = new CoverageAction(result);
+        CoverageBuildAction action = createAction(result);
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
@@ -311,8 +316,8 @@ public class CoverageChecksPublisherTest {
         return result;
     }
 
-    private CoverageAction createActionWithDefaultHealthReport(final CoverageResult result) {
-        CoverageAction action = new CoverageAction(result);
+    private CoverageBuildAction createActionWithDefaultHealthReport(final CoverageResult result) {
+        CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);

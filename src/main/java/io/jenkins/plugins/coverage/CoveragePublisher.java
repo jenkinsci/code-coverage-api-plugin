@@ -1,5 +1,20 @@
 package io.jenkins.plugins.coverage;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.jenkinsci.Symbol;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.FilePath;
@@ -13,27 +28,18 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import jenkins.tasks.SimpleBuildStep;
+
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.CoverageChecksPublisher;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import jenkins.tasks.SimpleBuildStep;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
@@ -65,7 +71,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
      * {@inheritDoc}
      */
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Publishing Coverage report....");
 
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
@@ -101,7 +107,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
 
         if (!skipPublishingChecks) {
-            CoverageAction coverageAction = run.getAction(CoverageAction.class);
+            CoverageBuildAction coverageAction = run.getAction(CoverageBuildAction.class);
             if (coverageAction != null) {
                 CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
                 checksPublisher.publishChecks(listener);
@@ -122,7 +128,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setAdapters(List<CoverageAdapter> adapters) {
+    public void setAdapters(final List<CoverageAdapter> adapters) {
         this.adapters = adapters;
     }
 
@@ -131,7 +137,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setGlobalThresholds(List<Threshold> globalThresholds) {
+    public void setGlobalThresholds(final List<Threshold> globalThresholds) {
         this.globalThresholds = globalThresholds;
     }
 
@@ -141,7 +147,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setFailUnhealthy(boolean failUnhealthy) {
+    public void setFailUnhealthy(final boolean failUnhealthy) {
         this.failUnhealthy = failUnhealthy;
     }
 
@@ -150,7 +156,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setFailUnstable(boolean failUnstable) {
+    public void setFailUnstable(final boolean failUnstable) {
         this.failUnstable = failUnstable;
     }
 
@@ -159,7 +165,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setFailNoReports(boolean failNoReports) {
+    public void setFailNoReports(final boolean failNoReports) {
         this.failNoReports = failNoReports;
     }
 
@@ -168,7 +174,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setSourceFileResolver(DefaultSourceFileResolver sourceFileResolver) {
+    public void setSourceFileResolver(final DefaultSourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
     }
 
@@ -177,7 +183,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setTag(String tag) {
+    public void setTag(final String tag) {
         this.tag = tag;
     }
 
@@ -194,12 +200,12 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
      */
     @Deprecated
     @DataBoundSetter
-    public void setCalculateDiffForChangeRequests(boolean calculateDiffForChangeRequests) {
+    public void setCalculateDiffForChangeRequests(final boolean calculateDiffForChangeRequests) {
         this.calculateDiffForChangeRequests = calculateDiffForChangeRequests;
     }
 
     @DataBoundSetter
-    public void setSkipPublishingChecks(boolean skipPublishingChecks) {
+    public void setSkipPublishingChecks(final boolean skipPublishingChecks) {
         this.skipPublishingChecks = skipPublishingChecks;
     }
 
@@ -208,7 +214,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 
@@ -217,7 +223,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+    public void setApplyThresholdRecursively(final boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
     }
 
@@ -234,7 +240,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
          * {@inheritDoc}
          */
         @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
+        public boolean configure(final StaplerRequest req, final JSONObject json) throws FormException {
             super.configure(req, json);
             save();
             return true;
@@ -250,18 +256,18 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
 
         @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+        public boolean isApplicable(final Class<? extends AbstractProject> jobType) {
             return true;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.CoveragePublisher_displayName();
         }
 
         @Override
-        public Publisher newInstance(@CheckForNull StaplerRequest req, @Nonnull JSONObject formData) throws FormException {
+        public Publisher newInstance(@CheckForNull final StaplerRequest req, @NonNull final JSONObject formData) throws FormException {
             return super.newInstance(req, formData);
         }
     }

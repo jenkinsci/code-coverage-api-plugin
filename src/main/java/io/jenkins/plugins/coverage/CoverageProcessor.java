@@ -1,27 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-
-import com.google.common.collect.Sets;
-
-import edu.hm.hafner.util.FilteredLog;
-import hudson.FilePath;
-import hudson.model.*;
-import hudson.remoting.VirtualChannel;
-import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
-import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
-import io.jenkins.plugins.coverage.detector.Detectable;
-import io.jenkins.plugins.coverage.detector.ReportDetector;
-import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.source.SourceFileResolver;
-import io.jenkins.plugins.coverage.targets.*;
-import io.jenkins.plugins.coverage.threshold.Threshold;
-import io.jenkins.plugins.forensics.reference.ReferenceFinder;
-import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jvnet.localizer.Localizable;
-
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,13 +21,43 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.collect.Sets;
+
+import edu.hm.hafner.util.FilteredLog;
+import edu.umd.cs.findbugs.annotations.NonNull;
+
+import org.jvnet.localizer.Localizable;
+import hudson.FilePath;
+import hudson.model.HealthReport;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
+
+import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
+import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
+import io.jenkins.plugins.coverage.detector.Detectable;
+import io.jenkins.plugins.coverage.detector.ReportDetector;
+import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
+import io.jenkins.plugins.coverage.threshold.Threshold;
+import io.jenkins.plugins.forensics.reference.ReferenceFinder;
+
 public class CoverageProcessor {
 
     private static final String DEFAULT_REPORT_SAVE_NAME = "coverage-report";
 
-    private Run<?, ?> run;
-    private FilePath workspace;
-    private TaskListener listener;
+    private final Run<?, ?> run;
+    private final FilePath workspace;
+    private final TaskListener listener;
 
     private boolean failUnhealthy;
     private boolean failUnstable;
@@ -68,7 +76,7 @@ public class CoverageProcessor {
      * @param workspace a workspace to use for any file operations
      * @param listener  a place to send output
      */
-    public CoverageProcessor(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener) {
+    public CoverageProcessor(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final TaskListener listener) {
         this.run = run;
         this.workspace = workspace;
         this.listener = listener;
@@ -82,7 +90,7 @@ public class CoverageProcessor {
      * @param reportDetectors  reportDetectors specified by user
      * @param globalThresholds global threshold specified by user
      */
-    public void performCoverageReport(List<CoverageReportAdapter> reportAdapters, List<ReportDetector> reportDetectors, List<Threshold> globalThresholds)
+    public void performCoverageReport(final List<CoverageReportAdapter> reportAdapters, final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
@@ -111,7 +119,7 @@ public class CoverageProcessor {
 
         setDiffInCoverageForChangeRequest(coverageReport);
 
-        CoverageAction action = convertResultToAction(coverageReport);
+        CoverageBuildAction action = convertResultToAction(coverageReport);
 
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
@@ -121,13 +129,13 @@ public class CoverageProcessor {
         }
     }
 
-    private CoverageAction convertResultToAction(CoverageResult coverageReport) throws IOException {
+    private CoverageBuildAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
         synchronized (CoverageProcessor.class) {
-            CoverageAction previousAction = run.getAction(CoverageAction.class);
+            CoverageBuildAction previousAction = run.getAction(CoverageBuildAction.class);
             if (previousAction == null) {
                 saveCoverageResult(run, coverageReport);
 
-                CoverageAction action = new CoverageAction(coverageReport);
+                CoverageBuildAction action = new CoverageBuildAction(run, coverageReport);
                 run.addAction(action);
 
                 return action;
@@ -163,7 +171,7 @@ public class CoverageProcessor {
         }
     }
 
-    private void setDiffInCoverageForChangeRequest(CoverageResult coverageReport) {
+    private void setDiffInCoverageForChangeRequest(final CoverageResult coverageReport) {
 
         ReferenceFinder referenceFinder = new ReferenceFinder();
         FilteredLog log = new FilteredLog("Errors while resolving the reference build:");
@@ -209,7 +217,7 @@ public class CoverageProcessor {
         coverageReport.setDeltaResults(deltaCoverage);
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(CoverageResult coverageResult) throws CoverageException {
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult) throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
             throw new CoverageException("Fail build because this change request decreases line coverage by " + coverageDiff);
@@ -222,7 +230,7 @@ public class CoverageProcessor {
      * @param adapters {@link CoverageReportAdapter} for each report
      * @return {@link CoverageResult} for each report
      */
-    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(List<CoverageReportAdapter> adapters, List<ReportDetector> reportDetectors)
+    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(final List<CoverageReportAdapter> adapters, final List<ReportDetector> reportDetectors)
             throws IOException, InterruptedException, CoverageException {
         PrintStream logger = listener.getLogger();
 
@@ -363,8 +371,8 @@ public class CoverageProcessor {
      * @param action             coverage action
      * @return Health report
      */
-    private HealthReport processThresholds(Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
-                                           List<Threshold> globalThresholds, CoverageAction action) throws CoverageException {
+    private HealthReport processThresholds(final Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
+                                           final List<Threshold> globalThresholds, final CoverageBuildAction action) throws CoverageException {
 
         int healthyCount = 0;
         int unhealthyCount = 0;
@@ -431,24 +439,28 @@ public class CoverageProcessor {
 
         if (unstableCount > 0) {
             if (getFailUnstable()) {
-                action.setFailMessage(String.format("Build failed because following metrics did not meet stability target: %s.", unstableThresholds.toString()));
+                action.setFailMessage(String.format("Build failed because following metrics did not meet stability target: %s.",
+                        unstableThresholds));
                 throw new CoverageException(action.getFailMessage());
             } else {
-                action.setFailMessage(String.format("Build unstable because following metrics did not meet stability target: %s.", unstableThresholds.toString()));
+                action.setFailMessage(String.format("Build unstable because following metrics did not meet stability target: %s.",
+                        unstableThresholds));
                 run.setResult(Result.UNSTABLE);
             }
         }
 
         if (unhealthyCount > 0) {
             if (getFailUnhealthy()) {
-                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.", unhealthyThresholds.toString()));
+                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.",
+                        unhealthyThresholds));
                 throw new CoverageException(action.getFailMessage());
             }
 
             unhealthyThresholds = unhealthyThresholds.stream().filter(Threshold::isFailUnhealthy)
                     .collect(Collectors.toSet());
             if (unhealthyThresholds.size() > 0) {
-                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.", unhealthyThresholds.toString()));
+                action.setFailMessage(String.format("Build failed because following metrics did not meet health target: %s.",
+                        unhealthyThresholds));
                 throw new CoverageException(action.getFailMessage());
             }
         }
@@ -472,7 +484,7 @@ public class CoverageProcessor {
      * @param results CoverageResults converted by adapter
      * @return Coverage report that have all coverage results
      */
-    private CoverageResult aggregateToOneReport(CoverageReportAdapter adapter, List<CoverageResult> results) {
+    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter, final List<CoverageResult> results) {
         CoverageResult report = new CoverageResult(CoverageElement.REPORT, null, adapter.getDescriptor().getDisplayName() + ": " + adapter.getPath());
 
         results.forEach(r -> {
@@ -495,7 +507,7 @@ public class CoverageProcessor {
      * @param results results will be aggregated
      * @return aggregated report
      */
-    private CoverageResult aggregateReports(Map<CoverageReportAdapter, List<CoverageResult>> results) {
+    private CoverageResult aggregateReports(final Map<CoverageReportAdapter, List<CoverageResult>> results) {
         if (results.size() == 0) {
             return null;
         }
@@ -524,7 +536,7 @@ public class CoverageProcessor {
      *
      * @param failUnhealthy value to set for property 'failUnhealthy'
      */
-    public void setFailUnhealthy(boolean failUnhealthy) {
+    public void setFailUnhealthy(final boolean failUnhealthy) {
         this.failUnhealthy = failUnhealthy;
     }
 
@@ -542,7 +554,7 @@ public class CoverageProcessor {
      *
      * @param failUnstable valzue to set for property 'failUnstable'
      */
-    public void setFailUnstable(boolean failUnstable) {
+    public void setFailUnstable(final boolean failUnstable) {
         this.failUnstable = failUnstable;
     }
 
@@ -560,11 +572,11 @@ public class CoverageProcessor {
      *
      * @param failNoReports value to set for property 'failNoReports'
      */
-    public void setFailNoReports(boolean failNoReports) {
+    public void setFailNoReports(final boolean failNoReports) {
         this.failNoReports = failNoReports;
     }
 
-    public void setSourceFileResolver(SourceFileResolver sourceFileResolver) {
+    public void setSourceFileResolver(final SourceFileResolver sourceFileResolver) {
         this.sourceFileResolver = sourceFileResolver;
     }
 
@@ -572,7 +584,7 @@ public class CoverageProcessor {
         return globalTag;
     }
 
-    public void setGlobalTag(String globalTag) {
+    public void setGlobalTag(final String globalTag) {
         this.globalTag = globalTag;
     }
 
@@ -580,7 +592,7 @@ public class CoverageProcessor {
         return applyThresholdRecursively;
     }
 
-    public void setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+    public void setApplyThresholdRecursively(final boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
     }
 
@@ -588,7 +600,7 @@ public class CoverageProcessor {
         return failBuildIfCoverageDecreasedInChangeRequest;
     }
 
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 
@@ -597,14 +609,14 @@ public class CoverageProcessor {
         private final String reportFilePath;
         private final CoverageReportAdapter reportAdapter;
 
-        public FindReportCallable(String reportFilePath, CoverageReportAdapter reportAdapter) {
+        public FindReportCallable(final String reportFilePath, final CoverageReportAdapter reportAdapter) {
             this.reportFilePath = reportFilePath;
             this.reportAdapter = reportAdapter;
         }
 
 
         @Override
-        public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+        public FilePath[] invoke(final File f, final VirtualChannel channel) throws IOException, InterruptedException {
 
             FilePath[] r = new FilePath(f).list(reportFilePath);
 
@@ -621,7 +633,7 @@ public class CoverageProcessor {
      * @param run    build
      * @param report report
      */
-    public static void saveCoverageResult(Run<?, ?> run, CoverageResult report) throws IOException {
+    public static void saveCoverageResult(final Run<?, ?> run, final CoverageResult report) throws IOException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reportFile))) {
@@ -635,7 +647,7 @@ public class CoverageProcessor {
      * @param run build
      * @return Coverage result
      */
-    public static CoverageResult recoverCoverageResult(Run<?, ?> run) throws IOException, ClassNotFoundException {
+    public static CoverageResult recoverCoverageResult(final Run<?, ?> run) throws IOException, ClassNotFoundException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
         try (ObjectInputStream ois = new CompatibleObjectInputStream(new FileInputStream(reportFile))) {
