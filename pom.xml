@@ -30,7 +30,7 @@
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>9.9.1-4</saxon-he.version>
 
-    <echarts-api.version>5.1.2-9-rc518.6968709b37da</echarts-api.version>
+    <echarts-api.version>5.1.2-9</echarts-api.version>
     <forensics-api.version>1.3.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.7</pull-request-monitoring.version>
     <plugin-util-api.version>2.4.0</plugin-util-api.version>
