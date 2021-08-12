@@ -122,20 +122,10 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
     }
 
-    /**
-     * Getter for property 'relativeSourcePath'.
-     *
-     * @return Value for property 'relativeSourcePath'.
-     */
     public String getRelativeSourcePath() {
         return relativeSourcePath;
     }
 
-    /**
-     * Setter for property 'relativeSourcePath'.
-     *
-     * @param relativeSourcePath Value to set for property 'relativeSourcePath'.
-     */
     public void setRelativeSourcePath(final String relativeSourcePath) {
         this.relativeSourcePath = relativeSourcePath;
 
@@ -144,11 +134,6 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
     }
 
-    /**
-     * Getter for property 'name'.
-     *
-     * @return Value for property 'name'.
-     */
     public String getName() {
         return name == null || name.trim().length() == 0 ? "Project" : name;
     }
@@ -157,29 +142,14 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         this.name = name;
     }
 
-    /**
-     * Getter for property 'parent'.
-     *
-     * @return Value for property 'parent'.
-     */
     public CoverageResult getParent() {
         return parent;
     }
 
-    /**
-     * Getter for property 'element'.
-     *
-     * @return Value for property 'element'.
-     */
     public CoverageElement getElement() {
         return element;
     }
 
-    /**
-     * Getter for property 'sourceCodeLevel'.
-     *
-     * @return Value for property 'sourceCodeLevel'.
-     */
     public boolean isSourceCodeLevel() {
         return relativeSourcePath != null;
     }
@@ -188,11 +158,6 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return element.equals(CoverageElement.AGGREGATED_REPORT);
     }
 
-    /**
-     * Getter for property 'paint'.
-     *
-     * @return Value for property 'paint'.
-     */
     public CoveragePaint getPaint() {
         return paint;
     }
