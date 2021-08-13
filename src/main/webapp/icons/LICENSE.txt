@@ -1,0 +1,3 @@
+License for FontAwesome icons:
+
+https://fontawesome.com/license

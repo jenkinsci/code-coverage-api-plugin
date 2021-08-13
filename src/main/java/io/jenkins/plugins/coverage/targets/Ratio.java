@@ -45,11 +45,9 @@ final public class Ratio implements Serializable {
         this.denominator = denominator;
     }
 
-    /**
-     * Gets "x/y" representation.
-     */
+    @Override
     public String toString() {
-        return print(numerator) + "/" + print(denominator);
+        return getPercentageString();
     }
 
     private String print(final float f) {
