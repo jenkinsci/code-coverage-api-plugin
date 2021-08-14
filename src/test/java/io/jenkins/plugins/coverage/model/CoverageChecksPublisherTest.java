@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.jvnet.localizer.Localizable;
 import hudson.model.HealthReport;
@@ -26,7 +26,12 @@ import io.jenkins.plugins.util.JenkinsFacade;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class CoverageChecksPublisherTest {
+/**
+ * Tests the class {@link CoverageChecksPublisher}.
+ *
+ * @author Kezhi Xiong
+ */
+class CoverageChecksPublisherTest {
     private static final String JENKINS_BASE_URL = "http://127.0.0.1:8080";
     private static final String COVERAGE_URL_NAME = "coverage";
     private static final String BUILD_LINK = "job/pipeline-coding-style/job/PR-3/49/";
@@ -34,13 +39,13 @@ public class CoverageChecksPublisherTest {
     private static final String LAST_SUCCESSFUL_BUILD_LINK = "http://127.0.0.1:8080/job/pipeline-coding-style/view/change-requests/job/PR-3/110/";
     private static final String HEALTH_REPORT = "Coverage Healthy score is 100%";
 
-    @BeforeClass
+    @BeforeAll
     public static void enforceEnglishLocale() {
         Locale.setDefault(Locale.ENGLISH);
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithLineAndMethodCoverage() {
+    void shouldConstructChecksDetailsWithLineAndMethodCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
@@ -49,51 +54,51 @@ public class CoverageChecksPublisherTest {
                 .withOutput(new ChecksOutputBuilder()
                         .withTitle("Line: 60.00%. Branch: 40.00%.")
                         .withSummary("## " + HEALTH_REPORT + ".")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"
+                        .withText("## Branch\n* :white_check_mark: Coverage: 40%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|-|-|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|40.00%|60.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|-|-|")
                         .build())
                 .build();
 
-        Run build = mock(Run.class);
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        Run<?, ?> build = mock(Run.class);
+        CoverageResult result = createCoverageResult((float) 0.6, (float) 0.4);
         when(result.getPreviousResult()).thenReturn(null);
-        when(result.getOwner()).thenReturn(build);
+        when(result.getOwner()).thenAnswer(b -> build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
         Assertions.assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
-                .extractChecksDetails())
+                        .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithIncreasedLineCoverageAndConditionalCoverage() {
+    void shouldConstructChecksDetailsWithIncreasedLineCoverageAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 50.00% (+10.00% against target branch). " +
-                                "Branch: 50.00% (+15.00% against target branch).")
+                        .withTitle("Line: 50.00% (+10.00% against target branch). "
+                                + "Branch: 50.00% (+15.00% against target branch).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK
+                                + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 20%\n"
+                        .withText("## Branch\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 20%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_up: Trend: 10%\n")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|50.00%|50.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|+20.00% :arrow_up:|+10.00% :arrow_up:|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|50.00%|50.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|+20.00% :arrow_up:|+10.00% :arrow_up:|")
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.4, (float)0.3, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
+        CoverageResult result = createCoverageResult((float) 0.4, (float) 0.3, (float) 0.5, (float) 0.5,
+                TARGET_BUILD_LINK,
                 +10, +15);
         CoverageBuildAction action = createAction(result);
 
@@ -108,28 +113,29 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndConditionalCoverage() {
+    void shouldConstructChecksDetailsWithDecreasedLineCoverageAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 50.00% (-10.00% against target branch). " +
-                                "Branch: 50.00% (-15.00% against target branch).")
+                        .withTitle("Line: 50.00% (-10.00% against target branch). "
+                                + "Branch: 50.00% (-15.00% against target branch).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK
+                                + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 15%\n"
+                        .withText("## Branch\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 15%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 50%\n* :arrow_down: Trend: 10%\n")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|50.00%|50.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|-20.00% :arrow_down:|-10.00% :arrow_down:|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|50.00%|50.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|-20.00% :arrow_down:|-10.00% :arrow_down:|")
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.7, (float)0.5, (float)0.5, TARGET_BUILD_LINK,
+        CoverageResult result = createCoverageResult((float) 0.6, (float) 0.7, (float) 0.5, (float) 0.5,
+                TARGET_BUILD_LINK,
                 -10, -15);
         CoverageBuildAction action = createAction(result);
 
@@ -148,26 +154,27 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldConstructChecksDetailsWithUnchangedLineAndConditionalCoverage() {
+    void shouldConstructChecksDetailsWithUnchangedLineAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 60.00% (+0.00% against target branch). " +
-                                "Branch: 40.00% (+0.00% against target branch).")
+                        .withTitle("Line: 60.00% (+0.00% against target branch). "
+                                + "Branch: 40.00% (+0.00% against target branch).")
                         .withSummary("* ### [Target branch build](" + JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK + ")\n"
-                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
+                                + "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK
+                                + ")\n"
                                 + "## " + HEALTH_REPORT + ".")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|+0.00% :arrow_right:|+0.00% :arrow_right:|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|40.00%|60.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|+0.00% :arrow_right:|+0.00% :arrow_right:|")
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4, (float)0.6, (float)0.4, TARGET_BUILD_LINK, 0,
+        CoverageResult result = createCoverageResult((float) 0.6, (float) 0.4, (float) 0.6, (float) 0.4,
+                TARGET_BUILD_LINK, 0,
                 0);
         CoverageBuildAction action = createAction(result);
 
@@ -182,27 +189,28 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldUseLastSuccessfulBuildForLineCoverageIfNoTargetBranchIsComparedWith() {
+    void shouldUseLastSuccessfulBuildForLineCoverageIfNoTargetBranchIsComparedWith() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
                 .withOutput(new ChecksOutputBuilder()
-                        .withTitle("Line: 60.00% (+10.00% against last successful build). " +
-                                "Branch: 40.00% (+10.00% against last successful build).")
-                        .withSummary("* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK + ")\n"
-                                + "## " + HEALTH_REPORT + ".")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n* :arrow_up: Trend: 10%\n"
+                        .withTitle("Line: 60.00% (+10.00% against last successful build). "
+                                + "Branch: 40.00% (+10.00% against last successful build).")
+                        .withSummary(
+                                "* ### [Last successful build](" + JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK
+                                        + ")\n"
+                                        + "## " + HEALTH_REPORT + ".")
+                        .withText("## Branch\n* :white_check_mark: Coverage: 40%\n* :arrow_up: Trend: 10%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n* :arrow_up: Trend: 10%\n")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|+10.00% :arrow_up:|+10.00% :arrow_up:|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|40.00%|60.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|+10.00% :arrow_up:|+10.00% :arrow_up:|")
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.5, (float)0.3, (float)0.6, (float)0.4, null, 0, -10);
+        CoverageResult result = createCoverageResult((float) 0.5, (float) 0.3, (float) 0.6, (float) 0.4, null, 0, -10);
         CoverageBuildAction action = createAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -216,7 +224,7 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldPublishFailedCheck() {
+    void shouldPublishFailedCheck() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
@@ -226,19 +234,18 @@ public class CoverageChecksPublisherTest {
                         .withTitle("Line: 60.00%. Branch: 40.00%.")
                         .withSummary("## Coverage Healthy score is 10%.\n"
                                 + "## Failed because coverage is unhealthy.")
-                        .withText("## Conditional\n* :white_check_mark: Coverage: 40%\n"
+                        .withText("## Branch\n* :white_check_mark: Coverage: 40%\n"
                                 + "## Line\n* :white_check_mark: Coverage: 60%\n")
-                        .withText("||Conditional|Line|\n" +
-                                "|:-:|:-:|:-:|\n" +
-                                "|:white_check_mark: **Coverage**|40.00%|60.00%|\n" +
-                                "|:chart_with_upwards_trend: **Trend**|-|-|")
+                        .withText("||Branch|Line|\n|:-:|:-:|:-:|\n"
+                                + "|:white_check_mark: **Coverage**|40.00%|60.00%|\n"
+                                + "|:chart_with_upwards_trend: **Trend**|-|-|")
                         .build())
                 .build();
 
-        Run build = mock(Run.class);
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        Run<?, ?> build = mock(Run.class);
+        CoverageResult result = createCoverageResult((float) 0.6, (float) 0.4);
         when(result.getPreviousResult()).thenReturn(null);
-        when(result.getOwner()).thenReturn(build);
+        when(result.getOwner()).thenAnswer(b -> build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
@@ -256,10 +263,10 @@ public class CoverageChecksPublisherTest {
     }
 
     @Test
-    public void shouldReportNoLineOrBranchCoverageInChecksTitle() {
-        Run build = mock(Run.class);
+    void shouldReportNoLineOrBranchCoverageInChecksTitle() {
+        Run<?, ?> build = mock(Run.class);
         CoverageResult result = mock(CoverageResult.class);
-        when(result.getOwner()).thenReturn(build);
+        when(result.getOwner()).thenAnswer(b -> build);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
         when(build.getUrl()).thenReturn(BUILD_LINK);
 
@@ -284,8 +291,8 @@ public class CoverageChecksPublisherTest {
     private CoverageResult createCoverageResult(final float lastLineCoverage, final float lastConditionCoverage,
             final float lineCoverage, final float conditionCoverage,
             final String targetBuildLink, final float targetLineDiff, final float targetBranchDiff) {
-        Run build = mock(Run.class);
-        Run lastBuild = mock(Run.class);
+        Run<?, ?> build = mock(Run.class);
+        Run<?, ?> lastBuild = mock(Run.class);
         CoverageResult lastResult = createCoverageResult(lastLineCoverage, lastConditionCoverage);
         CoverageResult result = createCoverageResult(lineCoverage, conditionCoverage);
 
@@ -293,9 +300,9 @@ public class CoverageChecksPublisherTest {
         when(result.getReferenceBuildUrl()).thenReturn(targetBuildLink);
         when(result.getCoverageDelta(CoverageElement.LINE)).thenReturn(targetLineDiff);
         when(result.getCoverageDelta(CoverageElement.CONDITIONAL)).thenReturn(targetBranchDiff);
-        when(result.getOwner()).thenReturn(build);
+        when(result.getOwner()).thenAnswer(b -> build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
-        when(build.getPreviousSuccessfulBuild()).thenReturn(lastBuild);
+        when(build.getPreviousSuccessfulBuild()).thenAnswer(b -> lastBuild);
         when(lastBuild.getUrl()).thenReturn(LAST_SUCCESSFUL_BUILD_LINK);
 
         return result;
@@ -328,9 +335,11 @@ public class CoverageChecksPublisherTest {
 
     private JenkinsFacade createJenkins() {
         JenkinsFacade jenkinsFacade = mock(JenkinsFacade.class);
-        when(jenkinsFacade.getAbsoluteUrl(BUILD_LINK, COVERAGE_URL_NAME)).thenReturn(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME);
+        when(jenkinsFacade.getAbsoluteUrl(BUILD_LINK, COVERAGE_URL_NAME)).thenReturn(
+                JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME);
         when(jenkinsFacade.getAbsoluteUrl(TARGET_BUILD_LINK)).thenReturn(JENKINS_BASE_URL + "/" + TARGET_BUILD_LINK);
-        when(jenkinsFacade.getAbsoluteUrl(LAST_SUCCESSFUL_BUILD_LINK)).thenReturn(JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK);
+        when(jenkinsFacade.getAbsoluteUrl(LAST_SUCCESSFUL_BUILD_LINK)).thenReturn(
+                JENKINS_BASE_URL + "/" + LAST_SUCCESSFUL_BUILD_LINK);
 
         return jenkinsFacade;
     }

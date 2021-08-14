@@ -36,7 +36,7 @@ public class CoverageChecksPublisher {
     private final CoverageBuildAction action;
     private final JenkinsFacade jenkinsFacade;
     private static final List<String> COVERAGE_TYPES =
-            Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Conditional", "Line",
+            Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Branch", "Line",
                     "Instruction");
 
     /**
