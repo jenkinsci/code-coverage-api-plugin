@@ -1,26 +1,29 @@
 package io.jenkins.plugins.coverage.adapter;
 
+import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import com.google.common.collect.Lists;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.jenkinsci.Symbol;
 import hudson.Extension;
+
 import io.jenkins.plugins.coverage.adapter.parser.CoverageParser;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
 
     @DataBoundConstructor
-    public IstanbulCoberturaReportAdapter(String path) {
+    public IstanbulCoberturaReportAdapter(final String path) {
         super(path);
     }
 
@@ -38,7 +41,7 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
 
     @CheckForNull
     @Override
-    protected CoverageResult parseToResult(Document document, String reportName) throws CoverageException {
+    protected CoverageResult parseToResult(final Document document, final String reportName) throws CoverageException {
         return new IstanbulCoberturaCoverageParser(reportName).parse(document);
     }
 
@@ -55,7 +58,7 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
         public List<CoverageElement> getCoverageElements() {
             return Lists.newArrayList(
                     new CoverageElement("Directory", 1),
-                    new CoverageElement("File", 2),
+                    CoverageElement.FILE,
                     new CoverageElement("Function", 4)
             );
         }
@@ -79,12 +82,12 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
          *
          * @param reportName name of the report
          */
-        public IstanbulCoberturaCoverageParser(String reportName) {
+        public IstanbulCoberturaCoverageParser(final String reportName) {
             super(reportName);
         }
 
         @Override
-        protected CoverageResult processElement(Element current, CoverageResult parentResult) {
+        protected CoverageResult processElement(final Element current, final CoverageResult parentResult) {
 
             CoverageResult result = null;
             switch (current.getLocalName()) {

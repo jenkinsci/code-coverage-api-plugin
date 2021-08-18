@@ -85,7 +85,25 @@ public class CoverageBuildAction extends BuildAction<CoverageResult> implements 
 
     @Override
     public Object getTarget() {
-        return getResult();
+        CoverageResult nextInterestingResult = getNextInterestingResult();
+
+        String name;
+        if (nextInterestingResult.hasParent()) {
+            name = nextInterestingResult.getParent().getDisplayName();
+        }
+        else {
+            name = nextInterestingResult.getDisplayName();
+        }
+
+        return new CoverageViewModel(getOwner(), nextInterestingResult, name);
+    }
+
+    private CoverageResult getNextInterestingResult() {
+        CoverageResult result = getResult();
+        while (result.hasSingletonChild()) {
+            result = result.getSingletonChild();
+        }
+        return result;
     }
 
     @Override

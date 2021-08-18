@@ -1,18 +1,20 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.Ratio;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
  * Parse the standard format coverage report and convert it into {@link CoverageResult}.
@@ -28,7 +30,7 @@ public abstract class CoverageParser {
      *
      * @param reportName name of the report
      */
-    public CoverageParser(String reportName) {
+    public CoverageParser(final String reportName) {
         this.reportName = reportName;
     }
 
@@ -38,7 +40,7 @@ public abstract class CoverageParser {
      * @param document DOM document of coverage report
      * @return Coverage result of specified report
      */
-    public CoverageResult parse(Document document) throws CoverageException {
+    public CoverageResult parse(final Document document) throws CoverageException {
         Element documentElement = document.getDocumentElement();
 
         if (documentElement == null) {
@@ -78,6 +80,7 @@ public abstract class CoverageParser {
      * @param parentResult parent coverage result
      * @return coverage result converted from Element
      */
+    @CheckForNull
     protected abstract CoverageResult processElement(Element current, CoverageResult parentResult);
 
 
@@ -95,11 +98,11 @@ public abstract class CoverageParser {
      *
      * @param reportName value to set for property 'reportName'
      */
-    public void setReportName(String reportName) {
+    public void setReportName(final String reportName) {
         this.reportName = reportName;
     }
 
-    protected String getAttribute(Element e, String attributeName, String defaultValue) {
+    protected String getAttribute(final Element e, final String attributeName, final String defaultValue) {
         String value = e.getAttribute(attributeName);
         return StringUtils.isEmpty(value) ? defaultValue : value;
     }
@@ -109,11 +112,11 @@ public abstract class CoverageParser {
      * @param attributeName attribute name
      * @return value of attribute, or <code>null</code> if attribute not exists.
      */
-    protected String getAttribute(Element e, String attributeName) {
+    protected String getAttribute(final Element e, final String attributeName) {
         return getAttribute(e, attributeName, null);
     }
 
-    protected void processLine(Element current, CoverageResult parentResult) {
+    protected void processLine(final Element current, final CoverageResult parentResult) {
         String hitsString = current.getAttribute("hits");
         String lineNumber = current.getAttribute("number");
         int denominator = 0;

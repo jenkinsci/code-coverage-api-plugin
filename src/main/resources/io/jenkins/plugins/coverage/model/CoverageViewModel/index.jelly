@@ -1,0 +1,64 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables">
+
+  <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
+
+  <bs:page it="${it}">
+
+    <st:adjunct includes="io.jenkins.plugins.echarts"/>
+    <st:adjunct includes="io.jenkins.plugins.data-tables"/>
+
+    <div class="row py-3 flex-nowrap">
+      <div class="col d-flex">
+
+        <bs:card title="${%Coverage overview}" fontAwesomeIcon="chart-bar" class="flex-fill">
+          <div id="coverage-overview" class="graph-cursor-pointer card-chart"/>
+        </bs:card>
+
+      </div>
+
+    </div>
+
+    <div class="row py-3 flex-nowrap">
+
+      <div class="col d-flex">
+
+        <bs:card title="${%Coverage statistics by package}" fontAwesomeIcon="search-plus" class="flex-fill">
+          <div id="coverage-details" class="graph-cursor-pointer card-chart"/>
+        </bs:card>
+
+      </div>
+
+    </div>
+
+    <div class="row py-3 flex-nowrap">
+
+      <div class="col">
+        <div id="file-table">
+          <bs:card title="${%Coverage details of all files}" fontAwesomeIcon="file-alt" class="flex-fill">
+            <dt:table model="${it.getTableModel('coverage-details')}"/>
+          </bs:card>
+        </div>
+      </div>
+
+    </div>
+
+  </bs:page>
+
+  <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart2.js"/>
+
+  <script>
+    const viewProxy = <st:bind value="${it}"/>;
+    const coverageChartGenerator = new CoverageChartGenerator();
+    viewProxy.getOverallStatistics(function(t) {
+        const ratios = t.responseObject();
+        coverageChartGenerator.generateSummaryChart(ratios, 'coverage-overview');
+    });
+    viewProxy.getDetailsOfFirstChild(function(t) {
+        const ratiosPerItem = t.responseObject();
+        const element = '${it.childElement.name}';
+        coverageChartGenerator.generateChildSummaryChart(ratiosPerItem, 'coverage-details', element)
+    });
+  </script>
+
+</j:jelly>

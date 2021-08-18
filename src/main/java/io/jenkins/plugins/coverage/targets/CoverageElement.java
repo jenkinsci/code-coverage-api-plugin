@@ -5,14 +5,16 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 public class CoverageElement implements Comparable<CoverageElement>, Serializable {
-
-    // Auto-generated
     private static final long serialVersionUID = 6722992955158201174L;
 
     public final static CoverageElement AGGREGATED_REPORT = new CoverageElement("Aggregated Report", Integer.MIN_VALUE);
     public final static CoverageElement REPORT = new CoverageElement("Report", Integer.MIN_VALUE + 1);
+
+    public final static CoverageElement FILE = new CoverageElement("File", 2);
+
     public final static CoverageElement LINE = new CoverageElement("Line", Integer.MAX_VALUE - 1, true);
     public final static CoverageElement CONDITIONAL = new CoverageElement("Branch", Integer.MAX_VALUE, true);
+
 
     public final static String COVERAGE_ELEMENT_TYPE_NONE = "None";
     public final static String COVERAGE_ELEMENT_TYPE_JAVA = "Java";

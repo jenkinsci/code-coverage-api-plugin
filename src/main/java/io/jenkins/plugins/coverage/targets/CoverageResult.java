@@ -34,12 +34,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -89,6 +94,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private float changeRequestCoverageDiffWithTargetBranch = 0;
 
     // these two pointers form a tree structure where edges are names.
+    @CheckForNull
     private CoverageResult parent;
 
     private final Map<String, CoverageResult> children = new TreeMap<>();
@@ -126,7 +132,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     // ---------- REFACTORING START ------------------
 
     // FIXME: currently this class handles UI requests and stores the coverage model
-    //        it would make more sense to split these information
+    //        it would make more sense to split this information
 
     /**
      * Returns the size of this result, i.e. the number of children that are part of this report.
@@ -197,6 +203,106 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     public boolean hasReferenceBuild() {
         return StringUtils.isNotBlank(referenceBuildUrl);
+    }
+
+    /**
+     * Returns the singleton child of this result.
+     *
+     * @return the singleton child of this result
+     * @throws NoSuchElementException
+     *         if this result does not contain children
+     * @see #hasSingletonChild()
+     */
+    public CoverageResult getSingletonChild() {
+        return children.values()
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("No child found"));
+    }
+
+    /**
+     * Returns whether this result has a singleton child.
+     *
+     * @return {@code true} if this result has a singleton child, {@code false} otherwise
+     */
+    public boolean hasSingletonChild() {
+        return children.size() == 1;
+    }
+
+    /**
+     * Returns whether this result has a parent.
+     *
+     * @return {@code true} if this result has a parent, {@code false} if it is the root of the hierarchy
+     */
+    public boolean hasParent() {
+        return parent != null;
+    }
+
+    /**
+     * Returns the name of the parent element or "-" if there is no such element.
+     *
+     * @return the name of the parent element
+     */
+    public String getParentName() {
+        return parent != null ? parent.getName() : "-";
+    }
+
+    /**
+     * Returns recursively all elements of the given type.
+     *
+     * @param element
+     *         the element type to look for
+     *
+     * @return all elements of the given type
+     */
+    public List<CoverageResult> getAll(final CoverageElement element) {
+        List<CoverageResult> fileNodes = children.values()
+                .stream()
+                .filter(result -> element.equals(result.getElement()))
+                .collect(Collectors.toList());
+        children.values()
+                .stream()
+                .filter(result -> isContainerNode(result, element))
+                .map(child -> child.getAll(CoverageElement.FILE))
+                .flatMap(List::stream).forEach(fileNodes::add);
+        return fileNodes;
+    }
+
+    private boolean isContainerNode(final CoverageResult result, final CoverageElement otherElement) {
+        CoverageElement coverageElement = result.getElement();
+        return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
+    }
+
+    public Optional<CoverageResult> find(final String element, final String name) {
+        int hashCode = Integer.parseInt(name);
+        for (String key : children.keySet()) {
+            if (key.hashCode() == hashCode) {
+                CoverageResult childResult = children.get(key);
+                if (childResult.getElement().getName().equalsIgnoreCase(element)) {
+                    return Optional.of(childResult);
+                }
+            }
+        }
+        return children.values()
+                .stream()
+                .map(child -> child.find(element, name))
+                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+                .findAny();
+    }
+
+    /**
+     * Prints the coverage for the specified element.
+     *
+     * @param element
+     *         the element to print the coverage for
+     *
+     * @return coverage ratio in a human-readable format
+     */
+    public String printCoverageFor(final CoverageElement element) {
+        if (aggregateResults.containsKey(element)) {
+            return String.format("%.2f%%", aggregateResults.get(element).getPercentageFloat());
+        }
+        return "n/a";
     }
 
     // ---------- REFACTORING END ------------------
@@ -417,39 +523,18 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return children.keySet();
     }
 
-    /**
-     * Getter for property 'children'.
-     *
-     * @return Value for property 'children'.
-     */
     public Map<String, CoverageResult> getChildrenReal() {
         return children;
     }
 
-    /**
-     * Getter for property 'results'.
-     *
-     * @return Value for property 'results'.
-     */
     public Map<CoverageElement, Ratio> getResults() {
         return Collections.unmodifiableMap(aggregateResults);
     }
 
-    /**
-     * Getter for property 'deltaResults'.
-     *
-     * @return Value for property 'deltaResults'.
-     */
     public Map<CoverageElement, Float> getDeltaResults() {
         return Collections.unmodifiableMap(deltaResults);
     }
 
-    /**
-     * Setter for property 'deltaResults'.
-     *
-     * @param deltaResults
-     *         Value to set for property 'deltaResults'.
-     */
     public void setDeltaResults(final Map<CoverageElement, Float> deltaResults) {
         this.deltaResults.clear();
         this.deltaResults.putAll(deltaResults);
