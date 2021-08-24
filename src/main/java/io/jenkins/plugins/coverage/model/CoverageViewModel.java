@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import j2html.tags.ContainerTag;
+
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -22,6 +24,7 @@ import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
 import io.jenkins.plugins.datatables.TableModel;
+import io.jenkins.plugins.datatables.TableModel.DetailedColumnDefinition;
 
 import static j2html.TagCreator.*;
 
@@ -145,8 +148,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
             columns.add(new TableColumn("Package", "packageName"));
             columns.add(new TableColumn("File", "fileName"));
-            columns.add(new TableColumn("Line Coverage", "lineCoverage").setHeaderClass(ColumnCss.NUMBER));
-            columns.add(new TableColumn("Branch Coverage", "branchCoverage").setHeaderClass(ColumnCss.NUMBER));
+            columns.add(new TableColumn("Line Coverage", "lineCoverageValue").setHeaderClass(ColumnCss.NUMBER));
+            columns.add(new TableColumn("Line Coverage", "lineCoverageChart", "number"));
+            columns.add(new TableColumn("Branch Coverage", "branchCoverageValue").setHeaderClass(ColumnCss.NUMBER));
+            columns.add(new TableColumn("Branch Coverage", "branchCoverageChart", "number"));
 
             return columns;
         }
@@ -178,12 +183,35 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return result.getParentName();
         }
 
-        public String getLineCoverage() {
+        public String getLineCoverageValue() {
             return result.printCoverageFor(CoverageElement.LINE);
         }
 
-        public String getBranchCoverage() {
+        public DetailedColumnDefinition getLineCoverageChart() {
+            return createDetailedColumnFor(CoverageElement.LINE);
+        }
+
+        public String getBranchCoverageValue() {
             return result.printCoverageFor(CoverageElement.CONDITIONAL);
+        }
+
+        public DetailedColumnDefinition getBranchCoverageChart() {
+            return createDetailedColumnFor(CoverageElement.CONDITIONAL);
+        }
+
+        private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement conditional) {
+            return new DetailedColumnDefinition(getBarChartFor(result.getCoverage(conditional)),
+                    result.getCoverage(conditional).getPercentageString());
+        }
+
+        private String getBarChartFor(final Ratio lineCoverage) {
+            return join(getBarChart("covered", lineCoverage.getPercentage()),
+                    getBarChart("missed", 100 - lineCoverage.getPercentage())).render();
+        }
+
+        private ContainerTag getBarChart(final String className, final int percentage) {
+            return span().withClasses("bar-graph", className, className + "--hover")
+                    .withStyle("width:" + percentage + "%").withText(".");
         }
     }
 }

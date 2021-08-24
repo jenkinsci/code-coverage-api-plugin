@@ -8,6 +8,8 @@
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.data-tables"/>
 
+    <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
+
     <div class="row py-3 flex-nowrap">
       <div class="col d-flex">
 

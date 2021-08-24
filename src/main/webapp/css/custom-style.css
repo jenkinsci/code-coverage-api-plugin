@@ -1,0 +1,22 @@
+/* Bar graph in table */
+.bar-graph {
+    float: left;
+    color: transparent;
+}
+
+.missed {
+    background-color: #FFCDD2;
+}
+
+.missed:hover {
+    background-color: #EF9A9A;
+}
+
+.covered {
+    background-color: #C8E6C9;
+}
+
+.covered--hover:hover {
+    background-color: #A5D6A7;
+}
+

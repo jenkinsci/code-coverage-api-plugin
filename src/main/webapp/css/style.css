@@ -60,3 +60,26 @@ table.source tr.noCover {
 .center {
   text-align: center;
 }
+
+/* Bar graph in table */
+.bar-graph {
+    float: left;
+    color: transparent;
+}
+
+.covered {
+    background-color: #FFCDD2;
+}
+
+.covered--hover:hover {
+    background-color: #EF9A9A;
+}
+
+.missed {
+    background-color: #C8E6C9;
+}
+
+.missed--hover:hover {
+    background-color: #A5D6A7;
+}
+
