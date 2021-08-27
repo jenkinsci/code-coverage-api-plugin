@@ -46,6 +46,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         the owner of this view
      * @param result
      *         the results to be shown
+     * @param displayName
+     *         human-readable name of this view (used in bread-crumb)
      */
     public CoverageViewModel(final Run<?, ?> owner, final CoverageResult result, final String displayName) {
         this.owner = owner;
@@ -105,10 +107,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Returns a new sub page for the selected link.
+     * Returns a new sub-page for the selected link.
      *
      * @param link
-     *         the link to identify the sub page to show
+     *         the link to identify the sub-page to show
      * @param request
      *         Stapler request
      * @param response
@@ -123,6 +125,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             Optional<CoverageResult> targetResult = getResult().find(split[0], split[1]);
             if (targetResult.isPresent()) {
                 CoverageResult coverageResult = targetResult.get();
+                if (coverageResult.getElement().equals(CoverageElement.FILE)) {
+                    return new SourceViewModel(getOwner(), coverageResult, coverageResult.getDisplayName());
+                }
                 return new CoverageViewModel(getOwner(), coverageResult, coverageResult.getDisplayName());
             }
         }

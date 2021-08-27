@@ -36,6 +36,7 @@ public class CoverageTrendChart {
         LinesDataSet dataSet = builder.createDataSet(configuration, results);
 
         LinesChartModel model = new LinesChartModel(dataSet);
+        model.useContinuousRangeAxis();
         model.setRangeMax(100);
         model.setRangeMin(Math.max(0, Math.min(min(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
                 min(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE) - 10)));

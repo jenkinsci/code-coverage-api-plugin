@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5">
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
@@ -8,7 +8,7 @@
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.data-tables"/>
 
-    <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
+    <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/style.css"/>
 
     <div class="row py-3 flex-nowrap">
       <div class="col d-flex">
@@ -23,27 +23,26 @@
 
     <div class="row py-3 flex-nowrap">
 
-      <div class="col d-flex">
-
-        <bs:card title="${%Coverage statistics by package}" fontAwesomeIcon="search-plus" class="flex-fill">
-          <div id="coverage-details" class="graph-cursor-pointer card-chart"/>
-        </bs:card>
-
-      </div>
-
-    </div>
-
-    <div class="row py-3 flex-nowrap">
-
       <div class="col">
         <div id="file-table">
-          <bs:card title="${%Coverage details of all files}" fontAwesomeIcon="file-alt" fontAwesomeStyle="regular" class="flex-fill">
-            <dt:table model="${it.getTableModel('coverage-details')}"/>
+          <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular" class="flex-fill">
+            <div style="overflow-x:scroll;">
+              <table class="source">
+                <thead>
+                  <tr>
+                    <th colspan="3">${it.relativeSourcePath}</th>
+                  </tr>
+                </thead>
+                <j:out value="${it.content}"/>
+              </table>
+            </div>
           </bs:card>
         </div>
       </div>
 
     </div>
+
+
 
   </bs:page>
 
@@ -55,11 +54,6 @@
     viewProxy.getOverallStatistics(function(t) {
         const ratios = t.responseObject();
         coverageChartGenerator.generateSummaryChart(ratios, 'coverage-overview');
-    });
-    viewProxy.getDetailsOfFirstChild(function(t) {
-        const ratiosPerItem = t.responseObject();
-        const element = '${it.childElement.name}';
-        coverageChartGenerator.generateChildSummaryChart(ratiosPerItem, 'coverage-details', element)
     });
   </script>
 
