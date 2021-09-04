@@ -43,6 +43,14 @@
     <workflow-multibranch.version>2.24</workflow-multibranch.version>
   </properties>
 
+  <developers>
+    <developer>
+      <id>cizezsy</id>
+      <name>Shenyu Zheng</name>
+      <email>zsy19980307@gmail.com</email>
+    </developer>
+  </developers>
+
   <licenses>
     <license>
       <name>MIT License</name>
@@ -125,6 +133,13 @@
 
     <!-- Test Dependencies -->
     <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>plugin-util-api</artifactId>
+      <version>${plugin-util-api.version}</version>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
       <scope>test</scope>
@@ -162,13 +177,22 @@
     </dependency>
   </dependencies>
 
-  <developers>
-    <developer>
-      <id>cizezsy</id>
-      <name>Shenyu Zheng</name>
-      <email>zsy19980307@gmail.com</email>
-    </developer>
-  </developers>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+        <configuration>
+          <packages combine.children="append">
+            <package>io.jenkins.plugins.coverage.model</package>
+          </packages>
+          <excludes combine.children="append">
+          </excludes>
+          <entryPointClassPackage>io.jenkins.plugins.coverage.model</entryPointClassPackage>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <scm>
     <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
