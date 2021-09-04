@@ -99,6 +99,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     private final Map<String, CoverageResult> children = new TreeMap<>();
 
+    // FIXME: storing different maps does not make much sense?
     private final Map<CoverageElement, Ratio> aggregateResults = new TreeMap<>();
 
     private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
@@ -133,6 +134,12 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     // FIXME: currently this class handles UI requests and stores the coverage model
     //        it would make more sense to split this information
+
+    @Override
+    public String toString() {
+        return String.format("CoverageResult of %s (line: %s, branch: %s)", name,
+                formatCoverage(CoverageElement.LINE), formatCoverage(CoverageElement.CONDITIONAL));
+    }
 
     /**
      * Returns the size of this result, i.e. the number of children that are part of this report.
@@ -182,12 +189,6 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
             return "n/a";
         }
         return String.format("%+.3f", delta);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("CoverageResult of %s (line: %s, branch: %s)", name,
-                formatCoverage(CoverageElement.LINE), formatCoverage(CoverageElement.CONDITIONAL));
     }
 
     private String formatCoverage(final CoverageElement coverageElement) {
@@ -273,6 +274,16 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
     }
 
+    /**
+     * Finds the coverage element with the given name.
+     *
+     * @param element
+     *         the coverage element name
+     * @param name
+     *         the name of the coverage instance
+     *
+     * @return the result if found
+     */
     public Optional<CoverageResult> find(final String element, final String name) {
         int hashCode = Integer.parseInt(name);
         for (String key : children.keySet()) {
@@ -291,16 +302,37 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     }
 
     /**
+     * Returns the coverage ratio for the specified element.
+     *
+     * @param coverageElement
+     *         the element to get the coverage ratio for
+     *
+     * @return coverage ratio if available
+     */
+    public Optional<Ratio> getCoverageFor(final CoverageElement coverageElement) {
+        if (aggregateResults.containsKey(coverageElement)) {
+            return Optional.ofNullable(aggregateResults.get(coverageElement));
+        }
+        if (localResults.containsKey(coverageElement)) {
+            return Optional.ofNullable(localResults.get(coverageElement));
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Prints the coverage for the specified element.
      *
-     * @param element
+     * @param coverageElement
      *         the element to print the coverage for
      *
      * @return coverage ratio in a human-readable format
      */
-    public String printCoverageFor(final CoverageElement element) {
-        if (aggregateResults.containsKey(element)) {
-            return String.format("%.2f%%", aggregateResults.get(element).getPercentageFloat());
+    public String printCoverageFor(final CoverageElement coverageElement) {
+        if (aggregateResults.containsKey(coverageElement)) {
+            return String.format("%.2f%%", aggregateResults.get(coverageElement).getPercentageFloat());
+        }
+        if (localResults.containsKey(coverageElement)) {
+            return String.format("%.2f%%", localResults.get(coverageElement).getPercentageFloat());
         }
         return "n/a";
     }

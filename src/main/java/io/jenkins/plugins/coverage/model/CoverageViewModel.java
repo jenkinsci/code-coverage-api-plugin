@@ -138,7 +138,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         private final CoverageResult result;
 
         CoverageTableModel(final CoverageResult result) {
-
             this.result = result;
         }
 

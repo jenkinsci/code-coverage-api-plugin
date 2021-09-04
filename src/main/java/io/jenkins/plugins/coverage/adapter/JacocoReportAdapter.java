@@ -44,6 +44,8 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
     @Symbol(value = {"jacocoAdapter", "jacoco"})
     @Extension
     public static final class JacocoReportAdapterDescriptor extends JavaCoverageReportAdapterDescriptor {
+        public static final CoverageElement INSTRUCTION = new CoverageElement("Instruction", 5);
+
         public JacocoReportAdapterDescriptor() {
             super(JacocoReportAdapter.class);
         }
@@ -57,7 +59,7 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
         @Override
         public List<CoverageElement> getCoverageElements() {
             List<CoverageElement> registerCoverageElements = super.getCoverageElements();
-            registerCoverageElements.add(new CoverageElement("Instruction", 5));
+            registerCoverageElements.add(INSTRUCTION);
             return registerCoverageElements;
         }
     }
@@ -72,9 +74,6 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
             CoverageResult result = super.processElement(current, parentResult);
             if (result == null) {
                 return null;
-            }
-            if (JavaCoverageReportAdapterDescriptor.PACKAGE.equals(result.getElement())) {
-                result.setName(fixPackageName(result.getName()));
             }
             if (getAttribute(current, "attr-mode", null) != null) {
                 String lineCoveredAttr = getAttribute(current, "line-covered");
@@ -110,13 +109,6 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
             }
 
             return result;
-        }
-
-        private String fixPackageName(final String name) {
-            if (StringUtils.isNotBlank(name)) {
-                return name.replaceAll("[\\\\/]", ".");
-            }
-            return name;
         }
     }
 }

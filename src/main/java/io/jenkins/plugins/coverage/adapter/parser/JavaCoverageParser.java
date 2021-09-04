@@ -65,8 +65,9 @@ public class JavaCoverageParser extends CoverageParser {
                         getAttribute(current, "name", "project"));
                 break;
             case "package":
+                String packageName = fixPackageName(getAttribute(current, "name", "-"));
                 result = new CoverageResult(CoverageElement.get("Package"), parentResult,
-                        getAttribute(current, "name", "<default>"));
+                        packageName);
                 break;
             case "file":
                 result = new CoverageResult(CoverageElement.get("File"), parentResult,
@@ -104,6 +105,12 @@ public class JavaCoverageParser extends CoverageParser {
         return result;
     }
 
+    private String fixPackageName(final String name) {
+        if (StringUtils.isNotBlank(name)) {
+            return name.replaceAll("[\\\\/]", ".");
+        }
+        return name;
+    }
 
     /**
      * convert method type signature and name to Java method name.

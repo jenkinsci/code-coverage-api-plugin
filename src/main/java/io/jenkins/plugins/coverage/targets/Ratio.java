@@ -47,7 +47,7 @@ final public class Ratio implements Serializable {
 
     @Override
     public String toString() {
-        return getPercentageString();
+        return getPercentageString() + String.format(" (%d/%d)", (int)numerator, (int)denominator);
     }
 
     private String print(final float f) {
