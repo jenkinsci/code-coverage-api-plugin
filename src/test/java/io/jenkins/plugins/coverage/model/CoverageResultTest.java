@@ -22,7 +22,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 class CoverageResultTest extends ResourceTest {
     private static final String EXPECTED_PACKAGE_NAME = "edu.hm.hafner.util";
-    private static final String TREE_STRING_BUILDER = "TreeStringBuilder.java";
+    private static final String TREE_STRING_BUILDER_FILE_NAME = "TreeStringBuilder.java";
+    private static final String TREE_STRING_BUILDER_CLASS = "edu.hm.hafner.util.TreeStringBuilder";
 
     private static final CoverageElement LINE = CoverageElement.LINE;
     private static final CoverageElement INSTRUCTION = JacocoReportAdapterDescriptor.INSTRUCTION;
@@ -53,24 +54,24 @@ class CoverageResultTest extends ResourceTest {
                 "PrefixLogger.java",
                 "StringContainsUtils.java",
                 "TreeString.java",
-                TREE_STRING_BUILDER,
+                TREE_STRING_BUILDER_FILE_NAME,
                 "VisibleForTesting.java");
         verifyCoverage(utilPackage, LINE, 294, 29);
         verifyCoverage(utilPackage, INSTRUCTION, 1260, 90);
         verifyCoverage(utilPackage, CONDITIONAL, 109, 7);
 
-        CoverageResult treeStringBuilderFile = utilPackage.getChild(TREE_STRING_BUILDER);
+        CoverageResult treeStringBuilderFile = utilPackage.getChild(TREE_STRING_BUILDER_FILE_NAME);
         assertThat(treeStringBuilderFile.getElement()).isEqualTo(CoverageElement.FILE);
         assertThat(treeStringBuilderFile.getChildren()).hasSize(2).containsExactly(
-                "edu/hm/hafner/util/TreeStringBuilder",
-                "edu/hm/hafner/util/TreeStringBuilder$Child");
+                TREE_STRING_BUILDER_CLASS,
+                "edu.hm.hafner.util.TreeStringBuilder.Child");
         verifyCoverage(treeStringBuilderFile, LINE, 51, 2);
 
         // FIXME: check why there is no INSTRUCTION result
         //        verifyCoverage(treeStringBuilderFile, INSTRUCTION, 229, 4);
         verifyCoverage(treeStringBuilderFile, CONDITIONAL, 17, 1);
 
-        CoverageResult treeStringBuilderClass = treeStringBuilderFile.getChild("edu/hm/hafner/util/TreeStringBuilder");
+        CoverageResult treeStringBuilderClass = treeStringBuilderFile.getChild(TREE_STRING_BUILDER_CLASS);
         assertThat(treeStringBuilderClass.getElement()).isEqualTo(JavaCoverageReportAdapterDescriptor.CLASS);
         assertThat(treeStringBuilderClass.getChildren()).hasSize(7).containsExactly("edu.hm.hafner.util.TreeString intern(edu.hm.hafner.util.TreeString)",
                 "edu.hm.hafner.util.TreeString intern(java.lang.String)",

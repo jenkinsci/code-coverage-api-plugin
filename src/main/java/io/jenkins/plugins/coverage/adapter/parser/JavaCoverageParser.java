@@ -65,7 +65,7 @@ public class JavaCoverageParser extends CoverageParser {
                         getAttribute(current, "name", "project"));
                 break;
             case "package":
-                String packageName = fixPackageName(getAttribute(current, "name", "-"));
+                String packageName = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
                 result = new CoverageResult(CoverageElement.get("Package"), parentResult,
                         packageName);
                 break;
@@ -75,8 +75,9 @@ public class JavaCoverageParser extends CoverageParser {
                 result.setRelativeSourcePath(getAttribute(current, "name", null));
                 break;
             case "class":
+                String className = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
                 result = new CoverageResult(CoverageElement.get("Class"), parentResult,
-                        getAttribute(current, "name", ""));
+                        className);
                 break;
             case "method":
                 String name = getAttribute(current, "name", "");
@@ -105,9 +106,9 @@ public class JavaCoverageParser extends CoverageParser {
         return result;
     }
 
-    private String fixPackageName(final String name) {
+    private String replacePathOrDollarWithDots(final String name) {
         if (StringUtils.isNotBlank(name)) {
-            return name.replaceAll("[\\\\/]", ".");
+            return name.replaceAll("[\\\\/$]", ".");
         }
         return name;
     }
