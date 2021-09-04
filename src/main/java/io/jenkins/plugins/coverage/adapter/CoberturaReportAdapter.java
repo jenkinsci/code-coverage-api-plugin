@@ -1,16 +1,18 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import hudson.Extension;
-import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
-import io.jenkins.plugins.coverage.detector.Detectable;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
+import java.io.File;
+import javax.annotation.Nonnull;
+import javax.xml.transform.TransformerException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.xml.transform.TransformerException;
-import java.io.File;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.jenkinsci.Symbol;
+import hudson.Extension;
+
+import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
+import io.jenkins.plugins.coverage.detector.Detectable;
 
 /**
  * Coverage report adapter for Cobertura.
