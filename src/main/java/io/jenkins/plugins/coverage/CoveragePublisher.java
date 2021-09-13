@@ -66,10 +66,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public CoveragePublisher() {
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Publishing Coverage report....");
@@ -90,7 +86,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         if (sourceFileResolver != null) {
             processor.setSourceFileResolver(sourceFileResolver);
         }
-
 
         processor.setGlobalTag(tag);
         processor.setFailBuildIfCoverageDecreasedInChangeRequest(failBuildIfCoverageDecreasedInChangeRequest);
@@ -115,9 +110,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -140,7 +132,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public void setGlobalThresholds(final List<Threshold> globalThresholds) {
         this.globalThresholds = globalThresholds;
     }
-
 
     public boolean isFailUnhealthy() {
         return failUnhealthy;
@@ -230,15 +221,11 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Symbol("publishCoverage")
     @Extension
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
-
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);
             load();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public boolean configure(final StaplerRequest req, final JSONObject json) throws FormException {
             super.configure(req, json);
