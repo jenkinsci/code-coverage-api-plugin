@@ -135,6 +135,17 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     // FIXME: currently this class handles UI requests and stores the coverage model
     //        it would make more sense to split this information
 
+    public void stripGroup() {
+        if (getElement().equals(CoverageElement.REPORT) && hasSingletonChild()) {
+            CoverageResult group = getSingletonChild();
+            if (group.getElement().getName().equals("Group")) {
+                children.clear();
+                children.putAll(group.children);
+            }
+
+        }
+    }
+
     @Override
     public String toString() {
         return String.format("CoverageResult of %s (line: %s, branch: %s)", name,
@@ -206,6 +217,10 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return StringUtils.isNotBlank(referenceBuildUrl);
     }
 
+    public Map<CoverageElement, Ratio> getLocalResults() {
+        return localResults;
+    }
+
     /**
      * Returns the singleton child of this result.
      *
@@ -264,7 +279,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         children.values()
                 .stream()
                 .filter(result -> isContainerNode(result, element))
-                .map(child -> child.getAll(CoverageElement.FILE))
+                .map(child -> child.getAll(element))
                 .flatMap(List::stream).forEach(fileNodes::add);
         return fileNodes;
     }

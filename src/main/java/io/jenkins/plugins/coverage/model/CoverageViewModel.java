@@ -101,6 +101,19 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().jsGetResults()));
     }
 
+    /**
+     * Interface for javascript code to get child coverage result.
+     *
+     * @return aggregated child coverage results
+     */
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public TreeChartNode getCoverageTree() {
+        CoverageNode tree = CoverageNode.fromResult(getResult());
+        tree.splitPackages();
+        return tree.toChartTree();
+    }
+
     @Override
     public TableModel getTableModel(final String id) {
         return new CoverageTableModel(getResult());

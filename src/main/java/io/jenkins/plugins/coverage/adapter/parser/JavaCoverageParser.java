@@ -66,8 +66,7 @@ public class JavaCoverageParser extends CoverageParser {
                 break;
             case "package":
                 String packageName = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
-                result = new CoverageResult(CoverageElement.get("Package"), parentResult,
-                        packageName);
+                result = new CoverageResult(CoverageElement.get("Package"), parentResult, packageName);
                 break;
             case "file":
                 result = new CoverageResult(CoverageElement.get("File"), parentResult,
@@ -76,8 +75,7 @@ public class JavaCoverageParser extends CoverageParser {
                 break;
             case "class":
                 String className = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
-                result = new CoverageResult(CoverageElement.get("Class"), parentResult,
-                        className);
+                result = new CoverageResult(CoverageElement.get("Class"), parentResult, className);
                 break;
             case "method":
                 String name = getAttribute(current, "name", "");

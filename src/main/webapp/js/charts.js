@@ -166,6 +166,155 @@ const CoverageChartGenerator = function () {
         }
     };
 
+    this.generateFilesTreeMap = function (coverageTree, id) {
+        function getLevelOption() {
+            return [
+                {
+                    itemStyle: {
+                        borderColor: 'black',
+                        borderWidth: 0,
+                        gapWidth: 1
+                    },
+                    upperLabel: {
+                        show: false
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderColor: '#ddd',
+                        borderWidth: 2,
+                        gapWidth: 2
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.6
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.7
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.6
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.7
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.6
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.7
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.6
+                    }
+                },
+                {
+                    itemStyle: {
+                        borderWidth: 4,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.7
+                    }
+                },
+            ];
+        }
+
+        const treeChart = echarts.init(document.getElementById(id));
+        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
+        const formatUtil = echarts.format;
+
+        const option = {
+            tooltip: {
+                formatter: function (info) {
+                    const treePathInfo = info.treePathInfo;
+                    const treePath = [];
+                    for (let i = 2; i < treePathInfo.length; i++) {
+                        treePath.push(treePathInfo[i].name);
+                    }
+
+                    const values = info.value;
+
+                    const total = values[0];
+                    const covered = values[1];
+
+                    const title = '<div class="chart-tooltip-title">' + formatUtil.encodeHTML(treePath.join('.')) + '</div>';
+                    if (total === 0) {
+                        return [title, 'Line Coverage: n/a',].join('');
+                    }
+                    return [
+                        title,
+                        'Line Coverage: ' + Number(covered / total).toLocaleString(undefined,
+                            {style: 'percent', minimumFractionDigits: 2}),
+                        ' (' + 'covered: ' + covered + ', missed: ' + (total - covered) + ')',
+                    ].join('');
+                }
+            },
+            series: [
+                {
+                    name: 'Line Coverage',
+                    type: 'treemap',
+                    breadcrumb: {
+                        itemStyle: {
+                            color: '#A4A4A4'
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                opacity: 0.6
+                            },
+                        }
+                    },
+                    width: '100%',
+                    height: '95%',
+                    top: 'top',
+                    label: {
+                        show: true,
+                        formatter: '{b}',
+                        color: textColor
+                    },
+                    upperLabel: {
+                        show: true,
+                        height: 30,
+                        color: 'black',
+                        borderColorSaturation: 0.6,
+                        colorSaturation: 0.6,
+                    },
+                    itemStyle: {
+                        borderColor: '#fff',
+                    },
+                    levels: getLevelOption(),
+                    data: [coverageTree]
+                }
+            ]
+        };
+        treeChart.setOption(option);
+    }
+
     this.generateChildSummaryChart = function (results, id, metric) {
 
         var childSummaryChartDiv = document.getElementById(id);

@@ -25,8 +25,8 @@
 
       <div class="col d-flex">
 
-        <bs:card title="${%Coverage statistics by package}" fontAwesomeIcon="search-plus" class="flex-fill">
-          <div id="coverage-details" class="graph-cursor-pointer card-chart"/>
+        <bs:card title="${%Coverage overview by package and file}" fontAwesomeIcon="search-plus" class="flex-fill">
+          <div id="coverage-details" class="graph-cursor-pointer details-chart"/>
         </bs:card>
 
       </div>
@@ -56,10 +56,9 @@
         const ratios = t.responseObject();
         coverageChartGenerator.generateSummaryChart(ratios, 'coverage-overview');
     });
-    viewProxy.getDetailsOfFirstChild(function(t) {
-        const ratiosPerItem = t.responseObject();
-        const element = '${it.childElement.name}';
-        coverageChartGenerator.generateChildSummaryChart(ratiosPerItem, 'coverage-details', element)
+    viewProxy.getCoverageTree(function(t) {
+        const tree = t.responseObject();
+        coverageChartGenerator.generateFilesTreeMap(tree, 'coverage-details');
     });
   </script>
 

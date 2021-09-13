@@ -1,3 +1,16 @@
+.details-chart {
+    width: 100%;
+    min-height: 512px;
+    min-width: 256px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-tooltip-title {
+    font-weight: bold;
+}
+
 /* Bar graph in table */
 .bar-graph {
     float: left;
@@ -5,18 +18,18 @@
 }
 
 .missed {
-    background-color: #FFCDD2;
-}
-
-.missed:hover {
     background-color: #EF9A9A;
 }
 
+.missed:hover {
+    background-color: #FFCDD2;
+}
+
 .covered {
-    background-color: #C8E6C9;
+    background-color: #A5D6A7;
 }
 
 .covered--hover:hover {
-    background-color: #A5D6A7;
+    background-color: #C8E6C9;
 }
 

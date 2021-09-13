@@ -4,7 +4,7 @@ set -e
 
 JENKINS_HOME=../docker/volumes/jenkins-home
 
-mvn clean install -Denforcer.skip || { echo "Build failed"; exit 1; }
+mvn clean install -Pskip || { echo "Build failed"; exit 1; }
 
 echo "Installing plugin in $JENKINS_HOME"
 
