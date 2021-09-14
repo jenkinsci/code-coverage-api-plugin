@@ -31,6 +31,7 @@
     <saxon-he.version>9.9.1-4</saxon-he.version>
 
     <echarts-api.version>5.1.2-11</echarts-api.version>
+    <data-tables-api.version>1.10.25-4-rc509.f9c2dcea0c95</data-tables-api.version>
     <forensics-api.version>1.3.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.7</pull-request-monitoring.version>
     <plugin-util-api.version>2.4.0</plugin-util-api.version>
@@ -108,6 +109,11 @@
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jquery3-api</artifactId>
       <version>${jquery3-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>data-tables-api</artifactId>
+      <version>${data-tables-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>

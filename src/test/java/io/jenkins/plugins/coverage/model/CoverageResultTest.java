@@ -27,7 +27,7 @@ class CoverageResultTest extends ResourceTest {
 
     private static final CoverageElement LINE = CoverageElement.LINE;
     private static final CoverageElement INSTRUCTION = JacocoReportAdapterDescriptor.INSTRUCTION;
-    private static final CoverageElement CONDITIONAL = CoverageElement.CONDITIONAL;
+    private static final CoverageElement BRANCH = CoverageElement.CONDITIONAL;
     private static final CoverageElement PACKAGE = JavaCoverageReportAdapterDescriptor.PACKAGE;
     private static final CoverageElement REPORT = CoverageElement.REPORT;
     private static final CoverageElement SOURCE_FILE = CoverageElement.FILE;
@@ -56,7 +56,7 @@ class CoverageResultTest extends ResourceTest {
                 "VisibleForTesting.java");
         verifyCoverage(utilPackage, LINE, 294, 29);
         verifyCoverage(utilPackage, INSTRUCTION, 1260, 90);
-        verifyCoverage(utilPackage, CONDITIONAL, 109, 7);
+        verifyCoverage(utilPackage, BRANCH, 109, 7);
 
         CoverageResult treeStringBuilderFile = utilPackage.getChild(TREE_STRING_BUILDER_FILE_NAME);
         assertThat(treeStringBuilderFile.getElement()).isEqualTo(SOURCE_FILE);
@@ -67,7 +67,7 @@ class CoverageResultTest extends ResourceTest {
 
         // FIXME: check why there is no INSTRUCTION result
         //        verifyCoverage(treeStringBuilderFile, INSTRUCTION, 229, 4);
-        verifyCoverage(treeStringBuilderFile, CONDITIONAL, 17, 1);
+        verifyCoverage(treeStringBuilderFile, BRANCH, 17, 1);
 
         CoverageResult treeStringBuilderClass = treeStringBuilderFile.getChild(TREE_STRING_BUILDER_CLASS);
         assertThat(treeStringBuilderClass.getElement()).isEqualTo(CLASS_NAME);
@@ -81,7 +81,7 @@ class CoverageResultTest extends ResourceTest {
                         "void setRoot(edu.hm.hafner.util.TreeStringBuilder$Child)");
         verifyCoverage(treeStringBuilderClass, LINE, 8, 2);
         verifyCoverage(treeStringBuilderClass, INSTRUCTION, 37, 4);
-        assertThat(treeStringBuilderClass.getCoverageFor(CONDITIONAL)).isEmpty();
+        assertThat(treeStringBuilderClass.getCoverageFor(BRANCH)).isEmpty();
     }
 
     private void verifyCoverage(final CoverageResult actualResult,
@@ -103,9 +103,9 @@ class CoverageResultTest extends ResourceTest {
         assertThat(coverage).hasCovered(8).hasMissed(2);
 
         CoverageNode root = CoverageNode.fromResult(report);
-        assertThat(root.getCoverage(LINE.getName())).hasCovered(294).hasMissed(29);
-        assertThat(root.getCoverage(CONDITIONAL.getName())).hasCovered(109).hasMissed(7);
-        assertThat(root.getCoverage(INSTRUCTION.getName())).hasCovered(1260).hasMissed(90);
+        assertThat(root.getCoverage(LINE)).hasCovered(294).hasMissed(29);
+        assertThat(root.getCoverage(BRANCH)).hasCovered(109).hasMissed(7);
+        assertThat(root.getCoverage(INSTRUCTION)).hasCovered(1260).hasMissed(90);
     }
 
     @Test

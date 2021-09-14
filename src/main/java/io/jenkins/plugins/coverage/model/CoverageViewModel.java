@@ -88,35 +88,26 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Interface for javascript code to get child coverage result.
+     * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart
+     * on the client side.
      *
-     * @return aggregated child coverage results
-     */
-    @JavaScriptMethod
-    @SuppressWarnings("unused")
-    public Map<String, List<JSCoverageResult>> getDetailsOfFirstChild() {
-        return getResult().getChildrenReal()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().jsGetResults()));
-    }
-
-    /**
-     * Interface for javascript code to get child coverage result.
-     *
-     * @return aggregated child coverage results
+     * @return the tree of nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeChartNode getCoverageTree() {
-        CoverageNode tree = CoverageNode.fromResult(getResult());
+        CoverageNode tree = getCoverage();
         tree.splitPackages();
         return tree.toChartTree();
     }
 
+    private CoverageNode getCoverage() {
+        return CoverageNode.fromResult(getResult());
+    }
+
     @Override
     public TableModel getTableModel(final String id) {
-        return new CoverageTableModel(getResult());
+        return new CoverageTableModel(getCoverage());
     }
 
     /**
@@ -148,10 +139,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     private static class CoverageTableModel extends TableModel {
-        private final CoverageResult result;
+        private final CoverageNode root;
 
-        CoverageTableModel(final CoverageResult result) {
-            this.result = result;
+        CoverageTableModel(final CoverageNode root) {
+            this.root = root;
         }
 
         @Override
@@ -165,9 +156,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
             columns.add(new TableColumn("Package", "packageName"));
             columns.add(new TableColumn("File", "fileName"));
-            columns.add(new TableColumn("Line Coverage", "lineCoverageValue").setHeaderClass(ColumnCss.NUMBER));
+            columns.add(new TableColumn("Line Coverage", "lineCoverageValue").setHeaderClass(ColumnCss.PERCENTAGE));
             columns.add(new TableColumn("Line Coverage", "lineCoverageChart", "number"));
-            columns.add(new TableColumn("Branch Coverage", "branchCoverageValue").setHeaderClass(ColumnCss.NUMBER));
+            columns.add(new TableColumn("Branch Coverage", "branchCoverageValue").setHeaderClass(ColumnCss.PERCENTAGE));
             columns.add(new TableColumn("Branch Coverage", "branchCoverageChart", "number"));
 
             return columns;
@@ -175,33 +166,34 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         @Override
         public List<Object> getRows() {
-            return result.getAll(CoverageElement.FILE).stream()
+            return root.getAll(CoverageElement.FILE).stream()
                     .map(CoverageRow::new).collect(Collectors.toList());
         }
     }
 
-    /**
-     * A table row that shows the coverage statistics of files.
-     */
     @SuppressWarnings("PMD.DataClass") // Used to automatically convert to JSON object
-    public static class CoverageRow {
-        private final CoverageResult result;
+    private static class CoverageRow {
+        private final CoverageNode root;
 
-        CoverageRow(final CoverageResult result) {
-            this.result = result;
+        CoverageRow(final CoverageNode root) {
+            this.root = root;
         }
 
         public String getFileName() {
-            String fileName = result.getName();
+            String fileName = root.getName();
             return a().withHref("file." + fileName.hashCode()).withText(fileName).render();
         }
 
         public String getPackageName() {
-            return result.getParentName();
+            return root.getParentName();
         }
 
-        public String getLineCoverageValue() {
-            return result.printCoverageFor(CoverageElement.LINE);
+        public double getLineCoverageValue() {
+            return getLineCoverage().getCoveredPercentage();
+        }
+
+        private Coverage getLineCoverage() {
+            return root.getCoverage(CoverageElement.LINE);
         }
 
         public DetailedColumnDefinition getLineCoverageChart() {
@@ -209,26 +201,27 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public String getBranchCoverageValue() {
-            return result.printCoverageFor(CoverageElement.CONDITIONAL);
+            return root.printCoverageFor(CoverageElement.CONDITIONAL);
         }
 
         public DetailedColumnDefinition getBranchCoverageChart() {
             return createDetailedColumnFor(CoverageElement.CONDITIONAL);
         }
 
-        private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement conditional) {
-            return new DetailedColumnDefinition(getBarChartFor(result.getCoverage(conditional)),
-                    result.getCoverage(conditional).getPercentageString());
+        private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement element) {
+            Coverage coverage = root.getCoverage(element);
+
+            return new DetailedColumnDefinition(getBarChartFor(coverage), String.valueOf(coverage.getCoveredPercentage()));
         }
 
-        private String getBarChartFor(final Ratio lineCoverage) {
-            return join(getBarChart("covered", lineCoverage.getPercentage()),
-                    getBarChart("missed", 100 - lineCoverage.getPercentage())).render();
+        private String getBarChartFor(final Coverage coverage) {
+            return join(getBarChart("covered", coverage.getCoveredPercentage()),
+                    getBarChart("missed", coverage.getMissedPercentage())).render();
         }
 
-        private ContainerTag getBarChart(final String className, final int percentage) {
+        private ContainerTag getBarChart(final String className, final double percentage) {
             return span().withClasses("bar-graph", className, className + "--hover")
-                    .withStyle("width:" + percentage + "%").withText(".");
+                    .withStyle("width:" + (percentage * 100) + "%").withText(".");
         }
     }
 }

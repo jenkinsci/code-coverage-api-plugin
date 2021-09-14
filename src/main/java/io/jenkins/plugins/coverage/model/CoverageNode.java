@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -13,24 +17,46 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
- * FIXME: comment class.
+ * A hierarchical decomposition of coverage results.
  *
  * @author Ullrich Hafner
  */
 public class CoverageNode {
-    private final String type;
-    private final String name;
 
+    public static CoverageNode fromResult(final CoverageResult result) {
+        CoverageElement element = result.getElement();
+        if (result.getChildren().isEmpty()) {
+            CoverageNode coverageNode = new CoverageNode(element, result.getName());
+            for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
+                CoverageLeaf leaf = new CoverageLeaf(coverage.getKey(), new Coverage(coverage.getValue()));
+                coverageNode.add(leaf);
+            }
+            return coverageNode;
+        }
+        else {
+            CoverageNode coverageNode = new CoverageNode(element, result.getName());
+            for (String childKey : result.getChildren()) {
+                CoverageResult childResult = result.getChild(childKey);
+                coverageNode.add(fromResult(childResult));
+            }
+            return coverageNode;
+        }
+    }
+
+    private final CoverageElement element;
+    private final String name;
     private final List<CoverageNode> children = new ArrayList<>();
     private final List<CoverageLeaf> leaves = new ArrayList<>();
+    @CheckForNull
+    private CoverageNode parent;
 
-    public CoverageNode(final String type, final String name) {
-        this.type = type;
+    public CoverageNode(final CoverageElement element, final String name) {
+        this.element = element;
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public CoverageElement getElement() {
+        return element;
     }
 
     public String getName() {
@@ -42,28 +68,107 @@ public class CoverageNode {
     }
 
     private void addAll(final List<CoverageNode> nodes) {
-        children.addAll(nodes);
+        nodes.forEach(this::add);
     }
 
+    /**
+     * Appends the specified child element to the list of children.
+     *
+     * @param child
+     *         the child to add
+     */
     public void add(final CoverageNode child) {
         children.add(child);
+        child.setParent(this);
     }
 
     public void add(final CoverageLeaf leaf) {
         leaves.add(leaf);
     }
 
-    public Coverage getCoverage(final String coverageType) {
+    /**
+     * Returns whether this node is the root of the tree.
+     *
+     * @return {@code true} if this node is the root of the tree, {@code false} otherwise
+     */
+    public boolean isRoot() {
+        return parent == null;
+    }
+
+    /**
+     * Returns whether this node has a parent node.
+     *
+     * @return {@code true} if this node has a parent node, {@code false} if it is the root of the hierarchy
+     */
+    public boolean hasParent() {
+        return !isRoot();
+    }
+
+    void setParent(final CoverageNode parent) {
+        this.parent = Objects.requireNonNull(parent);
+    }
+
+    /**
+     * Returns the name of the parent element or "-" if there is no such element.
+     *
+     * @return the name of the parent element
+     */
+    public String getParentName() {
+        return parent == null ? "-" : parent.getName();
+    }
+
+    /**
+     * Prints the coverage for the specified element.
+     *
+     * @param searchElement
+     *         the element to print the coverage for
+     *
+     * @return coverage ratio in a human-readable format
+     */
+    public String printCoverageFor(final CoverageElement searchElement) {
+        Coverage coverage = getCoverage(searchElement);
+        if (coverage.getTotal() > 0) {
+            return String.format("%.2f%%", coverage.getCoveredPercentage() * 100);
+        }
+        return "n/a";
+    }
+
+    public Coverage getCoverage(final CoverageElement searchElement) {
         Coverage childrenCoverage = children.stream()
-                .map(node -> node.getCoverage(coverageType))
+                .map(node -> node.getCoverage(searchElement))
                 .reduce(Coverage.NO_COVERAGE, Coverage::add);
         return leaves.stream()
-                .map(node -> node.getCoverage(coverageType))
+                .map(node -> node.getCoverage(searchElement))
                 .reduce(childrenCoverage, Coverage::add);
     }
 
+    /**
+     * Returns recursively all elements of the given type.
+     *
+     * @param searchElement
+     *         the element type to look for
+     *
+     * @return all elements of the given type
+     */
+    public List<CoverageNode> getAll(final CoverageElement searchElement) {
+        List<CoverageNode> selectedChildNodes = children
+                .stream()
+                .filter(result -> searchElement.equals(result.getElement()))
+                .collect(Collectors.toList());
+        children.stream()
+                .filter(result -> isContainerNode(result, searchElement))
+                .map(child -> child.getAll(searchElement))
+                .flatMap(List::stream).forEach(selectedChildNodes::add);
+        return selectedChildNodes;
+    }
+
+    private boolean isContainerNode(final CoverageNode result, final CoverageElement otherElement) {
+        CoverageElement coverageElement = result.getElement();
+        return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
+    }
+
     public void splitPackages() {
-        if (CoverageElement.REPORT.getName().equals(type)) {
+        if (CoverageElement.REPORT.equals(element)) {
             List<CoverageNode> allPackages = new ArrayList<>(children);
             children.clear();
             for (CoverageNode aPackage : allPackages) {
@@ -84,41 +189,16 @@ public class CoverageNode {
         }
     }
 
-    private CoverageNode createChild(final String name) {
+    private CoverageNode createChild(final String childName) {
         for (CoverageNode child : children) {
-            if (child.getName().equals(name)) {
+            if (child.getName().equals(childName)) {
                 return child;
             }
 
         }
-        CoverageNode newNode = new CoverageNode(JavaCoverageReportAdapterDescriptor.PACKAGE.getName(), name);
+        CoverageNode newNode = new CoverageNode(JavaCoverageReportAdapterDescriptor.PACKAGE, childName);
         add(newNode);
         return newNode;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("[%s] %s", type, name);
-    }
-
-    public static CoverageNode fromResult(final CoverageResult result) {
-        CoverageElement element = result.getElement();
-        if (result.getChildren().isEmpty()) {
-            CoverageNode coverageNode = new CoverageNode(element.getName(), result.getName());
-            for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
-                CoverageLeaf leaf = new CoverageLeaf(coverage.getKey().getName(), new Coverage(coverage.getValue()));
-                coverageNode.add(leaf);
-            }
-            return coverageNode;
-        }
-        else {
-            CoverageNode coverageNode = new CoverageNode(element.getName(), result.getName());
-            for (String childKey : result.getChildren()) {
-                CoverageResult childResult = result.getChild(childKey);
-                coverageNode.add(fromResult(childResult));
-            }
-            return coverageNode;
-        }
     }
 
     public TreeChartNode toChartTree() {
@@ -131,12 +211,12 @@ public class CoverageNode {
     }
 
     private TreeChartNode toChartTree(final CoverageNode node) {
-        Coverage coverage = node.getCoverage(CoverageElement.LINE.getName());
+        Coverage coverage = node.getCoverage(CoverageElement.LINE);
 
         TreeChartNode treeNode = new TreeChartNode(node.getName(),
-                assignColor(coverage.getPercentage() * 100),
+                assignColor(coverage.getCoveredPercentage() * 100),
                 coverage.getTotal(), coverage.getCovered());
-        if (node.getType().equals(CoverageElement.FILE.getName())) {
+        if (node.getElement().equals(CoverageElement.FILE)) {
             return treeNode;
         }
 
@@ -156,5 +236,10 @@ public class CoverageNode {
             }
         }
         return colors[levels.length - 1];
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] %s", element, name);
     }
 }

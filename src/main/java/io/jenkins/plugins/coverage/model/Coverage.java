@@ -26,8 +26,22 @@ public class Coverage {
         return covered;
     }
 
+    public double getCoveredPercentage() {
+        if (getTotal() == 0) {
+            return 0;
+        }
+        return covered * 1.0 / getTotal();
+    }
+
     public int getMissed() {
         return missed;
+    }
+
+    public double getMissedPercentage() {
+        if (getTotal() == 0) {
+            return 0;
+        }
+        return 1 - getCoveredPercentage();
     }
 
     public Coverage add(final Coverage additional) {
@@ -39,19 +53,12 @@ public class Coverage {
     public String toString() {
         int total = getTotal();
         if (total > 0) {
-            return String.format("%d/%d", covered, total);
+            return String.format("%.2f (%d/%d)", getCoveredPercentage() * 100, covered, total);
         }
         return "n/a";
     }
 
     public int getTotal() {
         return missed + covered;
-    }
-
-    public double getPercentage() {
-        if (getTotal() == 0) {
-            return 0;
-        }
-        return covered / (double) getTotal();
     }
 }
