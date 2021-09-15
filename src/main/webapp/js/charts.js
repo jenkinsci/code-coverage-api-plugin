@@ -28,7 +28,7 @@ const CoverageChartGenerator = function () {
 
         const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
 
-        var stackedBarOption = {
+        const summaryOption = {
             tooltip: {
                 trigger: 'axis',
                 axisPointer: {
@@ -135,11 +135,11 @@ const CoverageChartGenerator = function () {
                 }
             ]
         };
-        summaryChart.setOption(stackedBarOption);
+        summaryChart.setOption(summaryOption);
 
-        window.onresize = function () {
+        window.addEventListener('resize', function() {
             summaryChart.resize();
-        }
+        });
     };
 
     this.generateFilesTreeMap = function (coverageTree, id) {
@@ -288,8 +288,8 @@ const CoverageChartGenerator = function () {
             ]
         };
         treeChart.setOption(option);
-        window.onresize = function () {
+        window.addEventListener('resize', function() {
             treeChart.resize();
-        }
+        });
     }
 };
