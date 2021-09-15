@@ -12,7 +12,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.CoverageResult.JSCoverageResult;
+import io.jenkins.plugins.coverage.targets.CoverageResult.CoverageStatistics;
 import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
@@ -56,14 +56,14 @@ public class SourceViewModel implements ModelObject {
      * @return aggregated coverage results
      */
     @JavaScriptMethod
-    public List<JSCoverageResult> getOverallStatistics() {
-        List<JSCoverageResult> results = new ArrayList<>();
+    public List<CoverageStatistics> getOverallStatistics() {
+        List<CoverageStatistics> results = new ArrayList<>();
 
         List<Entry<CoverageElement, Ratio>> elements = new ArrayList<>(getResult().getResults().entrySet());
         elements.sort(Collections.reverseOrder(Entry.comparingByKey()));
 
         for (Map.Entry<CoverageElement, Ratio> c : elements) {
-            results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
+            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
         }
 
         return results;

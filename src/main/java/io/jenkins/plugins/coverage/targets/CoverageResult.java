@@ -846,11 +846,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @return aggregated coverage results
      */
     @JavaScriptMethod
-    public List<JSCoverageResult> jsGetResults() {
-        List<JSCoverageResult> results = new LinkedList<>();
+    public List<CoverageStatistics> jsGetResults() {
+        List<CoverageStatistics> results = new LinkedList<>();
 
         for (Map.Entry<CoverageElement, Ratio> c : aggregateResults.entrySet()) {
-            results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
+            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
         }
 
         return results;
@@ -863,7 +863,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public Map<String, List<JSCoverageResult>> jsGetChildResults() {
+    public Map<String, List<CoverageStatistics>> jsGetChildResults() {
         return getChildrenReal()
                 .entrySet()
                 .stream()
@@ -877,8 +877,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
-        Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
+    public Map<String, List<CoverageStatistics>> jsGetTrendResults() {
+        Map<String, List<CoverageStatistics>> results = new LinkedHashMap<>();
 
         if (getPreviousResult() == null) {
             return results;
@@ -888,7 +888,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
 
-            List<JSCoverageResult> r = c.getResults().entrySet().stream()
+            List<CoverageStatistics> r = c.getResults().entrySet().stream()
                     .filter(e -> {
                         if (isAggregatedLevel()) {
                             return e.getKey().equals(CoverageElement.LINE) || e.getKey().equals(CoverageElement.REPORT);
@@ -897,7 +897,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
                             return true;
                         }
                     })
-                    .map(e -> new JSCoverageResult(e.getKey().getName(), e.getValue()))
+                    .map(e -> new CoverageStatistics(e.getKey().getName(), e.getValue()))
                     .collect(Collectors.toList());
 
             if (r.size() != 0) {
@@ -913,11 +913,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return getName();
     }
 
-    public static class JSCoverageResult {
+    public static class CoverageStatistics {
         private String name;
         private Ratio ratio;
 
-        public JSCoverageResult(final String name, final Ratio ratio) {
+        public CoverageStatistics(final String name, final Ratio ratio) {
             this.name = name;
             this.ratio = ratio;
         }

@@ -7,7 +7,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -165,6 +167,71 @@ public class CoverageNode {
     private boolean isContainerNode(final CoverageNode result, final CoverageElement otherElement) {
         CoverageElement coverageElement = result.getElement();
         return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
+    }
+
+    /**
+     * Finds the coverage element with the given name starting from this node.
+     *
+     * @param searchElement
+     *         the coverage element to search for
+     * @param searchName
+     *         the name of the node
+     *
+     * @return the result if found
+     */
+    public Optional<CoverageNode> find(final CoverageElement searchElement, final String searchName) {
+        return find(searchElement, Integer.parseInt(searchName));
+    }
+
+    /**
+     * Finds the coverage element with the given name starting from this node.
+     *
+     * @param searchElement
+     *         the coverage element to search for
+     * @param searchNameHashCode
+     *         the hash code of the node name
+     *
+     * @return the result if found
+     */
+    public Optional<CoverageNode> find(final CoverageElement searchElement, final int searchNameHashCode) {
+        for (CoverageNode child : children) {
+            if (child.matches(searchElement, searchNameHashCode)) {
+                return Optional.of(child);
+            }
+        }
+        return children
+                .stream()
+                .map(child -> child.find(element, searchNameHashCode))
+                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+                .findAny();
+    }
+
+    /**
+     * Returns whether this node matches the specified coverage element and name.
+     *
+     * @param searchElement
+     *         the coverage element to search for
+     * @param searchName
+     *         the name of the node
+     *
+     * @return the result if found
+     */
+    public boolean matches(final CoverageElement searchElement, final String searchName) {
+        return element.equals(searchElement) && name.equals(searchName);
+    }
+
+    /**
+     * Returns whether this node matches the specified coverage element and name.
+     *
+     * @param searchElement
+     *         the coverage element to search for
+     * @param searchNameHashCode
+     *         the hash code of the node name
+     *
+     * @return the result if found
+     */
+    public boolean matches(final CoverageElement searchElement, final int searchNameHashCode) {
+        return element.equals(searchElement) && name.hashCode() == searchNameHashCode;
     }
 
     public void splitPackages() {

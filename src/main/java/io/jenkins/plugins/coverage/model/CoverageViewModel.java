@@ -18,7 +18,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.CoverageResult.JSCoverageResult;
+import io.jenkins.plugins.coverage.targets.CoverageResult.CoverageStatistics;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
@@ -35,6 +35,9 @@ import static j2html.TagCreator.*;
  * @author Ullrich Hafner
  */
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
+    private static final CoverageElement LINE_COVERAGE = CoverageElement.LINE;
+    private static final CoverageElement BRANCH_COVERAGE = CoverageElement.CONDITIONAL;
+
     private final Run<?, ?> owner;
     private final CoverageResult result;
     private final String displayName;
@@ -74,14 +77,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return aggregated coverage results
      */
     @JavaScriptMethod
-    public List<JSCoverageResult> getOverallStatistics() {
-        List<JSCoverageResult> results = new ArrayList<>();
+    public List<CoverageStatistics> getOverallStatistics() {
+        List<CoverageStatistics> results = new ArrayList<>();
 
         List<Entry<CoverageElement, Ratio>> elements = new ArrayList<>(getResult().getResults().entrySet());
         elements.sort(Collections.reverseOrder(Entry.comparingByKey()));
 
         for (Map.Entry<CoverageElement, Ratio> c : elements) {
-            results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
+            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
         }
 
         return results;
@@ -124,6 +127,16 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @SuppressWarnings("unused") // Called by jelly view
     public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+//        if (StringUtils.isNotEmpty(link)) {
+//            try {
+//                int hashCode = Integer.parseInt(link);
+//                Optional<CoverageNode> targetResult = getCoverage().find(CoverageElement.FILE, hashCode);
+//            }
+//            catch (NumberFormatException exception) {
+//                // ignore
+//            }
+//
+//        }
         String[] split = link.split("\\.", 2);
         if (split.length == 2) {
             Optional<CoverageResult> targetResult = getResult().find(split[0], split[1]);
@@ -188,24 +201,35 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return root.getParentName();
         }
 
-        public double getLineCoverageValue() {
-            return getLineCoverage().getCoveredPercentage();
+        public String getLineCoverageValue() {
+            return printCoverage(getLineCoverage());
         }
 
         private Coverage getLineCoverage() {
-            return root.getCoverage(CoverageElement.LINE);
+            return root.getCoverage(LINE_COVERAGE);
         }
 
         public DetailedColumnDefinition getLineCoverageChart() {
-            return createDetailedColumnFor(CoverageElement.LINE);
+            return createDetailedColumnFor(LINE_COVERAGE);
         }
 
         public String getBranchCoverageValue() {
-            return root.printCoverageFor(CoverageElement.CONDITIONAL);
+            return printCoverage(getBranchCoverage());
+        }
+
+        private String printCoverage(final Coverage branchCoverage) {
+            if (branchCoverage.isSet()) {
+                return String.valueOf(branchCoverage.getCoveredPercentage());
+            }
+            return "n/a";
+        }
+
+        private Coverage getBranchCoverage() {
+            return root.getCoverage(BRANCH_COVERAGE);
         }
 
         public DetailedColumnDefinition getBranchCoverageChart() {
-            return createDetailedColumnFor(CoverageElement.CONDITIONAL);
+            return createDetailedColumnFor(BRANCH_COVERAGE);
         }
 
         private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement element) {

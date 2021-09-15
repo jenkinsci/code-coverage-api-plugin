@@ -61,4 +61,8 @@ public class Coverage {
     public int getTotal() {
         return missed + covered;
     }
+
+    public boolean isSet() {
+        return getTotal() > 0;
+    }
 }
