@@ -22,13 +22,16 @@ const CoverageChartGenerator = function () {
                 formatter: function (obj) {
                     if (Array.isArray(obj)) {
                         if (obj.length === 2) {
-                            return '<b>' + obj[0].name + '</b><br/>'
-                                + obj[0].seriesName + ':' + overview.covered[obj[0].dataIndex] + '<br/>'
-                                + obj[1].seriesName + ':' + overview.missed[obj[1].dataIndex];
+                            return ['<b>' + obj[0].name + '</b>',
+                                obj[0].seriesName + ': ' + overview.covered[obj[0].dataIndex],
+                                obj[1].seriesName + ': ' + overview.missed[obj[1].dataIndex],
+                                printPercentage(overview.coveredPercentages[obj[0].dataIndex])
+
+                            ].join('<br/>');
                         }
                         else if (obj.length === 1) {
                             return '<b>' + obj[0].name + '</b><br/>'
-                                + obj[0].seriesName + ':' + (obj[0].seriesName === 'Covered' ? overview.covered[obj[0].dataIndex] : overview.missed[obj[0].dataIndex]);
+                                + obj[0].seriesName + ': ' + (obj[0].seriesName === 'Covered' ? overview.covered[obj[0].dataIndex] : overview.missed[obj[0].dataIndex]);
                         }
 
                     }
@@ -129,7 +132,7 @@ const CoverageChartGenerator = function () {
         };
         summaryChart.setOption(summaryOption);
 
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             summaryChart.resize();
         });
     };
@@ -279,7 +282,7 @@ const CoverageChartGenerator = function () {
             ]
         };
         treeChart.setOption(option);
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             treeChart.resize();
         });
     }

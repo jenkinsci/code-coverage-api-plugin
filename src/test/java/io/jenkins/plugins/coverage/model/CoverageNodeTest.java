@@ -1,9 +1,8 @@
 package io.jenkins.plugins.coverage.model;
 
-import org.junit.jupiter.api.Test;
+import java.util.List;
 
-import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
+import org.junit.jupiter.api.Test;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
@@ -14,12 +13,35 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  */
 class CoverageNodeTest extends AbstractCoverageTest {
     @Test
-    void shouldConvertCodingStyleToTree() throws CoverageException {
-        CoverageResult report = readReport("jacoco-codingstyle.xml");
+    void shouldConvertCodingStyleToTree() {
+        CoverageNode tree = readExampleReport();
 
-        CoverageNode tree = CoverageNode.fromResult(report);
-//        tree.splitPackages();
+        verifyCoverageMetrics(tree);
 
+        assertThat(tree.getAll(REPORT)).hasSize(1);
+        assertThat(tree.getAll(PACKAGE)).hasSize(1);
+        List<CoverageNode> files = tree.getAll(SOURCE_FILE);
+        assertThat(files).hasSize(10);
+        assertThat(tree.getAll(CLASS_NAME)).hasSize(18);
+        assertThat(tree.getAll(METHOD)).hasSize(102);
+
+        assertThat(tree).hasOnlyElements(REPORT, PACKAGE, SOURCE_FILE, CLASS_NAME, METHOD, LINE, BRANCH, INSTRUCTION);
+        assertThat(tree.getElementDistribution()).containsExactly(
+                entry(REPORT, new Coverage(1, 0)),
+                entry(PACKAGE, new Coverage(1, 0)),
+                entry(SOURCE_FILE, new Coverage(7, 3)),
+                entry(CLASS_NAME, new Coverage(15, 3)),
+                entry(METHOD, new Coverage(97, 5)),
+                entry(INSTRUCTION, new Coverage(1260, 90)),
+                entry(LINE, new Coverage(294, 29)),
+                entry(BRANCH, new Coverage(109, 7)));
+
+        assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
+                packageNode -> assertThat(packageNode).hasName("edu.hm.hafner.util")
+        );
+    }
+
+    private void verifyCoverageMetrics(final CoverageNode tree) {
         assertThat(tree.getCoverage(LINE)).isSet()
                 .hasCovered(294)
                 .hasCoveredPercentageCloseTo(0.91, PRECISION)
@@ -49,22 +71,46 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .doesNotHaveParent()
                 .isRoot()
                 .hasElement(REPORT).hasParentName(CoverageNode.ROOT);
+    }
 
-        assertThat(tree.getAll(REPORT)).hasSize(1);
-        assertThat(tree.getAll(PACKAGE)).hasSize(1);
-        assertThat(tree.getAll(SOURCE_FILE)).hasSize(10);
-        assertThat(tree.getAll(CLASS_NAME)).hasSize(18);
-        assertThat(tree.getAll(METHOD)).hasSize(102);
+    @Test
+    void shouldSplitPackages() {
+        CoverageNode tree = readExampleReport();
+        tree.splitPackages();
 
-        assertThat(tree).hasOnlyElements(REPORT, PACKAGE, SOURCE_FILE, CLASS_NAME, METHOD, LINE, BRANCH, INSTRUCTION);
-        assertThat(tree.getElementDistribution()).containsExactly(
-                entry(REPORT, new Coverage(1, 0)),
-                entry(PACKAGE, new Coverage(1, 0)),
-                entry(SOURCE_FILE, new Coverage(7, 3)),
-                entry(CLASS_NAME, new Coverage(15, 3)),
-                entry(METHOD, new Coverage(97, 5)),
-                entry(INSTRUCTION, new Coverage(1260, 90)),
-                entry(LINE, new Coverage(294, 29)),
-                entry(BRANCH, new Coverage(109, 7)));
+        verifyCoverageMetrics(tree);
+
+        assertThat(tree.getAll(PACKAGE)).hasSize(4);
+        assertThat(tree.getElementDistribution()).contains(
+                entry(PACKAGE, new Coverage(4, 0)));
+
+        assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
+                packageNode -> assertThat(packageNode).hasName("edu")
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenObtainingAllBasicBlocks() {
+        CoverageNode tree = readExampleReport();
+
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> tree.getAll(LINE));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> tree.getAll(BRANCH));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> tree.getAll(INSTRUCTION));
+    }
+
+    @Test
+    void shouldFindFiles() {
+        CoverageNode tree = readExampleReport();
+
+        String fileName = "Ensure.java";
+        assertThat(tree.findByHashCode(SOURCE_FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
+                node -> assertThat(node).hasName(fileName)
+        );
+        assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
+        assertThat(tree.findByHashCode(SOURCE_FILE, "not-found".hashCode())).isEmpty();
+    }
+
+    private CoverageNode readExampleReport() {
+        return CoverageNode.fromResult(readResult("jacoco-codingstyle.xml"));
     }
 }

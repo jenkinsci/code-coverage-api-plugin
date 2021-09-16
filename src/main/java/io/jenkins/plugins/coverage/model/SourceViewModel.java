@@ -1,80 +1,47 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.io.File;
+import java.io.IOException;
 
-import org.kohsuke.stapler.bind.JavaScriptMethod;
-import hudson.model.ModelObject;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import hudson.model.Run;
-
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.CoverageResult.CoverageStatistics;
-import io.jenkins.plugins.coverage.targets.Ratio;
+import hudson.util.TextFile;
 
 /**
- * Server side model that provides the data for the source code view of the coverage results. The layout of the associated
- * view is defined corresponding jelly view 'index.jelly'.
+ * Server side model that provides the data for the source code view of the coverage results. The layout of the
+ * associated view is defined corresponding jelly view 'index.jelly'.
  *
  * @author Ullrich Hafner
  */
-public class SourceViewModel implements ModelObject {
-    private final Run<?, ?> owner;
-    private final CoverageResult result;
-    private final String displayName;
-
+public class SourceViewModel extends CoverageViewModel {
     /**
-     * Creates a new view model instance.
+     * Creates a new source view model instance.
      *
      * @param owner
      *         the owner of this view
-     * @param result
-     *         the results to be shown
-     * @param displayName
-     *         human-readable name of this view (used in bread-crumb)
+     * @param fileNode
+     *         the selected file node of the coverage tree
      */
-    public SourceViewModel(final Run<?, ?> owner, final CoverageResult result, final String displayName) {
-        this.owner = owner;
-        this.result = result;
-        this.displayName = displayName;
-    }
-
-    public Run<?, ?> getOwner() {
-        return owner;
-    }
-
-    public CoverageResult getResult() {
-        return result;
+    public SourceViewModel(final Run<?, ?> owner, final CoverageNode fileNode) {
+        super(owner, fileNode, fileNode.getName());
     }
 
     /**
-     * Interface for javascript code to get code coverage result.
+     * Returns the source file rendered in HTML.
      *
-     * @return aggregated coverage results
+     * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    @JavaScriptMethod
-    public List<CoverageStatistics> getOverallStatistics() {
-        List<CoverageStatistics> results = new ArrayList<>();
-
-        List<Entry<CoverageElement, Ratio>> elements = new ArrayList<>(getResult().getResults().entrySet());
-        elements.sort(Collections.reverseOrder(Entry.comparingByKey()));
-
-        for (Map.Entry<CoverageElement, Ratio> c : elements) {
-            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
+    public String getSourceFileContent() {
+        try {
+            File sourceFile = getSourceFile(getOwner().getRootDir(), getNode().getName());
+            if (sourceFile != null) {
+                return new TextFile(sourceFile).read();
+            }
+            return "n/a";
         }
-
-        return results;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return Messages.Coverage_Title(displayName);
-    }
-
-    public String getContent() {
-        return result.getSourceFileContent();
+        catch (IOException exception) {
+            return ExceptionUtils.getStackTrace(exception);
+        }
     }
 }

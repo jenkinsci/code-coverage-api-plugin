@@ -26,7 +26,7 @@ public class AbstractCoverageTest extends ResourceTest {
     static final CoverageElement INSTRUCTION = JacocoReportAdapterDescriptor.INSTRUCTION;
     static final CoverageElement BRANCH = CoverageElement.CONDITIONAL;
 
-    CoverageResult readReport(final String fileName) {
+    CoverageResult readResult(final String fileName) {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("Hello");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
@@ -37,5 +37,9 @@ public class AbstractCoverageTest extends ResourceTest {
         catch (CoverageException exception) {
             throw new AssertionError(exception);
         }
+    }
+
+    CoverageNode readNode(final String fileName) {
+        return CoverageNode.fromResult(readResult(fileName));
     }
 }

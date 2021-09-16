@@ -1,14 +1,14 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 
 import j2html.tags.ContainerTag;
 
@@ -18,10 +18,8 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.CoverageResult.CoverageStatistics;
-import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -41,7 +39,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final CoverageElement BRANCH_COVERAGE = CoverageElement.CONDITIONAL;
 
     private final Run<?, ?> owner;
-    private final CoverageResult result;
+    private final CoverageNode node;
     private final String displayName;
 
     /**
@@ -49,14 +47,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @param owner
      *         the owner of this view
-     * @param result
-     *         the results to be shown
+     * @param node
+     *         the coverage node to be shown
      * @param displayName
      *         human-readable name of this view (used in bread-crumb)
      */
-    public CoverageViewModel(final Run<?, ?> owner, final CoverageResult result, final String displayName) {
+    public CoverageViewModel(final Run<?, ?> owner, final CoverageNode node, final String displayName) {
         this.owner = owner;
-        this.result = result;
+        this.node = node;
         this.displayName = displayName;
     }
 
@@ -64,8 +62,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return owner;
     }
 
-    public CoverageResult getResult() {
-        return result;
+    public CoverageNode getNode() {
+        return node;
     }
 
     @Override
@@ -73,28 +71,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return Messages.Coverage_Title(displayName);
     }
 
-    /**
-     * Interface for javascript code to get code coverage result.
-     *
-     * @return aggregated coverage results
-     */
-    @JavaScriptMethod
-    public List<CoverageStatistics> getOverallStatistics() {
-        List<CoverageStatistics> results = new ArrayList<>();
-
-        List<Entry<CoverageElement, Ratio>> elements = new ArrayList<>(getResult().getResults().entrySet());
-        elements.sort(Collections.reverseOrder(Entry.comparingByKey()));
-
-        for (Map.Entry<CoverageElement, Ratio> c : elements) {
-            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
-        }
-
-        return results;
-    }
-
     @JavaScriptMethod
     public CoverageOverview getOverview() {
-        return new CoverageOverview(getCoverage());
+        return new CoverageOverview(getNode());
     }
 
     /**
@@ -106,18 +85,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeChartNode getCoverageTree() {
-        CoverageNode tree = getCoverage();
-        tree.splitPackages();
-        return tree.toChartTree();
-    }
-
-    private CoverageNode getCoverage() {
-        return CoverageNode.fromResult(getResult());
+        return getNode().toChartTree();
     }
 
     @Override
     public TableModel getTableModel(final String id) {
-        return new CoverageTableModel(getCoverage());
+        return new CoverageTableModel(getNode(), getOwner().getRootDir());
     }
 
     /**
@@ -134,28 +107,43 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @SuppressWarnings("unused") // Called by jelly view
     public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
-//        if (StringUtils.isNotEmpty(link)) {
-//            try {
-//                int hashCode = Integer.parseInt(link);
-//                Optional<CoverageNode> targetResult = getCoverage().find(CoverageElement.FILE, hashCode);
-//            }
-//            catch (NumberFormatException exception) {
-//                // ignore
-//            }
-//
-//        }
-        String[] split = link.split("\\.", 2);
-        if (split.length == 2) {
-            Optional<CoverageResult> targetResult = getResult().find(split[0], split[1]);
-            if (targetResult.isPresent()) {
-                CoverageResult coverageResult = targetResult.get();
-                if (coverageResult.getElement().equals(CoverageElement.FILE)) {
-                    return new SourceViewModel(getOwner(), coverageResult, coverageResult.getDisplayName());
+        if (StringUtils.isNotEmpty(link)) {
+            try {
+                Optional<CoverageNode> targetResult = getNode().findByHashCode(
+                        CoverageElement.FILE, Integer.parseInt(link));
+                if (targetResult.isPresent()) {
+                    return new SourceViewModel(getOwner(), targetResult.get());
                 }
-                return new CoverageViewModel(getOwner(), coverageResult, coverageResult.getDisplayName());
+            }
+            catch (NumberFormatException exception) {
+                // ignore
             }
         }
-        return this; // fallback on broken URLs
+        return null; // fallback on broken URLs
+    }
+
+    /**
+     * Returns whether the source file is available in Jenkins build folder.
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    public boolean isSourceFileAvailable() {
+        return getSourceFile(getOwner().getRootDir(), getNode().getName()) != null;
+    }
+
+    protected static File getSourceFile(final File buildFolder, final String fileName) {
+        File sourceFile = new File(buildFolder,
+                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY
+                        + sanitizeFilename(fileName));
+        if (sourceFile.exists()) {
+            return sourceFile;
+        }
+
+        return null;
+    }
+
+    private static String sanitizeFilename(final String inputName) {
+        return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
     /**
@@ -205,9 +193,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
+        private final File buildFolder;
 
-        CoverageTableModel(final CoverageNode root) {
+        CoverageTableModel(final CoverageNode root, final File buildFolder) {
             this.root = root;
+            this.buildFolder = buildFolder;
         }
 
         @Override
@@ -232,7 +222,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public List<Object> getRows() {
             return root.getAll(CoverageElement.FILE).stream()
-                    .map(CoverageRow::new).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder)).collect(Collectors.toList());
         }
     }
 
@@ -241,14 +231,19 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private static class CoverageRow {
         private final CoverageNode root;
+        private final File buildFolder;
 
-        CoverageRow(final CoverageNode root) {
+        CoverageRow(final CoverageNode root, final File buildFolder) {
             this.root = root;
+            this.buildFolder = buildFolder;
         }
 
         public String getFileName() {
             String fileName = root.getName();
-            return a().withHref("file." + fileName.hashCode()).withText(fileName).render();
+            if (getSourceFile(buildFolder, fileName) != null) {
+                return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
+            }
+            return fileName;
         }
 
         public String getPackageName() {

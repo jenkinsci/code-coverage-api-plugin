@@ -26,16 +26,27 @@
       <div class="col">
         <div id="file-table">
           <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular" class="flex-fill">
-            <div style="overflow-x:scroll;">
-              <table class="source">
-                <thead>
-                  <tr>
-                    <th colspan="3">${it.relativeSourcePath}</th>
-                  </tr>
-                </thead>
-                <j:out value="${it.content}"/>
-              </table>
-            </div>
+            <j:choose>
+              <j:when test="${it.sourceFileAvailable}">
+                <div style="overflow-x:scroll;">
+                  <table class="source">
+                    <j:out value="${it.sourceFileContent}"/>
+                  </table>
+                </div>
+              </j:when>
+              <j:otherwise>
+                <p>
+                  <b>${%Source code is unavailable.}</b>
+                  ${%Some possible reasons are:}
+                  <ul>
+                    <li>${%reason.1}</li>
+                    <li>${%reason.2}</li>
+                    <li>${%reason.3}</li>
+                  </ul>
+                </p>
+              </j:otherwise>
+            </j:choose>
+
           </bs:card>
         </div>
       </div>

@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import edu.hm.hafner.util.Ensure;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
@@ -36,7 +37,7 @@ public class CoverageNode {
     public static CoverageNode fromResult(final CoverageResult result) {
         CoverageElement element = result.getElement();
         if (result.getChildren().isEmpty()) {
-            CoverageNode coverageNode = new CoverageNode(element, result.getName());
+            CoverageNode coverageNode = createNode(result, element);
             for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
                 CoverageLeaf leaf = new CoverageLeaf(coverage.getKey(), new Coverage(coverage.getValue()));
                 coverageNode.add(leaf);
@@ -44,13 +45,17 @@ public class CoverageNode {
             return coverageNode;
         }
         else {
-            CoverageNode coverageNode = new CoverageNode(element, result.getName());
+            CoverageNode coverageNode = createNode(result, element);
             for (String childKey : result.getChildren()) {
                 CoverageResult childResult = result.getChild(childKey);
                 coverageNode.add(fromResult(childResult));
             }
             return coverageNode;
         }
+    }
+
+    private static CoverageNode createNode(final CoverageResult result, final CoverageElement element) {
+        return new CoverageNode(element, result.getName());
     }
 
     private final CoverageElement element;
@@ -127,6 +132,12 @@ public class CoverageNode {
         child.setParent(this);
     }
 
+    /**
+     * Appends the specified leaf element to the list of leaves.
+     *
+     * @param leaf
+     *         the leaf to add
+     */
     public void add(final CoverageLeaf leaf) {
         leaves.add(leaf);
     }
@@ -221,22 +232,15 @@ public class CoverageNode {
      * @return all elements of the given type
      */
     public List<CoverageNode> getAll(final CoverageElement searchElement) {
-        List<CoverageNode> selectedChildNodes = children.stream()
-                .filter(result -> searchElement.equals(result.getElement()))
-                .collect(Collectors.toList());
-        children.stream()
-                .filter(result -> isContainerNode(result, searchElement))
-                .map(child -> child.getAll(searchElement))
-                .flatMap(List::stream).forEach(selectedChildNodes::add);
-        if (element.equals(searchElement)) {
-            selectedChildNodes.add(this);
-        }
-        return selectedChildNodes;
-    }
+        Ensure.that(searchElement.isBasicBlock()).isFalse("Basic blocks like '%s' are not stored as inner nodes of the tree", searchElement);
 
-    private boolean isContainerNode(final CoverageNode result, final CoverageElement otherElement) {
-        CoverageElement coverageElement = result.getElement();
-        return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
+        List<CoverageNode> childNodes = children.stream()
+                .map(child -> child.getAll(searchElement))
+                .flatMap(List::stream).collect(Collectors.toList());
+        if (element.equals(searchElement)) {
+            childNodes.add(this);
+        }
+        return childNodes;
     }
 
     /**
@@ -250,7 +254,7 @@ public class CoverageNode {
      * @return the result if found
      */
     public Optional<CoverageNode> find(final CoverageElement searchElement, final String searchName) {
-        return find(searchElement, Integer.parseInt(searchName));
+        return findByHashCode(searchElement, Integer.parseInt(searchName));
     }
 
     /**
@@ -263,15 +267,13 @@ public class CoverageNode {
      *
      * @return the result if found
      */
-    public Optional<CoverageNode> find(final CoverageElement searchElement, final int searchNameHashCode) {
-        for (CoverageNode child : children) {
-            if (child.matches(searchElement, searchNameHashCode)) {
-                return Optional.of(child);
-            }
+    public Optional<CoverageNode> findByHashCode(final CoverageElement searchElement, final int searchNameHashCode) {
+        if (matches(searchElement, searchNameHashCode)) {
+            return Optional.of(this);
         }
         return children
                 .stream()
-                .map(child -> child.find(element, searchNameHashCode))
+                .map(child -> child.findByHashCode(searchElement, searchNameHashCode))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
     }
@@ -301,7 +303,10 @@ public class CoverageNode {
      * @return the result if found
      */
     public boolean matches(final CoverageElement searchElement, final int searchNameHashCode) {
-        return element.equals(searchElement) && name.hashCode() == searchNameHashCode;
+        if (!element.equals(searchElement)) {
+            return false;
+        }
+        return name.hashCode() == searchNameHashCode;
     }
 
     public void splitPackages() {

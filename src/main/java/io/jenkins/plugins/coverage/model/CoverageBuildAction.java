@@ -95,7 +95,10 @@ public class CoverageBuildAction extends BuildAction<CoverageResult> implements 
             name = nextInterestingResult.getDisplayName();
         }
 
-        return new CoverageViewModel(getOwner(), nextInterestingResult, name);
+        CoverageNode coverageNode = CoverageNode.fromResult(nextInterestingResult);
+        coverageNode.splitPackages();
+
+        return new CoverageViewModel(getOwner(), coverageNode, name);
     }
 
     private CoverageResult getNextInterestingResult() {

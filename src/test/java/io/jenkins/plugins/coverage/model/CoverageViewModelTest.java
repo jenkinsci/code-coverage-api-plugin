@@ -20,7 +20,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
     void shouldReportOverview() {
-        CoverageViewModel model = new CoverageViewModel(mock(Run.class), readReport("jacoco-codingstyle.xml"),
+        CoverageViewModel model = new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"),
                 DISPLAY_NAME);
 
         assertThat(model.getDisplayName()).contains(DISPLAY_NAME);
