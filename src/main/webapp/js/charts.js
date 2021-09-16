@@ -2,28 +2,13 @@ const missedColor = '#EF9A9A';
 const coveredColor = '#A5D6A7';
 
 const CoverageChartGenerator = function () {
-    this.generateSummaryChart = function (results, id) {
+    function printPercentage(value) {
+        return Number(value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2});
+    }
+
+    this.createOverview = function (overview, id) {
         const summaryChartDiv = document.getElementById(id);
-
-        const metrics = [];
-        const covered = [];
-        const missed = [];
-        const coveredPercentage = [];
-        const missedPercentage = [];
-        for (var i = 0; i < results.length; i++) {
-            metrics[i] = results[i].name;
-            covered[i] = results[i].ratio.numerator;
-            missed[i] = results[i].ratio.denominator - covered[i];
-
-            coveredPercentage[i] = 100 * (covered[i] / results[i].ratio.denominator);
-            missedPercentage[i] = 100 - coveredPercentage[i];
-
-            if (results[i].ratio.denominator === 0) {
-                coveredPercentage[i] = 0;
-            }
-        }
-
-        summaryChartDiv.style.height = metrics.length * 31 + 200 + "px";
+        summaryChartDiv.style.height = overview.elements.length * 31 + 200 + "px";
         const summaryChart = echarts.init(summaryChartDiv);
 
         const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
@@ -37,9 +22,13 @@ const CoverageChartGenerator = function () {
                 formatter: function (obj) {
                     if (Array.isArray(obj)) {
                         if (obj.length === 2) {
-                            return '<b>' + obj[0].name + '</b><br/>' + obj[0].seriesName + ':' + covered[obj[0].dataIndex] + '<br/>' + obj[1].seriesName + ':' + missed[obj[1].dataIndex];
-                        } else if (obj.length === 1) {
-                            return '<b>' + obj[0].name + '</b><br/>' + obj[0].seriesName + ':' + (obj[0].seriesName === 'Covered' ? covered[obj[0].dataIndex] : missed[obj[0].dataIndex]);
+                            return '<b>' + obj[0].name + '</b><br/>'
+                                + obj[0].seriesName + ':' + overview.covered[obj[0].dataIndex] + '<br/>'
+                                + obj[1].seriesName + ':' + overview.missed[obj[1].dataIndex];
+                        }
+                        else if (obj.length === 1) {
+                            return '<b>' + obj[0].name + '</b><br/>'
+                                + obj[0].seriesName + ':' + (obj[0].seriesName === 'Covered' ? overview.covered[obj[0].dataIndex] : overview.missed[obj[0].dataIndex]);
                         }
 
                     }
@@ -63,12 +52,15 @@ const CoverageChartGenerator = function () {
             xAxis: {
                 type: 'value',
                 axisLabel: {
+                    formatter: function (value) {
+                        return printPercentage(value);
+                    },
                     color: textColor
                 }
             },
             yAxis: [{
                 type: 'category',
-                data: metrics,
+                data: overview.elements,
                 axisLine: {
                     show: false
                 },
@@ -80,11 +72,11 @@ const CoverageChartGenerator = function () {
                 }
             }, {
                 type: 'category',
-                data: coveredPercentage,
+                data: overview.coveredPercentages,
                 position: 'right',
                 axisLabel: {
                     formatter: function (value, index) {
-                        return coveredPercentage[index].toFixed(2) + "%";
+                        return printPercentage(overview.coveredPercentages[index]);
                     },
                     color: textColor
                 },
@@ -110,10 +102,10 @@ const CoverageChartGenerator = function () {
                         show: true,
                         position: 'insideLeft',
                         formatter: function (obj) {
-                            return covered[obj.dataIndex];
+                            return overview.covered[obj.dataIndex];
                         }
                     },
-                    data: coveredPercentage
+                    data: overview.coveredPercentages
                 },
                 {
                     name: 'Missed',
@@ -128,10 +120,10 @@ const CoverageChartGenerator = function () {
                         show: true,
                         position: 'insideRight',
                         formatter: function (obj) {
-                            return missed[obj.dataIndex];
+                            return overview.missed[obj.dataIndex];
                         }
                     },
-                    data: missedPercentage
+                    data: overview.missedPercentages
                 }
             ]
         };
@@ -142,7 +134,7 @@ const CoverageChartGenerator = function () {
         });
     };
 
-    this.generateFilesTreeMap = function (coverageTree, id) {
+    this.createFilesTreeMap = function (coverageTree, id) {
         function getLevelOption() {
             return [
                 {
@@ -244,8 +236,7 @@ const CoverageChartGenerator = function () {
                     }
                     return [
                         title,
-                        'Line Coverage: ' + Number(covered / total).toLocaleString(undefined,
-                            {style: 'percent', minimumFractionDigits: 2}),
+                        'Line Coverage: ' + printPercentage(covered / total),
                         ' (' + 'covered: ' + covered + ', missed: ' + (total - covered) + ')',
                     ].join('');
                 }

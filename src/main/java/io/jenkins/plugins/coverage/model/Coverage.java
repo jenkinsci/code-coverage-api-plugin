@@ -1,25 +1,45 @@
 package io.jenkins.plugins.coverage.model;
 
+import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
- * FIXME: comment class.
+ * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
+ * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageElement}.
  *
  * @author Ullrich Hafner
  */
-public class Coverage {
+public final class Coverage {
+    /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
     private final int covered;
     private final int missed;
 
+    /**
+     * Creates a new code coverage with the specified values.
+     *
+     * @param covered
+     *         the number of covered items
+     * @param missed
+     *         the number of missed items
+     */
     public Coverage(final int covered, final int missed) {
         this.covered = covered;
         this.missed = missed;
     }
 
-    public Coverage(final Ratio lineCoverage) {
-        this((int) lineCoverage.numerator, (int) (lineCoverage.denominator - lineCoverage.numerator));
+    /**
+     * Creates a new code coverage with the specified values.
+     *
+     * @param coverageRatio
+     *         the coverage {@link Ratio}
+     *
+     * @deprecated used to convert the old format
+     */
+    @Deprecated
+    public Coverage(final Ratio coverageRatio) {
+        this((int) coverageRatio.numerator, (int) (coverageRatio.denominator - coverageRatio.numerator));
     }
 
     public int getCovered() {
@@ -33,6 +53,10 @@ public class Coverage {
         return covered * 1.0 / getTotal();
     }
 
+    public String printCoveredPercentage() {
+        return printPercentage(getCoveredPercentage());
+    }
+
     public int getMissed() {
         return missed;
     }
@@ -42,6 +66,17 @@ public class Coverage {
             return 0;
         }
         return 1 - getCoveredPercentage();
+    }
+
+    public String printMissedPercentage() {
+        return printPercentage(getMissedPercentage());
+    }
+
+    private String printPercentage(final double percentage) {
+        if (isSet()) {
+            return String.valueOf(percentage);
+        }
+        return "n/a";
     }
 
     public Coverage add(final Coverage additional) {
@@ -64,5 +99,29 @@ public class Coverage {
 
     public boolean isSet() {
         return getTotal() > 0;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Coverage coverage = (Coverage) o;
+
+        if (covered != coverage.covered) {
+            return false;
+        }
+        return missed == coverage.missed;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = covered;
+        result = 31 * result + missed;
+        return result;
     }
 }

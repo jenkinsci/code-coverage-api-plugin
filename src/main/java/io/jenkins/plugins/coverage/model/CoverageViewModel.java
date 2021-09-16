@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import j2html.tags.ContainerTag;
 
@@ -90,9 +92,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return results;
     }
 
+    @JavaScriptMethod
+    public CoverageOverview getOverview() {
+        return new CoverageOverview(getCoverage());
+    }
+
     /**
-     * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart
-     * on the client side.
+     * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart on the
+     * client side.
      *
      * @return the tree of nodes for the ECharts treemap
      */
@@ -151,6 +158,51 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return this; // fallback on broken URLs
     }
 
+    /**
+     * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage
+     * metrics.
+     */
+    public static class CoverageOverview {
+        private final CoverageNode coverage;
+
+        CoverageOverview(final CoverageNode coverage) {
+            this.coverage = coverage;
+        }
+
+        public List<String> getElements() {
+            return getElementDistribution().keySet().stream()
+                    .map(CoverageElement::getName)
+                    .collect(Collectors.toList());
+        }
+
+        public List<Integer> getCovered() {
+            return streamCoverages().map(Coverage::getCovered).collect(Collectors.toList());
+        }
+
+        public List<Double> getCoveredPercentages() {
+            return streamCoverages().map(Coverage::getCoveredPercentage).collect(Collectors.toList());
+        }
+
+        public List<Integer> getMissed() {
+            return streamCoverages().map(Coverage::getMissed).collect(Collectors.toList());
+        }
+
+        public List<Double> getMissedPercentages() {
+            return streamCoverages().map(Coverage::getMissedPercentage).collect(Collectors.toList());
+        }
+
+        private Stream<Coverage> streamCoverages() {
+            return getElementDistribution().values().stream();
+        }
+
+        private SortedMap<CoverageElement, Coverage> getElementDistribution() {
+            return coverage.getElementDistribution();
+        }
+    }
+
+    /**
+     * UI table model for the coverage details table.
+     */
     private static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
 
@@ -184,7 +236,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
     }
 
-    @SuppressWarnings("PMD.DataClass") // Used to automatically convert to JSON object
+    /**
+     * UI row model for the coverage details table.
+     */
     private static class CoverageRow {
         private final CoverageNode root;
 
@@ -235,7 +289,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement element) {
             Coverage coverage = root.getCoverage(element);
 
-            return new DetailedColumnDefinition(getBarChartFor(coverage), String.valueOf(coverage.getCoveredPercentage()));
+            return new DetailedColumnDefinition(getBarChartFor(coverage),
+                    String.valueOf(coverage.getCoveredPercentage()));
         }
 
         private String getBarChartFor(final Coverage coverage) {

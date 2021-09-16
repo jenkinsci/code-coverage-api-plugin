@@ -3,11 +3,16 @@ package io.jenkins.plugins.coverage.model;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +29,9 @@ import io.jenkins.plugins.coverage.targets.Ratio;
  * @author Ullrich Hafner
  */
 public class CoverageNode {
+    static final String ROOT = "^";
+    private static final Coverage COVERED_NODE = new Coverage(1, 0);
+    private static final Coverage MISSED_NODE = new Coverage(0, 1);
 
     public static CoverageNode fromResult(final CoverageResult result) {
         CoverageElement element = result.getElement();
@@ -52,13 +60,48 @@ public class CoverageNode {
     @CheckForNull
     private CoverageNode parent;
 
+    /**
+     * Creates a new coverage item node with the given name.
+     *
+     * @param element
+     *         the type of the coverage element
+     * @param name
+     *         the human-readable name of the node
+     */
     public CoverageNode(final CoverageElement element, final String name) {
         this.element = element;
         this.name = name;
     }
 
+    /**
+     * Returns the type if the coverage element for this node.
+     *
+     * @return the element type
+     */
     public CoverageElement getElement() {
         return element;
+    }
+
+    /**
+     * Returns the available coverage elements for the whole tree starting with this node.
+     *
+     * @return the elements in this tree
+     */
+    public Set<CoverageElement> getElements() {
+        Set<CoverageElement> elements = children.stream()
+                .map(CoverageNode::getElements)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        elements.add(getElement());
+        leaves.stream().map(CoverageLeaf::getElement).forEach(elements::add);
+
+        return elements;
+    }
+
+    public SortedMap<CoverageElement, Coverage> getElementDistribution() {
+        return getElements().stream()
+                .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
     }
 
     public String getName() {
@@ -116,7 +159,7 @@ public class CoverageNode {
      * @return the name of the parent element
      */
     public String getParentName() {
-        return parent == null ? "-" : parent.getName();
+        return parent == null ? ROOT : parent.getName();
     }
 
     /**
@@ -135,13 +178,38 @@ public class CoverageNode {
         return "n/a";
     }
 
+    /**
+     * Returns the coverage for the specified element.
+     *
+     * @param searchElement
+     *         the element to get the coverage for
+     *
+     * @return coverage ratio
+     */
     public Coverage getCoverage(final CoverageElement searchElement) {
-        Coverage childrenCoverage = children.stream()
-                .map(node -> node.getCoverage(searchElement))
-                .reduce(Coverage.NO_COVERAGE, Coverage::add);
-        return leaves.stream()
-                .map(node -> node.getCoverage(searchElement))
-                .reduce(childrenCoverage, Coverage::add);
+        if (searchElement.isBasicBlock()) {
+            Coverage childrenCoverage = children.stream()
+                    .map(node -> node.getCoverage(searchElement))
+                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+            return leaves.stream()
+                    .map(node -> node.getCoverage(searchElement))
+                    .reduce(childrenCoverage, Coverage::add);
+        }
+        else {
+            Coverage childrenCoverage = children.stream()
+                    .map(node -> node.getCoverage(searchElement))
+                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+
+            if (element.equals(searchElement)) {
+                if (getCoverage(CoverageElement.LINE).getCovered() > 0) {
+                    return childrenCoverage.add(COVERED_NODE);
+                }
+                else {
+                    return childrenCoverage.add(MISSED_NODE);
+                }
+            }
+            return childrenCoverage;
+        }
     }
 
     /**
@@ -153,14 +221,16 @@ public class CoverageNode {
      * @return all elements of the given type
      */
     public List<CoverageNode> getAll(final CoverageElement searchElement) {
-        List<CoverageNode> selectedChildNodes = children
-                .stream()
+        List<CoverageNode> selectedChildNodes = children.stream()
                 .filter(result -> searchElement.equals(result.getElement()))
                 .collect(Collectors.toList());
         children.stream()
                 .filter(result -> isContainerNode(result, searchElement))
                 .map(child -> child.getAll(searchElement))
                 .flatMap(List::stream).forEach(selectedChildNodes::add);
+        if (element.equals(searchElement)) {
+            selectedChildNodes.add(this);
+        }
         return selectedChildNodes;
     }
 

@@ -16,6 +16,10 @@ public class CoverageLeaf {
         this.coverage = coverage;
     }
 
+    public CoverageElement getElement() {
+        return element;
+    }
+
     public Coverage getCoverage(final CoverageElement coverageType) {
         if (element.equals(coverageType)) {
             return coverage;

@@ -52,13 +52,11 @@
   <script>
     const viewProxy = <st:bind value="${it}"/>;
     const coverageChartGenerator = new CoverageChartGenerator();
-    viewProxy.getOverallStatistics(function(t) {
-        const ratios = t.responseObject();
-        coverageChartGenerator.generateSummaryChart(ratios, 'coverage-overview');
+    viewProxy.getOverview(function(t) {
+        coverageChartGenerator.createOverview(t.responseObject(), 'coverage-overview');
     });
     viewProxy.getCoverageTree(function(t) {
-        const tree = t.responseObject();
-        coverageChartGenerator.generateFilesTreeMap(tree, 'coverage-details');
+        coverageChartGenerator.createFilesTreeMap(t.responseObject(), 'coverage-details');
     });
   </script>
 
