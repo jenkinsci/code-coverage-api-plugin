@@ -3,7 +3,7 @@
   <t:summary icon="/plugin/code-coverage-api/icons/coverage-48x48.png">
     <j:set var="result" value="${it.result}"/>
     <j:choose>
-      <j:when test="${size(result) == 1}">
+      <j:when test="${size(result.children) == 1}">
         <a href="coverage/">${%Coverage Report}</a>
         <j:set var="items" value="${result.importantElements}"/>
       </j:when>
@@ -14,21 +14,22 @@
     </j:choose>
     <ul>
       <j:forEach var="element" items="${items}">
-        <li>${element.name}: ${result.getCoverage(element).percentage}%
-          <j:if test="${result.hasDelta(element)}">
+        <li>${element.name}: ${result.getCoverage(element).printCoveredPercentage()}%
+          <j:if test="${it.hasDelta(element)}">
             <j:choose>
-              <j:when test="${result.getDelta(element).startsWith('-')}">
-                <span style="color: #9d1212">(${result.getDelta(element)}%)</span>
+              <j:when test="${it.getDelta(element).startsWith('-')}">
+                <j:set var="color" value="#9d1212"/>
               </j:when>
               <j:otherwise>
-                <span style="color: #0a5f0e">(${result.getDelta(element)}%)</span>
+                <j:set var="color" value="#0a5f0e"/>
               </j:otherwise>
             </j:choose>
+            <span style="color: ${color}">(${it.getDelta(element)}%)</span>
           </j:if>
         </li>
       </j:forEach>
-      <j:if test="${result.hasReferenceBuild()}">
-        <li>Reference build: ${result.getReferenceBuildUrl()}</li>
+      <j:if test="${it.referenceBuild.present}">
+        <li>Reference build: ${it.referenceBuildId}</li>
       </j:if>
     </ul>
     <j:set var="failMessage" value="${it.failMessage}"/>

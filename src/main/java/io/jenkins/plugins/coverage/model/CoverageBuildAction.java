@@ -1,5 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -8,13 +12,13 @@ import org.kohsuke.stapler.StaplerProxy;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Run;
+import hudson.util.XStream2;
 
 import io.jenkins.plugins.coverage.Messages;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
+import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.JobAction;
 
 /**
@@ -24,16 +28,20 @@ import io.jenkins.plugins.util.JobAction;
  *
  * @author Ullrich Hafner
  */
-public class CoverageBuildAction extends BuildAction<CoverageResult> implements HealthReportingAction, StaplerProxy {
+public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
     private static final long serialVersionUID = -6023811049340671399L;
 
     static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage-24x24.png";
+    private static final String NO_REFERENCE_BUILD = "-";
 
     private HealthReport healthReport;
     private String failMessage;
 
-    private final Ratio lineCoverage;
-    private final Ratio branchCoverage;
+    private final Coverage lineCoverage;
+    private final Coverage branchCoverage;
+
+    private final String referenceBuildId;
+    private final SortedMap<CoverageElement, Double> delta;
 
     /**
      * Creates a new instance of {@link CoverageBuildAction}.
@@ -43,33 +51,81 @@ public class CoverageBuildAction extends BuildAction<CoverageResult> implements 
      * @param result
      *         the coverage results to persist with this action
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final CoverageResult result) {
-        this(owner, result, true);
+    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result) {
+        this(owner, result, NO_REFERENCE_BUILD, new TreeMap<>());
+    }
+
+    /**
+     * Creates a new instance of {@link CoverageBuildAction}.
+     *
+     * @param owner
+     *         the associated build that created the statistics
+     * @param result
+     *         the coverage results to persist with this action
+     * @param delta
+     *         the delta coverage with respect to the reference build
+     * @param referenceBuildId
+     *         the ID of the reference build
+     */
+    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
+            final String referenceBuildId, final SortedMap<CoverageElement, Double> delta) {
+        this(owner, result, referenceBuildId, delta, true);
     }
 
     @VisibleForTesting
-    CoverageBuildAction(final Run<?, ?> owner, final CoverageResult result, final boolean canSerialize) {
+    CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
+            final String referenceBuildId, final SortedMap<CoverageElement, Double> delta,
+            final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         lineCoverage = result.getCoverage(CoverageElement.LINE);
         branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL);
+
+        this.delta = delta;
+        this.referenceBuildId = referenceBuildId;
     }
 
-    public Ratio getLineCoverage() {
+    public Coverage getLineCoverage() {
         return lineCoverage;
     }
 
-    public Ratio getBranchCoverage() {
+    public Coverage getBranchCoverage() {
         return branchCoverage;
     }
 
+    public Optional<Run<?, ?>> getReferenceBuild() {
+        if (NO_REFERENCE_BUILD.equals(referenceBuildId)) {
+            return Optional.empty();
+        }
+        return new JenkinsFacade().getBuild(referenceBuildId);
+    }
+
+    public String getReferenceBuildId() {
+        return referenceBuildId;
+    }
+
+    public SortedMap<CoverageElement, Double> getDelta() {
+        return delta;
+    }
+
+    public boolean hasDelta(final CoverageElement element) {
+        return delta.containsKey(element);
+    }
+
+    public String getDelta(final CoverageElement element) {
+        if (hasDelta(element)) {
+            return String.format("%+.3f", delta.get(element));
+        }
+        return "n/a";
+    }
+
     @Override
-    protected AbstractXmlStream<CoverageResult> createXmlStream() {
+    protected AbstractXmlStream<CoverageNode> createXmlStream() {
         return new CoverageXmlStream();
     }
 
     @Override
-    protected JobAction<? extends BuildAction<CoverageResult>> createProjectAction() {
+    protected JobAction<? extends BuildAction<CoverageNode>> createProjectAction() {
         return new CoverageJobAction(getOwner().getParent());
     }
 
@@ -85,37 +141,7 @@ public class CoverageBuildAction extends BuildAction<CoverageResult> implements 
 
     @Override
     public Object getTarget() {
-        CoverageResult nextInterestingResult = getNextInterestingResult();
-
-        String name;
-        if (nextInterestingResult.hasParent()) {
-            name = nextInterestingResult.getParent().getDisplayName();
-        }
-        else {
-            name = nextInterestingResult.getDisplayName();
-        }
-
-        CoverageNode coverageNode = CoverageNode.fromResult(nextInterestingResult);
-        coverageNode.splitPackages();
-
-        return new CoverageViewModel(getOwner(), coverageNode, name);
-    }
-
-    private CoverageResult getNextInterestingResult() {
-        CoverageResult result = getResult();
-        while (result.hasSingletonChild()) {
-            result = result.getSingletonChild();
-        }
-        return result;
-    }
-
-    @Override
-    public CoverageResult getResult() {
-        CoverageResult result = super.getResult();
-        if (!getOwner().equals(result.getOwner())) {
-            result.setOwner(getOwner());
-        }
-        return result;
+        return new CoverageViewModel(getOwner(), getResult());
     }
 
     public HealthReport getHealthReport() {
@@ -152,14 +178,20 @@ public class CoverageBuildAction extends BuildAction<CoverageResult> implements 
         return "coverage";
     }
 
-    private static class CoverageXmlStream extends AbstractXmlStream<CoverageResult> {
+    private static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         CoverageXmlStream() {
-            super(CoverageResult.class);
+            super(CoverageNode.class);
         }
 
         @Override
-        protected CoverageResult createDefaultValue() {
-            return new CoverageResult(CoverageElement.REPORT, null, "Empty");
+        protected void configureXStream(final XStream2 xStream) {
+            xStream.alias("node", CoverageNode.class);
+            xStream.alias("leaf", CoverageLeaf.class);
+        }
+
+        @Override
+        protected CoverageNode createDefaultValue() {
+            return new CoverageNode(CoverageElement.REPORT, "Empty");
         }
     }
 }

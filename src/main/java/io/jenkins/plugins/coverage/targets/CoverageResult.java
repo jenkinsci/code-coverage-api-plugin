@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,9 +131,6 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     // ---------- REFACTORING START ------------------
 
-    // FIXME: currently this class handles UI requests and stores the coverage model
-    //        it would make more sense to split this information
-
     public void stripGroup() {
         if (getElement().equals(CoverageElement.REPORT) && hasSingletonChild()) {
             CoverageResult group = getSingletonChild();
@@ -150,28 +146,6 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     public String toString() {
         return String.format("CoverageResult of %s (line: %s, branch: %s)", name,
                 formatCoverage(CoverageElement.LINE), formatCoverage(CoverageElement.CONDITIONAL));
-    }
-
-    /**
-     * Returns the size of this result, i.e. the number of children that are part of this report.
-     *
-     * @return the number of children
-     */
-    public int size() {
-        return getChildren().size();
-    }
-
-    /**
-     * Returns the most important coverage elements.
-     *
-     * @return most important coverage elements
-     */
-    public Collection<CoverageElement> getImportantElements() {
-        List<CoverageElement> importantElements = new ArrayList<>();
-        importantElements.add(CoverageElement.LINE);
-        importantElements.add(CoverageElement.CONDITIONAL);
-        importantElements.retainAll(aggregateResults.keySet());
-        return importantElements;
     }
 
     /**

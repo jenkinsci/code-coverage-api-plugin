@@ -16,14 +16,11 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  */
 class CoverageViewModelTest extends AbstractCoverageTest {
-    private static final String DISPLAY_NAME = "Test View";
-
     @Test
     void shouldReportOverview() {
-        CoverageViewModel model = new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"),
-                DISPLAY_NAME);
+        CoverageViewModel model = new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
 
-        assertThat(model.getDisplayName()).contains(DISPLAY_NAME);
+        assertThat(model.getDisplayName()).contains("Java coding style: jacoco-codingstyle.xml");
 
         CoverageOverview overview = model.getOverview();
         assertThatJson(overview).node("elements").isArray().containsExactly(

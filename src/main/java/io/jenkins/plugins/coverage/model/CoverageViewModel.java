@@ -40,7 +40,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
-    private final String displayName;
 
     /**
      * Creates a new view model instance.
@@ -49,13 +48,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         the owner of this view
      * @param node
      *         the coverage node to be shown
-     * @param displayName
-     *         human-readable name of this view (used in bread-crumb)
      */
-    public CoverageViewModel(final Run<?, ?> owner, final CoverageNode node, final String displayName) {
+    public CoverageViewModel(final Run<?, ?> owner, final CoverageNode node) {
         this.owner = owner;
         this.node = node;
-        this.displayName = displayName;
     }
 
     public Run<?, ?> getOwner() {
@@ -68,7 +64,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     @Override
     public String getDisplayName() {
-        return Messages.Coverage_Title(displayName);
+        return Messages.Coverage_Title(node.getName());
     }
 
     @JavaScriptMethod

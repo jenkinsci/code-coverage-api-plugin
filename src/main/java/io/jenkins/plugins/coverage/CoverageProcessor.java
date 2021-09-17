@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -130,11 +132,11 @@ public class CoverageProcessor {
 
         PluginLogger pluginLogger = new PluginLogger(listener.getLogger(), "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
-        setDiffInCoverageForChangeRequest(coverageReport, log);
+        Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
         pluginLogger.logEachLine(log.getInfoMessages());
         pluginLogger.logEachLine(log.getErrorMessages());
 
-        CoverageBuildAction action = convertResultToAction(coverageReport);
+        CoverageAction action = convertResultToAction(coverageReport);
 
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
@@ -142,15 +144,38 @@ public class CoverageProcessor {
         if (failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
+
+        CoverageResult oldFormatResult = action.getResult();
+        oldFormatResult.stripGroup();
+
+        CoverageNode coverageNode = CoverageNode.fromResult(oldFormatResult);
+        coverageNode.splitPackages();
+
+        this.run.addOrReplaceAction(createNewBuildAction(coverageNode, possibleReferenceBuild));
     }
 
-    private CoverageBuildAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private CoverageBuildAction createNewBuildAction(final CoverageNode coverageNode,
+            final Optional<Run<?, ?>> possibleReferenceBuild) {
+        if (possibleReferenceBuild.isPresent()) {
+            Run<?, ?> referenceBuild = possibleReferenceBuild.get();
+            CoverageBuildAction previousAction = referenceBuild.getAction(CoverageBuildAction.class);
+            if (previousAction != null) {
+                SortedMap<CoverageElement, Double> delta = coverageNode.computeDelta(previousAction.getResult());
+                return new CoverageBuildAction(this.run, coverageNode, referenceBuild.getExternalizableId(), delta);
+            }
+        }
+
+        return new CoverageBuildAction(this.run, coverageNode);
+    }
+
+    private CoverageAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
         synchronized (CoverageProcessor.class) {
-            CoverageBuildAction previousAction = run.getAction(CoverageBuildAction.class);
+            CoverageAction previousAction = run.getAction(CoverageAction.class);
             if (previousAction == null) {
                 saveCoverageResult(run, coverageReport);
 
-                CoverageBuildAction action = new CoverageBuildAction(run, coverageReport);
+                CoverageAction action = new CoverageAction(coverageReport);
                 run.addAction(action);
 
                 return action;
@@ -189,12 +214,12 @@ public class CoverageProcessor {
         }
     }
 
-    private void setDiffInCoverageForChangeRequest(final CoverageResult coverageReport, final FilteredLog log) {
+    private Optional<Run<?, ?>> setDiffInCoverageForChangeRequest(final CoverageResult coverageReport, final FilteredLog log) {
         log.logInfo("Computing coverage delta report");
 
         ReferenceFinder referenceFinder = new ReferenceFinder();
         Optional<Run<?, ?>> reference = referenceFinder.findReference(run, log);
-        Optional<CoverageBuildAction> previousResult;
+        Optional<CoverageAction> previousResult;
         if (reference.isPresent()) {
             Run<?, ?> referenceRun = reference.get();
             log.logInfo("-> Using reference build '%s'", referenceRun);
@@ -209,32 +234,34 @@ public class CoverageProcessor {
         if (!previousResult.isPresent()) {
             log.logInfo("-> Found no reference result in reference build");
 
-            return;
+            return reference;
         }
 
-        CoverageBuildAction referenceAction = previousResult.get();
+        CoverageAction referenceAction = previousResult.get();
         log.logInfo("-> Found reference result '%s'", referenceAction);
 
         CoverageResult referenceCoverageResult = referenceAction.getResult();
 
         Map<CoverageElement, Float> deltaCoverage = new TreeMap<>();
         referenceCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
-            Ratio currentRatio = coverageReport.getCoverage(coverageElement);
+            Ratio buildRatio = coverageReport.getCoverage(coverageElement);
 
-            if (currentRatio != null) {
-                float diff = currentRatio.getPercentageFloat() - referenceRatio.getPercentageFloat();
-                log.logInfo("%s: current ratio: %s, previous ratio: %s, delta: %s",
-                        coverageElement.getName(), currentRatio, referenceRatio, diff);
+            if (buildRatio != null) {
+                float diff = buildRatio.getPercentageFloat() - referenceRatio.getPercentageFloat();
+                listener.getLogger()
+                        .println(coverageElement.getName() + " coverage diff: " + diff + "%. Add to CoverageResult.");
                 deltaCoverage.put(coverageElement, diff);
             }
         });
 
         coverageReport.setDeltaResults(deltaCoverage);
+
+        return reference;
     }
 
-    private Optional<CoverageBuildAction> getPreviousResult(final Run<?, ?> startSearch) {
+    private Optional<CoverageAction> getPreviousResult(final Run<?, ?> startSearch) {
         for (Run<?, ?> build = startSearch; build != null; build = build.getPreviousBuild()) {
-            CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+            CoverageAction action = build.getAction(CoverageAction.class);
             if (action != null) {
                 return Optional.of(action);
             }
@@ -242,8 +269,7 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult)
-            throws CoverageException {
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult) throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
             throw new CoverageException(
@@ -260,8 +286,8 @@ public class CoverageProcessor {
      *
      * @return {@link CoverageResult} for each report
      */
-    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(
-            final List<CoverageReportAdapter> adapters, final List<ReportDetector> reportDetectors)
+    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(final List<CoverageReportAdapter> adapters,
+            final List<ReportDetector> reportDetectors)
             throws IOException, InterruptedException, CoverageException {
         PrintStream logger = listener.getLogger();
 
@@ -412,7 +438,7 @@ public class CoverageProcessor {
      * @return Health report
      */
     private HealthReport processThresholds(final Map<CoverageReportAdapter, List<CoverageResult>> adapterWithResults,
-            final List<Threshold> globalThresholds, final CoverageBuildAction action) throws CoverageException {
+            final List<Threshold> globalThresholds, final CoverageAction action) throws CoverageException {
 
         int healthyCount = 0;
         int unhealthyCount = 0;
@@ -537,8 +563,7 @@ public class CoverageProcessor {
      *
      * @return Coverage report that have all coverage results
      */
-    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter,
-            final List<CoverageResult> results) {
+    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter, final List<CoverageResult> results) {
         CoverageResult report = new CoverageResult(CoverageElement.REPORT, null,
                 adapter.getDescriptor().getDisplayName() + ": " + adapter.getPath());
 
@@ -663,8 +688,7 @@ public class CoverageProcessor {
         return failBuildIfCoverageDecreasedInChangeRequest;
     }
 
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(
-            final boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 

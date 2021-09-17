@@ -74,7 +74,7 @@ public final class Coverage {
 
     private String printPercentage(final double percentage) {
         if (isSet()) {
-            return String.valueOf(percentage);
+            return String.format("%.2f", getCoveredPercentage() * 100);
         }
         return "n/a";
     }

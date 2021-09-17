@@ -104,9 +104,28 @@ public class CoverageNode {
         return elements;
     }
 
+    /**
+     * Returns the most important coverage elements.
+     *
+     * @return most important coverage elements
+     */
+    public Collection<CoverageElement> getImportantElements() {
+        List<CoverageElement> importantElements = new ArrayList<>();
+        importantElements.add(CoverageElement.LINE);
+        importantElements.add(CoverageElement.CONDITIONAL);
+        importantElements.retainAll(getElements());
+        return importantElements;
+    }
+
     public SortedMap<CoverageElement, Coverage> getElementDistribution() {
         return getElements().stream()
                 .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
+    }
+
+    public SortedMap<CoverageElement, Double> getElementPercentages() {
+        return getElements().stream()
+                .collect(Collectors.toMap(Function.identity(),
+                        searchElement -> getCoverage(searchElement).getCoveredPercentage(), (o1, o2) -> o1, TreeMap::new));
     }
 
     public String getName() {
@@ -383,5 +402,15 @@ public class CoverageNode {
     @Override
     public String toString() {
         return String.format("[%s] %s", element, name);
+    }
+
+    public SortedMap<CoverageElement, Double> computeDelta(final CoverageNode reference) {
+        SortedMap<CoverageElement, Double> deltaPercentages = new TreeMap<>();
+        SortedMap<CoverageElement, Double> elementPercentages = getElementPercentages();
+        SortedMap<CoverageElement, Double> referencePercentages = reference.getElementPercentages();
+        elementPercentages.forEach((key, value) -> {
+            deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0));
+        });
+        return deltaPercentages;
     }
 }

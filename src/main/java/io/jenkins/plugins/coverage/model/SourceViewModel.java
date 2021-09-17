@@ -24,7 +24,7 @@ public class SourceViewModel extends CoverageViewModel {
      *         the selected file node of the coverage tree
      */
     public SourceViewModel(final Run<?, ?> owner, final CoverageNode fileNode) {
-        super(owner, fileNode, fileNode.getName());
+        super(owner, fileNode);
     }
 
     /**

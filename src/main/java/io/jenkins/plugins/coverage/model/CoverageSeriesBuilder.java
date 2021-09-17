@@ -18,9 +18,14 @@ public class CoverageSeriesBuilder extends SeriesBuilder<CoverageBuildAction> {
     protected Map<String, Integer> computeSeries(final CoverageBuildAction coverageBuildAction) {
         Map<String, Integer> series = new HashMap<>();
 
-        series.put(LINE_COVERAGE, coverageBuildAction.getLineCoverage().getPercentage());
-        series.put(BRANCH_COVERAGE, coverageBuildAction.getBranchCoverage().getPercentage());
+        // FIXME: can we change the signature to double?
+        series.put(LINE_COVERAGE, asPercentage(coverageBuildAction.getLineCoverage()));
+        series.put(BRANCH_COVERAGE, asPercentage(coverageBuildAction.getBranchCoverage()));
 
         return series;
+    }
+
+    private int asPercentage(final Coverage coverage) {
+        return (int) (coverage.getCoveredPercentage() * 100);
     }
 }

@@ -35,8 +35,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageChecksPublisher;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
@@ -67,7 +65,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace,
+            @NonNull final Launcher launcher, @NonNull final TaskListener listener)
+            throws InterruptedException, IOException {
         listener.getLogger().println("Publishing Coverage report....");
 
         CoverageProcessor processor = new CoverageProcessor(run, workspace, listener);
@@ -78,7 +78,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         for (CoverageAdapter adapter : getAdapters()) {
             if (adapter instanceof CoverageReportAdapter) {
                 reportAdapters.add((CoverageReportAdapter) adapter);
-            } else if (adapter instanceof ReportDetector) {
+            }
+            else if (adapter instanceof ReportDetector) {
                 reportDetectors.add((ReportDetector) adapter);
             }
         }
@@ -96,13 +97,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         try {
             processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds);
-        } catch (CoverageException e) {
+        }
+        catch (CoverageException e) {
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
             run.setResult(Result.FAILURE);
         }
 
         if (!skipPublishingChecks) {
-            CoverageBuildAction coverageAction = run.getAction(CoverageBuildAction.class);
+            CoverageAction coverageAction = run.getAction(CoverageAction.class);
             if (coverageAction != null) {
                 CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
                 checksPublisher.publishChecks(listener);
@@ -205,7 +207,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(
+            final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 
@@ -254,7 +257,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
 
         @Override
-        public Publisher newInstance(@CheckForNull final StaplerRequest req, @NonNull final JSONObject formData) throws FormException {
+        public Publisher newInstance(@CheckForNull final StaplerRequest req, @NonNull final JSONObject formData)
+                throws FormException {
             return super.newInstance(req, formData);
         }
     }

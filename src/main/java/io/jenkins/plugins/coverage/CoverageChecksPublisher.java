@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,34 +28,27 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
- * Publishes coverage as checks to SCM platforms.
+ * Publishes coverage as checks to scm platforms.
  *
  * @author Kezhi Xiong
  */
-public class CoverageChecksPublisher {
-    private final CoverageBuildAction action;
+class CoverageChecksPublisher {
+    private final CoverageAction action;
     private final JenkinsFacade jenkinsFacade;
     private static final List<String> COVERAGE_TYPES =
-            Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Branch", "Line",
-                    "Instruction");
+            Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Conditional", "Line", "Instruction");
 
-    /**
-     * Creates a new instance of {@link CoverageChecksPublisher}.
-     *
-     * @param action
-     *         the action to obtain the results from
-     */
-    public CoverageChecksPublisher(final CoverageBuildAction action) {
+    CoverageChecksPublisher(final CoverageAction action) {
         this(action, new JenkinsFacade());
     }
 
     @VisibleForTesting
-    CoverageChecksPublisher(final CoverageBuildAction action, final JenkinsFacade jenkinsFacade) {
+    CoverageChecksPublisher(final CoverageAction action, final JenkinsFacade jenkinsFacade) {
         this.jenkinsFacade = jenkinsFacade;
         this.action = action;
     }
 
-    public void publishChecks(final TaskListener listener) {
+    void publishChecks(final TaskListener listener) {
         ChecksPublisher publisher = ChecksPublisherFactory.fromRun(action.getOwner(), listener);
         publisher.publish(extractChecksDetails());
     }
@@ -65,15 +58,14 @@ public class CoverageChecksPublisher {
         CoverageResult result = action.getResult();
         ChecksOutput output = new ChecksOutputBuilder()
                 .withTitle(extractChecksTitle(result))
-                .withSummary(extractComparedBuildsSummary(result) + extractHealthSummary())
+                .withSummary(extractComparedBuildsSummary(result) + extractHealthSummary(action))
                 .withText(extractChecksText(result))
                 .build();
 
         return new ChecksDetailsBuilder()
                 .withName("Code Coverage")
                 .withStatus(ChecksStatus.COMPLETED)
-                .withConclusion(StringUtils.isBlank(
-                        action.getFailMessage()) ? ChecksConclusion.SUCCESS : ChecksConclusion.FAILURE)
+                .withConclusion(StringUtils.isBlank(action.getFailMessage()) ? ChecksConclusion.SUCCESS : ChecksConclusion.FAILURE)
                 .withDetailsURL(jenkinsFacade.getAbsoluteUrl(result.getOwner().getUrl(), action.getUrlName()))
                 .withOutput(output)
                 .build();
@@ -99,15 +91,12 @@ public class CoverageChecksPublisher {
 
                     if (Float.compare(diff, 0) > 0) {
                         trends.append(" :arrow_up:|");
-                    }
-                    else if (Float.compare(diff, 0) < 0) {
+                    } else if (Float.compare(diff, 0) < 0) {
                         trends.append(" :arrow_down:|");
-                    }
-                    else {
+                    } else {
                         trends.append(" :arrow_right:|");
                     }
-                }
-                else {
+                } else {
                     trends.append("-|");
                 }
             }
@@ -128,12 +117,10 @@ public class CoverageChecksPublisher {
             if (result.getReferenceBuildUrl() != null) {
                 title.append(extractChecksTitle("Line", "target branch", lineCoverage,
                         result.getCoverageDelta(CoverageElement.LINE)));
-            }
-            else if (lastRatios.containsKey(CoverageElement.LINE)) {
+            } else if (lastRatios.containsKey(CoverageElement.LINE)) {
                 title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
                         lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat()));
-            }
-            else {
+            } else {
                 title.append(extractChecksTitle("Line", "", lineCoverage, 0));
             }
 
@@ -145,12 +132,10 @@ public class CoverageChecksPublisher {
             if (result.getReferenceBuildUrl() != null) {
                 title.append(extractChecksTitle("Branch", "target branch", branchCoverage,
                         result.getCoverageDelta(CoverageElement.CONDITIONAL)));
-            }
-            else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
+            } else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
                 title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
                         branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
-            }
-            else {
+            } else {
                 title.append(extractChecksTitle("Branch", "", branchCoverage, 0));
             }
         }
@@ -171,8 +156,7 @@ public class CoverageChecksPublisher {
 
         if (StringUtils.isBlank(targetBuildName)) {
             title.append(".");
-        }
-        else {
+        } else {
             title.append(" (")
                     .append(String.format("%+.2f%%", coverageDiff))
                     .append(" against ")
@@ -201,7 +185,7 @@ public class CoverageChecksPublisher {
         return summary.toString();
     }
 
-    private String extractHealthSummary() {
+    private String extractHealthSummary(final CoverageAction action) {
         StringBuilder summary = new StringBuilder("## ")
                 .append(action.getHealthReport().getLocalizableDescription().toString())
                 .append(".");

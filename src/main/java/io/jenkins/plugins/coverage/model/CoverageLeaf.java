@@ -3,7 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 
 /**
- * FIXME: comment class.
+ * A leaf in the coverage hierarchy. A leaf is a non-divisible coverage metric like line or branch coverage.
  *
  * @author Ullrich Hafner
  */
