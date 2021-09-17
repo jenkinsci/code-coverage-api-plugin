@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import edu.hm.hafner.util.ResourceTest;
 
+import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
@@ -40,6 +41,6 @@ public class AbstractCoverageTest extends ResourceTest {
     }
 
     CoverageNode readNode(final String fileName) {
-        return CoverageNode.fromResult(readResult(fileName));
+        return CoverageNodeConverter.convert(readResult(fileName));
     }
 }

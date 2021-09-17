@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import io.jenkins.plugins.coverage.CoverageNodeConverter;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
@@ -104,13 +106,18 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         String fileName = "Ensure.java";
         assertThat(tree.findByHashCode(SOURCE_FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
-                node -> assertThat(node).hasName(fileName)
+                node -> {
+                    assertThat(node).hasName(fileName);
+                    assertThat(node.getUncoveredLines()).containsExactly(
+                            78, 138, 139, 153, 154, 240, 245, 303, 340, 390, 395, 444, 476,
+                            483, 555, 559, 568, 600, 626, 627, 628, 650, 653, 690, 720);
+                }
         );
         assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
         assertThat(tree.findByHashCode(SOURCE_FILE, "not-found".hashCode())).isEmpty();
     }
 
     private CoverageNode readExampleReport() {
-        return CoverageNode.fromResult(readResult("jacoco-codingstyle.xml"));
+        return CoverageNodeConverter.convert(readResult("jacoco-codingstyle.xml"));
     }
 }

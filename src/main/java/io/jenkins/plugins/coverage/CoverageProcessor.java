@@ -145,10 +145,8 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        CoverageResult oldFormatResult = action.getResult();
-        oldFormatResult.stripGroup();
-
-        CoverageNode coverageNode = CoverageNode.fromResult(oldFormatResult);
+        coverageReport.stripGroup();
+        CoverageNode coverageNode = CoverageNodeConverter.convert(coverageReport);
         coverageNode.splitPackages();
 
         this.run.addOrReplaceAction(createNewBuildAction(coverageNode, possibleReferenceBuild));
@@ -234,7 +232,7 @@ public class CoverageProcessor {
         if (!previousResult.isPresent()) {
             log.logInfo("-> Found no reference result in reference build");
 
-            return reference;
+            return Optional.empty();
         }
 
         CoverageAction referenceAction = previousResult.get();
@@ -256,7 +254,7 @@ public class CoverageProcessor {
 
         coverageReport.setDeltaResults(deltaCoverage);
 
-        return reference;
+        return Optional.of(previousResult.get().getOwner());
     }
 
     private Optional<CoverageAction> getPreviousResult(final Run<?, ?> startSearch) {

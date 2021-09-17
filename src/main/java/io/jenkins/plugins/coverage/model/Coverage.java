@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
  * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
@@ -27,19 +26,6 @@ public final class Coverage {
     public Coverage(final int covered, final int missed) {
         this.covered = covered;
         this.missed = missed;
-    }
-
-    /**
-     * Creates a new code coverage with the specified values.
-     *
-     * @param coverageRatio
-     *         the coverage {@link Ratio}
-     *
-     * @deprecated used to convert the old format
-     */
-    @Deprecated
-    public Coverage(final Ratio coverageRatio) {
-        this((int) coverageRatio.numerator, (int) (coverageRatio.denominator - coverageRatio.numerator));
     }
 
     public int getCovered() {

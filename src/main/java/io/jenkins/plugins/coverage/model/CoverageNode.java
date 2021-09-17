@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -21,8 +20,6 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.coverage.targets.Ratio;
 
 /**
  * A hierarchical decomposition of coverage results.
@@ -30,33 +27,11 @@ import io.jenkins.plugins.coverage.targets.Ratio;
  * @author Ullrich Hafner
  */
 public class CoverageNode {
-    static final String ROOT = "^";
     private static final Coverage COVERED_NODE = new Coverage(1, 0);
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
+    private static final int[] EMPTY_ARRAY = new int[0];
 
-    public static CoverageNode fromResult(final CoverageResult result) {
-        CoverageElement element = result.getElement();
-        if (result.getChildren().isEmpty()) {
-            CoverageNode coverageNode = createNode(result, element);
-            for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
-                CoverageLeaf leaf = new CoverageLeaf(coverage.getKey(), new Coverage(coverage.getValue()));
-                coverageNode.add(leaf);
-            }
-            return coverageNode;
-        }
-        else {
-            CoverageNode coverageNode = createNode(result, element);
-            for (String childKey : result.getChildren()) {
-                CoverageResult childResult = result.getChild(childKey);
-                coverageNode.add(fromResult(childResult));
-            }
-            return coverageNode;
-        }
-    }
-
-    private static CoverageNode createNode(final CoverageResult result, final CoverageElement element) {
-        return new CoverageNode(element, result.getName());
-    }
+    static final String ROOT = "^";
 
     private final CoverageElement element;
     private final String name;
@@ -64,6 +39,7 @@ public class CoverageNode {
     private final List<CoverageLeaf> leaves = new ArrayList<>();
     @CheckForNull
     private CoverageNode parent;
+    private int[] uncoveredLines = EMPTY_ARRAY;
 
     /**
      * Creates a new coverage item node with the given name.
@@ -397,6 +373,16 @@ public class CoverageNode {
             }
         }
         return colors[levels.length - 1];
+    }
+
+    public void setUncoveredLines(final int[] uncoveredLines) {
+        // TODO: can we skip copying the parameter array?
+        this.uncoveredLines = uncoveredLines;
+    }
+
+    public int[] getUncoveredLines() {
+        // TODO: can we skip copying the returned array?
+        return uncoveredLines;
     }
 
     @Override

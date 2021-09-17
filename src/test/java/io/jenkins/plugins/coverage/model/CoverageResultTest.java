@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.util.ResourceTest;
 
+import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
@@ -99,10 +100,10 @@ class CoverageResultTest extends ResourceTest {
         CoverageResult treeStringBuilderClass = treeStringBuilderFile.getChild(TREE_STRING_BUILDER_CLASS);
 
         Ratio lineCoverage = treeStringBuilderClass.getCoverageFor(CoverageElement.LINE).get();
-        Coverage coverage = new Coverage(lineCoverage);
-        assertThat(coverage).hasCovered(8).hasMissed(2);
+        assertThat(lineCoverage.numerator).isEqualTo(8);
+        assertThat(lineCoverage.denominator).isEqualTo(10);
 
-        CoverageNode root = CoverageNode.fromResult(report);
+        CoverageNode root = CoverageNodeConverter.convert(report);
         assertThat(root.getCoverage(LINE)).hasCovered(294).hasMissed(29);
         assertThat(root.getCoverage(BRANCH)).hasCovered(109).hasMissed(7);
         assertThat(root.getCoverage(INSTRUCTION)).hasCovered(1260).hasMissed(90);
@@ -112,7 +113,7 @@ class CoverageResultTest extends ResourceTest {
     void shouldConvertCodingStyleToTree() throws CoverageException {
         CoverageResult report = readReport("jacoco-codingstyle.xml");
 
-        CoverageNode tree = CoverageNode.fromResult(report);
+        CoverageNode tree = CoverageNodeConverter.convert(report);
         tree.splitPackages();
 
         TreeChartNode root = tree.toChartTree();
@@ -127,7 +128,7 @@ class CoverageResultTest extends ResourceTest {
     void shouldConvertAnalysisModelToTree() throws CoverageException {
         CoverageResult report = readReport("jacoco-analysis-model.xml");
 
-        CoverageNode tree = CoverageNode.fromResult(report);
+        CoverageNode tree = CoverageNodeConverter.convert(report);
         tree.splitPackages();
 
         TreeChartNode root = tree.toChartTree();
