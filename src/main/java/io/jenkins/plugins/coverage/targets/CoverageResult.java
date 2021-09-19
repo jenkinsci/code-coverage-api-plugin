@@ -131,6 +131,9 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     // ---------- REFACTORING START ------------------
 
+    /**
+     * If the report contains a single group just remove the group.
+     */
     public void stripGroup() {
         if (getElement().equals(CoverageElement.REPORT) && hasSingletonChild()) {
             CoverageResult group = getSingletonChild();
@@ -139,6 +142,20 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
                 children.putAll(group.children);
             }
 
+        }
+    }
+
+    /**
+     * If the report is an aggregation with a single report just remove the aggregation.
+     *
+     * @return the actual root of the hierarchy
+     */
+    public CoverageResult getRoot() {
+        if (hasSingletonChild() && getSingletonChild().getElement().equals(CoverageElement.REPORT)) {
+            return getSingletonChild(); // ignore aggregation
+        }
+        else {
+            return this;
         }
     }
 

@@ -12,6 +12,8 @@ public final class Coverage {
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
+    static final String COVERAGE_NOT_AVAILABLE = "n/a";
+
     private final int covered;
     private final int missed;
 
@@ -28,10 +30,20 @@ public final class Coverage {
         this.missed = missed;
     }
 
+    /**
+     * Returns the number of covered items.
+     *
+     * @return the number of covered items
+     */
     public int getCovered() {
         return covered;
     }
 
+    /**
+     * Returns the covered percentage in the range of {@code [0, 1]}.
+     *
+     * @return the covered percentage
+     */
     public double getCoveredPercentage() {
         if (getTotal() == 0) {
             return 0;
@@ -39,14 +51,29 @@ public final class Coverage {
         return covered * 1.0 / getTotal();
     }
 
+    /**
+     * Prints the covered percentage as formatted String (with a precision of two digits after the comma).
+     *
+     * @return the covered percentage
+     */
     public String printCoveredPercentage() {
         return printPercentage(getCoveredPercentage());
     }
 
+    /**
+     * Returns the number of missed items.
+     *
+     * @return the number of missed items
+     */
     public int getMissed() {
         return missed;
     }
 
+    /**
+     * Returns the missed percentage in the range of {@code [0, 1]}.
+     *
+     * @return the missed percentage
+     */
     public double getMissedPercentage() {
         if (getTotal() == 0) {
             return 0;
@@ -54,15 +81,20 @@ public final class Coverage {
         return 1 - getCoveredPercentage();
     }
 
+    /**
+     * Prints the missed percentage as formatted String (with a precision of two digits after the comma).
+     *
+     * @return the missed percentage
+     */
     public String printMissedPercentage() {
         return printPercentage(getMissedPercentage());
     }
 
     private String printPercentage(final double percentage) {
         if (isSet()) {
-            return String.format("%.2f", getCoveredPercentage() * 100);
+            return String.format("%.2f", percentage * 100);
         }
-        return "n/a";
+        return COVERAGE_NOT_AVAILABLE;
     }
 
     public Coverage add(final Coverage additional) {
@@ -76,7 +108,7 @@ public final class Coverage {
         if (total > 0) {
             return String.format("%.2f (%d/%d)", getCoveredPercentage() * 100, covered, total);
         }
-        return "n/a";
+        return COVERAGE_NOT_AVAILABLE;
     }
 
     public int getTotal() {

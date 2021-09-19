@@ -145,11 +145,16 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        coverageReport.stripGroup();
-        CoverageNode coverageNode = CoverageNodeConverter.convert(coverageReport);
-        coverageNode.splitPackages();
-
+        CoverageNode coverageNode = convertCoverageResultToCoverageNode(coverageReport);
         this.run.addOrReplaceAction(createNewBuildAction(coverageNode, possibleReferenceBuild));
+    }
+
+    private CoverageNode convertCoverageResultToCoverageNode(final CoverageResult coverageReport) {
+        CoverageResult root = coverageReport.getRoot();
+        root.stripGroup();
+        CoverageNode coverageNode = CoverageNodeConverter.convert(root);
+        coverageNode.splitPackages();
+        return coverageNode;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
