@@ -1,5 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Locale;
+
+import org.junit.jupiter.api.BeforeAll;
+
 import edu.hm.hafner.util.ResourceTest;
 
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
@@ -26,6 +30,11 @@ public class AbstractCoverageTest extends ResourceTest {
     static final CoverageElement LINE = CoverageElement.LINE;
     static final CoverageElement INSTRUCTION = JacocoReportAdapterDescriptor.INSTRUCTION;
     static final CoverageElement BRANCH = CoverageElement.CONDITIONAL;
+
+    @BeforeAll
+    static void beforeAll() {
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
     CoverageResult readResult(final String fileName) {
         try {

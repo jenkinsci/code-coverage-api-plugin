@@ -38,8 +38,10 @@ public class CoverageTrendChart {
         LinesChartModel model = new LinesChartModel(dataSet);
         model.useContinuousRangeAxis();
         model.setRangeMax(100);
-        model.setRangeMin(Math.max(0, Math.min(min(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
-                min(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE) - 10)));
+        model.setRangeMin(Math.max(0,
+                Math.min(createRangeMinFor(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
+                createRangeMinFor(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE)
+                )));
 
         LineSeries lineSeries = new LineSeries("Line", Palette.GREEN.getNormal(),
                 StackedMode.SEPARATE_LINES, FilledMode.FILLED);
@@ -52,6 +54,10 @@ public class CoverageTrendChart {
         model.addSeries(branchSeries);
 
         return model;
+    }
+
+    private int createRangeMinFor(final LinesDataSet dataSet, final String coverage) {
+        return min(dataSet, coverage) - 10;
     }
 
     private Integer min(final LinesDataSet dataSet, final String dataSetId) {

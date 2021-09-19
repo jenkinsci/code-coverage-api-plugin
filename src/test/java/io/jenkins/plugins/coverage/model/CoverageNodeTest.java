@@ -14,7 +14,6 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageNodeTest extends AbstractCoverageTest {
-
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
 
     @Test
@@ -63,7 +62,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .hasMissed(29)
                 .hasMissedPercentageCloseTo(0.09, PRECISION)
                 .hasTotal(294 + 29);
-        assertThat(tree.printCoverageFor(LINE)).isEqualTo("91,02%");
+        assertThat(tree.printCoverageFor(LINE)).isEqualTo("91.02%");
 
         assertThat(tree.getCoverage(BRANCH)).isSet()
                 .hasCovered(109)
@@ -71,7 +70,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .hasMissed(7)
                 .hasMissedPercentageCloseTo(0.07, PRECISION)
                 .hasTotal(109 + 7);
-        assertThat(tree.printCoverageFor(BRANCH)).isEqualTo("93,97%");
+        assertThat(tree.printCoverageFor(BRANCH)).isEqualTo("93.97%");
 
         assertThat(tree.getCoverage(INSTRUCTION)).isSet()
                 .hasCovered(1260)
@@ -79,7 +78,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .hasMissed(90)
                 .hasMissedPercentageCloseTo(0.07, PRECISION)
                 .hasTotal(1260 + 90);
-        assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93,33%");
+        assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93.33%");
 
         assertThat(tree.getCoverage(REPORT)).isSet()
                 .hasCovered(1)
@@ -87,7 +86,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .hasMissed(0)
                 .hasMissedPercentageCloseTo(0, PRECISION)
                 .hasTotal(1);
-        assertThat(tree.printCoverageFor(REPORT)).isEqualTo("100,00%");
+        assertThat(tree.printCoverageFor(REPORT)).isEqualTo("100.00%");
 
         assertThat(tree).hasName(PROJECT_NAME)
                 .doesNotHaveParent()
