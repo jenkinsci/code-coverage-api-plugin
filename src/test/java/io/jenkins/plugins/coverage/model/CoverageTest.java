@@ -38,14 +38,14 @@ class CoverageTest {
                 .hasTotal(10)
                 .hasToString("60,00 (6/10)");
 
-        assertThat(coverage.printCoveredPercentage()).isEqualTo("60,00");
-        assertThat(coverage.printMissedPercentage()).isEqualTo("40,00");
+        assertThat(coverage.printCoveredPercentage()).isEqualTo("60,00%");
+        assertThat(coverage.printMissedPercentage()).isEqualTo("40,00%");
 
         assertThat(coverage.add(Coverage.NO_COVERAGE)).isEqualTo(coverage);
         Coverage sum = coverage.add(new Coverage(10, 0));
         assertThat(sum).isEqualTo(new Coverage(16, 4));
-        assertThat(sum.printCoveredPercentage()).isEqualTo("80,00");
-        assertThat(sum.printMissedPercentage()).isEqualTo("20,00");
+        assertThat(sum.printCoveredPercentage()).isEqualTo("80,00%");
+        assertThat(sum.printMissedPercentage()).isEqualTo("20,00%");
     }
 
     @Test

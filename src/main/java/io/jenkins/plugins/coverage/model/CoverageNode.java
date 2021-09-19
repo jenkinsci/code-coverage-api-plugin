@@ -165,7 +165,16 @@ public class CoverageNode {
      * @return the name of the parent element
      */
     public String getParentName() {
-        return parent == null ? ROOT : parent.getName();
+        if (parent == null) {
+            return ROOT;
+        }
+        CoverageElement type = parent.getElement();
+
+        List<String> parentsOfSameType = new ArrayList<>();
+        for (CoverageNode node = parent; node != null && node.getElement().equals(type); node = node.parent) {
+            parentsOfSameType.add(0, node.getName());
+        }
+        return String.join(".", parentsOfSameType);
     }
 
     /**
@@ -177,11 +186,7 @@ public class CoverageNode {
      * @return coverage ratio in a human-readable format
      */
     public String printCoverageFor(final CoverageElement searchElement) {
-        Coverage coverage = getCoverage(searchElement);
-        if (coverage.getTotal() > 0) {
-            return String.format("%.2f%%", coverage.getCoveredPercentage() * 100);
-        }
-        return "n/a";
+        return getCoverage(searchElement).printCoveredPercentage();
     }
 
     /**
@@ -249,11 +254,18 @@ public class CoverageNode {
      * @return the result if found
      */
     public Optional<CoverageNode> find(final CoverageElement searchElement, final String searchName) {
-        return findByHashCode(searchElement, Integer.parseInt(searchName));
+        if (matches(searchElement, searchName)) {
+            return Optional.of(this);
+        }
+        return children
+                .stream()
+                .map(child -> child.find(searchElement, searchName))
+                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+                .findAny();
     }
 
     /**
-     * Finds the coverage element with the given name starting from this node.
+     * Finds the coverage element with the given hash code starting from this node.
      *
      * @param searchElement
      *         the coverage element to search for
@@ -304,6 +316,9 @@ public class CoverageNode {
         return name.hashCode() == searchNameHashCode;
     }
 
+    /**
+     * Splits flat packages into a package hierarchy. Changes the internal tree structure in place.
+     */
     public void splitPackages() {
         if (CoverageElement.REPORT.equals(element)) {
             List<CoverageNode> allPackages = new ArrayList<>(children);

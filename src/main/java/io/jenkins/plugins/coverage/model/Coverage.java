@@ -92,7 +92,7 @@ public final class Coverage {
 
     private String printPercentage(final double percentage) {
         if (isSet()) {
-            return String.format("%.2f", percentage * 100);
+            return String.format("%.2f%%", percentage * 100);
         }
         return COVERAGE_NOT_AVAILABLE;
     }
