@@ -36,7 +36,7 @@
     <pull-request-monitoring.version>1.7.7</pull-request-monitoring.version>
     <plugin-util-api.version>2.4.0</plugin-util-api.version>
     <fontawesome-api.version>5.15.4-1</fontawesome-api.version>
-    <bootstrap5-api.version>5.1.0-3</bootstrap5-api.version>
+    <bootstrap5-api.version>5.1.1-1</bootstrap5-api.version>
     <jquery3-api.version>3.6.0-2</jquery3-api.version>
     <json-unit-assertj.version>2.27.0</json-unit-assertj.version>
 
