@@ -19,7 +19,6 @@ import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
 import io.jenkins.plugins.util.JenkinsFacade;
-import io.jenkins.plugins.util.JobAction;
 
 /**
  * Controls the life cycle of the coverage results in a job. This action persists the results of a build and displays a
@@ -112,6 +111,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return delta.containsKey(element);
     }
 
+    // TODO: format percentage on the client side
     public String getDelta(final CoverageElement element) {
         if (hasDelta(element)) {
             return String.format("%+.3f", delta.get(element));
@@ -125,7 +125,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     @Override
-    protected JobAction<? extends BuildAction<CoverageNode>> createProjectAction() {
+    protected CoverageJobAction createProjectAction() {
         return new CoverageJobAction(getOwner().getParent());
     }
 

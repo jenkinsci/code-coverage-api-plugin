@@ -8,8 +8,9 @@ const CoverageChartGenerator = function () {
 
     this.createOverview = function (overview, id) {
         const summaryChartDiv = document.getElementById(id);
-        summaryChartDiv.style.height = overview.elements.length * 31 + 200 + "px";
+        summaryChartDiv.style.height = overview.elements.length * 31 + 150 + "px";
         const summaryChart = echarts.init(summaryChartDiv);
+        summaryChartDiv.echart = summaryChart;
 
         const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
 
@@ -48,8 +49,8 @@ const CoverageChartGenerator = function () {
             grid: {
                 left: '20',
                 right: '10',
-                bottom: '30',
-                top: '15%',
+                bottom: '5',
+                top: '40',
                 containLabel: true
             },
             xAxis: {
@@ -216,7 +217,10 @@ const CoverageChartGenerator = function () {
             ];
         }
 
-        const treeChart = echarts.init(document.getElementById(id));
+        const treeChartDiv = document.getElementById(id);
+        const treeChart = echarts.init(treeChartDiv);
+        treeChartDiv.echart = treeChart;
+
         const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
         const formatUtil = echarts.format;
 

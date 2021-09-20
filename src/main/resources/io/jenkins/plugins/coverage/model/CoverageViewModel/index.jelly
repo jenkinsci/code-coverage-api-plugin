@@ -19,6 +19,14 @@
 
       </div>
 
+      <div class="col d-none d-md-block d-flex">
+
+        <bs:card title="${%Coverage trend}" fontAwesomeIcon="chart-line" class="flex-fill">
+          <div id="coverage-trend" class="graph-cursor-pointer card-chart"/>
+        </bs:card>
+
+      </div>
+
     </div>
 
     <div class="row py-3 flex-nowrap">
@@ -54,6 +62,15 @@
     const coverageChartGenerator = new CoverageChartGenerator();
     viewProxy.getOverview(function(t) {
         coverageChartGenerator.createOverview(t.responseObject(), 'coverage-overview');
+
+        const trendDiv = document.getElementById('coverage-trend');
+        const overview = document.getElementById('coverage-overview')
+        trendDiv.style.height = overview.style.height;
+
+        const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
+        viewProxy.getTrendChart(configuration, function(t) {
+            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history');
+        });
     });
     viewProxy.getCoverageTree(function(t) {
         coverageChartGenerator.createFilesTreeMap(t.responseObject(), 'coverage-details');

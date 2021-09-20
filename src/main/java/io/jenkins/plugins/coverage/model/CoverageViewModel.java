@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.echarts.JacksonFacade;
+import edu.hm.hafner.echarts.LinesChartModel;
+
 import j2html.tags.ContainerTag;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -37,6 +40,7 @@ import static j2html.TagCreator.*;
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
     private static final CoverageElement LINE_COVERAGE = CoverageElement.LINE;
     private static final CoverageElement BRANCH_COVERAGE = CoverageElement.CONDITIONAL;
+    private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -87,6 +91,24 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @Override
     public TableModel getTableModel(final String id) {
         return new CoverageTableModel(getNode(), getOwner().getRootDir());
+    }
+
+    private LinesChartModel createTrendChart(final String configuration) {
+        Optional<CoverageBuildAction> latestAction = getLatestAction();
+        if (latestAction.isPresent()) {
+            return latestAction.get().createProjectAction().createChartModel(configuration);
+        }
+        return new LinesChartModel();
+    }
+
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public String getTrendChart(final String configuration) {
+        return JACKSON_FACADE.toJson(createTrendChart(configuration));
+    }
+
+    private Optional<CoverageBuildAction> getLatestAction() {
+        return Optional.ofNullable(getOwner().getAction(CoverageBuildAction.class));
     }
 
     /**
