@@ -19,7 +19,7 @@ class CoverageLeafTest {
     void shouldCreateLeaf() {
         CoverageLeaf coverageLeaf = new CoverageLeaf(LINE, COVERED);
 
-        assertThat(coverageLeaf).hasElement(LINE).hasToString("[Line]: 100,00 (1/1)");
+        assertThat(coverageLeaf).hasElement(LINE).hasToString("[Line]: 100.00 (1/1)");
         assertThat(coverageLeaf.getCoverage(LINE)).isEqualTo(COVERED);
         assertThat(coverageLeaf.getCoverage(CoverageElement.REPORT)).isEqualTo(Coverage.NO_COVERAGE);
     }

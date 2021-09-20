@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts">
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
@@ -55,11 +55,22 @@
 
   </bs:page>
 
+  <c:chart-setup id="coverage-history"/>
+
   <script src="${rootURL}/plugin/code-coverage-api/js/charts.js"/>
 
   <script>
     const viewProxy = <st:bind value="${it}"/>;
     const coverageChartGenerator = new CoverageChartGenerator();
+
+    const openBuild = function (build) {
+        viewProxy.getUrlForBuild(build, window.location.href, function (buildUrl) {
+            if (buildUrl.responseJSON.startsWith('http')) {
+                window.location.assign(buildUrl.responseJSON);
+            }
+      });
+    };
+
     viewProxy.getOverview(function(t) {
         coverageChartGenerator.createOverview(t.responseObject(), 'coverage-overview');
 
@@ -69,12 +80,13 @@
 
         const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
         viewProxy.getTrendChart(configuration, function(t) {
-            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history');
+            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
         });
     });
     viewProxy.getCoverageTree(function(t) {
         coverageChartGenerator.createFilesTreeMap(t.responseObject(), 'coverage-details');
     });
   </script>
+
 
 </j:jelly>
