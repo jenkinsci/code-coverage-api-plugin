@@ -11,6 +11,14 @@ public class CoverageLeaf {
     private final CoverageElement element;
     private final Coverage coverage;
 
+    /**
+     * Creates a new leaf with the given coverage for the specified element.
+     *
+     * @param element
+     *         the element
+     * @param coverage
+     *         the coverage of the element
+     */
     public CoverageLeaf(final CoverageElement element, final Coverage coverage) {
         this.element = element;
         this.coverage = coverage;
@@ -20,8 +28,16 @@ public class CoverageLeaf {
         return element;
     }
 
-    public Coverage getCoverage(final CoverageElement coverageType) {
-        if (element.equals(coverageType)) {
+    /**
+     * Returns the coverage for the specified element.
+     *
+     * @param searchElement
+     *         the element to get the coverage for
+     *
+     * @return coverage ratio
+     */
+    public Coverage getCoverage(final CoverageElement searchElement) {
+        if (element.equals(searchElement)) {
             return coverage;
         }
         return Coverage.NO_COVERAGE;

@@ -101,7 +101,8 @@ public class CoverageNode {
     public SortedMap<CoverageElement, Double> getElementPercentages() {
         return getElements().stream()
                 .collect(Collectors.toMap(Function.identity(),
-                        searchElement -> getCoverage(searchElement).getCoveredPercentage(), (o1, o2) -> o1, TreeMap::new));
+                        searchElement -> getCoverage(searchElement).getCoveredPercentage(), (o1, o2) -> o1,
+                        TreeMap::new));
     }
 
     public String getName() {
@@ -224,6 +225,24 @@ public class CoverageNode {
     }
 
     /**
+     * Computes the coverage delta between this node and the specified reference node.
+     *
+     * @param reference
+     *         the reference node
+     *
+     * @return the delta coverage for each element
+     */
+    public SortedMap<CoverageElement, Double> computeDelta(final CoverageNode reference) {
+        SortedMap<CoverageElement, Double> deltaPercentages = new TreeMap<>();
+        SortedMap<CoverageElement, Double> elementPercentages = getElementPercentages();
+        SortedMap<CoverageElement, Double> referencePercentages = reference.getElementPercentages();
+        elementPercentages.forEach((key, value) -> {
+            deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0));
+        });
+        return deltaPercentages;
+    }
+
+    /**
      * Returns recursively all elements of the given type.
      *
      * @param searchElement
@@ -232,7 +251,8 @@ public class CoverageNode {
      * @return all elements of the given type
      */
     public List<CoverageNode> getAll(final CoverageElement searchElement) {
-        Ensure.that(searchElement.isBasicBlock()).isFalse("Basic blocks like '%s' are not stored as inner nodes of the tree", searchElement);
+        Ensure.that(searchElement.isBasicBlock())
+                .isFalse("Basic blocks like '%s' are not stored as inner nodes of the tree", searchElement);
 
         List<CoverageNode> childNodes = children.stream()
                 .map(child -> child.getAll(searchElement))
@@ -403,15 +423,5 @@ public class CoverageNode {
     @Override
     public String toString() {
         return String.format("[%s] %s", element, name);
-    }
-
-    public SortedMap<CoverageElement, Double> computeDelta(final CoverageNode reference) {
-        SortedMap<CoverageElement, Double> deltaPercentages = new TreeMap<>();
-        SortedMap<CoverageElement, Double> elementPercentages = getElementPercentages();
-        SortedMap<CoverageElement, Double> referencePercentages = reference.getElementPercentages();
-        elementPercentages.forEach((key, value) -> {
-            deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0));
-        });
-        return deltaPercentages;
     }
 }
