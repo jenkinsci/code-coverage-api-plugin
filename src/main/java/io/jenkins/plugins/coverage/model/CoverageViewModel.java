@@ -114,7 +114,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Returns the URL for same results of the selected build.
      *
-     * @param build
+     * @param buildDisplayName
      *         the selected build to open the new results for
      * @param currentUrl
      *         the absolute URL to this details view results
@@ -122,9 +122,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the URL to the results or an empty string if the results are not available
      */
     @JavaScriptMethod
-    public String getUrlForBuild(final String build, final String currentUrl) {
+    public String getUrlForBuild(final String buildDisplayName, final String currentUrl) {
         return new BuildResultNavigator().getSameUrlForOtherBuild(owner, currentUrl, "coverage",
-                    Integer.getInteger(build)).orElse(StringUtils.EMPTY);
+                buildDisplayName).orElse(StringUtils.EMPTY);
     }
 
     /**

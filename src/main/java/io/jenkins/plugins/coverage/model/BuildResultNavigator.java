@@ -9,6 +9,7 @@ import hudson.model.Run;
  *
  * @author Ullrich Hafner
  */
+// FIXME: move to plugin-util or echarts
 public class BuildResultNavigator {
     private static final String SLASH = "/";
 
@@ -17,22 +18,21 @@ public class BuildResultNavigator {
      *
      * @param currentBuild
      *         the current build that owns the view results
-     * @param viewUrl
+     * @param currentAbsoluteBrowserUrl
      *         the absolute URL to the view results
      * @param resultId
      *         the ID of the static analysis results
-     * @param selectedBuildNumber
+     * @param selectedBuildDisplayName
      *         the selected build to open the new results for
      *
      * @return the URL to the results if possible
      */
-    public Optional<String> getSameUrlForOtherBuild(final Run<?, ?> currentBuild, final String viewUrl,
-            final String resultId, final String selectedBuildNumber) {
-        try {
-            return getSameUrlForOtherBuild(currentBuild, viewUrl, resultId, Integer.parseInt(selectedBuildNumber));
-        }
-        catch (NumberFormatException exception) {
-            // ignore
+    public Optional<String> getSameUrlForOtherBuild(final Run<?, ?> currentBuild, final String currentAbsoluteBrowserUrl,
+            final String resultId, final String selectedBuildDisplayName) {
+        for (Run<?, ?> run = currentBuild.getParent().getLastBuild(); run != null; run = run.getPreviousBuild()) {
+            if (run.getDisplayName().equals(selectedBuildDisplayName)) {
+                return getSameUrlForOtherBuild(currentBuild, currentAbsoluteBrowserUrl, resultId, run);
+            }
         }
         return Optional.empty();
     }
@@ -46,20 +46,17 @@ public class BuildResultNavigator {
      *         the absolute URL to the view results
      * @param resultId
      *         the ID of the static analysis results
-     * @param selectedBuildNumber
+     * @param selectedBuild
      *         the selected build to open the new results for
      *
      * @return the URL to the results if possible
      */
-    public Optional<String> getSameUrlForOtherBuild(final Run<?, ?> currentBuild, final String viewUrl, final String resultId,
-            final int selectedBuildNumber) {
-        Run<?, ?> selectedBuild = currentBuild.getParent().getBuildByNumber(selectedBuildNumber);
-        if (selectedBuild != null) {
-            String match = SLASH + currentBuild.getNumber() + SLASH + resultId;
-            if (viewUrl.contains(match)) {
-                return Optional.of(viewUrl.replaceFirst(
-                        match + ".*", SLASH + selectedBuildNumber + SLASH + resultId));
-            }
+    public Optional<String> getSameUrlForOtherBuild(final Run<?, ?> currentBuild, final String viewUrl,
+            final String resultId, final Run<?, ?> selectedBuild) {
+        String match = SLASH + currentBuild.getNumber() + SLASH + resultId;
+        if (viewUrl.contains(match)) {
+            return Optional.of(viewUrl.replaceFirst(
+                    match + ".*", SLASH + selectedBuild.getNumber() + SLASH + resultId));
         }
         return Optional.empty();
     }

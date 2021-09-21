@@ -57,36 +57,11 @@
 
   <c:chart-setup id="coverage-history"/>
 
-  <script src="${rootURL}/plugin/code-coverage-api/js/charts.js"/>
 
   <script>
     const viewProxy = <st:bind value="${it}"/>;
-    const coverageChartGenerator = new CoverageChartGenerator();
-
-    const openBuild = function (build) {
-        viewProxy.getUrlForBuild(build, window.location.href, function (buildUrl) {
-            if (buildUrl.responseJSON.startsWith('http')) {
-                window.location.assign(buildUrl.responseJSON);
-            }
-      });
-    };
-
-    viewProxy.getOverview(function(t) {
-        coverageChartGenerator.createOverview(t.responseObject(), 'coverage-overview');
-
-        const trendDiv = document.getElementById('coverage-trend');
-        const overview = document.getElementById('coverage-overview')
-        trendDiv.style.height = overview.style.height;
-
-        const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
-        viewProxy.getTrendChart(configuration, function(t) {
-            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
-        });
-    });
-    viewProxy.getCoverageTree(function(t) {
-        coverageChartGenerator.createFilesTreeMap(t.responseObject(), 'coverage-details');
-    });
   </script>
 
+  <script type="text/javascript" src="${rootURL}/plugin/code-coverage-api/js/charts.js"/>
 
 </j:jelly>
