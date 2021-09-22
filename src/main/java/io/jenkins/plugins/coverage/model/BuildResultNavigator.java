@@ -30,7 +30,7 @@ public class BuildResultNavigator {
     public Optional<String> getSameUrlForOtherBuild(final Run<?, ?> currentBuild, final String currentAbsoluteBrowserUrl,
             final String resultId, final String selectedBuildDisplayName) {
         for (Run<?, ?> run = currentBuild.getParent().getLastBuild(); run != null; run = run.getPreviousBuild()) {
-            if (run.getDisplayName().equals(selectedBuildDisplayName)) {
+            if (selectedBuildDisplayName.equals(run.getDisplayName())) {
                 return getSameUrlForOtherBuild(currentBuild, currentAbsoluteBrowserUrl, resultId, run);
             }
         }

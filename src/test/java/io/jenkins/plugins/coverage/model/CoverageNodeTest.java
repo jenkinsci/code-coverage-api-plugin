@@ -1,10 +1,13 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
@@ -111,6 +114,53 @@ class CoverageNodeTest extends AbstractCoverageTest {
                         .hasParent()
                         .hasParentName(PROJECT_NAME)
         );
+    }
+
+    @Test
+    void shouldComputeDelta() {
+        CoverageNode tree = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
+
+        String checkStyleParser = "CheckStyleParser.java";
+        Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageElement.FILE, checkStyleParser);
+        assertThat(wrappedCheckStyle).isNotEmpty().hasValueSatisfying(
+                node -> assertThat(node).hasName(checkStyleParser)
+        );
+
+        CoverageNode checkStyle = wrappedCheckStyle.get();
+        assertThat(checkStyle.getElementPercentages())
+                .containsEntry(SOURCE_FILE, 1.0)
+                .containsEntry(CLASS_NAME, 1.0)
+                .containsEntry(METHOD, 1.0)
+                .extractingByKey(LINE).satisfies(
+                        p -> assertThat(p).isEqualTo(0.97, Offset.offset(0.01)));
+
+        String pmdParser = "PmdParser.java";
+        Optional<CoverageNode> wrappedPmd = tree.find(CoverageElement.FILE, pmdParser);
+        assertThat(wrappedPmd).isNotEmpty().hasValueSatisfying(
+                node -> assertThat(node).hasName(pmdParser)
+        );
+
+        CoverageNode pmd = wrappedPmd.get();
+        assertThat(pmd.getElementPercentages())
+                .containsEntry(SOURCE_FILE, 1.0)
+                .containsEntry(CLASS_NAME, 1.0)
+                .containsEntry(METHOD, 1.0)
+                .extractingByKey(LINE).satisfies(
+                        p -> assertThat(p).isEqualTo(0.91, Offset.offset(0.01)));
+
+        assertThat(checkStyle.computeDelta(pmd))
+                .containsEntry(SOURCE_FILE, 0.0)
+                .containsEntry(CLASS_NAME, 0.0)
+                .containsEntry(METHOD, 0.0)
+                .extractingByKey(LINE).satisfies(
+                        p -> assertThat(p).isEqualTo(0.06, Offset.offset(0.01)));
+
+        assertThat(pmd.computeDelta(checkStyle))
+                .containsEntry(SOURCE_FILE, 0.0)
+                .containsEntry(CLASS_NAME, 0.0)
+                .containsEntry(METHOD, 0.0)
+                .extractingByKey(LINE).satisfies(
+                        p -> assertThat(p).isEqualTo(-0.06, Offset.offset(0.01)));
     }
 
     @Test
