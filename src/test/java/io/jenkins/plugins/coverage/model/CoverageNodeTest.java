@@ -7,7 +7,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
@@ -25,32 +24,32 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         verifyCoverageMetrics(tree);
 
-        assertThat(tree.getAll(REPORT)).hasSize(1);
+        assertThat(tree.getAll(MODULE)).hasSize(1);
         assertThat(tree.getAll(PACKAGE)).hasSize(1);
-        List<CoverageNode> files = tree.getAll(SOURCE_FILE);
+        List<CoverageNode> files = tree.getAll(FILE);
         assertThat(files).hasSize(10);
-        assertThat(tree.getAll(CLASS_NAME)).hasSize(18);
+        assertThat(tree.getAll(CLASS)).hasSize(18);
         assertThat(tree.getAll(METHOD)).hasSize(102);
 
-        assertThat(tree).hasOnlyElements(REPORT, PACKAGE, SOURCE_FILE, CLASS_NAME, METHOD, LINE, BRANCH, INSTRUCTION)
-                .hasToString("[Report] " + PROJECT_NAME);
-        assertThat(tree.getElementDistribution()).containsExactly(
-                entry(REPORT, new Coverage(1, 0)),
+        assertThat(tree).hasOnlyMetrics(MODULE, PACKAGE, FILE, CLASS, METHOD, LINE, BRANCH, INSTRUCTION)
+                .hasToString("[Module] " + PROJECT_NAME);
+        assertThat(tree.getMetricsDistribution()).containsExactly(
+                entry(MODULE, new Coverage(1, 0)),
                 entry(PACKAGE, new Coverage(1, 0)),
-                entry(SOURCE_FILE, new Coverage(7, 3)),
-                entry(CLASS_NAME, new Coverage(15, 3)),
+                entry(FILE, new Coverage(7, 3)),
+                entry(CLASS, new Coverage(15, 3)),
                 entry(METHOD, new Coverage(97, 5)),
-                entry(INSTRUCTION, new Coverage(1260, 90)),
                 entry(LINE, new Coverage(294, 29)),
+                entry(INSTRUCTION, new Coverage(1260, 90)),
                 entry(BRANCH, new Coverage(109, 7)));
-        assertThat(tree.getElementPercentages()).containsExactly(
-                entry(REPORT, 1.0),
+        assertThat(tree.getMetricPercentages()).containsExactly(
+                entry(MODULE, 1.0),
                 entry(PACKAGE, 1.0),
-                entry(SOURCE_FILE, 0.7),
-                entry(CLASS_NAME, 15.0 / 18),
+                entry(FILE, 0.7),
+                entry(CLASS, 15.0 / 18),
                 entry(METHOD, 97.0 / 102),
-                entry(INSTRUCTION, 1260.0 / 1350),
                 entry(LINE, 294.0 / 323),
+                entry(INSTRUCTION, 1260.0 / 1350),
                 entry(BRANCH, 109.0 / 116));
 
         assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
@@ -83,18 +82,18 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .hasTotal(1260 + 90);
         assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93.33%");
 
-        assertThat(tree.getCoverage(REPORT)).isSet()
+        assertThat(tree.getCoverage(MODULE)).isSet()
                 .hasCovered(1)
                 .hasCoveredPercentageCloseTo(1, PRECISION)
                 .hasMissed(0)
                 .hasMissedPercentageCloseTo(0, PRECISION)
                 .hasTotal(1);
-        assertThat(tree.printCoverageFor(REPORT)).isEqualTo("100.00%");
+        assertThat(tree.printCoverageFor(MODULE)).isEqualTo("100.00%");
 
         assertThat(tree).hasName(PROJECT_NAME)
                 .doesNotHaveParent()
                 .isRoot()
-                .hasElement(REPORT).hasParentName(CoverageNode.ROOT);
+                .hasMetric(MODULE).hasParentName(CoverageNode.ROOT);
     }
 
     @Test
@@ -106,7 +105,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         verifyCoverageMetrics(tree);
 
         assertThat(tree.getAll(PACKAGE)).hasSize(4);
-        assertThat(tree.getElementDistribution()).contains(
+        assertThat(tree.getMetricsDistribution()).contains(
                 entry(PACKAGE, new Coverage(4, 0)));
 
         assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
@@ -121,43 +120,43 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode tree = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
 
         String checkStyleParser = "CheckStyleParser.java";
-        Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageElement.FILE, checkStyleParser);
+        Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageMetric.FILE, checkStyleParser);
         assertThat(wrappedCheckStyle).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(checkStyleParser)
         );
 
         CoverageNode checkStyle = wrappedCheckStyle.get();
-        assertThat(checkStyle.getElementPercentages())
-                .containsEntry(SOURCE_FILE, 1.0)
-                .containsEntry(CLASS_NAME, 1.0)
+        assertThat(checkStyle.getMetricPercentages())
+                .containsEntry(FILE, 1.0)
+                .containsEntry(CLASS, 1.0)
                 .containsEntry(METHOD, 1.0)
                 .extractingByKey(LINE).satisfies(
                         p -> assertThat(p).isEqualTo(0.97, Offset.offset(0.01)));
 
         String pmdParser = "PmdParser.java";
-        Optional<CoverageNode> wrappedPmd = tree.find(CoverageElement.FILE, pmdParser);
+        Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParser);
         assertThat(wrappedPmd).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(pmdParser)
         );
 
         CoverageNode pmd = wrappedPmd.get();
-        assertThat(pmd.getElementPercentages())
-                .containsEntry(SOURCE_FILE, 1.0)
-                .containsEntry(CLASS_NAME, 1.0)
+        assertThat(pmd.getMetricPercentages())
+                .containsEntry(FILE, 1.0)
+                .containsEntry(CLASS, 1.0)
                 .containsEntry(METHOD, 1.0)
                 .extractingByKey(LINE).satisfies(
                         p -> assertThat(p).isEqualTo(0.91, Offset.offset(0.01)));
 
         assertThat(checkStyle.computeDelta(pmd))
-                .containsEntry(SOURCE_FILE, 0.0)
-                .containsEntry(CLASS_NAME, 0.0)
+                .containsEntry(FILE, 0.0)
+                .containsEntry(CLASS, 0.0)
                 .containsEntry(METHOD, 0.0)
                 .extractingByKey(LINE).satisfies(
                         p -> assertThat(p).isEqualTo(0.06, Offset.offset(0.01)));
 
         assertThat(pmd.computeDelta(checkStyle))
-                .containsEntry(SOURCE_FILE, 0.0)
-                .containsEntry(CLASS_NAME, 0.0)
+                .containsEntry(FILE, 0.0)
+                .containsEntry(CLASS, 0.0)
                 .containsEntry(METHOD, 0.0)
                 .extractingByKey(LINE).satisfies(
                         p -> assertThat(p).isEqualTo(-0.06, Offset.offset(0.01)));
@@ -200,7 +199,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldFindImportantElements() {
         CoverageNode tree = readExampleReport();
 
-        assertThat(tree.getImportantElements()).containsExactly(LINE, BRANCH);
+        assertThat(tree.getImportantMetrics()).containsExactly(LINE, BRANCH);
     }
 
     @Test
@@ -209,7 +208,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         tree.splitPackages();
 
         String fileName = "Ensure.java";
-        assertThat(tree.findByHashCode(SOURCE_FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
+        assertThat(tree.findByHashCode(FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(fileName).isNotRoot().hasUncoveredLines(
                             78, 138, 139, 153, 154, 240, 245, 303, 340, 390, 395, 444, 476,
@@ -217,10 +216,10 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 }
         );
         assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
-        assertThat(tree.findByHashCode(SOURCE_FILE, "not-found".hashCode())).isEmpty();
+        assertThat(tree.findByHashCode(FILE, "not-found".hashCode())).isEmpty();
 
         String noBranchCoverage = "NoSuchElementException.java";
-        assertThat(tree.find(SOURCE_FILE, noBranchCoverage)).isNotEmpty().hasValueSatisfying(
+        assertThat(tree.find(FILE, noBranchCoverage)).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(noBranchCoverage).isNotRoot();
                     assertThat(node.getCoverage(BRANCH)).isNotSet();
@@ -235,7 +234,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode tree = readExampleReport();
 
         String fileName = "Ensure.java";
-        assertThat(tree.find(SOURCE_FILE, fileName)).isNotEmpty().hasValueSatisfying(
+        assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(fileName)
                             .hasParentName("edu.hm.hafner.util")
@@ -245,7 +244,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         );
 
         tree.splitPackages();
-        assertThat(tree.find(SOURCE_FILE, fileName)).isNotEmpty().hasValueSatisfying(
+        assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(fileName)
                             .hasParentName("edu.hm.hafner.util")

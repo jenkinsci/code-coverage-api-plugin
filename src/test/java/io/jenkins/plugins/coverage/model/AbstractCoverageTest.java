@@ -9,9 +9,7 @@ import edu.hm.hafner.util.ResourceTest;
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
-import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
@@ -22,14 +20,14 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  */
 public class AbstractCoverageTest extends ResourceTest {
     static final double PRECISION = 0.01;
-    static final CoverageElement REPORT = CoverageElement.REPORT;
-    static final CoverageElement PACKAGE = JavaCoverageReportAdapterDescriptor.PACKAGE;
-    static final CoverageElement SOURCE_FILE = CoverageElement.FILE;
-    static final CoverageElement CLASS_NAME = JavaCoverageReportAdapterDescriptor.CLASS;
-    static final CoverageElement METHOD = JavaCoverageReportAdapterDescriptor.METHOD;
-    static final CoverageElement LINE = CoverageElement.LINE;
-    static final CoverageElement INSTRUCTION = JacocoReportAdapterDescriptor.INSTRUCTION;
-    static final CoverageElement BRANCH = CoverageElement.CONDITIONAL;
+    static final CoverageMetric MODULE = CoverageMetric.MODULE;
+    static final CoverageMetric PACKAGE = CoverageMetric.PACKAGE;
+    static final CoverageMetric FILE = CoverageMetric.FILE;
+    static final CoverageMetric CLASS = CoverageMetric.CLASS;
+    static final CoverageMetric METHOD = CoverageMetric.METHOD;
+    static final CoverageMetric LINE = CoverageMetric.LINE;
+    static final CoverageMetric INSTRUCTION = CoverageMetric.INSTRUCTION;
+    static final CoverageMetric BRANCH = CoverageMetric.BRANCH;
 
     @BeforeAll
     static void beforeAll() {
@@ -38,7 +36,7 @@ public class AbstractCoverageTest extends ResourceTest {
 
     CoverageResult readResult(final String fileName) {
         try {
-            JacocoReportAdapter parser = new JacocoReportAdapter("Hello");
+            JacocoReportAdapter parser = new JacocoReportAdapter("unused");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
             CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
             result.stripGroup();

@@ -23,14 +23,14 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         assertThat(model.getDisplayName()).contains("Java coding style: jacoco-codingstyle.xml");
 
         CoverageOverview overview = model.getOverview();
-        assertThatJson(overview).node("elements").isArray().containsExactly(
-                "Report", "Package", "File", "Class", "Method", "Instruction", "Line", "Conditional"
+        assertThatJson(overview).node("metrics").isArray().containsExactly(
+                "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
         );
         assertThatJson(overview).node("covered").isArray().containsExactly(
-                1, 1, 7, 15, 97, 1260, 294, 109
+                1, 7, 15, 97, 294, 1260, 109
         );
         assertThatJson(overview).node("missed").isArray().containsExactly(
-                0, 0, 3, 3, 5, 90, 29, 7
+                0, 3, 3, 5, 29, 90, 7
         );
     }
 }

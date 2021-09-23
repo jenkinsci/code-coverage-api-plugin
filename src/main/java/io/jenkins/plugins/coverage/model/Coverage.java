@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.Serializable;
+
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 
 /**
@@ -8,7 +10,9 @@ import io.jenkins.plugins.coverage.targets.CoverageElement;
  *
  * @author Ullrich Hafner
  */
-public final class Coverage {
+public final class Coverage implements Serializable {
+    private static final long serialVersionUID = -3802318446471137305L;
+
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
@@ -97,6 +101,14 @@ public final class Coverage {
         return COVERAGE_NOT_AVAILABLE;
     }
 
+    /**
+     * Add the coverage details from the specified instance to the coverage details of this instance.
+     *
+     * @param additional
+     *         the additional coverage details
+     *
+     * @return the sum of this and the additional coverage
+     */
     public Coverage add(final Coverage additional) {
         return new Coverage(covered + additional.getCovered(),
                 missed + additional.getMissed());

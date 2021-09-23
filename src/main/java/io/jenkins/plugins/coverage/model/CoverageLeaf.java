@@ -1,43 +1,45 @@
 package io.jenkins.plugins.coverage.model;
 
-import io.jenkins.plugins.coverage.targets.CoverageElement;
+import java.io.Serializable;
 
 /**
  * A leaf in the coverage hierarchy. A leaf is a non-divisible coverage metric like line or branch coverage.
  *
  * @author Ullrich Hafner
  */
-public class CoverageLeaf {
-    private final CoverageElement element;
+public final class CoverageLeaf implements Serializable {
+    private static final long serialVersionUID = -1062406664372222691L;
+
+    private final CoverageMetric metric;
     private final Coverage coverage;
 
     /**
-     * Creates a new leaf with the given coverage for the specified element.
+     * Creates a new leaf with the given coverage for the specified metric.
      *
-     * @param element
-     *         the element
+     * @param metric
+     *         the coverage metric
      * @param coverage
      *         the coverage of the element
      */
-    public CoverageLeaf(final CoverageElement element, final Coverage coverage) {
-        this.element = element;
+    public CoverageLeaf(final CoverageMetric metric, final Coverage coverage) {
+        this.metric = metric;
         this.coverage = coverage;
     }
 
-    public CoverageElement getElement() {
-        return element;
+    public CoverageMetric getMetric() {
+        return metric;
     }
 
     /**
-     * Returns the coverage for the specified element.
+     * Returns the coverage for the specified metric.
      *
-     * @param searchElement
-     *         the element to get the coverage for
+     * @param searchMetric
+     *         the metric to get the coverage for
      *
      * @return coverage ratio
      */
-    public Coverage getCoverage(final CoverageElement searchElement) {
-        if (element.equals(searchElement)) {
+    public Coverage getCoverage(final CoverageMetric searchMetric) {
+        if (metric.equals(searchMetric)) {
             return coverage;
         }
         return Coverage.NO_COVERAGE;
@@ -45,6 +47,30 @@ public class CoverageLeaf {
 
     @Override
     public String toString() {
-        return String.format("[%s]: %s", element, coverage);
+        return String.format("[%s]: %s", metric, coverage);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        CoverageLeaf that = (CoverageLeaf) o;
+
+        if (!metric.equals(that.metric)) {
+            return false;
+        }
+        return coverage.equals(that.coverage);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = metric.hashCode();
+        result = 31 * result + coverage.hashCode();
+        return result;
     }
 }

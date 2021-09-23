@@ -45,6 +45,7 @@ import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -164,7 +165,7 @@ public class CoverageProcessor {
             Run<?, ?> referenceBuild = possibleReferenceBuild.get();
             CoverageBuildAction previousAction = referenceBuild.getAction(CoverageBuildAction.class);
             if (previousAction != null) {
-                SortedMap<CoverageElement, Double> delta = coverageNode.computeDelta(previousAction.getResult());
+                SortedMap<CoverageMetric, Double> delta = coverageNode.computeDelta(previousAction.getResult());
                 return new CoverageBuildAction(this.run, coverageNode, referenceBuild.getExternalizableId(), delta);
             }
         }

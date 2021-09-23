@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,9 +9,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,22 +20,21 @@ import java.util.stream.Stream;
 import edu.hm.hafner.util.Ensure;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
-import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-
 /**
  * A hierarchical decomposition of coverage results.
  *
  * @author Ullrich Hafner
  */
-public class CoverageNode {
+public final class CoverageNode implements Serializable {
+    private static final long serialVersionUID = -6608885640271135273L;
+
     private static final Coverage COVERED_NODE = new Coverage(1, 0);
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
     private static final int[] EMPTY_ARRAY = new int[0];
 
     static final String ROOT = "^";
 
-    private final CoverageElement element;
+    private final CoverageMetric metric;
     private final String name;
     private final List<CoverageNode> children = new ArrayList<>();
     private final List<CoverageLeaf> leaves = new ArrayList<>();
@@ -44,64 +45,69 @@ public class CoverageNode {
     /**
      * Creates a new coverage item node with the given name.
      *
-     * @param element
-     *         the type of the coverage element
+     * @param metric
+     *         the coverage metric this node belongs to
      * @param name
      *         the human-readable name of the node
      */
-    public CoverageNode(final CoverageElement element, final String name) {
-        this.element = element;
+    public CoverageNode(final CoverageMetric metric, final String name) {
+        this.metric = metric;
         this.name = name;
     }
 
     /**
-     * Returns the type if the coverage element for this node.
+     * Returns the type if the coverage metric for this node.
      *
      * @return the element type
      */
-    public CoverageElement getElement() {
-        return element;
+    public CoverageMetric getMetric() {
+        return metric;
     }
 
     /**
-     * Returns the available coverage elements for the whole tree starting with this node.
+     * Returns the available coverage metrics for the whole tree starting with this node.
      *
      * @return the elements in this tree
      */
-    public Set<CoverageElement> getElements() {
-        Set<CoverageElement> elements = children.stream()
-                .map(CoverageNode::getElements)
+    public SortedSet<CoverageMetric> getMetrics() {
+        SortedSet<CoverageMetric> elements = children.stream()
+                .map(CoverageNode::getMetrics)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
 
-        elements.add(getElement());
-        leaves.stream().map(CoverageLeaf::getElement).forEach(elements::add);
+        elements.add(getMetric());
+        leaves.stream().map(CoverageLeaf::getMetric).forEach(elements::add);
 
         return elements;
     }
 
     /**
-     * Returns the most important coverage elements.
+     * Returns the most important coverage metrics.
      *
-     * @return most important coverage elements
+     * @return most important coverage metrics
      */
-    public Collection<CoverageElement> getImportantElements() {
-        List<CoverageElement> importantElements = new ArrayList<>();
-        importantElements.add(CoverageElement.LINE);
-        importantElements.add(CoverageElement.CONDITIONAL);
-        importantElements.retainAll(getElements());
+    public Collection<CoverageMetric> getImportantMetrics() {
+        List<CoverageMetric> importantElements = new ArrayList<>();
+        importantElements.add(CoverageMetric.LINE);
+        importantElements.add(CoverageMetric.BRANCH);
+        importantElements.retainAll(getMetrics());
         return importantElements;
     }
 
-    public SortedMap<CoverageElement, Coverage> getElementDistribution() {
-        return getElements().stream()
+    /**
+     * Returns a mapping of metric to coverage. The root of the tree will be skipped.
+     *
+     * @return a mapping of metric to coverage.
+     */
+    public SortedMap<CoverageMetric, Coverage> getMetricsDistribution() {
+        return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
     }
 
-    public SortedMap<CoverageElement, Double> getElementPercentages() {
-        return getElements().stream()
+    public SortedMap<CoverageMetric, Double> getMetricPercentages() {
+        return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(),
-                        searchElement -> getCoverage(searchElement).getCoveredPercentage(), (o1, o2) -> o1,
+                        searchMetric -> getCoverage(searchMetric).getCoveredPercentage(), (o1, o2) -> o1,
                         TreeMap::new));
     }
 
@@ -169,10 +175,10 @@ public class CoverageNode {
         if (parent == null) {
             return ROOT;
         }
-        CoverageElement type = parent.getElement();
+        CoverageMetric type = parent.getMetric();
 
         List<String> parentsOfSameType = new ArrayList<>();
-        for (CoverageNode node = parent; node != null && node.getElement().equals(type); node = node.parent) {
+        for (CoverageNode node = parent; node != null && node.getMetric().equals(type); node = node.parent) {
             parentsOfSameType.add(0, node.getName());
         }
         return String.join(".", parentsOfSameType);
@@ -181,39 +187,39 @@ public class CoverageNode {
     /**
      * Prints the coverage for the specified element.
      *
-     * @param searchElement
+     * @param searchMetric
      *         the element to print the coverage for
      *
      * @return coverage ratio in a human-readable format
      */
-    public String printCoverageFor(final CoverageElement searchElement) {
-        return getCoverage(searchElement).printCoveredPercentage();
+    public String printCoverageFor(final CoverageMetric searchMetric) {
+        return getCoverage(searchMetric).printCoveredPercentage();
     }
 
     /**
-     * Returns the coverage for the specified element.
+     * Returns the coverage for the specified metric.
      *
-     * @param searchElement
+     * @param searchMetric
      *         the element to get the coverage for
      *
      * @return coverage ratio
      */
-    public Coverage getCoverage(final CoverageElement searchElement) {
-        if (searchElement.isBasicBlock()) {
+    public Coverage getCoverage(final CoverageMetric searchMetric) {
+        if (searchMetric.isLeaf()) {
             Coverage childrenCoverage = children.stream()
-                    .map(node -> node.getCoverage(searchElement))
+                    .map(node -> node.getCoverage(searchMetric))
                     .reduce(Coverage.NO_COVERAGE, Coverage::add);
             return leaves.stream()
-                    .map(node -> node.getCoverage(searchElement))
+                    .map(node -> node.getCoverage(searchMetric))
                     .reduce(childrenCoverage, Coverage::add);
         }
         else {
             Coverage childrenCoverage = children.stream()
-                    .map(node -> node.getCoverage(searchElement))
+                    .map(node -> node.getCoverage(searchMetric))
                     .reduce(Coverage.NO_COVERAGE, Coverage::add);
 
-            if (element.equals(searchElement)) {
-                if (getCoverage(CoverageElement.LINE).getCovered() > 0) {
+            if (metric.equals(searchMetric)) {
+                if (getCoverage(CoverageMetric.LINE).getCovered() > 0) {
                     return childrenCoverage.add(COVERED_NODE);
                 }
                 else {
@@ -230,107 +236,107 @@ public class CoverageNode {
      * @param reference
      *         the reference node
      *
-     * @return the delta coverage for each element
+     * @return the delta coverage for each available metric
      */
-    public SortedMap<CoverageElement, Double> computeDelta(final CoverageNode reference) {
-        SortedMap<CoverageElement, Double> deltaPercentages = new TreeMap<>();
-        SortedMap<CoverageElement, Double> elementPercentages = getElementPercentages();
-        SortedMap<CoverageElement, Double> referencePercentages = reference.getElementPercentages();
-        elementPercentages.forEach((key, value) -> {
+    public SortedMap<CoverageMetric, Double> computeDelta(final CoverageNode reference) {
+        SortedMap<CoverageMetric, Double> deltaPercentages = new TreeMap<>();
+        SortedMap<CoverageMetric, Double> metricPercentages = getMetricPercentages();
+        SortedMap<CoverageMetric, Double> referencePercentages = reference.getMetricPercentages();
+        metricPercentages.forEach((key, value) -> {
             deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0));
         });
         return deltaPercentages;
     }
 
     /**
-     * Returns recursively all elements of the given type.
+     * Returns recursively all nodes for the specified metric type.
      *
-     * @param searchElement
-     *         the element type to look for
+     * @param searchMetric
+     *         the metric to look for
      *
-     * @return all elements of the given type
+     * @return all nodes for the given metric
      */
-    public List<CoverageNode> getAll(final CoverageElement searchElement) {
-        Ensure.that(searchElement.isBasicBlock())
-                .isFalse("Basic blocks like '%s' are not stored as inner nodes of the tree", searchElement);
+    public List<CoverageNode> getAll(final CoverageMetric searchMetric) {
+        Ensure.that(searchMetric.isLeaf())
+                .isFalse("Leaves like '%s' are not stored as inner nodes of the tree", searchMetric);
 
         List<CoverageNode> childNodes = children.stream()
-                .map(child -> child.getAll(searchElement))
+                .map(child -> child.getAll(searchMetric))
                 .flatMap(List::stream).collect(Collectors.toList());
-        if (element.equals(searchElement)) {
+        if (metric.equals(searchMetric)) {
             childNodes.add(this);
         }
         return childNodes;
     }
 
     /**
-     * Finds the coverage element with the given name starting from this node.
+     * Finds the coverage metric with the given name starting from this node.
      *
-     * @param searchElement
-     *         the coverage element to search for
+     * @param searchMetric
+     *         the coverage metric to search for
      * @param searchName
      *         the name of the node
      *
      * @return the result if found
      */
-    public Optional<CoverageNode> find(final CoverageElement searchElement, final String searchName) {
-        if (matches(searchElement, searchName)) {
+    public Optional<CoverageNode> find(final CoverageMetric searchMetric, final String searchName) {
+        if (matches(searchMetric, searchName)) {
             return Optional.of(this);
         }
         return children
                 .stream()
-                .map(child -> child.find(searchElement, searchName))
+                .map(child -> child.find(searchMetric, searchName))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
     }
 
     /**
-     * Finds the coverage element with the given hash code starting from this node.
+     * Finds the coverage metric with the given hash code starting from this node.
      *
-     * @param searchElement
-     *         the coverage element to search for
+     * @param searchMetric
+     *         the coverage metric to search for
      * @param searchNameHashCode
      *         the hash code of the node name
      *
      * @return the result if found
      */
-    public Optional<CoverageNode> findByHashCode(final CoverageElement searchElement, final int searchNameHashCode) {
-        if (matches(searchElement, searchNameHashCode)) {
+    public Optional<CoverageNode> findByHashCode(final CoverageMetric searchMetric, final int searchNameHashCode) {
+        if (matches(searchMetric, searchNameHashCode)) {
             return Optional.of(this);
         }
         return children
                 .stream()
-                .map(child -> child.findByHashCode(searchElement, searchNameHashCode))
+                .map(child -> child.findByHashCode(searchMetric, searchNameHashCode))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
     }
 
     /**
-     * Returns whether this node matches the specified coverage element and name.
+     * Returns whether this node matches the specified coverage metric and name.
      *
-     * @param searchElement
-     *         the coverage element to search for
+     * @param searchMetric
+     *         the coverage metric to search for
      * @param searchName
      *         the name of the node
      *
      * @return the result if found
      */
-    public boolean matches(final CoverageElement searchElement, final String searchName) {
-        return element.equals(searchElement) && name.equals(searchName);
+    public boolean matches(final CoverageMetric searchMetric, final String searchName) {
+        return metric.equals(searchMetric) && name.equals(searchName);
     }
 
     /**
-     * Returns whether this node matches the specified coverage element and name.
+     * Returns whether this node matches the specified coverage metric and name.
      *
-     * @param searchElement
-     *         the coverage element to search for
+     * @param searchMetric
+     *         the coverage metric to search for
      * @param searchNameHashCode
      *         the hash code of the node name
      *
      * @return the result if found
      */
-    public boolean matches(final CoverageElement searchElement, final int searchNameHashCode) {
-        if (!element.equals(searchElement)) {
+    public boolean matches(final CoverageMetric searchMetric, final int searchNameHashCode) {
+        if (!metric.equals(searchMetric)) {
             return false;
         }
         return name.hashCode() == searchNameHashCode;
@@ -340,7 +346,7 @@ public class CoverageNode {
      * Splits flat packages into a package hierarchy. Changes the internal tree structure in place.
      */
     public void splitPackages() {
-        if (CoverageElement.REPORT.equals(element)) {
+        if (CoverageMetric.MODULE.equals(metric)) {
             List<CoverageNode> allPackages = new ArrayList<>(children);
             children.clear();
             for (CoverageNode aPackage : allPackages) {
@@ -368,11 +374,12 @@ public class CoverageNode {
             }
 
         }
-        CoverageNode newNode = new CoverageNode(JavaCoverageReportAdapterDescriptor.PACKAGE, childName);
+        CoverageNode newNode = new CoverageNode(CoverageMetric.PACKAGE, childName);
         add(newNode);
         return newNode;
     }
 
+    // TODO: extract the UI part to a different class
     public TreeChartNode toChartTree() {
         TreeChartNode root = toChartTree(this);
         for (TreeChartNode child : root.getChildren()) {
@@ -383,12 +390,12 @@ public class CoverageNode {
     }
 
     private TreeChartNode toChartTree(final CoverageNode node) {
-        Coverage coverage = node.getCoverage(CoverageElement.LINE);
+        Coverage coverage = node.getCoverage(CoverageMetric.LINE);
 
         TreeChartNode treeNode = new TreeChartNode(node.getName(),
                 assignColor(coverage.getCoveredPercentage() * 100),
                 coverage.getTotal(), coverage.getCovered());
-        if (node.getElement().equals(CoverageElement.FILE)) {
+        if (node.getMetric().equals(CoverageMetric.FILE)) {
             return treeNode;
         }
 
@@ -422,6 +429,42 @@ public class CoverageNode {
 
     @Override
     public String toString() {
-        return String.format("[%s] %s", element, name);
+        return String.format("[%s] %s", metric, name);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        CoverageNode that = (CoverageNode) o;
+
+        if (!metric.equals(that.metric)) {
+            return false;
+        }
+        if (!name.equals(that.name)) {
+            return false;
+        }
+        if (!children.equals(that.children)) {
+            return false;
+        }
+        if (!leaves.equals(that.leaves)) {
+            return false;
+        }
+        return Arrays.equals(uncoveredLines, that.uncoveredLines);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = metric.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + children.hashCode();
+        result = 31 * result + leaves.hashCode();
+        result = 31 * result + Arrays.hashCode(uncoveredLines);
+        return result;
     }
 }

@@ -22,7 +22,6 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -38,9 +37,10 @@ import static j2html.TagCreator.*;
  * @author Ullrich Hafner
  */
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
-    private static final CoverageElement LINE_COVERAGE = CoverageElement.LINE;
-    private static final CoverageElement BRANCH_COVERAGE = CoverageElement.CONDITIONAL;
+    private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
+    private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
+    private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -88,6 +88,15 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return getNode().toChartTree();
     }
 
+    /**
+     * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
+     * is shown in the view, so the ID is not used.
+     *
+     * @param id
+     *         ID of the table model
+     *
+     * @return the table model with the specified ID
+     */
     @Override
     public TableModel getTableModel(final String id) {
         return new CoverageTableModel(getNode(), getOwner().getRootDir());
@@ -101,6 +110,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new LinesChartModel();
     }
 
+    /**
+     * Returns the trend chart configuration.
+     *
+     * @param configuration
+     *         JSON object to configure optional properties for the trend chart
+     *
+     * @return the trend chart model (converted to a JSON string)
+     */
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public String getTrendChart(final String configuration) {
@@ -112,9 +129,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Returns the URL for same results of the selected build.
+     * Returns the URL for coverage results of the selected build. Based on the current URL, the new URL will be
+     * composed by replacing the current build number with the selected build number.
      *
-     * @param buildDisplayName
+     * @param selectedBuildDisplayName
      *         the selected build to open the new results for
      * @param currentUrl
      *         the absolute URL to this details view results
@@ -122,9 +140,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the URL to the results or an empty string if the results are not available
      */
     @JavaScriptMethod
-    public String getUrlForBuild(final String buildDisplayName, final String currentUrl) {
-        return new BuildResultNavigator().getSameUrlForOtherBuild(owner, currentUrl, "coverage",
-                buildDisplayName).orElse(StringUtils.EMPTY);
+    public String getUrlForBuild(final String selectedBuildDisplayName, final String currentUrl) {
+        return NAVIGATOR.getSameUrlForOtherBuild(owner,
+                        currentUrl, CoverageBuildAction.DETAILS_URL, selectedBuildDisplayName)
+                .orElse(StringUtils.EMPTY);
     }
 
     /**
@@ -137,14 +156,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @param response
      *         Stapler response
      *
-     * @return the new sub page
+     * @return the new sub-page
      */
     @SuppressWarnings("unused") // Called by jelly view
     public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
-                Optional<CoverageNode> targetResult = getNode().findByHashCode(
-                        CoverageElement.FILE, Integer.parseInt(link));
+                Optional<CoverageNode> targetResult = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
                 if (targetResult.isPresent()) {
                     return new SourceViewModel(getOwner(), targetResult.get());
                 }
@@ -181,8 +199,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage
-     * metrics.
+     * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage metrics.
      */
     public static class CoverageOverview {
         private final CoverageNode coverage;
@@ -191,9 +208,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             this.coverage = coverage;
         }
 
-        public List<String> getElements() {
-            return getElementDistribution().keySet().stream()
-                    .map(CoverageElement::getName)
+        public List<String> getMetrics() {
+            return getMetricsDistribution().keySet().stream()
+                    .skip(1) // ignore the root of the tree as the coverage is always 1 of 1
+                    .map(CoverageMetric::getName)
                     .collect(Collectors.toList());
         }
 
@@ -214,11 +232,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         private Stream<Coverage> streamCoverages() {
-            return getElementDistribution().values().stream();
+            return getMetricsDistribution().values().stream().skip(1);
         }
 
-        private SortedMap<CoverageElement, Coverage> getElementDistribution() {
-            return coverage.getElementDistribution();
+        private SortedMap<CoverageMetric, Coverage> getMetricsDistribution() {
+            return coverage.getMetricsDistribution();
         }
     }
 
@@ -255,7 +273,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         @Override
         public List<Object> getRows() {
-            return root.getAll(CoverageElement.FILE).stream()
+            return root.getAll(CoverageMetric.FILE).stream()
                     .map((CoverageNode file) -> new CoverageRow(file, buildFolder)).collect(Collectors.toList());
         }
     }
@@ -315,7 +333,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createDetailedColumnFor(BRANCH_COVERAGE);
         }
 
-        private DetailedColumnDefinition createDetailedColumnFor(final CoverageElement element) {
+        private DetailedColumnDefinition createDetailedColumnFor(final CoverageMetric element) {
             Coverage coverage = root.getCoverage(element);
 
             return new DetailedColumnDefinition(getBarChartFor(coverage),

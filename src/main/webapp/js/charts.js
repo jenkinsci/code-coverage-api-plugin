@@ -12,13 +12,17 @@
         });
     };
 
-    function createOverview(overview, id) {
-            const summaryChartDiv = document.getElementById(id);
-            summaryChartDiv.style.height = overview.elements.length * 31 + 150 + "px";
-            const summaryChart = echarts.init(summaryChartDiv);
-            summaryChartDiv.echart = summaryChart;
+    function getTextColor() {
+        return getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
+    }
 
-            const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
+    function createOverview(overview, id) {
+            const summaryChartDiv = $('#' + id);
+            summaryChartDiv.height(overview.metrics.length * 31 + 150 + 'px');
+            const summaryChart = echarts.init(summaryChartDiv[0]);
+            summaryChartDiv[0].echart = summaryChart;
+
+            const textColor = getTextColor();
 
             const summaryOption = {
                 tooltip: {
@@ -38,9 +42,11 @@
                             }
                             else if (obj.length === 1) {
                                 return '<b>' + obj[0].name + '</b><br/>'
-                                    + obj[0].seriesName + ': ' + (obj[0].seriesName === 'Covered' ? overview.covered[obj[0].dataIndex] : overview.missed[obj[0].dataIndex]);
+                                    + obj[0].seriesName + ': '
+                                    + (obj[0].seriesName === 'Covered' ?
+                                        overview.covered[obj[0].dataIndex]
+                                        : overview.missed[obj[0].dataIndex]);
                             }
-
                         }
                     }
                 },
@@ -70,7 +76,7 @@
                 },
                 yAxis: [{
                     type: 'category',
-                    data: overview.elements,
+                    data: overview.metrics,
                     axisLine: {
                         show: false
                     },
@@ -223,11 +229,11 @@
                 ];
             }
 
-            const treeChartDiv = document.getElementById(id);
-            const treeChart = echarts.init(treeChartDiv);
-            treeChartDiv.echart = treeChart;
+            const treeChartDiv = $('#' + id);
+            const treeChart = echarts.init(treeChartDiv[0]);
+            treeChartDiv[0].echart = treeChart;
 
-            const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
+            const textColor = getTextColor();
             const formatUtil = echarts.format;
 
             const option = {

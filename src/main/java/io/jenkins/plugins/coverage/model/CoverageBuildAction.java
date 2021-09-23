@@ -4,6 +4,12 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -15,7 +21,6 @@ import hudson.model.Run;
 import hudson.util.XStream2;
 
 import io.jenkins.plugins.coverage.Messages;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
 import io.jenkins.plugins.util.JenkinsFacade;
@@ -33,6 +38,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage-24x24.png";
     private static final String NO_REFERENCE_BUILD = "-";
 
+    /** Relative URL to the details of the code coverage results. */
+    static final String DETAILS_URL = "coverage";
+
     private HealthReport healthReport;
     private String failMessage;
 
@@ -40,7 +48,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final Coverage branchCoverage;
 
     private final String referenceBuildId;
-    private final SortedMap<CoverageElement, Double> delta;
+    private final SortedMap<CoverageMetric, Double> delta;
 
     /**
      * Creates a new instance of {@link CoverageBuildAction}.
@@ -67,18 +75,18 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the ID of the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageElement, Double> delta) {
+            final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta) {
         this(owner, result, referenceBuildId, delta, true);
     }
 
     @VisibleForTesting
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageElement, Double> delta,
+            final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
-        lineCoverage = result.getCoverage(CoverageElement.LINE);
-        branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL);
+        lineCoverage = result.getCoverage(CoverageMetric.LINE);
+        branchCoverage = result.getCoverage(CoverageMetric.BRANCH);
 
         this.delta = delta;
         this.referenceBuildId = referenceBuildId;
@@ -103,16 +111,16 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return referenceBuildId;
     }
 
-    public SortedMap<CoverageElement, Double> getDelta() {
+    public SortedMap<CoverageMetric, Double> getDelta() {
         return delta;
     }
 
-    public boolean hasDelta(final CoverageElement element) {
+    public boolean hasDelta(final CoverageMetric element) {
         return delta.containsKey(element);
     }
 
     // TODO: format percentage on the client side
-    public String getDelta(final CoverageElement element) {
+    public String getDelta(final CoverageMetric element) {
         if (hasDelta(element)) {
             return String.format("%+.3f", delta.get(element));
         }
@@ -175,10 +183,33 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @NonNull
     @Override
     public String getUrlName() {
-        return "coverage";
+        return DETAILS_URL;
     }
 
-    private static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
+    /**
+     * Default {@link Converter} implementation for XStream that does interning scoped to one unmarshalling.
+     */
+    private static final class MetricsConverter implements Converter {
+        @SuppressWarnings("PMD.NullAssignment")
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof CoverageMetric ? ((CoverageMetric) source).getName() : null);
+        }
+
+        @Override
+        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return CoverageMetric.valueOf(reader.getValue());
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == CoverageMetric.class;
+        }
+    }
+
+
+    static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         CoverageXmlStream() {
             super(CoverageNode.class);
         }
@@ -187,11 +218,13 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         protected void configureXStream(final XStream2 xStream) {
             xStream.alias("node", CoverageNode.class);
             xStream.alias("leaf", CoverageLeaf.class);
+            xStream.addImmutableType(CoverageMetric.class);
+            xStream.registerConverter(new MetricsConverter());
         }
 
         @Override
         protected CoverageNode createDefaultValue() {
-            return new CoverageNode(CoverageElement.REPORT, "Empty");
+            return new CoverageNode(CoverageMetric.MODULE, "Empty");
         }
     }
 }

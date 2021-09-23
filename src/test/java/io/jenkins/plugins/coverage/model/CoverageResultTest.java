@@ -2,8 +2,6 @@ package io.jenkins.plugins.coverage.model;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.util.ResourceTest;
-
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
@@ -21,7 +19,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  *
  * @author Ullrich Hafner
  */
-class CoverageResultTest extends ResourceTest {
+class CoverageResultTest extends AbstractCoverageTest {
     private static final String EXPECTED_PACKAGE_NAME = "edu.hm.hafner.util";
     private static final String TREE_STRING_BUILDER_FILE_NAME = "TreeStringBuilder.java";
     private static final String TREE_STRING_BUILDER_CLASS = "edu.hm.hafner.util.TreeStringBuilder";
@@ -90,23 +88,6 @@ class CoverageResultTest extends ResourceTest {
         assertThat(actualResult.getCoverageFor(coverageElement))
                 .isNotEmpty()
                 .contains(Ratio.create(covered, covered + missed));
-    }
-
-    @Test
-    void shouldConvertToNewModel() throws CoverageException {
-        CoverageResult report = readReport("jacoco-codingstyle.xml");
-        CoverageResult utilPackage = report.getSingletonChild();
-        CoverageResult treeStringBuilderFile = utilPackage.getChild(TREE_STRING_BUILDER_FILE_NAME);
-        CoverageResult treeStringBuilderClass = treeStringBuilderFile.getChild(TREE_STRING_BUILDER_CLASS);
-
-        Ratio lineCoverage = treeStringBuilderClass.getCoverageFor(CoverageElement.LINE).get();
-        assertThat(lineCoverage.numerator).isEqualTo(8);
-        assertThat(lineCoverage.denominator).isEqualTo(10);
-
-        CoverageNode root = CoverageNodeConverter.convert(report);
-        assertThat(root.getCoverage(LINE)).hasCovered(294).hasMissed(29);
-        assertThat(root.getCoverage(BRANCH)).hasCovered(109).hasMissed(7);
-        assertThat(root.getCoverage(INSTRUCTION)).hasCovered(1260).hasMissed(90);
     }
 
     @Test
