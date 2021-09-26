@@ -61,10 +61,8 @@
 
   <script>
     const viewProxy = <st:bind value="${it}"/>;
-    const coverageChartGenerator = new CoverageChartGenerator();
-    viewProxy.getOverview(function(t) {
-        coverageChartGenerator.createOverview(t.responseObject(), 'coverage-overview');
-    });
+    const coverageChartGenerator = new CoverageChartGenerator(jQuery3);
+    coverageChartGenerator.populateOverview();
   </script>
 
 </j:jelly>
