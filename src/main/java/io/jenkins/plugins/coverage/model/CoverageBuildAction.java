@@ -21,6 +21,7 @@ import hudson.model.Run;
 import hudson.util.XStream2;
 
 import io.jenkins.plugins.coverage.Messages;
+import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
 import io.jenkins.plugins.util.JenkinsFacade;
@@ -113,13 +114,13 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns the IF of a reference build that has been used to compute the coverage delta. If no such reference build
-     * has been used, then the constant {@link #NO_REFERENCE_BUILD} will be returned.
+     * Renders the reference build as HTML link.
      *
-     * @return the reference build ID, if available
+     * @return the reference build
+     * @see #getReferenceBuild()
      */
-    public String getReferenceBuildId() {
-        return referenceBuildId;
+    public String getReferenceBuildLink() {
+        return ReferenceBuild.getReferenceBuildLink(referenceBuildId);
     }
 
     /**

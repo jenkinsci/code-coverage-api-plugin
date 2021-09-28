@@ -29,7 +29,7 @@
         </li>
       </j:forEach>
       <j:if test="${it.referenceBuild.present}">
-        <li>Reference build: ${it.referenceBuildId}</li>
+        <li>Reference build: <j:out value="${it.referenceBuildLink}"/></li>
       </j:if>
     </ul>
     <j:set var="failMessage" value="${it.failMessage}"/>

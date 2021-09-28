@@ -6,7 +6,7 @@ import java.util.Map;
 import edu.hm.hafner.echarts.SeriesBuilder;
 
 /**
- *  Builds one x-axis point for the series of a line chart showing the line and branch coverage of a project.
+ * Builds one x-axis point for the series of a line chart showing the line and branch coverage of a project.
  *
  * @author Ullrich Hafner
  */
