@@ -100,6 +100,11 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return branchCoverage;
     }
 
+    /**
+     * Returns the possible reference build that has been used to compute the coverage delta.
+     *
+     * @return the reference build, if available
+     */
     public Optional<Run<?, ?>> getReferenceBuild() {
         if (NO_REFERENCE_BUILD.equals(referenceBuildId)) {
             return Optional.empty();
@@ -107,22 +112,50 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return new JenkinsFacade().getBuild(referenceBuildId);
     }
 
+    /**
+     * Returns the IF of a reference build that has been used to compute the coverage delta. If no such reference build
+     * has been used, then the constant {@link #NO_REFERENCE_BUILD} will be returned.
+     *
+     * @return the reference build ID, if available
+     */
     public String getReferenceBuildId() {
         return referenceBuildId;
     }
 
+    /**
+     * Returns the delta metrics, i.e. the coverage results of the current build minus the same results of the reference
+     * build.
+     *
+     * @return the delta for each available coverage metric
+     */
     public SortedMap<CoverageMetric, Double> getDelta() {
         return delta;
     }
 
-    public boolean hasDelta(final CoverageMetric element) {
-        return delta.containsKey(element);
+    /**
+     * Returns whether a delta metric for the specified metric exist.
+     *
+     * @param metric
+     *         the metric to check
+     *
+     * @return {@code true} if a delta is available for the specified metric
+     */
+    public boolean hasDelta(final CoverageMetric metric) {
+        return delta.containsKey(metric);
     }
 
+    /**
+     * Returns the delta metric for the specified metric exist.
+     *
+     * @param metric
+     *         the metric to get the delta for
+     *
+     * @return the delta metric
+     */
     // TODO: format percentage on the client side
-    public String getDelta(final CoverageMetric element) {
-        if (hasDelta(element)) {
-            return String.format("%+.3f", delta.get(element));
+    public String getDelta(final CoverageMetric metric) {
+        if (hasDelta(metric)) {
+            return String.format("%+.3f", delta.get(metric));
         }
         return "n/a";
     }
@@ -207,7 +240,6 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             return type == CoverageMetric.class;
         }
     }
-
 
     static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         CoverageXmlStream() {

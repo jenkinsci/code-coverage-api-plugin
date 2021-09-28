@@ -242,9 +242,8 @@ public final class CoverageNode implements Serializable {
         SortedMap<CoverageMetric, Double> deltaPercentages = new TreeMap<>();
         SortedMap<CoverageMetric, Double> metricPercentages = getMetricPercentages();
         SortedMap<CoverageMetric, Double> referencePercentages = reference.getMetricPercentages();
-        metricPercentages.forEach((key, value) -> {
-            deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0));
-        });
+        metricPercentages.forEach((key, value) ->
+                deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0)));
         return deltaPercentages;
     }
 
@@ -379,7 +378,7 @@ public final class CoverageNode implements Serializable {
         return newNode;
     }
 
-   public void setUncoveredLines(final int... uncoveredLines) {
+    public void setUncoveredLines(final int... uncoveredLines) {
         this.uncoveredLines = copy(uncoveredLines);
     }
 
