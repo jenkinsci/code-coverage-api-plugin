@@ -2,13 +2,10 @@ package io.jenkins.plugins.coverage.model;
 
 import org.junit.jupiter.api.Test;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.JavaCoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 
@@ -88,43 +85,5 @@ class CoverageResultTest extends AbstractCoverageTest {
         assertThat(actualResult.getCoverageFor(coverageElement))
                 .isNotEmpty()
                 .contains(Ratio.create(covered, covered + missed));
-    }
-
-    @Test
-    void shouldConvertCodingStyleToTree() throws CoverageException {
-        CoverageResult report = readReport("jacoco-codingstyle.xml");
-
-        CoverageNode tree = CoverageNodeConverter.convert(report);
-        tree.splitPackages();
-
-        TreeChartNode root = tree.toChartTree();
-        assertThat(root).hasName("Java coding style: jacoco-codingstyle.xml").hasValue(323.0, 294.0);
-
-        assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> assertThat(node).hasName("edu.hm.hafner.util").hasValue(323.0, 294.0)
-        );
-    }
-
-    @Test
-    void shouldConvertAnalysisModelToTree() throws CoverageException {
-        CoverageResult report = readReport("jacoco-analysis-model.xml");
-
-        CoverageNode tree = CoverageNodeConverter.convert(report);
-        tree.splitPackages();
-
-        TreeChartNode root = tree.toChartTree();
-
-        assertThat(root).hasName("Static Analysis Model and Parsers: jacoco-analysis-model.xml").hasValue(6368.0, 6083.0);
-        assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> assertThat(node).hasName("edu.hm.hafner").hasValue(6368.0, 6083.0)
-        );
-    }
-
-    private CoverageResult readReport(final String fileName) throws CoverageException {
-        JacocoReportAdapter parser = new JacocoReportAdapter("Hello");
-        CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
-        CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
-        result.stripGroup();
-        return result;
     }
 }

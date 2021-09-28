@@ -89,11 +89,11 @@ public class TreeNode {
     public void collapsePackage() {
         while (getChildren().size() == 1) {
             TreeNode singleChild = getChildrenMap().values().iterator().next();
-            if (!name.isEmpty()) {
-                setName(name + "." + singleChild.getName());
+            if (name.isEmpty()) {
+                setName(singleChild.getName());
             }
             else {
-                setName(singleChild.getName());
+                setName(name + "." + singleChild.getName());
             }
             childrenMap = singleChild.getChildrenMap();
         }

@@ -379,52 +379,16 @@ public final class CoverageNode implements Serializable {
         return newNode;
     }
 
-    // TODO: extract the UI part to a different class
-    public TreeChartNode toChartTree() {
-        TreeChartNode root = toChartTree(this);
-        for (TreeChartNode child : root.getChildren()) {
-            child.collapseEmptyPackages();
-        }
-
-        return root;
-    }
-
-    private TreeChartNode toChartTree(final CoverageNode node) {
-        Coverage coverage = node.getCoverage(CoverageMetric.LINE);
-
-        TreeChartNode treeNode = new TreeChartNode(node.getName(),
-                assignColor(coverage.getCoveredPercentage() * 100),
-                coverage.getTotal(), coverage.getCovered());
-        if (node.getMetric().equals(CoverageMetric.FILE)) {
-            return treeNode;
-        }
-
-        node.getChildren().stream()
-                .map(this::toChartTree)
-                .forEach(treeNode::insertNode);
-        return treeNode;
-    }
-
-    private String assignColor(final double percentage) {
-        String[] colors = {"#ef9a9a", "#f6bca0", "#fbdea6", "#e2f1aa", "#c4e4a9", "#a5d6a7"};
-        double[] levels = {75, 50, 85, 90, 95};
-
-        for (int index = 0; index < levels.length; index++) {
-            if (percentage < levels[index]) {
-                return colors[index];
-            }
-        }
-        return colors[levels.length - 1];
-    }
-
-    public void setUncoveredLines(final int[] uncoveredLines) {
-        // TODO: can we skip copying the parameter array?
-        this.uncoveredLines = uncoveredLines;
+   public void setUncoveredLines(final int... uncoveredLines) {
+        this.uncoveredLines = copy(uncoveredLines);
     }
 
     public int[] getUncoveredLines() {
-        // TODO: can we skip copying the returned array?
-        return uncoveredLines;
+        return copy(uncoveredLines);
+    }
+
+    private int[] copy(final int[] values) {
+        return Arrays.copyOf(values, values.length);
     }
 
     @Override

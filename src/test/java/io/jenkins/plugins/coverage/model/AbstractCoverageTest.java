@@ -50,4 +50,12 @@ public class AbstractCoverageTest extends ResourceTest {
     CoverageNode readNode(final String fileName) {
         return CoverageNodeConverter.convert(readResult(fileName));
     }
+
+    protected CoverageResult readReport(final String fileName) throws CoverageException {
+        JacocoReportAdapter parser = new JacocoReportAdapter("Hello");
+        CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
+        CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
+        result.stripGroup();
+        return result;
+    }
 }

@@ -40,6 +40,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
     private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
+    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
 
     private final Run<?, ?> owner;
@@ -54,6 +55,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         the coverage node to be shown
      */
     public CoverageViewModel(final Run<?, ?> owner, final CoverageNode node) {
+        super();
+
         this.owner = owner;
         this.node = node;
     }
@@ -85,7 +88,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeChartNode getCoverageTree() {
-        return getNode().toChartTree();
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
     }
 
     /**
@@ -248,6 +251,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         private final File buildFolder;
 
         CoverageTableModel(final CoverageNode root, final File buildFolder) {
+            super();
+
             this.root = root;
             this.buildFolder = buildFolder;
         }

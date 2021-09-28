@@ -50,6 +50,7 @@ public class CoverageMetric implements Comparable<CoverageMetric>, Serializable 
      *
      * @return the metric
      */
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     public static CoverageMetric valueOf(final String name) {
         if (MODULE.equalsIgnoreCase(name) || REPORT.equalsIgnoreCase(name)) {
             return MODULE;
