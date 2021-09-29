@@ -386,7 +386,7 @@ public final class CoverageNode implements Serializable {
         return copy(uncoveredLines);
     }
 
-    private int[] copy(final int[] values) {
+    private int[] copy(final int... values) {
         return Arrays.copyOf(values, values.length);
     }
 

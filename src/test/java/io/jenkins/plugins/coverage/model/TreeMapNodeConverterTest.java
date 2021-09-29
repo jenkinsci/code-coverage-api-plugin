@@ -25,7 +25,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         assertThat(root).hasName("Java coding style: jacoco-codingstyle.xml").hasValue(323.0, 294.0);
 
         assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> Assertions.assertThat(node).hasName("edu.hm.hafner.util").hasValue(323.0, 294.0)
+                node -> assertThat(node).hasName("edu.hm.hafner.util").hasValue(323.0, 294.0)
         );
     }
 
@@ -40,7 +40,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
         assertThat(root).hasName("Static Analysis Model and Parsers: jacoco-analysis-model.xml").hasValue(6368.0, 6083.0);
         assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> Assertions.assertThat(node).hasName("edu.hm.hafner").hasValue(6368.0, 6083.0)
+                node -> assertThat(node).hasName("edu.hm.hafner").hasValue(6368.0, 6083.0)
         );
     }
 }
