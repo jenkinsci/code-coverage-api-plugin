@@ -27,6 +27,7 @@ import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
 import io.jenkins.plugins.datatables.TableModel;
 import io.jenkins.plugins.datatables.TableModel.DetailedColumnDefinition;
+import io.jenkins.plugins.util.BuildResultNavigator;
 
 import static j2html.TagCreator.*;
 

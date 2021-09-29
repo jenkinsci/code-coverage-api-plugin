@@ -34,7 +34,7 @@
     <data-tables-api.version>1.11.2-1</data-tables-api.version>
     <forensics-api.version>1.4.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.7</pull-request-monitoring.version>
-    <plugin-util-api.version>2.4.0</plugin-util-api.version>
+    <plugin-util-api.version>2.5.0</plugin-util-api.version>
     <fontawesome-api.version>5.15.4-1</fontawesome-api.version>
     <bootstrap5-api.version>5.1.1-1</bootstrap5-api.version>
     <jquery3-api.version>3.6.0-2</jquery3-api.version>
@@ -42,7 +42,7 @@
     <codingstyle.config.version>2.9.0</codingstyle.config.version>
 
     <gson.version>2.8.6</gson.version>
-    <workflow-cps.version>2.92</workflow-cps.version>
+    <workflow-cps.version>2.94</workflow-cps.version>
     <workflow-multibranch.version>2.24</workflow-multibranch.version>
   </properties>
 
@@ -153,6 +153,12 @@
       <artifactId>json-unit-assertj</artifactId>
       <version>${json-unit-assertj.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.ow2.asm</groupId>
+          <artifactId>asm</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
