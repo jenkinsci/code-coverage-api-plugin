@@ -25,6 +25,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("PMD.GodClass")
 public final class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 
