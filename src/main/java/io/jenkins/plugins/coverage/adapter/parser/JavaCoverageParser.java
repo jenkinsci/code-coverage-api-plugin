@@ -1,12 +1,15 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 
 /**
  * <p>parse Java standard format coverage report to {@link CoverageResult}.</p>
@@ -45,15 +48,12 @@ public class JavaCoverageParser extends CoverageParser {
     private static final Pattern METHOD_ARGS_PATTERN = Pattern.compile("\\[*([TL][^;]*;)|([ZCBSIFJDV])");
 
 
-    public JavaCoverageParser(String reportName) {
+    public JavaCoverageParser(final String reportName) {
         super(reportName);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CoverageResult processElement(Element current, CoverageResult parentResult) {
+    @Override @CheckForNull
+    protected CoverageResult processElement(final Element current, final CoverageResult parentResult) {
         CoverageResult result = null;
         switch (current.getLocalName()) {
             case "report":
@@ -65,8 +65,8 @@ public class JavaCoverageParser extends CoverageParser {
                         getAttribute(current, "name", "project"));
                 break;
             case "package":
-                result = new CoverageResult(CoverageElement.get("Package"), parentResult,
-                        getAttribute(current, "name", "<default>"));
+                String packageName = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
+                result = new CoverageResult(CoverageElement.get("Package"), parentResult, packageName);
                 break;
             case "file":
                 result = new CoverageResult(CoverageElement.get("File"), parentResult,
@@ -74,8 +74,8 @@ public class JavaCoverageParser extends CoverageParser {
                 result.setRelativeSourcePath(getAttribute(current, "name", null));
                 break;
             case "class":
-                result = new CoverageResult(CoverageElement.get("Class"), parentResult,
-                        getAttribute(current, "name", ""));
+                String className = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
+                result = new CoverageResult(CoverageElement.get("Class"), parentResult, className);
                 break;
             case "method":
                 String name = getAttribute(current, "name", "");
@@ -104,6 +104,12 @@ public class JavaCoverageParser extends CoverageParser {
         return result;
     }
 
+    private String replacePathOrDollarWithDots(final String name) {
+        if (StringUtils.isNotBlank(name)) {
+            return name.replaceAll("[\\\\/$]", ".");
+        }
+        return name;
+    }
 
     /**
      * convert method type signature and name to Java method name.
@@ -114,7 +120,7 @@ public class JavaCoverageParser extends CoverageParser {
      * @param signature method type signature
      * @return Java method name
      */
-    private String buildMethodName(String name, String signature) {
+    private String buildMethodName(final String name, final String signature) {
         Matcher signatureMatcher = METHOD_SIGNATURE_PATTERN.matcher(signature);
         StringBuilder methodName = new StringBuilder();
         if (signatureMatcher.matches()) {
@@ -151,7 +157,7 @@ public class JavaCoverageParser extends CoverageParser {
      * @param s type signature
      * @return Java type
      */
-    private String parseMethodArg(String s) {
+    private String parseMethodArg(final String s) {
         char c = s.charAt(0);
         int end;
         switch (c) {

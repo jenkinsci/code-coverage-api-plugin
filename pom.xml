@@ -1,228 +1,242 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>4.15</version>
-        <relativePath />
-    </parent>
-    <groupId>io.jenkins.plugins</groupId>
-    <artifactId>code-coverage-api</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
-    <packaging>hpi</packaging>
-    <properties>
-        <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.baseline>2.249</jenkins.baseline>
-        <jenkins.version>${jenkins.baseline}.1</jenkins.version>
-        <java.level>8</java.level>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-        <trove4j.version>3.0.3</trove4j.version>
-        <saxon-he.version>9.9.1-4</saxon-he.version>
-        <assertj-core.version>3.16.1</assertj-core.version>
-        <echarts-api.version>5.1.0-2</echarts-api.version>
-        <forensics-api.version>1.0.0</forensics-api.version>
-        <pull-request-monitoring.version>1.7.1</pull-request-monitoring.version>
-        <plugin-util-api.version>2.2.0</plugin-util-api.version>
-        <fontawesome-api.version>5.15.3-2</fontawesome-api.version>
-        <gson.version>2.8.6</gson.version>
-        <workflow-cps.version>2.92</workflow-cps.version>
-        <workflow-multibranch.version>2.24</workflow-multibranch.version>
-        <!-- Other properties you may want to use:
-          ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
-          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
-          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
-     -->
-    </properties>
-    <name>Code Coverage API Plugin</name>
-    <description>Code Coverage API Plugin</description>
-    <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
+  <parent>
+    <groupId>org.jvnet.hudson.plugins</groupId>
+    <artifactId>analysis-pom</artifactId>
+    <version>5.9.0</version>
+    <relativePath />
+  </parent>
 
-    <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
+  <groupId>io.jenkins.plugins</groupId>
+  <artifactId>code-coverage-api</artifactId>
+  <version>${revision}${changelist}</version>
+  <packaging>hpi</packaging>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-${jenkins.baseline}.x</artifactId>
-                <version>807.v6d348e44c987</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <name>Code Coverage API Plugin</name>
+  <description>Code Coverage API Plugin</description>
+  <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
-    <dependencies>
+  <properties>
+    <revision>2.0.0</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
+    <jenkins.baseline>2.263</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <java.level>8</java.level>
 
-        <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <version>${trove4j.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.saxon</groupId>
-            <artifactId>Saxon-HE</artifactId>
-            <version>${saxon-he.version}</version>
-        </dependency>
+    <trove4j.version>3.0.3</trove4j.version>
+    <saxon-he.version>9.9.1-4</saxon-he.version>
 
-        <!-- Workflow Dependencies -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-multibranch</artifactId>
-            <version>${workflow-multibranch.version}</version>
-        </dependency>
+    <echarts-api.version>5.1.2-11</echarts-api.version>
+    <data-tables-api.version>1.11.2-1</data-tables-api.version>
+    <forensics-api.version>1.4.0</forensics-api.version>
+    <pull-request-monitoring.version>1.7.7</pull-request-monitoring.version>
+    <plugin-util-api.version>2.5.0</plugin-util-api.version>
+    <fontawesome-api.version>5.15.4-1</fontawesome-api.version>
+    <bootstrap5-api.version>5.1.1-1</bootstrap5-api.version>
+    <jquery3-api.version>3.6.0-2</jquery3-api.version>
+    <json-unit-assertj.version>2.27.0</json-unit-assertj.version>
+    <codingstyle.config.version>2.9.0</codingstyle.config.version>
 
-        <!-- Plugin Dependencies -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jackson2-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>checks-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>display-url-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>echarts-api</artifactId>
-            <version>${echarts-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>forensics-api</artifactId>
-            <version>${forensics-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>plugin-util-api</artifactId>
-            <version>${plugin-util-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>font-awesome-api</artifactId>
-            <version>${fontawesome-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>pull-request-monitoring</artifactId>
-            <version>${pull-request-monitoring.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
-        </dependency>
+    <gson.version>2.8.6</gson.version>
+    <workflow-cps.version>2.94</workflow-cps.version>
+    <workflow-multibranch.version>2.24</workflow-multibranch.version>
+  </properties>
 
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <version>${workflow-cps.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-basic-steps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-durable-task-step</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <developers>
+    <developer>
+      <id>cizezsy</id>
+      <name>Shenyu Zheng</name>
+      <email>zsy19980307@gmail.com</email>
+    </developer>
+  </developers>
 
-    <developers>
-        <developer>
-            <id>cizezsy</id>
-            <name>Shenyu Zheng</name>
-            <email>zsy19980307@gmail.com</email>
-        </developer>
-    </developers>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+  <dependencies>
 
-    <scm>
-        <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-        <tag>HEAD</tag>
-    </scm>
+    <dependency>
+      <groupId>net.sf.trove4j</groupId>
+      <artifactId>trove4j</artifactId>
+      <version>${trove4j.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.saxon</groupId>
+      <artifactId>Saxon-HE</artifactId>
+      <version>${saxon-he.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
+    </dependency>
 
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <!-- Plugin Dependencies -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-multibranch</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>jackson2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>checks-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>display-url-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>echarts-api</artifactId>
+      <version>${echarts-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>bootstrap5-api</artifactId>
+      <version>${bootstrap5-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jquery3-api</artifactId>
+      <version>${jquery3-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>data-tables-api</artifactId>
+      <version>${data-tables-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>forensics-api</artifactId>
+      <version>${forensics-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>plugin-util-api</artifactId>
+      <version>${plugin-util-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>font-awesome-api</artifactId>
+      <version>${fontawesome-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>pull-request-monitoring</artifactId>
+      <version>${pull-request-monitoring.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>plugin-util-api</artifactId>
+      <version>${plugin-util-api.version}</version>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>net.javacrumbs.json-unit</groupId>
+      <artifactId>json-unit-assertj</artifactId>
+      <version>${json-unit-assertj.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.ow2.asm</groupId>
+          <artifactId>asm</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <version>${workflow-cps.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-basic-steps</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-durable-task-step</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-support</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+        <configuration>
+          <packages combine.children="append">
+            <package>io.jenkins.plugins.coverage.model</package>
+          </packages>
+          <excludes combine.children="append">
+          </excludes>
+          <entryPointClassPackage>io.jenkins.plugins.coverage.model</entryPointClassPackage>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <scm>
+    <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+    <repository>
+      <id>incrementals.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/incrementals/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
 </project>

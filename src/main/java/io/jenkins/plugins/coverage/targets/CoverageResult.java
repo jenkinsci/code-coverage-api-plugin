@@ -21,30 +21,46 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang.StringUtils;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.TextFile;
+
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-
 
 // Code adopted from Cobertura Plugin https://github.com/jenkinsci/cobertura-plugin/
 
@@ -57,10 +73,6 @@ import java.util.stream.Collectors;
  */
 @ExportedBean(defaultVisibility = 2)
 public class CoverageResult implements Serializable, Chartable, ModelObject {
-
-    /**
-     * Generated
-     */
     private static final long serialVersionUID = -3524882671364156445L;
 
     private static final int DEFAULT_MAX_BUILDS_SHOW_IN_TREND = 6;
@@ -71,7 +83,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private final CoverageElement element;
 
     /**
-     * Name of the programming element that this result object represent, such as package name, class name, method name, etc.
+     * Name of the programming element that this result object represent, such as package name, class name, method name,
+     * etc.
      */
     private String name;
     private String tag;
@@ -80,10 +93,12 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     private float changeRequestCoverageDiffWithTargetBranch = 0;
 
     // these two pointers form a tree structure where edges are names.
+    @CheckForNull
     private CoverageResult parent;
 
     private final Map<String, CoverageResult> children = new TreeMap<>();
 
+    // FIXME: storing different maps does not make much sense?
     private final Map<CoverageElement, Ratio> aggregateResults = new TreeMap<>();
 
     private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
@@ -97,11 +112,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     private String relativeSourcePath;
 
-    private Map<String, Set<String>> additionalProperties = new HashMap<>();
+    private final Map<String, Set<String>> additionalProperties = new HashMap<>();
 
     public transient Run<?, ?> owner = null;
 
-    public CoverageResult(CoverageElement elementType, CoverageResult parent, String name) {
+    public CoverageResult(final CoverageElement elementType, final CoverageResult parent, final String name) {
         this.element = elementType;
         this.parent = parent;
         this.name = name;
@@ -114,21 +129,227 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
     }
 
+    // ---------- REFACTORING START ------------------
+
     /**
-     * Getter for property 'relativeSourcePath'.
-     *
-     * @return Value for property 'relativeSourcePath'.
+     * If the report contains a single group just remove the group.
      */
+    public void stripGroup() {
+        if (getElement().equals(CoverageElement.REPORT) && hasSingletonChild()) {
+            CoverageResult group = getSingletonChild();
+            if (group.getElement().getName().equals("Group")) {
+                children.clear();
+                children.putAll(group.children);
+            }
+
+        }
+    }
+
+    /**
+     * If the report is an aggregation with a single report just remove the aggregation.
+     *
+     * @return the actual root of the hierarchy
+     */
+    public CoverageResult getRoot() {
+        if (hasSingletonChild() && getSingletonChild().getElement().equals(CoverageElement.REPORT)) {
+            return getSingletonChild(); // ignore aggregation
+        }
+        else {
+            return this;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("CoverageResult of %s (line: %s, branch: %s)", name,
+                formatCoverage(CoverageElement.LINE), formatCoverage(CoverageElement.CONDITIONAL));
+    }
+
+    /**
+     * Returns whether a delta result with respect to the reference build is available.
+     *
+     * @param coverageElement
+     *         the element to check
+     *
+     * @return {@code true} if a delta result is available, {@code false} otherwise
+     */
+    public boolean hasDelta(final CoverageElement coverageElement) {
+        return deltaResults.containsKey(coverageElement);
+    }
+
+    /**
+     * Returns the delta result with respect to the reference build.
+     *
+     * @param coverageElement
+     *         the element to get the delta for
+     *
+     * @return the delta result (if available)
+     */
+    public String getDelta(final CoverageElement coverageElement) {
+        Float delta = deltaResults.get(coverageElement);
+        if (delta == null) {
+            return "n/a";
+        }
+        return String.format("%+.3f", delta);
+    }
+
+    private String formatCoverage(final CoverageElement coverageElement) {
+        Ratio ratio = getCoverage(coverageElement);
+
+        return Ratio.NULL.equals(ratio) ? "n/a" : ratio.getPercentageString();
+    }
+
+    /**
+     * Returns whether a delta computation with a reference build is available.
+     *
+     * @return {@code true} if there is a reference build, {@code false} if not
+     */
+    public boolean hasReferenceBuild() {
+        return StringUtils.isNotBlank(referenceBuildUrl);
+    }
+
+    public Map<CoverageElement, Ratio> getLocalResults() {
+        return localResults;
+    }
+
+    /**
+     * Returns the singleton child of this result.
+     *
+     * @return the singleton child of this result
+     * @throws NoSuchElementException
+     *         if this result does not contain children
+     * @see #hasSingletonChild()
+     */
+    public CoverageResult getSingletonChild() {
+        return children.values()
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("No child found"));
+    }
+
+    /**
+     * Returns whether this result has a singleton child.
+     *
+     * @return {@code true} if this result has a singleton child, {@code false} otherwise
+     */
+    public boolean hasSingletonChild() {
+        return children.size() == 1;
+    }
+
+    /**
+     * Returns whether this result has a parent.
+     *
+     * @return {@code true} if this result has a parent, {@code false} if it is the root of the hierarchy
+     */
+    public boolean hasParent() {
+        return parent != null;
+    }
+
+    /**
+     * Returns the name of the parent element or "-" if there is no such element.
+     *
+     * @return the name of the parent element
+     */
+    public String getParentName() {
+        return parent != null ? parent.getName() : "-";
+    }
+
+    /**
+     * Returns recursively all elements of the given type.
+     *
+     * @param element
+     *         the element type to look for
+     *
+     * @return all elements of the given type
+     */
+    public List<CoverageResult> getAll(final CoverageElement element) {
+        List<CoverageResult> fileNodes = children.values()
+                .stream()
+                .filter(result -> element.equals(result.getElement()))
+                .collect(Collectors.toList());
+        children.values()
+                .stream()
+                .filter(result -> isContainerNode(result, element))
+                .map(child -> child.getAll(element))
+                .flatMap(List::stream).forEach(fileNodes::add);
+        return fileNodes;
+    }
+
+    private boolean isContainerNode(final CoverageResult result, final CoverageElement otherElement) {
+        CoverageElement coverageElement = result.getElement();
+        return !otherElement.equals(coverageElement) && !coverageElement.isBasicBlock();
+    }
+
+    /**
+     * Finds the coverage element with the given name.
+     *
+     * @param element
+     *         the coverage element name
+     * @param name
+     *         the name of the coverage instance
+     *
+     * @return the result if found
+     */
+    public Optional<CoverageResult> find(final String element, final String name) {
+        int hashCode = Integer.parseInt(name);
+        for (String key : children.keySet()) {
+            if (key.hashCode() == hashCode) {
+                CoverageResult childResult = children.get(key);
+                if (childResult.getElement().getName().equalsIgnoreCase(element)) {
+                    return Optional.of(childResult);
+                }
+            }
+        }
+        return children.values()
+                .stream()
+                .map(child -> child.find(element, name))
+                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+                .findAny();
+    }
+
+    /**
+     * Returns the coverage ratio for the specified element.
+     *
+     * @param coverageElement
+     *         the element to get the coverage ratio for
+     *
+     * @return coverage ratio if available
+     */
+    public Optional<Ratio> getCoverageFor(final CoverageElement coverageElement) {
+        if (aggregateResults.containsKey(coverageElement)) {
+            return Optional.ofNullable(aggregateResults.get(coverageElement));
+        }
+        if (localResults.containsKey(coverageElement)) {
+            return Optional.ofNullable(localResults.get(coverageElement));
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Prints the coverage for the specified element.
+     *
+     * @param coverageElement
+     *         the element to print the coverage for
+     *
+     * @return coverage ratio in a human-readable format
+     */
+    public String printCoverageFor(final CoverageElement coverageElement) {
+        if (aggregateResults.containsKey(coverageElement)) {
+            return String.format("%.2f%%", aggregateResults.get(coverageElement).getPercentageFloat());
+        }
+        if (localResults.containsKey(coverageElement)) {
+            return String.format("%.2f%%", localResults.get(coverageElement).getPercentageFloat());
+        }
+        return "n/a";
+    }
+
+    // ---------- REFACTORING END ------------------
+
     public String getRelativeSourcePath() {
         return relativeSourcePath;
     }
 
-    /**
-     * Setter for property 'relativeSourcePath'.
-     *
-     * @param relativeSourcePath Value to set for property 'relativeSourcePath'.
-     */
-    public void setRelativeSourcePath(String relativeSourcePath) {
+    public void setRelativeSourcePath(final String relativeSourcePath) {
         this.relativeSourcePath = relativeSourcePath;
 
         if (!StringUtils.isEmpty(relativeSourcePath)) {
@@ -136,42 +357,22 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
     }
 
-    /**
-     * Getter for property 'name'.
-     *
-     * @return Value for property 'name'.
-     */
     public String getName() {
         return name == null || name.trim().length() == 0 ? "Project" : name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    /**
-     * Getter for property 'parent'.
-     *
-     * @return Value for property 'parent'.
-     */
     public CoverageResult getParent() {
         return parent;
     }
 
-    /**
-     * Getter for property 'element'.
-     *
-     * @return Value for property 'element'.
-     */
     public CoverageElement getElement() {
         return element;
     }
 
-    /**
-     * Getter for property 'sourceCodeLevel'.
-     *
-     * @return Value for property 'sourceCodeLevel'.
-     */
     public boolean isSourceCodeLevel() {
         return relativeSourcePath != null;
     }
@@ -180,22 +381,17 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return element.equals(CoverageElement.AGGREGATED_REPORT);
     }
 
-    /**
-     * Getter for property 'paint'.
-     *
-     * @return Value for property 'paint'.
-     */
     public CoveragePaint getPaint() {
         return paint;
     }
 
-    public void paint(int line, int hits) {
+    public void paint(final int line, final int hits) {
         if (paint != null) {
             paint.paint(line, hits);
         }
     }
 
-    public void paint(int line, int hits, int branchHits, int branchTotal) {
+    public void paint(final int line, final int hits, final int branchHits, final int branchTotal) {
         if (paint != null) {
             paint.paint(line, hits, branchHits, branchTotal);
         }
@@ -208,12 +404,15 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     private File getSourceFile() {
         if (hasPermission()) {
-            File sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(relativeSourcePath));
+            File sourceFile = new File(owner.getRootDir(),
+                    DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(
+                            relativeSourcePath));
             if (sourceFile.exists()) {
                 return sourceFile;
             }
             // keep compatibility
-            sourceFile = new File(owner.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
+            sourceFile = new File(owner.getRootDir(),
+                    DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath);
             if (sourceFile.exists()) {
                 return sourceFile;
             }
@@ -224,7 +423,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return null;
     }
 
-    private String sanitizeFilename(String inputName) {
+    private String sanitizeFilename(final String inputName) {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
     }
 
@@ -232,11 +431,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * Get delta coverage from {@link #deltaResults} for a specific {@link CoverageElement}.
      *
      * @param element
-     *          the element to get the diff coverage for.
-     * @return
-     *          the diff coverage or 0, if diff coverage for element is not available.
+     *         the element to get the diff coverage for.
+     *
+     * @return the diff coverage or 0, if diff coverage for element is not available.
      */
-    public float getCoverageDelta(CoverageElement element) {
+    public float getCoverageDelta(final CoverageElement element) {
         return deltaResults.getOrDefault(element, 0.0F);
     }
 
@@ -254,29 +453,21 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     /**
      * Setter for property 'changeRequestCoverageDiffWithTargetBranch'.
      *
-     * @param changeRequestCoverageDiffWithTargetBranch Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
+     * @param changeRequestCoverageDiffWithTargetBranch
+     *         Value to set for property 'changeRequestCoverageDiffWithTargetBranch'.
+     *
      * @deprecated diff coverage is stored in {@link #deltaResults}.
      */
     @Deprecated
-    public void setChangeRequestCoverageDiffWithTargetBranch(float changeRequestCoverageDiffWithTargetBranch) {
+    public void setChangeRequestCoverageDiffWithTargetBranch(final float changeRequestCoverageDiffWithTargetBranch) {
         this.changeRequestCoverageDiffWithTargetBranch = changeRequestCoverageDiffWithTargetBranch;
     }
 
-    /**
-     * Getter for property 'referenceBuildUrl'.
-     *
-     * @return Value for property 'referenceBuildUrl'.
-     */
     public String getReferenceBuildUrl() {
         return referenceBuildUrl;
     }
 
-    /**
-     * Setter for property 'referenceBuildUrl'.
-     *
-     * @param referenceBuildUrl Value to set for property 'referenceBuildUrl'.
-     */
-    public void setReferenceBuildUrl(String referenceBuildUrl) {
+    public void setReferenceBuildUrl(final String referenceBuildUrl) {
         this.referenceBuildUrl = referenceBuildUrl;
     }
 
@@ -312,7 +503,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
         try {
             return new TextFile(sourceFile).read();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             return null;
         }
     }
@@ -350,8 +542,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return getChildElements().stream().findAny().orElse(null);
     }
 
-
-    public Set<String> getChildren(CoverageElement element) {
+    public Set<String> getChildren(final CoverageElement element) {
         Set<String> result = new TreeSet<>();
         for (CoverageResult child : children.values()) {
             if (child.element.equals(element)) {
@@ -370,39 +561,19 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return children.keySet();
     }
 
-    /**
-     * Getter for property 'children'.
-     *
-     * @return Value for property 'children'.
-     */
     public Map<String, CoverageResult> getChildrenReal() {
         return children;
     }
 
-    /**
-     * Getter for property 'results'.
-     *
-     * @return Value for property 'results'.
-     */
     public Map<CoverageElement, Ratio> getResults() {
         return Collections.unmodifiableMap(aggregateResults);
     }
 
-    /**
-     * Getter for property 'deltaResults'.
-     *
-     * @return Value for property 'deltaResults'.
-     */
     public Map<CoverageElement, Float> getDeltaResults() {
         return Collections.unmodifiableMap(deltaResults);
     }
 
-    /**
-     * Setter for property 'deltaResults'.
-     *
-     * @param deltaResults Value to set for property 'deltaResults'.
-     */
-    public void setDeltaResults(Map<CoverageElement, Float> deltaResults) {
+    public void setDeltaResults(final Map<CoverageElement, Float> deltaResults) {
         this.deltaResults.clear();
         this.deltaResults.putAll(deltaResults);
     }
@@ -438,8 +609,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return coverageTrends;
     }
 
-
-    public String urlTransform(String name) {
+    public String urlTransform(final String name) {
         StringBuilder buf = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
@@ -447,18 +617,19 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
                     || ('A' <= c && 'Z' >= c)
                     || ('a' <= c && 'z' >= c)) {
                 buf.append(c);
-            } else {
+            }
+            else {
                 buf.append('_');
             }
         }
         return buf.toString();
     }
 
-    public String xmlTransform(String name) {
+    public String xmlTransform(final String name) {
         return name.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 
-    public String relativeUrl(CoverageResult parent) {
+    public String relativeUrl(final CoverageResult parent) {
         StringBuilder url = new StringBuilder("..");
         CoverageResult p = getParent();
         while (p != null && p != parent) {
@@ -468,26 +639,25 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return url.toString();
     }
 
-    public CoverageResult getChild(String name) {
+    public CoverageResult getChild(final String name) {
         return children.get(name);
     }
 
-    public Ratio getCoverage(CoverageElement element) {
-        return aggregateResults.get(element);
+    public Ratio getCoverage(final CoverageElement element) {
+        return aggregateResults.getOrDefault(element, Ratio.NULL);
     }
-
 
     public Set<CoverageElement> getElements() {
         return Collections.unmodifiableSet(
                 aggregateResults.isEmpty() ? Collections.emptySet() : aggregateResults.keySet());
     }
 
-
-    public void updateCoverage(CoverageElement element, Ratio additionalResult) {
+    public void updateCoverage(final CoverageElement element, final Ratio additionalResult) {
         if (localResults.containsKey(element)) {
             Ratio existingResult = localResults.get(element);
             localResults.put(element, CoverageAggregationRule.combine(element, existingResult, additionalResult));
-        } else {
+        }
+        else {
             localResults.put(element, additionalResult);
         }
     }
@@ -504,9 +674,10 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     /**
      * Setter for property 'owner'.
      *
-     * @param owner Value to set for property 'owner'.
+     * @param owner
+     *         Value to set for property 'owner'.
      */
-    public void setOwner(Run<?, ?> owner) {
+    public void setOwner(final Run<?, ?> owner) {
         this.owner = owner;
         aggregateResults.clear();
         for (CoverageResult child : children.values()) {
@@ -524,47 +695,44 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
                 prevTotal = Ratio.create(0, 0);
             }
 
-            boolean isChildCovered = false;
+            boolean isChildCovered = child.aggregateResults.entrySet().stream().anyMatch(coverageElementRatioEntry ->
+                    coverageElementRatioEntry.getValue().numerator > 0);
 
-            if (child.aggregateResults.entrySet().stream().anyMatch(coverageElementRatioEntry ->
-                    coverageElementRatioEntry.getValue().numerator > 0)) {
-                isChildCovered = true;
-            }
-
-            aggregateResults.put(child.getElement(), Ratio.create(prevTotal.numerator + (isChildCovered ? 1 : 0), prevTotal.denominator + 1));
+            aggregateResults.put(child.getElement(),
+                    Ratio.create(prevTotal.numerator + (isChildCovered ? 1 : 0), prevTotal.denominator + 1));
         }
 
         // override any local results
         aggregateResults.putAll(localResults);
     }
 
-    public void setOwner(AbstractBuild<?, ?> owner) {
+    public void setOwner(final AbstractBuild<?, ?> owner) {
         setOwner((Run<?, ?>) owner);
     }
 
-
-    public void merge(CoverageResult another) throws CoverageException {
+    public void merge(final CoverageResult another) throws CoverageException {
         if (!element.equals(another.element)) {
-            throw new CoverageException(String.format("Unable to merge reports: Unmatched element %s and %s", element.getName(), another.getElement().getName()));
+            throw new CoverageException(
+                    String.format("Unable to merge reports: Unmatched element %s and %s", element.getName(),
+                            another.getElement().getName()));
         }
 
         for (Map.Entry<String, CoverageResult> childBeMerged : another.getChildrenReal().entrySet()) {
             if (getChild(childBeMerged.getKey()) == null) {
                 childBeMerged.getValue().resetParent(this);
-            } else {
+            }
+            else {
                 getChild(childBeMerged.getKey()).merge(childBeMerged.getValue());
             }
         }
 
-
     }
-
 
     public String getTag() {
         return tag;
     }
 
-    public void setTag(String tag) {
+    public void setTag(final String tag) {
         this.tag = tag;
     }
 
@@ -584,13 +752,14 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
                 prevBuild = BuildUtils.getPreviousNotFailedCompletedBuild(prevBuild);
             }
             return action == null ? null : action.getResult();
-        } else {
+        }
+        else {
             CoverageResult prevParent = parent.getPreviousResult();
             return prevParent == null ? null : prevParent.getChild(name);
         }
     }
 
-    public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) throws IOException {
+    public Object getDynamic(String token, final StaplerRequest req, final StaplerResponse rsp) throws IOException {
         token = token.toLowerCase();
         String restPath = req.getRestOfPath();
 
@@ -598,7 +767,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         if (restPath.startsWith("/api/")) {
             if (token.equals("trend")) {
                 return new RestResultWrapper(new CoverageTrendTree(getName(), getCoverageTrends(), getChildrenReal()));
-            } else if (token.equals("result")) {
+            }
+            else if (token.equals("result")) {
                 return new RestResultWrapper(this);
             }
         }
@@ -635,9 +805,10 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     /**
      * add parent for CoverageResult(Only effect when parent is null)
      *
-     * @param p parent
+     * @param p
+     *         parent
      */
-    public void addParent(CoverageResult p) {
+    public void addParent(final CoverageResult p) {
         if (parent == null) {
             parent = p;
             if (this.parent != null) {
@@ -646,17 +817,17 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         }
     }
 
-    public void resetParent(CoverageResult p) {
+    public void resetParent(final CoverageResult p) {
         parent = null;
         addParent(p);
     }
 
-    public void addAdditionalProperty(String propertyName, String value) {
+    public void addAdditionalProperty(final String propertyName, final String value) {
         additionalProperties.putIfAbsent(propertyName, new HashSet<>());
         additionalProperties.get(propertyName).add(value);
     }
 
-    public Set<String> getAdditionalProperty(String propertyName) {
+    public Set<String> getAdditionalProperty(final String propertyName) {
         return additionalProperties.get(propertyName);
     }
 
@@ -666,16 +837,15 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @return aggregated coverage results
      */
     @JavaScriptMethod
-    public List<JSCoverageResult> jsGetResults() {
-        List<JSCoverageResult> results = new LinkedList<>();
+    public List<CoverageStatistics> jsGetResults() {
+        List<CoverageStatistics> results = new LinkedList<>();
 
         for (Map.Entry<CoverageElement, Ratio> c : aggregateResults.entrySet()) {
-            results.add(new JSCoverageResult(c.getKey().getName(), c.getValue()));
+            results.add(new CoverageStatistics(c.getKey().getName(), c.getValue()));
         }
 
         return results;
     }
-
 
     /**
      * Interface for javascript code to get child coverage result.
@@ -684,13 +854,12 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public Map<String, List<JSCoverageResult>> jsGetChildResults() {
+    public Map<String, List<CoverageStatistics>> jsGetChildResults() {
         return getChildrenReal()
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().jsGetResults()));
     }
-
 
     /**
      * Interface for javascript code to get code coverage trend.
@@ -699,8 +868,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public Map<String, List<JSCoverageResult>> jsGetTrendResults() {
-        Map<String, List<JSCoverageResult>> results = new LinkedHashMap<>();
+    public Map<String, List<CoverageStatistics>> jsGetTrendResults() {
+        Map<String, List<CoverageStatistics>> results = new LinkedHashMap<>();
 
         if (getPreviousResult() == null) {
             return results;
@@ -710,15 +879,16 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         for (Chartable c = this; c != null && i < DEFAULT_MAX_BUILDS_SHOW_IN_TREND; c = c.getPreviousResult(), i++) {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(c.getOwner());
 
-            List<JSCoverageResult> r = c.getResults().entrySet().stream()
+            List<CoverageStatistics> r = c.getResults().entrySet().stream()
                     .filter(e -> {
                         if (isAggregatedLevel()) {
                             return e.getKey().equals(CoverageElement.LINE) || e.getKey().equals(CoverageElement.REPORT);
-                        } else {
+                        }
+                        else {
                             return true;
                         }
                     })
-                    .map(e -> new JSCoverageResult(e.getKey().getName(), e.getValue()))
+                    .map(e -> new CoverageStatistics(e.getKey().getName(), e.getValue()))
                     .collect(Collectors.toList());
 
             if (r.size() != 0) {
@@ -734,12 +904,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return getName();
     }
 
-
-    public static class JSCoverageResult {
+    public static class CoverageStatistics {
         private String name;
         private Ratio ratio;
 
-        public JSCoverageResult(String name, Ratio ratio) {
+        public CoverageStatistics(final String name, final Ratio ratio) {
             this.name = name;
             this.ratio = ratio;
         }
@@ -748,7 +917,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -756,7 +925,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
             return ratio;
         }
 
-        public void setRatio(Ratio ratio) {
+        public void setRatio(final Ratio ratio) {
             this.ratio = ratio;
         }
     }
