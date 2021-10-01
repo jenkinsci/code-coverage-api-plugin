@@ -7,7 +7,8 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
- * Node for constructing a tree structure for a sunburst or treemap ECharts diagram.
+ * Node for constructing a tree structure of {@code double} values for a sunburst or treemap
+ * ECharts diagram.
  *
  * @author Andreas Pabst
  * @author Ullrich Hafner
