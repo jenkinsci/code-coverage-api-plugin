@@ -2,11 +2,13 @@ package io.jenkins.plugins.coverage.model;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.echarts.TreeMapNode;
+
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests the class {@link TreeMapNodeConverter}.
@@ -21,11 +23,15 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         CoverageNode tree = CoverageNodeConverter.convert(report);
         tree.splitPackages();
 
-        TreeChartNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
-        assertThat(root).hasName("Java coding style: jacoco-codingstyle.xml").hasValue(323.0, 294.0);
+        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
+        assertThat(root.getName()).isEqualTo("Java coding style: jacoco-codingstyle.xml");
+        assertThat(root.getValue()).containsExactly(323.0, 294.0);
 
         assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> assertThat(node).hasName("edu.hm.hafner.util").hasValue(323.0, 294.0)
+                node -> {
+                    assertThat(node.getName()).isEqualTo("edu.hm.hafner.util");
+                    assertThat(node.getValue()).containsExactly(323.0, 294.0);
+                }
         );
     }
 
@@ -36,11 +42,15 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         CoverageNode tree = CoverageNodeConverter.convert(report);
         tree.splitPackages();
 
-        TreeChartNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
+        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
 
-        assertThat(root).hasName("Static Analysis Model and Parsers: jacoco-analysis-model.xml").hasValue(6368.0, 6083.0);
+        assertThat(root.getName()).isEqualTo("Static Analysis Model and Parsers: jacoco-analysis-model.xml");
+        assertThat(root.getValue()).containsExactly(6368.0, 6083.0);
         assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-                node -> assertThat(node).hasName("edu.hm.hafner").hasValue(6368.0, 6083.0)
+                node -> {
+                    assertThat(node.getName()).isEqualTo("edu.hm.hafner");
+                    assertThat(node.getValue()).containsExactly(6368.0, 6083.0);
+                }
         );
     }
 }

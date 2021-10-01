@@ -1,25 +1,27 @@
 package io.jenkins.plugins.coverage.model;
 
+import edu.hm.hafner.echarts.TreeMapNode;
+
 /**
- * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeChartNode ECharts tree
+ * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeMapNode ECharts tree
  * map nodes}.
  *
  * @author Ullrich Hafner
  */
 class TreeMapNodeConverter {
-    TreeChartNode toTeeChartModel(final CoverageNode node) {
-        TreeChartNode root = toTreeChartNode(node);
-        for (TreeChartNode child : root.getChildren()) {
+    TreeMapNode toTeeChartModel(final CoverageNode node) {
+        TreeMapNode root = toTreeMapNode(node);
+        for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
         }
 
         return root;
     }
 
-    private TreeChartNode toTreeChartNode(final CoverageNode node) {
+    private TreeMapNode toTreeMapNode(final CoverageNode node) {
         Coverage coverage = node.getCoverage(CoverageMetric.LINE);
 
-        TreeChartNode treeNode = new TreeChartNode(node.getName(),
+        TreeMapNode treeNode = new TreeMapNode(node.getName(),
                 assignColor(coverage.getCoveredPercentage() * 100),
                 coverage.getTotal(), coverage.getCovered());
         if (node.getMetric().equals(CoverageMetric.FILE)) {
@@ -27,7 +29,7 @@ class TreeMapNodeConverter {
         }
 
         node.getChildren().stream()
-                .map(this::toTreeChartNode)
+                .map(this::toTreeMapNode)
                 .forEach(treeNode::insertNode);
         return treeNode;
     }
