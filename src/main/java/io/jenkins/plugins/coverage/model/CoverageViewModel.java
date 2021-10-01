@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
+import edu.hm.hafner.echarts.TreeMapNode;
 
 import j2html.tags.ContainerTag;
 
@@ -88,7 +89,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeChartNode getCoverageTree() {
+    public TreeMapNode getCoverageTree() {
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
     }
 
