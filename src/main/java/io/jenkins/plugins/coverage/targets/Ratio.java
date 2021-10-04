@@ -34,22 +34,23 @@ import java.text.NumberFormat;
  * @author Kohsuke Kawaguchi
  */
 final public class Ratio implements Serializable {
+    /** Null Object. **/
+    public static final Ratio NULL = new Ratio(0, 1);
+
     public final float numerator;
     public final float denominator;
 
-    private Ratio(float numerator, float denominator) {
+    private Ratio(final float numerator, final float denominator) {
         this.numerator = numerator;
         this.denominator = denominator;
     }
 
-    /**
-     * Gets "x/y" representation.
-     */
+    @Override
     public String toString() {
-        return print(numerator) + "/" + print(denominator);
+        return getPercentageString() + String.format(" (%d/%d)", (int)numerator, (int)denominator);
     }
 
-    private String print(float f) {
+    private String print(final float f) {
         int i = (int) f;
         if (i == f)
             return String.valueOf(i);
@@ -113,7 +114,7 @@ final public class Ratio implements Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -149,7 +150,7 @@ final public class Ratio implements Serializable {
      * @param y denominator
      * @return the ratio
      */
-    public static Ratio create(float x, float y) {
+    public static Ratio create(final float x, final float y) {
         // TODO COMMON_INSTANCES seems broken and return the wrong cached ratio, need to be fix.
 //        int xx = (int) x;
 //        int yy = (int) y;
