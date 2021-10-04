@@ -237,7 +237,7 @@ public class CoverageChecksPublisherTest {
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
-        CoverageAction action = new CoverageAction(result);
+        CoverageAction action = getCoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn("Coverage Healthy score is 10%");
@@ -248,6 +248,12 @@ public class CoverageChecksPublisherTest {
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
+    }
+
+    private CoverageAction getCoverageAction(final CoverageResult result) {
+        CoverageAction action = new CoverageAction(result);
+        action.onAttached(mock(Run.class));
+        return action;
     }
 
     @Test
@@ -312,7 +318,7 @@ public class CoverageChecksPublisherTest {
     }
 
     private CoverageAction createActionWithDefaultHealthReport(final CoverageResult result) {
-        CoverageAction action = new CoverageAction(result);
+        CoverageAction action = getCoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
