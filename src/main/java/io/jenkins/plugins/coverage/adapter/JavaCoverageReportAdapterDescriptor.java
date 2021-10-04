@@ -1,23 +1,30 @@
 package io.jenkins.plugins.coverage.adapter;
 
-import com.google.common.collect.Lists;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-
 import java.util.List;
 
-public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoverageReportAdapter> {
+import com.google.common.collect.Lists;
 
-    public JavaCoverageReportAdapterDescriptor(Class<? extends CoverageReportAdapter> clazz) {
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+
+public class JavaCoverageReportAdapterDescriptor extends CoverageReportAdapterDescriptor<CoverageReportAdapter> {
+    /** A Java package. */
+    public static final CoverageElement PACKAGE = new CoverageElement("Package", 1);
+    /** A Java class. */
+    public static final CoverageElement CLASS = new CoverageElement("Class", 3);
+    /** A Java method. */
+    public static final CoverageElement METHOD = new CoverageElement("Method", 4);
+
+    public JavaCoverageReportAdapterDescriptor(final Class<? extends CoverageReportAdapter> clazz) {
         super(clazz);
     }
 
     @Override
     public List<CoverageElement> getCoverageElements() {
         return Lists.newArrayList(new CoverageElement("Group", 0),
-                new CoverageElement("Package", 1),
-                new CoverageElement("File", 2),
-                new CoverageElement("Class", 3),
-                new CoverageElement("Method", 4));
+                PACKAGE,
+                CoverageElement.FILE,
+                CLASS,
+                METHOD);
     }
 
     @Override

@@ -1,10 +1,14 @@
-# code-coverage-api-plugin
+# Jenkins Code Coverage Plug-in
 
 [![Gitter](https://badges.gitter.im/jenkinsci/code-coverage-api-plugin.svg)](https://gitter.im/jenkinsci/code-coverage-api-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/code-coverage-api.svg?color=red)](https://plugins.jenkins.io/code-coverage-api)
+[![Jenkins](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/master/badge/icon?subject=Jenkins%20CI)](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/master/)
+[![GitHub Actions](https://github.com/jenkinsci/code-coverage-api-plugin/workflows/GitHub%20CI/badge.svg?branch=master)](https://github.com/jenkinsci/code-coverage-api-plugin/actions)
+[![Codecov](https://codecov.io/gh/jenkinsci/code-coverage-api/branch/master/graph/badge.svg)](https://codecov.io/gh/jenkinsci/code-coverage-api-plugin/branch/master)
 
 
-This plugin serves as API to integrate and publish multiple coverage report types.
-More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
+This Jenkins plugin integrates and publishes multiple coverage report types.
+It has been developed during [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
 ## Features
 * Pipeline support
@@ -21,21 +25,22 @@ More information see [https://jenkins.io/projects/gsoc/2018/code-coverage-api-pl
 #### Embedded
 - [JaCoCo](https://www.jacoco.org/jacoco/trunk/doc/)
 - [Istanbul](https://istanbul.js.org/) - [Cobertura Reporter](https://istanbul.js.org/docs/advanced/alternative-reporters/#cobertura)
+- [Cobertura](http://cobertura.github.io/cobertura/)
+
 #### Other plugins as an Extension of Code Coverage API plugin
-- [Cobertura](http://cobertura.github.io/cobertura/) ([Cobertura Plugin](https://github.com/jenkinsci/cobertura-plugin))
 - [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst) ([llvm-cov plugin](https://github.com/jenkinsci/llvm-cov-plugin))
 - [OpenCover](https://github.com/OpenCover/opencover) ([OpenCover Plugin](https://github.com/jenkinsci/opencover-plugin))
 
 ## Release Notes
-See the [CHANGELOG](CHANGELOG.md).
+See the [GitHub Releases](https://github.com/jenkinsci/code-coverage-api-plugin/releases).
 
-## How to Implement it
-see [wiki](https://github.com/jenkinsci/code-coverage-api-plugin/wiki).
 ## How to Use it
 
-#####  1. Config coverage tool to generate reports.
+###  1. Configure your coverage tool to generate reports
 
-Config maven to generate Cobertura coverage reports:
+#### Cobertura based coverage
+
+Configure Maven to generate Cobertura coverage reports:
 ```xml
 <build>
     <plugins>
@@ -63,7 +68,9 @@ Config maven to generate Cobertura coverage reports:
 ```
 More information about [Cobertura](http://cobertura.github.io/cobertura/).
 
-Config maven to generate JaCoCo coverage reports:
+#### JaCoCo based coverage
+
+Configure Maven to generate JaCoCo coverage reports:
 
 ```xml
 <build>
@@ -92,19 +99,21 @@ Config maven to generate JaCoCo coverage reports:
 ```
 More Information about [JaCoCo](https://www.jacoco.org/jacoco/trunk/doc/).
 
+#### llvm-cov based coverage
+
 Use llvm-cov to generate JSON format report:
 ```
 $ llvm-cov export -instr-profile /path/to/foo.profdata /path/to/foo
 ```
 More Information  [llvm-cov](https://github.com/llvm-mirror/clang/blob/master/docs/SourceBasedCodeCoverage.rst#exporting-coverage-data).
 
-##### 2. Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
-##### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions.
-##### 4. Add your coverage tool adapter and specify reports path.
+### 2. (Optional) Install Jenkins plugins which implement Code Coverage API plugin (cobertura-plugin, llvm-cov-plugin).
+### 3. Enable "Publish Coverage Report" publisher in the Post-build Actions.
+### 4. Add your coverage tool adapter and specify reports path.
 ![alt text](./images/config-add-adapter.png "Add coverage adapter")
-##### 5. (Optional) Use the [forensics-api](https://github.com/jenkinsci/forensics-api-plugin) plugin to discover the reference build that is used to compute a delta report of the coverage results. 
-##### 6. (Optional) Specify Thresholds of each metrics in global or adapter level.
-##### 7. (Optional) Specify Source code storing level to enable source code navigation.
+### 5. (Optional) Use the [forensics-api](https://github.com/jenkinsci/forensics-api-plugin) plugin to discover the reference build that is used to compute a delta report of the coverage results. 
+### 6. (Optional) Specify Thresholds of each metrics in global or adapter level.
+### 7. (Optional) Specify Source code storing level to enable source code navigation.
 ![alt text](./images/config.png "Config")
 
 ## Pipeline example
