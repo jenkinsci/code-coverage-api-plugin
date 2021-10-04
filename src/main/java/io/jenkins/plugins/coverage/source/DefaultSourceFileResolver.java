@@ -39,10 +39,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultSourceFileResolver extends SourceFileResolver {
 
@@ -93,6 +96,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 final boolean copiedSucceed = workspace.act(new SourceFilePainter(
+                        listener,
                         sourceFilePath,
                         paint,
                         buildDirSourceFile,
@@ -154,7 +158,9 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     private static class SourceFilePainter extends MasterToSlaveFileCallable<Boolean> {
         private static final long serialVersionUID = 6548573019315830249L;
+        private static List<Path> allPossiblePaths;
 
+        private final TaskListener listener;
         private final String sourceFilePath;
         private final Set<String> possiblePaths;
         private final CoveragePaint paint;
@@ -168,6 +174,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 @NonNull Set<String> possiblePaths,
                 @NonNull Map<String, FilePath> sourceFileMapping
         ) {
+            this.listener = listener;
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;
@@ -177,14 +184,26 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         @Override
         public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
+            //adding some debugging stuff to see whats taking up time
+            long start = System.currentTimeMillis();
             FilePath sourceFile = tryFindSourceFile(workspace);
+            long finish = System.currentTimeMillis();
+            long timeElapsed = finish - start;
+            listener.getLogger().printf("Finding source file took: %d %n", timeElapsed);
+
             if (sourceFile == null) {
                 throw new IOException(
                         String.format("Unable to find source file %s in workspace %s", sourceFilePath, workspace.getAbsolutePath()));
             }
 
             try {
+                start = System.currentTimeMillis();
                 paintSourceCode(sourceFile, paint, destination);
+                finish = System.currentTimeMillis();
+
+                timeElapsed = finish - start;
+                listener.getLogger().printf("Painting source file took: %d %n", timeElapsed);
+
             } catch (CoverageException e) {
                 throw new IOException(e);
             }
@@ -195,8 +214,15 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private FilePath tryFindSourceFile(File workspace) {
             List<File> possibleDirectories = new LinkedList<>();
 
+            listener.getLogger().printf("paths fuck my life ig");
+            listener.getLogger().printf(workspace.getPath());
+            listener.getLogger().printf(sourceFilePath);
+            
+            long start = System.currentTimeMillis();
             // guess its parent directory
             for (String directory : possiblePaths) {
+                listener.getLogger().printf("possible path");    
+                listener.getLogger().printf(directory);
                 File pathFromRoot = new File(directory);
                 if (pathFromRoot.exists() && pathFromRoot.isDirectory()) {
                     possibleDirectories.add(pathFromRoot);
@@ -208,20 +234,36 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
+            long finish = System.currentTimeMillis();
+            long timeElapsed = finish - start;
+            listener.getLogger().printf("1 file took: %d %n", timeElapsed);
+
+            start = System.currentTimeMillis();
             // check if we can find source file in workspace
             File sourceFile = new File(workspace, sourceFilePath);
             if (isValidSourceFile(sourceFile)) {
                 return new FilePath(sourceFile);
             }
+            finish = System.currentTimeMillis();
+            timeElapsed = finish - start;
+            listener.getLogger().printf("2 file took: %d %n", timeElapsed);
 
+            start = System.currentTimeMillis();
             // check if we can find source file in the possible parent directories
             for (File directory : possibleDirectories) {
+                listener.getLogger().printf("possible directory");    
+                listener.getLogger().printf(directory.getPath());
                 sourceFile = new File(directory, sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
                     return new FilePath(sourceFile);
                 }
             }
 
+            finish = System.currentTimeMillis();
+            timeElapsed = finish - start;
+            listener.getLogger().printf("3 file took: %d %n", timeElapsed);
+
+            start = System.currentTimeMillis();
             // if sourceFilePath is a absolute path check if it is under the workspace directory
             if (Paths.get(sourceFilePath).isAbsolute()
                     && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
@@ -230,9 +272,56 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     return new FilePath(sourceFile);
                 }
             }
+            finish = System.currentTimeMillis();
+            timeElapsed = finish - start;
+            listener.getLogger().printf("4 file took: %d %n", timeElapsed);
+
+            start = System.currentTimeMillis();
+
+            // lets try this
+            List<Path> allPaths = getAllPossiblePaths();
+            List<Path> results;
+            if (allPaths != null) {
+                results = allPaths.stream().filter(x -> x.endsWith(sourceFilePath)).collect(Collectors.toList());
+                
+                // what if two files have the same sourceFilePath, but are in different parent directories?
+                if (results.size() > 0) {
+                    sourceFile = new File(results.get(0).toString());
+                    if (isValidSourceFile(sourceFile)) {
+                        return new FilePath(sourceFile);
+                    }
+                }
+            } 
+            else {
+                this.setAllPossiblePaths(workspace);
+            }
+
+            finish = System.currentTimeMillis();
+            timeElapsed = finish - start;
+            listener.getLogger().printf("5 file took: %d %n", timeElapsed);
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches
             return sourceFileMapping.get(sourceFilePath);
+        }
+
+        
+        private void setAllPossiblePaths(File workspace) {
+            try {
+                Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()));
+                List<Path> results = walk
+                    .filter(Files::isRegularFile)
+                    .collect(Collectors.toList());
+
+                this.allPossiblePaths = results;
+            }
+            catch (Exception ex){
+                //do nothing
+            }
+
+        }
+
+        private List<Path> getAllPossiblePaths() {
+            return allPossiblePaths;
         }
 
         private boolean isValidSourceFile(File sourceFile) {
