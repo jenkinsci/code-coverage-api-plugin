@@ -19,6 +19,44 @@ class CoverageNodeTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
 
     @Test
+    void shouldSplitPackagesWithoutPackageNodes() {
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+
+        root.add(new CoverageNode(CoverageMetric.FILE, "file.c"));
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+    }
+
+    @Test
+    void shouldSplitPackagesWithoutName() {
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+
+        root.add(new CoverageNode(CoverageMetric.PACKAGE, ""));
+        assertThat(root.getAll(PACKAGE)).hasSize(1);
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(1);
+    }
+
+    @Test
+    void shouldSplitPackagesWithSingleDot() {
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(0);
+
+        root.add(new CoverageNode(CoverageMetric.PACKAGE, "."));
+        assertThat(root.getAll(PACKAGE)).hasSize(1);
+        root.splitPackages();
+        assertThat(root.getAll(PACKAGE)).hasSize(1);
+    }
+
+    @Test
     void shouldConvertCodingStyleToTree() {
         CoverageNode tree = readExampleReport();
 
