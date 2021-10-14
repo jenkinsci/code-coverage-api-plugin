@@ -235,7 +235,7 @@ public class CoverageProcessor {
             previousResult = getPreviousResult(run.getPreviousBuild());
         }
 
-        if (!previousResult.isPresent()) {
+        if (!previousResult.isPresent() || previousResult.get().getResult() == null) {
             log.logInfo("-> Found no reference result in reference build");
 
             return Optional.empty();
