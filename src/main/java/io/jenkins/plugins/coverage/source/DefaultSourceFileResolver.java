@@ -89,6 +89,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
             try {
                 listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
+                listener.getLogger().printf("buildDirSourceFile %s. %n", buildDirSourceFile.toString());
 
                 Set<String> possibleParentPaths = getPossiblePaths();
                 if (possibleParentPaths == null) {
@@ -158,7 +159,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
     private static class SourceFilePainter extends MasterToSlaveFileCallable<Boolean> {
         private static final long serialVersionUID = 6548573019315830249L;
-        private static List<Path> allPossiblePaths;
+        private static List<Path> allPossiblePaths =  new ArrayList<>();
 
         private final TaskListener listener;
         private final String sourceFilePath;
@@ -186,27 +187,16 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         @Override
         public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
             //adding some debugging stuff to see whats taking up time
-            long start = System.currentTimeMillis();
-            
-            // in the case that there are source files that are named the same but have differing parent directories, we are gonna make this return a list instead
-            List<FilePath> sourcePath = tryFindSourceFile(workspace);
-            long finish = System.currentTimeMillis();
-            long timeElapsed = finish - start;
-            listener.getLogger().printf("Finding source file took: %d %n", timeElapsed);
-
-            if (sourcePath == null) {
+            listener.getLogger().printf("Invoked: %s -> %s %n", sourceFilePath.toString(), destination.toString());
+    
+            FilePath sourceFile = tryFindSourceFile(workspace);
+            if (sourceFile == null) {
                 throw new IOException(
                         String.format("Unable to find source file %s in workspace %s", sourceFilePath, workspace.getAbsolutePath()));
             }
 
             try {
-                for (FilePath sourceFile : sourcePath) {
-                    start = System.currentTimeMillis();
-                    paintSourceCode(sourceFile, paint, destination);
-                    finish = System.currentTimeMillis();
-                    timeElapsed = finish - start;
-                    listener.getLogger().printf("Painting source file took: %d %n", timeElapsed);
-                }
+                paintSourceCode(sourceFile, paint, destination);
             } catch (CoverageException e) {
                 throw new IOException(e);
             }
@@ -214,11 +204,11 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             return true;
         }
 
-        private List<FilePath> tryFindSourceFile(File workspace) {
+        private FilePath tryFindSourceFile(File workspace) {
             List<File> possibleDirectories = new LinkedList<>();
-            List<FilePath> results = new LinkedList<>();
-            listener.getLogger().printf(workspace.getPath());
-            listener.getLogger().printf(sourceFilePath);
+            FilePath result;
+            listener.getLogger().printf(workspace.getPath() + "%n");
+            listener.getLogger().printf("source file path: " + sourceFilePath + "%n");
             
             // guess its parent directory
             for (String directory : possiblePaths) {
@@ -236,15 +226,15 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             // check if we can find source file in workspace
             File sourceFile = new File(workspace, sourceFilePath);
             if (isValidSourceFile(sourceFile)) {
-                results.add(new FilePath(sourceFile));
-                return results;
+                result = new FilePath(sourceFile);
+                return result;
             }
             // check if we can find source file in the possible parent directories
             for (File directory : possibleDirectories) {
                 sourceFile = new File(directory, sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
-                    results.add(new FilePath(sourceFile));
-                    return results;
+                    result = new FilePath(sourceFile);
+                    return result;
                 }
             }
 
@@ -253,55 +243,82 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
                 sourceFile = new File(sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
-                    results.add(new FilePath(sourceFile));
-                    return results;
+                    result = new FilePath(sourceFile);
+                    return result;
                 }
             }
 
             // In case we still havent found the source file, this will walk through the direcrory and find files that match
             List<Path> allPaths = getAllPossiblePaths();
+            if (allPaths.size() == 0){
+                this.setAllPossiblePaths(workspace.getAbsolutePath());
+                listener.getLogger().printf("possible paths was empty%n");
+                allPaths = getAllPossiblePaths();
+            }
+
             List<Path> filteredPaths;
-            if (allPaths != null) {
+            if (allPaths.size() > 0) {
                 filteredPaths = allPaths.stream().filter(x -> x.endsWith(sourceFilePath)).collect(Collectors.toList());
+                if (filteredPaths.size() == 0) {
+                    listener.getLogger().printf("filtered paths is empty for file path: %s %n", sourceFilePath);
+                    for (Path temp : allPaths){
+                        listener.getLogger().printf("path: %s %n", temp.toString());
+                    }
+                }
+                
                 for (Path path : filteredPaths){
                     sourceFile = new File(path.toString());
                     if (isValidSourceFile(sourceFile)) {
-                        results.add(new FilePath(sourceFile));
+                        result = new FilePath(sourceFile);
+                        return result;
                     }
                 }
-                return results;
             } 
             else {
-                this.setAllPossiblePaths(workspace);
+                listener.getLogger().printf("All paths is empty%n");
             }
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches
             if(sourceFileMapping.containsKey(sourceFilePath)){
-                results.add(sourceFileMapping.get(sourceFilePath));
-                return results;
+                result = sourceFileMapping.get(sourceFilePath);
+                return result;
             }
 
             return null;
         }
 
-        
-        private void setAllPossiblePaths(File workspace) {
-            try {
-                Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()));
-                List<Path> results = walk
-                    .filter(Files::isRegularFile)
-                    .collect(Collectors.toList());
+        private void setAllPossiblePaths(String workspace) {
+            File directory = new File(workspace);
 
-                this.allPossiblePaths = results;
+            // Get all files from a directory.
+            File[] fList = directory.listFiles();
+            if(fList != null)
+                for (File file : fList) {      
+                    if (file.isFile()) {
+                        this.allPossiblePaths.add(file.toPath());
+                    } else if (file.isDirectory()) {
+                        setAllPossiblePaths(file.getAbsolutePath());
+                }
             }
-            catch (Exception ex){
-                //do nothing
-            }
-
         }
 
+        //private void setAllPossiblePaths(File workspace) {
+        //    try {
+        //        Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()));
+        //        List<Path> results = walk
+        //            .filter(Files::isRegularFile)
+        //            .collect(Collectors.toList());
+
+        //        this.allPossiblePaths = results;
+        //   }
+        //    catch (Exception ex){
+        //        //do nothing
+        //    }
+
+        //}
+
         private List<Path> getAllPossiblePaths() {
-            return allPossiblePaths;
+            return this.allPossiblePaths;
         }
 
         private boolean isValidSourceFile(File sourceFile) {

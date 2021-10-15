@@ -112,6 +112,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     private String relativeSourcePath;
 
+    private String packagePath;
+
     private final Map<String, Set<String>> additionalProperties = new HashMap<>();
 
     public transient Run<?, ?> owner = null;
@@ -143,6 +145,14 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
             }
 
         }
+    }
+
+    public void setPackageSourcePath(String path){
+        this.packagePath = path;
+    }
+
+    public String getPackageSourcePath(){
+        return this.packagePath;
     }
 
     /**
