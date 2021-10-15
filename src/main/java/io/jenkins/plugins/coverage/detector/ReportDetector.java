@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.detector;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -10,7 +11,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.apache.commons.io.FileUtils;
 
-import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;

@@ -1,8 +1,9 @@
 package io.jenkins.plugins.coverage.targets;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import java.io.Serializable;
 import java.util.Objects;
-import javax.annotation.Nonnull;
 
 public class CoverageElement implements Comparable<CoverageElement>, Serializable {
     private static final long serialVersionUID = 6722992955158201174L;
@@ -64,7 +65,7 @@ public class CoverageElement implements Comparable<CoverageElement>, Serializabl
     }
 
     @Override
-    public int compareTo(@Nonnull final CoverageElement coverageElement) {
+    public int compareTo(@NonNull final CoverageElement coverageElement) {
         if (this.order == coverageElement.order) {
             return 0;
         }
