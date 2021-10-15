@@ -129,7 +129,7 @@ public class CoveragePaint implements Serializable {
         private static final long serialVersionUID = 1L;
     }
 
-    protected TIntObjectMap<CoveragePaintDetails> lines = new TIntObjectHashMap<CoveragePaintDetails>();
+    protected TIntObjectMap<CoveragePaintDetails> lines = new TIntObjectHashMap<>();
 
     private int totalLines = 0;
 

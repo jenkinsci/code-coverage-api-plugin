@@ -13,7 +13,7 @@ public abstract class CoverageAdapter implements ExtensionPoint, Describable<Cov
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<CoverageAdapter> getDescriptor() {
-        return Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return Jenkins.get().getDescriptorOrDie(getClass());
     }
 
 }

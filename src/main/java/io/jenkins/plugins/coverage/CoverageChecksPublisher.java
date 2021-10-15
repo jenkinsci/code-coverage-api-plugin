@@ -207,7 +207,7 @@ class CoverageChecksPublisher {
     }
 
     private Map<String, Float> convertRatios(final Map<CoverageElement, Ratio> ratios) {
-        Map<String, Float> converted = new HashMap<String, Float>(ratios.size());
+        Map<String, Float> converted = new HashMap<>(ratios.size());
         for (Map.Entry<CoverageElement, Ratio> singleRatio : ratios.entrySet()) {
             converted.put(singleRatio.getKey().getName(), singleRatio.getValue().getPercentageFloat());
         }

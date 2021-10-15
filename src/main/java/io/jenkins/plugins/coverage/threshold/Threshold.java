@@ -12,7 +12,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class Threshold implements ExtensionPoint, Describable<Threshold>, Serializable {
@@ -92,7 +91,7 @@ public class Threshold implements ExtensionPoint, Describable<Threshold>, Serial
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<Threshold> getDescriptor() {
-        return Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return Jenkins.get().getDescriptorOrDie(getClass());
     }
 
     @Extension
