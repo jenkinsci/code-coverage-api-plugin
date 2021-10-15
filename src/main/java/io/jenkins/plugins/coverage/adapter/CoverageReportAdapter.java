@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import com.google.common.collect.Lists;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -14,7 +15,6 @@ import io.jenkins.plugins.coverage.threshold.Threshold;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.w3c.dom.Document;
 
-import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;

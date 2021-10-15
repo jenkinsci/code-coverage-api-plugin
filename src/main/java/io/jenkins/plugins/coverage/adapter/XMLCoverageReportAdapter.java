@@ -1,12 +1,12 @@
 package io.jenkins.plugins.coverage.adapter;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import io.jenkins.plugins.coverage.adapter.util.XMLUtils;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileNotFoundException;

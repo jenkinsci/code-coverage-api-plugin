@@ -1,10 +1,10 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -68,7 +68,7 @@ public class IstanbulCoberturaReportAdapter extends XMLCoverageReportAdapter {
             return CoverageElement.COVERAGE_ELEMENT_TYPE_JAVASCRIPT;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.IstanbulCoberturaReportAdapter_displayName();
