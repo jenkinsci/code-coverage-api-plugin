@@ -88,9 +88,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             final FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
 
             try {
-                listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
-                listener.getLogger().printf("buildDirSourceFile %s. %n", buildDirSourceFile.toString());
-
                 Set<String> possibleParentPaths = getPossiblePaths();
                 if (possibleParentPaths == null) {
                     possibleParentPaths = Collections.emptySet();
@@ -185,9 +182,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
 
         @Override
         public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
-            //adding some debugging stuff to see whats taking up time
-            listener.getLogger().printf("Invoked: %s -> %s %n", sourceFilePath.toString(), destination.toString());
-    
             FilePath sourceFile = tryFindSourceFile(workspace);
             if (sourceFile == null) {
                 throw new IOException(
@@ -206,8 +200,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private FilePath tryFindSourceFile(File workspace) {
             List<File> possibleDirectories = new LinkedList<>();
             FilePath result;
-            listener.getLogger().printf(workspace.getPath() + "%n");
-            listener.getLogger().printf("source file path: " + sourceFilePath + "%n");
             
             // guess its parent directory
             for (String directory : possiblePaths) {
@@ -251,19 +243,12 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             List<Path> allPaths = getAllPossiblePaths();
             if (allPaths.size() == 0){
                 this.setAllPossiblePaths(workspace.getAbsolutePath());
-                listener.getLogger().printf("possible paths was empty%n");
                 allPaths = getAllPossiblePaths();
             }
 
             List<Path> filteredPaths;
             if (allPaths.size() > 0) {
                 filteredPaths = allPaths.stream().filter(x -> x.endsWith(sourceFilePath)).collect(Collectors.toList());
-                if (filteredPaths.size() == 0) {
-                    listener.getLogger().printf("filtered paths is empty for file path: %s %n", sourceFilePath);
-                    for (Path temp : allPaths){
-                        listener.getLogger().printf("path: %s %n", temp.toString());
-                    }
-                }
                 
                 for (Path path : filteredPaths){
                     sourceFile = new File(path.toString());
@@ -272,9 +257,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                         return result;
                     }
                 }
-            } 
-            else {
-                listener.getLogger().printf("All paths is empty%n");
             }
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches
