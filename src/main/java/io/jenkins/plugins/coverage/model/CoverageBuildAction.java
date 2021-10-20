@@ -221,7 +221,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Default {@link Converter} implementation for XStream that does interning scoped to one unmarshalling.
+     * {@link Converter} for {@link CoverageMetric} instances so that only the string name will be serialized. After
+     * reading the values back from the stream, the string representation will be converted to an actual instance
+     * again.
      */
     private static final class MetricsConverter implements Converter {
         @SuppressWarnings("PMD.NullAssignment")

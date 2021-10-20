@@ -21,6 +21,7 @@
  */
 package io.jenkins.plugins.coverage.source;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
@@ -36,7 +37,6 @@ import org.apache.commons.io.FileUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -160,7 +160,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private static final long serialVersionUID = 6548573019315830249L;
         private static List<Path> allPossiblePaths;
 
-        private final TaskListener listener;
         private final String sourceFilePath;
         private final Set<String> possiblePaths;
         private final CoveragePaint paint;
@@ -168,14 +167,12 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private final Map<String, FilePath> sourceFileMapping;
 
         SourceFilePainter(
-                @Nonnull TaskListener listener,
-                @Nonnull String sourceFilePath,
-                @Nonnull CoveragePaint paint,
-                @Nonnull FilePath destination,
-                @Nonnull Set<String> possiblePaths,
-                @Nonnull Map<String, FilePath> sourceFileMapping
+                @NonNull String sourceFilePath,
+                @NonNull CoveragePaint paint,
+                @NonNull FilePath destination,
+                @NonNull Set<String> possiblePaths,
+                @NonNull Map<String, FilePath> sourceFileMapping
         ) {
-            this.listener = listener;
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;

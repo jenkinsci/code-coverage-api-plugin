@@ -36,7 +36,7 @@ public abstract class SourceFileResolver implements ExtensionPoint, Describable<
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<SourceFileResolver> getDescriptor() {
-        return Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return Jenkins.get().getDescriptorOrDie(getClass());
     }
 
 

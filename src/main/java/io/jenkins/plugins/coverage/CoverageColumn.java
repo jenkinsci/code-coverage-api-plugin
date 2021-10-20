@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage;
 
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.views.ListViewColumn;
@@ -93,6 +94,7 @@ public class CoverageColumn extends ListViewColumn {
             return false;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.CoverageColumn_ColumnName();

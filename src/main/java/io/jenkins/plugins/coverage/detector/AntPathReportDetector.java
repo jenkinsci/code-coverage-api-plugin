@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.detector;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
@@ -11,7 +12,6 @@ import jenkins.MasterToSlaveFileCallable;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class AntPathReportDetector extends ReportDetector {
             super(AntPathReportDetector.class);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.AntPathDetector_displayName();
