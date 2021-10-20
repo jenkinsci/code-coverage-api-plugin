@@ -94,7 +94,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 final boolean copiedSucceed = workspace.act(new SourceFilePainter(
-                        listener,
                         sourceFilePath,
                         paint,
                         buildDirSourceFile,
@@ -158,7 +157,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         private static final long serialVersionUID = 6548573019315830249L;
         private static List<Path> allPossiblePaths =  new ArrayList<>();
 
-        private final TaskListener listener;
         private final String sourceFilePath;
         private final Set<String> possiblePaths;
         private final CoveragePaint paint;
@@ -172,7 +170,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 @NonNull Set<String> possiblePaths,
                 @NonNull Map<String, FilePath> sourceFileMapping
         ) {
-            this.listener = listener;
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
             this.destination = destination;
