@@ -36,7 +36,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
     private static final long serialVersionUID = -6023811049340671399L;
 
-    static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage-24x24.png";
+    static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
     private static final String NO_REFERENCE_BUILD = "-";
 
     /** Relative URL to the details of the code coverage results. */
