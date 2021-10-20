@@ -1,11 +1,11 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -53,7 +53,7 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
             super(JacocoReportAdapter.class);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.JacocoReportAdapter_displayName();

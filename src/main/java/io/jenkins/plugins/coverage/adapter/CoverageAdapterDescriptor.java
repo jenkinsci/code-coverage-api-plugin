@@ -11,6 +11,6 @@ public class CoverageAdapterDescriptor<T extends CoverageAdapter> extends Descri
     }
 
     public static DescriptorExtensionList<CoverageAdapter, CoverageAdapterDescriptor<?>> all() {
-        return Jenkins.getInstance().getDescriptorList(CoverageAdapter.class);
+        return Jenkins.get().getDescriptorList(CoverageAdapter.class);
     }
 }

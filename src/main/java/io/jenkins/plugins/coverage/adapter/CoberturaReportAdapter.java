@@ -1,9 +1,9 @@
 package io.jenkins.plugins.coverage.adapter;
 
 import java.io.File;
-import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -74,7 +74,7 @@ public final class CoberturaReportAdapter extends JavaXMLCoverageReportAdapter {
             return "coverage".equals(e.getLocalName());
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.CoberturaReportAdapter_displayName();

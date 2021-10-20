@@ -347,11 +347,21 @@ public final class CoverageNode implements Serializable {
      */
     public void splitPackages() {
         if (CoverageMetric.MODULE.equals(metric)) {
-            List<CoverageNode> allPackages = new ArrayList<>(children);
-            children.clear();
-            for (CoverageNode aPackage : allPackages) {
-                Deque<String> packageLevels = new ArrayDeque<>(Arrays.asList(aPackage.getName().split("\\.")));
-                insertPackage(aPackage, packageLevels);
+            List<CoverageNode> allPackages = children.stream()
+                    .filter(child -> CoverageMetric.PACKAGE.equals(child.getMetric()))
+                    .collect(Collectors.toList());
+            if (!allPackages.isEmpty()) {
+                children.clear();
+                for (CoverageNode packageNode : allPackages) {
+                    String[] packageParts = packageNode.getName().split("\\.");
+                    if (packageParts.length > 1) {
+                        Deque<String> packageLevels = new ArrayDeque<>(Arrays.asList(packageParts));
+                        insertPackage(packageNode, packageLevels);
+                    }
+                    else {
+                        add(packageNode);
+                    }
+                }
             }
         }
     }
