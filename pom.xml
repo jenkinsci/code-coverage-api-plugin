@@ -22,7 +22,7 @@
     <revision>2.0.3</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
-    <jenkins.baseline>2.263</jenkins.baseline>
+    <jenkins.baseline>2.289</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.1</jenkins.version>
     <java.level>8</java.level>
 
