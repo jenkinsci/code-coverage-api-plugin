@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Group-Id: io.jenkins.plugins
+Short-Name: code-coverage-api
+Long-Name: Code Coverage API Plugin
+Url: https://github.com/jenkinsci/code-coverage-api-plugin
+Minimum-Java-Version: 1.8
+Plugin-Version: 1.4.2-SNAPSHOT (private-fe125020-temcdona)
+Hudson-Version: 2.249.1
+Jenkins-Version: 2.249.1
+Plugin-Dependencies: checks-api:1.7.0,echarts-api:5.1.0-2,font-awesome
+ -api:5.15.3-2,forensics-api:1.0.0,plugin-util-api:2.2.0,pull-request-
+ monitoring:1.7.1;resolution:=optional,workflow-multibranch:2.24,displ
+ ay-url-api:2.3.4,jackson2-api:2.12.3
+Plugin-Developers: Shenyu Zheng:cizezsy:zsy19980307@gmail.com
+Plugin-License-Name: MIT License
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmUrl: https://github.com/jenkinsci/code-coverage-api-plugin
+Libraries: C:\Users\temcdona\dev\code-coverage-api-plugin\src\main\res
+ ources,C:\Users\temcdona\dev\code-coverage-api-plugin\target\classes,
+ C:\Users\temcdona\.m2\repository\com\google\code\gson\gson\2.8.6\gson
+ -2.8.6.jar,C:\Users\temcdona\.m2\repository\net\sf\saxon\Saxon-HE\9.9
+ .1-4\Saxon-HE-9.9.1-4.jar,C:\Users\temcdona\.m2\repository\net\sf\tro
+ ve4j\trove4j\3.0.3\trove4j-3.0.3.jar
+Resource-Path: C:\Users\temcdona\dev\code-coverage-api-plugin\src\main
+ \webapp
+
