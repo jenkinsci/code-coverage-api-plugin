@@ -32,7 +32,6 @@ class CoverageResultTest extends AbstractCoverageTest {
     @Test
     void shouldReadJaCoCoResult() throws CoverageException {
         CoverageResult project = readReport("jacoco-codingstyle.xml");
-
         assertThat(project.getElement()).isEqualTo(REPORT);
         assertThat(project.hasSingletonChild()).isTrue();
         assertThat(project.getChildren()).hasSize(1).containsExactly(EXPECTED_PACKAGE_NAME);
