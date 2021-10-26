@@ -18,7 +18,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  */
 class CoverageResultTest extends AbstractCoverageTest {
     private static final String EXPECTED_PACKAGE_NAME = "edu.hm.hafner.util";
-    private static final String TREE_STRING_BUILDER_FILE_NAME = "TreeStringBuilder.java";
+    private static final String TREE_STRING_BUILDER_FILE_NAME = "edu/hm/hafner/util/TreeStringBuilder.java";
     private static final String TREE_STRING_BUILDER_CLASS = "edu.hm.hafner.util.TreeStringBuilder";
 
     private static final CoverageElement LINE = CoverageElement.LINE;
@@ -40,16 +40,16 @@ class CoverageResultTest extends AbstractCoverageTest {
         CoverageResult utilPackage = project.getSingletonChild();
         assertThat(utilPackage.getElement()).isEqualTo(PACKAGE);
         assertThat(utilPackage.getChildren()).hasSize(10).containsExactly(
-                "Ensure.java",
-                "FilteredLog.java",
-                "Generated.java",
-                "NoSuchElementException.java",
-                "PathUtil.java",
-                "PrefixLogger.java",
-                "StringContainsUtils.java",
-                "TreeString.java",
+                "edu/hm/hafner/util/Ensure.java",
+                "edu/hm/hafner/util/FilteredLog.java",
+                "edu/hm/hafner/util/Generated.java",
+                "edu/hm/hafner/util/NoSuchElementException.java",
+                "edu/hm/hafner/util/PathUtil.java",
+                "edu/hm/hafner/util/PrefixLogger.java",
+                "edu/hm/hafner/util/StringContainsUtils.java",
+                "edu/hm/hafner/util/TreeString.java",
                 TREE_STRING_BUILDER_FILE_NAME,
-                "VisibleForTesting.java");
+                "edu/hm/hafner/util/VisibleForTesting.java");
         verifyCoverage(utilPackage, LINE, 294, 29);
         verifyCoverage(utilPackage, INSTRUCTION, 1260, 90);
         verifyCoverage(utilPackage, BRANCH, 109, 7);
