@@ -271,6 +271,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldCreatePackageName() {
         CoverageNode tree = readExampleReport();
 
+
         String fileName = "edu/hm/hafner/util/Ensure.java";
         assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
                 node -> {
