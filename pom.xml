@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>5.12.0</version>
+    <version>5.13.0</version>
     <relativePath />
   </parent>
 
@@ -22,9 +22,6 @@
     <revision>2.0.3</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
-    <jenkins.baseline>2.263</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
-    <java.level>8</java.level>
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>10.6</saxon-he.version>
@@ -50,6 +47,11 @@
       <id>cizezsy</id>
       <name>Shenyu Zheng</name>
       <email>zsy19980307@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Ullrich Hafner</name>
+      <id>uhafner</id>
+      <email>ullrich.hafner@gmail.com</email>
     </developer>
   </developers>
 

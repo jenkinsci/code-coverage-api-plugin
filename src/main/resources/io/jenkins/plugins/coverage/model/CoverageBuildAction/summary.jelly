@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
-  <t:summary icon="/plugin/code-coverage-api/icons/coverage-48x48.png">
+  <t:summary icon="/plugin/code-coverage-api/icons/coverage.svg">
     <j:set var="result" value="${it.result}"/>
     <j:choose>
       <j:when test="${size(result.children) == 1}">
