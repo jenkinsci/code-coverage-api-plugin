@@ -157,7 +157,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldComputeDelta() {
         CoverageNode tree = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
 
-        String checkStyleParser = "CheckStyleParser.java";
+        String checkStyleParser = "edu/hm/hafner/analysis/parser/checkstyle/CheckStyleParser.java";
         Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageMetric.FILE, checkStyleParser);
         assertThat(wrappedCheckStyle).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(checkStyleParser)
@@ -171,7 +171,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .extractingByKey(LINE).satisfies(
                         p -> assertThat(p).isEqualTo(0.97, Offset.offset(0.01)));
 
-        String pmdParser = "PmdParser.java";
+        String pmdParser = "edu/hm/hafner/analysis/parser/pmd/PmdParser.java";
         Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParser);
         assertThat(wrappedPmd).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(pmdParser)
@@ -245,7 +245,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode tree = readExampleReport();
         tree.splitPackages();
 
-        String fileName = "Ensure.java";
+        String fileName = "edu/hm/hafner/util/Ensure.java";
         assertThat(tree.findByHashCode(FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(fileName).isNotRoot().hasUncoveredLines(
@@ -256,7 +256,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
         assertThat(tree.findByHashCode(FILE, "not-found".hashCode())).isEmpty();
 
-        String noBranchCoverage = "NoSuchElementException.java";
+        String noBranchCoverage = "edu/hm/hafner/util/NoSuchElementException.java";
         assertThat(tree.find(FILE, noBranchCoverage)).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(noBranchCoverage).isNotRoot();
@@ -271,7 +271,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldCreatePackageName() {
         CoverageNode tree = readExampleReport();
 
-        String fileName = "Ensure.java";
+        String fileName = "edu/hm/hafner/util/Ensure.java";
         assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
                 node -> {
                     assertThat(node).hasName(fileName)
