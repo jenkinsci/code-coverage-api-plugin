@@ -214,15 +214,13 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             // check if we can find source file in workspace
             File sourceFile = new File(workspace, sourceFilePath);
             if (isValidSourceFile(sourceFile)) {
-                result = new FilePath(sourceFile);
-                return result;
+                return new FilePath(sourceFile);
             }
             // check if we can find source file in the possible parent directories
             for (File directory : possibleDirectories) {
                 sourceFile = new File(directory, sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
-                    result = new FilePath(sourceFile);
-                    return result;
+                    return new FilePath(sourceFile);
                 }
             }
 
@@ -231,8 +229,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
                 sourceFile = new File(sourceFilePath);
                 if (isValidSourceFile(sourceFile)) {
-                    result = new FilePath(sourceFile);
-                    return result;
+                    return new FilePath(sourceFile);
                 }
             }
 
@@ -250,16 +247,14 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 for (Path path : filteredPaths){
                     sourceFile = new File(path.toString());
                     if (isValidSourceFile(sourceFile)) {
-                        result = new FilePath(sourceFile);
-                        return result;
+                        return new FilePath(sourceFile);
                     }
                 }
             }
 
             // fallback to use the pre-scanned workspace to see if there's a file that matches
             if(sourceFileMapping.containsKey(sourceFilePath)){
-                result = sourceFileMapping.get(sourceFilePath);
-                return result;
+                return sourceFileMapping.get(sourceFilePath);
             }
 
             return null;
@@ -279,21 +274,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
         }
-
-        //private void setAllPossiblePaths(File workspace) {
-        //    try {
-        //        Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()));
-        //        List<Path> results = walk
-        //            .filter(Files::isRegularFile)
-        //            .collect(Collectors.toList());
-
-        //        this.allPossiblePaths = results;
-        //   }
-        //    catch (Exception ex){
-        //        //do nothing
-        //    }
-
-        //}
 
         private List<Path> getAllPossiblePaths() {
             return this.allPossiblePaths;
