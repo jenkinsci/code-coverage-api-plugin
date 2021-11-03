@@ -9,6 +9,7 @@
     <st:adjunct includes="io.jenkins.plugins.data-tables"/>
 
     <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
+    <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
 
     <div class="row py-3 flex-nowrap">
       <div class="col d-flex">
@@ -65,8 +66,6 @@
   </bs:page>
 
   <c:chart-setup id="coverage-history"/>
-
-  <script type="text/javascript" src="${rootURL}/plugin/code-coverage-api/js/charts.js"/>
 
   <script>
     const viewProxy =<st:bind value="${it}"/>;
