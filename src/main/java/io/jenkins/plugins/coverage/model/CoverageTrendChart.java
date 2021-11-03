@@ -36,23 +36,24 @@ public class CoverageTrendChart {
         LinesDataSet dataSet = builder.createDataSet(configuration, results);
 
         LinesChartModel model = new LinesChartModel(dataSet);
-        model.useContinuousRangeAxis();
-        model.setRangeMax(100);
-        model.setRangeMin(Math.max(0,
-                Math.min(createRangeMinFor(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
-                createRangeMinFor(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE)
-                )));
+        if (!dataSet.isEmpty()) {
+            model.useContinuousRangeAxis();
+            model.setRangeMax(100);
+            model.setRangeMin(Math.max(0,
+                    Math.min(createRangeMinFor(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
+                            createRangeMinFor(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE)
+                    )));
 
-        LineSeries lineSeries = new LineSeries("Line", Palette.GREEN.getNormal(),
-                StackedMode.SEPARATE_LINES, FilledMode.FILLED);
-        lineSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE));
-        model.addSeries(lineSeries);
+            LineSeries lineSeries = new LineSeries("Line", Palette.GREEN.getNormal(),
+                    StackedMode.SEPARATE_LINES, FilledMode.FILLED);
+            lineSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE));
+            model.addSeries(lineSeries);
 
-        LineSeries branchSeries = new LineSeries("Branch", Palette.GREEN.getHover(),
-                StackedMode.SEPARATE_LINES, FilledMode.FILLED);
-        branchSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE));
-        model.addSeries(branchSeries);
-
+            LineSeries branchSeries = new LineSeries("Branch", Palette.GREEN.getHover(),
+                    StackedMode.SEPARATE_LINES, FilledMode.FILLED);
+            branchSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE));
+            model.addSeries(branchSeries);
+        }
         return model;
     }
 

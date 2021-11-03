@@ -30,7 +30,7 @@
     <data-tables-api.version>1.11.3-1</data-tables-api.version>
     <forensics-api.version>1.5.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
-    <plugin-util-api.version>2.5.0</plugin-util-api.version>
+    <plugin-util-api.version>2.5.1</plugin-util-api.version>
     <fontawesome-api.version>5.15.4-1</fontawesome-api.version>
     <bootstrap5-api.version>5.1.1-1</bootstrap5-api.version>
     <jquery3-api.version>3.6.0-2</jquery3-api.version>
