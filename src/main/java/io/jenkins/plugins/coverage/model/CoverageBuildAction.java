@@ -253,7 +253,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         protected void configureXStream(final XStream2 xStream) {
             xStream.alias("node", CoverageNode.class);
             xStream.alias("leaf", CoverageLeaf.class);
-            xStream.addImmutableType(CoverageMetric.class);
+            xStream.addImmutableType(CoverageMetric.class, false);
             xStream.registerConverter(new MetricsConverter());
         }
 
