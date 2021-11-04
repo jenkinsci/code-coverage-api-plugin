@@ -82,7 +82,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         final Map<String, FilePath> sourceFileMapping = createSourceFileMapping(workspace, listener);
 
         paints.forEach((sourceFilePath, paint) -> {
-            final FilePath buildDirSourceFile = new FilePath(new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath)));
+            final File buildDirSourceFile = new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath));
 
             try {
                 listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
@@ -92,17 +92,13 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                     possibleParentPaths = Collections.emptySet();
                 }
 
-                final boolean copiedSucceed = workspace.act(new SourceFilePainter(
+                FileUtils.write(buildDirSourceFile, workspace.act(new SourceFilePainter(
                         sourceFilePath,
                         paint,
-                        buildDirSourceFile,
                         possibleParentPaths,
                         sourceFileMapping
-                ));
-                if (copiedSucceed) {
-                    listener.getLogger().printf("Copied %s. %n", sourceFilePath);
-
-                }
+                )), StandardCharsets.UTF_8);
+                listener.getLogger().printf("Copied %s. %n", sourceFilePath);
 
             } catch (IOException | InterruptedException e) {
                 listener.getLogger().println(e.getMessage());
@@ -152,31 +148,28 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         }
     }
 
-    private static class SourceFilePainter extends MasterToSlaveFileCallable<Boolean> {
+    private static class SourceFilePainter extends MasterToSlaveFileCallable<String> {
         private static final long serialVersionUID = 6548573019315830249L;
 
         private final String sourceFilePath;
         private final Set<String> possiblePaths;
         private final CoveragePaint paint;
-        private final FilePath destination;
         private final Map<String, FilePath> sourceFileMapping;
 
         SourceFilePainter(
                 @NonNull String sourceFilePath,
                 @NonNull CoveragePaint paint,
-                @NonNull FilePath destination,
                 @NonNull Set<String> possiblePaths,
                 @NonNull Map<String, FilePath> sourceFileMapping
         ) {
             this.sourceFilePath = sourceFilePath;
             this.paint = paint;
-            this.destination = destination;
             this.possiblePaths = possiblePaths;
             this.sourceFileMapping = sourceFileMapping;
         }
 
         @Override
-        public Boolean invoke(File workspace, VirtualChannel channel) throws IOException {
+        public String invoke(File workspace, VirtualChannel channel) throws IOException {
             FilePath sourceFile = tryFindSourceFile(workspace);
             if (sourceFile == null) {
                 throw new IOException(
@@ -184,12 +177,10 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             }
 
             try {
-                paintSourceCode(sourceFile, paint, destination);
+                return paintSourceCode(sourceFile, paint);
             } catch (CoverageException e) {
                 throw new IOException(e);
             }
-
-            return true;
         }
 
         private FilePath tryFindSourceFile(File workspace) {
@@ -239,8 +230,8 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             return sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead();
         }
 
-        private void paintSourceCode(FilePath source, CoveragePaint paint, FilePath canvas) throws CoverageException {
-            try (BufferedWriter output = new BufferedWriter(new OutputStreamWriter(canvas.write(), StandardCharsets.UTF_8));
+        private String paintSourceCode(FilePath source, CoveragePaint paint) throws CoverageException {
+            try (StringWriter output = new StringWriter();
                  BufferedReader input = new BufferedReader(new InputStreamReader(source.read(), StandardCharsets.UTF_8))) {
                 int line = 0;
                 String content;
@@ -276,6 +267,7 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
 
                 paint.setTotalLines(line);
+                return output.toString();
             } catch (IOException | InterruptedException e) {
                 throw new CoverageException(e);
             }

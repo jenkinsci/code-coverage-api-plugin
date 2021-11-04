@@ -5,18 +5,14 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import jenkins.MasterToSlaveFileCallable;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AntPathReportDetector extends ReportDetector {
 
@@ -30,12 +26,7 @@ public class AntPathReportDetector extends ReportDetector {
     @Override
     public List<FilePath> findFiles(Run<?, ?> run, FilePath workspace, TaskListener listener) throws CoverageException {
         try {
-            return Arrays.stream(workspace.act(new MasterToSlaveFileCallable<FilePath[]>() {
-                @Override
-                public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    return workspace.list(path);
-                }
-            })).collect(Collectors.toList());
+            return Arrays.asList(workspace.list(path));
         } catch (IOException | InterruptedException e) {
             throw new CoverageException(e);
         }
