@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage;
 
 import hudson.model.Descriptor;
+import hudson.model.Slave;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
@@ -21,6 +22,7 @@ public class CoverageScriptedPipelineScriptBuilder {
     private boolean applyThresholdRecursively;
 
     private boolean enableSourceFileResolver;
+    private Slave agent;
 
     private CoverageScriptedPipelineScriptBuilder() {
     }
@@ -40,10 +42,18 @@ public class CoverageScriptedPipelineScriptBuilder {
         return this;
     }
 
+    public CoverageScriptedPipelineScriptBuilder onAgent(Slave slave) {
+        this.agent = slave;
+        return this;
+    }
 
     public String build() {
         StringBuilder sb = new StringBuilder();
-        sb.append("node {")
+        sb.append("node");
+        if (agent != null) {
+            sb.append("('").append(agent.getNodeName()).append("')");
+        }
+        sb.append(" {")
                 .append("publishCoverage(");
 
         sb.append("failUnhealthy:").append(failUnhealthy);
