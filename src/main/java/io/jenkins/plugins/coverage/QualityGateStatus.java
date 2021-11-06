@@ -65,6 +65,4 @@ public enum QualityGateStatus {
     public boolean isWorseThan(final QualityGateStatus other) {
         return ordinal() > other.ordinal();
     }
-
-
 }
