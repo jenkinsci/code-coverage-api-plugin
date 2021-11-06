@@ -20,14 +20,14 @@ public class QualityGateEvaluator {
         QualityGateStatus status = QualityGateStatus.PASSED;
 
         for (QualityGate qualityGate : qualityGates) {
-            CoverageMetric metric = qualityGate.getType();
-            Coverage coverage = rootNode.getCoverage(metric);
-            if (coverage.getCoveredPercentage() < qualityGate.getThreshold()) {
-                if (qualityGate.getStatusIfNotPassedSuccesful().isWorseThan(status)) {
-                    status = qualityGate.getStatusIfNotPassedSuccesful();
+            Coverage coverage = rootNode.getCoverage(qualityGate.getType());
+            if (coverage != null) {
+                if (coverage.getCoveredPercentage() < qualityGate.getThreshold()) {
+                    if (qualityGate.getStatusIfNotPassedSuccesful().isWorseThan(status)) {
+                        status = qualityGate.getStatusIfNotPassedSuccesful();
+                    }
                 }
             }
-
         }
         return status;
     }
