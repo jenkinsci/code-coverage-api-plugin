@@ -8,8 +8,8 @@ import io.jenkins.plugins.coverage.model.CoverageNode;
 
 public class QualityGateEvaluator {
 
-    public QualityGateStatus evaluate(final CoverageNode coverageNode, final List<QualityGate> qualityGates, final FormattedLogger logger) {
-        return QualityGateStatus.FAILED;
+    public QualityGateStatus evaluate(final CoverageNode rootNode, final List<QualityGate> qualityGates, final FormattedLogger logger) {
+        return null;
     }
 
     /**
