@@ -4,17 +4,29 @@ import java.io.Serializable;
 
 import java.util.Objects;
 
+import edu.hm.hafner.util.VisibleForTesting;
+
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
+import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
+import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.util.JenkinsFacade;
 
 public class QualityGate implements Serializable {
 
     private final float threshold;
-    private final QualityGateType type;
+    private final CoverageMetric type;
     private final QualityGateStatus status;
 
-    public QualityGate(final float threshold, final QualityGateType type, final boolean unstable) {
+    public QualityGate(final float threshold, final CoverageMetric type, final boolean unstable) {
         this.threshold = threshold;
         this.type = type;
         this.status = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
