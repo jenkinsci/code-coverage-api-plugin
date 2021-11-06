@@ -46,6 +46,16 @@ public enum QualityGateStatus {
     }
 
     /**
+     * Returns whether the quality gate has not been passed successful.
+     *
+     * @return {@code true} if the quality gate has been passed, {@code false}  otherwise
+     */
+    @Whitelisted
+    public boolean isNotSuccessful() {
+        return this == WARNING || this == FAILED;
+    }
+
+    /**
      * Returns the associated {@link Result}.
      *
      * @return the associated {@link Result}

@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.QualityGateEvaluator.FormattedLogger;
+import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 
@@ -34,7 +35,7 @@ class QualityGateEvaluatorTest {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
         root.setUncoveredLines(1);
-        QualityGate qualityGateStable = new QualityGate(100, CoverageMetric.FILE, false);
+        QualityGate qualityGateStable = new QualityGate(1, CoverageMetric.FILE, false);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateStable);
@@ -51,7 +52,7 @@ class QualityGateEvaluatorTest {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
         root.setUncoveredLines(1);
-        QualityGate qualityGateStable = new QualityGate(100, CoverageMetric.FILE, true);
+        QualityGate qualityGateStable = new QualityGate(1, CoverageMetric.FILE, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateStable);
@@ -65,9 +66,10 @@ class QualityGateEvaluatorTest {
     void shouldBePassedIfQualityGateSucceeded() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
-        root.setUncoveredLines(0);
-        QualityGate qualityGateStable = new QualityGate(100, CoverageMetric.FILE, true);
+        CoverageNode root = mock(CoverageNode.class);
+        when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(100, 0));
+
+        QualityGate qualityGateStable = new QualityGate(1, CoverageMetric.FILE, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateStable);
@@ -81,11 +83,14 @@ class QualityGateEvaluatorTest {
     void shouldBePassedIfAllQualityGatesSucceeded() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
-        root.setUncoveredLines(0);
+
+        CoverageNode root = mock(CoverageNode.class);
+        when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(100, 0));
+        when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(100, 0));
+
         // Min 90% of files need at least one line covered
-        QualityGate qualityGateStableOne = new QualityGate(90, CoverageMetric.FILE, true);
-        QualityGate qualityGateStableTwo = new QualityGate(100, CoverageMetric.BRANCH, true);
+        QualityGate qualityGateStableOne = new QualityGate(0.9f, CoverageMetric.FILE, true);
+        QualityGate qualityGateStableTwo = new QualityGate(1, CoverageMetric.BRANCH, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateStableOne);
@@ -105,7 +110,6 @@ class QualityGateEvaluatorTest {
     void shouldBeInactiveIfNoQualityGateMatchCoverageNode() {
 
     }
-
 
     /**
      * Logger for the tests that provides a way verify and clear the messages.

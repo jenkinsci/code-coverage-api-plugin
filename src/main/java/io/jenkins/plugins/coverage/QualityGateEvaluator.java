@@ -4,12 +4,32 @@ import java.util.List;
 
 import com.google.errorprone.annotations.FormatMethod;
 
+import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 
 public class QualityGateEvaluator {
 
-    public QualityGateStatus evaluate(final CoverageNode rootNode, final List<QualityGate> qualityGates, final FormattedLogger logger) {
-        return null;
+    public QualityGateStatus evaluate(final CoverageNode rootNode, final List<QualityGate> qualityGates,
+            final FormattedLogger logger) {
+        if (qualityGates.isEmpty()) {
+            logger.print("-> INACTIVE - No quality gate defined");
+
+            return QualityGateStatus.INACTIVE;
+        }
+        QualityGateStatus status = QualityGateStatus.PASSED;
+
+        for (QualityGate qualityGate : qualityGates) {
+            CoverageMetric metric = qualityGate.getType();
+            Coverage coverage = rootNode.getCoverage(metric);
+            if (coverage.getCoveredPercentage() < qualityGate.getThreshold()) {
+                if (qualityGate.getStatusIfNotPassedSuccesful().isWorseThan(status)) {
+                    status = qualityGate.getStatusIfNotPassedSuccesful();
+                }
+            }
+
+        }
+        return status;
     }
 
     /**
