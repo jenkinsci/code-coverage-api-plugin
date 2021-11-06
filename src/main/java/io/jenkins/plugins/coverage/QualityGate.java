@@ -1,19 +1,14 @@
-
 package io.jenkins.plugins.coverage;
-
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 
 public class QualityGate {
 
     private final int threshold;
-    private final CoverageMetric metric;
-    private final QualityGateStatus status = QualityGateStatus.INACTIVE;
-    private final QualityGateStatus statusWhenNotPassed;
+    private final QualityGateType type;
+    private final QualityGateStatus status;
 
-
-    public QualityGate(final int requiredPercentage, final CoverageMetric metric, final QualityGateStatus statusWhenNotPassed) {
-        this.threshold = requiredPercentage;
-        this.metric = metric;
-        this.statusWhenNotPassed = statusWhenNotPassed;
+    public QualityGate(final int threshold, final QualityGateType type, final boolean unstable) {
+        this.threshold = threshold;
+        this.type = type;
+        this.status = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
     }
 }
