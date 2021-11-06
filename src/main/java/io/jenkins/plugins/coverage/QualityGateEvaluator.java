@@ -1,29 +1,15 @@
 package io.jenkins.plugins.coverage;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.google.errorprone.annotations.FormatMethod;
 
 import io.jenkins.plugins.coverage.model.CoverageNode;
 
-/**
- *
- * @author Nikolas Paripovic / Michael Müller
- */
 public class QualityGateEvaluator {
-    private final List<QualityGate> qualityGates = new ArrayList<>();
 
-    /**
-     *
-     * @param coverageNode
-     * @param qualityGates
-     * @param logger
-     * @return
-     */
     public QualityGateStatus evaluate(final CoverageNode coverageNode, final List<QualityGate> qualityGates, final FormattedLogger logger) {
-        return null;
+        return QualityGateStatus.FAILED;
     }
 
     /**
@@ -44,4 +30,5 @@ public class QualityGateEvaluator {
         @FormatMethod
         void print(String format, Object... args);
     }
+
 }
