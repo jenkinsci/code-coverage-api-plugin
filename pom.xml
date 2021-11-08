@@ -26,7 +26,7 @@
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>10.6</saxon-he.version>
 
-    <echarts-api.version>5.2.1-2</echarts-api.version>
+    <echarts-api.version>5.2.2-1</echarts-api.version>
     <data-tables-api.version>1.11.3-1</data-tables-api.version>
     <forensics-api.version>1.5.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
