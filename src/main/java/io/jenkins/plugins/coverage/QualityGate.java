@@ -6,13 +6,24 @@ import java.util.Objects;
 
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 
+/**
+ * Defines a quality gate based on a specific threshold of coverages (Module, Package, File, Class, Method,
+ * Instruction, Line, Branch, Conditional) in the current build. After a build has been finished, a set of
+ * {@link QualityGate quality gates} will be evaluated and the overall quality gate status will be reported in
+ * Jenkins UI.
+ *
+ * @author Michael Müller, Nikolas Paripovic
+ */
 public class QualityGate implements Serializable {
+    private static final long serialVersionUID = -8305345358877991900L;
+    // TODO: Do we need extends AbstractDescribableImpl<QualityGate>?
 
     private final double threshold;
     private final CoverageMetric type;
     private final QualityGateStatus statusIfNotPassedSuccesful;
 
     /**
+     * Creates a new instance of {@link QualityGate}.
      *
      * @param threshold
      *        the minimum coverage percentage for passing the QualityGate successful. In the range of {@code [0, 1]}.
@@ -27,14 +38,29 @@ public class QualityGate implements Serializable {
         this.statusIfNotPassedSuccesful = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
     }
 
+    /**
+     * Returns the minimum percentage of coverage that will fail the quality gate.
+     *
+     * @return minimum percentage of coverage
+     */
     public double getThreshold() {
         return threshold;
     }
 
-    public QualityGateStatus getStatusIfNotPassedSuccesful() {
+    /**
+     * Returns the quality gate status to set if the quality gate is failed.
+     *
+     * @return the status
+     */
+    public QualityGateStatus getStatusIfNotPassedSuccessful() {
         return statusIfNotPassedSuccesful;
     }
 
+    /**
+     * Returns the coverage metric type bound to this QualityGate.
+     *
+     * @return the coverage metric type
+     */
     public CoverageMetric getType() {
         return type;
     }

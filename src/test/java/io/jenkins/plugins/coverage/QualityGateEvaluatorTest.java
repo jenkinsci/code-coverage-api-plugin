@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +14,11 @@ import io.jenkins.plugins.coverage.model.CoverageNode;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests the class {@link QualityGateEvaluator}.
+ *
+ * @author Michael Müller, Nikolas Paripovic
+ */
 class QualityGateEvaluatorTest {
 
     @Test
@@ -48,6 +52,7 @@ class QualityGateEvaluatorTest {
 
         QualityGateStatus status = evaluator.evaluate(root, qualityGates, logger);
 
+        // TODO: Method requires inactive, but tested here is passed
         assertThat(status).isEqualTo(QualityGateStatus.PASSED);
     }
 

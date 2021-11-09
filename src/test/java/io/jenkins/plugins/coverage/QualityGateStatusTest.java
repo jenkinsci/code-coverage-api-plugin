@@ -6,13 +6,18 @@ import hudson.model.Result;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Tests the class {@link QualityGateStatus}.
+ *
+ * @author Michael Müller, Nikolas Paripovic
+ */
 class QualityGateStatusTest {
     @Test
     void shouldIdentifySuccessfulStatus() {
-        assertThat(QualityGateStatus.PASSED.isSuccessful());
-        assertThat(QualityGateStatus.INACTIVE.isSuccessful());
-        assertThat(QualityGateStatus.WARNING.isNotSuccessful());
-        assertThat(QualityGateStatus.FAILED.isNotSuccessful());
+        assertThat(QualityGateStatus.PASSED.isSuccessful()).isTrue();
+        assertThat(QualityGateStatus.INACTIVE.isSuccessful()).isTrue();
+        assertThat(QualityGateStatus.WARNING.isNotSuccessful()).isTrue();
+        assertThat(QualityGateStatus.FAILED.isNotSuccessful()).isTrue();
     }
 
     @Test
@@ -39,5 +44,33 @@ class QualityGateStatusTest {
         assertThat(QualityGateStatus.INACTIVE.isWorseThan(QualityGateStatus.PASSED)).isFalse();
         assertThat(QualityGateStatus.INACTIVE.isWorseThan(QualityGateStatus.FAILED)).isFalse();
         assertThat(QualityGateStatus.INACTIVE.isWorseThan(QualityGateStatus.WARNING)).isFalse();
+    }
+
+    @Test
+    void shouldReturnWorseStatus() {
+
+        assertThat(QualityGateStatus.FAILED.getWorseStatus(QualityGateStatus.INACTIVE)).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(QualityGateStatus.FAILED.getWorseStatus(QualityGateStatus.PASSED)).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(QualityGateStatus.FAILED.getWorseStatus(QualityGateStatus.WARNING)).isEqualTo(QualityGateStatus.FAILED);
+
+        assertThat(QualityGateStatus.FAILED.getWorseStatus(QualityGateStatus.FAILED)).isEqualTo(QualityGateStatus.FAILED);
+
+        assertThat(QualityGateStatus.WARNING.getWorseStatus(QualityGateStatus.INACTIVE)).isEqualTo(QualityGateStatus.WARNING);
+        assertThat(QualityGateStatus.WARNING.getWorseStatus(QualityGateStatus.PASSED)).isEqualTo(QualityGateStatus.WARNING);
+
+        assertThat(QualityGateStatus.WARNING.getWorseStatus(QualityGateStatus.FAILED)).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(QualityGateStatus.WARNING.getWorseStatus(QualityGateStatus.WARNING)).isEqualTo(QualityGateStatus.WARNING);
+
+        assertThat(QualityGateStatus.PASSED.getWorseStatus(QualityGateStatus.INACTIVE)).isEqualTo(QualityGateStatus.PASSED);
+
+        assertThat(QualityGateStatus.PASSED.getWorseStatus(QualityGateStatus.PASSED)).isEqualTo(QualityGateStatus.PASSED);
+        assertThat(QualityGateStatus.PASSED.getWorseStatus(QualityGateStatus.FAILED)).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(QualityGateStatus.PASSED.getWorseStatus(QualityGateStatus.WARNING)).isEqualTo(QualityGateStatus.WARNING);
+
+        assertThat(QualityGateStatus.INACTIVE.getWorseStatus(QualityGateStatus.INACTIVE)).isEqualTo(QualityGateStatus.INACTIVE);
+        assertThat(QualityGateStatus.INACTIVE.getWorseStatus(QualityGateStatus.PASSED)).isEqualTo(QualityGateStatus.PASSED);
+        assertThat(QualityGateStatus.INACTIVE.getWorseStatus(QualityGateStatus.FAILED)).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(QualityGateStatus.INACTIVE.getWorseStatus(QualityGateStatus.WARNING)).isEqualTo(QualityGateStatus.WARNING);
+
     }
 }
