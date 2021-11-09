@@ -113,7 +113,6 @@ public final class JacocoReportAdapter extends JavaXMLCoverageReportAdapter {
                 case "class":
                     String className = replacePathOrDollarWithDots(getAttribute(current, "name", "-"));
                     result = new CoverageResult(CoverageElement.get("Class"), parentResult, className);
-                    //result.setRelativeSourcePath(parentResult.getRelativeSourcePath());
                     
                     break;
                 case "method":
