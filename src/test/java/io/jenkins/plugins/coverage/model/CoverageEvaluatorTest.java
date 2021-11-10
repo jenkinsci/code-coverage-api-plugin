@@ -21,7 +21,8 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(qualityGateStatus).isEqualTo(QualityGateStatus.WARNING);
         assertThat(logger.getMessages()).containsExactly(
-                "-> WARNING - QualityGate: " + CoverageMetric.INSTRUCTION + " - warn/fail/actual: " + 0.98 + "/" + 0.81 + "/"
+                "-> WARNING - QualityGate: " + CoverageMetric.INSTRUCTION + " - warn/fail/actual: " + 0.98 + "/" + 0.81
+                        + "/"
                         + 0.96);
     }
 
