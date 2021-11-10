@@ -64,14 +64,32 @@ public class CoverageEvaluator {
         }
     }
 
+    /**
+     * Add quality gate to evaluator.
+     *
+     * @param gate
+     *         QualityGate to add
+     */
     public void add(final QualityGate gate) {
         this.qualityGateList.add(gate);
     }
 
+    /**
+     * Adds list of quality gates to evaluator.
+     *
+     * @param gateList
+     *         List of QualityGates to add
+     */
     public void addAll(final List<QualityGate> gateList) {
         qualityGateList.addAll(gateList);
     }
 
+    /**
+     * Removes specific quality gate from evaluator.
+     *
+     * @param gate
+     *         QualityGate to remove.
+     */
     public void remove(final QualityGate gate) {
         qualityGateList.remove(gate);
     }
