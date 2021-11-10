@@ -2,8 +2,6 @@ package io.jenkins.plugins.coverage;
 
 import org.junit.jupiter.api.Test;
 
-import hudson.model.Result;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -12,6 +10,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Michael Müller, Nikolas Paripovic
  */
 class QualityGateStatusTest {
+
     @Test
     void shouldIdentifySuccessfulStatus() {
         assertThat(QualityGateStatus.PASSED.isSuccessful()).isTrue();

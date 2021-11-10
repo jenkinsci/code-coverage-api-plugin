@@ -20,7 +20,7 @@ public class QualityGate implements Serializable {
 
     private final double threshold;
     private final CoverageMetric type;
-    private final QualityGateStatus statusIfNotPassedSuccesful;
+    private final QualityGateStatus statusIfNotPassedSuccessful;
 
     /**
      * Creates a new instance of {@link QualityGate}.
@@ -35,7 +35,7 @@ public class QualityGate implements Serializable {
     public QualityGate(final double threshold, final CoverageMetric type, final boolean unstable) {
         this.threshold = threshold;
         this.type = type;
-        this.statusIfNotPassedSuccesful = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
+        this.statusIfNotPassedSuccessful = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
     }
 
     /**
@@ -53,7 +53,7 @@ public class QualityGate implements Serializable {
      * @return the status
      */
     public QualityGateStatus getStatusIfNotPassedSuccessful() {
-        return statusIfNotPassedSuccesful;
+        return statusIfNotPassedSuccessful;
     }
 
     /**
@@ -74,12 +74,12 @@ public class QualityGate implements Serializable {
             return false;
         }
         QualityGate that = (QualityGate) o;
-        return threshold == that.threshold && type == that.type && statusIfNotPassedSuccesful
-                == that.statusIfNotPassedSuccesful;
+        return threshold == that.threshold && type == that.type && statusIfNotPassedSuccessful
+                == that.statusIfNotPassedSuccessful;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(threshold, type, statusIfNotPassedSuccesful);
+        return Objects.hash(threshold, type, statusIfNotPassedSuccessful);
     }
 }

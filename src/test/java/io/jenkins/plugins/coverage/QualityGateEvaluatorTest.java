@@ -21,6 +21,8 @@ import static org.mockito.Mockito.*;
  */
 class QualityGateEvaluatorTest {
 
+    //TODO: Is unit testing enough? Integration test? Test on jenkins server?
+
     @Test
     void shouldBeInactiveIfGatesAreEmpty() {
         Logger logger = new Logger();
@@ -30,20 +32,19 @@ class QualityGateEvaluatorTest {
         QualityGateStatus status = evaluator.evaluate(root, Collections.emptyList(), logger);
 
         assertThat(status).isEqualTo(QualityGateStatus.INACTIVE);
-//        assertThat(logger.getMessages()).containsExactly("-> INACTIVE - No quality gate defined");
+        //TODO: Test logging? Test just the number or also the text?
+        assertThat(logger.getMessages()).containsExactly("-> INACTIVE - No quality gate defined");
     }
 
     @Test
-    void shouldBeInactiveIfNoQualityGateMatchesCoverageNode() {
+    void shouldBePassedIfNoQualityGateMatchesCoverageNode() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
 
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.MODULE)).thenReturn(new Coverage(100, 0));
-        // when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(100, 0));
 
-        // Min 90% of files need at least one line covered
-        QualityGate qualityGateStableOne = new QualityGate(0.9f, CoverageMetric.FILE, true);
+        QualityGate qualityGateStableOne = new QualityGate(0.9, CoverageMetric.FILE, true);
         QualityGate qualityGateStableTwo = new QualityGate(1, CoverageMetric.BRANCH, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
@@ -52,7 +53,6 @@ class QualityGateEvaluatorTest {
 
         QualityGateStatus status = evaluator.evaluate(root, qualityGates, logger);
 
-        // TODO: Method requires inactive, but tested here is passed
         assertThat(status).isEqualTo(QualityGateStatus.PASSED);
     }
 
@@ -60,6 +60,7 @@ class QualityGateEvaluatorTest {
     void shouldBePassedIfOneQualityGateSucceeded() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(100, 0));
 
@@ -82,8 +83,7 @@ class QualityGateEvaluatorTest {
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(92, 8));
         when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(100, 0));
 
-        // Min 90% of files need at least one line covered
-        QualityGate qualityGateStableOne = new QualityGate(0.9f, CoverageMetric.FILE, true);
+        QualityGate qualityGateStableOne = new QualityGate(0.9, CoverageMetric.FILE, true);
         QualityGate qualityGateStableTwo = new QualityGate(1, CoverageMetric.BRANCH, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
@@ -99,6 +99,7 @@ class QualityGateEvaluatorTest {
     void shouldBePassedIfNoQualityGateMatched() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(100, 0));
 
@@ -116,6 +117,7 @@ class QualityGateEvaluatorTest {
     void shouldBeWarningIfOneUnstableQualityGateFailed() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(90, 10));
         QualityGate qualityGateStable = new QualityGate(1, CoverageMetric.FILE, true);
@@ -132,12 +134,13 @@ class QualityGateEvaluatorTest {
     void shouldBeWarningIfMultipleUnstableQualityGatesFailed() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(90, 10));
         when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(40, 60));
 
         QualityGate qualityGateStableOne = new QualityGate(1, CoverageMetric.FILE, true);
-        QualityGate qualityGateStableTwo = new QualityGate(0.5f, CoverageMetric.BRANCH, true);
+        QualityGate qualityGateStableTwo = new QualityGate(0.5, CoverageMetric.BRANCH, true);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateStableOne);
@@ -152,12 +155,13 @@ class QualityGateEvaluatorTest {
     void shouldBeFailedIfStableQualityGateFailed() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(90, 10));
         when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(40, 60));
 
         QualityGate qualityGateUntableOne = new QualityGate(1, CoverageMetric.FILE, false);
-        QualityGate qualityGateUntableTwo = new QualityGate(0.3f, CoverageMetric.BRANCH, false);
+        QualityGate qualityGateUntableTwo = new QualityGate(0.3, CoverageMetric.BRANCH, false);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateUntableOne);
@@ -172,12 +176,13 @@ class QualityGateEvaluatorTest {
     void shouldBeFailedIfMultipleQualityGateFailed() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = mock(CoverageNode.class);
         when(root.getCoverage(CoverageMetric.FILE)).thenReturn(new Coverage(90, 10));
         when(root.getCoverage(CoverageMetric.BRANCH)).thenReturn(new Coverage(40, 60));
 
-        QualityGate qualityGateUntableOne = new QualityGate(0.95f, CoverageMetric.FILE, false);
-        QualityGate qualityGateUntableTwo = new QualityGate(0.5f, CoverageMetric.BRANCH, false);
+        QualityGate qualityGateUntableOne = new QualityGate(0.95, CoverageMetric.FILE, false);
+        QualityGate qualityGateUntableTwo = new QualityGate(0.5, CoverageMetric.BRANCH, false);
 
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(qualityGateUntableOne);
@@ -192,6 +197,7 @@ class QualityGateEvaluatorTest {
     void shouldBeFailedIfMultipleQualityGatesFailed() {
         Logger logger = new Logger();
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
+
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
         root.setUncoveredLines(1);
         QualityGate qualityGateStable = new QualityGate(1, CoverageMetric.FILE, false);
@@ -203,6 +209,7 @@ class QualityGateEvaluatorTest {
 
         assertThat(status).isEqualTo(QualityGateStatus.FAILED);
     }
+
 
 
     /**

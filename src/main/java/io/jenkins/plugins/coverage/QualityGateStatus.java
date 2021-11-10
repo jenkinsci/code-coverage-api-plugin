@@ -34,6 +34,8 @@ public enum QualityGateStatus {
         this.result = result;
     }
 
+    // TODO: get color is not used. Remove?
+
     /**
      * Returns the associated {@link Result} color.
      *
@@ -43,6 +45,8 @@ public enum QualityGateStatus {
         return result.color;
     }
 
+    // TODO: getIconClass is not used. Remove?
+
     /**
      * Returns the associated {@link Result} icon class to be used in the UI.
      *
@@ -51,6 +55,8 @@ public enum QualityGateStatus {
     public String getIconClass() {
         return getColor().getIconClassName();
     }
+
+    // TODO: isSuccessful is not used. Remove?
 
     /**
      * Returns whether the quality gate has been passed (or has not been activated at all).
@@ -62,6 +68,8 @@ public enum QualityGateStatus {
         return this == PASSED || this == INACTIVE;
     }
 
+    // TODO: isNotSuccessful is not used. Remove?
+
     /**
      * Returns whether the quality gate has not been passed successful.
      *
@@ -71,6 +79,8 @@ public enum QualityGateStatus {
     public boolean isNotSuccessful() {
         return this == WARNING || this == FAILED;
     }
+
+    // TODO: getResult is not used. Remove?
 
     /**
      * Returns the associated {@link Result}.
