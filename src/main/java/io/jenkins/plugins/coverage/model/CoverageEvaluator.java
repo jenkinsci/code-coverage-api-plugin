@@ -49,7 +49,11 @@ public class CoverageEvaluator {
                 warningList.put(qualityGate, percentage);
             }
         }
-        if (!warningList.isEmpty()) {
+        if (warningList.isEmpty()) {
+            logger.print("-> SUCCESSFUL - QualityGate");
+            return QualityGateStatus.SUCCESSFUL;
+        }
+        else {
             for (Map.Entry<QualityGate, Double> entry : warningList.entrySet()) {
                 final QualityGate qualityGate = entry.getKey();
                 logger.print("-> WARNING - QualityGate: %s - warn/fail/actual: %.2f/%.2f/%.2f",
@@ -57,10 +61,6 @@ public class CoverageEvaluator {
                         qualityGate.getFailedLimit(), entry.getValue());
             }
             return QualityGateStatus.WARNING;
-        }
-        else {
-            logger.print("-> SUCCESSFUL - QualityGate");
-            return QualityGateStatus.SUCCESSFUL;
         }
     }
 
