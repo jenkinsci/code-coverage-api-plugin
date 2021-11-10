@@ -16,10 +16,13 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         Logger logger = new Logger();
         CoverageNode coverageNode = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
         CoverageEvaluator evaluator = new CoverageEvaluator();
-        evaluator.add(new QualityGate(0.95, 0.80, CoverageMetric.BRANCH));
+        evaluator.add(new QualityGate(0.98, 0.81, CoverageMetric.INSTRUCTION));
         QualityGateStatus qualityGateStatus = evaluator.evaluate(coverageNode, logger);
 
         assertThat(qualityGateStatus).isEqualTo(QualityGateStatus.WARNING);
+        assertThat(logger.getMessages()).containsExactly(
+                "-> WARNING - QualityGate: " + CoverageMetric.INSTRUCTION + " - warn/fail/actual: " + 0.98 + "/" + 0.81 + "/"
+                        + 0.96);
     }
 
     @Test
@@ -37,11 +40,15 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(qualityGates).hasSize(3);
         assertThat(qualityGateStatus).isEqualTo(QualityGateStatus.SUCCESSFUL);
+        assertThat(logger.getMessages()).containsExactly("-> SUCCESSFUL - QualityGate");
 
         qualityGates.remove(lineQualityGate);
+        logger.clear();
         qualityGateStatus = evaluator.evaluate(coverageNode, logger);
+
         assertThat(qualityGates).hasSize(2);
         assertThat(qualityGateStatus).isEqualTo(QualityGateStatus.SUCCESSFUL);
+        assertThat(logger.getMessages()).containsExactly("-> SUCCESSFUL - QualityGate");
 
     }
 
@@ -70,9 +77,8 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus qualityGateStatus = evaluator.evaluate(coverageNode, logger);
 
         assertThat(qualityGateStatus).isEqualTo(QualityGateStatus.INACTIVE);
+        assertThat(logger.getMessages()).containsExactly("-> INACTIVE - No quality gate defined");
     }
-
-    //add addALL and remove tests
 
     /**
      * Logger for the tests that provides a way verify and clear the messages.
