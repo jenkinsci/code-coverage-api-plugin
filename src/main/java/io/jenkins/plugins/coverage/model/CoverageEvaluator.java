@@ -8,9 +8,24 @@ import java.util.SortedMap;
 
 import com.google.errorprone.annotations.FormatMethod;
 
+/**
+ * Evaluates a set of quality gates for code coverage.
+ *
+ * @author Adrian Germeck
+ */
 public class CoverageEvaluator {
     private final List<QualityGate> qualityGateList = new ArrayList<>();
 
+    /**
+     * Enforces quality gates for the specified run.
+     *
+     * @param node
+     *         the CoverageNode to evaluate
+     * @param logger
+     *         the logger that reports the passed and failed quality gate thresholds
+     *
+     * @return result of the evaluation, expressed by a QualityGateStatus
+     */
     public QualityGateStatus evaluate(final CoverageNode node, final FormattedLogger logger) {
         if (this.qualityGateList.isEmpty()) {
             logger.print("-> INACTIVE - No quality gate defined");

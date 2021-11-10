@@ -1,13 +1,14 @@
 package io.jenkins.plugins.coverage.model;
 
 /**
- * wird vom Benutzer erfasst und dient dazu die Qualitätsanforderungen an den Build zu erfassen (failed, warning,
- * successful, inactive)
+ * Stores quality gate limits for specific metric.
+ *
+ * @author Adrian Germeck
  */
 public class QualityGate {
-    private CoverageMetric coverageMetric;
-    private double warningLimit;
-    private double failedLimit;
+    private final CoverageMetric coverageMetric;
+    private final double warningLimit;
+    private final double failedLimit;
 
     public QualityGate(final double warningLimit, final double failedLimit, final CoverageMetric coverageMetric) {
         if (warningLimit < failedLimit) {
