@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jetbrains.annotations.NotNull;
+
 
 import io.jenkins.plugins.coverage.exception.QualityGatesInvalidException;
 
@@ -56,7 +56,7 @@ public class QualityGate implements Comparable<QualityGate> {
     }
 
     @Override
-    public int compareTo(@NotNull final QualityGate other) {
+    public int compareTo(final QualityGate other) {
         return Comparator.comparing(QualityGate::getQualityGateStatus)
                 .thenComparing(QualityGate::getMetric)
                 .compare(this, other);
