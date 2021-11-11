@@ -7,7 +7,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 class QualityGateEvaluatorTest extends AbstractCoverageTest {
-    private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
 
     @Test
     void shouldBeInactiveIfGatesAreEmpty() {
@@ -103,8 +102,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldBeEnabled() {
-        CoverageNode tree = readExampleReport();
-
         QualityGateEvaluator sut = new QualityGateEvaluator();
         sut.add(0.8, QualityGate.QualityGateType.FILE, QualityGate.QualityGateResult.UNSTABLE);
         boolean result = sut.isEnabled();
@@ -114,17 +111,12 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldBeDisabled() {
-        CoverageNode tree = readExampleReport();
-
         QualityGateEvaluator sut = new QualityGateEvaluator();
-
         assertThat(sut.isEnabled()).isEqualTo(false);
     }
 
     @Test
     void shouldAddAll() {
-        CoverageNode tree = readExampleReport();
-
         QualityGateEvaluator sut = new QualityGateEvaluator();
         List<QualityGate> qualityGates = new ArrayList<>();
         qualityGates.add(new QualityGate(0.8, QualityGate.QualityGateType.FILE,
