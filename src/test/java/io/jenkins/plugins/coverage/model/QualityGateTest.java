@@ -16,15 +16,6 @@ class QualityGateTest {
         assertThat(gate.getQualityGateStatus()).isEqualTo(QualityGateStatus.FAILED);
         assertThat(gate.getMetric()).isEqualTo(CoverageMetric.PACKAGE);
         assertThat(gate.getLimit()).isEqualTo(30);
-
-        gate.setLimit(50);
-        gate.setQualityGateStatus(QualityGateStatus.WARNING);
-        gate.setMetric(CoverageMetric.METHOD);
-
-        assertThat(gate.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
-        assertThat(gate.getMetric()).isEqualTo(CoverageMetric.METHOD);
-        assertThat(gate.getLimit()).isEqualTo(50);
-
     }
 
     @Test
