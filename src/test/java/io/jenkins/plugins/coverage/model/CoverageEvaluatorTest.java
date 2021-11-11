@@ -69,9 +69,9 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
         String[] loggerValues
                    = {"-> PASSED - Quality Gate: (FAILED, 30.000, Line); ACHIEVED: 90.000",
-                   "-> PASSED - Quality Gate: (FAILED, 30.000, Instruction); ACHIEVED: 85.000",
-                   "-> PASSED - Quality Gate: (WARNING, 40.000, Package); ACHIEVED: 50.000",
-                   "-> PASSED - Quality Gate: (WARNING, 40.000, Branch); ACHIEVED: 95.000"};
+                      "-> PASSED - Quality Gate: (FAILED, 30.000, Instruction); ACHIEVED: 85.000",
+                      "-> PASSED - Quality Gate: (WARNING, 40.000, Package); ACHIEVED: 50.000",
+                      "-> PASSED - Quality Gate: (WARNING, 40.000, Branch); ACHIEVED: 95.000"};
 
         assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
         logger.clear();
@@ -127,7 +127,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         CoverageEvaluator evaluator = new CoverageEvaluator();
         QualityGate gate = new QualityGate(CoverageMetric.LINE, 50, QualityGateStatus.WARNING);
         evaluator.add(gate);
-        assertThat(evaluator.getQualityGateList()).hasSize(1);
+        assertThat(evaluator.getQualityGateSet()).hasSize(1);
     }
 
     @Test
@@ -137,7 +137,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
                 new QualityGate(CoverageMetric.LINE, 30, QualityGateStatus.WARNING),
                 new QualityGate(CoverageMetric.BRANCH, 10, QualityGateStatus.WARNING),
                 new QualityGate(CoverageMetric.BRANCH, 10, QualityGateStatus.FAILED)));
-        assertThat(evaluator.getQualityGateList()).hasSize(3);
+        assertThat(evaluator.getQualityGateSet()).hasSize(3);
     }
 
     @Test
@@ -146,7 +146,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGate gate = new QualityGate(CoverageMetric.LINE, 50, QualityGateStatus.WARNING);
         evaluator.add(gate);
         evaluator.remove(gate);
-        assertThat(evaluator.getQualityGateList()).isEmpty();
+        assertThat(evaluator.getQualityGateSet()).isEmpty();
     }
 
     private static class Logger implements FormattedLogger {
@@ -166,7 +166,5 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         }
     }
 
-    public Logger getLogger() {
-        return logger;
-    }
+
 }

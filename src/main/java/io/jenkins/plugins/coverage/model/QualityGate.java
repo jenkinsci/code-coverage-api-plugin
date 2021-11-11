@@ -5,6 +5,7 @@ import java.util.Comparator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import io.jenkins.plugins.coverage.exception.QualityGatesInvalidException;
 
@@ -17,6 +18,13 @@ public class QualityGate implements Comparable<QualityGate> {
     private double limit; //if Metric is below return QualityGateStatus
     private QualityGateStatus qualityGateStatus;
 
+    /***
+     * Constructor to create a QualityGate. If it is invalid, it throws an exception.
+     * @param metric the metric which is evaluated
+     * @param limit the upper limit of no warning or failure, if below it returns qualityGateStatus
+     * @param qualityGateStatus the status to return if the CoverageNode's percentage for the same metric is below limit
+     * @throws QualityGatesInvalidException if QualityGate's metric is not FAILED or WARNING
+     */
     public QualityGate(final CoverageMetric metric, final double limit, final QualityGateStatus qualityGateStatus)
             throws QualityGatesInvalidException {
         if (qualityGateStatus.equals(QualityGateStatus.FAILED) || qualityGateStatus.equals(QualityGateStatus.WARNING)) {
@@ -55,8 +63,9 @@ public class QualityGate implements Comparable<QualityGate> {
         this.qualityGateStatus = qualityGateStatus;
     }
 
+
     @Override
-    public int compareTo(final QualityGate other) {
+    public int compareTo(@NonNull final QualityGate other) {
         return Comparator.comparing(QualityGate::getQualityGateStatus)
                 .thenComparing(QualityGate::getMetric)
                 .compare(this, other);

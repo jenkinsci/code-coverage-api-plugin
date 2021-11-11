@@ -7,22 +7,28 @@ import java.util.TreeSet;
 import com.google.errorprone.annotations.FormatMethod;
 
 /*
- * create a QualityGateStatus based on a list of QualityGates for a specific CoverageNode
+ * create a QualityGateStatus based on a list of QualityGates for a specific CoverageNode.
  */
 public class CoverageEvaluator {
 
-    private final Set<QualityGate> qualityGateList = new TreeSet<>();
+    private final Set<QualityGate> qualityGateSet = new TreeSet<>();
 
+    /**
+     * Evaluates a node by using QualityGates.
+     * @param node the given node object to evaluate
+     * @param logger the logger
+     * @return the resulting QualityGateStatus
+     */
     public QualityGateStatus evaluate(final CoverageNode node, final FormattedLogger logger) {
 
         boolean returnWarning = false;
 
-        if (qualityGateList.isEmpty()) {
+        if (qualityGateSet.isEmpty()) {
             logger.print("-> INACTIVE - No quality gate defined");
             return QualityGateStatus.INACTIVE;
         }
         else {
-            for (QualityGate gate : qualityGateList) {
+            for (QualityGate gate : qualityGateSet) {
                 double percentage = node.getMetricPercentages().get(gate.getMetric());
                 if (percentage < gate.getLimit()) {
                     if (gate.getQualityGateStatus() == QualityGateStatus.FAILED) {
@@ -49,22 +55,41 @@ public class CoverageEvaluator {
         return QualityGateStatus.SUCCESSFUL;
     }
 
+    /**
+     * Is used to add a QualityGate to the existing QualityGates in qualityGateList.
+     * @param gate the QualityGate which should be added
+     */
     public void add(final QualityGate gate) {
-        this.qualityGateList.add(gate);
+        this.qualityGateSet.add(gate);
     }
 
+    /**
+     * Is used to add a List of QualityGates to the existing QualityGates in qualityGateList.
+     * @param gateList the QualityGates which should be added
+     */
     public void addAll(final List<QualityGate> gateList) {
-        this.qualityGateList.addAll(gateList);
+        this.qualityGateSet.addAll(gateList);
     }
 
+    /**
+     * Is used to remove a QualityGate from qualityGateList.
+     * @param gate the QualityGate which should be added
+     */
     public void remove(final QualityGate gate) {
-        qualityGateList.remove(gate);
+        qualityGateSet.remove(gate);
     }
 
-    public Set<QualityGate> getQualityGateList() {
-        return qualityGateList;
+    /**
+     * Getter for existing QualityGates
+     * @return existing QualityGates
+     */
+    public Set<QualityGate> getQualityGateSet() {
+        return qualityGateSet;
     }
 
+    /**
+     * Interface for logging a specified message using a format
+     */
     @FunctionalInterface
     public interface FormattedLogger {
         /**
@@ -77,6 +102,7 @@ public class CoverageEvaluator {
          *         format specifiers, the extra arguments are ignored.  The number of arguments is variable and may be
          *         zero.
          */
+
         @FormatMethod
         void print(String format, Object... args);
     }
