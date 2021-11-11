@@ -13,7 +13,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void shouldBeInactiveIfGatesAreEmpty() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -27,7 +26,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void shouldPassAll() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -49,7 +47,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void evaluateWarning() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -64,7 +61,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void evaluatePassed() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -79,7 +75,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void evaluateFailed() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -94,7 +89,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     void shouldChangeStatus() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
@@ -110,8 +104,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     @Test
     void shouldBeEnabled() {
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
-        CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
         sut.add(0.8, QualityGate.QualityGateType.FILE, QualityGate.QualityGateResult.UNSTABLE);
@@ -123,7 +115,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     @Test
     void shouldBeDisabled() {
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
 
@@ -133,7 +124,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     @Test
     void shouldAddAll() {
         CoverageNode tree = readExampleReport();
-        verifyCoverageMetrics(tree);
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
         List<QualityGate> qualityGates = new ArrayList<>();
@@ -148,46 +138,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(sut.isEnabled()).isEqualTo(true);
     }
-
-    private void verifyCoverageMetrics(final CoverageNode tree) {
-        Assertions.assertThat(tree.getCoverage(LINE)).isSet()
-                .hasCovered(294)
-                .hasCoveredPercentageCloseTo(0.91, PRECISION)
-                .hasMissed(29)
-                .hasMissedPercentageCloseTo(0.09, PRECISION)
-                .hasTotal(294 + 29);
-        assertThat(tree.printCoverageFor(LINE)).isEqualTo("91.02%");
-
-        Assertions.assertThat(tree.getCoverage(BRANCH)).isSet()
-                .hasCovered(109)
-                .hasCoveredPercentageCloseTo(0.93, PRECISION)
-                .hasMissed(7)
-                .hasMissedPercentageCloseTo(0.07, PRECISION)
-                .hasTotal(109 + 7);
-        assertThat(tree.printCoverageFor(BRANCH)).isEqualTo("93.97%");
-
-        Assertions.assertThat(tree.getCoverage(INSTRUCTION)).isSet()
-                .hasCovered(1260)
-                .hasCoveredPercentageCloseTo(0.93, PRECISION)
-                .hasMissed(90)
-                .hasMissedPercentageCloseTo(0.07, PRECISION)
-                .hasTotal(1260 + 90);
-        assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93.33%");
-
-        Assertions.assertThat(tree.getCoverage(MODULE)).isSet()
-                .hasCovered(1)
-                .hasCoveredPercentageCloseTo(1, PRECISION)
-                .hasMissed(0)
-                .hasMissedPercentageCloseTo(0, PRECISION)
-                .hasTotal(1);
-        assertThat(tree.printCoverageFor(MODULE)).isEqualTo("100.00%");
-
-        Assertions.assertThat(tree).hasName(PROJECT_NAME)
-                .doesNotHaveParent()
-                .isRoot()
-                .hasMetric(MODULE).hasParentName(CoverageNode.ROOT);
-    }
-
 
     private CoverageNode readExampleReport() {
         return CoverageNodeConverter.convert(readResult("jacoco-codingstyle.xml"));

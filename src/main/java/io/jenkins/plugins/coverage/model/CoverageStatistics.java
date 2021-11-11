@@ -109,8 +109,8 @@ public class CoverageStatistics {
      * @return the covered percentage
      */
     private double getPercentage(final String key) {
-        return sortedCoverages.containsKey(key) ?
-                sortedCoverages.get(key).getCoveredPercentage() : 0;
+        return sortedCoverages.containsKey(key)
+                ? sortedCoverages.get(key).getCoveredPercentage() : 0;
     }
 
     /**
