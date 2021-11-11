@@ -34,54 +34,6 @@ public enum QualityGateStatus {
         this.result = result;
     }
 
-    // TODO: get color is not used. Remove?
-
-    /**
-     * Returns the associated {@link Result} color.
-     *
-     * @return Jenkins' {@link Result} color
-     */
-    public BallColor getColor() {
-        return result.color;
-    }
-
-    // TODO: getIconClass is not used. Remove?
-
-    /**
-     * Returns the associated {@link Result} icon class to be used in the UI.
-     *
-     * @return Jenkins' {@link Result} icon class
-     */
-    public String getIconClass() {
-        return getColor().getIconClassName();
-    }
-
-    // TODO: isSuccessful is not used. Remove?
-
-    /**
-     * Returns whether the quality gate has been passed (or has not been activated at all).
-     *
-     * @return {@code true} if the quality gate has been passed, {@code false}  otherwise
-     */
-    @Whitelisted
-    public boolean isSuccessful() {
-        return this == PASSED || this == INACTIVE;
-    }
-
-    // TODO: isNotSuccessful is not used. Remove?
-
-    /**
-     * Returns whether the quality gate has not been passed successful.
-     *
-     * @return {@code true} if the quality gate has been passed, {@code false}  otherwise
-     */
-    @Whitelisted
-    public boolean isNotSuccessful() {
-        return this == WARNING || this == FAILED;
-    }
-
-    // TODO: getResult is not used. Remove?
-
     /**
      * Returns the associated {@link Result}.
      *

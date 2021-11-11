@@ -21,8 +21,6 @@ import static org.mockito.Mockito.*;
  */
 class QualityGateEvaluatorTest {
 
-    //TODO: Is unit testing enough? Integration test? Test on jenkins server?
-
     @Test
     void shouldBeInactiveIfGatesAreEmpty() {
         Logger logger = new Logger();
@@ -32,7 +30,6 @@ class QualityGateEvaluatorTest {
         QualityGateStatus status = evaluator.evaluate(root, Collections.emptyList(), logger);
 
         assertThat(status).isEqualTo(QualityGateStatus.INACTIVE);
-        //TODO: Test logging? Test just the number or also the text?
         assertThat(logger.getMessages()).containsExactly("-> INACTIVE - No quality gate defined");
     }
 

@@ -34,13 +34,9 @@ public class QualityGateEvaluator {
             return QualityGateStatus.INACTIVE;
         }
 
-        // TODO: Do we need logger prints like .. ? (if not, maybe adjust the method-documentation)
-        // logger.print("-> %s - %s: %d - Quality QualityGate: %d", qualityGate.getStatus(), qualityGate.getName(), actualSize, qualityGate.getThreshold());
-        // logger.print("-> PASSED - %s: %d - Quality QualityGate: %d", qualityGate.getName(), actualSize, qualityGate.getThreshold());
-
         return qualityGates.stream().reduce(QualityGateStatus.PASSED,
                 (currentStatus, qualityGate) ->
-                    Optional.ofNullable(coverageNode.getCoverage(qualityGate.getType()))
+                    Optional.ofNullable(coverageNode.getCoverage(qualityGate.getCoverageMetric()))
                             .filter(coverage -> coverage.getCoveredPercentage() < qualityGate.getThreshold())
                             .map(coverage -> qualityGate.getStatusIfNotPassedSuccessful())
                             .filter(status -> status.isWorseThan(currentStatus))

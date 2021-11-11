@@ -16,10 +16,9 @@ import io.jenkins.plugins.coverage.model.CoverageMetric;
  */
 public class QualityGate implements Serializable {
     private static final long serialVersionUID = -8305345358877991900L;
-    // TODO: Do we need extends AbstractDescribableImpl<QualityGate>?
 
     private final double threshold;
-    private final CoverageMetric type;
+    private final CoverageMetric coverageMetric;
     private final QualityGateStatus statusIfNotPassedSuccessful;
 
     /**
@@ -27,14 +26,14 @@ public class QualityGate implements Serializable {
      *
      * @param threshold
      *        the minimum coverage percentage for passing the QualityGate successful. In the range of {@code [0, 1]}.
-     * @param type
-     *        the type of metric which is checked in this QualityGate
+     * @param coverageMetric
+     *        the coverage metric which is checked in this QualityGate
      * @param unstable
      *        determines if the the build will be allowed to pass unstable with warnings in case of unreached threshold or it should fail
      */
-    public QualityGate(final double threshold, final CoverageMetric type, final boolean unstable) {
+    public QualityGate(final double threshold, final CoverageMetric coverageMetric, final boolean unstable) {
         this.threshold = threshold;
-        this.type = type;
+        this.coverageMetric = coverageMetric;
         this.statusIfNotPassedSuccessful = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
     }
 
@@ -61,8 +60,8 @@ public class QualityGate implements Serializable {
      *
      * @return the coverage metric type
      */
-    public CoverageMetric getType() {
-        return type;
+    public CoverageMetric getCoverageMetric() {
+        return coverageMetric;
     }
 
     @Override
@@ -74,12 +73,12 @@ public class QualityGate implements Serializable {
             return false;
         }
         QualityGate that = (QualityGate) o;
-        return threshold == that.threshold && type == that.type && statusIfNotPassedSuccessful
+        return threshold == that.threshold && coverageMetric == that.coverageMetric && statusIfNotPassedSuccessful
                 == that.statusIfNotPassedSuccessful;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(threshold, type, statusIfNotPassedSuccessful);
+        return Objects.hash(threshold, coverageMetric, statusIfNotPassedSuccessful);
     }
 }

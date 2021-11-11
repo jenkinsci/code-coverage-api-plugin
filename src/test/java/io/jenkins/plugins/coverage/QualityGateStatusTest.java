@@ -12,14 +12,6 @@ import static org.assertj.core.api.Assertions.*;
 class QualityGateStatusTest {
 
     @Test
-    void shouldIdentifySuccessfulStatus() {
-        assertThat(QualityGateStatus.PASSED.isSuccessful()).isTrue();
-        assertThat(QualityGateStatus.INACTIVE.isSuccessful()).isTrue();
-        assertThat(QualityGateStatus.WARNING.isNotSuccessful()).isTrue();
-        assertThat(QualityGateStatus.FAILED.isNotSuccessful()).isTrue();
-    }
-
-    @Test
     void shouldDefineOrder() {
         assertThat(QualityGateStatus.FAILED.isWorseThan(QualityGateStatus.INACTIVE)).isTrue();
         assertThat(QualityGateStatus.FAILED.isWorseThan(QualityGateStatus.PASSED)).isTrue();
