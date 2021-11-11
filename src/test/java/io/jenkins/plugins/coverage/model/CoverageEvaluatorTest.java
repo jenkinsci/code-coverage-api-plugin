@@ -16,24 +16,20 @@ import static org.mockito.Mockito.*;
 
 class CoverageEvaluatorTest extends AbstractCoverageTest {
 
-    final Logger logger = new Logger();
+    private final Logger logger = new Logger();
 
     @Test
     void shouldReturnWarningLine() throws QualityGatesInvalidException {
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
+        evaluator.add(new QualityGate(CoverageMetric.LINE, 96, QualityGateStatus.WARNING));
+        evaluator.add(new QualityGate(CoverageMetric.LINE, 95, QualityGateStatus.FAILED));
 
-        evaluator.add(new QualityGate(CoverageMetric.LINE, 30, QualityGateStatus.FAILED));
-        evaluator.add(new QualityGate(CoverageMetric.LINE, 95, QualityGateStatus.WARNING));
 
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
-        assertThat(buildStatus).isEqualTo(QualityGateStatus.WARNING);
-        String[] loggerValues
-                = {"-> PASSED - Quality Gate: (FAILED, 30.000, Line); ACHIEVED: 90.000",
-                "-> NOT PASSED: WARNING - Quality Gate: (WARNING, 95.000, Line); ACHIEVED: 90.000"};
+        assertThat(buildStatus).isEqualTo(QualityGateStatus.FAILED);
 
-        assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
-        logger.clear();
+
     }
 
     private CoverageNode getCoverageNode() {
@@ -72,10 +68,10 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
         String[] loggerValues
-                = {"-> PASSED - Quality Gate: (FAILED, 30.000, Line); ACHIEVED: 90.000",
-                "-> PASSED - Quality Gate: (FAILED, 30.000, Instruction); ACHIEVED: 85.000",
-                "-> PASSED - Quality Gate: (WARNING, 40.000, Package); ACHIEVED: 50.000",
-                "-> PASSED - Quality Gate: (WARNING, 40.000, Branch); ACHIEVED: 95.000"};
+                   = {"-> PASSED - Quality Gate: (FAILED, 30.000, Line); ACHIEVED: 90.000",
+                   "-> PASSED - Quality Gate: (FAILED, 30.000, Instruction); ACHIEVED: 85.000",
+                   "-> PASSED - Quality Gate: (WARNING, 40.000, Package); ACHIEVED: 50.000",
+                   "-> PASSED - Quality Gate: (WARNING, 40.000, Branch); ACHIEVED: 95.000"};
 
         assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
         logger.clear();
@@ -93,7 +89,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
         assertThat(buildStatus).isEqualTo(QualityGateStatus.FAILED);
         String[] loggerValues
-                = {"-> NOT PASSED: FAILED - Quality Gate: (FAILED, 70.000, File); ACHIEVED: 60.000"};
+                   = {"-> NOT PASSED: FAILED - Quality Gate: (FAILED, 70.000, File); ACHIEVED: 60.000"};
 
         assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
         logger.clear();
@@ -108,7 +104,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
         assertThat(buildStatus).isEqualTo(QualityGateStatus.FAILED);
         String[] loggerValues
-                = {"-> NOT PASSED: FAILED - Quality Gate: (FAILED, 85.000, Method); ACHIEVED: 80.000"};
+                   = {"-> NOT PASSED: FAILED - Quality Gate: (FAILED, 85.000, Method); ACHIEVED: 80.000"};
         assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
         logger.clear();
     }
@@ -120,7 +116,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
         assertThat(buildStatus).isEqualTo(QualityGateStatus.INACTIVE);
         String[] loggerValues
-                = {"-> INACTIVE - No quality gate defined"};
+                   = {"-> INACTIVE - No quality gate defined"};
 
         assertThat(logger.getMessages()).containsExactlyElementsOf(Arrays.asList(loggerValues));
         logger.clear();
@@ -168,5 +164,9 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
         void clear() {
             messages.clear();
         }
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 }

@@ -48,15 +48,12 @@ class QualityGateTest {
 
     }
 
-    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Test
     void testEquals() throws QualityGatesInvalidException {
         QualityGate gate1 = new QualityGate(CoverageMetric.PACKAGE, 30, QualityGateStatus.FAILED);
         QualityGate gate2 = new QualityGate(CoverageMetric.PACKAGE, 50, QualityGateStatus.FAILED);
         assertThat(gate1).isEqualTo(gate1);
         assertThat(gate1).isEqualTo(gate2);
-        QualityGateStatus gateStatus = QualityGateStatus.FAILED;
-        assertThat(gate1.equals(gateStatus)).isFalse();
 
         QualityGate gate3 = new QualityGate(CoverageMetric.PACKAGE, 30, QualityGateStatus.WARNING);
         assertThat(gate1).isNotEqualTo(gate3);
