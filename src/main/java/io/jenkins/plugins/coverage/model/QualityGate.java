@@ -13,6 +13,8 @@ import java.util.function.Function;
  * @author Johannes Walter
  */
 public class QualityGate extends AbstractDescribableImpl<QualityGate> implements Serializable {
+    private static final long serialVersionUID = -397278599489426668L;
+
     private final double threshold;
     private final QualityGateType type;
     private final QualityGateStatus status;
@@ -102,7 +104,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
          * @param metric The underlying metric
          * @param properties The statistics properties
          */
-        QualityGateType(CoverageMetric metric, CoverageStatistics.StatisticProperties properties) {
+        QualityGateType(final CoverageMetric metric, final CoverageStatistics.StatisticProperties properties) {
             this.metric = metric;
             this.properties = properties;
         }
@@ -122,7 +124,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
          * @return threshold getter
          */
         public Function<CoverageStatistics, Double> getCoverageGetter() {
-            return properties.getSizeGetter();
+            return properties.getCoverageGetter();
         }
 
     }

@@ -2,11 +2,9 @@ package io.jenkins.plugins.coverage.model;
 
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class QualityGateEvaluatorTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
@@ -111,7 +109,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldBeEnabled() {
-        Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
         verifyCoverageMetrics(tree);
         CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
@@ -125,10 +122,8 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldBeDisabled() {
-        Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
         verifyCoverageMetrics(tree);
-        CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
 
@@ -137,10 +132,8 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldAddAll() {
-        Logger logger = new Logger();
         CoverageNode tree = readExampleReport();
         verifyCoverageMetrics(tree);
-        CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
 
         QualityGateEvaluator sut = new QualityGateEvaluator();
         List<QualityGate> qualityGates = new ArrayList<>();
@@ -155,9 +148,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(sut.isEnabled()).isEqualTo(true);
     }
-
-
-
 
     private void verifyCoverageMetrics(final CoverageNode tree) {
         Assertions.assertThat(tree.getCoverage(LINE)).isSet()
