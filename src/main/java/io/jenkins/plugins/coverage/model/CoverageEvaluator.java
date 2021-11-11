@@ -12,7 +12,7 @@ import com.google.errorprone.annotations.FormatMethod;
 public class CoverageEvaluator {
 
     /**
-     * Set of used QualityGates
+     * Set of used QualityGates.
      */
     private final Set<QualityGate> qualityGateSet = new TreeSet<>();
 
