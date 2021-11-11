@@ -30,7 +30,6 @@ class QualityGateEvaluatorTest {
         QualityGateStatus status = evaluator.evaluate(root, Collections.emptyList(), logger);
 
         assertThat(status).isEqualTo(QualityGateStatus.INACTIVE);
-        assertThat(logger.getMessages()).containsExactly("-> INACTIVE - No quality gate defined");
     }
 
     @Test
