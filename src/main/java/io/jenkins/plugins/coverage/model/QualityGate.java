@@ -14,9 +14,9 @@ import io.jenkins.plugins.coverage.exception.QualityGatesInvalidException;
  * If no QualityGates are defined, the evaluation (QualityGateEvaluator.java) returns inactive.
  */
 public class QualityGate implements Comparable<QualityGate> {
-    private CoverageMetric metric;
-    private double limit; //if Metric is below return QualityGateStatus
-    private QualityGateStatus qualityGateStatus;
+    private final CoverageMetric metric;
+    private final double limit; //if Metric is below return QualityGateStatus
+    private final QualityGateStatus qualityGateStatus;
 
     /***
      * Constructor to create a QualityGate. If it is invalid, it throws an exception.
@@ -43,26 +43,13 @@ public class QualityGate implements Comparable<QualityGate> {
         return metric;
     }
 
-    public void setMetric(final CoverageMetric metric) {
-        this.metric = metric;
-    }
-
     public double getLimit() {
         return limit;
-    }
-
-    public void setLimit(final double limit) {
-        this.limit = limit;
     }
 
     public QualityGateStatus getQualityGateStatus() {
         return qualityGateStatus;
     }
-
-    public void setQualityGateStatus(final QualityGateStatus qualityGateStatus) {
-        this.qualityGateStatus = qualityGateStatus;
-    }
-
 
     @Override
     public int compareTo(@NonNull final QualityGate other) {

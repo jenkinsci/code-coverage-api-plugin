@@ -6,11 +6,14 @@ import java.util.TreeSet;
 
 import com.google.errorprone.annotations.FormatMethod;
 
-/*
+/**
  * create a QualityGateStatus based on a list of QualityGates for a specific CoverageNode.
  */
 public class CoverageEvaluator {
 
+    /**
+     * Set of used QualityGates
+     */
     private final Set<QualityGate> qualityGateSet = new TreeSet<>();
 
     /**
@@ -80,7 +83,7 @@ public class CoverageEvaluator {
     }
 
     /**
-     * Getter for existing QualityGates
+     * Getter for existing QualityGates.
      * @return existing QualityGates
      */
     public Set<QualityGate> getQualityGateSet() {
@@ -88,7 +91,7 @@ public class CoverageEvaluator {
     }
 
     /**
-     * Interface for logging a specified message using a format
+     * Interface for logging a specified message using a format.
      */
     @FunctionalInterface
     public interface FormattedLogger {

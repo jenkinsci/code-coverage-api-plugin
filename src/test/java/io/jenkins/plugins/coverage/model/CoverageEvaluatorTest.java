@@ -16,10 +16,9 @@ import static org.mockito.Mockito.*;
 
 class CoverageEvaluatorTest extends AbstractCoverageTest {
 
-    private final Logger logger = new Logger();
-
     @Test
     void shouldReturnWarningLine() throws QualityGatesInvalidException {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
         evaluator.add(new QualityGate(CoverageMetric.LINE, 96, QualityGateStatus.WARNING));
@@ -48,6 +47,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldReturnWarningPackage() throws QualityGatesInvalidException {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
         evaluator.add(new QualityGate(CoverageMetric.PACKAGE, 30, QualityGateStatus.FAILED));
@@ -58,6 +58,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldSuccess() throws QualityGatesInvalidException {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
 
@@ -80,6 +81,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldReturnFailFile() throws QualityGatesInvalidException {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
 
@@ -97,6 +99,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldReturnFailMethod() throws QualityGatesInvalidException {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
         evaluator.add(new QualityGate(CoverageMetric.METHOD, 85, QualityGateStatus.FAILED));
@@ -111,6 +114,7 @@ class CoverageEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldReturnInactive() {
+        Logger logger = new Logger();
         CoverageNode node = getCoverageNode();
         CoverageEvaluator evaluator = new CoverageEvaluator();
         QualityGateStatus buildStatus = evaluator.evaluate(node, logger);
