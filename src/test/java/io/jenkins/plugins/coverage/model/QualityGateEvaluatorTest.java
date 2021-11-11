@@ -26,6 +26,28 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldPassAll() {
+        Logger logger = new Logger();
+        CoverageNode tree = readExampleReport();
+        verifyCoverageMetrics(tree);
+        CoverageStatistics stats = new CoverageStatistics(tree.getMetricsDistribution());
+
+        QualityGateEvaluator sut = new QualityGateEvaluator();
+        sut.add(0, QualityGate.QualityGateType.FILE, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.METHOD, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.MODULE, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.INSTRUCTION, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.LINE, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.BRANCH, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.PACKAGE, QualityGate.QualityGateResult.UNSTABLE);
+        sut.add(0, QualityGate.QualityGateType.CLASS, QualityGate.QualityGateResult.UNSTABLE);
+
+        QualityGateStatus result = sut.evaluate(stats, logger);
+
+        assertThat(result).isEqualTo(QualityGateStatus.PASSED);
+    }
+
+    @Test
     void evaluateWarning() {
         Logger logger = new Logger();
         CoverageNode tree = readExampleReport();

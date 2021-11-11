@@ -1,24 +1,32 @@
 package io.jenkins.plugins.coverage.model;
 
 import hudson.model.AbstractDescribableImpl;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
 import java.util.function.Function;
 
+/**
+ * Defines a quality gate based on a specific threshold of code coverage in the current build. After a
+ * build has been finished, a set of {@link QualityGate quality gates} will be evaluated and the overall quality gate
+ * status will be reported in Jenkins UI.
+ *
+ * @author Johannes Walter
+ */
 public class QualityGate extends AbstractDescribableImpl<QualityGate> implements Serializable {
     private final double threshold;
     private final QualityGateType type;
     private final QualityGateStatus status;
 
-    @DataBoundConstructor
-    public QualityGate(double threshold, QualityGateType type, final boolean unstable) {
-        super();
-        this.threshold = threshold;
-        this.type = type;
-        this.status = unstable ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
-    }
-
+    /**
+     * Creates a new instance of {@link QualityGate}.
+     *
+     * @param threshold
+     *         the minimum coverage that is needed for the quality gate
+     * @param type
+     *         the type of the quality gate
+     * @param result
+     *         determines whether the quality gate is a warning or failure
+     */
     public QualityGate(final double threshold, final QualityGateType type, final QualityGateResult result) {
         super();
 
@@ -27,24 +35,49 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         status = result.status;
     }
 
+    /**
+     * Returns the minimum number of issues that will fail the quality gate.
+     *
+     * @return minimum number of issues
+     */
     public double getThreshold() {
         return threshold;
     }
 
+    /**
+     * Returns the human readable name of the quality gate.
+     *
+     * @return the human readable name
+     */
     public String getName() {
         return type.getName();
     }
 
+    /**
+     * Returns the type of the quality gate.
+     *
+     * @return the type of quality gate
+     */
     public QualityGateType getType() {
         return type;
     }
 
+    /**
+     * Returns the status of the quality gate.
+     *
+     * @return the status
+     */
     public QualityGateStatus getStatus() {
         return status;
     }
 
-    public Function<CoverageStatistics, Double> getActualSizeMethodReference() {
-        return type.getSizeGetter();
+    /**
+     * Returns the method that should be used to determine the actual coverage in the build.
+     *
+     * @return threshold getter
+     */
+    public Function<CoverageStatistics, Double> getActualCoverageReference() {
+        return type.getCoverageGetter();
     }
 
     /**
@@ -63,6 +96,12 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         private final CoverageMetric metric;
         private final CoverageStatistics.StatisticProperties properties;
 
+        /**
+         * Ctor for QualityGateTypes.
+         *
+         * @param metric The underlying metric
+         * @param properties The statistics properties
+         */
         QualityGateType(CoverageMetric metric, CoverageStatistics.StatisticProperties properties) {
             this.metric = metric;
             this.properties = properties;
@@ -77,7 +116,12 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
             return metric.getName();
         }
 
-        public Function<CoverageStatistics, Double> getSizeGetter() {
+        /**
+         * Returns the method that should be used to determine the actual coverage in the build.
+         *
+         * @return threshold getter
+         */
+        public Function<CoverageStatistics, Double> getCoverageGetter() {
             return properties.getSizeGetter();
         }
 

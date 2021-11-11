@@ -5,10 +5,6 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import hudson.model.BallColor;
 import hudson.model.Result;
 
-import io.jenkins.plugins.coverage.model.QualityGateEvaluator.FormattedLogger;
-
-import java.util.SortedMap;
-
 /**
  * Result of a QualityGateEvaluator#evaluate(SortedMap, FormattedLogger) call.
  *
