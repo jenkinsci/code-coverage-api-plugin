@@ -256,10 +256,28 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 }
             }
 
+            // In case we still havent found the source file, this will walk through the direcrory and find files that match
+            List<Path> allPaths = getAllPossiblePaths();
+            if (allPaths.size() == 0){
+                this.setAllPossiblePaths(workspace.getAbsolutePath());
+                allPaths = getAllPossiblePaths();
+            }
+
+            List<Path> filteredPaths;
+            if (allPaths.size() > 0) {
+                filteredPaths = allPaths.stream().filter(x -> x.endsWith(sourceFilePath)).collect(Collectors.toList());
+                
+                for (Path path : filteredPaths){
+                    sourceFile = new File(path.toString());
+                    if (isValidSourceFile(sourceFile)) {
+                        return new FilePath(sourceFile);
+                    }
+                }
+            }
+
             // fallback to use the pre-scanned workspace to see if there's a file that matches
             if(sourceFileMapping.containsKey(sourceFilePath)){
-                result = sourceFileMapping.get(sourceFilePath);
-                return result;
+                return sourceFileMapping.get(sourceFilePath);
             }
 
             return null;
