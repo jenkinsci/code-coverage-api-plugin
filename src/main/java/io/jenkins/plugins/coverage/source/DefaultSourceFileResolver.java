@@ -280,21 +280,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
             }
         }
 
-        //private void setAllPossiblePaths(File workspace) {
-        //    try {
-        //        Stream<Path> walk = Files.walk(Paths.get(workspace.getAbsolutePath()));
-        //        List<Path> results = walk
-        //            .filter(Files::isRegularFile)
-        //            .collect(Collectors.toList());
-
-        //        this.allPossiblePaths = results;
-        //   }
-        //    catch (Exception ex){
-        //        //do nothing
-        //    }
-
-        //}
-
         private List<Path> getAllPossiblePaths() {
             return this.allPossiblePaths;
         }
