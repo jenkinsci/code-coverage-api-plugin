@@ -22,6 +22,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
+    /** Example integration test for a freestyle build with code coverage. */
     @Test
     public void coveragePluginHelloWorld() {
         // automatisch 1. Jenkins starten
