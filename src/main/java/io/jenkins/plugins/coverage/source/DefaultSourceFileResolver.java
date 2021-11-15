@@ -250,26 +250,6 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
                 for (Path path : filteredPaths){
                     sourceFile = new File(path.toString());
                     if (isValidSourceFile(sourceFile)) {
-                        result = new FilePath(sourceFile);
-                        return result;
-                    }
-                }
-            }
-
-            // In case we still havent found the source file, this will walk through the direcrory and find files that match
-            List<Path> allPaths = getAllPossiblePaths();
-            if (allPaths.size() == 0){
-                this.setAllPossiblePaths(workspace.getAbsolutePath());
-                allPaths = getAllPossiblePaths();
-            }
-
-            List<Path> filteredPaths;
-            if (allPaths.size() > 0) {
-                filteredPaths = allPaths.stream().filter(x -> x.endsWith(sourceFilePath)).collect(Collectors.toList());
-                
-                for (Path path : filteredPaths){
-                    sourceFile = new File(path.toString());
-                    if (isValidSourceFile(sourceFile)) {
                         return new FilePath(sourceFile);
                     }
                 }
