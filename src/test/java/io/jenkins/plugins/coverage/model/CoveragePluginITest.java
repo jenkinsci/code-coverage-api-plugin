@@ -1,6 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -11,6 +14,7 @@ import hudson.model.Run;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
@@ -23,30 +27,67 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
-    private static final String FILE_NAME_JACOCO = "jacoco-analysis-model.xml";
+    private static final String FILE_NAME_JACOCO_ANALYSIS_MODEL = "jacoco-analysis-model.xml";
+    private static final String FILE_NAME_JACOCO_CODING_STYLE = "jacoco-codingstyle.xml";
     private static final String FILE_NAME_COBERTURA = "cobertura-coverage.xml";
 
     @Test
-    public void  freestyleJacocoWithEmptyFiles() {
+    public void  freestyleWithEmptyFiles() {
         FreeStyleProject project = createFreeStyleProject();
-        // copyFilesToWorkspace(project, FILE_NAME_JACOCO);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("");
         coveragePublisher.setAdapters(Collections.emptyList());
         project.getPublishersList().add(coveragePublisher);
 
-        verifySimpleCoverageNode(project, 0, 0);
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult).isEqualTo(null);
     }
 
     @Test
     public void freestyleJacocoWithOneFile() {
-        // TODO
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, FILE_NAME_JACOCO_ANALYSIS_MODEL);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME_JACOCO_ANALYSIS_MODEL);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        // 6. Mit Assertions Ergebnisse überprüfen
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
     @Test
     public void freestyleJacocoWithTwoFiles() {
-        // TODO
+
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, FILE_NAME_JACOCO_ANALYSIS_MODEL, FILE_NAME_JACOCO_CODING_STYLE);
+//        copyFilesToWorkspace(project, FILE_NAME_JACOCO_CODING_STYLE);
+
+        JacocoReportAdapter jacocoReportAdapterOne = new JacocoReportAdapter(FILE_NAME_JACOCO_ANALYSIS_MODEL);
+        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(FILE_NAME_JACOCO_CODING_STYLE);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        List<CoverageAdapter> adapterList = Arrays.asList(jacocoReportAdapterOne, jacocoReportAdapterTwo);
+        coveragePublisher.setAdapters(adapterList);
+
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
     @Test
@@ -69,7 +110,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Example integration test for a pipeline with code coverage. */
     @Test
     public void coveragePluginPipelineHelloWorld() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME_JACOCO);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME_JACOCO_ANALYSIS_MODEL);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
@@ -85,10 +126,10 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // automatisch 2. Plugin deployen
         // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, FILE_NAME_JACOCO);
+        copyFilesToWorkspace(project, FILE_NAME_JACOCO_ANALYSIS_MODEL);
         // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME_JACOCO);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME_JACOCO_ANALYSIS_MODEL);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
