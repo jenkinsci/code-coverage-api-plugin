@@ -4,8 +4,11 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Run;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
@@ -22,9 +25,20 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
+    /** Example integration test for a pipeline with code coverage. */
+    @Test
+    public void coveragePluginPipelineHelloWorld() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        verifySimpleCoverageNode(job);
+    }
+
     /** Example integration test for a freestyle build with code coverage. */
     @Test
-    public void coveragePluginHelloWorld() {
+    public void coveragePluginFreestyleHelloWorld() {
         // automatisch 1. Jenkins starten
         // automatisch 2. Plugin deployen
         // 3a. Job erzeugen
@@ -36,6 +50,10 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
+        verifySimpleCoverageNode(project);
+    }
+
+    private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
         // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
         // 5. Jenkins Build starten
         Run<?, ?> build = buildSuccessfully(project);
@@ -46,4 +64,5 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
+
 }
