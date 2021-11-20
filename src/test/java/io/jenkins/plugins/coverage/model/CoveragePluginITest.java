@@ -1,62 +1,163 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
+import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
+import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * o 1 cobertura file o 2 cobertura files o 1 cobertura and 1 jacoco files
+ */
+
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
-    private static final String FILE_NAME = "jacoco-analysis-model.xml";
+    private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
+    private static final String JACOCO_FILE_NAME_2 = "jacoco-codingstyle.xml";
+
+    private static final String COBERTURA_FILE_NAME = "../cobertura-coverage.xml";
+    private static final String COBERTURA_FILE_NAME_2 = "../coverage-with-lots-of-data.xml";
 
     /** Example integration test for a pipeline with code coverage. */
     @Test
-    public void coveragePluginPipelineHelloWorld() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
+    public void pipelineForOneJacoco() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
-        verifySimpleCoverageNode(job);
+        verifyForOneJacoco(job);
+    }
+
+    @Test
+    public void pipelineForTwoJacoco() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        verifyForTwoJacoco(job);
+    }
+
+    /** Example integration test for a pipeline with code coverage. */
+    @Test
+    public void pipelineForNoFiles() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "}", true));
+
+        verifyForNoFiles(job);
     }
 
     /** Example integration test for a freestyle build with code coverage. */
     @Test
-    public void coveragePluginFreestyleHelloWorld() {
+    public void freestyleForOneJacoco() {
         // automatisch 1. Jenkins starten
         // automatisch 2. Plugin deployen
         // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, FILE_NAME);
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
         // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
-        verifySimpleCoverageNode(project);
+        verifyForOneJacoco(project);
     }
 
-    private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
-        // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
-        // 5. Jenkins Build starten
+    @Test
+    public void freestyleForTwoJacoco() {
+
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter2 = new JacocoReportAdapter(JACOCO_FILE_NAME_2);
+        List<CoverageAdapter> reportAdapters = new ArrayList<>();
+        reportAdapters.add(jacocoReportAdapter);
+        reportAdapters.add(jacocoReportAdapter2);
+        coveragePublisher.setAdapters(reportAdapters);
+        project.getPublishersList().add(coveragePublisher);
+
+        verifyForTwoJacoco(project);
+    }
+
+    /** Example integration test for a freestyle build with code coverage. */
+    @Test
+    public void freestyleForNoFiles() {
+        FreeStyleProject project = createFreeStyleProject();
+        verifyForNoFiles(project);
+    }
+
+    /** Example integration test for a freestyle build with code coverage. */
+    @Test
+    public void freestyleForOneCobertura() throws IOException {
+        // automatisch 1. Jenkins starten
+        // automatisch 2. Plugin deployen
+        // 3a. Job erzeugen
+        FreeStyleProject project = createFreeStyleProject();
+        project.renameTo("Adrian");
+        copyFilesToWorkspace(project, COBERTURA_FILE_NAME);
+        // 3b. Job konfigurieren// 3a. Job erzeugen
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME_2);
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        verifyForOneCobertura(project);
+    }
+
+    private void verifyForOneJacoco(final ParameterizedJob<?, ?> project) {
+
         Run<?, ?> build = buildSuccessfully(project);
-        // 6. Mit Assertions Ergebnisse überprüfen
+
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
+
+    private void verifyForTwoJacoco(final ParameterizedJob<?, ?> project) {
+
+        Run<?, ?> build = buildSuccessfully(project);
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6377, 6691 - 6377));
+    }
+
+    private void verifyForNoFiles(final ParameterizedJob<?, ?> project) {
+        //TODO: Ist Success fachlich korrekt?
+        //TODO: Welche Assertions sind sinnvoll?
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        assertThat(build.getNumber()).isEqualTo(1);
+    }
+
+    private void verifyForOneCobertura(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+        assertThat(build.getNumber()).isEqualTo(1);
+        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+    }
+
 }
