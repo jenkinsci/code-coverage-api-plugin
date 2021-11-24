@@ -107,9 +107,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                                 + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
                                 + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
                                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-                                + "            relativeTargetDir: 'forensics-api']]])\n"
-                        + "sh 'mvn verify'\n"
-                        + "publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')]\n"
+                                + "            relativeTargetDir: 'checkout']]])\n"
+                        + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')]\n"
                         + "}", true));
 
         return job;
