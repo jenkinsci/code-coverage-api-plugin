@@ -36,8 +36,9 @@ import static org.assertj.core.api.Assumptions.*;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
-    /** Docker container for java/maven builds. */
+    /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
@@ -71,8 +72,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySimpleCoverageNode(project);
     }
 
+    /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
-    public void coverageOnAgent() throws IOException, InterruptedException {
+    public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
@@ -88,27 +90,28 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySimpleCoverageNode(project);
     }
 
+    /** Example integration test for a pipeline with code coverage that runs on an agent. */
     @Test
-    public void coverageOnAgentNode() throws IOException, InterruptedException {
+    public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-        WorkflowJob project = createJob();
+        WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, FILE_NAME, FILE_NAME);
 
         verifySimpleCoverageNode(project);
     }
 
-    private WorkflowJob createJob() {
+    private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
-                        + "checkout([$class: 'GitSCM', "
+                        + "    checkout([$class: 'GitSCM', "
                                 + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
                                 + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
                                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                                 + "            relativeTargetDir: 'checkout']]])\n"
-                        + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')]\n"
+                        + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                         + "}", true));
 
         return job;
@@ -118,7 +121,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Creates a docker container agent.
      *
      * @param dockerContainer
-     *         The docker container of the agent
+     *         the docker container of the agent
      *
      * @return A docker container agent.
      */
@@ -144,7 +147,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
             throw new AssumptionViolatedException("Failed to create docker container", e);
         }
     }
-
 
     private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
         // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
