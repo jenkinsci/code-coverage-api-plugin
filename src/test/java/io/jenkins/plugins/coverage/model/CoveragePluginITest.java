@@ -29,7 +29,6 @@ import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assumptions.*;
 
 /**
  * Integration tests for the coverage API plugin.
@@ -75,8 +74,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
     public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
-        assumeThat(isWindows()).as("Running on Windows").isFalse();
-
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         FreeStyleProject project = createFreeStyleProject();
         project.setAssignedNode(agent);
@@ -93,8 +90,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Example integration test for a pipeline with code coverage that runs on an agent. */
     @Test
     public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
-        assumeThat(isWindows()).as("Running on Windows").isFalse();
-
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         WorkflowJob project = createPipelineOnAgent();
 
