@@ -48,7 +48,15 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void coveragePluginPipelineHelloWorld() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "timestamps {\n"
+                + "    checkout([$class: 'GitSCM', "
+                + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "                    relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}"
                 + "}", true));
 
         verifySimpleCoverageNode(job);
@@ -101,13 +109,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
-                        + "    checkout([$class: 'GitSCM', "
-                                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-                                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
-                                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-                                + "            relativeTargetDir: 'checkout']]])\n"
-                        + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
-                        + "}", true));
+                + "timestamps {\n"
+                + "    checkout([$class: 'GitSCM', "
+                + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "                    relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}"
+                + "}", true));
 
         return job;
     }

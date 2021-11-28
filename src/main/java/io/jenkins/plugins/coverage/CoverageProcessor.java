@@ -48,6 +48,7 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourcePainter.AgentPainter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
@@ -114,6 +115,8 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
+        PluginLogger pluginLogger = new PluginLogger(listener.getLogger(), "Coverage");
+
         if (sourceFileResolver != null) {
             Set<String> possiblePaths = new HashSet<>();
             coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
@@ -131,7 +134,6 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
-        PluginLogger pluginLogger = new PluginLogger(listener.getLogger(), "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
         Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
         pluginLogger.logEachLine(log.getInfoMessages());
@@ -146,16 +148,19 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        CoverageNode coverageNode = convertCoverageResultToCoverageNode(coverageReport);
-        this.run.addOrReplaceAction(createNewBuildAction(coverageNode, possibleReferenceBuild));
-    }
+        CoverageResult rootResult = coverageReport.getRoot();
+        rootResult.stripGroup();
 
-    private CoverageNode convertCoverageResultToCoverageNode(final CoverageResult coverageReport) {
-        CoverageResult root = coverageReport.getRoot();
-        root.stripGroup();
-        CoverageNode coverageNode = CoverageNodeConverter.convert(root);
-        coverageNode.splitPackages();
-        return coverageNode;
+        CoverageNodeConverter converter = new CoverageNodeConverter();
+
+        CoverageNode rootNode = converter.convert(rootResult);
+        rootNode.splitPackages();
+
+        FilteredLog agentLog = workspace.act(new AgentPainter(converter.getPaintedFiles()));
+        pluginLogger.logEachLine(agentLog.getInfoMessages());
+        pluginLogger.logEachLine(agentLog.getErrorMessages());
+
+        this.run.addOrReplaceAction(createNewBuildAction(rootNode, possibleReferenceBuild));
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
