@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -48,13 +49,15 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourcePainter;
 import io.jenkins.plugins.coverage.source.SourcePainter.AgentPainter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
-import io.jenkins.plugins.util.PluginLogger;
+import io.jenkins.plugins.util.LogHandler;
 
 public class CoverageProcessor {
 
@@ -115,7 +118,6 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
-        PluginLogger pluginLogger = new PluginLogger(listener.getLogger(), "Coverage");
 
         if (sourceFileResolver != null) {
             Set<String> possiblePaths = new HashSet<>();
@@ -134,10 +136,10 @@ public class CoverageProcessor {
             sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
+        LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
         Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
-        pluginLogger.logEachLine(log.getInfoMessages());
-        pluginLogger.logEachLine(log.getErrorMessages());
+        logHandler.log(log);
 
         CoverageAction action = convertResultToAction(coverageReport);
 
@@ -156,9 +158,23 @@ public class CoverageProcessor {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
-        FilteredLog agentLog = workspace.act(new AgentPainter(converter.getPaintedFiles()));
-        pluginLogger.logEachLine(agentLog.getInfoMessages());
-        pluginLogger.logEachLine(agentLog.getErrorMessages());
+        Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
+        log.logInfo("Painting %d source files on agent", paintedFiles.size());
+
+        FilteredLog agentLog = workspace.act(new AgentPainter(paintedFiles));
+        log.merge(agentLog);
+
+        log.logInfo("Copying painted sources from agent to build folder");
+        logHandler.log(log);
+
+        FilePath buildFolder = new FilePath(run.getRootDir());
+        FilePath buildZip = buildFolder.child(SourcePainter.COVERAGE_SOURCES_ZIP);
+        workspace.child(SourcePainter.COVERAGE_SOURCES_ZIP).copyTo(buildZip);
+        log.logInfo("-> extracting...");
+        buildZip.unzip(buildFolder);
+        log.logInfo("-> done");
+
+        logHandler.log(log);
 
         this.run.addOrReplaceAction(createNewBuildAction(rootNode, possibleReferenceBuild));
     }

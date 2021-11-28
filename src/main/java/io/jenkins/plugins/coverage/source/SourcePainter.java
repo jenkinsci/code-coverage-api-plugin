@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
 
+import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 
@@ -39,48 +39,67 @@ public class SourcePainter implements Serializable {
             the painting.
      */
     private static final long serialVersionUID = -7390586016893061868L;
+    public static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
 
-    public void paintSources(final List<PaintedNode> paintedFiles, final FilteredLog log, final File workspace,
+    public void paintSources(final List<PaintedNode> paintedFiles, final FilteredLog log, final FilePath workspace,
             final Collection<String> sourceFolders, final Charset sourceEncoding) {
         try {
-            Path outputFolder = workspace.toPath().resolve("coverage-sources");
-            Files.createDirectory(outputFolder);
+            FilePath outputFolder = getSourcesFolder(workspace);
+            outputFolder.mkdirs();
 
-            log.logInfo("Painting %d files in folder '%s'", paintedFiles.size(), outputFolder);
-            paintedFiles.parallelStream().forEach(
-                    f -> paintFile(f, workspace.toPath(), sourceFolders, log, sourceEncoding));
-            log.logInfo("-> finished painting successfully");
+            int count = paintedFiles.parallelStream().mapToInt(
+                    f -> paintFile(f, workspace, sourceFolders, log, sourceEncoding)).sum();
+            if (count == paintedFiles.size()) {
+                log.logInfo("-> finished painting successfully");
+            }
+            else {
+                log.logInfo("-> finished painting (%d files have been painted, %d files failed)",
+                        count, paintedFiles.size() - count);
+            }
+            FilePath zipFile = workspace.child(COVERAGE_SOURCES_ZIP);
+            outputFolder.zip(zipFile);
+            log.logInfo("-> zipping sources from folder '%s' as '%s'", outputFolder, zipFile);
         }
         catch (IOException exception) {
             log.logException(exception,
                     "Cannot create temporary directory in folder '%s' for the painted source files", workspace);
         }
+        catch (InterruptedException exception) {
+            log.logException(exception,
+                    "Processing has been interrupted: skipping zipping of source files", workspace);
+        }
     }
 
-    private void paintFile(final PaintedNode fileNode, final Path workspace,
+    private int paintFile(final PaintedNode fileNode, final FilePath workspace,
             final Collection<String> sourceFolders, final FilteredLog log, final Charset sourceEncoding) {
         String sourcePath = fileNode.getNode().getPath();
-        Optional<Path> sourceFile = findSourceFile(workspace, sourcePath, sourceFolders, log);
-        sourceFile.ifPresent(path -> paint(fileNode.getPaint(), sourcePath, path, sourceEncoding, workspace, log));
+        return findSourceFile(workspace, sourcePath, sourceFolders, log)
+                .map(path -> paint(fileNode.getPaint(), sourcePath, path, sourceEncoding, workspace, log))
+                .orElse(0);
     }
 
-    private void paint(final CoveragePaint paint, final String fileName, final Path inputPath, final Charset charset,
-            final Path workspace, final FilteredLog log) {
-        Path outputPath = workspace.resolve(getTempName(fileName));
+    private int paint(final CoveragePaint paint, final String fileName, final FilePath inputPath, final Charset charset,
+            final FilePath workspace, final FilteredLog log) {
+        FilePath outputPath = getSourcesFolder(workspace).child(getTempName(fileName));
         try {
-            log.logInfo("Writing painted source of '%s' to '%s'", fileName, outputPath);
-            try (BufferedWriter output = Files.newBufferedWriter(outputPath)) {
-                List<String> lines = Files.readAllLines(inputPath, charset);
+            try (BufferedWriter output = Files.newBufferedWriter(Paths.get(outputPath.getRemote()))) {
+                List<String> lines = Files.readAllLines(Paths.get(inputPath.getRemote()), charset);
                 for (int line = 0; line < lines.size(); line++) {
                     String content = lines.get(line);
                     paintLine(line, content, paint, output);
                 }
                 paint.setTotalLines(lines.size());
             }
+            return 1;
         }
         catch (IOException exception) {
             log.logException(exception, "Can't write coverage paint of '%s' to source file '%s'", fileName, outputPath);
+            return 0;
         }
+    }
+
+    private FilePath getSourcesFolder(final FilePath workspace) {
+        return workspace.child("coverage-sources");
     }
 
     private void paintLine(final int line, final String content, final CoveragePaint paint,
@@ -136,29 +155,30 @@ public class SourcePainter implements Serializable {
         return Integer.toHexString(fileName.hashCode()) + ".tmp";
     }
 
-    private Optional<Path> findSourceFile(final Path workspace, final String nodePath,
+    private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
             final Collection<String> sourceFolders, final FilteredLog log) {
         try {
-            String relativeSourcePath = nodePath;
-            Path absolutePath = Paths.get(relativeSourcePath);
-            if (Files.exists(absolutePath)) {
+            FilePath absolutePath = new FilePath(new File(fileName));
+            if (absolutePath.exists()) {
                 return Optional.of(absolutePath);
             }
-            Path relativePath = workspace.resolve(relativeSourcePath);
-            if (Files.exists(relativePath)) {
+
+            FilePath relativePath = workspace.child(fileName);
+            if (relativePath.exists()) {
                 return Optional.of(relativePath);
             }
 
             for (String sourceFolder : sourceFolders) {
-                Path sourcePath = workspace.resolve(sourceFolder).resolve(relativeSourcePath);
-                if (Files.exists(sourcePath)) {
+                FilePath sourcePath = workspace.child(sourceFolder).child(fileName);
+                if (sourcePath.exists()) {
                     return Optional.of(sourcePath);
                 }
             }
-            log.logError("Source file '%s' not found", nodePath);
+
+            log.logError("Source file '%s' not found", fileName);
         }
-        catch (InvalidPathException exception) {
-            log.logException(exception, "No valid path in coverage node: '%s'", nodePath);
+        catch (InvalidPathException | IOException | InterruptedException exception) {
+            log.logException(exception, "No valid path in coverage node: '%s'", fileName);
         }
         return Optional.empty();
     }
@@ -180,12 +200,10 @@ public class SourcePainter implements Serializable {
             FilteredLog log = new FilteredLog("Errors during source code painting:");
 
             SourcePainter sourcePainter = new SourcePainter();
-            sourcePainter.paintSources(paintedFiles, log, workspace, Arrays.asList("checkout/src/main/java"), StandardCharsets.UTF_8);
+            sourcePainter.paintSources(paintedFiles, log, new FilePath(workspace), Arrays.asList("checkout/src/main/java"), StandardCharsets.UTF_8);
 
             return log;
         }
-
-
     }
 
     static class PaintedNode implements Serializable {
