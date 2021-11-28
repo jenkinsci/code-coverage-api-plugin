@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
@@ -16,33 +15,54 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
     @Test
-    public void shouldFail() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+    public void noFileShouldFail() {
         FreeStyleProject project = createFreeStyleProject();
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(null);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("");
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+        buildWithResult(project, Result.FAILURE);
     }
 
     @Test
-    public void shouldBuildSuccessfully() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+    public void noFileShouldSucceed() {
         FreeStyleProject project = createFreeStyleProject();
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(false);
+        project.getPublishersList().add(coveragePublisher);
+
+        buildWithResult(project, Result.SUCCESS);
+    }
+
+    @Test
+    public void WithFileShouldFail() {
+        FreeStyleProject project = createFreeStyleProject();
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildSuccessfully(project);
+        buildWithResult(project, Result.FAILURE);
     }
 
+    @Test
+    public void WithFileShouldSucceed() {
+        FreeStyleProject project = createFreeStyleProject();
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(false);
+        project.getPublishersList().add(coveragePublisher);
+
+        buildWithResult(project, Result.SUCCESS);
+    }
 }
