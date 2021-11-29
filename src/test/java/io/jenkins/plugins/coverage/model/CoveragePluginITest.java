@@ -27,6 +27,7 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // IM Team pipeline job und freestyle job! AUFTEILEN!
+//
 
 // 1
 //kein report, schlägt nicht fehl
@@ -69,6 +70,20 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
+    @Test(expected = NullPointerException.class)
+    public void coveragePluginNoInputPipeline() {
+        WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles();
+        pipelineJob.setDefinition(new CpsFlowDefinition("node {"
+                //initialize jacoco adapter via script
+               + "   publishCoverage adapters: [jacocoAdapters('')  "
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(pipelineJob);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+    }
+
     @Test
     public void coveragePluginOneJacoco() {
         // automatisch 1. Jenkins starten
@@ -87,7 +102,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
         // 5. Jenkins Build starten
         Run<?, ?> build = buildSuccessfully(project);
-        // 6. Mit Assertions Ergebnisse prüfend
+        // 6. Mit Assertions Ergebnisse prüfen
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -96,6 +111,21 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
 
+    }
+
+
+    @Test()
+    public void coveragePluginOneJacocoPipeline() {
+        WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        pipelineJob.setDefinition(new CpsFlowDefinition("node {"
+                //initialize jacoco adapter via script
+                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')  "
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(pipelineJob);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
     @Test
@@ -113,6 +143,22 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(602, 958 - 602));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(285, 628 - 285));
+    }
+
+    @Test()
+    public void coveragePluginOneCoberturaPipeline() {
+        WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME);
+        pipelineJob.setDefinition(new CpsFlowDefinition("node {"
+                //initialize cobertura adapter via script
+                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')  "
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(pipelineJob);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(602, 958 - 602));
@@ -138,6 +184,27 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6685, 7326 - 6685));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1946, 2503 - 1946));
+    }
+
+    @Test()
+    public void coveragePluginOneCoberturaJacocoPipeline() {
+        WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME, JACOCO_FILE_NAME);
+        pipelineJob.setDefinition(new CpsFlowDefinition("node {"
+                //initialize cobertura adapter via script
+                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')  "
+                + "}", true));
+        pipelineJob.setDefinition(new CpsFlowDefinition("node {"
+                //initialize jacoco adapter via script
+                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')  "
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(pipelineJob);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(6685, 7326 - 6685));
