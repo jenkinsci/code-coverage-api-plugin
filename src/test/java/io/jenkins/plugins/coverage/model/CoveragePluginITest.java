@@ -75,7 +75,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles();
         pipelineJob.setDefinition(new CpsFlowDefinition("node {"
                 //initialize jacoco adapter via script
-               + "   publishCoverage adapters: [jacocoAdapters('')  "
+               + "   publishCoverage adapters: [jacocoAdapters('')]  "
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(pipelineJob);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -119,7 +119,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         pipelineJob.setDefinition(new CpsFlowDefinition("node {"
                 //initialize jacoco adapter via script
-                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')  "
+                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')]  "
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(pipelineJob);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -155,7 +155,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME);
         pipelineJob.setDefinition(new CpsFlowDefinition("node {"
                 //initialize cobertura adapter via script
-                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')  "
+                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')]  "
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(pipelineJob);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -196,11 +196,11 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob pipelineJob = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME, JACOCO_FILE_NAME);
         pipelineJob.setDefinition(new CpsFlowDefinition("node {"
                 //initialize cobertura adapter via script
-                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')  "
+                + "   publishCoverage adapters: [coberturaAdapters('**/*.xml')]  "
                 + "}", true));
         pipelineJob.setDefinition(new CpsFlowDefinition("node {"
                 //initialize jacoco adapter via script
-                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')  "
+                + "   publishCoverage adapters: [jacocoAdapters('**/*.xml')]  "
                 + "}", true));
 
         Run<?, ?> build = buildSuccessfully(pipelineJob);
