@@ -35,34 +35,15 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME = "coverage-with-lots-of-data.xml";
     private static final String COBERTURA_COVERAGE_FILE_NAME = "cobertura-coverage.xml";
 
-    private static final int JACOCO_ANALYSIS_MODEL_TOTAL_LINES = 6368;
-    private static final int JACOCO_ANALYSIS_MODEL_COVERED_LINES = 6083;
-    private static final int JACOCO_CODING_STYLE_TOTAL_LINES = 323;
-    private static final int JACOCO_CODING_STYLE_COVERED_LINES = 294;
-    private static final int COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_COVERED_LINES = 602;
-    private static final int COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_TOTAL_LINES = 958;
+    private static final int JACOCO_ANALYSIS_MODEL_LINES_TOTAL = 6368;
+    private static final int JACOCO_ANALYSIS_MODEL_LINES_COVERED = 6083;
+    private static final int JACOCO_CODING_STYLE_LINES_TOTAL = 323;
+    private static final int JACOCO_CODING_STYLE_LINES_COVERED = 294;
+    private static final int COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED = 602;
+    private static final int COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL = 958;
 
-    private static final int COBERTURA_COVERAGE_COVERED_LINES = 2;
-    private static final int COBERTURA_COVERAGE_TOTAL_LINES = 2;
-
-    /** Example integration test for a freestyle build with code coverage. */
-    @Test
-    public void coveragePluginFreestyleHelloWorld() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        verifySimpleCoverageNode(project,
-                JACOCO_ANALYSIS_MODEL_COVERED_LINES,
-                JACOCO_ANALYSIS_MODEL_TOTAL_LINES - JACOCO_ANALYSIS_MODEL_COVERED_LINES);
-    }
+    private static final int COBERTURA_COVERAGE_LINES_COVERED = 2;
+    private static final int COBERTURA_COVERAGE_LINES_TOTAL = 2;
 
     /** Test with no adapters */
     @Test
@@ -111,7 +92,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        // 6. Mit Assertions Ergebnisse überprüfen
         assertThat(build.getNumber()).isEqualTo(1);
 
 //        assertLineCoverageResults(Arrays.asList(TOTAL_LINES_JACOCO_ANALYSIS_MODEL),
@@ -135,8 +115,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         assertThat(build.getNumber()).isEqualTo(1);
 
-        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_TOTAL_LINES, JACOCO_CODING_STYLE_TOTAL_LINES),
-                Arrays.asList(JACOCO_ANALYSIS_MODEL_COVERED_LINES, JACOCO_CODING_STYLE_COVERED_LINES), coverageResult);
+        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), coverageResult);
     }
 
     /** Test with two Jacoco files and two adapters */
@@ -158,20 +138,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         assertThat(build.getNumber()).isEqualTo(1);
 
-        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_TOTAL_LINES, JACOCO_CODING_STYLE_TOTAL_LINES),
-                Arrays.asList(JACOCO_ANALYSIS_MODEL_COVERED_LINES, JACOCO_CODING_STYLE_COVERED_LINES), coverageResult);
-    }
-
-    private void assertLineCoverageResults(List<Integer> totalLines, List<Integer> coveredLines,
-            CoverageBuildAction coverageResult) {
-        int totalCoveredLines = coveredLines.stream().mapToInt(x -> x).sum();
-        int totalMissedLines =
-                totalLines.stream().mapToInt(x -> x).sum() - coveredLines.stream().mapToInt(x -> x).sum();
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(
-                        totalCoveredLines,
-                        totalMissedLines
-                ));
+        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), coverageResult);
     }
 
     /** Test with Cobertura Adapter and no files */
@@ -208,8 +176,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         assertLineCoverageResults(
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_TOTAL_LINES),
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_COVERED_LINES),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED),
                 coverageResult);
     }
 
@@ -230,8 +198,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         assertLineCoverageResults(
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_TOTAL_LINES, COBERTURA_COVERAGE_TOTAL_LINES),
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_COVERED_LINES, COBERTURA_COVERAGE_COVERED_LINES),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL, COBERTURA_COVERAGE_LINES_TOTAL),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED, COBERTURA_COVERAGE_LINES_COVERED),
                 coverageResult);
     }
 
@@ -241,8 +209,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         copyFilesToWorkspace(project, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(
-                COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
 
         coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
@@ -274,12 +241,10 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        // 6. Mit Assertions Ergebnisse überprüfen
         assertThat(build.getNumber()).isEqualTo(1);
-
         assertLineCoverageResults(
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_TOTAL_LINES, JACOCO_CODING_STYLE_TOTAL_LINES),
-                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_COVERED_LINES, JACOCO_CODING_STYLE_COVERED_LINES),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+                Arrays.asList(COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED),
                 coverageResult);
     }
 
@@ -405,26 +370,44 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     // TODO: @All: Check Google DOC for more assigned tests !
 
     @Test
-    public void pipelineCoberturaWithOneFile() {
+    public void pipelineJacocoWithOneFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
-        verifySimpleCoverageNode(job, 6083, 6368 - 6083);
-
+        verifySimpleCoverageNode(job,
+                JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_ANALYSIS_MODEL_LINES_TOTAL - JACOCO_ANALYSIS_MODEL_LINES_COVERED);
     }
 
-    /** Example integration test for a pipeline with code coverage. */
     @Test
-    public void coveragePluginPipelineHelloWorld() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+    public void pipelineJacocoWithTwoFiles() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_CODING_STYLE_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
-        verifySimpleCoverageNode(job, 6083, 6368 - 6083);
+        Run<?, ?> build = buildSuccessfully(job);
 
+        // 6. Mit Assertions Ergebnisse überprüfen
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), coverageResult);
+    }
+
+    private void assertLineCoverageResults(List<Integer> totalLines, List<Integer> coveredLines,
+            CoverageBuildAction coverageResult) {
+        int totalCoveredLines = coveredLines.stream().mapToInt(x -> x).sum();
+        int totalMissedLines =
+                totalLines.stream().mapToInt(x -> x).sum() - coveredLines.stream().mapToInt(x -> x).sum();
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(
+                        totalCoveredLines,
+                        totalMissedLines
+                ));
     }
 
     private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project, int assertCoveredLines,
@@ -441,4 +424,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(assertCoveredLines, assertMissedLines));
     }
 
+
+    /** Example integration test for a pipeline with code coverage. */
+    @Test
+    public void coveragePluginPipelineHelloWorld() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        verifySimpleCoverageNode(job, 6083, 6368 - 6083);
+
+    }
 }
