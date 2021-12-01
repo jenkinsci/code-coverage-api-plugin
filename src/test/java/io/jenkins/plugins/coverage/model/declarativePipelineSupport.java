@@ -7,10 +7,14 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.ExcessivePublicCount", "PMD.GodClass", "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
+/**
+ * Integration test to check if declarative pipelines are supported.
+ */
 public class declarativePipelineSupport extends IntegrationTestWithJenkinsPerSuite {
 
+    /**
+     * Check if declarative pipelines are supported.
+     */
     @Test
     public void declarativePipelineShouldRunSuccessfully() {
         //FIXME: (NoSuchMethodError: No such DSL method 'pipeline' found among steps)
