@@ -311,8 +311,29 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        runFreestyleBuildAndAssertBuildResult(project, Result.SUCCESS);
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+    }
 
+    @Test
+    public void freestyleQualityGatesSuccessfulUnhealthy() {
+//        FreeStyleProject project = createFreeStyleProject();
+//        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
+//
+//        CoveragePublisher coveragePublisher = new CoveragePublisher();
+//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+//        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+//
+//        Threshold lineThreshold = new Threshold("Line");
+//        lineThreshold.setUnhealthyThreshold(99f);
+//
+//        coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
+//        project.getPublishersList().add(coveragePublisher);
+//
+//        Run<?, ?> build = buildSuccessfully(project);
+//        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+//        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        // TODO. How to get check health report ?
+        //        assertThat(coverageResult.getHealthReport()).isEqualTo(1);
     }
 
     @Test
@@ -330,7 +351,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        runFreestyleBuildAndAssertBuildResult(project, Result.UNSTABLE);
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
     }
 
     @Test
@@ -349,7 +370,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        runFreestyleBuildAndAssertBuildResult(project, Result.FAILURE);
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
     }
 
 
@@ -359,9 +380,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // TODO: Niko
     }
 
-    // TODO: Michi: Build is successful. Wrong checks ?
     @Test
     public void freestyleFailWhenCoverageDecreases() {
+        // TODO: Michi: Build is successful. Wrong checks ?
         // build 1
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
@@ -379,7 +400,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         project.getPublishersList().add(coveragePublisherTwo);
         Run<?, ?> build_two = buildWithResult(project, Result.FAILURE);
-        assertThat(build_two.getResult()).isEqualTo(Result.FAILURE);
     }
 
     @Test
@@ -465,18 +485,17 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
     @Test
     public void pipelineQualityGatesSuccessUnhealthy() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                + "}", true));
-        Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+//        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+//        job.setDefinition(new CpsFlowDefinition("node {"
+//                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
+//                + "}", true));
+//        Run<?, ?> build = buildSuccessfully(job);
+//        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+//        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         // TODO: How to check unhealthy status ? Create Freestyle test as well for this case
     }
@@ -498,7 +517,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml', thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 99.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
                 + "}", true));
         Run<?, ?> build = buildWithResult(job, Result.FAILURE);
-        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
     private void assertLineCoverageResults(List<Integer> totalLines, List<Integer> coveredLines,
@@ -525,15 +543,5 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(assertCoveredLines, assertMissedLines));
-    }
-
-    void runFreestyleBuildAndAssertBuildResult(FreeStyleProject project, Result expectedResult) {
-        Run<?, ?> build = buildWithResult(project, expectedResult);
-        assertThat(build.getResult()).isEqualTo(expectedResult);
-    }
-
-    void runPipelineBuildAndAssertBuildResult(WorkflowJob job, Result expectedResult) {
-        Run<?, ?> build = buildWithResult(job, expectedResult);
-        assertThat(build.getResult()).isEqualTo(expectedResult);
     }
 }
