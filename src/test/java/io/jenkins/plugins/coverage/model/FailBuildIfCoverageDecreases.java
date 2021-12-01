@@ -14,7 +14,7 @@ import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 /**
- * integration test for checking if build failes when coverage decreases
+ * Integration test for checking if build failes when coverage decreases.
  */
 public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerSuite {
 
@@ -22,7 +22,7 @@ public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerS
     private static final String COBERTURA_FILE_NAME_2 = "cobertura-lower-coverage.xml";
 
     /**
-     * integration test for checking if build failes when coverage decreases
+     * Integration test for checking if build failes when coverage decreases.
      *
      * @throws IOException
      *         if creating Project throws Exception
@@ -38,7 +38,7 @@ public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Creates Project with second buiild containing decreased coverage.
+     * Creates Project with second build containing decreased coverage.
      *
      * @param filename
      *         with higher coverage
