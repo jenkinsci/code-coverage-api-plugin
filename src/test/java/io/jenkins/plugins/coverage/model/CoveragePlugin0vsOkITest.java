@@ -11,9 +11,15 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+/**
+ * Tests if 0 reports fail vs ok.
+ */
 public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
+    /**
+     * Adapter reads no file and failNoReports is set true.
+     */
     @Test
     public void noFileShouldFail() {
         FreeStyleProject project = createFreeStyleProject();
@@ -27,6 +33,9 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
         buildWithResult(project, Result.FAILURE);
     }
 
+    /**
+     * Adapter reads no file and failNoReports is set false.
+     */
     @Test
     public void noFileShouldSucceed() {
         FreeStyleProject project = createFreeStyleProject();
@@ -40,6 +49,9 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
         buildWithResult(project, Result.SUCCESS);
     }
 
+    /**
+     * Adapter reads one file and failNoReports is set true.
+     */
     @Test
     public void WithFileShouldFail() {
         FreeStyleProject project = createFreeStyleProject();
@@ -53,6 +65,9 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
         buildWithResult(project, Result.FAILURE);
     }
 
+    /**
+     * Adapter reads one file and failNoReports is set false.
+     */
     @Test
     public void WithFileShouldSucceed() {
         FreeStyleProject project = createFreeStyleProject();

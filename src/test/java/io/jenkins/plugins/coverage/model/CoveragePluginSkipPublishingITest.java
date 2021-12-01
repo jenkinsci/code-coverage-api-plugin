@@ -13,9 +13,15 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class CoveragePluginPublishingITest extends IntegrationTestWithJenkinsPerSuite {
+/**
+ * Tests if publishing of checks can be skipped.
+ */
+public class CoveragePluginSkipPublishingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
+    /**
+     * Tests if publishing of checks is skipped when skip publishing checks flag is set.
+     */
     @Test
     public void skipPublishingOfChecks() {
         FreeStyleProject project = createFreeStyleProject();

@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * o 1 cobertura file o 2 cobertura files o 1 cobertura and 1 jacoco files
  */
-
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
@@ -46,6 +45,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
+    public void pipelineForNoJacoco() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        verifyForNoFile(job);
+    }
+
+    @Test
     public void pipelineForTwoJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -57,12 +66,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Example integration test for a pipeline with code coverage. */
     @Test
-    public void pipelineForNoFiles() {
+    public void pipelineForNoAdapter() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "}", true));
 
-        verifyForNoFiles(job);
+        verifyForNoAdapter(job);
     }
 
     /** Example integration test for a freestyle build with code coverage. */
@@ -102,9 +111,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Example integration test for a freestyle build with code coverage. */
     @Test
-    public void freestyleForNoFiles() {
+    public void freestyleForNoAdapter() {
         FreeStyleProject project = createFreeStyleProject();
-        verifyForNoFiles(project);
+        verifyForNoAdapter(project);
     }
 
     /** Example integration test for a freestyle build with code coverage. */
@@ -171,7 +180,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void freestyleForOneCoberturaAndOneJacoco()  {
+    public void freestyleForOneCoberturaAndOneJacoco() {
         // automatisch 1. Jenkins starten
         // automatisch 2. Plugin deployen
         // 3a. Job erzeugen
@@ -216,7 +225,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     private void verifyForTwoJacoco(final ParameterizedJob<?, ?> project) {
-
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
 
@@ -225,9 +233,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(6377, 6691 - 6377));
     }
 
-    private void verifyForNoFiles(final ParameterizedJob<?, ?> project) {
-        //TODO: Ist Success fachlich korrekt?
-        //TODO: Welche Assertions sind sinnvoll?
+    private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
+        //TODO: Build should fail
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        assertThat(build.getNumber()).isEqualTo(1);
+    }
+
+    private void verifyForNoFile(final ParameterizedJob<?, ?> project) {
+
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
     }
