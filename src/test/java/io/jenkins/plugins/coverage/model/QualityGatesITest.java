@@ -7,11 +7,9 @@ import java.util.List;
 import org.junit.Test;
 
 import hudson.model.FreeStyleProject;
-import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Run;
 
-import io.jenkins.plugins.analysis.core.model.ResultAction;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
@@ -20,111 +18,64 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Integration test for QualityGates/tresholds beeing respected.
+ */
 public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
-    //TODO: refactoring
-
+    /**
+     * Tests if when QualityGates beeing fullfilled, build returns success without failure message.
+     */
     @Test
     public void shouldReturnSuccess() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(50);
-        lineThreshold.setUnstableThreshold(80);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS); //Unhealthy 90, unstable 95
+        FreeStyleProject project = createFreeStyleProjectWithOneLineTresholds(50, 80);
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         String message = build.getAction(CoverageAction.class).getFailMessage();
         assertThat(message).isEqualTo(null);
-       // assertThat(healthReport.getIconUrl()).isEqualTo("health-80plus.png");
     }
 
-    @Test
-    public void shouldReturnFail() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(95);
-        lineThreshold.setUnstableThreshold(98);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
-        String message = build.getAction(CoverageAction.class).getFailMessage();
-        assertThat(message).isEqualTo("Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=98.0, unhealthyThreshold=95.0}].");
-    }
-
-    @Test
-    public void shouldReturnFailDueToFailOnUnhealthy() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(95);
-        lineThreshold.setUnstableThreshold(98);
-        lineThreshold.setFailUnhealthy(true);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
-        HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
-
-        String message = build.getAction(CoverageAction.class).getFailMessage();
-        assertThat(message).isEqualTo("Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=98.0, unhealthyThreshold=95.0}].");
-
-    }
-
+    /**
+     * Tests if when QualityGates for unstable not beeing fullfilled, build returns unstable with failure message.
+     */
     @Test
     public void shouldReturnUnstable() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+        FreeStyleProject project = createFreeStyleProjectWithOneLineTresholds(100, 100);
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        String message = build.getAction(CoverageAction.class).getFailMessage();
+        assertThat(message).isEqualTo(
+                "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=100.0, unhealthyThreshold=100.0}].");
+    }
+
+    /**
+     * Creates a freestyle project with one line treshold
+     * @param unhealthy treshold for line coverage
+     * @param unstable treshold for line coverage
+     * @return freestyle project with one line treshold
+     */
+    FreeStyleProject createFreeStyleProjectWithOneLineTresholds(final float unhealthy, final float unstable) {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(95);
-        lineThreshold.setUnstableThreshold(99);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
+        coveragePublisher.setGlobalThresholds(createTresholdsContainingOneLineTreshold(unhealthy, unstable));
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
-        String message = build.getAction(CoverageAction.class).getFailMessage();
-        assertThat(message).isEqualTo("Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=99.0, unhealthyThreshold=95.0}].");
-
+        return project;
     }
 
+    /**
+     * Creates Tresholds containing one line treshold.
+     * @param unhealthy treshold for line coverage
+     * @param unstable treshold for line coverage
+     * @return tresholds containing one line treshold
+     */
+    List<Threshold> createTresholdsContainingOneLineTreshold(final float unhealthy, final float unstable) {
+        List<Threshold> thresholds = new ArrayList<>();
+        Threshold lineThreshold = new Threshold("Line");
+        lineThreshold.setUnhealthyThreshold(unhealthy);
+        lineThreshold.setUnstableThreshold(unstable);
+        thresholds.add(lineThreshold);
+        return thresholds;
+    }
 }

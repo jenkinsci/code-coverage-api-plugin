@@ -11,7 +11,6 @@ import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Run;
 
-import io.jenkins.plugins.analysis.core.model.ResultAction;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
@@ -20,97 +19,72 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Integration Test for HealthReports.
+ */
 public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
-    //TODO: refactoring
 
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
+    /**
+     * Build should succeed and HealthScore is 100%.
+     */
     @Test
     public void shouldReturnSuccess() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
 
         List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(50);
-        lineThreshold.setUnstableThreshold(80);
-        thresholds.add(lineThreshold);
         coveragePublisher.setGlobalThresholds(thresholds);
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS); //Unhealthy 90, unstable 95
+
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+
         HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
         assertThat(healthReport.getScore()).isEqualTo(100);
+        assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");
         assertThat(healthReport.getIconUrl()).isEqualTo("health-80plus.png");
     }
 
+    /**
+     * Build should fail and HealthScore is 0%.
+     */
     @Test
     public void shouldReturnFail() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
 
         List<Threshold> thresholds = new ArrayList<>();
         Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(95);
         lineThreshold.setUnstableThreshold(98);
         thresholds.add(lineThreshold);
         coveragePublisher.setGlobalThresholds(thresholds);
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
+
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+
         HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
         assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
-        //assertThat(healthReport.getLocalizableDescription()).isEqualTo("Coverage Healthy score is 0%");
+        assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 0%");
         assertThat(healthReport.getScore()).isEqualTo(0);
     }
 
-    @Test
-    public void shouldReturnFailDueToFailOnUnhealthy() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnhealthyThreshold(95);
-        lineThreshold.setUnstableThreshold(98);
-        lineThreshold.setFailUnhealthy(true);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
-        HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
-        assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
-        //assertThat(healthReport.getLocalizableDescription()).isEqualTo("Coverage Healthy score is 0%");
-        assertThat(healthReport.getScore()).isEqualTo(0);
-    }
-
+    /**
+     * Build should be unstable and HealthScore is 0%.
+     */
     @Test
     public void shouldReturnUnstable() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
@@ -121,12 +95,14 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
         lineThreshold.setUnstableThreshold(99);
         thresholds.add(lineThreshold);
         coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE); //Unhealthy 90, unstable 95
-        HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
 
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+
+        HealthReport healthReport = build.getAction(CoverageAction.class).getHealthReport();
         assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
-        //assertThat(healthReport.getLocalizableDescription()).isEqualTo("Coverage Healthy score is 0%");
+        assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 0%");
         assertThat(healthReport.getScore()).isEqualTo(0);
     }
 
