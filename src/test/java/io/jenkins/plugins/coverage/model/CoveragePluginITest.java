@@ -156,7 +156,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(coverageResult).isEqualTo(null);
+        assertThat(coverageResult).isNull();
     }
 
     @Test
@@ -368,6 +368,19 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     // TODO: @All: Check Google DOC for more assigned tests !
+
+    @Test
+    public void pipelineJacocoWithNoFile() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult).isNull();
+    }
 
     @Test
     public void pipelineJacocoWithOneFile() {
