@@ -29,10 +29,10 @@ import static org.assertj.core.api.Assertions.*;
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     // TODO: other possibility than duplicating files because of different ressource folder ?
-    // TODO: Difference between **/*.xml and *.xml.
+    // TODO: Difference between **/*.xml and *.xml. Make consistent
     private static final String JACOCO_ANALYSIS_MODEL_FILE_NAME = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODING_STYLE_FILE_NAME = "jacoco-codingstyle.xml";
-    private static final String JACOCO_CODING_STYLE_DECREASED_FILE_NAME = "jacoco-codingstyle-2.xml";
+    private static final String JACOCO_CODING_STYLE_DECREASED_FILE_NAME = "jacoco-codingstyle-decreased-line-coverage.xml";
     private static final String COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME = "coverage-with-lots-of-data.xml";
     private static final String COBERTURA_COVERAGE_FILE_NAME = "cobertura-coverage.xml";
 
@@ -508,6 +508,22 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
         assertThat(build.getResult()).isEqualTo(Result.UNSTABLE);
+    }
+
+    @Test
+    public void pipelineFailWhenCoverageDecreases() {
+        WorkflowJob job1 = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_FILE_NAME);
+        job1.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "}", true));
+        Run<?, ?> build = buildWithResult(job1, Result.SUCCESS);
+
+        WorkflowJob job2 = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        job2.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "}", true));
+        Run<?, ?> build2 = buildWithResult(job2, Result.FAILURE);
+        assertThat(build2.getResult()).isEqualTo(Result.FAILURE);
     }
 
     @Test

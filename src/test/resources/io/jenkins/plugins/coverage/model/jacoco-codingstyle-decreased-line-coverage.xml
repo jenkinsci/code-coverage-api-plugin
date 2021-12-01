@@ -6,13 +6,13 @@
     <class name="edu/hm/hafner/util/Ensure$ObjectCondition" sourcefilename="Ensure.java">
       <method name="&lt;init&gt;" desc="(Ljava/lang/Object;)V" line="511">
         <counter type="INSTRUCTION" missed="0" covered="6"/>
-        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="LINE" missed="2" covered="0"/>
         <counter type="COMPLEXITY" missed="0" covered="1"/>
         <counter type="METHOD" missed="0" covered="1"/>
       </method>
       <method name="&lt;init&gt;" desc="(Ljava/lang/Object;[Ljava/lang/Object;)V" line="524">
         <counter type="INSTRUCTION" missed="0" covered="9"/>
-        <counter type="LINE" missed="0" covered="4"/>
+        <counter type="LINE" missed="4" covered="0"/>
         <counter type="COMPLEXITY" missed="0" covered="1"/>
         <counter type="METHOD" missed="0" covered="1"/>
       </method>
@@ -1170,10 +1170,10 @@
     <counter type="METHOD" missed="5" covered="97"/>
     <counter type="CLASS" missed="1" covered="15"/>
   </package>
-  <counter type="INSTRUCTION" missed="100" covered="1"/>
-  <counter type="BRANCH" missed="100" covered="1"/>
-  <counter type="LINE" missed="100" covered="1"/>
-  <counter type="COMPLEXITY" missed="100" covered="1"/>
-  <counter type="METHOD" missed="100" covered="1"/>
-  <counter type="CLASS" missed="100" covered="1"/>
+  <counter type="INSTRUCTION" missed="90" covered="1260"/>
+  <counter type="BRANCH" missed="7" covered="109"/>
+  <counter type="LINE" missed="30" covered="293"/>
+  <counter type="COMPLEXITY" missed="12" covered="148"/>
+  <counter type="METHOD" missed="5" covered="97"/>
+  <counter type="CLASS" missed="1" covered="15"/>
 </report>
