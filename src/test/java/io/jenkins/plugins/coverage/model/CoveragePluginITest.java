@@ -430,7 +430,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineCoberturaAndJacocoFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME, COBERTURA_COVERAGE_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), cobertura('**/*.xml')]"
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
