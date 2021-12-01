@@ -411,6 +411,21 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), coverageResult);
     }
 
+    @Test
+    public void pipelineCoberturaWithNoFile() {
+        // TODO: Niko
+    }
+
+    @Test
+    public void pipelineCoberturaWithOneFile() {
+        // TODO: Niko
+    }
+
+    @Test
+    public void pipelineCoberturaWithTwoFiles() {
+        // TODO: Niko
+    }
+
     private void assertLineCoverageResults(List<Integer> totalLines, List<Integer> coveredLines,
             CoverageBuildAction coverageResult) {
         int totalCoveredLines = coveredLines.stream().mapToInt(x -> x).sum();
