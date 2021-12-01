@@ -335,13 +335,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void healthReports() {
+    public void freestyleHealthReports() {
         // TODO: Niko
     }
 
     // TODO: Michi: Build is successful. Wrong checks ?
     @Test
-    public void failWhenCoverageDecreases() {
+    public void freestyleFailWhenCoverageDecreases() {
         // build 1
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
@@ -363,7 +363,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void skipChecksWhenPublishing() {
+    public void freestyleSkipChecksWhenPublishing() {
         // TODO: Niko
     }
 
@@ -422,18 +422,5 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(assertCoveredLines, assertMissedLines));
-    }
-
-
-    /** Example integration test for a pipeline with code coverage. */
-    @Test
-    public void coveragePluginPipelineHelloWorld() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
-
-        verifySimpleCoverageNode(job, 6083, 6368 - 6083);
-
     }
 }
