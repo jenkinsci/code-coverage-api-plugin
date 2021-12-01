@@ -426,6 +426,18 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // TODO: Niko
     }
 
+    @Test
+    public void pipelineCoberturaAndJacocoFile() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME, COBERTURA_COVERAGE_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertLineCoverageResults(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, COBERTURA_COVERAGE_LINES_TOTAL),
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, COBERTURA_COVERAGE_LINES_COVERED), coverageResult);
+    }
+
     private void assertLineCoverageResults(List<Integer> totalLines, List<Integer> coveredLines,
             CoverageBuildAction coverageResult) {
         int totalCoveredLines = coveredLines.stream().mapToInt(x -> x).sum();
