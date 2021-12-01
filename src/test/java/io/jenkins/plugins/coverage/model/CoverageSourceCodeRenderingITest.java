@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -22,16 +23,16 @@ public class CoverageSourceCodeRenderingITest extends IntegrationTestWithJenkins
      * Reads source code from git and adds it to project.
      */
     @Test
-    public void SourceCodeCopyingTest() {
+    public void SourceCodeCopyingTest() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
-        //project.setScm(new GitSCM("https://github.com/jenkinsci/code-coverage-api-plugin.git"));
-        GitSCM gitSCM = new GitSCM("https://github.com/jenkinsci/code-coverage-api-plugin.git");
+       project.setScm(new GitSCM("https://github.com/jenkinsci/code-coverage-api-plugin.git"));
 
         Run<?, ?> build = buildSuccessfully(project);
 

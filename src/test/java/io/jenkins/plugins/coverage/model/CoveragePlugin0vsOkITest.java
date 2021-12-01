@@ -61,7 +61,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
-
+        // Sollte der Build wirklich failen?
         buildWithResult(project, Result.FAILURE);
     }
 
