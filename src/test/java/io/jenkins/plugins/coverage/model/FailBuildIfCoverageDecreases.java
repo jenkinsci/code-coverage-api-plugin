@@ -11,86 +11,71 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
+import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerTest {
-    //TODO: refactoring
-
+/**
+ * integration test for checking if build failes when coverage decreases
+ */
+public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
     private static final String COBERTURA_FILE_NAME_2 = "cobertura-lower-coverage.xml";
+
+    /**
+     * integration test for checking if build failes when coverage decreases
+     *
+     * @throws IOException
+     *         if creating Project throws Exception
+     */
     @Test
-    public void shouldFailDueToDecreasingCoverageIsSetTrue() throws IOException {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
-        FreeStyleProject project = createFreeStyleProject();
-        project.renameTo("Adrian");
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-
-        //set FailBuildIfCoverageDecreasedInChangeRequest on true
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        //run first build
-        Run<?, ?> build = buildSuccessfully(project);
-
-        //prepare second build
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME_2);
-
-        CoberturaReportAdapter reportAdapter2 = new CoberturaReportAdapter(
-                COBERTURA_FILE_NAME_2);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-
-        coveragePublisher.setAdapters(Collections.singletonList(reportAdapter2));
-        project.getPublishersList().replace(coveragePublisher);
-
-        //run second build in same project
-        Run<?, ?> currentBuild2 = buildWithResult(project, Result.FAILURE);
+    public void shouldReturnSuccessAndFailureDependingOnFailBuildIfCoverageDecreases() throws IOException {
+        FreeStyleProject projectIfDecreasesSetFailTrue = createProjectWithDecreasedCoverage(COBERTURA_FILE_NAME,
+                COBERTURA_FILE_NAME_2, true);
+        buildWithResult(projectIfDecreasesSetFailTrue, Result.FAILURE);
+        FreeStyleProject projectIfDecreasesSetFailFalse = createProjectWithDecreasedCoverage(COBERTURA_FILE_NAME,
+                COBERTURA_FILE_NAME_2, false);
+        buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
     }
 
-    @Test
-    public void shouldSucceedDueToDecreasingCoverageIsSetFalse() throws IOException {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
+    /**
+     * Creates Project with second buiild containing decreased coverage.
+     *
+     * @param filename
+     *         with higher coverage
+     * @param filenameOfDecreasedCoverage
+     *         with decreased coverage
+     * @param setFailIfCoverageDecreased
+     *         to set if build should fail when coverage decreases
+     */
+    FreeStyleProject createProjectWithDecreasedCoverage(final String filename, final String filenameOfDecreasedCoverage,
+            final boolean setFailIfCoverageDecreased)
+            throws IOException {
+
         FreeStyleProject project = createFreeStyleProject();
-        project.renameTo("Adrian");
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+        copyFilesToWorkspace(project, filename);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
 
         //set FailBuildIfCoverageDecreasedInChangeRequest on true
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(setFailIfCoverageDecreased);
 
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(filename);
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
         //run first build
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
 
         //prepare second build
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME_2);
+        copyFilesToWorkspace(project, filenameOfDecreasedCoverage);
 
         CoberturaReportAdapter reportAdapter2 = new CoberturaReportAdapter(
-                COBERTURA_FILE_NAME_2);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(false);
-        //adapters.add(jacocoReportAdapter2);
-        coveragePublisher.setAdapters(Collections.singletonList(reportAdapter2));
-        //coverageResult.getReferenceBuild();
+                filenameOfDecreasedCoverage);
+        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(setFailIfCoverageDecreased);
 
-        // coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        coveragePublisher.setAdapters(Collections.singletonList(reportAdapter2));
         project.getPublishersList().replace(coveragePublisher);
 
-        //run second build in same project
-        Run<?, ?> currentBuild2 = buildWithResult(project, Result.SUCCESS);
-
+        return project;
     }
 
 }
