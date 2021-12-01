@@ -512,17 +512,19 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void pipelineFailWhenCoverageDecreases() {
-        WorkflowJob job1 = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_FILE_NAME);
-        job1.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
-                + "}", true));
-        Run<?, ?> build = buildWithResult(job1, Result.SUCCESS);
 
-        WorkflowJob job2 = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        job2.setDefinition(new CpsFlowDefinition("node {"
+        // TODO: not working yet
+        WorkflowJob jobOne = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_FILE_NAME);
+        jobOne.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
                 + "}", true));
-        Run<?, ?> build2 = buildWithResult(job2, Result.FAILURE);
+        Run<?, ?> build = buildWithResult(jobOne, Result.SUCCESS);
+
+        WorkflowJob jobTwo = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        jobTwo.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "}", true));
+        Run<?, ?> build2 = buildWithResult(jobTwo, Result.FAILURE);
         assertThat(build2.getResult()).isEqualTo(Result.FAILURE);
     }
 
