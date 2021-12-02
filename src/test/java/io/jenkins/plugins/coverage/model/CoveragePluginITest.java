@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -506,27 +507,45 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleReferenceBuild() {
-        // TODO: how to set build as reference build ?
-//        FreeStyleProject project = createFreeStyleProject();
-//        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-//
-//        // build 1
-//        CoveragePublisher coveragePublisher = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
-//        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
-//        project.getPublishersList().add(coveragePublisher);
-//        Run<?, ?> build = buildSuccessfully(project);
-//
-//        // build 2
-//        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-//        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
-//        project.getPublishersList().add(coveragePublisherTwo);
-//        Run<?, ?> buildTwo = buildSuccessfully(project);
-//
-//        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
-//
-//        assertThat(coverageResult.getReferenceBuild().isPresent()).isTrue();
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+
+        // build 1
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        // build 2
+        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+        project.getPublishersList().add(coveragePublisherTwo);
+        Run<?, ?> buildTwo = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
+
+        assertThat(coverageResult.getReferenceBuild()).isPresent();
+        Run<?, ?> referenceBuild = coverageResult.getReferenceBuild().get();
+        assertThat(referenceBuild).isEqualTo(build);
+    }
+
+    @Test
+    public void freestyleNoReferenceBuild() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+
+        // build 1
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
     @Test
