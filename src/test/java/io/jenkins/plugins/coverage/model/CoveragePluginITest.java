@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
+import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
@@ -252,47 +254,37 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void zeroReportsFail() {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
 
-//        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        // 6. Mit Assertions Ergebnisse überprüfen
         assertThat(build.getNumber()).isEqualTo(1);
-
-        // TODO: Niko: complete tests
-//        assertThat(coverageResult)
-//        assertThatThrownBy(() -> coverageResult.getHealthReport());
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
     @Test
     public void zeroReportsOkay() {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
 
-//        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
-        coveragePublisher.setFailNoReports(true);
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        coveragePublisher.setFailNoReports(false);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        // 6. Mit Assertions Ergebnisse überprüfen
         assertThat(build.getNumber()).isEqualTo(1);
-
-        // TODO: Niko: complete tests
-//        assertThat(coverageResult)
-//        assertThatThrownBy(() -> coverageResult.getHealthReport());
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
     @Test
@@ -377,7 +369,21 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleHealthReports() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
+
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+
+        Run<?, ?> build = buildSuccessfully(project);
+        HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
+
         // TODO: Niko
+        // TODO: Health reports are not set?
     }
 
     @Test
@@ -403,8 +409,24 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void freestyleSkipChecksWhenPublishing() {
+    public void freestyleSkipChecksWhenPublishing() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setSkipPublishingChecks(true);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
+
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+
+        List<String> log = build.getLog(20);
+        log.forEach(System.out::println);
+
         // TODO: Niko
+        // TODO: How to inject/check the TaskListener for entries?
     }
 
     // TODO: @All: Check Google DOC for more assigned tests !
