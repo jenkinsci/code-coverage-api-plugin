@@ -506,7 +506,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void freestyleReferenceBuild() {
+    public void freestyleReferenceBuildPresent() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
@@ -532,7 +532,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void freestyleNoReferenceBuild() {
+    public void freestyleReferenceBuildEmpty() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
