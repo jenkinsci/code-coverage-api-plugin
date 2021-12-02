@@ -407,9 +407,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
 
         Run<?, ?> build = buildSuccessfully(project);
-        HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
-
-        assertThat(healthReport).isNotNull();
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(100);
     }
 
     @Test
