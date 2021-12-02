@@ -41,6 +41,7 @@ import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for the coverage API plugin.
@@ -554,7 +555,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        // TODO: How to check report aggregation
+        int covered = JACOCO_ANALYSIS_MODEL_LINES_COVERED + JACOCO_CODING_STYLE_LINES_COVERED;
+        int total = JACOCO_ANALYSIS_MODEL_LINES_TOTAL + JACOCO_CODING_STYLE_LINES_TOTAL;
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(covered, total - covered));
     }
 
     @Test
@@ -740,6 +743,11 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
+    public void pipelineReportAggregation() {
+        // TODO: Niko
+    }
+
+    @Test
     public void pipelineDeltaComputation() {
 
         // TODO: PipelineDeltaComputation: not working
@@ -783,7 +791,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         WorkflowJob project = createPipelineOnAgent();
 
-        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE_NAME,
+                JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         verifySimpleCoverageNode(project);
     }
@@ -800,13 +809,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
-                        + "    checkout([$class: 'GitSCM', "
-                                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-                                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
-                                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-                                + "            relativeTargetDir: 'checkout']]])\n"
-                        + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
-                        + "}", true));
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}", true));
         return job;
     }
 
