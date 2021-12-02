@@ -252,7 +252,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void zeroReportsFail() {
+    public void freestyleZeroReportsFail() {
         FreeStyleProject project = createFreeStyleProject();
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -270,7 +270,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void zeroReportsOkay() {
+    public void freestyleZeroReportsOkay() {
         FreeStyleProject project = createFreeStyleProject();
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
