@@ -21,7 +21,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads no file and failNoReports is set true.
      */
     @Test
-    public void noFileShouldFail() {
+    public void noFileAndFailNoReportsTrue() {
         FreeStyleProject project = createFreeStyleProject();
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -37,9 +37,9 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads no file and failNoReports is set false.
      */
     @Test
-    public void noFileShouldSucceed() {
+    public void noFileAndFailNoReportsFalse() {
         FreeStyleProject project = createFreeStyleProject();
-
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("");
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
@@ -53,27 +53,57 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set true.
      */
     @Test
-    public void WithFileShouldFail() {
+    public void withFileAndFailNoReportsTrue() {
         FreeStyleProject project = createFreeStyleProject();
-
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
-        // Sollte der Build wirklich failen?
-        buildWithResult(project, Result.FAILURE);
+
+        buildWithResult(project, Result.SUCCESS);
     }
 
     /**
      * Adapter reads one file and failNoReports is set false.
      */
     @Test
-    public void WithFileShouldSucceed() {
+    public void withFileAndFailNoReportsFalse() {
         FreeStyleProject project = createFreeStyleProject();
-
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(false);
+        project.getPublishersList().add(coveragePublisher);
+
+        buildWithResult(project, Result.SUCCESS);
+    }
+
+    /**
+     * Adapter reads one file and failNoReports is set false.
+     */
+    @Test
+    public void withFileWildcardAndFailNoReportsTrue() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("**/*.xml");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        coveragePublisher.setFailNoReports(true);
+        project.getPublishersList().add(coveragePublisher);
+
+        buildWithResult(project, Result.SUCCESS);
+    }    /**
+     * Adapter reads one file and failNoReports is set false.
+     */
+    @Test
+    public void withFileWildcardAndFailNoReportsFalse() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("**/*.xml");
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         coveragePublisher.setFailNoReports(false);
         project.getPublishersList().add(coveragePublisher);
