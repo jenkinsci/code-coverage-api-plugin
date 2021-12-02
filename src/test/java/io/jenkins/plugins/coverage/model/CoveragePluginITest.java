@@ -676,15 +676,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void pipelineQualityGatesSuccessUnhealthy() {
-    //        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-    //        job.setDefinition(new CpsFlowDefinition("node {"
-    //                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
-    //                + "}", true));
-    //        Run<?, ?> build = buildSuccessfully(job);
-    //        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-    //        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-
-        // TODO: How to check unhealthy status ? Create Freestyle test as well for this case
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 99.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
     @Test
@@ -759,7 +758,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                 + "}", true));
 
         return job;
