@@ -409,8 +409,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
 
-        // TODO: Niko
-        // TODO: Health reports are not set?
+        // TODO: Niko: Health reports are not set?
     }
 
     @Test
@@ -452,8 +451,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         List<String> log = build.getLog(20);
         log.forEach(System.out::println);
 
-        // TODO: Niko
-        // TODO: How to inject/check the TaskListener for entries?
+        // TODO: Niko: How to inject/check the TaskListener for entries?
         // skipPublishingChecks is a flag that either publishes the coverageAction to a TaskListener or not
         // Currently only logging default message "No suitable checks publisher found." (see ChecksPublisher.class)
         // Check for this default message? (possible with build.getLog?
@@ -462,7 +460,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleSourceCodeRendering() {
-        // TODO: How to tests ?
+        // TODO: How to test ?
 
 //        FreeStyleProject project = createFreeStyleProject();
 //
@@ -488,7 +486,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleSourceCodeCopying() {
-        // TODO: Difference to rendering ?
+        // TODO: How to test ? Difference to rendering ?
     }
 
     @Test
@@ -513,6 +511,30 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
+    }
+
+    @Test
+    public void freestyleReferenceBuild() {
+        FreeStyleProject project = createFreeStyleProject();
+
+        // build 1
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        // build 2
+        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+        project.getPublishersList().add(coveragePublisherTwo);
+        Run<?, ?> buildTwo = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);‚
+
+        assertThat(coverageResult.getReferenceBuild()).isEqualTo("-0.019");
     }
 
     @Test
@@ -649,8 +671,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void pipelineFailWhenCoverageDecreases() {
-
-        // TODO: not working yet
         WorkflowJob jobOne = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_FILE_NAME);
         jobOne.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
