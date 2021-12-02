@@ -532,7 +532,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisherTwo);
         Run<?, ?> buildTwo = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);‚
+        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getReferenceBuild()).isEqualTo("-0.019");
     }
