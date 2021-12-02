@@ -13,6 +13,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.slaves.DumbSlave;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
@@ -338,24 +339,23 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleQualityGatesSuccessfulUnhealthy() {
-//        FreeStyleProject project = createFreeStyleProject();
-//        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
-//
-//        CoveragePublisher coveragePublisher = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
-//        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-//
-//        Threshold lineThreshold = new Threshold("Line");
-//        lineThreshold.setUnhealthyThreshold(99f);
-//
-//        coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
-//        project.getPublishersList().add(coveragePublisher);
-//
-//        Run<?, ?> build = buildSuccessfully(project);
-//        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-//        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-        // TODO. How to get check health report ?
-        //        assertThat(coverageResult.getHealthReport()).isEqualTo(1);
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+
+        Threshold lineThreshold = new Threshold("Line");
+        lineThreshold.setUnhealthyThreshold(99f);
+
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
     @Test
@@ -409,7 +409,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
 
-        // TODO: Niko: Health reports are not set?
+        assertThat(healthReport).isNotNull();
     }
 
     @Test
@@ -440,48 +440,40 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        coveragePublisher.setSkipPublishingChecks(true);
+        coveragePublisher.setSkipPublishingChecks(false);
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
 
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-
         Run<?, ?> build = buildSuccessfully(project);
 
-        List<String> log = build.getLog(20);
-        log.forEach(System.out::println);
-
-        // TODO: Niko: How to inject/check the TaskListener for entries?
-        // skipPublishingChecks is a flag that either publishes the coverageAction to a TaskListener or not
-        // Currently only logging default message "No suitable checks publisher found." (see ChecksPublisher.class)
-        // Check for this default message? (possible with build.getLog?
-        // Or inject another "real" listener to get the ChecksDetails? How?
+        assertThat(build.getLog(20)).contains(new String("[Checks API] No suitable checks publisher found."));
     }
 
     @Test
     public void freestyleSourceCodeRendering() {
         // TODO: How to test ?
 
-//        FreeStyleProject project = createFreeStyleProject();
-//
-//        // build 1
-//        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-//        CoveragePublisher coveragePublisher = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
-//        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
-//        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
-//                SourceFileResolverLevel.NEVER_STORE);
-//        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
-//        project.getPublishersList().add(coveragePublisher);
-//        Run<?, ?> build = buildSuccessfully(project);
-//
-//        // build 2
-//        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-//        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
-//        coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-//        project.getPublishersList().add(coveragePublisherTwo);
-//        Run<?, ?> buildTwo = buildWithResult(project, Result.FAILURE);
+        FreeStyleProject project = createFreeStyleProject();
+
+        // build 1
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
+                SourceFileResolverLevel.NEVER_STORE);
+        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        // build 2
+        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+        coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        project.getPublishersList().add(coveragePublisherTwo);
+        Run<?, ?> buildTwo = buildWithResult(project, Result.FAILURE);
     }
 
     @Test
@@ -535,7 +527,24 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 //
 //        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
 //
-//        assertThat(coverageResult.getReferenceBuild()).isEqualTo(null);
+//        assertThat(coverageResult.getReferenceBuild().isPresent()).isTrue();
+    }
+
+    @Test
+    public void freestyleReportAggregation() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_CODING_STYLE_FILE_NAME);
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        // TODO: How to check report aggregation
     }
 
     @Test
@@ -649,13 +658,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void pipelineQualityGatesSuccessUnhealthy() {
-//        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-//        job.setDefinition(new CpsFlowDefinition("node {"
-//                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
-//                + "}", true));
-//        Run<?, ?> build = buildSuccessfully(job);
-//        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-//        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+    //        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+    //        job.setDefinition(new CpsFlowDefinition("node {"
+    //                + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', thresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 95.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
+    //                + "}", true));
+    //        Run<?, ?> build = buildSuccessfully(job);
+    //        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+    //        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         // TODO: How to check unhealthy status ? Create Freestyle test as well for this case
     }
@@ -693,6 +702,61 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml', thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 99.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
                 + "}", true));
         Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+    }
+
+    @Test
+    public void pipelineDeltaComputation() {
+
+        // TODO: PipelineDeltaComputation: not working
+        // build 1
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')"
+                + "}", true));
+        Run<?, ?> build = buildSuccessfully(job);
+
+        // build 2
+        WorkflowJob jobTwo = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        jobTwo.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')"
+                + "}", true));
+        Run<?, ?> buildTwo = buildSuccessfully(jobTwo);
+
+        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
+    }
+
+    @Test
+    public void coveragePluginPipelineHelloWorld() {
+        WorkflowJob job = createPipelineOnAgent();
+
+        verifySimpleCoverageNode(job);
+    }
+
+    private WorkflowJob createPipelineOnAgent() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}", true));
+
+        return job;
+    }
+
+    private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
+        // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
+        // 5. Jenkins Build starten
+        Run<?, ?> build = buildSuccessfully(project);
+        // 6. Mit Assertions Ergebnisse überprüfen
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
     /**
