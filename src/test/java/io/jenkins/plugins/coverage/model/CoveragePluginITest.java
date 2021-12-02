@@ -328,6 +328,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         //        assertThat(coverageResult.getHealthReport()).isEqualTo(1);
     }
 
+    
     @Test
     public void freestyleQualityGatesUnstable() {
         FreeStyleProject project = createFreeStyleProject();
