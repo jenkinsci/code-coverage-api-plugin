@@ -312,32 +312,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void pipelineZeroReportsFail() {
-        WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: true, sourceFileResolver: sourceFiles('NEVER_STORE')"
-                + "}", true));
-
-        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
-
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
-    }
-
-    @Test
-    public void pipelineZeroReportsOkay() {
-        WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: false, sourceFileResolver: sourceFiles('NEVER_STORE')"
-                + "}", true));
-
-        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
-
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-    }
-
-    @Test
     public void freestyleQualityGatesSuccessful() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
@@ -684,6 +658,32 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
+    public void pipelineZeroReportsFail() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: true, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+    }
+
+    @Test
+    public void pipelineZeroReportsOkay() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: false, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+    }
+
+    @Test
     public void pipelineQualityGatesSuccess() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -761,13 +761,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
-    @Test
-    public void coveragePluginPipelineHelloWorld() {
-        WorkflowJob job = createPipelineOnAgent();
-
-        verifySimpleCoverageNode(job);
-    }
-
     /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
     public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
@@ -787,25 +780,33 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Example integration test for a pipeline with code coverage that runs on an agent. */
     @Test
     public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
-//        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-//        WorkflowJob project = createPipelineOnAgent();
-//
-//        copySingleFileToAgentWorkspace(agent, project, FILE_NAME, FILE_NAME);
-//
-//        verifySimpleCoverageNode(project);
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        WorkflowJob project = createPipelineOnAgent();
+
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_ANALYSIS_MODEL_FILE_NAME);
+
+        verifySimpleCoverageNode(project);
+    }
+
+    @Test
+    public void coveragePluginPipelineHelloWorld() {
+        WorkflowJob job = createPipelineOnAgent();
+
+        verifySimpleCoverageNode(job);
+
+        CoverageBuildAction coverageResult = job.getAction(CoverageBuildAction.class);
     }
 
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
-//        job.setDefinition(new CpsFlowDefinition("node('docker') {"
-//                        + "    checkout([$class: 'GitSCM', "
-//                                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-//                                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
-//                                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-//                                + "            relativeTargetDir: 'checkout']]])\n"
-//                        + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
-//                        + "}", true));
-//
+        job.setDefinition(new CpsFlowDefinition("node('docker') {"
+                        + "    checkout([$class: 'GitSCM', "
+                                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                                + "            relativeTargetDir: 'checkout']]])\n"
+                        + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                        + "}", true));
         return job;
     }
 
