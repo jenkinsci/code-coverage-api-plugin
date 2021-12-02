@@ -291,6 +291,32 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
+    public void pipelineZeroReportsFail() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: true, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+    }
+
+    @Test
+    public void pipelineZeroReportsOkay() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('*.xml')], failNoReports: false, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+    }
+
+    @Test
     public void freestyleQualityGatesSuccessful() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
@@ -430,6 +456,10 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         // TODO: Niko
         // TODO: How to inject/check the TaskListener for entries?
+        // skipPublishingChecks is a flag that either publishes the coverageAction to a TaskListener or not
+        // Currently only logging default message "No suitable checks publisher found." (see ChecksPublisher.class)
+        // Check for this default message? (possible with build.getLog?
+        // Or inject another "real" listener to get the ChecksDetails? How?
     }
 
     @Test
@@ -507,17 +537,42 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void pipelineCoberturaWithNoFile() {
-        // TODO: Niko
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult).isNull();
     }
 
     @Test
     public void pipelineCoberturaWithOneFile() {
-        // TODO: Niko
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_COVERAGE_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        verifySimpleCoverageNode(job,
+                COBERTURA_COVERAGE_LINES_COVERED, COBERTURA_COVERAGE_LINES_TOTAL - COBERTURA_COVERAGE_LINES_COVERED);
     }
 
     @Test
     public void pipelineCoberturaWithTwoFiles() {
-        // TODO: Niko
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_COVERAGE_FILE_NAME, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertLineCoverageResults(Arrays.asList(COBERTURA_COVERAGE_LINES_COVERED, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL),
+                Arrays.asList(COBERTURA_COVERAGE_LINES_COVERED, COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED), coverageResult);
     }
 
     @Test
