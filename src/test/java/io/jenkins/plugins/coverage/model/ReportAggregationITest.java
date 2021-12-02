@@ -15,10 +15,7 @@ import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-import static org.assertj.core.api.Assertions.*;
-
 public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
-    //TODO: files können nicht eingelesen werden, tests schreiben
 
     private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
     private static final String COBERTURA_FILE_NAME_2 = "coverage-with-lots-of-data.xml";
@@ -26,6 +23,7 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void checkAggregationReports() {
         CoverageBuildAction containsAggregatedReport = getCoverageResultFromFreestyleJobWithCoberturaFile();
+        //TODO: add and check assertions
         //assertThat(containsAggregatedReport.getLineCoverage()).isEqualTo(new Coverage(604, 960 - 604));
         //assertThat(containsAggregatedReport.getBranchCoverage()).isEqualTo(new Coverage(285, 628 - 285));
     }

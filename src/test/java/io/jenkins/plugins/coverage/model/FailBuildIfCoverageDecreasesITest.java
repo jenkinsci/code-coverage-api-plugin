@@ -16,10 +16,10 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 /**
  * Integration test for checking if build failes when coverage decreases.
  */
-public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerSuite {
+public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkinsPerSuite {
 
-    private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
-    private static final String COBERTURA_FILE_NAME_2 = "cobertura-lower-coverage.xml";
+    private static final String COBERTURA_HIGHER_COVERAGE = "cobertura-higher-coverage.xml";
+    private static final String COBERTURA_LOWER_COVERAGE = "cobertura-lower-coverage.xml";
 
     /**
      * Integration test for checking if build failes when coverage decreases.
@@ -29,11 +29,13 @@ public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerS
      */
     @Test
     public void shouldReturnSuccessAndFailureDependingOnFailBuildIfCoverageDecreases() throws IOException {
-        FreeStyleProject projectIfDecreasesSetFailTrue = createProjectWithDecreasedCoverage(COBERTURA_FILE_NAME,
-                COBERTURA_FILE_NAME_2, true);
-        buildWithResult(projectIfDecreasesSetFailTrue, Result.FAILURE);
-        FreeStyleProject projectIfDecreasesSetFailFalse = createProjectWithDecreasedCoverage(COBERTURA_FILE_NAME,
-                COBERTURA_FILE_NAME_2, false);
+        FreeStyleProject freestyleProjectIfDecreasesSetFailTrue = createFreestyleProjectWithDecreasedCoverage(
+                COBERTURA_HIGHER_COVERAGE,
+                COBERTURA_LOWER_COVERAGE, true);
+        buildWithResult(freestyleProjectIfDecreasesSetFailTrue, Result.FAILURE);
+        FreeStyleProject projectIfDecreasesSetFailFalse = createFreestyleProjectWithDecreasedCoverage(
+                COBERTURA_HIGHER_COVERAGE,
+                COBERTURA_LOWER_COVERAGE, false);
         buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
     }
 
@@ -47,7 +49,7 @@ public class FailBuildIfCoverageDecreases extends IntegrationTestWithJenkinsPerS
      * @param setFailIfCoverageDecreased
      *         to set if build should fail when coverage decreases
      */
-    FreeStyleProject createProjectWithDecreasedCoverage(final String filename, final String filenameOfDecreasedCoverage,
+    FreeStyleProject createFreestyleProjectWithDecreasedCoverage(final String filename, final String filenameOfDecreasedCoverage,
             final boolean setFailIfCoverageDecreased)
             throws IOException {
 

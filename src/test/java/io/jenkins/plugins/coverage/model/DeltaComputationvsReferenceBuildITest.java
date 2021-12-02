@@ -75,8 +75,10 @@ public class DeltaComputationvsReferenceBuildITest extends IntegrationTestWithJe
         CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("1"));
         CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("2"));
 
+        //TODO: add more tests
         assertThat(resultSecondBuild.hasDelta(CoverageElement.LINE)).isTrue();
         assertThat(resultFirstBuild.hasDelta(CoverageElement.LINE)).isFalse();
+
 
     }
 }
