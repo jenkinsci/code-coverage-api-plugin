@@ -18,6 +18,9 @@ import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
@@ -328,7 +331,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         //        assertThat(coverageResult.getHealthReport()).isEqualTo(1);
     }
 
-    
+
     @Test
     public void freestyleQualityGatesUnstable() {
         FreeStyleProject project = createFreeStyleProject();
@@ -366,8 +369,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
     }
 
-
-
     @Test
     public void freestyleHealthReports() {
         FreeStyleProject project = createFreeStyleProject();
@@ -390,9 +391,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void freestyleFailWhenCoverageDecreases() {
         // TODO: Michi: Build is successful. Wrong checks ?
-        // build 1
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        // build 1
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
         coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
@@ -401,6 +402,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
 
         // build 2
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
@@ -430,7 +432,36 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // TODO: How to inject/check the TaskListener for entries?
     }
 
-    // TODO: @All: Check Google DOC for more assigned tests !
+    @Test
+    public void freestyleSourceCodeRendering() {
+        // TODO: How to tests ?
+
+//        FreeStyleProject project = createFreeStyleProject();
+//
+//        // build 1
+//        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+//        CoveragePublisher coveragePublisher = new CoveragePublisher();
+//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+//        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+//        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
+//                SourceFileResolverLevel.NEVER_STORE);
+//        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
+//        project.getPublishersList().add(coveragePublisher);
+//        Run<?, ?> build = buildSuccessfully(project);
+//
+//        // build 2
+//        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
+//        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+//        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+//        coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+//        project.getPublishersList().add(coveragePublisherTwo);
+//        Run<?, ?> buildTwo = buildWithResult(project, Result.FAILURE);
+    }
+
+    @Test
+    public void freestyleSourceCodeCopying() {
+       // TODO: Difference to rendering ?
+    }
 
     @Test
     public void pipelineJacocoWithNoFile() {
