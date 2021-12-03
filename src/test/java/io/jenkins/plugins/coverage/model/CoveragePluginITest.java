@@ -306,10 +306,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
     @Test
@@ -348,7 +345,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
@@ -681,9 +677,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
-
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
     @Test
@@ -703,7 +697,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
