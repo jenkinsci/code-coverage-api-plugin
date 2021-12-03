@@ -142,7 +142,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
         Run<?, ?> build = buildSuccessfully(project);
 
-        assertLineCoverageResultsOfBuild(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+        assertLineCoverageResultsOfBuild(
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
                 Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
@@ -162,7 +163,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         Run<?, ?> build = buildSuccessfully(project);
 
-        assertLineCoverageResultsOfBuild(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+        assertLineCoverageResultsOfBuild(
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
                 Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
@@ -402,7 +404,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisherTwo);
         Run<?, ?> secondBuild = buildWithResult(project, Result.FAILURE);
 
-        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
@@ -586,8 +588,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                         + "}", Result.SUCCESS, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_CODING_STYLE_FILE_NAME);
 
-
-        assertLineCoverageResultsOfBuild(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
+        assertLineCoverageResultsOfBuild(
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
                 Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
@@ -634,7 +636,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), cobertura('**/*.xml')]"
                         + "}", Result.SUCCESS, JACOCO_ANALYSIS_MODEL_FILE_NAME, COBERTURA_COVERAGE_FILE_NAME);
 
-        assertLineCoverageResultsOfBuild(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, COBERTURA_COVERAGE_LINES_TOTAL),
+        assertLineCoverageResultsOfBuild(
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, COBERTURA_COVERAGE_LINES_TOTAL),
                 Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, COBERTURA_COVERAGE_LINES_COVERED), build);
     }
 
@@ -823,8 +826,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                 + "}", true));
 
-
-
         Run<?, ?> build = buildSuccessfully(job);
 
         String consoleLog = getConsoleLog(build);
@@ -857,7 +858,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Assert.assertNotNull(r);
         j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
 
-        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
+        File sourceFile = new File(r.getRootDir(),
+                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll(
+                        "[^a-zA-Z0-9-_.]", "_"));
 
         Assert.assertTrue(sourceFile.exists());
     }
@@ -865,17 +868,18 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
     public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
-//        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-//        FreeStyleProject project = createFreeStyleProject();
-//        project.setAssignedNode(agent);
-//
-//        copySingleFileToAgentWorkspace(agent, project, FILE_NAME, FILE_NAME);
-//        CoveragePublisher coveragePublisher = new CoveragePublisher();
-//        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME);
-//        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-//        project.getPublishersList().add(coveragePublisher);
-//
-//        verifySimpleCoverageNode(project);
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        FreeStyleProject project = createFreeStyleProject();
+        project.setAssignedNode(agent);
+
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        verifySimpleCoverageNode(project);
     }
 
     /** Example integration test for a pipeline with code coverage that runs on an agent. */
