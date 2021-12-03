@@ -116,7 +116,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
@@ -366,7 +366,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void freestyleHealthReports() {
+    public void freestyleHealthReport() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
 
@@ -392,7 +392,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
         coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
 
         // build 2
         CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
@@ -400,14 +400,31 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> build2 = buildWithResult(project, Result.FAILURE);
+        Run<?, ?> secondBuild = buildWithResult(project, Result.FAILURE);
 
         CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
     @Test
-    public void freestyleSkipChecksWhenPublishing() throws IOException {
+    public void freestyleSkipPublishingChecks() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setSkipPublishingChecks(true);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("*.xml");
+
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        assertThat(build.getLog(1000))
+                .doesNotContain("[Checks API] No suitable checks publisher found.");
+    }
+
+    @Test
+    public void freestylePublishingChecks() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, COBERTURA_COVERAGE_FILE_NAME);
 
@@ -419,7 +436,38 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
         Run<?, ?> build = buildSuccessfully(project);
 
-        assertThat(build.getLog(20)).contains(new String("[Checks API] No suitable checks publisher found."));
+        assertThat(build.getLog(1000))
+                .contains("[Checks API] No suitable checks publisher found.");
+    }
+
+    @Test
+    public void freestyleSourceCodeRendering() {
+        // TODO: How to test ? maybe see CoveragePublisherPipelineTest last two tests ?
+
+        FreeStyleProject project = createFreeStyleProject();
+
+        // build 1
+        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
+        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
+                SourceFileResolverLevel.NEVER_STORE);
+        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
+
+        // build 2
+        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+        project.getPublishersList().add(coveragePublisherTwo);
+        Run<?, ?> secondBuild = buildWithResult(project, Result.FAILURE);
+    }
+
+    @Test
+    public void freestyleSourceCodeCopying() {
+        // TODO: How to test ? Difference to rendering ? maybe see CoveragePublisherPipelineTest last two tests ?
     }
 
     @Test
@@ -432,16 +480,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
         coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
 
         // build 2
         CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> build2 = buildSuccessfully(project);
+        Run<?, ?> secondBuild = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
@@ -456,20 +504,20 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
         coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
 
         // build 2
         CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> build2 = buildSuccessfully(project);
+        Run<?, ?> secondBuild = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getReferenceBuild()).isPresent();
         Run<?, ?> referenceBuild = coverageResult.getReferenceBuild().get();
-        assertThat(referenceBuild).isEqualTo(build);
+        assertThat(referenceBuild).isEqualTo(firstBuild);
     }
 
     @Test
@@ -636,15 +684,39 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineFailWhenCoverageDecreases() {
 
         // TODO: fails
-        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+        Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
                         + "}", Result.SUCCESS, JACOCO_CODING_STYLE_FILE_NAME);
-        Run<?, ?> build2 = createPipelineJobAndAssertBuildResult(
+        Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
                         + "}", Result.FAILURE, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        assertThat(build2.getResult()).isEqualTo(Result.FAILURE);
+        assertThat(secondBuild.getResult()).isEqualTo(Result.FAILURE);
+    }
+
+    @Test
+    public void pipelineSkipPublishingChecks() throws IOException {
+
+        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [cobertura('*.xml')], skipPublishingChecks: true, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, COBERTURA_COVERAGE_FILE_NAME);
+
+        assertThat(build.getLog(1000))
+                .doesNotContain("[Checks API] No suitable checks publisher found.");
+    }
+
+    @Test
+    public void pipelinePublishingChecks() throws IOException {
+
+        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [cobertura('*.xml')], skipPublishingChecks: false, sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, COBERTURA_COVERAGE_FILE_NAME);
+
+        assertThat(build.getLog(1000))
+                .contains("[Checks API] No suitable checks publisher found.");
     }
 
     @Test
@@ -656,7 +728,31 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
+    public void pipelineHealthReport() {
+
+        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, COBERTURA_COVERAGE_FILE_NAME);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(100);
+    }
+
+    @Test
     public void pipelineReportAggregation() {
+
+        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_CODING_STYLE_FILE_NAME);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        int covered = JACOCO_ANALYSIS_MODEL_LINES_COVERED + JACOCO_CODING_STYLE_LINES_COVERED;
+        int total = JACOCO_ANALYSIS_MODEL_LINES_TOTAL + JACOCO_CODING_STYLE_LINES_TOTAL;
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(covered, total - covered));
+
         // TODO: Niko
     }
 
@@ -664,22 +760,52 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineDeltaComputation() {
 
         // TODO: PipelineDeltaComputation: not working
-        // build 1
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')"
-                + "}", true));
-        Run<?, ?> build = buildSuccessfully(job);
+        Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
-        // build 2
-        WorkflowJob job2 = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        job2.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')"
-                + "}", true));
-        Run<?, ?> build2 = buildSuccessfully(job2);
+        Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
-        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
+        CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
+
+        assertThat(secondCoverageBuild.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
+    }
+
+    @Test
+    public void pipelineReferenceBuildPresent() {
+
+        // TODO: doesnt work yet
+        Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+
+        Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+
+        CoverageBuildAction secondCoverageResult = secondBuild.getAction(CoverageBuildAction.class);
+
+        assertThat(secondCoverageResult.getReferenceBuild()).isPresent();
+        Run<?, ?> referenceBuild = secondCoverageResult.getReferenceBuild().get();
+        assertThat(referenceBuild).isEqualTo(firstBuild);
+    }
+
+    @Test
+    public void pipelineReferenceBuildEmpty() {
+
+        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.SUCCESS, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
     @Test
