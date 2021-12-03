@@ -445,7 +445,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleSourceCodeRendering() {
-        // TODO: How to test ?
+        // TODO: How to test ? maybe see CoveragePublisherPipelineTest last two tests ?
 
         FreeStyleProject project = createFreeStyleProject();
 
@@ -471,7 +471,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     public void freestyleSourceCodeCopying() {
-        // TODO: How to test ? Difference to rendering ?
+        // TODO: How to test ? Difference to rendering ? maybe see CoveragePublisherPipelineTest last two tests ?
     }
 
     @Test
