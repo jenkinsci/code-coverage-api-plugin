@@ -101,7 +101,7 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
         coveragePublisher.setSkipPublishingChecks(skipPublishingChecks);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        assertThat(coveragePublisher.isSkipPublishingChecks()).isTrue();
+        assertThat(coveragePublisher.isSkipPublishingChecks()).isEqualTo(skipPublishingChecks);
         return project;
     }
 }
