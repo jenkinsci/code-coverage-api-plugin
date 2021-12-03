@@ -434,7 +434,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> buildTwo = buildWithResult(project, Result.FAILURE);
+        Run<?, ?> build2 = buildWithResult(project, Result.FAILURE);
     }
 
     @Test
@@ -459,9 +459,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> buildTwo = buildSuccessfully(project);
+        Run<?, ?> build2 = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
@@ -483,9 +483,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
         project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> buildTwo = buildSuccessfully(project);
+        Run<?, ?> build2 = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
 
         assertThat(coverageResult.getReferenceBuild()).isPresent();
         Run<?, ?> referenceBuild = coverageResult.getReferenceBuild().get();
@@ -692,13 +692,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(job);
 
         // build 2
-        WorkflowJob jobTwo = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        jobTwo.setDefinition(new CpsFlowDefinition("node {"
+        WorkflowJob job2 = createPipelineWithWorkspaceFiles(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        job2.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')"
                 + "}", true));
-        Run<?, ?> buildTwo = buildSuccessfully(jobTwo);
+        Run<?, ?> build2 = buildSuccessfully(job2);
 
-        CoverageBuildAction coverageResult = buildTwo.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
