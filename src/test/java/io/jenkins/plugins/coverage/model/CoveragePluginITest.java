@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +21,9 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
-
+/**
+ * Integration test for different jacoco and cobertura files.
+ */
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
@@ -42,6 +43,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneJacoco(job);
     }
 
+    /**
+     * Pipeline integration test with no file.
+     */
     @Test
     public void pipelineForNoJacoco() {
         WorkflowJob job = createPipeline();
@@ -52,6 +56,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForNoFile(job);
     }
 
+    /**
+     * Pipeline integration test with two jacoco files.
+     */
     @Test
     public void pipelineForTwoJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
@@ -62,7 +69,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForTwoJacoco(job);
     }
 
-    /** Example integration test for a pipeline with code coverage. */
+    /**
+     * Pipeline integration test with no adapter.
+     */
     @Test
     public void pipelineForNoAdapter() {
         WorkflowJob job = createPipeline();
@@ -72,7 +81,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForNoAdapter(job);
     }
 
-    /** Example integration test for a freestyle build with code coverage. */
+    /**
+     * Freestyle integration test with one jacoco file.
+     */
     @Test
     public void freestyleForOneJacoco() {
         FreeStyleProject project = createFreeStyleProject();
@@ -85,6 +96,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneJacoco(project);
     }
 
+    /**
+     * Freestyle integration test with two jacoco files.
+     */
     @Test
     public void freestyleForTwoJacoco() {
 
@@ -103,14 +117,18 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForTwoJacoco(project);
     }
 
-    /** Example integration test for a freestyle build with code coverage. */
+    /**
+     * Freestyle integration test with no adapter.
+     */
     @Test
     public void freestyleForNoAdapter() {
         FreeStyleProject project = createFreeStyleProject();
         verifyForNoAdapter(project);
     }
 
-    /** Example integration test for a freestyle build with code coverage. */
+    /**
+     * Freestyle integration test with one cobertura file.
+     */
     @Test
     public void freestyleForOneCobertura() {
         FreeStyleProject project = createFreeStyleProject();
@@ -123,6 +141,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneCobertura(project);
     }
 
+    /**
+     * Freestyle integration test with two cobertura files.
+     */
     @Test
     public void freestyleForTwoCobertura() {
 
@@ -143,6 +164,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForTwoCobertura(project);
     }
 
+    /**
+     * Pipeline integration test with one cobertura file.
+     */
     @Test
     public void pipelineForOneCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME);
@@ -153,6 +177,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneCobertura(job);
     }
 
+    /**
+     * Pipeline integration test with two cobertura files.
+     */
     @Test
     public void pipelineForTwoCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME_2, COBERTURA_FILE_NAME);
@@ -163,6 +190,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForTwoCobertura(job);
     }
 
+    /**
+     * Freestyle integration test with one cobertura and one jacoco file.
+     */
     @Test
     public void freestyleForOneCoberturaAndOneJacoco() {
         // automatisch 1. Jenkins starten
@@ -187,6 +217,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneCoberturaAndOneJacoco(project);
     }
 
+    /**
+     * Pipeline integration test with one cobertura and one jacoco file.
+     */
     @Test
     public void pipelineForOneCoberturaAndOneJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, COBERTURA_FILE_NAME);
@@ -197,6 +230,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifyForOneCoberturaAndOneJacoco(job);
     }
 
+    /**
+     * Verifies project with one jacoco file.
+     *
+     * @param project
+     *         the project with added files
+     */
     private void verifyForOneJacoco(final ParameterizedJob<?, ?> project) {
 
         Run<?, ?> build = buildSuccessfully(project);
@@ -208,6 +247,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
+    /**
+     * Verifies project with two jacoco files.
+     *
+     * @param project
+     *         the project with added files
+     */
     private void verifyForTwoJacoco(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
@@ -217,22 +262,39 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(6377, 6691 - 6377));
     }
 
+    /**
+     * Verifies project with no adapter.
+     *
+     * @param project
+     *         the project with no adapter
+     */
     private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
         //TODO: Build should fail
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
     }
 
+    /**
+     * Verifies project with no files.
+     *
+     * @param project
+     *         the project with no files
+     */
     private void verifyForNoFile(final ParameterizedJob<?, ?> project) {
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
     }
 
+    /**
+     * Verifies project with one cobertura file.
+     *
+     * @param project
+     *         the project with added files
+     */
     private void verifyForOneCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
-
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
@@ -241,18 +303,30 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     }
 
+    /**
+     * Verifies project with two cobertura files.
+     *
+     * @param project
+     *         the project with added files
+     */
     private void verifyForTwoCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //TODO
         //assertThat(coverageResult.getLineCoverage())
         //        .isEqualTo(new Coverage(472, 246));
     }
 
+    /**
+     * Verifies project with one cobertura and one jacoco file.
+     *
+     * @param project
+     *         the project with added files
+     */
     private void verifyForOneCoberturaAndOneJacoco(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //TODO
         //assertThat(coverageResult.getLineCoverage())
         //        .isEqualTo(new Coverage(6085, 285));

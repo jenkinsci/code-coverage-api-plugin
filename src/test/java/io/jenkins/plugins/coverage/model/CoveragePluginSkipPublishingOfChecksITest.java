@@ -27,27 +27,34 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
     public void skipPublishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(true);
 
-        Run<?, ?> build = buildSuccessfully(project);
-
-        String consoleLog = getConsoleLog(build);
-
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(consoleLog).contains("Skip publishing Coverage report....");
+        checkConsoleLog(project, "Skip publishing Coverage report....");
     }
 
     /**
      * Tests publishing of checks when skip publishing checks is false.
      */
     @Test
-    public void PublishingOfChecks() {
+    public void publishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(false);
 
+        checkConsoleLog(project, "Publishing Coverage report....");
+    }
+
+    /**
+     * Checks console log.
+     *
+     * @param project
+     *         the project with console log
+     * @param expectedConsoleLog
+     *         the expected console log
+     */
+    private void checkConsoleLog(final FreeStyleProject project, final String expectedConsoleLog) {
         Run<?, ?> build = buildSuccessfully(project);
 
         String consoleLog = getConsoleLog(build);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(consoleLog).contains("Publishing Coverage report....");
+        assertThat(consoleLog).contains(expectedConsoleLog);
     }
 
     /**
@@ -57,12 +64,7 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
     public void skipPublishingOfChecksWithRepo() throws IOException {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(true);
         project.setScm(new GitSCM("https://github.com/jenkinsci/analysis-model.git"));
-        Run<?, ?> build = buildSuccessfully(project);
-
-        String consoleLog = getConsoleLog(build);
-
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(consoleLog).contains("Skip publishing Coverage report....");
+        checkConsoleLog(project, "Skip publishing Coverage report....");
 
     }
 
@@ -70,15 +72,10 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
      * Tests publishing of checks with source code when skip publishing checks is false.
      */
     @Test
-    public void PublishingOfChecksWithRepo() throws IOException {
+    public void publishingOfChecksWithRepo() throws IOException {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(false);
         project.setScm(new GitSCM("https://github.com/jenkinsci/analysis-model.git"));
-        Run<?, ?> build = buildSuccessfully(project);
-
-        String consoleLog = getConsoleLog(build);
-
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(consoleLog).contains("Publishing Coverage report....");
+        checkConsoleLog(project, "Publishing Coverage report....");
 
     }
 

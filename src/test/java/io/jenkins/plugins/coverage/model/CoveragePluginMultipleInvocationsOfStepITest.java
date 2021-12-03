@@ -24,7 +24,7 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
     @Test
     public void withNoTag() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE, COBERTURA_LOWER_COVERAGE);
-        // FIXME: Ist das so richtig?
+        // TODO: Ist das so richtig?
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE + "')]"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE + "')]"

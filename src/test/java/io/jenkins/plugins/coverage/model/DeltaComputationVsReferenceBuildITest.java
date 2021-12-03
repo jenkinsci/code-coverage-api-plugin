@@ -26,7 +26,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
 /**
  * Integration test for delta computation of reference builds.
  */
-public class DeltaComputationvsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
+public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
     private static final List<String> MESSAGES = Arrays.asList("Message 1", "Message 2");
 
     private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
@@ -60,7 +60,7 @@ public class DeltaComputationvsReferenceBuildITest extends IntegrationTestWithJe
         CoberturaReportAdapter jacocoReportAdapter2 = new CoberturaReportAdapter(
                 COBERTURA_FILE_NAME_2);
 
-        List<CoverageAdapter> coverageAdapters = new ArrayList<>();
+        //List<CoverageAdapter> coverageAdapters = new ArrayList<>();
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter2));
 
         project.getPublishersList().add(coveragePublisher);

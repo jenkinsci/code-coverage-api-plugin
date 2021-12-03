@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
@@ -48,8 +47,13 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      *         with decreased coverage
      * @param setFailIfCoverageDecreased
      *         to set if build should fail when coverage decreases
+     *
+     * @return {@link FreeStyleProject} with decreased Coverage
+     * @throws IOException
+     *         if publisher list of project is missing
      */
-    FreeStyleProject createFreestyleProjectWithDecreasedCoverage(final String filename, final String filenameOfDecreasedCoverage,
+    FreeStyleProject createFreestyleProjectWithDecreasedCoverage(final String filename,
+            final String filenameOfDecreasedCoverage,
             final boolean setFailIfCoverageDecreased)
             throws IOException {
 
@@ -65,7 +69,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         project.getPublishersList().add(coveragePublisher);
 
         //run first build
-        Run<?, ?> firstBuild = buildSuccessfully(project);
+        //Run<?, ?> firstBuild = buildSuccessfully(project);
 
         //prepare second build
         copyFilesToWorkspace(project, filenameOfDecreasedCoverage);

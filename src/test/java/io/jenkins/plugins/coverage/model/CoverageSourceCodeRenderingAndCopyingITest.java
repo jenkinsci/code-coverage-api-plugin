@@ -56,12 +56,12 @@ public class CoverageSourceCodeRenderingAndCopyingITest extends IntegrationTestW
      * Reads source code from git and adds it to project.
      */
     @Test
-    public void SourceCodeCopyingTest() {
+    public void sourceCodeCopyingTest() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '" + COMMIT + "' ]],\n"
-                + "userRemoteConfigs: [[url: '" + "" + REPOSITORY + "" + "']],\n"
+                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
                 + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME
@@ -123,8 +123,8 @@ public class CoverageSourceCodeRenderingAndCopyingITest extends IntegrationTestW
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
                 + "    checkout([$class: 'GitSCM', "
-                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "branches: [[name: '" + COMMIT + "' ]],\n"
+                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
                 + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME
