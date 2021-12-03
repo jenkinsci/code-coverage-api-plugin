@@ -54,16 +54,4 @@ public class CoveragePluginITestUtil {
                         totalMissedLines
                 ));
     }
-
-    public static void verifySimpleCoverageNode(Run<?, ?> build, int assertCoveredLines,
-            int assertMissedLines) {
-        assertThat(build.getNumber()).isEqualTo(1);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(assertCoveredLines, assertMissedLines));
-    }
-
-
-
 }

@@ -42,7 +42,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
-
     @Test
     public void pipelineJacocoWithNoFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -61,9 +60,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
-        CoveragePluginITestUtil.verifySimpleCoverageNode(build,
-                CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED,
-                CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL - CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED);
+        CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
+                build);
     }
 
     @Test
@@ -96,8 +96,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.COBERTURA_COVERAGE_FILE_NAME);
 
-        CoveragePluginITestUtil.verifySimpleCoverageNode(build,
-                CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_COVERED, CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_TOTAL - CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_COVERED);
+        CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
+                Collections.singletonList(CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_COVERED),
+                build);
     }
 
     @Test
@@ -351,14 +353,19 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     @Test
-    public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
+    public void pipelineOnAgentNode() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-        WorkflowJob project = createPipelineOnAgent();
+        WorkflowJob job = createPipelineOnAgent();
 
-        copySingleFileToAgentWorkspace(agent, project, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME,
+        copySingleFileToAgentWorkspace(agent, job, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME,
                 CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
-        CoveragePluginITestUtil.verifySimpleCoverageNode(project);
+        Run<?, ?> build = buildSuccessfully(job);
+
+        CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
+                build);
     }
 
     private WorkflowJob createPipelineOnAgent() {
@@ -390,7 +397,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         return build;
     }
 
-    private DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer, IntegrationTestWithJenkinsPerSuite integrationTestWithJenkinsPerSuite) {
+    private DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
         try {
             SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
                     Collections.singletonList(
@@ -411,7 +418,4 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
             throw new AssumptionViolatedException("Failed to create docker container", e);
         }
     }
-
-
-
 }
