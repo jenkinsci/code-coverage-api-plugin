@@ -1,13 +1,17 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.junit.Assert;
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
@@ -16,8 +20,10 @@ import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
+import hudson.FilePath;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -28,6 +34,7 @@ import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoverageScriptedPipelineScriptBuilder;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
@@ -65,6 +72,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final int COBERTURA_COVERAGE_LINES_COVERED = 2;
     private static final int COBERTURA_COVERAGE_LINES_TOTAL = 2;
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     /** Test with no adapters */
     @Test
@@ -371,6 +381,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(100);
     }
 
+    // TODO: build2 result is not failing as expected
     @Test
     public void freestyleFailWhenCoverageDecreases() {
         FreeStyleProject project = createFreeStyleProject();
@@ -386,14 +397,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // build 2
         CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
+        coveragePublisherTwo.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         project.getPublishersList().add(coveragePublisherTwo);
         Run<?, ?> build2 = buildWithResult(project, Result.FAILURE);
 
-        // TODO: Build is successful although there is a negativ delta computated
-//        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
-//        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
+        CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
     @Test
@@ -410,36 +420,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
 
         assertThat(build.getLog(20)).contains(new String("[Checks API] No suitable checks publisher found."));
-    }
-
-    @Test
-    public void freestyleSourceCodeRendering() {
-        // TODO: How to test ? maybe see CoveragePublisherPipelineTest last two tests ?
-
-        FreeStyleProject project = createFreeStyleProject();
-
-        // build 1
-        copyFilesToWorkspace(project, JACOCO_CODING_STYLE_FILE_NAME, JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_CODING_STYLE_FILE_NAME);
-        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
-        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
-                SourceFileResolverLevel.NEVER_STORE);
-        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
-
-        // build 2
-        CoveragePublisher coveragePublisherTwo = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapterTwo = new JacocoReportAdapter(JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        coveragePublisherTwo.setAdapters(Arrays.asList(jacocoReportAdapterTwo));
-        project.getPublishersList().add(coveragePublisherTwo);
-        Run<?, ?> build2 = buildWithResult(project, Result.FAILURE);
-    }
-
-    @Test
-    public void freestyleSourceCodeCopying() {
-        // TODO: How to test ? Difference to rendering ? maybe see CoveragePublisherPipelineTest last two tests ?
     }
 
     @Test
@@ -701,6 +681,81 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build2.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
+
+    @Test
+    public void pipelineSourceCodeCopying() throws Exception {
+        DumbSlave agent = j.createOnlineSlave();
+
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .onAgent(agent)
+                .setEnableSourceFileResolver(true);
+
+        WorkflowJob job = j.createProject(WorkflowJob.class, "pipeline-source-code-copying-test");
+        job.setDefinition(new CpsFlowDefinition("node('docker') {"
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}", true));
+
+        job.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(job.scheduleBuild2(0)).waitForStart();
+
+        String relativeSourcePath = "package.json";
+
+        Assert.assertNotNull(r);
+        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
+
+        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
+
+        Assert.assertTrue(sourceFile.exists());
+    }
+
+    @Test
+    public void testRelativePathSourceFile() throws Exception {
+        DumbSlave agent = j.createOnlineSlave();
+
+        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
+                .onAgent(agent)
+                .setEnableSourceFileResolver(true);
+
+        CoberturaReportAdapter adapter = new CoberturaReportAdapter("cobertura-coverage.xml");
+        builder.addAdapter(adapter);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = agent.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child("cobertura-coverage.xml")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        workspace.child("cc.js")
+                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
+
+        String relativeSourcePath = "cc.js";
+
+        String sourceFileContent = workspace
+                .child("cobertura-coverage.xml")
+                .readToString()
+                .replaceAll("cc.js", relativeSourcePath);
+
+        workspace.child("cobertura-coverage.xml")
+                .write(sourceFileContent, "utf-8");
+
+        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+
+        Assert.assertNotNull(r);
+        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
+
+        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
+
+        Assert.assertTrue(sourceFile.exists());
+    }
+
 
     /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
