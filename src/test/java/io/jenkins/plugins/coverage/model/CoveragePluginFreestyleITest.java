@@ -348,33 +348,6 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 .contains("[Checks API] No suitable checks publisher found.");
     }
 
-    // TODO: How to test ? maybe see CoveragePublisherPipelineTest last two tests ?
-    @Test
-    public void freestyleSourceCodeRendering() {
-        FreeStyleProject project = createFreeStyleProject();
-
-        // build 1
-        copyFilesToWorkspace(project, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-
-        DefaultSourceFileResolver sourceFileResolverNeverStore = new DefaultSourceFileResolver(
-                SourceFileResolverLevel.NEVER_STORE);
-        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
-        coveragePublisher.setSourceFileResolver(sourceFileResolverNeverStore);
-        project.getPublishersList().add(coveragePublisher);
-        buildSuccessfully(project);
-
-        // build 2
-        CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
-        project.getPublishersList().add(coveragePublisher2);
-        buildWithResult(project, Result.FAILURE);
-    }
-
-    // TODO: How to test ? Difference to rendering ? maybe see CoveragePublisherPipelineTest last two tests ?
-    @Test
-    public void freestyleSourceCodeCopying() {
-    }
-
     @Test
     public void freestyleDeltaComputation() {
         FreeStyleProject project = createFreeStyleProject();
@@ -452,25 +425,6 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         int total = CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL
                 + CoveragePluginITestUtil.JACOCO_CODING_STYLE_LINES_TOTAL;
         assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(covered, total - covered));
-    }
-
-    @Test
-    public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
-        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-        FreeStyleProject project = createFreeStyleProject();
-        project.setAssignedNode(agent);
-
-        copySingleFileToAgentWorkspace(agent, project, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
-
-        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
-
-        CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
-                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
-                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
-                build);
     }
 
     private DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
