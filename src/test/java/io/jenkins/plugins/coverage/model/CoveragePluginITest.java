@@ -686,12 +686,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineSourceCodeCopying() throws Exception {
         DumbSlave agent = j.createOnlineSlave();
 
-        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
-                .onAgent(agent)
-                .setEnableSourceFileResolver(true);
-
         WorkflowJob job = j.createProject(WorkflowJob.class, "pipeline-source-code-copying-test");
-        job.setDefinition(new CpsFlowDefinition("node('docker') {"
+        job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
                 + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
@@ -701,7 +697,33 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                 + "}", true));
 
-        job.setDefinition(new CpsFlowDefinition(builder.build(), true));
+
+
+        Run<?, ?> build = buildSuccessfully(job);
+
+        String consoleLog = getConsoleLog(build);
+    }
+
+    @Test
+    public void pipelineSourceCodeCopyingAlt() throws Exception {
+        DumbSlave agent = j.createOnlineSlave();
+
+        WorkflowJob job = j.createProject(WorkflowJob.class, "pipeline-source-code-copying-test");
+
+        String script = "node {"
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}";
+
+//        FilePath workspace = agent.getWorkspaceFor(job);
+
+        job.setDefinition(new CpsFlowDefinition(script, true));
+
         WorkflowRun r = Objects.requireNonNull(job.scheduleBuild2(0)).waitForStart();
 
         String relativeSourcePath = "package.json";
@@ -713,49 +735,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         Assert.assertTrue(sourceFile.exists());
     }
-
-    @Test
-    public void testRelativePathSourceFile() throws Exception {
-        DumbSlave agent = j.createOnlineSlave();
-
-        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder()
-                .onAgent(agent)
-                .setEnableSourceFileResolver(true);
-
-        CoberturaReportAdapter adapter = new CoberturaReportAdapter("cobertura-coverage.xml");
-        builder.addAdapter(adapter);
-
-        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-        FilePath workspace = agent.getWorkspaceFor(project);
-
-        Objects.requireNonNull(workspace)
-                .child("cobertura-coverage.xml")
-                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
-
-        workspace.child("cc.js")
-                .copyFrom(getClass().getResourceAsStream("cobertura-coverage.xml"));
-
-        String relativeSourcePath = "cc.js";
-
-        String sourceFileContent = workspace
-                .child("cobertura-coverage.xml")
-                .readToString()
-                .replaceAll("cc.js", relativeSourcePath);
-
-        workspace.child("cobertura-coverage.xml")
-                .write(sourceFileContent, "utf-8");
-
-        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
-        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
-
-        Assert.assertNotNull(r);
-        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(r));
-
-        File sourceFile = new File(r.getRootDir(), DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + relativeSourcePath.replaceAll("[^a-zA-Z0-9-_.]", "_"));
-
-        Assert.assertTrue(sourceFile.exists());
-    }
-
 
     /** Example integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
