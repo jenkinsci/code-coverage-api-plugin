@@ -298,6 +298,22 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
+    @Test
+    public void pipelineOnAgentNode() throws IOException, InterruptedException {
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        WorkflowJob job = createPipelineOnAgent();
+
+        copySingleFileToAgentWorkspace(agent, job, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME,
+                CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
+
+        Run<?, ?> build = buildSuccessfully(job);
+
+        CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
+                build);
+    }
+
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
