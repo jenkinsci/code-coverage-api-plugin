@@ -558,10 +558,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                         + "}", Result.SUCCESS, JACOCO_ANALYSIS_MODEL_FILE_NAME, JACOCO_CODING_STYLE_FILE_NAME);
 
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         assertLineCoverageResultsOfBuild(Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_TOTAL, JACOCO_CODING_STYLE_LINES_TOTAL),
-                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), coverageResult);
+                Arrays.asList(JACOCO_ANALYSIS_MODEL_LINES_COVERED, JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
     @Test
