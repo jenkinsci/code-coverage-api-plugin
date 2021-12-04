@@ -453,8 +453,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
             String... jacocoFileNames) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         List<CoverageAdapter> jacocoReportAdapters = new ArrayList<>();
-        for (String jacocoFileName : jacocoFileNames) {
-            jacocoReportAdapters.add(new JacocoReportAdapter(jacocoFileName));
+        for (String fileName : jacocoFileNames) {
+            jacocoReportAdapters.add(new JacocoReportAdapter(fileName));
         }
         coveragePublisher.setAdapters(jacocoReportAdapters);
         project.getPublishersList().add(coveragePublisher);
@@ -465,8 +465,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
             String... coberturaFileNames) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         List<CoverageAdapter> jacocoReportAdapters = new ArrayList<>();
-        for (String jacocoFileName : coberturaFileNames) {
-            jacocoReportAdapters.add(new JacocoReportAdapter(jacocoFileName));
+        for (String fileName : coberturaFileNames) {
+            jacocoReportAdapters.add(new CoberturaReportAdapter(fileName));
         }
         coveragePublisher.setAdapters(jacocoReportAdapters);
         project.getPublishersList().add(coveragePublisher);
