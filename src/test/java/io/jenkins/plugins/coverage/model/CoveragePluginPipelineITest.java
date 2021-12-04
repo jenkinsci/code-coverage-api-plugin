@@ -1,16 +1,12 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Objects;
 
-import org.junit.Assert;
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
@@ -19,7 +15,6 @@ import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import hudson.model.Result;
@@ -29,16 +24,11 @@ import hudson.slaves.DumbSlave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
 
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
@@ -253,11 +243,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
 
         Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
-                "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                "node {\n"
+                        + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')\n"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
         CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
