@@ -5,8 +5,11 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
@@ -36,10 +39,19 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, false);
         buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
+        WorkflowJob pipelineProjectIfDecreasesSetFailTrue = createPipelineProjectWithDecreasedCoverage(
+                COBERTURA_HIGHER_COVERAGE,
+                COBERTURA_LOWER_COVERAGE, true);
+        buildWithResult(pipelineProjectIfDecreasesSetFailTrue, Result.FAILURE);
+
+        WorkflowJob pipelineProjectIfDecreasesSetFailFalse = createPipelineProjectWithDecreasedCoverage(
+                COBERTURA_HIGHER_COVERAGE,
+                COBERTURA_LOWER_COVERAGE, false);
+        buildWithResult(pipelineProjectIfDecreasesSetFailFalse, Result.SUCCESS);
     }
 
     /**
-     * Creates Project with second build containing decreased coverage.
+     * Creates freestyle-project with second build containing decreased coverage.
      *
      * @param filename
      *         with higher coverage
@@ -69,7 +81,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         project.getPublishersList().add(coveragePublisher);
 
         //run first build
-        //Run<?, ?> firstBuild = buildSuccessfully(project);
+        Run<?, ?> firstBuild = buildSuccessfully(project);
 
         //prepare second build
         copyFilesToWorkspace(project, filenameOfDecreasedCoverage);
@@ -82,6 +94,37 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         project.getPublishersList().replace(coveragePublisher);
 
         return project;
+    }
+
+    /**
+     * Creates pipeline-project with second build containing decreased coverage.
+     *
+     * @param filename
+     *         with higher coverage
+     * @param filenameOfDecreasedCoverage
+     *         with decreased coverage
+     * @param setFailIfCoverageDecreased
+     *         to set if build should fail when coverage decreases
+     *
+     * @return {@link WorkflowJob} with decreased Coverage
+     */
+    WorkflowJob createPipelineProjectWithDecreasedCoverage(final String filename,
+            final String filenameOfDecreasedCoverage,
+            final boolean setFailIfCoverageDecreased) {
+
+        WorkflowJob job = createPipelineWithWorkspaceFiles(filename, filenameOfDecreasedCoverage);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filename + "')],"
+                + "   failBuildIfCoverageDecreasedInChangeRequest: " + setFailIfCoverageDecreased
+                + "}", true));
+        buildSuccessfully(job);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filenameOfDecreasedCoverage + "')],"
+                + "   failBuildIfCoverageDecreasedInChangeRequest: " + setFailIfCoverageDecreased
+                + "}", true));
+
+        return job;
     }
 
 }
