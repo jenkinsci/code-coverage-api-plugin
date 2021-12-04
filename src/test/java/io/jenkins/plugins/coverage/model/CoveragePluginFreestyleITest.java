@@ -464,11 +464,11 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     private Run<?, ?> createBuildWithCoberturaAdapaters(FreeStyleProject project, Result expectedBuildResult,
             String... coberturaFileNames) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        List<CoverageAdapter> jacocoReportAdapters = new ArrayList<>();
+        List<CoverageAdapter> coberturaAdapters = new ArrayList<>();
         for (String fileName : coberturaFileNames) {
-            jacocoReportAdapters.add(new CoberturaReportAdapter(fileName));
+            coberturaAdapters.add(new CoberturaReportAdapter(fileName));
         }
-        coveragePublisher.setAdapters(jacocoReportAdapters);
+        coveragePublisher.setAdapters(coberturaAdapters);
         project.getPublishersList().add(coveragePublisher);
         return buildWithResult(project, expectedBuildResult);
     }
