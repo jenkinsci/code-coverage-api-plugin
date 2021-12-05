@@ -1,10 +1,16 @@
 package io.jenkins.plugins.coverage.model;
 
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.model.FreeStyleProject;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
@@ -13,6 +19,9 @@ import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerRule;
+import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -21,6 +30,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 // IM Team pipeline job und freestyle job! AUFTEILEN!
 
@@ -51,9 +61,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
-//
-//    @Rule
-//    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
+
+    @Rule
+    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     @Test
     public void noJacocoInputFile() {
@@ -593,7 +603,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     @Test
-    public void agentInDocker() {
+    public void agentInDocker() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         FreeStyleProject project = createFreeStyleProject();
         project.setAssignedNode(agent);
@@ -604,10 +614,45 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
-        verifySimpleCoverageNode(project);
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
 
+    /**
+     * Creates a docker container agent.
+     *
+     * @param dockerContainer
+     *         the docker container of the agent
+     *
+     * @return A docker container agent.
+     */
+    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "IllegalCatch"})
+    protected DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
+        try {
+            SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
+                    Collections.singletonList(
+                            new UsernamePasswordCredentialsImpl(CredentialsScope.SYSTEM, "dummyCredentialId",
+                                    null, "test", "test")
+                    )
+            );
+            DumbSlave agent = new DumbSlave("docker", "/home/test",
+                    new SSHLauncher(dockerContainer.ipBound(22), dockerContainer.port(22), "dummyCredentialId"));
+            agent.setNodeProperties(Collections.singletonList(new EnvironmentVariablesNodeProperty(
+                    new EnvironmentVariablesNodeProperty.Entry("JAVA_HOME", "/usr/lib/jvm/java-8-openjdk-amd64/jre"))));
+            getJenkins().jenkins.addNode(agent);
+            getJenkins().waitOnline(agent);
 
+            return agent;
+        }
+        catch (Throwable e) {
+            throw new AssumptionViolatedException("Failed to create docker container", e);
+        }
+    }
 }
