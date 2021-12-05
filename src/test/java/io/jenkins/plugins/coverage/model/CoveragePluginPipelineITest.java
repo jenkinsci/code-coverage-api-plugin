@@ -322,7 +322,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
             WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
             workflowJob.setDefinition(new CpsFlowDefinition("node {"
                     + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
-                    + "skipPublishingChecks: true"
+                    + "skipPublishingChecks: false"
                     + "}", true));
 
             Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
@@ -354,29 +354,29 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
     //TODO declarative pipeline support --> see shouldIRunInDeclarativePipeline im analysis model
 
-    @Test
-    public void declarativePipeline(){
-
-
-        WorkflowJob workflowJob = createPipeline();
-        workflowJob.setDefinition(new CpsFlowDefinition("pipeline {\n"
-                + "agent 'any' \n"
-                + "stages {n\"
-                + "     stage ('Create a fake warning') {n\"
-                + "         steps{n\"
-                + createShellStep ( "echo \"foo.cc:4:39 error: foo.h: No such file directory\" >warnings.log" )
-                +"               }\n
-                +"       }\n
-                +"}\n
-                +"post {n\"
-                +"      always {n\"
-                +"          recordIssues tool: gcc4(pattern: 'warnings.log')\n"
-                +"    }\n
-                +"}\n
-                +"}", true));
-        AnalysisResult result = scheduleSuccessfulBuild(workflowJob);
-        assertThat(result).hasTotalSize(1);
-    }
+//    @Test
+//    public void declarativePipeline(){
+//
+//
+//        WorkflowJob workflowJob = createPipeline();
+//        workflowJob.setDefinition(new CpsFlowDefinition("pipeline {\n"
+//                + "agent 'any' \n"
+//                + "stages {n\"
+//                + "     stage ('Create a fake warning') {n\"
+//                + "         steps{n\"
+//                + createShellStep ( "echo \"foo.cc:4:39 error: foo.h: No such file directory\" >warnings.log" )
+//                +"               }\n
+//                +"       }\n
+//                +"}\n
+//                +"post {n\"
+//                +"      always {n\"
+//                +"          recordIssues tool: gcc4(pattern: 'warnings.log')\n"
+//                +"    }\n
+//                +"}\n
+//                +"}", true));
+//        AnalysisResult result = scheduleSuccessfulBuild(workflowJob);
+//        assertThat(result).hasTotalSize(1);
+//    }
 
     //TODO multiple invocations of step (no tag set)
 

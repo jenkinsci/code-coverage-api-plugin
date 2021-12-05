@@ -16,9 +16,9 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,9 +51,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
-
-    @Rule
-    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
+//
+//    @Rule
+//    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     @Test
     public void noJacocoInputFile() {
@@ -305,10 +305,291 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
      * Siehe Discord für link
      */
     @Test
-    public void skipPublishingChecks() {
+    public void skipPublishingChecksTrue() throws IOException {
         assertThat(true).isEqualTo(true);
         // skipping true = assert in console that specific log isnt there
         // skipping false = assert in console that specific log is there
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setSkipPublishingChecks(true);
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+        System.out.println(build.getLogText().readAll().toString());
+
+        Scanner s = new Scanner(build.getLogInputStream()).useDelimiter("\\A");
+        String result = s.hasNext() ? s.next() : "";
+        assertThat(result.contains("Skipping checks")).isEqualTo(true);
+    }
+
+    @Test
+    public void skipPublishingChecksFalse() throws IOException {
+        assertThat(true).isEqualTo(true);
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setSkipPublishingChecks(false);
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+
+        assertThat(getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
+    }
+
+
+    @Test
+    public void skipPublishingChecksStandard() throws IOException {
+        assertThat(true).isEqualTo(true);
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+
+        assertThat(getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
+    }
+
+    private String getLogFromInputStream(InputStream in) {
+        Scanner s = new Scanner(in).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
+    @Test
+    public void deltaComputation() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+        copyFilesToWorkspace(project, JACOCO_MINI_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        buildSuccessfully(project);
+
+        project.getPublishersList().clear();
+        JacocoReportAdapter adapterSecondBuild = new JacocoReportAdapter(JACOCO_MINI_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterSecondBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+
+        assertThat(build.getNumber()).isEqualTo(2);
+        assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
+    }
+
+
+    @Test
+    public void deltaComputationZeroDelta() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        buildSuccessfully(project);
+
+        project.getPublishersList().clear();
+        JacocoReportAdapter adapterSecondBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterSecondBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+
+        assertThat(build.getNumber()).isEqualTo(2);
+        assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("+0.000");
+    }
+
+    @Test
+    public void deltaComputationSingleBuild() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("n/a");
+    }
+
+    @Test
+    public void deltaComputationUseOnlyPreviousAndCurrent() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+        copyFilesToWorkspace(project, JACOCO_MINI_DATA);
+        copyFilesToWorkspace(project, JACOCO_SMALL_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_SMALL_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        buildSuccessfully(project);
+
+        project.getPublishersList().clear();
+
+        JacocoReportAdapter adapterSecondBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterSecondBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        buildSuccessfully(project);
+
+        project.getPublishersList().clear();
+        JacocoReportAdapter adapterThirdBuild = new JacocoReportAdapter(JACOCO_MINI_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterThirdBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+
+        assertThat(build.getNumber()).isEqualTo(3);
+        assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
+    }
+
+    @Test
+    public void referenceBuildSingleBuild() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageBuildAction.getReferenceBuild()).isEmpty();
+    }
+
+    @Test
+    public void referenceBuildReferenceIsPrevious() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter adapterFirstBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterFirstBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> referenceBuild = buildSuccessfully(project);
+
+        project.getPublishersList().clear();
+        JacocoReportAdapter adapterSecondBuild = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(adapterSecondBuild));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
+
+
+        assertThat(build.getNumber()).isEqualTo(2);
+        assertThat(coverageBuildAction.getReferenceBuild()).isPresent();
+        assertThat(coverageBuildAction.getReferenceBuild().get()).isEqualTo(referenceBuild);
+     }
+
+    @Test
+    public void reportAggregation() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+        copyFilesToWorkspace(project, JACOCO_MINI_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        jacocoReportAdapter.setMergeToOneReport(true);
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("A total of 1 reports were found");
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(11399, 11947 - 11399));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(3306, 3620 - 3306));
+    }
+
+    @Test
+    public void reportAggregationFalse() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+        copyFilesToWorkspace(project, JACOCO_MINI_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        jacocoReportAdapter.setMergeToOneReport(false);
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("A total of 2 reports were found");
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(11399, 11947 - 11399));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(3306, 3620 - 3306));
     }
 
     @Test
