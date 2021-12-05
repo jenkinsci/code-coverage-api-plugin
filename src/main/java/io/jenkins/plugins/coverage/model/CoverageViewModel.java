@@ -164,7 +164,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the new sub-page
      */
     @SuppressWarnings("unused") // Called by jelly view
-    public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+    public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
                 Optional<CoverageNode> targetResult = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
