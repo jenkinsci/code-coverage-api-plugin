@@ -624,6 +624,43 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
+    @Test
+    public void failNoReportsFalse() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setFailNoReports(false);
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coveragePublisher.isFailNoReports()).isFalse();
+    }
+
+    @Test
+    public void failNoReportsTrue() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setFailNoReports(true);
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("*.xml");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+        assertThat(coveragePublisher.isFailNoReports()).isTrue();
+    }
 
     /**
      * Creates a docker container agent.
