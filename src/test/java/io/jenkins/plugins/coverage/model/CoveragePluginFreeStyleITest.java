@@ -4,12 +4,15 @@ import hudson.model.FreeStyleProject;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.slaves.DumbSlave;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -67,6 +70,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult).isEqualTo(null);
     }
+
 
     @Test
     public void oneJacocoFile() {
@@ -220,7 +224,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Frage: Wie können wir den Build auf unhealtykeit überprüfenn?
+     * Frage: Wie können wir den Build auf "unhealthy" überprüfenn?
      */
     @Test
     public void healthReportingUnhealthy() {
@@ -297,16 +301,32 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Was sind checks, waurm werden sie geskippt und wo steht das?
+     * Was sind checks, warum werden sie geskippt und wo steht das?
      * Siehe Discord für link
      */
     @Test
     public void skipPublishingChecks() {
         assertThat(true).isEqualTo(true);
+        // skipping true = assert in console that specific log isnt there
+        // skipping false = assert in console that specific log is there
     }
 
     @Test
     public void agentInDocker() {
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        FreeStyleProject project = createFreeStyleProject();
+        project.setAssignedNode(agent);
+
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        verifySimpleCoverageNode(project);
 
     }
+
+
+
 }
