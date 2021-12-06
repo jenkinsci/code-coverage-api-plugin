@@ -21,8 +21,10 @@ import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,17 +56,13 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     @Test
     public void noJacocoFile() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
-        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-        FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
-        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
-        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+        WorkflowJob job = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        job.setDefinition(new CpsFlowDefinition(builder.build(), true));
+        WorkflowRun run = Objects.requireNonNull(job.scheduleBuild2(0)).waitForStart();
 
-        CoverageBuildAction coverageResult = r.getAction(CoverageBuildAction.class);
-
-
-        j.assertBuildStatusSuccess(j.waitForCompletion(r));
-        j.assertLogContains("No reports were found", r);
+        j.assertBuildStatusSuccess(j.waitForCompletion(run));
+        j.assertLogContains("No reports were found", run);
 
     }
 
@@ -76,9 +74,28 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
         assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void twoJacocoFile() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_SMALL_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
@@ -87,36 +104,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     @Test
-    public void twoJacocoFile() throws IOException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_BIG_DATA);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
-
-        Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getNumber()).isEqualTo(1);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(12166, 12736 - 12166));
-        assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(3322, 3750 - 3322));
-        j.assertLogContains("A total of 2 reports were found", build);
-    }
-
-    @Test
     public void noCoberturaFile() throws Exception {
         CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-        FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
         project.setDefinition(new CpsFlowDefinition(builder.build(), true));
         WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
-
-        CoverageBuildAction coverageResult = r.getAction(CoverageBuildAction.class);
-
 
         j.assertBuildStatusSuccess(j.waitForCompletion(r));
         j.assertLogContains("No reports were found", r);
@@ -132,9 +125,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(602, 958 - 602));
@@ -143,62 +137,61 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     @Test
-    public void twoCoberturaFile() throws IOException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_BIG_DATA, COBERTURA_BIG_DATA);
+    public void twoCoberturaFile() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_BIG_DATA, COBERTURA_SMALL_DATA);
 
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [cobertura('**/*.xml')]"
                 + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(1204, 1916 - 1204));
+                .isEqualTo(new Coverage(604, 960 - 604));
         assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(570, 1256 - 570));
-        j.assertLogContains("A total of 2 reports were found", build);
+                .isEqualTo(new Coverage(285, 628 - 285));
     }
 
-
     @Test
-    public void oneJacocoOneCobertura() throws IOException {
+    public void oneJacocoOneCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, COBERTURA_BIG_DATA);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [cobertura('**/*.xml'),jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(6685, 7326 - 6685));
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1946, 2503 - 1946));
-        j.assertLogContains("A total of 2 reports were found", build);
     }
 
-    //TODO
     @Test
     public void healthReportingHealthy(){
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
-                + "globalThresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 90.0, unstableThreshold: 96.0]]"
+                + "globalThresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 90.0, unstableThreshold: 94.0]]"
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
         HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
     }
 
     @Test
-    public void healthReportingUnhealthyUnstable(){
+    public void healthReportingUnstable(){
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -206,19 +199,25 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(workflowJob, Result.UNSTABLE);
-        assertThat(build.getNumber()).isEqualTo(1);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(build.getResult()).isEqualTo(Result.UNSTABLE);
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
     }
-    //TODO
+
    @Test
     public void healthReportingUnhealthySuccess(){
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
-                + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 90.0]]"
+                + "globalThresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 96.0]]"
                 + "}", true));
 
-        Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
-        assertThat(build.getNumber()).isEqualTo(1);
+       Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
+       HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+       assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+       assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
     }
 
     @Test
@@ -236,7 +235,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
 
     @Test
-      public void failNoReports(){
+      public void failNoReportsTrue() throws IOException {
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles();
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -244,14 +243,98 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(workflowJob, Result.FAILURE);
+
         assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
-    //TODO Test QualityGate
     @Test
-    public  void qualityGate(){
+    public void failNoReportsFalse() throws IOException {
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles();
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
+                + "failNoReports: false"
+                + "}", true));
 
+        Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
+
+    private String getLogFromInputStream(InputStream in) {
+        Scanner s = new Scanner(in).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdFailUnhealthy() throws IOException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
+                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]}"
+                , true));
+
+        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdSuccess() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
+                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 42.0]])]}"
+                , true));
+
+        Run<?, ?> build = buildSuccessfully(job);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdUnstable() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
+                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 99.0]])]}"
+                , true));
+
+        Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.UNSTABLE);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+
+
+
+
+
+
 
     //FailIfCoverage Decreases true
     @Test
@@ -478,8 +561,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         Run<?, ?> build = buildWithResult(workflowJob, Result.FAILURE);
         assertThat(build.getNumber()).isEqualTo(1);
     }
+
     @Test
-    public WorkflowJob multipleInvocationsTagSet(){
+    public void multipleInvocationsTagSet(){
 
 
         WorkflowJob workflowJob = createPipeline();
@@ -494,7 +578,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 +   "publishCoverage tag:'someTag' adapters: [jacocoAdapters('" + JACOCO_SMALL_DATA +"')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                 + "}"
                 + "}", true));
-        return workflowJob;
 
     }
 

@@ -204,7 +204,13 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
+        coveragePublisher.setFailUnhealthy(true);
+        Threshold threshold = new Threshold("Line");
+        threshold.setUnhealthyThreshold(20);
+
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        jacocoReportAdapter.setThresholds(Collections.singletonList(threshold));
+
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
