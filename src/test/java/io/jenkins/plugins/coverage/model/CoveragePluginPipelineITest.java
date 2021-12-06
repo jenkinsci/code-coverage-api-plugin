@@ -1,9 +1,11 @@
 package io.jenkins.plugins.coverage.model;
 
 import hudson.FilePath;
+import hudson.model.FreeStyleProject;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
 import hudson.model.Run;
+import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoverageScriptedPipelineScriptBuilder;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
@@ -19,6 +21,7 @@ import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +40,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
+
+    private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
+    private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
+
     @ClassRule
     public static BuildWatcher bw = new BuildWatcher();
 
@@ -228,13 +235,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
 
-    //TODO DC vs. RB
-    //TODO Report aggregation --> see video
-    // j.assertLogContains("A total of 2 reports were found", build);
-    // 2. Test  j.assertLogContains("A total of 1 reports were found", build);
-
-
-
     @Test
       public void failNoReports(){
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles();
@@ -333,9 +333,57 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
             j.assertLogNotContains("No suitable checks publisher found", build);
         }
 
+
+
+    @Test
+    public void deltaComputation(){
+
+    }
+
+    @Test
+    public void deltaComputationZeroDelta(){}
+
+    @Test
+    public void deltaComputationSingleBuild(){
+
+    }
+
+    @Test
+    public void deltaComputationUseOnlyPreviousAndCurrent(){}
+
+
+    @Test
+    public void referenceBuildSingleBuild() {
+
+
+    }
+
+    @Test
+    public void referenceBuildReferenceIsPrevious() {
+
+
+
+    }
+
+    @Test
+    public void reportAggregation() throws IOException {
+
+    }
+
+    @Test
+    public void reportAggregationFalse() throws IOException {
+
+    }
+
+
+
+
+
+
+    // onAgentNode
 // Agent in Docker
     @Test
-    public void agentInDocker(){
+    public void agentOnDocker(){
 
 
         WorkflowJob workflowJob = createPipeline();
@@ -350,6 +398,30 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
 
     }
+    @Test
+    public void copyTest() {
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '" + COMMIT + "' ]],\n"
+                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_BIG_DATA
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        String consoleLog = getConsoleLog(build);
+        assertThat(consoleLog)
+                .contains("Cloning repository " + REPOSITORY)
+                .contains("Checking out Revision " + COMMIT)
+                .contains("git checkout -f " + COMMIT);
+    }
+
+
 
 
     //TODO declarative pipeline support --> see shouldIRunInDeclarativePipeline im analysis model
@@ -381,6 +453,31 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     //TODO multiple invocations of step (no tag set)
 
     //TODO multiple invocations of step (tag set) --> prüfen, wie das tag setzen hier erfolgt
+
+
+    @Test
+    public void withNoTag() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_SMALL_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_BIG_DATA + "')]"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_SMALL_DATA + "')]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+        assertThat(build.getNumber()).isEqualTo(2);
+    }
+
+    @Test
+    public void withTag() {
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_SMALL_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters('someTag'): [jacocoAdapter('" + JACOCO_BIG_DATA + "')]"
+                + "   publishCoverage adapters('someTag'): [jacocoAdapter('" + JACOCO_SMALL_DATA + "')]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(workflowJob, Result.FAILURE);
+        assertThat(build.getNumber()).isEqualTo(1);
+    }
     @Test
     public WorkflowJob multipleInvocationsTagSet(){
 
