@@ -141,7 +141,7 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
     }
 
     /**
-     * Creates pipeline project with jaoco file and adapter.
+     * Creates pipeline project with jacoco file and adapter.
      *
      * @param skipPublishingChecks
      *         if publishing checks should be skipped
@@ -160,9 +160,9 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
     }
 
     /**
-     * Creates a build of a pipeline project with jaoco file and adapter.
+     * Creates a build of a pipeline project with jacoco file and adapter.
      *
-     * @return build
+     * @return build of project with scm
      */
     private Run<?, ?> getPipelineProjectWithSCM(final boolean skipPublishingChecks) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILENAME);
@@ -173,7 +173,7 @@ public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWi
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
                 + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILENAME
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'),\n"
+                + "')],\n"
                 + "skipPublishingChecks: " + skipPublishingChecks
                 + "}", true));
 
