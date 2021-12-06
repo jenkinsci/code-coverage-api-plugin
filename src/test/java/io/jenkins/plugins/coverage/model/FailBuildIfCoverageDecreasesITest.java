@@ -24,13 +24,13 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
     private static final String COBERTURA_LOWER_COVERAGE = "cobertura-lower-coverage.xml";
 
     /**
-     * Integration test for checking if build failes when coverage decreases.
+     * Integration test freestyle projects for checking if build failes when coverage decreases.
      *
      * @throws IOException
      *         if creating Project throws Exception
      */
     @Test
-    public void shouldReturnSuccessAndFailureDependingOnFailBuildIfCoverageDecreases() throws IOException {
+    public void freestyleProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() throws IOException {
         FreeStyleProject freestyleProjectIfDecreasesSetFailTrue = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, true);
@@ -39,6 +39,15 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, false);
         buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
+
+    }
+
+
+    /**
+     * Integration test for pipeline projects for checking if build failes when coverage decreases.
+     */
+    @Test
+    public void pipelineProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() {
         WorkflowJob pipelineProjectIfDecreasesSetFailTrue = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, true);
@@ -106,7 +115,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      * @param setFailIfCoverageDecreased
      *         to set if build should fail when coverage decreases
      *
-     * @return {@link WorkflowJob} with decreased Coverage
+     * @return {@link WorkflowJob} with decreased coverage
      */
     WorkflowJob createPipelineProjectWithDecreasedCoverage(final String filename,
             final String filenameOfDecreasedCoverage,
