@@ -17,8 +17,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import org.junit.AssumptionViolatedException;
@@ -27,28 +25,13 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
-// IM Team pipeline job und freestyle job! AUFTEILEN!
-
-// 1
-//kein report, schlägt nicht fehl
-//build schlägt fehl, wenn nix drin
-
-// 2
-// 0 Reports findet man im CoveragePublisherPipelineTest
-// Die asserts gehen nur auf log, wir wollen mehr prüfen!!!
-
-// 3
-// Workflow job! mit job.setDefiniton
-
-
-/*
-
- */
 
 /**
  * FreeStyle integration tests for the CoveragePlugin
@@ -80,7 +63,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult).isEqualTo(null);
     }
-
 
     @Test
     public void oneJacocoFile() {
@@ -233,9 +215,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
     }
 
-    /**
-     * Frage: Wie können wir den Build auf "unhealthy" überprüfenn?
-     */
     @Test
     public void healthReportingUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -244,9 +223,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         coveragePublisher.setFailUnhealthy(true);
         Threshold threshold = new Threshold("Line");
-        //threshold.setFailUnhealthy(true);
         threshold.setUnhealthyThreshold(100);
-        //coveragePublisher.setGlobalThresholds(Collections.singletonList(threshold));
 
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
         jacocoReportAdapter.setThresholds(Collections.singletonList(threshold));
@@ -254,7 +231,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
-        //Run<?, ?> build = buildSuccessfully(project);
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
         HealthReportingAction x = build.getAction(HealthReportingAction.class);
 
@@ -310,15 +286,8 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
-    /**
-     * Was sind checks, warum werden sie geskippt und wo steht das?
-     * Siehe Discord für link
-     */
     @Test
     public void skipPublishingChecksTrue() throws IOException {
-        assertThat(true).isEqualTo(true);
-        // skipping true = assert in console that specific log isnt there
-        // skipping false = assert in console that specific log is there
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
@@ -346,7 +315,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
 
     @Test
     public void skipPublishingChecksFalse() throws IOException {
-        assertThat(true).isEqualTo(true);
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
@@ -425,7 +393,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(2);
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }
-
 
     @Test
     public void deltaComputationZeroDelta() {
@@ -660,6 +627,230 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
         assertThat(coveragePublisher.isFailNoReports()).isTrue();
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdSuccess() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        Threshold globalThreshold = new Threshold("Line");
+        globalThreshold.setUnstableThreshold(20);
+        globalThreshold.setUnhealthyThreshold(40);
+        globalThreshold.setFailUnhealthy(true);
+
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(globalThreshold));
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdUnstable() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        Threshold globalThreshold = new Threshold("Line");
+        globalThreshold.setUnstableThreshold(99);
+
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(globalThreshold));
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.UNSTABLE);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+
+    @Test
+    public void qualityGatesGlobalThresholdSuccessUnhealthy() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        Threshold globalThreshold = new Threshold("Line");
+        globalThreshold.setUnstableThreshold(20);
+        globalThreshold.setUnhealthyThreshold(100);
+        globalThreshold.setFailUnhealthy(false);
+
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(globalThreshold));
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesGlobalThresholdFailUnhealthy() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        Threshold globalThreshold = new Threshold("Line");
+        globalThreshold.setUnstableThreshold(20);
+        globalThreshold.setUnhealthyThreshold(100);
+        globalThreshold.setFailUnhealthy(true);
+
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(globalThreshold));
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+    }
+
+    @Test
+    public void qualityGatesPublisherThresholdSuccess() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        Threshold adapterThreshold = new Threshold("Line");
+        adapterThreshold.setUnstableThreshold(20);
+        adapterThreshold.setUnhealthyThreshold(40);
+        adapterThreshold.setFailUnhealthy(true);
+        jacocoReportAdapter.setThresholds(Collections.singletonList(adapterThreshold));
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesPublisherThresholdUnstable() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        Threshold adapterThreshold = new Threshold("Line");
+        adapterThreshold.setUnstableThreshold(99);
+        adapterThreshold.setUnhealthyThreshold(40);
+        adapterThreshold.setFailUnhealthy(true);
+        jacocoReportAdapter.setThresholds(Collections.singletonList(adapterThreshold));
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.UNSTABLE);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesPublisherThresholdSuccessUnhealthy() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        Threshold adapterThreshold = new Threshold("Line");
+        adapterThreshold.setUnstableThreshold(20);
+        adapterThreshold.setUnhealthyThreshold(99);
+        adapterThreshold.setFailUnhealthy(false);
+        jacocoReportAdapter.setThresholds(Collections.singletonList(adapterThreshold));
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
+
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(1661, 1875 - 1661));
+    }
+
+    @Test
+    public void qualityGatesPublisherThresholdFailUnhealthy() throws IOException {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        Threshold adapterThreshold = new Threshold("Line");
+        adapterThreshold.setUnstableThreshold(20);
+        adapterThreshold.setUnhealthyThreshold(99);
+        adapterThreshold.setFailUnhealthy(true);
+        jacocoReportAdapter.setThresholds(Collections.singletonList(adapterThreshold));
+
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
     /**
