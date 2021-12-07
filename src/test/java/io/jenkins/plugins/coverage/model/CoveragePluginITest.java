@@ -299,7 +299,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(2, 0));
-        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
     }
 
@@ -312,10 +311,10 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifyForTwoCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
-        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //TODO
-        //assertThat(coverageResult.getLineCoverage())
-        //        .isEqualTo(new Coverage(472, 246));
+        assertThat(coverageResult.getLineCoverage())
+               .isEqualTo(new Coverage(2, 0));
     }
 
     /**
@@ -326,10 +325,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForOneCoberturaAndOneJacoco(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
-        //CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        //TODO
-        //assertThat(coverageResult.getLineCoverage())
-        //        .isEqualTo(new Coverage(6085, 285));
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6085, 285));
     }
 
 }
