@@ -314,7 +314,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //TODO
         assertThat(coverageResult.getLineCoverage())
-               .isEqualTo(new Coverage(2, 0));
+                .isEqualTo(new Coverage(2, 0));
     }
 
     /**
