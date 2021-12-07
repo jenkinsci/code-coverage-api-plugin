@@ -10,8 +10,10 @@ import org.junit.Test;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoverageProcessor;
 import io.jenkins.plugins.coverage.CoveragePublisher;
@@ -66,17 +68,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
 
         project.getPublishersList().add(coveragePublisher);
 
-        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, MESSAGES);
-        referenceBuild.onLoad(firstBuild);
-
-        //run second build
-        Run<?, ?> secondBuild = buildWithResult(project, Result.SUCCESS);
-        referenceBuild.onAttached(secondBuild);
-
-        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("1"));
-        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("2"));
-
-        verifyDeltaComputation(resultFirstBuild, resultSecondBuild);
+        createReferenceBuild(project, firstBuild);
     }
 
     private void verifyDeltaComputation(final CoverageResult resultFirstBuild, final CoverageResult resultSecondBuild) {
@@ -112,10 +104,28 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
                 + "')]"
                 + "}", true));
 
+        createReferenceBuild(job, firstBuild);
+    }
+
+    /**
+     * Starts a new build with given job and stores first build for reference.
+     *
+     * @param job
+     *         that creates second build
+     * @param firstBuild
+     *         of project for reference
+     *
+     * @throws IOException
+     *         when trying to recover coverage result
+     * @throws ClassNotFoundException
+     *         when trying to recover coverage result
+     */
+    private void createReferenceBuild(final Job<?, ?> job, final Run<?, ?> firstBuild)
+            throws IOException, ClassNotFoundException {
         ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, MESSAGES);
         referenceBuild.onLoad(firstBuild);
 
-        Run<?, ?> secondBuild = buildWithResult(job, Result.SUCCESS);
+        Run<?, ?> secondBuild = buildWithResult((ParameterizedJob<?, ?>) job, Result.SUCCESS);
         referenceBuild.onAttached(secondBuild);
 
         CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(1));
