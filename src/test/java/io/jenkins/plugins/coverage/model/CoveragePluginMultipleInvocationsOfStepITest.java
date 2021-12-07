@@ -15,23 +15,52 @@ import static org.assertj.core.api.Assertions.*;
  * Test multiple invocations of step.
  */
 public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite {
-    private static final String COBERTURA_HIGHER_COVERAGE = "cobertura-higher-coverage.xml";
-    private static final String COBERTURA_LOWER_COVERAGE = "cobertura-lower-coverage.xml";
+    private static final String JACOCO_LOWER_BRANCH_COVERAGE = "jacoco-analysis-model.xml";
+    private static final String JACOCO_HIGHER_BRANCH_COVERAGE = "jacoco-codingstyle.xml";
+    private static final int JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE = 109;
+    private static final int JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE = 7;
+    private static final int JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE = 1661;
+    private static final int JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE = 214;
 
     /**
-     * Pipeline with multiple invocations of step and not tag set.
+     * Pipeline with multiple invocations of step, no tag set and higher coverage file first.
      */
     @Test
-    public void withNoTag() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE, COBERTURA_LOWER_COVERAGE);
-        // TODO: Ist das so richtig?
+    public void withoutTagFirstLowerFile() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
+
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE + "')]"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE + "')]"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]\n"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]"
                 + "}", true));
 
-        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
         assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE));
+
+    }
+
+    /**
+     * Pipeline with multiple invocations of step, no tag set and lower coverage file first.
+     */
+    @Test
+    public void withoutTagFirstHigherFile() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]\n"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
     }
 
     /**
@@ -39,10 +68,10 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
      */
     @Test
     public void withTag() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE, COBERTURA_LOWER_COVERAGE);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters('hi'): [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE + "')]"
-                + "   publishCoverage adapters('ciao'): [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE + "')]"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]\n"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]"
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.FAILURE);
