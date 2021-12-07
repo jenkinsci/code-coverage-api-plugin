@@ -69,12 +69,19 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
     @Test
     public void withTag() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
+
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]\n"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]\n"
+                + "   tag: 'Tag1'\n"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]\n"
+                + "   tag: 'Tag2'\n"
                 + "}", true));
 
-        Run<?, ?> build = buildWithResult(job, Result.FAILURE);
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+
         assertThat(build.getNumber()).isEqualTo(1);
+        assertThat(coverageResult.getBranchCoverage())
+                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
     }
 }
