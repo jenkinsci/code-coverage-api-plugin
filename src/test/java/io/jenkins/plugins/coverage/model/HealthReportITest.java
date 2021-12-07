@@ -73,9 +73,11 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
     /**
      * Verifies details of health report of successful build.
-     * @param build which is successful
+     *
+     * @param build
+     *         which is successful
      */
-    private void verifyHealthReportSuccess(final Run<?,?> build) {
+    private void verifyHealthReportSuccess(final Run<?, ?> build) {
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
         assertThat(healthReport.getScore()).isEqualTo(100);
         assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");
@@ -84,9 +86,11 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
     /**
      * Verifies details of health report of unstable build.
-     * @param build which is unstable
+     *
+     * @param build
+     *         which is unstable
      */
-    private void verifyHealthReportUnstable(final Run<?,?> build) {
+    private void verifyHealthReportUnstable(final Run<?, ?> build) {
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
         assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
         assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 0%");

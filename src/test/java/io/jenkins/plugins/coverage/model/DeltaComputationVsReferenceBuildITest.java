@@ -39,7 +39,8 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      *         when trying to recover coverage result
      */
     @Test
-    public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
+    public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
+            throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
