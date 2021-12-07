@@ -30,7 +30,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME_2 = "jacoco-codingstyle.xml";
 
     private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
-    private static final String COBERTURA_FILE_NAME_2 = "coverage-with-lots-of-data.xml";
+    private static final String COBERTURA_FILE_NAME_2 = "../coverage-with-lots-of-data.xml";
 
     /** Example integration test for a pipeline with code coverage. */
     @Test
