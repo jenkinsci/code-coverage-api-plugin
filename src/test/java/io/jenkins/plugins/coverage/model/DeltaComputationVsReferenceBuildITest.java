@@ -45,8 +45,8 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter jacocoReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_FILE_NAME);
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
 
         project.getPublishersList().add(coveragePublisher);
 
@@ -56,11 +56,11 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         //prepare second build
         copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
-        CoberturaReportAdapter jacocoReportAdapter2 = new CoberturaReportAdapter(
+        CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(
                 COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
         //List<CoverageAdapter> coverageAdapters = new ArrayList<>();
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter2));
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter2));
 
         project.getPublishersList().add(coveragePublisher);
 
