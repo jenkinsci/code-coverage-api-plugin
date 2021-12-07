@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +14,6 @@ import hudson.model.Run;
 import io.jenkins.plugins.coverage.CoverageProcessor;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
-import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
@@ -29,8 +27,8 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
 public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
     private static final List<String> MESSAGES = Arrays.asList("Message 1", "Message 2");
 
-    private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
-    private static final String COBERTURA_FILE_NAME_2 = "cobertura-lower-coverage.xml";
+    private static final String COBERTURA_LOWER_COVERAGE_FILE_NAME = "cobertura-lower-coverage.xml";
+    private static final String COBERTURA_HIGHER_COVERAGE_FILE_NAME = "cobertura-higher-coverage.xml";
 
     /**
      * Checks if delta can be computed for reference build.
@@ -41,12 +39,12 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      *         when trying to recover coverage result
      */
     @Test
-    public void checkIfReferenceBuildForDeltaComputationIsAvailable() throws IOException, ClassNotFoundException {
+    public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME, COBERTURA_FILE_NAME_2);
+        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter jacocoReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
+        CoberturaReportAdapter jacocoReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
 
         project.getPublishersList().add(coveragePublisher);
@@ -55,10 +53,10 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         Run<?, ?> firstBuild = buildSuccessfully(project);
 
         //prepare second build
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME_2);
+        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
         CoberturaReportAdapter jacocoReportAdapter2 = new CoberturaReportAdapter(
-                COBERTURA_FILE_NAME_2);
+                COBERTURA_HIGHER_COVERAGE_FILE_NAME);
 
         //List<CoverageAdapter> coverageAdapters = new ArrayList<>();
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter2));
@@ -75,10 +73,14 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("1"));
         CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(project.getBuild("2"));
 
-        //TODO: add more tests
-        assertThat(resultSecondBuild.hasDelta(CoverageElement.LINE)).isTrue();
-        assertThat(resultFirstBuild.hasDelta(CoverageElement.LINE)).isFalse();
+        verifyDeltaComputation(resultFirstBuild, resultSecondBuild);
+    }
 
-
+    private void verifyDeltaComputation(final CoverageResult resultFirstBuild, final CoverageResult resultSecondBuild) {
+        assertThat(resultSecondBuild.hasDelta(CoverageElement.CONDITIONAL)).isTrue();
+        assertThat(resultFirstBuild.hasDelta(CoverageElement.CONDITIONAL)).isFalse();
+        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(100);
+        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.LINE)).isEqualTo(50);
+        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.FILE)).isEqualTo(0);
     }
 }
