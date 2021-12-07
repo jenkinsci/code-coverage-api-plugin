@@ -77,6 +77,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineForNoAdapter() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: []"
                 + "}", true));
 
         verifyForNoAdapter(job);
@@ -124,6 +125,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void freestyleForNoAdapter() {
         FreeStyleProject project = createFreeStyleProject();
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        project.getPublishersList().add(coveragePublisher);
         verifyForNoAdapter(project);
     }
 
