@@ -16,10 +16,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -45,14 +43,8 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
-import io.jenkins.plugins.coverage.source.SourcePainter;
-import io.jenkins.plugins.coverage.source.SourcePainter.AgentPainter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
@@ -118,22 +110,21 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
-
         if (sourceFileResolver != null) {
-            Set<String> possiblePaths = new HashSet<>();
-            coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
-                Set<String> paths = coverageResult.getAdditionalProperty(
-                        CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH);
-                if (paths != null) {
-                    possiblePaths.addAll(paths);
-                }
-            });
-
-            if (possiblePaths.size() > 0) {
-                sourceFileResolver.setPossiblePaths(possiblePaths);
-            }
-
-            sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
+//            Set<String> possiblePaths = new HashSet<>();
+//            coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
+//                Set<String> paths = coverageResult.getAdditionalProperty(
+//                        CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH);
+//                if (paths != null) {
+//                    possiblePaths.addAll(paths);
+//                }
+//            });
+//
+//            if (possiblePaths.size() > 0) {
+//                sourceFileResolver.setPossiblePaths(possiblePaths);
+//            }
+//
+//            sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
         }
 
         LogHandler logHandler = new LogHandler(listener, "Coverage");
@@ -150,48 +141,9 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        CoverageResult rootResult = coverageReport.getRoot();
-        rootResult.stripGroup();
-
-        CoverageNodeConverter converter = new CoverageNodeConverter();
-
-        CoverageNode rootNode = converter.convert(rootResult);
-        rootNode.splitPackages();
-
-        Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
-        log.logInfo("Painting %d source files on agent", paintedFiles.size());
-
-        FilteredLog agentLog = workspace.act(new AgentPainter(paintedFiles));
-        log.merge(agentLog);
-
-        log.logInfo("Copying painted sources from agent to build folder");
-        logHandler.log(log);
-
-        FilePath buildFolder = new FilePath(run.getRootDir());
-        FilePath buildZip = buildFolder.child(SourcePainter.COVERAGE_SOURCES_ZIP);
-        workspace.child(SourcePainter.COVERAGE_SOURCES_ZIP).copyTo(buildZip);
-        log.logInfo("-> extracting...");
-        buildZip.unzip(buildFolder);
-        log.logInfo("-> done");
-
-        logHandler.log(log);
-
-        this.run.addOrReplaceAction(createNewBuildAction(rootNode, possibleReferenceBuild));
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private CoverageBuildAction createNewBuildAction(final CoverageNode coverageNode,
-            final Optional<Run<?, ?>> possibleReferenceBuild) {
-        if (possibleReferenceBuild.isPresent()) {
-            Run<?, ?> referenceBuild = possibleReferenceBuild.get();
-            CoverageBuildAction previousAction = referenceBuild.getAction(CoverageBuildAction.class);
-            if (previousAction != null) {
-                SortedMap<CoverageMetric, Double> delta = coverageNode.computeDelta(previousAction.getResult());
-                return new CoverageBuildAction(this.run, coverageNode, referenceBuild.getExternalizableId(), delta);
-            }
-        }
-
-        return new CoverageBuildAction(this.run, coverageNode);
+        // Invoke the transformation to the new model
+        CoverageReporter coverageReporter = new CoverageReporter();
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener);
     }
 
     private CoverageAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
@@ -281,7 +233,7 @@ public class CoverageProcessor {
 
         coverageReport.setDeltaResults(deltaCoverage);
 
-        return Optional.of(previousResult.get().getOwner());
+        return Optional.of(referenceAction.getOwner());
     }
 
     private Optional<CoverageAction> getPreviousResult(final Run<?, ?> startSearch) {

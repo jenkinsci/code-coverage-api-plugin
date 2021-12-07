@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,7 +83,9 @@ public class SourcePainter implements Serializable {
             final FilePath workspace, final FilteredLog log) {
         FilePath outputPath = getSourcesFolder(workspace).child(getTempName(fileName));
         try {
-            try (BufferedWriter output = Files.newBufferedWriter(Paths.get(outputPath.getRemote()))) {
+            Path paintedFilesFolder = Files.createTempDirectory("coverage-sources");
+            Path fullSourcePath = paintedFilesFolder.resolve(getTempName(fileName).replace(".zip", ".source"));
+            try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
                 List<String> lines = Files.readAllLines(Paths.get(inputPath.getRemote()), charset);
                 for (int line = 0; line < lines.size(); line++) {
                     String content = lines.get(line);
@@ -90,9 +93,10 @@ public class SourcePainter implements Serializable {
                 }
                 paint.setTotalLines(lines.size());
             }
+            new FilePath(fullSourcePath.toFile()).zip(outputPath);
             return 1;
         }
-        catch (IOException exception) {
+        catch (IOException | InterruptedException exception) {
             log.logException(exception, "Can't write coverage paint of '%s' to source file '%s'", fileName, outputPath);
             return 0;
         }
@@ -151,8 +155,8 @@ public class SourcePainter implements Serializable {
      *
      * @return the temporary name
      */
-    private static String getTempName(final String fileName) {
-        return Integer.toHexString(fileName.hashCode()) + ".tmp";
+    public static String getTempName(final String fileName) {
+        return Integer.toHexString(fileName.hashCode()) + ".zip";
     }
 
     private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
@@ -200,7 +204,8 @@ public class SourcePainter implements Serializable {
             FilteredLog log = new FilteredLog("Errors during source code painting:");
 
             SourcePainter sourcePainter = new SourcePainter();
-            sourcePainter.paintSources(paintedFiles, log, new FilePath(workspace), Arrays.asList("checkout/src/main/java"), StandardCharsets.UTF_8);
+            sourcePainter.paintSources(paintedFiles, log, new FilePath(workspace),
+                    Arrays.asList("checkout/src/main/java"), StandardCharsets.UTF_8); // TODO: parameters
 
             return log;
         }

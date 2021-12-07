@@ -2,11 +2,17 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.util.TextFile;
+
+import io.jenkins.plugins.coverage.source.SourcePainter;
 
 /**
  * Server side model that provides the data for the source code view of the coverage results. The layout of the
@@ -34,14 +40,35 @@ public class SourceViewModel extends CoverageViewModel {
      */
     public String getSourceFileContent() {
         try {
-            File sourceFile = getSourceFile(getOwner().getRootDir(), getNode().getName());
-            if (sourceFile != null) {
-                return new TextFile(sourceFile).read();
+            Optional<File> sourceFile = getSourceFile(getOwner().getRootDir(), getNode().getName(), getNode().getPath());
+            if (sourceFile.isPresent()) {
+                File file = sourceFile.get();
+                if (file.toString().endsWith(".zip")) {
+                    return unzip(file, SourcePainter.getTempName(getNode().getPath()));
+                }
+                return read(file);
             }
             return "n/a";
         }
-        catch (IOException exception) {
+        catch (IOException | InterruptedException exception) {
             return ExceptionUtils.getStackTrace(exception);
+        }
+    }
+
+    private String read(final File file) throws IOException {
+        return new TextFile(file).read();
+    }
+
+    private String unzip(final File zipFile, final String fileName) throws IOException, InterruptedException {
+        Path tempDir = Files.createTempDirectory("coverage-source");
+        FilePath zipDir = new FilePath(tempDir.toFile());
+        try {
+            new FilePath(zipFile).unzip(zipDir);
+
+            return read(tempDir.resolve(fileName.replace(".zip", ".source")).toFile());
+        }
+        finally {
+            zipDir.deleteRecursive();
         }
     }
 }

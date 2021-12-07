@@ -23,6 +23,7 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourcePainter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -185,18 +186,26 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable() {
-        return getSourceFile(getOwner().getRootDir(), getNode().getName()) != null;
+        return getSourceFile(getOwner().getRootDir(), getNode().getName(), getNode().getPath()).isPresent();
     }
 
-    protected static File getSourceFile(final File buildFolder, final String fileName) {
-        File sourceFile = new File(buildFolder,
-                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY
-                        + sanitizeFilename(fileName));
-        if (sourceFile.exists()) {
-            return sourceFile;
+    protected static Optional<File> getSourceFile(final File buildFolder, final String fileName, final String path) {
+        File originalFileLocation = createFileInBuildFolder(buildFolder, sanitizeFilename(fileName));
+        if (originalFileLocation.canRead()) {
+            return Optional.of(originalFileLocation);
         }
 
-        return null;
+        File hashBasedLocation = createFileInBuildFolder(buildFolder, SourcePainter.getTempName(path));
+        if (hashBasedLocation.canRead()) {
+            return Optional.of(hashBasedLocation);
+        }
+
+        return Optional.empty();
+    }
+
+    private static File createFileInBuildFolder(final File buildFolder, final String fileName) {
+        return new File(buildFolder,
+                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + fileName);
     }
 
     private static String sanitizeFilename(final String inputName) {
@@ -299,7 +308,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public String getFileName() {
             String fileName = root.getName();
-            if (getSourceFile(buildFolder, fileName) != null) {
+            if (getSourceFile(buildFolder, fileName, root.getPath()).isPresent()) {
                 return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
             }
             return fileName;
