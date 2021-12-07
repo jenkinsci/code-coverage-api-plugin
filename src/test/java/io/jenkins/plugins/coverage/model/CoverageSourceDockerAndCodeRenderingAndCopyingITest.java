@@ -2,6 +2,8 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
@@ -42,7 +44,9 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
-    /** Example integration test for a pipeline with code coverage that runs on an agent. */
+    /**
+     * Integration test for a pipeline with sourcecode that runs on an agent.
+     */
     @Test
     public void copySourceCodeAndCodeRenderingPipelineOnAgent() throws IOException, InterruptedException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
@@ -52,17 +56,38 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_NAME, JACOCO_FILE_NAME);
 
-        verifyGitRepository(project);
+        Run<?, ?> build = verifyGitRepository(project);
+
+        verifySourceCode(build);
 
     }
 
     /**
-     * Reads source code from git and adds it to project.
+     * Integration test for a pipeline with sourcecode.
      */
     @Test
     public void copySourceCodeAndCodeRenderingPipeline() {
         WorkflowJob job = createPipelineWithSCMandJacocoAdapter("node");
-        verifyGitRepository(job);
+        Run<?, ?> build = verifyGitRepository(job);
+
+        verifySourceCode(build);
+    }
+
+    /**
+     * Verifies sourcecode is present in project.
+     *
+     * @param build
+     *         job of the project
+     */
+    private void verifySourceCode(final Run<?, ?> build) {
+        assertThat(build.getNumber()).isEqualTo(1);
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
+        SortedMap<CoverageMetric, Double> metrics = new TreeMap<>();
+
+        CoverageBuildAction action = new CoverageBuildAction(build, root, "-", metrics, false);
+        CoverageViewModel coverageViewModel = (CoverageViewModel) action.getTarget();
+
+        assertThat(coverageViewModel.getOwner()).isEqualTo(build);
     }
 
     /**
@@ -70,8 +95,10 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
      *
      * @param workflowJob
      *         job of the project
+     *
+     * @return build of {@link WorkflowJob}
      */
-    private void verifyGitRepository(final WorkflowJob workflowJob) {
+    private Run<?, ?> verifyGitRepository(final WorkflowJob workflowJob) {
         Run<?, ?> build = buildSuccessfully(workflowJob);
 
         String consoleLog = getConsoleLog(build);
@@ -80,6 +107,7 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
                 .contains("Cloning repository " + REPOSITORY)
                 .contains("Checking out Revision " + COMMIT)
                 .contains("git checkout -f " + COMMIT);
+        return build;
     }
 
     /**
