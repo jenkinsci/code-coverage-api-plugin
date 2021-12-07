@@ -31,7 +31,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     public void shouldReturnSuccess() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(50, 80);
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        String message = build.getAction(CoverageAction.class).getFailMessage();
+        String message = build.getAction(CoverageBuildAction.class).getFailMessage();
         assertThat(message).isEqualTo(null);
     }
 
@@ -42,6 +42,8 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     public void shouldReturnUnstable() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(100, 100);
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+
+        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class
         String message = build.getAction(CoverageAction.class).getFailMessage();
         assertThat(message).isEqualTo(
                 "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=100.0, unhealthyThreshold=100.0}].");
