@@ -17,6 +17,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
+import hudson.model.Descriptor.FormException;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.plugins.sshslaves.SSHLauncher;
@@ -28,26 +29,42 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Integration tests for the coverage plugin using pipelines.
+ *
+ * @author Michael Müller, Nikolas Paripovic
+ */
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
-    @Rule
-    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
+    // TODO: @Michael bitte verifizieren
+    /**
+     * Docker rule describing a JavaGitContainer.
+     */
+    @Rule
+    private final DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
+
+    /**
+     * Tests a pipeline job with no files present, using a jacoco adapter.
+     */
     @Test
     public void pipelineJacocoWithNoFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult).isNull();
     }
 
+    /**
+     * Tests a pipeline job with one jacoco file present.
+     */
     @Test
     public void pipelineJacocoWithOneFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
@@ -56,11 +73,14 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 build);
     }
 
+    /**
+     * Tests a pipeline job with two jacoco files present.
+     */
     @Test
     public void pipelineJacocoWithTwoFiles() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
 
         CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
@@ -68,6 +88,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Arrays.asList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED, CoveragePluginITestUtil.JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
+    /**
+     * Tests a pipeline job with no files present, using a cobertura adapter.
+     */
     @Test
     public void pipelineCoberturaWithNoFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -79,6 +102,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(coverageResult).isNull();
     }
 
+    /**
+     * Tests a pipeline job with one cobertura file present.
+     */
     @Test
     public void pipelineCoberturaWithOneFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -92,6 +118,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 build);
     }
 
+    /**
+     * Tests a pipeline job with two cobertura files present.
+     */
     @Test
     public void pipelineCoberturaWithTwoFiles() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -106,6 +135,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 build);
     }
 
+    /**
+     * Tests a pipeline job with a cobertura file as well as a jacoco file present.
+     */
     @Test
     public void pipelineCoberturaAndJacocoFile() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -118,6 +150,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Arrays.asList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED, CoveragePluginITestUtil.COBERTURA_COVERAGE_LINES_COVERED), build);
     }
 
+    /**
+     * Tests a pipeline job failing while set up parameter failNoReports and containing no reports.
+     */
     @Test
     public void pipelineZeroReportsFail() {
         createPipelineJobAndAssertBuildResult(
@@ -126,6 +161,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "}", Result.FAILURE);
     }
 
+    /**
+     * Tests a pipeline job succeeding while parameter failNoReports is not set and containing no reports.
+     */
     @Test
     public void pipelineZeroReportsOkay() {
         createPipelineJobAndAssertBuildResult(
@@ -134,6 +172,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "}", Result.SUCCESS);
     }
 
+    /**
+     * Tests a pipeline job succeeding while containing a quality gate.
+     */
     @Test
     public void pipelineQualityGatesSuccess() {
         createPipelineJobAndAssertBuildResult(
@@ -142,6 +183,18 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
     }
 
+    /**
+     * Tests a pipeline job failing while containing a quality gate.
+     */
+    @Test
+    public void pipelineQualityGatesFail() {
+        createPipelineJobAndAssertBuildResult(
+                "node {"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml', thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 99.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
+                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
+    }
+
+    // TODO: Michi - Bitte dokumentieren
     @Test
     public void pipelineQualityGatesSuccessUnhealthy() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -152,6 +205,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
+    /**
+     * Tests a pipeline job resulting unstable while containing a quality gate.
+     */
     @Test
     public void pipelineQualityGatesUnstable() {
         createPipelineJobAndAssertBuildResult(
@@ -160,21 +216,45 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "}", Result.UNSTABLE, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
     }
 
+    /**
+     * Tests a pipeline job failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage decreases.
+     */
     @Test
     public void pipelineFailWhenCoverageDecreases() {
 
-        // TODO: fails
-        Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
+
+        WorkflowJob job = createPipelineWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "}", true));
+
+        Run<?, ?> secondBuild = buildWithResult(job, Result.FAILURE);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        // TODO: still fails
+        /*Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
-        Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
+                        + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true\n"
+                        + "   publishCoverage adapters: [jacocoAdapter('"+ CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);*/
+        /*Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
-                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
-        assertThat(secondBuild.getResult()).isEqualTo(Result.FAILURE);
+                        + "   publishCoverage adapters: [jacocoAdapter('**.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);*/
+        //assertThat(secondBuild.getResult()).isEqualTo(Result.FAILURE);
     }
 
+    /**
+     * Tests a pipeline job with decreased logs while parameter skipPublishingChecks is set.
+     * @throws IOException if build log cannot be read
+     */
     @Test
     public void pipelineSkipPublishingChecks() throws IOException {
 
@@ -187,6 +267,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 .doesNotContain("[Checks API] No suitable checks publisher found.");
     }
 
+    /**
+     * Tests a pipeline job with extending logs while parameter skipPublishingChecks is not set.
+     * @throws IOException if build log cannot be read
+     */
     @Test
     public void pipelinePublishingChecks() throws IOException {
 
@@ -199,14 +283,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 .contains("[Checks API] No suitable checks publisher found.");
     }
 
-    @Test
-    public void pipelineQualityGatesFail() {
-        createPipelineJobAndAssertBuildResult(
-                "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml', thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 99.0]])], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
-    }
-
+    /**
+     * Tests the health report of a pipeline job.
+     */
     @Test
     public void pipelineHealthReport() {
 
@@ -219,6 +298,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(100);
     }
 
+    /**
+     * Tests whether the coverage result of two files in a pipeline job are aggregated.
+     */
     @Test
     public void pipelineReportAggregation() {
 
@@ -236,17 +318,19 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         // TODO: Niko
     }
 
+    /**
+     * Tests the delta computation of two pipeline jobs.
+     */
     @Test
     public void pipelineDeltaComputation() {
 
-        // TODO: PipelineDeltaComputation: not working
         Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
 
         Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
-                "node {\n"
+                "node {"
                         + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')\n"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
@@ -256,10 +340,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(secondCoverageBuild.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
+    /**
+     * Tests whether a reference build is correctly set in a second pipeline build.
+     */
     @Test
     public void pipelineReferenceBuildPresent() {
 
-        // TODO: doesnt work yet
         Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -267,6 +353,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
+                        + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
@@ -277,6 +364,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(referenceBuild).isEqualTo(firstBuild);
     }
 
+    /**
+     * Tests whether a reference build is correctly not set in a single pipeline build.
+     */
     @Test
     public void pipelineReferenceBuildEmpty() {
 
@@ -303,6 +393,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
                 build);
+
+        //TODO: Here assertions are missing that check for the source code.
     }
 
     private WorkflowJob createPipelineOnAgent() {
@@ -319,8 +411,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         return job;
     }
 
-    private Run<?, ?> createPipelineJobAndAssertBuildResult(String jobDefinition, Result expectedBuildResult,
-            String... fileNames) {
+    private Run<?, ?> createPipelineJobAndAssertBuildResult(final String jobDefinition, final Result expectedBuildResult,
+            final String... fileNames) {
         WorkflowJob job;
         if (fileNames.length > 0) {
             job = createPipelineWithWorkspaceFiles(fileNames);
@@ -351,7 +443,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
             return agent;
         }
-        catch (Throwable e) {
+        catch (Exception e) {
             throw new AssumptionViolatedException("Failed to create docker container", e);
         }
     }

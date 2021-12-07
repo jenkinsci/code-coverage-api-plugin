@@ -24,28 +24,38 @@ import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
+import hudson.tasks.Publisher;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisherPipelineTest;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
-import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Integration tests for the coverage plugin using freestyle jobs.
+ *
+ * @author Michael Müller, Nikolas Paripovic
+ */
 public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerSuite {
 
+    // TODO: @Michael bitte verifizieren
+    /**
+     * Docker rule describing a JavaGitContainer.
+     */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
-    /** Test with no adapters */
+    /**
+     * Tests a freestyle job with no files present, using no adapters.
+     */
     @Test
     public void freestyleWithEmptyAdapters() {
         FreeStyleProject project = createFreeStyleProject();
+        // TODO: This is not necessary to duplicate in all tests, try to integrate into the method that creates the job
         Run<?, ?> build = createBuildWithJacocoAdapaters(project, Result.SUCCESS);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
@@ -54,9 +64,11 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
     }
 
-    /** Test with JacocoAdapter and no files */
+    /**
+     * Tests a freestyle job with no files present, using a jacoco adapter.
+     */
     @Test
-    public void freestyleJacocoWithEmptyFiles() {
+    public void freestyleJacocoWithNoFiles() {
         FreeStyleProject project = createFreeStyleProject();
         Run<?, ?> build = createBuildWithJacocoAdapaters(project, Result.SUCCESS, "*.xml");
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -65,7 +77,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult).isEqualTo(null);
     }
 
-    /** Test with one Jacoco file */
+    /**
+     * Tests a freestyle job with one jacoco file present.
+     */
     @Test
     public void freestyleJacocoWithOneFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -75,11 +89,13 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
         assertThat(build.getNumber()).isEqualTo(1);
         CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
-                Arrays.asList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
-                Arrays.asList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED), build);
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED), build);
     }
 
-    /** Test with two Jacoco files */
+    /**
+     * Tests a freestyle job with two jacoco files present.
+     */
     @Test
     public void freestyleJacocoWithTwoFiles() {
         FreeStyleProject project = createFreeStyleProject();
@@ -95,7 +111,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                         CoveragePluginITestUtil.JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
-    /** Test with two Jacoco files and two adapters */
+    /**
+     * Tests a freestyle job with two jacoco file present using two jacoco adapters.
+     */
     @Test
     public void freestyleJacocoWithTwoFilesAndTwoAdapters() {
         FreeStyleProject project = createFreeStyleProject();
@@ -113,9 +131,11 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                         CoveragePluginITestUtil.JACOCO_CODING_STYLE_LINES_COVERED), build);
     }
 
-    /** Test with Cobertura Adapter and no files */
+    /**
+     * Tests a freestyle job with no files present, using a cobertura adapter.
+     */
     @Test
-    public void freestyleCoberturaWithEmptyFiles() {
+    public void freestyleCoberturaWithNoFiles() {
         FreeStyleProject project = createFreeStyleProject();
         Run<?, ?> build = createBuildWithCoberturaAdapaters(project, Result.SUCCESS,
                 "*.xml");
@@ -125,6 +145,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult).isNull();
     }
 
+    /**
+     * Tests a freestyle job with one cobertura file present.
+     */
     @Test
     public void freestyleCoberturaWithOneFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -133,11 +156,14 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 "*.xml");
 
         CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
-                Arrays.asList(CoveragePluginITestUtil.COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL),
-                Arrays.asList(CoveragePluginITestUtil.COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED),
+                Collections.singletonList(CoveragePluginITestUtil.COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_TOTAL),
+                Collections.singletonList(CoveragePluginITestUtil.COBERTURA_COVERAGE_WITH_LOTS_OF_DATA_LINES_COVERED),
                 build);
     }
 
+    /**
+     * Tests a freestyle job with two cobertura files present.
+     */
     @Test
     public void freestyleCoberturaWithTwoFiles() {
         FreeStyleProject project = createFreeStyleProject();
@@ -155,6 +181,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 build);
     }
 
+    /**
+     * Tests a freestyle job with a cobertura file present using a jacoco adapter resulting in coverages with value 0.
+     */
     @Test
     public void freestyleWithJacocoAdapterAndCoberturaFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -171,6 +200,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 build);
     }
 
+    /**
+     * Tests a freestyle job with a cobertura file as well as a jacoco file present.
+     */
     @Test
     public void freestyleWithCoberturaAndJacocoFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -196,6 +228,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 build);
     }
 
+    /**
+     * Tests a freestyle job failing while set up parameter failNoReports and containing no reports.
+     */
     @Test
     public void freestyleZeroReportsFail() {
         FreeStyleProject project = createFreeStyleProject();
@@ -204,22 +239,27 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setFailNoReports(true);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
-
-        assertThat(build.getResult()).isEqualTo(Result.FAILURE);
+        buildWithResult(project, Result.FAILURE);
     }
 
+    /**
+     * Tests a freestyle job succeeding while parameter failNoReports is not set and containing no reports.
+     */
     @Test
     public void freestyleZeroReportsOkay() {
         FreeStyleProject project = createFreeStyleProject();
 
+        // TODO: DRY! Try to use one method with parameters.
         CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
         coveragePublisher.setFailNoReports(false);
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        buildWithResult(project, Result.SUCCESS);
     }
 
+    /**
+     * Tests a freestyle job succeeding while containing a quality gate.
+     */
     @Test
     public void freestyleQualityGatesSuccessful() {
         FreeStyleProject project = createFreeStyleProject();
@@ -234,9 +274,10 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        buildWithResult(project, Result.SUCCESS);
     }
 
+    // TODO: Michi - Bitte dokumentieren
     @Test
     public void freestyleQualityGatesSuccessfulUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -255,6 +296,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
+    /**
+     * Tests a freestyle job resulting unstable while containing a quality gate.
+     */
     @Test
     public void freestyleQualityGatesUnstable() {
         FreeStyleProject project = createFreeStyleProject();
@@ -271,6 +315,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
     }
 
+    /**
+     * Tests a freestyle job failing while containing a quality gate.
+     */
     @Test
     public void freestyleQualityGatesFail() {
         FreeStyleProject project = createFreeStyleProject();
@@ -285,9 +332,12 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+        buildWithResult(project, Result.FAILURE);
     }
 
+    /**
+     * Tests the health report of a freestyle job.
+     */
     @Test
     public void freestyleHealthReport() {
         FreeStyleProject project = createFreeStyleProject();
@@ -301,6 +351,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(100);
     }
 
+    /**
+     * Tests a freestyle job failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage decreases.
+     */
     // TODO: Bug in coverage-plugin ? second build is not failing as expected although negative delta is computed.
     @Test
     public void freestyleFailWhenCoverageDecreases() {
@@ -320,34 +373,39 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         buildWithResult(project, Result.FAILURE);
     }
 
+    /**
+     * Tests a freestyle job with decreased logs while parameter skipPublishingChecks is set.
+     * @throws IOException if build log cannot be read
+     */
     @Test
     public void freestyleSkipPublishingChecks() throws IOException {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, CoveragePluginITestUtil.COBERTURA_COVERAGE_FILE_NAME);
-
         CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
+        coveragePublisher.setSkipPublishingChecks(true);
+
+        Run<?, ?> build = createFreestyleProjectAndAssertBuildResult(coveragePublisher, Result.SUCCESS, CoveragePluginITestUtil.COBERTURA_COVERAGE_FILE_NAME);
 
         assertThat(build.getLog(1000))
                 .doesNotContain("[Checks API] No suitable checks publisher found.");
     }
 
+    /**
+     * Tests a freestyle job with extended logs while parameter skipPublishingChecks is not set.
+     * @throws IOException if build log cannot be read
+     */
     @Test
     public void freestylePublishingChecks() throws IOException {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, CoveragePluginITestUtil.COBERTURA_COVERAGE_FILE_NAME);
-
         CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
         coveragePublisher.setSkipPublishingChecks(false);
 
-        project.getPublishersList().add(coveragePublisher);
-        Run<?, ?> build = buildSuccessfully(project);
+        Run<?, ?> build = createFreestyleProjectAndAssertBuildResult(coveragePublisher, Result.SUCCESS, CoveragePluginITestUtil.COBERTURA_COVERAGE_FILE_NAME);
 
         assertThat(build.getLog(1000))
                 .contains("[Checks API] No suitable checks publisher found.");
     }
 
+    /**
+     * Tests the delta computation of two freestyle jobs.
+     */
     @Test
     public void freestyleDeltaComputation() {
         FreeStyleProject project = createFreeStyleProject();
@@ -369,6 +427,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
+    /**
+     * Tests whether a reference build is correctly set in a second freestyle build.
+     */
     @Test
     public void freestyleReferenceBuildPresent() {
         FreeStyleProject project = createFreeStyleProject();
@@ -392,6 +453,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(referenceBuild).isEqualTo(firstBuild);
     }
 
+    /**
+     * Tests whether a reference build is correctly not set in a single freestyle build.
+     */
     @Test
     public void freestyleReferenceBuildEmpty() {
         FreeStyleProject project = createFreeStyleProject();
@@ -408,6 +472,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
+    /**
+     * Tests whether the coverage result of two files in a freestyle job are aggregated.
+     */
     @Test
     public void freestyleReportAggregation() {
         FreeStyleProject project = createFreeStyleProject();
@@ -449,8 +516,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         }
     }
 
-    private Run<?, ?> createBuildWithJacocoAdapaters(FreeStyleProject project, Result expectedBuildResult,
-            String... jacocoFileNames) {
+    private Run<?, ?> createBuildWithJacocoAdapaters(final FreeStyleProject project, final Result expectedBuildResult,
+            final String... jacocoFileNames) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         List<CoverageAdapter> jacocoReportAdapters = new ArrayList<>();
         for (String fileName : jacocoFileNames) {
@@ -461,8 +528,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         return buildWithResult(project, expectedBuildResult);
     }
 
-    private Run<?, ?> createBuildWithCoberturaAdapaters(FreeStyleProject project, Result expectedBuildResult,
-            String... coberturaFileNames) {
+    private Run<?, ?> createBuildWithCoberturaAdapaters(final FreeStyleProject project, final Result expectedBuildResult,
+            final String... coberturaFileNames) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         List<CoverageAdapter> coberturaAdapters = new ArrayList<>();
         for (String fileName : coberturaFileNames) {
@@ -474,20 +541,35 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
 
-    private CoveragePublisher createPublisherWithCoberturaAdapter(String fileName) {
+    private CoveragePublisher createPublisherWithCoberturaAdapter(final String fileName) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(fileName);
 
-        coveragePublisher.setAdapters(Arrays.asList(coberturaReportAdapter));
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         return coveragePublisher;
     }
 
-    private CoveragePublisher createPublisherWithJacocoAdapter(String fileName) {
+    private CoveragePublisher createPublisherWithJacocoAdapter(final String fileName) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(fileName);
 
-        coveragePublisher.setAdapters(Arrays.asList(jacocoReportAdapter));
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         return coveragePublisher;
+    }
+
+    private Run<?, ?> createFreestyleProjectAndAssertBuildResult(final Publisher publisher, final Result expectedBuildResult,
+            final String... fileNames) {
+        FreeStyleProject project;
+        if (fileNames.length > 0) {
+            project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
+        }
+        else {
+            project = createFreeStyleProject();
+        }
+        project.getPublishersList().add(publisher);
+        Run<?, ?> build = buildWithResult(project, expectedBuildResult);
+        assertThat(build.getNumber()).isEqualTo(1);
+        return build;
     }
 
 }
