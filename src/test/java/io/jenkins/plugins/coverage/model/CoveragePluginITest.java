@@ -26,16 +26,16 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
-    private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
-    private static final String JACOCO_FILE_NAME_2 = "jacoco-codingstyle.xml";
+    private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
 
-    private static final String COBERTURA_FILE_NAME = "cobertura-higher-coverage.xml";
-    private static final String COBERTURA_FILE_NAME_2 = "../coverage-with-lots-of-data.xml";
+    private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
+    private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "../coverage-with-lots-of-data.xml";
 
     /** Example integration test for a pipeline with code coverage. */
     @Test
     public void pipelineForOneJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
@@ -61,7 +61,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineForTwoJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
@@ -87,9 +87,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void freestyleForOneJacoco() {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
@@ -103,11 +103,11 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void freestyleForTwoJacoco() {
 
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME, JACOCO_FILE_NAME_2);
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        JacocoReportAdapter jacocoReportAdapter2 = new JacocoReportAdapter(JACOCO_FILE_NAME_2);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
+        JacocoReportAdapter jacocoReportAdapter2 = new JacocoReportAdapter(JACOCO_CODINGSTYLE_FILE);
         List<CoverageAdapter> reportAdapters = new ArrayList<>();
         reportAdapters.add(jacocoReportAdapter);
         reportAdapters.add(jacocoReportAdapter2);
@@ -132,9 +132,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void freestyleForOneCobertura() {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME);
+        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         project.getPublishersList().add(coveragePublisher);
 
@@ -148,13 +148,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void freestyleForTwoCobertura() {
 
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_FILE_NAME, COBERTURA_FILE_NAME_2);
+        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
 
         List<CoverageAdapter> coverageAdapters = new ArrayList<>();
 
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
-        CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(COBERTURA_FILE_NAME_2);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
+        CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(COBERTURA_WITH_LOTS_OF_DATA_FILE);
 
         coverageAdapters.add(coberturaReportAdapter);
         coverageAdapters.add(coberturaReportAdapter2);
@@ -169,7 +169,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineForOneCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
                 + "}", true));
@@ -182,7 +182,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineForTwoCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_NAME_2, COBERTURA_FILE_NAME);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_WITH_LOTS_OF_DATA_FILE,
+                COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
                 + "}", true));
@@ -199,16 +200,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         // automatisch 2. Plugin deployen
         // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME, COBERTURA_FILE_NAME);
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
         // 3b. Job konfigurieren// 3a. Job erzeugen
         CoveragePublisher coveragePublisher = new CoveragePublisher();
 
         List<CoverageAdapter> coverageAdapters = new ArrayList<>();
 
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
         coverageAdapters.add(jacocoReportAdapter);
 
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_FILE_NAME);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
         coverageAdapters.add(coberturaReportAdapter);
 
         coveragePublisher.setAdapters(coverageAdapters);
@@ -222,7 +223,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineForOneCoberturaAndOneJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME, COBERTURA_FILE_NAME);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
                 + "}", true));
