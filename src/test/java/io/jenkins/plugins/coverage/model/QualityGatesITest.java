@@ -6,9 +6,12 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.CoveragePublisher;
@@ -30,9 +33,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void shouldReturnSuccess() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(50, 80);
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        String message = build.getAction(CoverageBuildAction.class).getFailMessage();
-        assertThat(message).isEqualTo(null);
+        verifiesBuildStatus(project);
     }
 
     /**
@@ -40,13 +41,11 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void shouldReturnUnstable() {
-        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(100, 100);
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        float unhealthy = 99.9f;
+        float unstable = 99.9f;
+        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(unhealthy, unstable);
 
-        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class
-        String message = build.getAction(CoverageAction.class).getFailMessage();
-        assertThat(message).isEqualTo(
-                "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold=100.0, unhealthyThreshold=100.0}].");
+        verifiesBuildStatusAndFailMessage(unhealthy, unstable, project);
     }
 
     /**
@@ -87,5 +86,80 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
         lineThreshold.setUnstableThreshold(unstable);
         thresholds.add(lineThreshold);
         return thresholds;
+    }
+
+    /**
+     * Tests if build succeeds, when line thresholds within range.
+     */
+    @Test
+    public void pipelineWithThresholdShouldSucceed() {
+        WorkflowJob job = createPipelineWithLineThreshold(50f, 80f);
+        verifiesBuildStatus(job);
+    }
+
+    /**
+     * Tests if build is unstable, when line thresholds above coverage.
+     */
+    @Test
+    public void pipelineWithThresholdShouldBeUnstable() {
+        float unhealthyThreshold = 99.9f;
+        float unstableThreshold = 99.9f;
+
+        WorkflowJob job = createPipelineWithLineThreshold(unhealthyThreshold, unstableThreshold);
+        verifiesBuildStatusAndFailMessage(unhealthyThreshold, unstableThreshold, job);
+    }
+
+    /**
+     * Verifies if build is successful and has no fail message.
+     *
+     * @param job
+     *         job to fest with
+     */
+    private void verifiesBuildStatus(final ParameterizedJob<?, ?> job) {
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+        String message = build.getAction(CoverageBuildAction.class).getFailMessage();
+        assertThat(message).isEqualTo(null);
+    }
+
+    /**
+     * Verifies build status and fail message of job.
+     *
+     * @param unhealthyThreshold
+     *         value of unhealthy threshold
+     * @param unstableThreshold
+     *         value of unstable threshold
+     * @param job
+     *         job to test with
+     */
+    private void verifiesBuildStatusAndFailMessage(final float unhealthyThreshold, final float unstableThreshold,
+            final ParameterizedJob<?, ?> job) {
+        Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
+
+        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class
+        String message = build.getAction(CoverageAction.class).getFailMessage();
+        assertThat(message).isEqualTo(
+                "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold="
+                        + unstableThreshold
+                        + ", unhealthyThreshold=" + unhealthyThreshold + "}].");
+    }
+
+    /**
+     * Creates pipeline project with jacoco adapter and global threshold.
+     *
+     * @param unhealthyThreshold
+     *         value of unhealthy threshold
+     * @param unstableThreshold
+     *         value of unstable threshold
+     *
+     * @return pipeline project
+     */
+    private WorkflowJob createPipelineWithLineThreshold(final float unhealthyThreshold, final float unstableThreshold) {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')]"
+                + "   publishCoverage globalThresholds: [thresholdTarget('Line'), unhealthyThreshold("
+                + unhealthyThreshold + "), unstableThreshold(" + unstableThreshold + ")]"
+                + "}", true));
+        return job;
     }
 }
