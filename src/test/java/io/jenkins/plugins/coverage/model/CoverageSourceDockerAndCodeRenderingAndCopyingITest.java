@@ -37,17 +37,18 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
+
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     /** Example integration test for a pipeline with code coverage that runs on an agent. */
     @Test
-    public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
+    public void copySourceCodeAndCodeRenderingPipelineOnAgent() throws IOException, InterruptedException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
-        WorkflowJob project = createPipelineOnAgent();
+        WorkflowJob project = createPipelineWithSCMandJacocoAdapter("node('docker')");
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_NAME, JACOCO_FILE_NAME);
 
@@ -55,23 +56,12 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
 
     }
 
-
     /**
      * Reads source code from git and adds it to project.
      */
     @Test
-    public void sourceCodeCopyingTest() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "    checkout([$class: 'GitSCM', "
-                + "branches: [[name: '" + COMMIT + "' ]],\n"
-                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
-                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-                + "            relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
-                + "}", true));
-
+    public void copySourceCodeAndCodeRenderingPipeline() {
+        WorkflowJob job = createPipelineWithSCMandJacocoAdapter("node");
         verifyGitRepository(job);
     }
 
@@ -123,9 +113,9 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
         }
     }
 
-    private WorkflowJob createPipelineOnAgent() {
+    private WorkflowJob createPipelineWithSCMandJacocoAdapter(final String node) {
         WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node('docker') {"
+        job.setDefinition(new CpsFlowDefinition(node + " {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '" + COMMIT + "' ]],\n"
                 + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
@@ -140,8 +130,11 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
 
     /**
      * Tests if freestyle project is running successfully in docker.
-     * @throws IOException due to javaDockerRule.get()
-     * @throws InterruptedException to setAssignedNode() to project
+     *
+     * @throws IOException
+     *         due to javaDockerRule.get()
+     * @throws InterruptedException
+     *         to setAssignedNode() to project
      */
     @Test
     public void freestyleProjectCoverageOnAgentNode() throws IOException, InterruptedException {
