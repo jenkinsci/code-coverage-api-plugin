@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -42,7 +44,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
     public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
             throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
+        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_FILE_NAME);
@@ -84,4 +86,42 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.LINE)).isEqualTo(50);
         assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.FILE)).isEqualTo(0);
     }
+
+    /**
+     * Checks if delta can be computed with reference build in pipeline project.
+     *
+     * @throws IOException
+     *         when trying to recover coverage result
+     * @throws ClassNotFoundException
+     *         when trying to recover coverage result
+     */
+    @Test
+    public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_FILE_NAME
+                + "')]"
+                + "}", true));
+
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+
+        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_FILE_NAME
+                + "')]"
+                + "}", true));
+
+        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, MESSAGES);
+        referenceBuild.onLoad(firstBuild);
+
+        Run<?, ?> secondBuild = buildWithResult(job, Result.SUCCESS);
+        referenceBuild.onAttached(secondBuild);
+
+        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(1));
+        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(2));
+
+        verifyDeltaComputation(resultFirstBuild, resultSecondBuild);
+    }
+
 }
