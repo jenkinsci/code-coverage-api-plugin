@@ -36,9 +36,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void pipelineForOneJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
+        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
 
         verifyForOneJacoco(job);
     }
@@ -49,9 +47,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void pipelineForNoJacoco() {
         WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
+        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
 
         verifyForNoFile(job);
     }
@@ -62,9 +58,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void pipelineForTwoJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
+        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
 
         verifyForTwoJacoco(job);
     }
@@ -170,9 +164,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void pipelineForOneCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
-                + "}", true));
+        job.setDefinition(getCpsFlowDefinitionWithCoberturaAdapter());
 
         verifyForOneCobertura(job);
     }
@@ -184,9 +176,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     public void pipelineForTwoCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_WITH_LOTS_OF_DATA_FILE,
                 COBERTURA_HIGHER_COVERAGE_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
-                + "}", true));
+        job.setDefinition(getCpsFlowDefinitionWithCoberturaAdapter());
 
         verifyForTwoCobertura(job);
     }
@@ -196,12 +186,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void freestyleForOneCoberturaAndOneJacoco() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
 
         List<CoverageAdapter> coverageAdapters = new ArrayList<>();
@@ -229,6 +216,28 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
 
         verifyForOneCoberturaAndOneJacoco(job);
+    }
+
+    /**
+     * Creates a script with jacoco adapter set to wildcard.
+     *
+     * @return {@link CpsFlowDefinition} with set jacoco adapter
+     */
+    private CpsFlowDefinition getCpsFlowDefinitionWithJacocoAdapter() {
+        return new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true);
+    }
+
+    /**
+     * Creates a script with cobertura adapter set to wildcard.
+     *
+     * @return {@link CpsFlowDefinition} with set cobertura adapter
+     */
+    private CpsFlowDefinition getCpsFlowDefinitionWithCoberturaAdapter() {
+        return new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
+                + "}", true);
     }
 
     /**
