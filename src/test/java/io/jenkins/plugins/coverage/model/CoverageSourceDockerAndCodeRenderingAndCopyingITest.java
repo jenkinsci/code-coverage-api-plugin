@@ -16,21 +16,24 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
+import hudson.model.FreeStyleProject;
 import hudson.model.Run;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
 
+import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
 
 /**
- * Tests if source code Rendering and copying works.
+ * Tests if source code Rendering and copying works with Docker and if freestyle-projects run successfully with Docker.
  */
-public class CoverageSourceCodeRenderingAndCopyingITest extends IntegrationTestWithJenkinsPerSuite {
+public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
@@ -51,6 +54,7 @@ public class CoverageSourceCodeRenderingAndCopyingITest extends IntegrationTestW
         verifyGitRepository(project);
 
     }
+
 
     /**
      * Reads source code from git and adds it to project.
@@ -132,5 +136,31 @@ public class CoverageSourceCodeRenderingAndCopyingITest extends IntegrationTestW
                 + "}", true));
 
         return job;
+    }
+
+    /**
+     * Tests if freestyle project is running successfully in docker.
+     * @throws IOException due to javaDockerRule.get()
+     * @throws InterruptedException to setAssignedNode() to project
+     */
+    @Test
+    public void freestyleProjectCoverageOnAgentNode() throws IOException, InterruptedException {
+        assumeThat(isWindows()).as("Running on Windows").isFalse();
+
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        FreeStyleProject project = createFreeStyleProject();
+        project.setAssignedNode(agent);
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_NAME, JACOCO_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+        Run<?, ?> build = buildSuccessfully(project);
+
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 }
