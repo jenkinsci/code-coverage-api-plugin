@@ -388,7 +388,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "pipeline {\n"
                         + "    agent any\n"
                         + "    stages {\n"
-                        + "        stage('firstStage') {\n"
+                        + "        stage('first-stage') {\n"
                         + "            steps {\n"
                         + "                    publishCoverage(adapters: [jacocoAdapter('" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
                         + "            )}\n"
