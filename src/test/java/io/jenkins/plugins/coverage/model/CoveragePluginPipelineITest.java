@@ -15,6 +15,7 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import org.apache.http.impl.auth.GGSSchemeBase;
 import org.codehaus.groovy.tools.shell.util.JAnsiHelper;
+import org.eclipse.collections.api.map.primitive.MutableIntIntMap;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -55,16 +56,14 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     @Test
-    public void noJacocoFile() throws Exception {
-//        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
-//
-//        WorkflowJob job = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-//        job.setDefinition(new CpsFlowDefinition(builder.build(), true));
-//        WorkflowRun run = Objects.requireNonNull(job.scheduleBuild2(0)).waitForStart();
-//
-//        j.assertBuildStatusSuccess(j.waitForCompletion(run));
-//        j.assertLogContains("No reports were found", run);
+    public void noJacocoFile() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
+       Run<?, ?> build = buildSuccessfully(job);
+       assertThat(build.getNumber()).isEqualTo(1);
     }
 
     @Test
@@ -99,22 +98,20 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(6083, 6368 - 6083));
+                .isEqualTo(new Coverage(11400, 11947 - 11400));
         assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(1661, 1875 - 1661));
+                .isEqualTo(new Coverage(3306, 3620 - 3306));
     }
 
     @Test
-    public void noCoberturaFile() throws Exception {
-//        CoverageScriptedPipelineScriptBuilder builder = CoverageScriptedPipelineScriptBuilder.builder();
-//        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
-//
-//        project.setDefinition(new CpsFlowDefinition(builder.build(), true));
-//        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
-//
-//        j.assertBuildStatusSuccess(j.waitForCompletion(r));
-//        j.assertLogContains("No reports were found", r);
+    public void noCoberturaFile() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [cobertura('**/*.xml')]"
+                + "}", true));
 
+        Run<?, ?> build = buildSuccessfully(job);
+        assertThat(build.getNumber()).isEqualTo(1);
     }
 
     @Test
@@ -435,41 +432,40 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
     @Test
     public void failDecreasingCoverageTrue(){
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
-        workflowJob.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+        buildSuccessfully(job);
+
+        cleanWorkspace(job);
+        copyFilesToWorkspace(job, JACOCO_MINI_DATA);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
+                + "   failBuildIfCoverageDecreasedInChangeRequest: true"
                 + "}", true));
 
-
-        buildWithResult(workflowJob, Result.SUCCESS);
-
-        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
-        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
-                + "failBuildIfCoverageDecreasedInChangeRequest: true"
-                + "}", true));
-
-        buildWithResult(workflowJob2, Result.FAILURE);
+        buildWithResult(job, Result.FAILURE);
     }
 
     @Test
     public void failDecreasingCoverageFalse() {
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
-        workflowJob.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+        buildSuccessfully(job);
+
+        cleanWorkspace(job);
+        copyFilesToWorkspace(job, JACOCO_MINI_DATA);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
+                + "   failBuildIfCoverageDecreasedInChangeRequest: false"
                 + "}", true));
 
-
-        Run<?, ?> build1 = buildWithResult(workflowJob, Result.SUCCESS);
-
-        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
-        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
-                + "discoverReferenceBuild(referenceJob:'" + build1.getParent().getName() + "')"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
-                + "failBuildIfCoverageDecreasedInChangeRequest: false"
-                + "}", true));
-
-        buildWithResult(workflowJob2, Result.SUCCESS);
+        buildWithResult(job, Result.SUCCESS);
     }
 
     @Test
@@ -678,6 +674,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
+    // TODO: auslagern
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
