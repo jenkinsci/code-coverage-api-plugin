@@ -1,27 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.Collections;
 import java.util.List;
-
-import org.junit.AssumptionViolatedException;
-
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.Domain;
-import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
-
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.sshslaves.SSHLauncher;
-import hudson.slaves.DumbSlave;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
-import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
-
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -45,7 +25,6 @@ public class CoveragePluginITestUtil {
      * Jacoco coding style example file with decreased line coverage.
      */
     public static final String JACOCO_CODING_STYLE_DECREASED_FILE_NAME = "jacoco-codingstyle-decreased-line-coverage.xml";
-
 
     /**
      * Cobertura example file with lots of data.
@@ -96,6 +75,13 @@ public class CoveragePluginITestUtil {
      * The number of total lines for file {@link #COBERTURA_COVERAGE_FILE_NAME}.
      */
     public static final int COBERTURA_COVERAGE_LINES_TOTAL = 2;
+
+    /**
+     * Private default constructor avoiding public default constructor.
+     */
+    private CoveragePluginITestUtil() {
+
+    }
 
     /**
      * Takes a build and asserts its line coverage.

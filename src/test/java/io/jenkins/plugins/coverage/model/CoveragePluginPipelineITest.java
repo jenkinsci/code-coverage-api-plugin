@@ -173,7 +173,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Tests a pipeline job succeeding while containing a quality gate.
+     * Tests a pipeline job succeeding while containing a passed quality gate.
      */
     @Test
     public void pipelineQualityGatesSuccess() {
@@ -184,7 +184,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Tests a pipeline job failing while containing a quality gate.
+     * Tests a pipeline job failing while containing a failed quality gate.
      */
     @Test
     public void pipelineQualityGatesFail() {
@@ -194,7 +194,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
     }
 
-    // TODO: Michi - Bitte dokumentieren
+    /**
+     * Tests a pipeline job resulting with unhealthy health report while containing a failed quality gate.
+     */
     @Test
     public void pipelineQualityGatesSuccessUnhealthy() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
@@ -206,7 +208,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Tests a pipeline job resulting unstable while containing a quality gate.
+     * Tests a pipeline job resulting unstable while containing a failed quality gate.
      */
     @Test
     public void pipelineQualityGatesUnstable() {
@@ -248,7 +250,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineSkipPublishingChecks() throws IOException {
-
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [cobertura('*.xml')], skipPublishingChecks: true, sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -264,7 +265,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelinePublishingChecks() throws IOException {
-
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [cobertura('*.xml')], skipPublishingChecks: false, sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -279,7 +279,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineHealthReport() {
-
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [cobertura('*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -294,7 +293,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineReportAggregation() {
-
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -314,7 +312,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineDeltaComputation() {
-
         Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -336,7 +333,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineReferenceBuildPresent() {
-
         Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -360,7 +356,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineReferenceBuildEmpty() {
-
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
@@ -370,6 +365,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
+    /**
+     * Tests a pipeline job in a docker container.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Test
     public void pipelineOnAgentNode() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
@@ -385,7 +386,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
                 build);
 
-        //TODO: Here assertions are missing that check for the source code.
+        //TODO: ASK HAFNER: How to check sources ?
     }
 
     private WorkflowJob createPipelineOnAgent() {
