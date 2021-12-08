@@ -150,7 +150,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Creates pipeline project with jacoco adapter and global threshold.
+     * Creates pipeline project with jacoco adapter and line thresholds.
      *
      * @param unhealthyThreshold
      *         value of unhealthy threshold
