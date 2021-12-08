@@ -156,9 +156,9 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     private WorkflowJob createPipelineWithLineThreshold(final float unhealthyThreshold, final float unstableThreshold) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')]"
-                + "   publishCoverage globalThresholds: [thresholdTarget('Line'), unhealthyThreshold("
-                + unhealthyThreshold + "), unstableThreshold(" + unstableThreshold + ")]"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')],"
+                + "   globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: "
+                + unhealthyThreshold + ", unstableThreshold: " + unstableThreshold + "]]"
                 + "}", true));
         return job;
     }
