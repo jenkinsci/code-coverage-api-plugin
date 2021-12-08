@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test for report aggregation.
  */
 public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
-//TODO: Assertions ändern
 
     private static final String COBERTURA_FILE_NAME = "cobertura-lower-coverage.xml";
     private static final String COBERTURA_ANOTHER_FILE_FILE_NAME = "../coverage-with-lots-of-data.xml";
