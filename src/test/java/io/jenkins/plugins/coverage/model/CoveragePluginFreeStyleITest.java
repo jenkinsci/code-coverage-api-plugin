@@ -17,6 +17,8 @@ import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import org.junit.AssumptionViolatedException;
@@ -30,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -886,5 +889,35 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         catch (Throwable e) {
             throw new AssumptionViolatedException("Failed to create docker container", e);
         }
+    }
+
+    @Test
+    public void sourceCodeRenderingAndCopying() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_BIG_DATA);
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_BIG_DATA);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+
+        assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
+
+        CoverageViewModel model = action.getTarget();
+
+        CoverageViewModel.CoverageOverview overview = model.getOverview();
+        assertThatJson(overview).node("metrics").isArray().containsExactly(
+                "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
+        );
+        assertThatJson(overview).node("covered").isArray().containsExactly(
+                21, 306, 344, 1801, 6083, 26283, 1661
+        );
+        assertThatJson(overview).node("missed").isArray().containsExactly(
+                0, 1, 5, 48, 285, 1036, 214
+        );
     }
 }

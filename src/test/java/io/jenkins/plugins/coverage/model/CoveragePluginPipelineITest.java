@@ -11,6 +11,7 @@ import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import org.codehaus.groovy.tools.shell.util.JAnsiHelper;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -28,6 +29,7 @@ import java.util.TreeMap;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
 /*
 Pipeline integration tests for coverage api plugin
@@ -39,6 +41,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     private static final String COBERTURA_FILE_NAME = "coverage-with-lots-of-data.xml";
     private static final String JACOCO_BIG_DATA = "jacoco-analysis-model.xml";
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
+    private static final String JACOCO_CODING_STYLE = "jacoco-codingstyle.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
@@ -720,13 +723,42 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     @Test
-    public void sourceCodeRenderingAndCopying() throws IOException, InterruptedException {
+    public void sourceCodeRenderingAndCopying() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
+
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+
+        assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
+
+        CoverageViewModel model = action.getTarget();
+
+        CoverageViewModel.CoverageOverview overview = model.getOverview();
+        assertThatJson(overview).node("metrics").isArray().containsExactly(
+                "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
+        );
+        assertThatJson(overview).node("covered").isArray().containsExactly(
+                21, 306, 344, 1801, 6083, 26283, 1661
+        );
+        assertThatJson(overview).node("missed").isArray().containsExactly(
+                0, 1, 5, 48, 285, 1036, 214
+        );
+    }
+
+    @Test
+    public void sourceCodeRenderingAndCopyingAgent() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
 
         Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
 
         String consoleLog = getConsoleLog(build);
 
@@ -735,21 +767,21 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 .contains("Checking out Revision " + COMMIT)
                 .contains("git checkout -f " + COMMIT);
 
-        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
-        SortedMap<CoverageMetric, Double> metrics = new TreeMap<>();
-
-        CoverageBuildAction action = new CoverageBuildAction(build, root, "-", metrics, false);
-
-        assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
 
+        CoverageViewModel model = action.getTarget();
+
+        CoverageViewModel.CoverageOverview overview = model.getOverview();
+        assertThatJson(overview).node("metrics").isArray().containsExactly(
+                "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
+        );
+        assertThatJson(overview).node("covered").isArray().containsExactly(
+                21, 306, 344, 1801, 6083, 26283, 1661
+        );
+        assertThatJson(overview).node("missed").isArray().containsExactly(
+                0, 1, 5, 48, 285, 1036, 214
+        );
     }
-
-
-
-
-
-
 
     @Test
     public void declarativePipelineSupportJacoco() {
