@@ -31,8 +31,8 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
 public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
     private static final List<String> MESSAGES = Arrays.asList("Message 1", "Message 2");
 
-    private static final String COBERTURA_LOWER_COVERAGE_FILE_NAME = "cobertura-lower-coverage.xml";
-    private static final String COBERTURA_HIGHER_COVERAGE_FILE_NAME = "cobertura-higher-coverage.xml";
+    private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
+    private static final String COBERTURA_HIGHER_COVERAGE_XML = "cobertura-higher-coverage.xml";
 
     /**
      * Checks if delta can be computed for reference build.
@@ -46,10 +46,10 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
     public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
             throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_FILE_NAME);
+        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_XML);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_FILE_NAME);
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_XML);
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
 
         project.getPublishersList().add(coveragePublisher);
@@ -58,10 +58,10 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         Run<?, ?> firstBuild = buildSuccessfully(project);
 
         //prepare second build
-        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
+        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_XML);
 
         CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(
-                COBERTURA_HIGHER_COVERAGE_FILE_NAME);
+                COBERTURA_HIGHER_COVERAGE_XML);
 
         //List<CoverageAdapter> coverageAdapters = new ArrayList<>();
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter2));
@@ -89,18 +89,18 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      */
     @Test
     public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_FILE_NAME);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_FILE_NAME
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_XML
                 + "')]"
                 + "}", true));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
-        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_FILE_NAME);
+        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_XML);
 
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_FILE_NAME
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_XML
                 + "')]"
                 + "}", true));
 
@@ -128,8 +128,8 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         Run<?, ?> secondBuild = buildWithResult((ParameterizedJob<?, ?>) job, Result.SUCCESS);
         referenceBuild.onAttached(secondBuild);
 
-        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(1));
-        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(2));
+        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(firstBuild);
+        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(secondBuild);
 
         verifyDeltaComputation(resultFirstBuild, resultSecondBuild);
     }
