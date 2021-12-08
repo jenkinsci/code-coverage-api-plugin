@@ -23,24 +23,20 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Integration Test for HealthReports.
  */
+
+enum Thresholds {SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
+
 public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final int UNSTABLE_LINE_THRESHOLD = 100;
 
     /**
-     * Build should succeed and HealthScore is 100%.
+     * No Build should succeed, no thresholds set, HealthScore should be 100%.
      */
     @Test
     public void freestyleProjectShouldReturnSuccess() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILE_NAME);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        coveragePublisher.setGlobalThresholds(thresholds);
-        project.getPublishersList().add(coveragePublisher);
+        FreeStyleProject project = createFreeStyleProject(Thresholds.DONT_SET_ANY_THRESHOLDS);
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
 
@@ -48,23 +44,11 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Build should be unstable and HealthScore is 0%.
+     * Build should be unstable, thresholds set, HealthScore is 0%.
      */
     @Test
     public void freestyleProjectShouldReturnUnstable() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILE_NAME);
-
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold lineThreshold = new Threshold("Line");
-        lineThreshold.setUnstableThreshold(UNSTABLE_LINE_THRESHOLD);
-        thresholds.add(lineThreshold);
-        coveragePublisher.setGlobalThresholds(thresholds);
-
-        project.getPublishersList().add(coveragePublisher);
+        FreeStyleProject project = createFreeStyleProject(Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
         verifyHealthReportUnstable(build);
@@ -72,7 +56,32 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Pipeline project and build should succeed and HealthScore is 100%.
+     * Used to create a freestyle project and apply/don't apply thresholds.
+     *
+     * @param thresholdsApplied
+     *         to apply/don't apply thresholds
+     *
+     * @return project
+     */
+    private FreeStyleProject createFreeStyleProject(final Thresholds thresholdsApplied) {
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILE_NAME);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+
+        if (thresholdsApplied == Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD) {
+            List<Threshold> thresholds = new ArrayList<>();
+            Threshold lineThreshold = new Threshold("Line");
+            lineThreshold.setUnstableThreshold(UNSTABLE_LINE_THRESHOLD);
+            thresholds.add(lineThreshold);
+            coveragePublisher.setGlobalThresholds(thresholds);
+        }
+        project.getPublishersList().add(coveragePublisher);
+        return project;
+    }
+
+    /**
+     * Build of pipeline project should succeed and HealthScore is 100%.
      */
     @Test
     public void pipelineShouldReturnSuccess() {
@@ -86,8 +95,9 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
         verifyHealthReportSuccess(build);
     }
+
     /**
-     * Pipeline project and build should be unstable and HealthScore is 0%.
+     * Build of pipeline project should be unstable and HealthScore is 0%.
      */
     @Test
     public void pipelineShouldReturnUnstable() {
@@ -101,7 +111,6 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
         verifyHealthReportUnstable(build);
     }
-
 
     /**
      * Verifies details of health report of successful build.
