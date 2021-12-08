@@ -17,9 +17,15 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
-enum Checks {PUBLISH_CHECKS, SKIP_CHECKS}
+/**
+ * Enum to set skipping of publishing of checks.
+ */
+enum Checks { PUBLISH_CHECKS, SKIP_CHECKS }
 
-enum Sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
+/**
+ * Enum to set if SCM is used or not.
+ */
+enum Sourcecode { ADD_SOURCECODE, NO_SOURCECODE }
 
 /**
  * Tests if publishing of checks can be skipped.

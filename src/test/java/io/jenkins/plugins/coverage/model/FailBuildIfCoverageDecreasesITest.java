@@ -15,7 +15,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-enum CoverageDecreasedAction {failBuild, dontFailBuild}
+enum CoverageDecreasedAction { FAIL_BUILD, DONT_FAIL_BUILD }
 
 /**
  * Integration test for checking if build failes when coverage decreases.
@@ -34,11 +34,11 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
     public void freestyleProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() throws IOException {
         FreeStyleProject freestyleProjectIfDecreasesSetFailTrue = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.failBuild);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.FAIL_BUILD);
         buildWithResult(freestyleProjectIfDecreasesSetFailTrue, Result.FAILURE);
         FreeStyleProject projectIfDecreasesSetFailFalse = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.dontFailBuild);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.DONT_FAIL_BUILD);
         buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
 
     }
@@ -50,12 +50,12 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
     public void pipelineProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() {
         WorkflowJob pipelineProjectIfDecreasesSetFailTrue = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.failBuild);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.FAIL_BUILD);
         buildWithResult(pipelineProjectIfDecreasesSetFailTrue, Result.FAILURE);
 
         WorkflowJob pipelineProjectIfDecreasesSetFailFalse = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.dontFailBuild);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.DONT_FAIL_BUILD);
         buildWithResult(pipelineProjectIfDecreasesSetFailFalse, Result.SUCCESS);
     }
 
@@ -87,7 +87,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         project.getPublishersList().add(coveragePublisher);
 
         //run first build
-        Run<?, ?> firstBuild = buildSuccessfully(project);
+        buildSuccessfully(project);
 
         //prepare second build
         copyFilesToWorkspace(project, filenameOfDecreasedCoverage);
@@ -97,7 +97,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
 
         //set FailBuildIfCoverageDecreasedInChangeRequest on true
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(
-                coverageDecreased == CoverageDecreasedAction.failBuild);
+                coverageDecreased == CoverageDecreasedAction.FAIL_BUILD);
 
         coveragePublisher.setAdapters(Collections.singletonList(reportAdapter2));
         project.getPublishersList().replace(coveragePublisher);
@@ -130,7 +130,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filenameOfDecreasedCoverage + "')],"
                 + "   failBuildIfCoverageDecreasedInChangeRequest: " + (coverageDecreased
-                == CoverageDecreasedAction.failBuild)
+                == CoverageDecreasedAction.FAIL_BUILD)
                 + "}", true));
 
         return job;

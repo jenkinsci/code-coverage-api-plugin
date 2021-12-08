@@ -26,20 +26,61 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
-    public static final int JACOCO_MISSED_LINES = 6083;
+    /**
+     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
+     */
+    public static final int JACOCO_COVERED_LINES = 6083;
+    /**
+     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
+     */
     public static final int JACOCO_ALL_LINES = 6368;
-    public static final int BOTH_JACOCO_MISSED_LINES = 6377;
+    /**
+     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value JACOCO_CODINGSTYLE_FILE}.
+     */
+    public static final int BOTH_JACOCO_COVERED_LINES = 6377;
+    /**
+     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value JACOCO_CODINGSTYLE_FILE}.
+     */
     public static final int BOTH_JACOCO_ALL_LINES = 6691;
+    /**
+     * Covered lines in {@value COBERTURA_HIGHER_COVERAGE_FILE}.
+     */
     public static final int COBERTURA_COVERED_LINES = 2;
+    /**
+     * All lines in {@value COBERTURA_HIGHER_COVERAGE_FILE}.
+     */
     public static final int COBERTURA_ALL_LINES = 2;
+    /**
+     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value COBERTURA_HIGHER_COVERAGE_FILE}.
+     */
     public static final int JACOCO_COBERTURA_COVERED_LINES = 6085;
+    /**
+     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value COBERTURA_HIGHER_COVERAGE_FILE}.
+     */
     public static final int JACOCO_COBERTURA_ALL_LINES = 6370;
+    /**
+     * Jacoco file for testing.
+     */
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    /**
+     * Another jacoco file for testing.
+     */
     private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
+    /**
+     * Cobertura file for testing.
+     */
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
+    /**
+     * Another cobertura file for testing.
+     */
     private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "../coverage-with-lots-of-data.xml";
-
+    /**
+     * Symbol of cobertura adapter in pipeline.
+     */
     private static final String COBERTURA_ADAPTER = "istanbulCoberturaAdapter";
+    /**
+     * Symbol of jacoco adapter in pipeline.
+     */
     private static final String JACOCO_ADAPTER = "jacocoAdapter";
 
     /**
@@ -297,7 +338,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(JACOCO_MISSED_LINES, JACOCO_ALL_LINES - JACOCO_MISSED_LINES));
+                .isEqualTo(new Coverage(JACOCO_COVERED_LINES, JACOCO_ALL_LINES - JACOCO_COVERED_LINES));
     }
 
     /**
@@ -311,7 +352,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(BOTH_JACOCO_MISSED_LINES, BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_MISSED_LINES));
+                .isEqualTo(new Coverage(BOTH_JACOCO_COVERED_LINES, BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES));
     }
 
     /**
@@ -322,7 +363,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
         //FIXME: Build should fail
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
+        buildWithResult(project, Result.SUCCESS);
 
     }
 
@@ -361,7 +402,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForTwoCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //FIXME
+        assertThat(coverageResult.getLineCoverage()).isNotNull();
     }
 
     /**
