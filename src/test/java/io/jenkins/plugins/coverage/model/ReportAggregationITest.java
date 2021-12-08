@@ -84,29 +84,6 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Checks aggregated coverage result for pipeline job with two cobertura files.
-     *
-     * @throws IOException
-     *         due to verifyCoberturaReportAggregation()
-     * @throws ClassNotFoundException
-     *         due to verifyCoberturaReportAggregation()
-     */
-    @Test
-    public void checkCoverageResultFromPipelineJobWithCoberturaFiles() throws IOException, ClassNotFoundException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML,
-                COVERAGE_WITH_LOTS_OF_DATA_XML);
-
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('mergeToOneReport: true,"
-                + COBERTURA_LOWER_COVERAGE_XML + "'),"
-                + "istanbulCoberturaAdapter('mergeToOneReport: true," + COVERAGE_WITH_LOTS_OF_DATA_XML + "')]"
-                + "}", true));
-
-        Run<?, ?> build = buildSuccessfully(job);
-        verifyCoberturaReportAggregation(build);
-    }
-
-    /**
      * Checks aggregated coverage result for freestyle job with two jacoco files.
      *
      * @throws IOException
@@ -133,6 +110,29 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
 
         project.getPublishersList().add(coveragePublisher);
         Run<?, ?> build = buildSuccessfully(project);
+        verifyCoberturaReportAggregation(build);
+    }
+
+    /**
+     * Checks aggregated coverage result for pipeline job with two cobertura files.
+     *
+     * @throws IOException
+     *         due to verifyCoberturaReportAggregation()
+     * @throws ClassNotFoundException
+     *         due to verifyCoberturaReportAggregation()
+     */
+    @Test
+    public void checkCoverageResultFromPipelineJobWithCoberturaFiles() throws IOException, ClassNotFoundException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML,
+                COVERAGE_WITH_LOTS_OF_DATA_XML);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('mergeToOneReport: true,"
+                + COBERTURA_LOWER_COVERAGE_XML + "'),"
+                + "istanbulCoberturaAdapter('mergeToOneReport: true," + COVERAGE_WITH_LOTS_OF_DATA_XML + "')]"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(job);
         verifyCoberturaReportAggregation(build);
     }
 
