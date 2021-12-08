@@ -182,7 +182,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     @Override
-    public Object getTarget() {
+    public CoverageViewModel getTarget() {
         return new CoverageViewModel(getOwner(), getResult());
     }
 

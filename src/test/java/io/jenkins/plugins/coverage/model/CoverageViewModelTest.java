@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class CoverageViewModelTest extends AbstractCoverageTest {
     @Test
     void shouldReportOverview() {
-        CoverageViewModel model = new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
+        CoverageViewModel model = createModel();
 
         assertThat(model.getDisplayName()).contains("Java coding style: jacoco-codingstyle.xml");
 
@@ -32,5 +32,21 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         assertThatJson(overview).node("missed").isArray().containsExactly(
                 0, 3, 3, 5, 29, 90, 7
         );
+
+        assertThat(model.getDynamic("unknown", null, null))
+                .isNull();
+    }
+
+    @Test
+    void shouldReturnEmptySourceViewForExistingLinkButMissingSourceFile() {
+        CoverageViewModel model = createModel();
+
+        String link = String.valueOf("PathUtil.java".hashCode());
+        assertThat(model.getDynamic(link, null, null))
+                .extracting(SourceViewModel::getSourceFileContent).isEqualTo("n/a");
+    }
+
+    private CoverageViewModel createModel() {
+        return new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
     }
 }
