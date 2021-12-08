@@ -221,8 +221,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineFailWhenCoverageDecreases() {
-
-
         WorkflowJob job = createPipelineWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
