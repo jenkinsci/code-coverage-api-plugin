@@ -39,36 +39,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
     private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "../coverage-with-lots-of-data.xml";
 
-    /** Example integration test for a pipeline with code coverage. */
-    @Test
-    public void pipelineForOneJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
-        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
-
-        verifyForOneJacoco(job);
-    }
-
-    /**
-     * Pipeline integration test with no file.
-     */
-    @Test
-    public void pipelineForNoJacoco() {
-        WorkflowJob job = createPipeline();
-        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
-
-        verifyForNoFile(job);
-    }
-
-    /**
-     * Pipeline integration test with two jacoco files.
-     */
-    @Test
-    public void pipelineForTwoJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-        job.setDefinition(getCpsFlowDefinitionWithJacocoAdapter());
-
-        verifyForTwoJacoco(job);
-    }
+    private static final String COBERTURA_ADAPTER = "istanbulCoberturaAdapter";
+    private static final String JACOCO_ADAPTER = "jacocoAdapter";
 
     /**
      * Pipeline integration test with no adapter.
@@ -81,6 +53,63 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
 
         verifyForNoAdapter(job);
+    }
+
+    /**
+     * Freestyle integration test with no adapter.
+     */
+    @Test
+    public void freestyleForNoAdapter() {
+        FreeStyleProject project = createFreeStyleProject();
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        project.getPublishersList().add(coveragePublisher);
+        verifyForNoAdapter(project);
+    }
+
+    /**
+     * Pipeline integration test with no file.
+     */
+    @Test
+    public void pipelineForNoJacoco() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
+
+        verifyForNoFile(job);
+    }
+
+    /** Example integration test for a pipeline with code coverage. */
+    @Test
+    public void pipelineForOneJacoco() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
+
+        verifyForOneJacoco(job);
+    }
+
+    /**
+     * Pipeline integration test with two jacoco files.
+     */
+    @Test
+    public void pipelineForTwoJacoco() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
+
+        verifyForTwoJacoco(job);
+    }
+
+    /**
+     * Freestyle integration test with no jacoco file.
+     */
+    @Test
+    public void freestyleForNoJacoco() {
+        FreeStyleProject project = createFreeStyleProject();
+
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter("");
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        verifyForNoFile(project);
     }
 
     /**
@@ -120,14 +149,52 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Freestyle integration test with no adapter.
+     * Pipeline integration test with no cobertura file.
      */
     @Test
-    public void freestyleForNoAdapter() {
+    public void pipelineForNoCobertura() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
+
+        verifyForNoFile(job);
+    }
+
+    /**
+     * Pipeline integration test with one cobertura file.
+     */
+    @Test
+    public void pipelineForOneCobertura() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
+
+        verifyForOneCobertura(job);
+    }
+
+    /**
+     * Pipeline integration test with two cobertura files.
+     */
+    @Test
+    public void pipelineForTwoCobertura() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_WITH_LOTS_OF_DATA_FILE,
+                COBERTURA_HIGHER_COVERAGE_FILE);
+        job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
+
+        verifyForTwoCobertura(job);
+    }
+
+    /**
+     * Freestyle integration test with no cobertura file.
+     */
+    @Test
+    public void freestyleForNoCobertura() {
         FreeStyleProject project = createFreeStyleProject();
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
+        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("");
+        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        verifyForNoAdapter(project);
+
+        verifyForNoFile(project);
     }
 
     /**
@@ -169,26 +236,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Pipeline integration test with one cobertura file.
+     * Pipeline integration test with one cobertura and one jacoco file.
      */
     @Test
-    public void pipelineForOneCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
-        job.setDefinition(getCpsFlowDefinitionWithCoberturaAdapter());
+    public void pipelineForOneCoberturaAndOneJacoco() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
+                + "}", true));
 
-        verifyForOneCobertura(job);
-    }
-
-    /**
-     * Pipeline integration test with two cobertura files.
-     */
-    @Test
-    public void pipelineForTwoCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_WITH_LOTS_OF_DATA_FILE,
-                COBERTURA_HIGHER_COVERAGE_FILE);
-        job.setDefinition(getCpsFlowDefinitionWithCoberturaAdapter());
-
-        verifyForTwoCobertura(job);
+        verifyForOneCoberturaAndOneJacoco(job);
     }
 
     /**
@@ -216,37 +273,16 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Pipeline integration test with one cobertura and one jacoco file.
-     */
-    @Test
-    public void pipelineForOneCoberturaAndOneJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
-                + "}", true));
-
-        verifyForOneCoberturaAndOneJacoco(job);
-    }
-
-    /**
-     * Creates a script with jacoco adapter set to wildcard.
+     * Creates a script with adapter set to wildcard.
+     *
+     * @param adapter
+     *         publish coverage adapter
      *
      * @return {@link CpsFlowDefinition} with set jacoco adapter
      */
-    private CpsFlowDefinition getCpsFlowDefinitionWithJacocoAdapter() {
+    private CpsFlowDefinition getCpsFlowDefinitionWithAdapter(final String adapter) {
         return new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true);
-    }
-
-    /**
-     * Creates a script with cobertura adapter set to wildcard.
-     *
-     * @return {@link CpsFlowDefinition} with set cobertura adapter
-     */
-    private CpsFlowDefinition getCpsFlowDefinitionWithCoberturaAdapter() {
-        return new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('**/*.xml')]"
+                + "   publishCoverage adapters: [" + adapter + "('**/*.xml')]"
                 + "}", true);
     }
 
@@ -257,10 +293,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      *         the project with added files
      */
     private void verifyForOneJacoco(final ParameterizedJob<?, ?> project) {
-
         Run<?, ?> build = buildSuccessfully(project);
-
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
@@ -275,7 +308,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForTwoJacoco(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
@@ -289,9 +321,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      *         the project with no adapter
      */
     private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
-        //TODO: Build should fail
+        //FIXME: Build should fail
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        assertThat(build.getNumber()).isEqualTo(1);
+
     }
 
     /**
@@ -301,9 +333,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      *         the project with no files
      */
     private void verifyForNoFile(final ParameterizedJob<?, ?> project) {
-
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        assertThat(build.getNumber()).isEqualTo(1);
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+        assertThat(action).isEqualTo(null);
     }
 
     /**
@@ -314,7 +346,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForOneCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
@@ -330,9 +361,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForTwoCobertura(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
-        assertThat(build.getNumber()).isEqualTo(1);
+
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        //TODO
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(COBERTURA_COVERED_LINES, COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES));
     }
@@ -345,6 +375,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyForOneCoberturaAndOneJacoco(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
+
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(JACOCO_COBERTURA_COVERED_LINES,

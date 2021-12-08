@@ -45,8 +45,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
     @Test
     public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
             throws IOException, ClassNotFoundException {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_LOWER_COVERAGE_XML);
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_XML);
@@ -71,7 +70,20 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         createReferenceBuild(project, firstBuild);
     }
 
-    private void verifyDeltaComputation(final CoverageResult resultFirstBuild, final CoverageResult resultSecondBuild) {
+    /**
+     * Verifies delta of first and second build of job.
+     *
+     * @param job
+     *         with two builds to test with
+     *
+     * @throws IOException
+     *         when trying to recover coverage result
+     * @throws ClassNotFoundException
+     *         when trying to recover coverage result
+     */
+    private void verifyDeltaComputation(final Job<?, ?> job) throws IOException, ClassNotFoundException {
+        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(1));
+        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(2));
         assertThat(resultSecondBuild.hasDelta(CoverageElement.CONDITIONAL)).isTrue();
         assertThat(resultFirstBuild.hasDelta(CoverageElement.CONDITIONAL)).isFalse();
         assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(100);
@@ -79,33 +91,6 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.FILE)).isEqualTo(0);
     }
 
-    /**
-     * Checks if delta can be computed with reference build in pipeline project.
-     *
-     * @throws IOException
-     *         when trying to recover coverage result
-     * @throws ClassNotFoundException
-     *         when trying to recover coverage result
-     */
-    @Test
-    public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_XML
-                + "')]"
-                + "}", true));
-
-        Run<?, ?> firstBuild = buildSuccessfully(job);
-
-        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_XML);
-
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_XML
-                + "')]"
-                + "}", true));
-
-        createReferenceBuild(job, firstBuild);
-    }
 
     /**
      * Starts a new build with given job and stores first build for reference.
@@ -128,10 +113,36 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         Run<?, ?> secondBuild = buildWithResult((ParameterizedJob<?, ?>) job, Result.SUCCESS);
         referenceBuild.onAttached(secondBuild);
 
-        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(firstBuild);
-        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(secondBuild);
+        verifyDeltaComputation(job);
+    }
 
-        verifyDeltaComputation(resultFirstBuild, resultSecondBuild);
+    /**
+     * Checks if delta can be computed with reference build in pipeline project.
+     *
+     * @throws IOException
+     *         when trying to recover coverage result
+     * @throws ClassNotFoundException
+     *         when trying to recover coverage result
+     */
+    @Test
+    public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_XML
+                + "')]"
+                + "}", true));
+
+        buildSuccessfully(job);
+        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_XML);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_XML + "')]\n"
+                + "discoverReferenceBuild(referenceJob: '" + job.getName() + "')"
+                + "}", true));
+
+        buildSuccessfully(job);
+
+        verifyDeltaComputation(job);
     }
 
 }
