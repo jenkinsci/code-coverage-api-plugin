@@ -54,7 +54,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
     public void freeStyleSkipPublishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.SKIP_CHECKS);
         // FIXME: Sollte eigentlich erfolgreich durchlaufen.
-        // checkConsoleLog(buildSuccessfully(project), checks.SKIP_CHECKS);
+        // checkConsoleLog(buildSuccessfully(project), Checks.SKIP_CHECKS);
     }
 
     /**
@@ -63,8 +63,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
     @Test
     public void pipelineSkipPublishingOfChecks() {
         WorkflowJob job = getPipelineProjectWithJacoco(Checks.SKIP_CHECKS, Sourcecode.NO_SOURCECODE);
-        // FIXME: Sollte eigentlich erfolgreich durchlaufen.
-        // checkConsoleLog(buildSuccessfully(job), checks.SKIP_CHECKS);
+        checkConsoleLog(buildSuccessfully(job), Checks.SKIP_CHECKS);
     }
 
     /**
@@ -120,18 +119,14 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILENAME);
         if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             coveragePublisher.setSkipPublishingChecks(true);
-        }
-        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
-            coveragePublisher.setSkipPublishingChecks(false);
-        }
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             assertThat(coveragePublisher.isSkipPublishingChecks()).isEqualTo(true);
         }
         else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
+            coveragePublisher.setSkipPublishingChecks(false);
             assertThat(coveragePublisher.isSkipPublishingChecks()).isEqualTo(false);
         }
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
         return project;
     }
 
@@ -162,8 +157,8 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILENAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + pipelineSCMCommand
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILENAME + "')],\n"
-                + "skipPublishingChecks: " + skipPublishingChecksValue
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILENAME + "')]\n"
+                + "    skipPublishingChecks: " + skipPublishingChecksValue
                 + "}", true));
 
         return job;
