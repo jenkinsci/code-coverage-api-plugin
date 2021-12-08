@@ -91,7 +91,6 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.FILE)).isEqualTo(0);
     }
 
-
     /**
      * Starts a new build with given job and stores first build for reference.
      *

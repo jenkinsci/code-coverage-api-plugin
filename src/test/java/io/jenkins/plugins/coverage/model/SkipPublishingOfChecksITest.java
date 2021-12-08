@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Enum to set skipping of publishing of checks.
  */
-enum Checks { PUBLISH_CHECKS, SKIP_CHECKS }
+enum Checks {PUBLISH_CHECKS, SKIP_CHECKS}
 
 /**
  * Enum to set if SCM is used or not.
  */
-enum Sourcecode { ADD_SOURCECODE, NO_SOURCECODE }
+enum Sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
 
 /**
  * Tests if publishing of checks can be skipped.
@@ -138,6 +138,11 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
 
     /**
      * Creates a build of a pipeline project with jacoco file and adapter.
+     *
+     * @param skipPublishingChecks
+     *         to set if publishing checks should be skipped
+     * @param shouldAddSCM
+     *         to set if SCM should be added
      *
      * @return build of project with scm
      */

@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.*;
  * Enum for Thresholds being set or not to get different HealthReports in tests.
  */
 
-enum Thresholds { SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS }
+enum Thresholds {SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
 
 /**
  * Integration Test for HealthReports.
@@ -117,10 +117,16 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
     /**
      * Verifies details of health report based on thresholds used or not.
+     *
+     * @param build
+     *         to be verified
+     * @param wereThresholdsSet
+     *         to verify health report depending on thresholds applied or not.
      */
-    private void verifyHealthReportBasedOnHighOrNoThresholdsSet(final Run<?, ?> build, final Thresholds thresholdsSet) {
+    private void verifyHealthReportBasedOnHighOrNoThresholdsSet(final Run<?, ?> build,
+            final Thresholds wereThresholdsSet) {
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
-        if (thresholdsSet == Thresholds.DONT_SET_ANY_THRESHOLDS) {
+        if (wereThresholdsSet == Thresholds.DONT_SET_ANY_THRESHOLDS) {
             assertThat(healthReport.getScore()).isEqualTo(100);
             assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");
             assertThat(healthReport.getIconUrl()).isEqualTo("health-80plus.png");

@@ -9,13 +9,12 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-enum CoverageDecreasedAction { FAIL_BUILD, DONT_FAIL_BUILD }
+enum CoverageDecreasedAction {FAIL_BUILD, DONT_FAIL_BUILD}
 
 /**
  * Integration test for checking if build failes when coverage decreases.
