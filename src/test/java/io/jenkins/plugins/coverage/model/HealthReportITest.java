@@ -40,7 +40,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
 
-        verifyHealthReportSuccess(build);
+        verifyHealthReportBasedOnHighOrNoThresholdsSet(build, Thresholds.DONT_SET_ANY_THRESHOLDS);
     }
 
     /**
@@ -51,7 +51,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
         FreeStyleProject project = createFreeStyleProject(Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
-        verifyHealthReportUnstable(build);
+        verifyHealthReportBasedOnHighOrNoThresholdsSet(build, Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD);
 
     }
 
@@ -93,7 +93,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
 
         Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
 
-        verifyHealthReportSuccess(build);
+        verifyHealthReportBasedOnHighOrNoThresholdsSet(build, Thresholds.DONT_SET_ANY_THRESHOLDS);
     }
 
     /**
@@ -109,33 +109,23 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
-        verifyHealthReportUnstable(build);
+        verifyHealthReportBasedOnHighOrNoThresholdsSet(build, Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD);
     }
 
     /**
-     * Verifies details of health report of successful build.
-     *
-     * @param build
-     *         which is successful
+     * Verifies details of health report based on thresholds used or not.
      */
-    private void verifyHealthReportSuccess(final Run<?, ?> build) {
+    private void verifyHealthReportBasedOnHighOrNoThresholdsSet(final Run<?, ?> build, final Thresholds thresholdsSet) {
         HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
-        assertThat(healthReport.getScore()).isEqualTo(100);
-        assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");
-        assertThat(healthReport.getIconUrl()).isEqualTo("health-80plus.png");
+        if (thresholdsSet == Thresholds.DONT_SET_ANY_THRESHOLDS) {
+            assertThat(healthReport.getScore()).isEqualTo(100);
+            assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");
+            assertThat(healthReport.getIconUrl()).isEqualTo("health-80plus.png");
+        }
+        else {
+            assertThat(healthReport.getScore()).isEqualTo(0);
+            assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 0%");
+            assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
+        }
     }
-
-    /**
-     * Verifies details of health report of unstable build.
-     *
-     * @param build
-     *         which is unstable
-     */
-    private void verifyHealthReportUnstable(final Run<?, ?> build) {
-        HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
-        assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
-        assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 0%");
-        assertThat(healthReport.getScore()).isEqualTo(0);
-    }
-
 }
