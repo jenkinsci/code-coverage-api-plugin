@@ -219,6 +219,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     /**
      * Tests a pipeline job failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage decreases.
      */
+    // TODO: Bug in coverage-plugin ?
     @Test
     public void pipelineFailWhenCoverageDecreases() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
