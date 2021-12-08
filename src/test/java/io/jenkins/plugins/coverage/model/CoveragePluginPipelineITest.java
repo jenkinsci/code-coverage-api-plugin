@@ -41,7 +41,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      * Docker rule describing a JavaGitContainer.
      */
     @Rule
-    private final DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
+    public final DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     /**
      * Tests a pipeline job with no files present, using a jacoco adapter.
@@ -225,7 +225,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         WorkflowJob job = createPipelineWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
+                + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
@@ -238,17 +238,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         assertThat(build.getNumber()).isEqualTo(1);
 
-        // TODO: still fails
-        /*Run<?, ?> firstBuild = createPipelineJobAndAssertBuildResult(
-                "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('" +  CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true\n"
-                        + "   publishCoverage adapters: [jacocoAdapter('"+ CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
-                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);*/
-        /*Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
-                "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter('**.xml')], failBuildIfCoverageDecreasedInChangeRequest: true"
-                        + "}", Result.FAILURE, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);*/
-        //assertThat(secondBuild.getResult()).isEqualTo(Result.FAILURE);
+        // TODO: @Hafner: Delta is correctly computed but build still is successful. To test uncomment the following lines and replace FAILURE check in second build with SUCCESS.
+        CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
+        assertThat(secondCoverageBuild.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
 
     /**
