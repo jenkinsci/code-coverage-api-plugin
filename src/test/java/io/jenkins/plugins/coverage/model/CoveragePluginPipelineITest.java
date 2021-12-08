@@ -16,6 +16,8 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.slaves.DumbSlave;
 
+import io.jenkins.plugins.coverage.CoverageProcessor;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
@@ -378,18 +380,22 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * TODO
+     * Tests a pipeline job with declarative script.
      */
     @Test
-    public void pipelineMultipleInvocationsOfStepWithTag() {
-        Run<?, ?> build = createPipelineJobAndAssertBuildResult(
-                "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getReferenceBuild()).isEmpty();
+    public void pipelineDeclarativeSupport() {
+        createPipelineJobAndAssertBuildResult(
+                "pipeline {\n"
+                        + "    agent any\n"
+                        + "    stages {\n"
+                        + "        stage('firstStage') {\n"
+                        + "            steps {\n"
+                        + "                    publishCoverage(adapters: [jacocoAdapter('" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
+                        + "            )}\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}",
+                Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
     }
 
     /**
