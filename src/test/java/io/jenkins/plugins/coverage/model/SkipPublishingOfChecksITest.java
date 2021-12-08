@@ -17,9 +17,9 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
-enum checks {PUBLISH_CHECKS, SKIP_CHECKS}
+enum Checks {PUBLISH_CHECKS, SKIP_CHECKS}
 
-enum sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
+enum Sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
 
 /**
  * Tests if publishing of checks can be skipped.
@@ -34,8 +34,8 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void freeStylePublishingOfChecks() {
-        FreeStyleProject project = getFreeStyleProjectWithJacoco(checks.PUBLISH_CHECKS);
-        checkConsoleLog(buildSuccessfully(project), checks.PUBLISH_CHECKS);
+        FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.PUBLISH_CHECKS);
+        checkConsoleLog(buildSuccessfully(project), Checks.PUBLISH_CHECKS);
     }
 
     /**
@@ -43,8 +43,8 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelinePublishingOfChecks() {
-        WorkflowJob job = getPipelineProjectWithJacoco(checks.PUBLISH_CHECKS, sourcecode.NO_SOURCECODE);
-        checkConsoleLog(buildSuccessfully(job), checks.PUBLISH_CHECKS);
+        WorkflowJob job = getPipelineProjectWithJacoco(Checks.PUBLISH_CHECKS, Sourcecode.NO_SOURCECODE);
+        checkConsoleLog(buildSuccessfully(job), Checks.PUBLISH_CHECKS);
     }
 
     /**
@@ -52,7 +52,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void freeStyleSkipPublishingOfChecks() {
-        FreeStyleProject project = getFreeStyleProjectWithJacoco(checks.SKIP_CHECKS);
+        FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.SKIP_CHECKS);
         // FIXME: Sollte eigentlich erfolgreich durchlaufen.
         // checkConsoleLog(buildSuccessfully(project), checks.SKIP_CHECKS);
     }
@@ -62,7 +62,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineSkipPublishingOfChecks() {
-        WorkflowJob job = getPipelineProjectWithJacoco(checks.SKIP_CHECKS, sourcecode.NO_SOURCECODE);
+        WorkflowJob job = getPipelineProjectWithJacoco(Checks.SKIP_CHECKS, Sourcecode.NO_SOURCECODE);
         // FIXME: Sollte eigentlich erfolgreich durchlaufen.
         // checkConsoleLog(buildSuccessfully(job), checks.SKIP_CHECKS);
     }
@@ -72,9 +72,9 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void freeStylePublishingOfChecksWithRepo() throws IOException {
-        FreeStyleProject project = getFreeStyleProjectWithJacoco(checks.PUBLISH_CHECKS);
+        FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.PUBLISH_CHECKS);
         project.setScm(new GitSCM(REPOSITORY_URL));
-        checkConsoleLog(buildSuccessfully(project), checks.PUBLISH_CHECKS);
+        checkConsoleLog(buildSuccessfully(project), Checks.PUBLISH_CHECKS);
     }
 
     /**
@@ -82,8 +82,8 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelinePublishingOfChecksWithRepo() {
-        WorkflowJob job = getPipelineProjectWithJacoco(checks.PUBLISH_CHECKS, sourcecode.ADD_SOURCECODE);
-        checkConsoleLog(buildSuccessfully(job), checks.PUBLISH_CHECKS);
+        WorkflowJob job = getPipelineProjectWithJacoco(Checks.PUBLISH_CHECKS, Sourcecode.ADD_SOURCECODE);
+        checkConsoleLog(buildSuccessfully(job), Checks.PUBLISH_CHECKS);
     }
 
     /**
@@ -94,12 +94,12 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      * @param skipPublishingChecks
      *         if publishing checks should be skipped
      */
-    private void checkConsoleLog(final Run<?, ?> build, final checks skipPublishingChecks) {
+    private void checkConsoleLog(final Run<?, ?> build, final Checks skipPublishingChecks) {
         String consoleLog = getConsoleLog(build);
-        if (skipPublishingChecks == checks.SKIP_CHECKS) {
+        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             assertThat(consoleLog).contains("[Checks API] No suitable checks publisher found.");
         }
-        else if (skipPublishingChecks == checks.PUBLISH_CHECKS) {
+        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
             assertThat(consoleLog).contains("Publishing Coverage report....");
 
         }
@@ -113,23 +113,23 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      *
      * @return {@link FreeStyleProject} with jacoco file and adapter
      */
-    private FreeStyleProject getFreeStyleProjectWithJacoco(final checks skipPublishingChecks) {
+    private FreeStyleProject getFreeStyleProjectWithJacoco(final Checks skipPublishingChecks) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILENAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILENAME);
-        if (skipPublishingChecks == checks.SKIP_CHECKS) {
+        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             coveragePublisher.setSkipPublishingChecks(true);
         }
-        else if (skipPublishingChecks == checks.PUBLISH_CHECKS) {
+        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
             coveragePublisher.setSkipPublishingChecks(false);
         }
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
-        if (skipPublishingChecks == checks.SKIP_CHECKS) {
+        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             assertThat(coveragePublisher.isSkipPublishingChecks()).isEqualTo(true);
         }
-        else if (skipPublishingChecks == checks.PUBLISH_CHECKS) {
+        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
             assertThat(coveragePublisher.isSkipPublishingChecks()).isEqualTo(false);
         }
         return project;
@@ -140,18 +140,18 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      *
      * @return build of project with scm
      */
-    private WorkflowJob getPipelineProjectWithJacoco(final checks skipPublishingChecks, final sourcecode shouldAddSCM) {
+    private WorkflowJob getPipelineProjectWithJacoco(final Checks skipPublishingChecks, final Sourcecode shouldAddSCM) {
         String pipelineSCMCommand = "";
         String skipPublishingChecksValue = "";
 
-        if (skipPublishingChecks == checks.SKIP_CHECKS) {
+        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             skipPublishingChecksValue = "true";
         }
-        else if (skipPublishingChecks == checks.PUBLISH_CHECKS) {
+        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
             skipPublishingChecksValue = "false";
 
         }
-        if (shouldAddSCM == sourcecode.ADD_SOURCECODE) {
+        if (shouldAddSCM == Sourcecode.ADD_SOURCECODE) {
             pipelineSCMCommand = " checkout([$class: 'GitSCM', "
                     + "branches: [[name: '" + COMMIT + "' ]],\n"
                     + "userRemoteConfigs: [[url: '" + REPOSITORY_URL + "']],\n"
