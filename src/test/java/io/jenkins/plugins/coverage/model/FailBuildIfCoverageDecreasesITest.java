@@ -15,11 +15,12 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+enum CoverageDecreasedAction {failBuild, dontFailBuild}
+
 /**
  * Integration test for checking if build failes when coverage decreases.
  */
 public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkinsPerSuite {
-
     private static final String COBERTURA_HIGHER_COVERAGE = "cobertura-higher-coverage.xml";
     private static final String COBERTURA_LOWER_COVERAGE = "cobertura-lower-coverage.xml";
 
@@ -33,15 +34,14 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
     public void freestyleProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() throws IOException {
         FreeStyleProject freestyleProjectIfDecreasesSetFailTrue = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, true);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.failBuild);
         buildWithResult(freestyleProjectIfDecreasesSetFailTrue, Result.FAILURE);
         FreeStyleProject projectIfDecreasesSetFailFalse = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, false);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.dontFailBuild);
         buildWithResult(projectIfDecreasesSetFailFalse, Result.SUCCESS);
 
     }
-
 
     /**
      * Integration test for pipeline projects for checking if build failes when coverage decreases.
@@ -50,12 +50,12 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
     public void pipelineProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() {
         WorkflowJob pipelineProjectIfDecreasesSetFailTrue = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, true);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.failBuild);
         buildWithResult(pipelineProjectIfDecreasesSetFailTrue, Result.FAILURE);
 
         WorkflowJob pipelineProjectIfDecreasesSetFailFalse = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
-                COBERTURA_LOWER_COVERAGE, false);
+                COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.dontFailBuild);
         buildWithResult(pipelineProjectIfDecreasesSetFailFalse, Result.SUCCESS);
     }
 
@@ -66,7 +66,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      *         with higher coverage
      * @param filenameOfDecreasedCoverage
      *         with decreased coverage
-     * @param setFailIfCoverageDecreased
+     * @param coverageDecreased
      *         to set if build should fail when coverage decreases
      *
      * @return {@link FreeStyleProject} with decreased Coverage
@@ -75,15 +75,12 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      */
     FreeStyleProject createFreestyleProjectWithDecreasedCoverage(final String filename,
             final String filenameOfDecreasedCoverage,
-            final boolean setFailIfCoverageDecreased)
+            final CoverageDecreasedAction coverageDecreased)
             throws IOException {
 
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, filename);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-
-        //set FailBuildIfCoverageDecreasedInChangeRequest on true
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(setFailIfCoverageDecreased);
 
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(filename);
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
@@ -97,7 +94,10 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
 
         CoberturaReportAdapter reportAdapter2 = new CoberturaReportAdapter(
                 filenameOfDecreasedCoverage);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(setFailIfCoverageDecreased);
+
+        //set FailBuildIfCoverageDecreasedInChangeRequest on true
+        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(
+                coverageDecreased == CoverageDecreasedAction.failBuild);
 
         coveragePublisher.setAdapters(Collections.singletonList(reportAdapter2));
         project.getPublishersList().replace(coveragePublisher);
@@ -112,25 +112,25 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      *         with higher coverage
      * @param filenameOfDecreasedCoverage
      *         with decreased coverage
-     * @param setFailIfCoverageDecreased
+     * @param coverageDecreased
      *         to set if build should fail when coverage decreases
      *
      * @return {@link WorkflowJob} with decreased coverage
      */
     WorkflowJob createPipelineProjectWithDecreasedCoverage(final String filename,
             final String filenameOfDecreasedCoverage,
-            final boolean setFailIfCoverageDecreased) {
+            final CoverageDecreasedAction coverageDecreased) {
 
         WorkflowJob job = createPipelineWithWorkspaceFiles(filename, filenameOfDecreasedCoverage);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filename + "')],"
-                + "   failBuildIfCoverageDecreasedInChangeRequest: " + setFailIfCoverageDecreased
+                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filename + "')]"
                 + "}", true));
         buildSuccessfully(job);
 
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + filenameOfDecreasedCoverage + "')],"
-                + "   failBuildIfCoverageDecreasedInChangeRequest: " + setFailIfCoverageDecreased
+                + "   failBuildIfCoverageDecreasedInChangeRequest: " + (coverageDecreased
+                == CoverageDecreasedAction.failBuild)
                 + "}", true));
 
         return job;
