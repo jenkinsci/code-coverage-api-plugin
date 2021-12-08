@@ -37,13 +37,12 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for the coverage plugin using freestyle jobs.
+ * Integration tests for the coverage plugin using freestyle projects.
  *
  * @author Michael Müller, Nikolas Paripovic
  */
 public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerSuite {
 
-    // TODO: @Michael bitte verifizieren
     /**
      * Docker rule describing a JavaGitContainer.
      */
@@ -51,7 +50,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     /**
-     * Tests a freestyle job with no files present, using no adapters.
+     * Tests a freestyle project with no files present, using no adapters.
      */
     @Test
     public void freestyleWithEmptyAdapters() {
@@ -62,7 +61,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with no files present, using a jacoco adapter.
+     * Tests a freestyle project with no files present, using a jacoco adapter.
      */
     @Test
     public void freestyleJacocoWithNoFiles() {
@@ -73,7 +72,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with one jacoco file present.
+     * Tests a freestyle project with one jacoco file present.
      */
     @Test
     public void freestyleJacocoWithOneFile() {
@@ -86,7 +85,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with two jacoco files present.
+     * Tests a freestyle project with two jacoco files present.
      */
     @Test
     public void freestyleJacocoWithTwoFiles() {
@@ -102,7 +101,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with two jacoco file present using two jacoco adapters.
+     * Tests a freestyle project with two jacoco file present using two jacoco adapters.
      */
     @Test
     public void freestyleJacocoWithTwoFilesAndTwoAdapters() {
@@ -118,7 +117,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with no files present, using a cobertura adapter.
+     * Tests a freestyle project with no files present, using a cobertura adapter.
      */
     @Test
     public void freestyleCoberturaWithNoFiles() {
@@ -129,7 +128,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with one cobertura file present.
+     * Tests a freestyle project with one cobertura file present.
      */
     @Test
     public void freestyleCoberturaWithOneFile() {
@@ -143,7 +142,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with two cobertura files present.
+     * Tests a freestyle project with two cobertura files present.
      */
     @Test
     public void freestyleCoberturaWithTwoFiles() {
@@ -160,7 +159,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with a cobertura file present using a jacoco adapter resulting in coverages with value 0.
+     * Tests a freestyle project with a cobertura file present using a jacoco adapter resulting in coverages with value 0.
      */
     @Test
     public void freestyleWithJacocoAdapterAndCoberturaFile() {
@@ -180,7 +179,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with a cobertura file as well as a jacoco file present.
+     * Tests a freestyle project with a cobertura file as well as a jacoco file present.
      */
     @Test
     public void freestyleWithCoberturaAndJacocoFile() {
@@ -208,7 +207,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job failing while set up parameter failNoReports and containing no reports.
+     * Tests a freestyle project failing while set up parameter failNoReports and containing no reports.
      */
     @Test
     public void freestyleZeroReportsFail() {
@@ -218,7 +217,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job succeeding while parameter failNoReports is not set and containing no reports.
+     * Tests a freestyle project succeeding while parameter failNoReports is not set and containing no reports.
      */
     @Test
     public void freestyleZeroReportsOkay() {
@@ -228,7 +227,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job succeeding while containing a quality gate.
+     * Tests a freestyle project succeeding while containing a passed quality gate.
      */
     @Test
     public void freestyleQualityGatesSuccessful() {
@@ -247,7 +246,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         buildWithResult(project, Result.SUCCESS);
     }
 
-    // TODO: Michi - Bitte dokumentieren
+    /**
+     * Tests a freestyle project resulting with unhealthy health report while containing a failed quality gate.
+     */
     @Test
     public void freestyleQualityGatesSuccessfulUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -260,14 +261,14 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
-
         Run<?, ?> build = buildSuccessfully(project);
+
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getHealthReport().getScore()).isEqualTo(0);
     }
 
     /**
-     * Tests a freestyle job resulting unstable while containing a quality gate.
+     * Tests a freestyle project resulting unstable while containing a failed quality gate.
      */
     @Test
     public void freestyleQualityGatesUnstable() {
@@ -282,11 +283,11 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
         project.getPublishersList().add(coveragePublisher);
 
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        buildWithResult(project, Result.UNSTABLE);
     }
 
     /**
-     * Tests a freestyle job failing while containing a quality gate.
+     * Tests a freestyle project failing while containing a failed quality gate.
      */
     @Test
     public void freestyleQualityGatesFail() {
@@ -306,7 +307,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests the health report of a freestyle job.
+     * Tests the health report of a freestyle project.
      */
     @Test
     public void freestyleHealthReport() {
@@ -322,7 +323,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage
+     * Tests a freestyle project failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage
      * decreases.
      */
     // TODO: Bug in coverage-plugin ?
@@ -345,7 +346,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with decreased logs while parameter skipPublishingChecks is set.
+     * Tests a freestyle project with decreased logs while parameter skipPublishingChecks is set.
      *
      * @throws IOException
      *         if build log cannot be read
@@ -363,7 +364,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle job with extended logs while parameter skipPublishingChecks is not set.
+     * Tests a freestyle project with extended logs while parameter skipPublishingChecks is not set.
      *
      * @throws IOException
      *         if build log cannot be read
@@ -381,7 +382,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests the delta computation of two freestyle jobs.
+     * Tests the delta computation of two freestyle projects.
      */
     @Test
     public void freestyleDeltaComputation() {
@@ -455,7 +456,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests whether the coverage result of two files in a freestyle job are aggregated.
+     * Tests whether the coverage result of two files in a freestyle project are aggregated.
      */
     @Test
     public void freestyleReportAggregation() {
