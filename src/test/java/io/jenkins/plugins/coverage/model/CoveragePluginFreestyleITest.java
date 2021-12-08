@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
@@ -57,8 +58,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = createFreestyleProjectWithJacocoAdapatersAndAssertBuildResult(Result.SUCCESS);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(coverageResult).isEqualTo(null);
+        assertThat(coverageResult).isNull();
     }
 
     /**
@@ -69,8 +69,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = createFreestyleProjectWithJacocoAdapatersAndAssertBuildResult(Result.SUCCESS);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
-        assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(coverageResult).isEqualTo(null);
+        assertThat(coverageResult).isNull();
     }
 
     /**
@@ -80,7 +79,6 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     public void freestyleJacocoWithOneFile() {
         Run<?, ?> build = createFreestyleProjectWithJacocoAdapatersAndAssertBuildResult(Result.SUCCESS,
                 CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
-        assertThat(build.getNumber()).isEqualTo(1);
 
         CoveragePluginITestUtil.assertLineCoverageResultsOfBuild(
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
@@ -127,7 +125,6 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = createFreestyleProjectWithCoberturaAdapatersAndAssertBuildResult(Result.SUCCESS);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult).isNull();
     }
 
@@ -215,13 +212,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
      */
     @Test
     public void freestyleZeroReportsFail() {
-        FreeStyleProject project = createFreeStyleProject();
-
-        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter("*.xml");
+        CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
         coveragePublisher.setFailNoReports(true);
-        project.getPublishersList().add(coveragePublisher);
-
-        buildWithResult(project, Result.FAILURE);
+        createFreestyleProjectAndAssertBuildResult(coveragePublisher, Result.FAILURE);
     }
 
     /**
@@ -229,14 +222,9 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
      */
     @Test
     public void freestyleZeroReportsOkay() {
-        FreeStyleProject project = createFreeStyleProject();
-
-        // TODO: DRY! Try to use one method with parameters.
         CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
         coveragePublisher.setFailNoReports(false);
-        project.getPublishersList().add(coveragePublisher);
-
-        buildWithResult(project, Result.SUCCESS);
+        createFreestyleProjectAndAssertBuildResult(coveragePublisher, Result.SUCCESS);
     }
 
     /**
@@ -512,40 +500,28 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
     private Run<?, ?> createFreestyleProjectWithJacocoAdapatersAndAssertBuildResult(final Result expectedBuildResult,
             final String... jacocoFileNames) {
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        List<CoverageAdapter> jacocoReportAdapters = new ArrayList<>();
-        for (String fileName : jacocoFileNames) {
-            jacocoReportAdapters.add(new JacocoReportAdapter(fileName));
-        }
-        coveragePublisher.setAdapters(jacocoReportAdapters);
+        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter("*.xml");
         return createFreestyleProjectAndAssertBuildResult(coveragePublisher, expectedBuildResult, jacocoFileNames);
     }
 
     private Run<?, ?> createFreestyleProjectWithCoberturaAdapatersAndAssertBuildResult(final Result expectedBuildResult,
             final String... coberturaFileNames) {
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        List<CoverageAdapter> coberturaAdapters = new ArrayList<>();
-        for (String fileName : coberturaFileNames) {
-            coberturaAdapters.add(new CoberturaReportAdapter(fileName));
-        }
-        coveragePublisher.setAdapters(coberturaAdapters);
+        CoveragePublisher coveragePublisher = createPublisherWithCoberturaAdapter("*.xml");
         return createFreestyleProjectAndAssertBuildResult(coveragePublisher, expectedBuildResult, coberturaFileNames);
     }
 
-    private CoveragePublisher createPublisherWithCoberturaAdapter(final String fileName) {
+    private CoveragePublisher createPublisherWithAdapter(final CoverageAdapter adapter) {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(fileName);
-
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        coveragePublisher.setAdapters(Collections.singletonList(adapter));
         return coveragePublisher;
     }
 
-    private CoveragePublisher createPublisherWithJacocoAdapter(final String fileName) {
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(fileName);
+    private CoveragePublisher createPublisherWithCoberturaAdapter(final String fileName) {
+        return createPublisherWithAdapter(new CoberturaReportAdapter(fileName));
+    }
 
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        return coveragePublisher;
+    private CoveragePublisher createPublisherWithJacocoAdapter(final String fileName) {
+        return createPublisherWithAdapter(new JacocoReportAdapter(fileName));
     }
 
     private Run<?, ?> createFreestyleProjectAndAssertBuildResult(final Publisher publisher,
