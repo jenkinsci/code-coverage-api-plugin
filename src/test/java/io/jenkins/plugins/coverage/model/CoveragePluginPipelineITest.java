@@ -5,10 +5,14 @@ import hudson.model.FreeStyleProject;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
 import hudson.model.Run;
+import io.jenkins.plugins.coverage.CoverageProcessor;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoverageScriptedPipelineScriptBuilder;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.targets.CoverageElement;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -233,9 +237,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         assertThat(build.getNumber()).isEqualTo(1);
     }
 
-
     @Test
-      public void failNoReportsTrue() throws IOException {
+    public void failNoReportsTrue() throws IOException {
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles();
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -505,60 +508,152 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     @Test
-    public void deltaComputation(){
+    public void deltaComputation() {
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
+        buildSuccessfully(workflowJob);
 
-        Run<?, ?> referenceBuild = buildWithResult(workflowJob, Result.SUCCESS);
-
-        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
-        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
-                + "discoverReferenceBuild(referenceJob:'" + referenceBuild.getParent().getName() + "')\n"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+        cleanWorkspace(workflowJob);
+        copyFilesToWorkspace(workflowJob, JACOCO_MINI_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
+                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
                 + "}", true));
 
-        Run<?, ?> build = buildWithResult(workflowJob2, Result.SUCCESS);
+        Run<?, ?> secondBuild = buildSuccessfully(workflowJob);
 
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }
 
     @Test
-    public void deltaComputationZeroDelta(){}
+    public void deltaComputationZeroDelta(){
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
-    @Test
-    public void deltaComputationSingleBuild(){
+        buildSuccessfully(workflowJob);
 
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
+                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
+                + "}", true));
+
+        Run<?, ?> secondBuild = buildSuccessfully(workflowJob);
+
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("+0.000");
     }
 
     @Test
-    public void deltaComputationUseOnlyPreviousAndCurrent(){}
+    public void deltaComputationSingleBuild(){
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        Run<?, ?> build = buildSuccessfully(workflowJob);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("n/a");
+    }
+
+    @Test
+    public void deltaComputationUseOnlyPreviousAndCurrent(){
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_SMALL_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        buildSuccessfully(workflowJob);
+
+        cleanWorkspace(workflowJob);
+        copyFilesToWorkspace(workflowJob, JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
+                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
+                + "}", true));
+
+        buildSuccessfully(workflowJob);
+
+        cleanWorkspace(workflowJob);
+        copyFilesToWorkspace(workflowJob, JACOCO_MINI_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
+                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
+                + "}", true));
+
+        Run<?, ?> thirdBuild = buildSuccessfully(workflowJob);
+
+        CoverageBuildAction coverageResult = thirdBuild.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
+    }
 
 
     @Test
     public void referenceBuildSingleBuild() {
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_SMALL_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
+        Run<?, ?> build = buildSuccessfully(workflowJob);
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
+        assertThat(coverageResult.getReferenceBuild()).isEmpty();
     }
 
     @Test
     public void referenceBuildReferenceIsPrevious() {
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
+        Run<?, ?> firstBuild = buildSuccessfully(workflowJob);
 
+        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
+        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
+                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
+                + "}", true));
 
+        Run<?, ?> secondBuild = buildSuccessfully(workflowJob2);
+
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
+
+        assertThat(coverageResult.getReferenceBuild()).isPresent();
+        assertThat(coverageResult.getReferenceBuild().get()).isEqualTo(firstBuild);
     }
 
     @Test
-    public void reportAggregation() throws IOException {
+    public void reportAggregationTrue() throws IOException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_SMALL_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter(mergeToOneReport: true, path: '*.xml')]"
+                + "}", true));
 
+        Run<?, ?> build = buildSuccessfully(job);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("A total of 1 reports were found");
     }
 
     @Test
     public void reportAggregationFalse() throws IOException {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA, JACOCO_SMALL_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter(mergeToOneReport: false, path: '*.xml')]"
+                + "}", true));
 
+        Run<?, ?> build = buildSuccessfully(job);
+
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("A total of 2 reports were found");
     }
 
 

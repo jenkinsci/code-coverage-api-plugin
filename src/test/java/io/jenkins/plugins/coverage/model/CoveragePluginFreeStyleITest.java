@@ -692,7 +692,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
-
     @Test
     public void qualityGatesGlobalThresholdSuccessUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
