@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.HealthReport;
 import hudson.model.Result;
@@ -31,8 +33,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void freestyleProjectShouldReturnSuccess() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILE_NAME);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
@@ -51,8 +52,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void freestyleProjectShouldReturnUnstable() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_FILE_NAME);
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_FILE_NAME);
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
@@ -70,6 +70,38 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
         verifyHealthReportUnstable(build);
 
     }
+
+    /**
+     * Pipeline project and build should succeed and HealthScore is 100%.
+     */
+    @Test
+    public void pipelineShouldReturnSuccess() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')],"
+                + "   globalThresholds: [[failUnhealthy: false, thresholdTarget: 'Line']]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+
+        verifyHealthReportSuccess(build);
+    }
+    /**
+     * Pipeline project and build should be unstable and HealthScore is 0%.
+     */
+    @Test
+    public void pipelineShouldReturnUnstable() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')],"
+                + "   globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', " + ", unstableThreshold: "
+                + UNSTABLE_LINE_THRESHOLD + "]]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
+        verifyHealthReportUnstable(build);
+    }
+
 
     /**
      * Verifies details of health report of successful build.
