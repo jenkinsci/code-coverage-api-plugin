@@ -31,7 +31,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if when QualityGates being fulfilled, build returns success without failure message.
      */
     @Test
-    public void shouldReturnSuccess() {
+    public void freeStyleShouldMeetQualityTargets() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(50, 80);
         verifiesBuildStatus(project);
     }
@@ -40,7 +40,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if when QualityGates for unstable not being fulfilled, build returns unstable with failure message.
      */
     @Test
-    public void shouldReturnUnstable() {
+    public void freeStyleShouldNotMeetQualityTargets() {
         float unhealthy = 99.9f;
         float unstable = 99.9f;
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(unhealthy, unstable);
@@ -92,7 +92,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if build succeeds, when line thresholds within range.
      */
     @Test
-    public void pipelineWithThresholdShouldSucceed() {
+    public void pipelineShouldMeetQualityTargets() {
         WorkflowJob job = createPipelineWithLineThreshold(50f, 80f);
         verifiesBuildStatus(job);
     }
@@ -101,7 +101,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if build is unstable, when line thresholds above coverage.
      */
     @Test
-    public void pipelineWithThresholdShouldBeUnstable() {
+    public void pipelineShouldNotMeetQualityTargets() {
         float unhealthyThreshold = 99.9f;
         float unstableThreshold = 99.9f;
 
