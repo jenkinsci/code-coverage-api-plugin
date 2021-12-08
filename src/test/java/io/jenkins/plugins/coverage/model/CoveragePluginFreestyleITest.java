@@ -1,30 +1,16 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 
-import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.Domain;
-import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
-
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.sshslaves.SSHLauncher;
-import hudson.slaves.DumbSlave;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
-import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
 import hudson.tasks.Publisher;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
@@ -159,7 +145,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     /**
-     * Tests a freestyle project with a cobertura file present using a jacoco adapter resulting in coverages with value 0.
+     * Tests a freestyle project with a cobertura file present using a jacoco adapter resulting in coverages with value
+     * 0.
      */
     @Test
     public void freestyleWithJacocoAdapterAndCoberturaFile() {
@@ -334,12 +321,14 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
                 CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
 
         // build 1
-        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
+        CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
         project.getPublishersList().add(coveragePublisher);
         buildSuccessfully(project);
 
         // build 2
-        CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+        CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
         coveragePublisher2.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         project.getPublishersList().add(coveragePublisher2);
         buildWithResult(project, Result.FAILURE);
@@ -475,28 +464,6 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         int total = CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL
                 + CoveragePluginITestUtil.JACOCO_CODING_STYLE_LINES_TOTAL;
         assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(covered, total - covered));
-    }
-
-    private DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
-        try {
-            SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
-                    Collections.singletonList(
-                            new UsernamePasswordCredentialsImpl(CredentialsScope.SYSTEM, "dummyCredentialId",
-                                    null, "test", "test")
-                    )
-            );
-            DumbSlave agent = new DumbSlave("docker", "/home/test",
-                    new SSHLauncher(dockerContainer.ipBound(22), dockerContainer.port(22), "dummyCredentialId"));
-            agent.setNodeProperties(Collections.singletonList(new EnvironmentVariablesNodeProperty(
-                    new Entry("JAVA_HOME", "/usr/lib/jvm/java-8-openjdk-amd64/jre"))));
-            getJenkins().jenkins.addNode(agent);
-            getJenkins().waitOnline(agent);
-
-            return agent;
-        }
-        catch (Throwable e) {
-            throw new AssumptionViolatedException("Failed to create docker container", e);
-        }
     }
 
     private Run<?, ?> createFreestyleProjectWithJacocoAdapatersAndAssertBuildResult(final Result expectedBuildResult,
