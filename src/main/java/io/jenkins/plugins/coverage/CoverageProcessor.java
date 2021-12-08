@@ -148,6 +148,8 @@ public class CoverageProcessor {
 
         CoverageNode coverageNode = convertCoverageResultToCoverageNode(coverageReport);
         this.run.addOrReplaceAction(createNewBuildAction(coverageNode, possibleReferenceBuild));
+        CoverageBuildAction newBuildAction = createNewBuildAction(coverageNode, possibleReferenceBuild);
+        this.run.addOrReplaceAction(newBuildAction);
     }
 
     private CoverageNode convertCoverageResultToCoverageNode(final CoverageResult coverageReport) {

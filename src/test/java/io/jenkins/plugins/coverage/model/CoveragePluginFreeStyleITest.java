@@ -749,7 +749,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     @Test
-    public void qualityGatesPublisherThresholdSuccess() {
+    public void qualityGatesAdapterThresholdSuccess() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
@@ -779,7 +779,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     @Test
-    public void qualityGatesPublisherThresholdUnstable() {
+    public void qualityGatesAdapterThresholdUnstable() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
@@ -808,7 +808,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     @Test
-    public void qualityGatesPublisherThresholdSuccessUnhealthy() {
+    public void qualityGatesAdapterThresholdSuccessUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
@@ -837,7 +837,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     }
 
     @Test
-    public void qualityGatesPublisherThresholdFailUnhealthy() throws IOException {
+    public void qualityGatesAdapterThresholdFailUnhealthy() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_BIG_DATA);
 
