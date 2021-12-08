@@ -395,7 +395,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageBuildAction = build.getAction(CoverageBuildAction.class);
 
-
         assertThat(build.getNumber()).isEqualTo(2);
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }

@@ -504,11 +504,26 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         j.assertLogContains("No suitable checks publisher found", build);
     }
 
-
-
     @Test
     public void deltaComputation(){
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        workflowJob.setDefinition(new CpsFlowDefinition("node {"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
+
+        Run<?, ?> referenceBuild = buildWithResult(workflowJob, Result.SUCCESS);
+
+        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
+        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
+                + "discoverReferenceBuild(referenceJob:'" + referenceBuild.getParent().getName() + "')\n"
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+
+        Run<?, ?> build = buildWithResult(workflowJob2, Result.SUCCESS);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }
 
     @Test
