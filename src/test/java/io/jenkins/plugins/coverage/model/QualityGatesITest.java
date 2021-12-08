@@ -25,6 +25,13 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test for QualityGates/thresholds being respected.
  */
 public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
+//TODO: fix pipeline project tests
+
+    private static final float NOT_ACHIEVED_UNHEALTHY_THRESHOLD = 99.9f;
+    private static final float NOT_ACHIEVED_UNSTABLE_THRESHOLD = 99.9f;
+    private static final float ACHIEVED_UNHEALTHY_THRESHOLD = 50f;
+    private static final float ACHIEVED_UNSTABLE_THRESHOLD = 80f;
+
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
 
     /**
@@ -32,7 +39,8 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void freeStyleShouldMeetQualityTargets() {
-        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(50, 80);
+        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(ACHIEVED_UNHEALTHY_THRESHOLD,
+                ACHIEVED_UNSTABLE_THRESHOLD);
         verifiesBuildStatus(project);
     }
 
@@ -41,11 +49,11 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void freeStyleShouldNotMeetQualityTargets() {
-        float unhealthy = 99.9f;
-        float unstable = 99.9f;
-        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(unhealthy, unstable);
 
-        verifiesBuildStatusAndFailMessage(unhealthy, unstable, project);
+        FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(NOT_ACHIEVED_UNHEALTHY_THRESHOLD,
+                NOT_ACHIEVED_UNSTABLE_THRESHOLD);
+
+        verifiesBuildStatusAndFailMessage(NOT_ACHIEVED_UNHEALTHY_THRESHOLD, NOT_ACHIEVED_UNSTABLE_THRESHOLD, project);
     }
 
     /**
@@ -93,7 +101,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineShouldMeetQualityTargets() {
-        WorkflowJob job = createPipelineWithLineThreshold(50f, 80f);
+        WorkflowJob job = createPipelineWithLineThreshold(ACHIEVED_UNHEALTHY_THRESHOLD, ACHIEVED_UNSTABLE_THRESHOLD);
         verifiesBuildStatus(job);
     }
 
@@ -102,11 +110,10 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineShouldNotMeetQualityTargets() {
-        float unhealthyThreshold = 99.9f;
-        float unstableThreshold = 99.9f;
 
-        WorkflowJob job = createPipelineWithLineThreshold(unhealthyThreshold, unstableThreshold);
-        verifiesBuildStatusAndFailMessage(unhealthyThreshold, unstableThreshold, job);
+        WorkflowJob job = createPipelineWithLineThreshold(NOT_ACHIEVED_UNHEALTHY_THRESHOLD,
+                NOT_ACHIEVED_UNSTABLE_THRESHOLD);
+        verifiesBuildStatusAndFailMessage(NOT_ACHIEVED_UNHEALTHY_THRESHOLD, NOT_ACHIEVED_UNSTABLE_THRESHOLD, job);
     }
 
     /**
