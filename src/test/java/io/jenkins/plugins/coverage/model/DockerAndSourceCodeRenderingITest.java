@@ -2,8 +2,6 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
@@ -35,8 +33,8 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code Rendering and copying works with Docker and if freestyle-projects run successfully with Docker.
  */
-public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends IntegrationTestWithJenkinsPerSuite {
-    private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
+public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
+    private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
 
@@ -54,7 +52,7 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         WorkflowJob project = createPipelineWithSCMandJacocoAdapter("node('docker')");
 
-        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_NAME, JACOCO_FILE_NAME);
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = verifyGitRepository(project);
 
@@ -82,12 +80,11 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
     private void verifySourceCode(final Run<?, ?> build) {
         assertThat(build.getNumber()).isEqualTo(1);
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
-        SortedMap<CoverageMetric, Double> metrics = new TreeMap<>();
 
-        CoverageBuildAction action = new CoverageBuildAction(build, root, "-", metrics, false);
-        CoverageViewModel coverageViewModel = (CoverageViewModel) action.getTarget();
+        CoverageBuildAction action = new CoverageBuildAction(build, root);
 
-        assertThat(coverageViewModel.getOwner()).isEqualTo(build);
+        assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
+        assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
     }
 
     /**
@@ -149,7 +146,7 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
                 + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
                 + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
                 + "}", true));
 
@@ -171,9 +168,9 @@ public class CoverageSourceDockerAndCodeRenderingAndCopyingITest extends Integra
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
         FreeStyleProject project = createFreeStyleProject();
         project.setAssignedNode(agent);
-        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_NAME, JACOCO_FILE_NAME);
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_ANALYSIS_MODEL_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_NAME);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
         project.getPublishersList().add(coveragePublisher);
         Run<?, ?> build = buildSuccessfully(project);

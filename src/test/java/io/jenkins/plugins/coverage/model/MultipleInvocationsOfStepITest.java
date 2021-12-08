@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -7,6 +9,8 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Result;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.CoverageProcessor;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
@@ -14,7 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Test multiple invocations of step.
  */
-public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite {
+public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_LOWER_BRANCH_COVERAGE = "jacoco-analysis-model.xml";
     private static final String JACOCO_HIGHER_BRANCH_COVERAGE = "jacoco-codingstyle.xml";
     private static final int JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE = 109;
@@ -26,7 +30,7 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
      * Pipeline with multiple invocations of step, no tag set and higher coverage file first.
      */
     @Test
-    public void withoutTagFirstLowerFile() {
+    public void withoutTagFirstHigherFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -39,7 +43,8 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
 
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE,
+                        JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE));
 
     }
 
@@ -47,7 +52,7 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
      * Pipeline with multiple invocations of step, no tag set and lower coverage file first.
      */
     @Test
-    public void withoutTagFirstHigherFile() {
+    public void withoutTagFirstLowerFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -60,28 +65,33 @@ public class CoveragePluginMultipleInvocationsOfStepITest extends IntegrationTes
 
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE,
+                        JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
     }
 
     /**
      * Pipeline with multiple invocations of step and tag set.
      */
     @Test
-    public void withTag() {
+    public void withTag() throws IOException, ClassNotFoundException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')]\n"
-                + "   tag: 'Tag1'\n"
-                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')]\n"
-                + "   tag: 'Tag2'\n"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LOWER_BRANCH_COVERAGE + "')],"
+                + "   tag: 't1'\n"
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_HIGHER_BRANCH_COVERAGE + "')],"
+                + "   tag: 't2'\n"
                 + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        CoverageBuildAction buildAction = build.getAction(CoverageBuildAction.class);
+        CoverageResult result = CoverageProcessor.recoverCoverageResult(build);
+
+        assertThat(result.getTag()).isEqualTo("t2");
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(coverageResult.getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE, JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
+        assertThat(buildAction.getBranchCoverage())
+                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE,
+                        JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
     }
 }

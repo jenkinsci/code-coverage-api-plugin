@@ -24,7 +24,7 @@ enum sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
 /**
  * Tests if publishing of checks can be skipped.
  */
-public class CoveragePluginSkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSuite {
+public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILENAME = "jacoco-analysis-model.xml";
     private static final String REPOSITORY_URL = "https://github.com/jenkinsci/analysis-model.git";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
