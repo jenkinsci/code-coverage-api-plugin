@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test for QualityGates/thresholds being respected.
  */
 public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
-//TODO: fix pipeline project tests
 
     private static final float NOT_ACHIEVED_UNHEALTHY_THRESHOLD = 99.9f;
     private static final float NOT_ACHIEVED_UNSTABLE_THRESHOLD = 99.9f;
@@ -142,7 +141,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
             final ParameterizedJob<?, ?> job) {
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
 
-        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class
+        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class instead of CoverageAction.class
         String message = build.getAction(CoverageAction.class).getFailMessage();
         assertThat(message).isEqualTo(
                 "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold="
