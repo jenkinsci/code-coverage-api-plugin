@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code Rendering and copying works with Docker and if freestyle-projects run successfully with Docker.
  */
+@SuppressWarnings("checkstyle:ClassDataAbstractionCouplingCheck")
 public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
