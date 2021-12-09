@@ -14,17 +14,13 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
-import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.TopLevelItem;
 import hudson.slaves.DumbSlave;
 
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-import static io.jenkins.plugins.coverage.model.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
  * Integration tests for the coverage plugin using pipelines.
@@ -236,7 +232,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
                 + "}", true));
 
-        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
+        buildWithResult(job, Result.SUCCESS);
 
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('"
@@ -494,27 +490,19 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void pipelineSourceCodeCopying() throws Exception {
-        WorkflowJob job = createPipelineJobWithSimpleNode();
-        copyFileToWorkspace(job, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
+        WorkflowJob job = createPipelineJobWithSimpleNode(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         Run<?, ?> build = buildSuccessfully(job);
-
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
 
         String link = String.valueOf("AcuCobolParser.java".hashCode());
-
         SourceViewModel model = action.getTarget().getDynamic(link, null, null);
-
         assertThat(model.getDisplayName()).contains("AcuCobolParser.java");
 
-        String fileText = model.getDynamic(link, null, null).getSourceFileContent();
+        String sourceFileContent = model.getDynamic(link, null, null).getSourceFileContent();
+        assertThat(sourceFileContent)
+                .contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
 
-        assertThat(fileText).contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
-    }
-
-    private CoverageViewModel createModel(String fileName) {
-        AbstractCoverageTest coverageTest = new AbstractCoverageTest();
-        return new CoverageViewModel(mock(Run.class), coverageTest.readNode(fileName));
     }
 
     private WorkflowJob createPipelineJobWithDockerNode() {
@@ -533,8 +521,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
 
-    private WorkflowJob createPipelineJobWithSimpleNode() {
-        WorkflowJob job = createPipeline();
+    private WorkflowJob createPipelineJobWithSimpleNode(String... files) {
+        WorkflowJob job = files.length <= 0 ? createPipeline() : createPipelineWithWorkspaceFiles(files);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
@@ -551,13 +539,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     private Run<?, ?> createPipelineJobAndAssertBuildResult(final String jobDefinition,
             final Result expectedBuildResult,
             final String... fileNames) {
-        WorkflowJob job;
-        if (fileNames.length > 0) {
-            job = createPipelineWithWorkspaceFiles(fileNames);
-        }
-        else {
-            job = createPipeline();
-        }
+        WorkflowJob job = fileNames.length <= 0 ? createPipeline() : createPipelineWithWorkspaceFiles(fileNames);
         job.setDefinition(new CpsFlowDefinition(jobDefinition, true));
         Run<?, ?> build = buildWithResult(job, expectedBuildResult);
         assertThat(build.getNumber()).isEqualTo(1);

@@ -445,13 +445,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     private Run<?, ?> createFreestyleProjectAndAssertBuildResult(final Publisher publisher,
             final Result expectedBuildResult,
             final String... fileNames) {
-        FreeStyleProject project;
-        if (fileNames.length > 0) {
-            project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
-        }
-        else {
-            project = createFreeStyleProject();
-        }
+        FreeStyleProject project = fileNames.length <= 0 ? createFreeStyleProject() : createFreeStyleProjectWithWorkspaceFiles(fileNames);
         project.getPublishersList().add(publisher);
         Run<?, ?> build = buildWithResult(project, expectedBuildResult);
         assertThat(build.getNumber()).isEqualTo(1);
