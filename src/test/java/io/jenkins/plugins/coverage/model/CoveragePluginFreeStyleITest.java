@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +33,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
-    private static final TestUtil testUtil = new TestUtil();
+    private static final TestUtil TEST_UTIL = new TestUtil();
 
     /**
      * Tests the freestyle job with Jacoco Adapter and no input files.
@@ -338,7 +337,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
 
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())
                 .contains("Skipping checks")).isEqualTo(true);
     }
 
@@ -367,7 +366,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
 
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
     }
 
     /**
@@ -395,7 +394,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
 
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
     }
 
     /**
@@ -565,7 +564,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(2);
         assertThat(coverageBuildAction.getReferenceBuild()).isPresent();
         assertThat(coverageBuildAction.getReferenceBuild().get()).isEqualTo(referenceBuild);
-     }
+    }
 
     /**
      * Tests if reports are aggregated.
@@ -589,7 +588,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("A total of 1 reports were found");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("A total of 1 reports were found");
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(11_399, 11_947 - 11_399));
         assertThat(coverageResult.getBranchCoverage())
@@ -618,7 +617,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("A total of 2 reports were found");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("A total of 2 reports were found");
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new Coverage(11_399, 11_947 - 11_399));
         assertThat(coverageResult.getBranchCoverage())
@@ -632,7 +631,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
      */
     @Test
     public void agentInDocker() throws IOException, InterruptedException {
-        DumbSlave agent = testUtil.createDockerContainerAgent();
+        DumbSlave agent = TEST_UTIL.createDockerContainerAgent();
         FreeStyleProject project = createFreeStyleProject();
         project.setAssignedNode(agent);
 
@@ -670,7 +669,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = buildSuccessfully(project);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(coveragePublisher.isFailNoReports()).isFalse();
     }
@@ -693,7 +692,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
 
         assertThat(build.getNumber()).isEqualTo(1);
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("No reports were found");
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
         assertThat(coveragePublisher.isFailNoReports()).isTrue();
     }
@@ -818,7 +817,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
 
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
 
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
@@ -941,7 +940,7 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
 
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
 
-        assertThat(testUtil.getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
+        assertThat(TEST_UTIL.getLogFromInputStream(build.getLogInputStream())).contains("Build failed", "Line");
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }

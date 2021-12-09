@@ -23,6 +23,9 @@ import java.util.Scanner;
  */
 public class TestUtil extends IntegrationTestWithJenkinsPerSuite {
 
+    /**
+     * Docker container for java-maven builds. Contains also git to check out from an SCM.
+     */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
@@ -32,7 +35,7 @@ public class TestUtil extends IntegrationTestWithJenkinsPerSuite {
      * @param in the {@link InputStream}
      * @return the {@link InputStream} as {@link String}
      */
-    protected String getLogFromInputStream(InputStream in) {
+    protected String getLogFromInputStream(final InputStream in) {
         Scanner s = new Scanner(in).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
@@ -43,9 +46,9 @@ public class TestUtil extends IntegrationTestWithJenkinsPerSuite {
      * @return A docker container agent.
      */
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "IllegalCatch"})
-    public DumbSlave createDockerContainerAgent() throws IOException, InterruptedException {
-        DockerContainer dockerContainer = javaDockerRule.get();
+    public DumbSlave createDockerContainerAgent() {
         try {
+            DockerContainer dockerContainer = javaDockerRule.get();
             SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
                     Collections.singletonList(
                             new UsernamePasswordCredentialsImpl(CredentialsScope.SYSTEM, "dummyCredentialId",

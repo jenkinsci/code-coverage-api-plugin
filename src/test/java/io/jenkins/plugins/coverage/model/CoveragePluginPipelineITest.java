@@ -18,6 +18,7 @@ import java.util.Scanner;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.*;
 
 /**
  * Tests the class code-coverage-api-plugin.
@@ -30,7 +31,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
-    private static final TestUtil testUtil = new TestUtil();
+    private static final TestUtil TEST_UTIL = new TestUtil();
 
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
@@ -754,7 +755,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void agentInDocker() throws IOException, InterruptedException {
-        DumbSlave agent = testUtil.createDockerContainerAgent();
+        assumeThat(isWindows()).as("Running on Windows").isFalse();
+        DumbSlave agent = TEST_UTIL.createDockerContainerAgent();
         WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
@@ -832,7 +834,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void sourceCodeRenderingAndCopyingAgent() throws IOException, InterruptedException {
-        DumbSlave agent = testUtil.createDockerContainerAgent();
+        assumeThat(isWindows()).as("Running on Windows").isFalse();
+        DumbSlave agent = TEST_UTIL.createDockerContainerAgent();
         WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
@@ -857,7 +860,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
         );
         assertThatJson(overview).node("covered").isArray().containsExactly(
-                21, 306, 344, 1801, 6083, 26283, 1661
+                21, 306, 344, 1801, 6083, 26_283, 1661
         );
         assertThatJson(overview).node("missed").isArray().containsExactly(
                 0, 1, 5, 48, 285, 1036, 214
