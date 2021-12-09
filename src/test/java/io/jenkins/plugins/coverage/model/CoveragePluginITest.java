@@ -1,25 +1,48 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
+import java.util.Collections;
+
+import org.junit.AssumptionViolatedException;
+import org.junit.Rule;
 import org.junit.Test;
+
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerRule;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaGitContainer;
+import hudson.model.FreeStyleProject;
+import hudson.slaves.DumbSlave;
 import hudson.model.Result;
 import hudson.model.Run;
-import io.jenkins.plugins.coverage.CoverageProcessor;
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
+import hudson.plugins.sshslaves.SSHLauncher;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+
+import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
-import static io.jenkins.plugins.coverage.model.Assertions.*;
-import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test for the coverage API plugin.
+ *
+ *  todo: DRY, constants for values, javadoc
  *
  * @author Thomas Willeit
  *
  */
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
+
+    /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
+    @Rule
+    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     private static final String JACOCO_FILE_WITH_HIGHER_COVERAGE = "jacoco-analysis-model.xml";
     private static final String JACOCO_LESS_WITH_LESS_COVERAGE = "jacoco-codingstyle.xml";
@@ -28,7 +51,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineZeroJacocoInputFile() {
+    public void coveragePluginPipelineZeroJacocoInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles();
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
@@ -43,7 +66,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineOneJacocoInputFile() {
+    public void coveragePluginPipelineOneJacocoInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('jacoco-analysis-model.xml')]"
@@ -53,12 +76,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368-6083));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
     }
 
 
     @Test
-    public void CoveragePluginPipelineTwoJacocoInputFile() {
+    public void coveragePluginPipelineTwoJacocoInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE,
                 JACOCO_LESS_WITH_LESS_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -69,12 +92,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6377, 6691-6377));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6377, 6691 - 6377));
     }
 
 
     @Test
-    public void CoveragePluginPipelineZeroCoberturaInputFile() {
+    public void coveragePluginPipelineZeroCoberturaInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles();
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -90,7 +113,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineOneCoberturaInputFile() {
+    public void coveragePluginPipelineOneCoberturaInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_ONE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -105,7 +128,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     @Test
-    public void CoveragePluginPipelineTwoCoberturaInputFile() {
+    public void coveragePluginPipelineTwoCoberturaInputFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_FILE_ONE, COBERTURA_FILE_TWO);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -121,7 +144,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineOneCoberturaInputFileOneJacocoInputFile() throws IOException {
+    public void coveragePluginPipelineOneCoberturaInputFileOneJacocoInputFile() throws IOException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE, COBERTURA_FILE_ONE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [cobertura('" + COBERTURA_FILE_ONE + "'),jacocoAdapter('" + JACOCO_FILE_WITH_HIGHER_COVERAGE + "')]"
@@ -131,13 +154,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6085, 6370-6085));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6085, 6370 - 6085));
         CoveragePluginITest.JENKINS_PER_SUITE.assertLogContains("A total of 2 reports were found", build);
     }
 
 
     @Test
-    public void CoveragePluginPipelineFailUnhealthyWithResultFailure() {
+    public void coveragePluginPipelineFailUnhealthyWithResultFailure() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -153,7 +176,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailUnhealthyWithResultFailureContainsBUG() {
+    public void coveragePluginPipelineFailUnhealthyWithResultFailureContainsBUG() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -172,7 +195,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailUnhealthyWithResultUnstable() {
+    public void coveragePluginPipelineFailUnhealthyWithResultUnstable() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -185,7 +208,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailUnhealthyWithResultSuccess() {
+    public void coveragePluginPipelineFailUnhealthyWithResultSuccess() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -198,7 +221,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailUnstable() {
+    public void coveragePluginPipelineFailUnstable() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -212,7 +235,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailNoReports() {
+    public void coveragePluginPipelineFailNoReports() {
         WorkflowJob job = createPipelineWithWorkspaceFiles();
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -225,7 +248,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineGetDelta() {
+    public void coveragePluginPipelineGetDelta() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LESS_WITH_LESS_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_LESS_WITH_LESS_COVERAGE
@@ -249,7 +272,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public void CoveragePluginPipelineFailDecreasingCoverage() {
+    public void coveragePluginPipelineFailDecreasingCoverage() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
@@ -273,7 +296,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
 
     @Test
-    public  void CoveragePluginPipelineSkipPublishingChecks() throws IOException {
+    public void coveragePluginPipelineSkipPublishingChecks() throws IOException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
@@ -284,14 +307,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368-6083));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
 
         CoveragePluginITest.JENKINS_PER_SUITE.assertLogNotContains("[Checks API] No suitable checks publisher found.", build);
     }
 
 
     @Test
-    public  void CoveragePluginPipelinePublishingChecks() throws IOException {
+    public void coveragePluginPipelinePublishingChecks() throws IOException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
@@ -301,14 +324,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368-6083));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
 
         CoveragePluginITest.JENKINS_PER_SUITE.assertLogContains("[Checks API] No suitable checks publisher found.", build);
     }
 
 
     @Test
-    public void reportAggregationTrue() throws IOException {
+    public void coveragePluginPipelineReportAggregationTrue() throws IOException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_WITH_HIGHER_COVERAGE, JACOCO_LESS_WITH_LESS_COVERAGE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter(mergeToOneReport: true, path: '**/*.xml')]"
@@ -319,5 +342,60 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
 
         CoveragePluginITest.JENKINS_PER_SUITE.assertLogContains("A total of 1 reports were found", build);
+    }
+
+
+    @Test
+    /**
+     * Test ignored ... falsche Imports?
+     * java.lang.IllegalArgumentException: Unknown server host key algorithm 'ssh-ed25519'
+     */
+    public void  coveragePluginFreestyleProjectDockerTest() throws IOException, InterruptedException {
+        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        FreeStyleProject project = createFreeStyleProject();
+        project.setAssignedNode(agent);
+
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE_WITH_HIGHER_COVERAGE, JACOCO_FILE_WITH_HIGHER_COVERAGE);
+        CoveragePublisher coveragePublisher = new CoveragePublisher();
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_FILE_WITH_HIGHER_COVERAGE);
+        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().add(coveragePublisher);
+
+        Run<?, ? > build = buildSuccessfully(project);
+        assertThat(build.getNumber()).isEqualTo(1);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
+    }
+
+    /**
+     * Creates a docker container agent.
+     *
+     * @param dockerContainer
+     *         the docker container of the agent
+     *
+     * @return A docker container agent.
+     */
+    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "IllegalCatch"})
+    protected DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
+        try {
+            SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
+                    Collections.singletonList(
+                            new UsernamePasswordCredentialsImpl(CredentialsScope.SYSTEM, "dummyCredentialId",
+                                    null, "test", "test")
+                    )
+            );
+            DumbSlave agent = new DumbSlave("docker", "/home/test",
+                    new SSHLauncher(dockerContainer.ipBound(22), dockerContainer.port(22), "dummyCredentialId"));
+            agent.setNodeProperties(Collections.singletonList(new EnvironmentVariablesNodeProperty(
+                    new EnvironmentVariablesNodeProperty.Entry("JAVA_HOME", "/usr/lib/jvm/java-8-openjdk-amd64/jre"))));
+            getJenkins().jenkins.addNode(agent);
+            getJenkins().waitOnline(agent);
+
+            return agent;
+        }
+        catch (Throwable e) {
+            throw new AssumptionViolatedException("Failed to create docker container", e);
+        }
     }
 }
