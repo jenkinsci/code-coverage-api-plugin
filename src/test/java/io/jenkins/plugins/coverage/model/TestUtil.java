@@ -13,7 +13,6 @@ import org.jenkinsci.test.acceptance.docker.DockerRule;
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Scanner;
