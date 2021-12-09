@@ -73,6 +73,25 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
+     * Verifies result of aggregated report of two jacoco files.
+     *
+     * @param build
+     *         which contains aggregated report
+     *
+     * @throws IOException
+     *         due to recoverCoverageResult()
+     * @throws ClassNotFoundException
+     *         due to recoverCoverageResult()
+     */
+    private void verifyJacocoReportAggregation(final Run<?, ?> build) throws IOException, ClassNotFoundException {
+        CoverageResult aggregatedResult = CoverageProcessor.recoverCoverageResult(build);
+        aggregatedResult.isAggregatedLevel();
+        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("095.16 (5825/6121)");
+        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo(
+                "088.63 (1653/1865)");
+    }
+
+    /**
      * Checks aggregated coverage result for freestyle job with two jacoco files.
      *
      * @throws IOException
@@ -87,6 +106,42 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
                 COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
         Run<?, ?> build = buildSuccessfully(project);
         verifyCoberturaReportAggregation(build);
+    }
+
+    /**
+     * Checks aggregated coverage result for pipeline job with two cobertura files.
+     *
+     * @throws IOException
+     *         due to verifyCoberturaReportAggregation()
+     * @throws ClassNotFoundException
+     *         due to verifyCoberturaReportAggregation()
+     */
+    @Test
+    public void pipelineProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
+        WorkflowJob job = createPipelineProjectWithSpecifiedAdapterAndFiles(UsedAdapter.COBERTURA,
+                COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
+
+        Run<?, ?> build = buildSuccessfully(job);
+        verifyCoberturaReportAggregation(build);
+    }
+
+    /**
+     * Verifies result of aggregated report of two cobertura files.
+     *
+     * @param build
+     *         which contains aggregated report
+     *
+     * @throws IOException
+     *         due to recoverCoverageResult()
+     * @throws ClassNotFoundException
+     *         due to recoverCoverageResult()
+     */
+    private void verifyCoberturaReportAggregation(final Run<?, ?> build) throws IOException, ClassNotFoundException {
+        CoverageResult aggregatedResult = CoverageProcessor.recoverCoverageResult(build);
+        aggregatedResult.isAggregatedLevel();
+        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("065.18 (526/807)");
+        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo("048.50 (259/534)");
+
     }
 
     /**
@@ -153,60 +208,4 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
         return job;
     }
-
-    /**
-     * Checks aggregated coverage result for pipeline job with two cobertura files.
-     *
-     * @throws IOException
-     *         due to verifyCoberturaReportAggregation()
-     * @throws ClassNotFoundException
-     *         due to verifyCoberturaReportAggregation()
-     */
-    @Test
-    public void pipelineProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
-        WorkflowJob job = createPipelineProjectWithSpecifiedAdapterAndFiles(UsedAdapter.COBERTURA,
-                COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
-
-        Run<?, ?> build = buildSuccessfully(job);
-        verifyCoberturaReportAggregation(build);
-    }
-
-    /**
-     * Verifies result of aggregated report of two jacoco files.
-     *
-     * @param build
-     *         which contains aggregated report
-     *
-     * @throws IOException
-     *         due to recoverCoverageResult()
-     * @throws ClassNotFoundException
-     *         due to recoverCoverageResult()
-     */
-    private void verifyJacocoReportAggregation(final Run<?, ?> build) throws IOException, ClassNotFoundException {
-        CoverageResult aggregatedResult = CoverageProcessor.recoverCoverageResult(build);
-        aggregatedResult.isAggregatedLevel();
-        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("095.16 (5825/6121)");
-        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo(
-                "088.63 (1653/1865)");
-    }
-
-    /**
-     * Verifies result of aggregated report of two cobertura files.
-     *
-     * @param build
-     *         which contains aggregated report
-     *
-     * @throws IOException
-     *         due to recoverCoverageResult()
-     * @throws ClassNotFoundException
-     *         due to recoverCoverageResult()
-     */
-    private void verifyCoberturaReportAggregation(final Run<?, ?> build) throws IOException, ClassNotFoundException {
-        CoverageResult aggregatedResult = CoverageProcessor.recoverCoverageResult(build);
-        aggregatedResult.isAggregatedLevel();
-        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("065.18 (526/807)");
-        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo("048.50 (259/534)");
-
-    }
-
 }
