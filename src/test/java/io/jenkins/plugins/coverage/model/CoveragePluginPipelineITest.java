@@ -22,7 +22,9 @@ import hudson.slaves.DumbSlave;
 
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+import static io.jenkins.plugins.coverage.model.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration tests for the coverage plugin using pipelines.
@@ -487,26 +489,53 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         //TODO: ASK HAFNER: How to check sources ?
     }
 
-    /**
+    /**CoverageViewModel.java
      * Tests the source code copying of a pipeline job.
      */
     @Test
     public void pipelineSourceCodeCopying() throws Exception {
-        DumbSlave agent = CoveragePluginITestUtil.createDockerContainerAgent(javaDockerRule.get(), getJenkins());
-        WorkflowJob job = createPipelineJobWithDockerNode();
-
-        copySingleFileToAgentWorkspace(agent, job, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
-
-        FilePath workspace = getAgentWorkspace(agent, job);
-
+        WorkflowJob job = createPipelineJobWithSimpleNode();
+        copyFileToWorkspace(job, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         Run<?, ?> build = buildSuccessfully(job);
+
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+
+        String link = String.valueOf("AcuCobolParser.java".hashCode());
+
+        SourceViewModel model = action.getTarget().getDynamic(link, null, null);
+
+        assertThat(model.getDisplayName()).contains("AcuCobolParser.java");
+
+        String fileText = model.getDynamic(link, null, null).getSourceFileContent();
+
+        assertThat(fileText).contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
+    }
+
+    private CoverageViewModel createModel(String fileName) {
+        AbstractCoverageTest coverageTest = new AbstractCoverageTest();
+        return new CoverageViewModel(mock(Run.class), coverageTest.readNode(fileName));
     }
 
     private WorkflowJob createPipelineJobWithDockerNode() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
+                + "    checkout([$class: 'GitSCM', "
+                + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
+                + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
+                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "            relativeTargetDir: 'checkout']]])\n"
+                + "    publishCoverage adapters: [jacocoAdapter('"
+                + CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME
+                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "}", true));
+        return job;
+    }
+
+
+    private WorkflowJob createPipelineJobWithSimpleNode() {
+        WorkflowJob job = createPipeline();
+        job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
                 + "userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
