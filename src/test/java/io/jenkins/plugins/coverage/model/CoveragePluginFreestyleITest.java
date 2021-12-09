@@ -206,6 +206,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
         Threshold lineThreshold = new Threshold("Line");
         lineThreshold.setUnhealthyThreshold(95f);
         lineThreshold.setFailUnhealthy(true);
+        coveragePublisher.setGlobalThresholds(Collections.singletonList(lineThreshold));
 
         createFreestyleProjectAndAssertBuildResult(coveragePublisher, Result.SUCCESS, CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
     }
