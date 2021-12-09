@@ -100,6 +100,14 @@ public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPe
                         JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
     }
 
+    /**
+     * Creates pipeline project with jacoco adapters and tag 't1' and adapter with variable tag.
+     *
+     * @param tagTwo
+     *         tag of second adapter
+     *
+     * @return Pipeline job with adapters and their tags
+     */
     private WorkflowJob createPipelineWithAdaptersAndTags(final String tagTwo) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
