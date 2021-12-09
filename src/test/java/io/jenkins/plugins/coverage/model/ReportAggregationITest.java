@@ -19,6 +19,7 @@ import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -28,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
 public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
-    private static final String COVERAGE_WITH_LOTS_OF_DATA_XML = "../coverage-with-lots-of-data.xml";
+    private static final String COVERAGE_WITH_LOTS_OF_DATA_XML = "cobertura-lots-of-data.xml";
 
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
@@ -169,8 +170,8 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifyCoberturaReportAggregation(final Run<?, ?> build) throws IOException, ClassNotFoundException {
         CoverageResult aggregatedResult = CoverageProcessor.recoverCoverageResult(build);
         aggregatedResult.isAggregatedLevel();
-        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("050.00 (2/4)");
-        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo("000.00 (0/4)");
+        assertThat(aggregatedResult.getCoverage(CoverageElement.LINE).toString()).isEqualTo("065.18 (526/807)");
+        assertThat(aggregatedResult.getCoverage(CoverageElement.CONDITIONAL).toString()).isEqualTo("048.50 (259/534)");
 
     }
 
