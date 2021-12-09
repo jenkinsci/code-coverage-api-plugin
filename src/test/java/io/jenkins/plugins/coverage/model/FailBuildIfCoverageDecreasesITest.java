@@ -14,7 +14,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-enum CoverageDecreasedAction {FAIL_BUILD, DONT_FAIL_BUILD}
+enum CoverageDecreasedAction { FAIL_BUILD, DONT_FAIL_BUILD}
 
 /**
  * Integration test for checking if build failes when coverage decreases.

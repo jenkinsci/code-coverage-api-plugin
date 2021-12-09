@@ -141,7 +141,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
             final ParameterizedJob<?, ?> job) {
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
 
-        //FIXME: bug? - test should run successfully too by using CoverageBuildAction.class instead of CoverageAction.class
+        //test should run successfully too by using CoverageBuildAction.class instead of CoverageAction.class
         String message = build.getAction(CoverageAction.class).getFailMessage();
         assertThat(message).isEqualTo(
                 "Build unstable because following metrics did not meet stability target: [Line {unstableThreshold="

@@ -25,11 +25,13 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration test for report aggregation.
+ * Enum for setting adapter in freestyle and pipeline projects.
  */
-
 enum UsedAdapter { COBERTURA, JACOCO}
 
+/**
+ * Integration test for report aggregation.
+ */
 public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
