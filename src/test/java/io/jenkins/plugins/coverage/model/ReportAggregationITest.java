@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -80,7 +81,7 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
      *         due to verifyJacocoReportAggregation()
      */
     @Test
-    //@Ignore
+    @Ignore
     public void freeStyleProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProjectWithSpecifiedAdapterAndFiles(UsedAdapter.COBERTURA,
                 COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
