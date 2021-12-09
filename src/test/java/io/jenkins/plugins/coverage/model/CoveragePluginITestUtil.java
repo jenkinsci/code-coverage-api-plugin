@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -137,7 +136,7 @@ public class CoveragePluginITestUtil {
      * @throws Exception
      *         thrown by {@link DumbSlave}
      */
-    public static DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer, JenkinsRule jenkinsRule)
+    public static DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer, final JenkinsRule jenkinsRule)
             throws Exception {
         SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
                 Collections.singletonList(
