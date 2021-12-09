@@ -323,7 +323,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private CpsFlowDefinition getCpsFlowDefinitionWithAdapter(final String adapter) {
         return new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [" + adapter + "('**/**/*.xml')]"
+                + "   publishCoverage adapters: [" + adapter + "('**/*.xml')]"
                 + "}", true);
     }
 
