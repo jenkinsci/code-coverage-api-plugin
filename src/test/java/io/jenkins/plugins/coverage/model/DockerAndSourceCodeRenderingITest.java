@@ -80,7 +80,6 @@ public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkin
      *         job of the project
      */
     private void verifySourceCode(final Run<?, ?> build) {
-        assertThat(build.getNumber()).isEqualTo(1);
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
 
         CoverageBuildAction action = new CoverageBuildAction(build, root);
@@ -105,7 +104,7 @@ public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkin
         assertThat(consoleLog)
                 .contains("Cloning repository " + REPOSITORY)
                 .contains("Checking out Revision " + COMMIT)
-                .contains("git checkout -f " + COMMIT);
+                .contains("checkout -f " + COMMIT);
         return build;
     }
 
