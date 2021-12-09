@@ -1,29 +1,18 @@
 package io.jenkins.plugins.coverage.model;
 
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.Domain;
-import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
 import io.jenkins.plugins.coverage.CoverageProcessor;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerRule;
-import org.junit.AssumptionViolatedException;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -41,13 +30,10 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
+    private static final TestUtil testUtil = new TestUtil();
 
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
-
-    /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
-    @Rule
-    public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     /**
      * Tests the Pipeline with Jacoco Adapter and no input files.
@@ -56,8 +42,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     public void noJacocoFile() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node {"
-            + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-            + "}", true));
+                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
         assertThat(build.getNumber()).isEqualTo(1);
@@ -318,8 +304,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
-                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]}"
-                , true));
+                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]"
+                        + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.FAILURE);
 
@@ -337,8 +323,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
-                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 42.0]])]}"
-                , true));
+                        + "thresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 42.0]])]"
+                        + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -362,8 +348,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
-                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]}"
-                , true));
+                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]"
+                        + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -387,8 +373,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
-                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unstableThreshold: 99.0]])]}"
-                , true));
+                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unstableThreshold: 99.0]])]"
+                        + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -412,8 +398,9 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml')], "
-                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 100.0]]}"
-                , true));
+                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line'"
+                        + ", unhealthyThreshold: 100.0]]"
+                        + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.FAILURE);
 
@@ -431,8 +418,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml')], "
-                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 0.0]]}"
-                , true));
+                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 0.0]]"
+                        + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -456,8 +443,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml', "
-                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]}"
-                , true));
+                        + "thresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 100.0]])]"
+                        + "}", true));
 
         Run<?, ?> build = buildSuccessfully(job);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -481,8 +468,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         job.setDefinition(new CpsFlowDefinition(
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '**/*.xml')], "
-                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unstableThreshold: 100.0]]}"
-                , true));
+                        + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unstableThreshold: 100.0]]"
+                        + "}", true));
 
         Run<?, ?> build = buildWithResult(job, Result.UNSTABLE);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
@@ -561,7 +548,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
 
-        assertThat(getLogFromInputStream(build.getLogInputStream())).doesNotContain("No suitable checks publisher found");
+        assertThat(getLogFromInputStream(build.getLogInputStream()))
+                .doesNotContain("No suitable checks publisher found");
     }
 
     /**
@@ -766,7 +754,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void agentInDocker() throws IOException, InterruptedException {
-        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        DumbSlave agent = testUtil.createDockerContainerAgent();
         WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
@@ -808,37 +796,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Creates a docker container agent.
-     *
-     * @param dockerContainer
-     *         the docker container of the agent
-     *
-     * @return A docker container agent.
-     */
-    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "IllegalCatch"})
-    protected DumbSlave createDockerContainerAgent(final DockerContainer dockerContainer) {
-        try {
-            SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(Domain.global(),
-                    Collections.singletonList(
-                            new UsernamePasswordCredentialsImpl(CredentialsScope.SYSTEM, "dummyCredentialId",
-                                    null, "test", "test")
-                    )
-            );
-            DumbSlave agent = new DumbSlave("docker", "/home/test",
-                    new SSHLauncher(dockerContainer.ipBound(22), dockerContainer.port(22), "dummyCredentialId"));
-            agent.setNodeProperties(Collections.singletonList(new EnvironmentVariablesNodeProperty(
-                    new EnvironmentVariablesNodeProperty.Entry("JAVA_HOME", "/usr/lib/jvm/java-8-openjdk-amd64/jre"))));
-            getJenkins().jenkins.addNode(agent);
-            getJenkins().waitOnline(agent);
-
-            return agent;
-        }
-        catch (Throwable e) {
-            throw new AssumptionViolatedException("Failed to create docker container", e);
-        }
-    }
-
-    /**
      * Tests the source code rendering.
      */
     @Test
@@ -875,7 +832,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void sourceCodeRenderingAndCopyingAgent() throws IOException, InterruptedException {
-        DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
+        DumbSlave agent = testUtil.createDockerContainerAgent();
         WorkflowJob project = createPipelineOnAgent();
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_BIG_DATA, JACOCO_BIG_DATA);
