@@ -73,7 +73,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /**
      * Another cobertura file for testing.
      */
-    private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "../coverage-with-lots-of-data.xml";
+    private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "cobertura-lots-of-data.xml";
     /**
      * Symbol of cobertura adapter in pipeline.
      */
@@ -216,8 +216,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     @Test
     public void pipelineForTwoCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_WITH_LOTS_OF_DATA_FILE,
-                COBERTURA_HIGHER_COVERAGE_FILE);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
+
         job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
 
         verifyForTwoCobertura(job);
@@ -323,7 +323,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private CpsFlowDefinition getCpsFlowDefinitionWithAdapter(final String adapter) {
         return new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [" + adapter + "('**/*.xml')]"
+                + "   publishCoverage adapters: [" + adapter + "('**/**/*.xml')]"
                 + "}", true);
     }
 
@@ -404,7 +404,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //FIXME
-        assertThat(coverageResult.getLineCoverage()).isNotNull();
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(472,722 - 472));
     }
 
     /**
