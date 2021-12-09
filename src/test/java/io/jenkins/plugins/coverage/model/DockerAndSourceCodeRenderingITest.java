@@ -33,13 +33,14 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code Rendering and copying works with Docker and if freestyle-projects run successfully with Docker.
  */
-@SuppressWarnings("checkstyle:ClassDataAbstractionCouplingCheck")
+
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
 
-    /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
+    /** Docker con@SuppressWarnings("checkstyle:ClassDataAbstractionCouplingCheck")tainer for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
