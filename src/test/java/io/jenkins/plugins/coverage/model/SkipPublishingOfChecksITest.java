@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Enum to set skipping of publishing of checks.
  */
-enum Checks {PUBLISH_CHECKS, SKIP_CHECKS}
+enum Checks { PUBLISH_CHECKS, SKIP_CHECKS}
 
 /**
  * Enum to set if SCM is used or not.
  */
-enum Sourcecode {ADD_SOURCECODE, NO_SOURCECODE}
+enum Sourcecode { ADD_SOURCECODE, NO_SOURCECODE}
 
 /**
  * Tests if publishing of checks can be skipped.
@@ -59,8 +59,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
     @Test
     public void freeStyleSkipPublishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.SKIP_CHECKS);
-        // FIXME: Sollte eigentlich erfolgreich durchlaufen.
-        // checkConsoleLog(buildSuccessfully(project), Checks.SKIP_CHECKS);
+        checkConsoleLog(buildSuccessfully(project), Checks.SKIP_CHECKS);
     }
 
     /**
@@ -101,10 +100,10 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      */
     private void checkConsoleLog(final Run<?, ?> build, final Checks skipPublishingChecks) {
         String consoleLog = getConsoleLog(build);
-        if (skipPublishingChecks == Checks.SKIP_CHECKS) {
+        if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
             assertThat(consoleLog).contains("[Checks API] No suitable checks publisher found.");
         }
-        else if (skipPublishingChecks == Checks.PUBLISH_CHECKS) {
+        else if (skipPublishingChecks == Checks.SKIP_CHECKS) {
             assertThat(consoleLog).contains("Publishing Coverage report....");
 
         }
@@ -168,7 +167,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILENAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + pipelineSCMCommand
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILENAME + "')]\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILENAME + "')],\n"
                 + "    skipPublishingChecks: " + skipPublishingChecksValue
                 + "}", true));
 
