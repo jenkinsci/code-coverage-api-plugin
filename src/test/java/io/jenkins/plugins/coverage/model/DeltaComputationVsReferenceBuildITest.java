@@ -96,7 +96,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         assertThat(resultFirstBuild.hasDelta(CoverageElement.CONDITIONAL)).isFalse();
 
         //Coverage result is different depending on using pipeline or freestyle project
-        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(5.6865005f);
+        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(5.686_500_5f);
     }
 
     /**
