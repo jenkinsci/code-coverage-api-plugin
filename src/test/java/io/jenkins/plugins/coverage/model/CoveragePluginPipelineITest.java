@@ -260,7 +260,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Tests the reports whether build fails if no reports are found.
+     * Tests the reports whether build successful if no reports are found.
+     * @throws IOException from getLogFromInputStream {@link InputStream}
      */
     @Test
     public void failNoReportsTrue() throws IOException {
@@ -278,7 +279,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
     /**
-     * Tests the reports whether build successful if no reports are found.
+     * Tests the reports whether build fails if no reports are found.
+     * @throws IOException from getLogFromInputStream {@link InputStream}
      */
     @Test
     public void failNoReportsFalse() throws IOException {
