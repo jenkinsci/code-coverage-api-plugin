@@ -29,7 +29,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  * Integration test for delta computation of reference builds.
  */
 public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
-    private static final List<String> MESSAGES = Arrays.asList("Message 1", "Message 2");
+
 
     private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
     private static final String COBERTURA_HIGHER_COVERAGE_XML = "cobertura-higher-coverage.xml";
@@ -62,7 +62,6 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
         CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(
                 COBERTURA_HIGHER_COVERAGE_XML);
 
-        //List<CoverageAdapter> coverageAdapters = new ArrayList<>();
         coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter2));
 
         project.getPublishersList().add(coveragePublisher);
@@ -106,7 +105,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      */
     private void createReferenceBuild(final Job<?, ?> job, final Run<?, ?> firstBuild)
             throws IOException, ClassNotFoundException {
-        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, MESSAGES);
+        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, Collections.emptyList());
         referenceBuild.onLoad(firstBuild);
 
         Run<?, ?> secondBuild = buildWithResult((ParameterizedJob<?, ?>) job, Result.SUCCESS);

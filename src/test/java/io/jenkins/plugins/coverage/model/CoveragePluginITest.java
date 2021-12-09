@@ -367,9 +367,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      *         the project with no adapter
      */
     private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
-        //FIXME: Build should fail
         buildWithResult(project, Result.FAILURE);
-
     }
 
     /**

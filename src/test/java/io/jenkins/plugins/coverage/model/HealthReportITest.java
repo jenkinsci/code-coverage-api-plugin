@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.*;
  * Enum for Thresholds being set or not to get different HealthReports in tests.
  */
 
-enum Thresholds {SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
+enum Thresholds { SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
 
 /**
  * Integration Test for HealthReports.
