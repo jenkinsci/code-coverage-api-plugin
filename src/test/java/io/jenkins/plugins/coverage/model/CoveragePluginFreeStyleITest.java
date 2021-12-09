@@ -17,8 +17,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import org.junit.AssumptionViolatedException;
@@ -45,7 +43,6 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     private static final String JACOCO_BIG_DATA = "jacoco-analysis-model.xml";
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
-    private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
 
     @Rule

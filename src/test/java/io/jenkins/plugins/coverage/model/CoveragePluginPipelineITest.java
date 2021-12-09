@@ -40,10 +40,8 @@ Pipeline integration tests for coverage api plugin
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
-    private static final String COBERTURA_FILE_NAME = "coverage-with-lots-of-data.xml";
     private static final String JACOCO_BIG_DATA = "jacoco-analysis-model.xml";
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
-    private static final String JACOCO_CODING_STYLE = "jacoco-codingstyle.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
     private static final String COBERTURA_SMALL_DATA = "cobertura-coverage.xml";
     private static final String COBERTURA_BIG_DATA = "coverage-with-lots-of-data.xml";
@@ -479,9 +477,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
         assertThat(build.getNumber()).isEqualTo(1);
 
+
+
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
-        //TODO: j.assertLogNotContains("No suitable checks publisher found", build);
+
+        assertThat(getLogFromInputStream(build.getLogInputStream())).doesNotContain("No suitable checks publisher found");
     }
 
     @Test
@@ -497,7 +498,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(6083, 6368 - 6083));
-        //TODO: j.assertLogContains("No suitable checks publisher found", build);
+
+        assertThat(getLogFromInputStream(build.getLogInputStream())).contains("No suitable checks publisher found");
     }
 
     @Test
@@ -602,20 +604,20 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
     @Test
     public void referenceBuildReferenceIsPrevious() {
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
-        workflowJob.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+                + "}", true));
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+
+        cleanWorkspace(job);
+        copyFilesToWorkspace(job, JACOCO_MINI_DATA);
+
+        job.setDefinition(new CpsFlowDefinition("node {"
+                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
                 + "}", true));
 
-        Run<?, ?> firstBuild = buildSuccessfully(workflowJob);
-
-        WorkflowJob workflowJob2 = createPipelineWithWorkspaceFiles(JACOCO_MINI_DATA);
-        workflowJob2.setDefinition(new CpsFlowDefinition("node {"
-                + "discoverReferenceBuild(referenceJob: '" + workflowJob.getFullName() + "')"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]\n"
-                + "}", true));
-
-        Run<?, ?> secondBuild = buildSuccessfully(workflowJob2);
+        Run<?, ?> secondBuild = buildWithResult(job, Result.SUCCESS);
 
         CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
 
@@ -674,7 +676,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
-    // TODO: auslagern
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node('docker') {"
