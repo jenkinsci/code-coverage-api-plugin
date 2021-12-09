@@ -1,23 +1,19 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
-import hudson.model.Job;
-import hudson.model.Result;
 import hudson.model.Run;
-import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoverageProcessor;
 import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
+import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
@@ -30,9 +26,8 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  */
 public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
 
-
-    private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
-    private static final String COBERTURA_HIGHER_COVERAGE_XML = "cobertura-higher-coverage.xml";
+    private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
 
     /**
      * Checks if delta can be computed for reference build.
@@ -42,76 +37,66 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      * @throws ClassNotFoundException
      *         when trying to recover coverage result
      */
+    @Ignore
     @Test
     public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
             throws IOException, ClassNotFoundException {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
 
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_LOWER_COVERAGE_XML);
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
+        CoveragePublisher coveragePublisherFirstBuild = new CoveragePublisher();
+        coveragePublisherFirstBuild.setAdapters(
+                Collections.singletonList(new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE)));
 
-        project.getPublishersList().add(coveragePublisher);
+        project.getPublishersList().add(coveragePublisherFirstBuild);
 
         //run first build
         Run<?, ?> firstBuild = buildSuccessfully(project);
+        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, Collections.emptyList());
+
+        //verify reference build owner
+        assertThat(referenceBuild.getOwner()).isEqualTo(firstBuild);
 
         //prepare second build
-        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_XML);
+        copyFilesToWorkspace(project, JACOCO_CODINGSTYLE_FILE);
 
-        CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(
-                COBERTURA_HIGHER_COVERAGE_XML);
+        CoveragePublisher coveragePublisherSecondBuild = new CoveragePublisher();
 
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter2));
+        coveragePublisherSecondBuild.setAdapters(Collections.singletonList(new JacocoReportAdapter(
+                JACOCO_CODINGSTYLE_FILE)));
+        project.getPublishersList().add(coveragePublisherSecondBuild);
 
-        project.getPublishersList().add(coveragePublisher);
-
-        createReferenceBuild(project, firstBuild);
+        //run second build
+        Run<?, ?> secondBuild = buildSuccessfully(project);
+        verifyDeltaComputation(firstBuild, secondBuild);
     }
 
     /**
      * Verifies delta of first and second build of job.
      *
-     * @param job
-     *         with two builds to test with
+     * @param firstBuild
+     *         of project
+     * @param secondBuild
+     *         of project with reference
      *
      * @throws IOException
      *         when trying to recover coverage result
      * @throws ClassNotFoundException
      *         when trying to recover coverage result
      */
-    private void verifyDeltaComputation(final Job<?, ?> job) throws IOException, ClassNotFoundException {
-        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(1));
-        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(job.getBuildByNumber(2));
+    private void verifyDeltaComputation(final Run<?, ?> firstBuild, final Run<?, ?> secondBuild)
+            throws IOException, ClassNotFoundException {
+        assertThat(secondBuild.getAction(CoverageBuildAction.class)).isNotNull();
+        CoverageBuildAction coverageResult = secondBuild.getAction(CoverageBuildAction.class);
+
+        assertThat(coverageResult.getReferenceBuild().get()).isEqualTo(firstBuild);
+
+        CoverageResult resultFirstBuild = CoverageProcessor.recoverCoverageResult(firstBuild);
+        CoverageResult resultSecondBuild = CoverageProcessor.recoverCoverageResult(secondBuild);
         assertThat(resultSecondBuild.hasDelta(CoverageElement.CONDITIONAL)).isTrue();
         assertThat(resultFirstBuild.hasDelta(CoverageElement.CONDITIONAL)).isFalse();
-        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(100);
-        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.LINE)).isEqualTo(50);
-        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.FILE)).isEqualTo(0);
-    }
 
-    /**
-     * Starts a new build with given job and stores first build for reference.
-     *
-     * @param job
-     *         that creates second build
-     * @param firstBuild
-     *         of project for reference
-     *
-     * @throws IOException
-     *         when trying to recover coverage result
-     * @throws ClassNotFoundException
-     *         when trying to recover coverage result
-     */
-    private void createReferenceBuild(final Job<?, ?> job, final Run<?, ?> firstBuild)
-            throws IOException, ClassNotFoundException {
-        ReferenceBuild referenceBuild = new ReferenceBuild(firstBuild, Collections.emptyList());
-        referenceBuild.onLoad(firstBuild);
-
-        Run<?, ?> secondBuild = buildWithResult((ParameterizedJob<?, ?>) job, Result.SUCCESS);
-        referenceBuild.onAttached(secondBuild);
-
-        verifyDeltaComputation(job);
+        //Coverage result is different depending on using pipeline or freestyle project
+        assertThat(resultSecondBuild.getDeltaResults().get(CoverageElement.CONDITIONAL)).isEqualTo(5.686_500_5f);
     }
 
     /**
@@ -124,23 +109,23 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      */
     @Test
     public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_LOWER_COVERAGE_XML);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_LOWER_COVERAGE_XML
+                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
                 + "')]"
                 + "}", true));
 
-        buildSuccessfully(job);
-        copyFilesToWorkspace(job, COBERTURA_HIGHER_COVERAGE_XML);
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+        copyFilesToWorkspace(job, JACOCO_CODINGSTYLE_FILE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [istanbulCoberturaAdapter('" + COBERTURA_HIGHER_COVERAGE_XML + "')]\n"
+                + "publishCoverage adapters: [jacocoAdapter('" + JACOCO_CODINGSTYLE_FILE + "')]\n"
                 + "discoverReferenceBuild(referenceJob: '" + job.getName() + "')"
                 + "}", true));
 
-        buildSuccessfully(job);
+        Run<?, ?> secondBuild = buildSuccessfully(job);
 
-        verifyDeltaComputation(job);
+        verifyDeltaComputation(firstBuild, secondBuild);
     }
 
 }
