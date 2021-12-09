@@ -16,6 +16,8 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.slaves.DumbSlave;
 
+import io.jenkins.plugins.coverage.CoverageProcessor;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
@@ -27,7 +29,6 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
 
-    // TODO: @Michael bitte verifizieren
     /**
      * Docker rule describing a JavaGitContainer.
      */
@@ -225,7 +226,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     @Test
     public void pipelineFailWhenCoverageDecreases() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('"
                 + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
@@ -235,7 +236,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('"
-                + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME
+                + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME
                 + "')], failBuildIfCoverageDecreasedInChangeRequest: true"
                 + "}", true));
 
@@ -332,7 +333,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "node {"
                         + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')\n"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
 
@@ -348,13 +349,13 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         Run<?, ?> secondBuild = createPipelineJobAndAssertBuildResult(
                 "node {"
                         + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         CoverageBuildAction secondCoverageResult = secondBuild.getAction(CoverageBuildAction.class);
 
@@ -372,10 +373,29 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "node {"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getReferenceBuild()).isEmpty();
+    }
+
+    /**
+     * Tests a pipeline job with declarative script.
+     */
+    @Test
+    public void pipelineDeclarativeSupport() {
+        createPipelineJobAndAssertBuildResult(
+                "pipeline {\n"
+                        + "    agent any\n"
+                        + "    stages {\n"
+                        + "        stage('first-stage') {\n"
+                        + "            steps {\n"
+                        + "                    publishCoverage(adapters: [jacocoAdapter('" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
+                        + "            )}\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}",
+                Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME);
     }
 
     /**

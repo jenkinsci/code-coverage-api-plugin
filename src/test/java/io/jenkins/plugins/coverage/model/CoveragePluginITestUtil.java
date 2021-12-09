@@ -39,7 +39,7 @@ public class CoveragePluginITestUtil {
     /**
      * Jacoco coding style example file with decreased line coverage.
      */
-    public static final String JACOCO_CODING_STYLE_DECREASED_FILE_NAME = "jacoco-codingstyle-decreased-line-coverage.xml";
+    public static final String JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME = "jacoco-codingstyle-decreased-line-coverage.xml";
 
     /**
      * Cobertura example file with lots of data.

@@ -279,7 +279,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     public void freestyleFailWhenCoverageDecreases() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         // build 1
         CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(
@@ -289,7 +289,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
         // build 2
         CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
         coveragePublisher2.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         project.getPublishersList().add(coveragePublisher2);
         buildWithResult(project, Result.FAILURE);
@@ -337,7 +337,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     @Test
     public void freestyleDeltaComputation() {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         // build 1
         CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(
@@ -347,7 +347,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
         // build 2
         CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
         project.getPublishersList().add(coveragePublisher2);
         Run<?, ?> secondBuild = buildSuccessfully(project);
 
@@ -363,7 +363,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
     public void freestyleReferenceBuildPresent() {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(
                 CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         // build 1
         CoveragePublisher coveragePublisher = createPublisherWithJacocoAdapter(
@@ -373,7 +373,7 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
 
         // build 2
         CoveragePublisher coveragePublisher2 = createPublisherWithJacocoAdapter(
-                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_FILE_NAME);
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
         project.getPublishersList().add(coveragePublisher2);
         Run<?, ?> secondBuild = buildSuccessfully(project);
 
