@@ -530,7 +530,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
         return job;
     }
 
-    private WorkflowJob createPipelineJobWithSimpleNode(String... files) {
+    private WorkflowJob createPipelineJobWithSimpleNode(final String... files) {
         WorkflowJob job = files.length <= 0 ? createPipeline() : createPipelineWithWorkspaceFiles(files);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
