@@ -48,6 +48,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
+    /**
+     * Tests the freestyle job without any Jacoco File
+     */
     @Test
     public void noJacocoInputFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -64,6 +67,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult).isEqualTo(null);
     }
 
+    /**
+     * Tests the freestyle job with one Jacoco File
+     */
     @Test
     public void oneJacocoFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -85,7 +91,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
 
     }
-
+    /**
+     * Tests the freestyle job with two Jacoco Files
+     */
     @Test
     public void twoJacocoFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -109,7 +117,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(3322, 3750 - 3322));
     }
-
+    /**
+     * Tests the freestyle job without any Cobertura File
+     */
     @Test
     public void noCoberturaInputFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -125,7 +135,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageResult).isEqualTo(null);
     }
-
+    /**
+     * Tests the freestyle job with one Cobertura Files
+     */
     @Test
     public void oneCoberturaFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -147,7 +159,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(285, 628 - 285));
     }
-
+    /**
+     * Tests the freestyle job with two Cobertura Files
+     */
     @Test
     public void twoCoberturaFile() {
         FreeStyleProject project = createFreeStyleProject();
@@ -171,7 +185,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(570, 1256 - 570));
     }
-
+    /**
+     * Tests the freestyle job with one Jacoco Files one Cobertura Files
+     */
     @Test
     public void oneJacocoOneCobertura() {
         FreeStyleProject project = createFreeStyleProject();
@@ -197,7 +213,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1946, 2503 - 1946));
     }
-
+    /**
+     * Tests the health report whether it is successful when the threshold is healthy
+     */
     @Test
     public void healthReportingHealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -220,7 +238,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
         assertThat(x.getBuildHealth().getScore()).isEqualTo(100);
     }
-
+    /**
+     * Tests the health report whether the build fails when it is unhealthy
+     */
     @Test
     public void healthReportingUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -244,6 +264,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(x.getBuildHealth()).isEqualTo(null);
     }
 
+    /**
+     * Tests the if the build fails when the coverage compared to the previous build decreased
+     */
     @Test
     public void failIfCoverageDecreasesTrue() {
         FreeStyleProject project = createFreeStyleProject();
@@ -268,6 +291,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
+    /**
+     * Tests the if the build runs successful when the coverage compared to the previous build decreased - but the flag is set to false
+     */
     @Test
     public void failIfCoverageDecreasesFalse() {
         FreeStyleProject project = createFreeStyleProject();
@@ -292,6 +318,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
     }
 
+    /**
+     * Tests when the flag for skipping publishing checks is true, it will skip the publishing checks
+     */
     @Test
     public void skipPublishingChecksTrue() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -318,7 +347,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         String result = s.hasNext() ? s.next() : "";
         assertThat(result.contains("Skipping checks")).isEqualTo(true);
     }
-
+    /**
+     * Tests when the flag for skipping publishing checks is false, it won't skip the publishing checks
+     */
     @Test
     public void skipPublishingChecksFalse() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -343,7 +374,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(getLogFromInputStream(build.getLogInputStream()).contains("Skipping checks")).isEqualTo(false);
     }
 
-
+    /**
+     * Tests the when the flag for skipping publishing checks is not set, it will skip the checks by default
+     */
     @Test
     public void skipPublishingChecksStandard() throws IOException {
         assertThat(true).isEqualTo(true);
@@ -372,7 +405,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         Scanner s = new Scanner(in).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
-
+    /**
+     * Tests the delta computing of two input files with a delta
+     */
     @Test
     public void deltaComputation() {
         FreeStyleProject project = createFreeStyleProject();
@@ -399,6 +434,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }
 
+    /**
+     * Tests the delta computing of two input files with no delta
+     */
     @Test
     public void deltaComputationZeroDelta() {
         FreeStyleProject project = createFreeStyleProject();
@@ -424,7 +462,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(2);
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("+0.000");
     }
-
+    /**
+     * Tests the delta computing of one input file
+     */
     @Test
     public void deltaComputationSingleBuild() {
         FreeStyleProject project = createFreeStyleProject();
@@ -442,7 +482,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getNumber()).isEqualTo(1);
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("n/a");
     }
-
+    /**
+     * Tests the delta computing of only the current and the previous build
+     */
     @Test
     public void deltaComputationUseOnlyPreviousAndCurrent() {
         FreeStyleProject project = createFreeStyleProject();
@@ -479,6 +521,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageBuildAction.getDelta(CoverageMetric.LINE)).isEqualTo("-0.002");
     }
 
+    /**
+     * Tests the reference build is a single build
+     */
     @Test
     public void referenceBuildSingleBuild() {
         FreeStyleProject project = createFreeStyleProject();
@@ -497,6 +542,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageBuildAction.getReferenceBuild()).isEmpty();
     }
 
+    /**
+     * Tests the reference build is the previous build
+     */
     @Test
     public void referenceBuildReferenceIsPrevious() {
         FreeStyleProject project = createFreeStyleProject();
@@ -523,7 +571,10 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageBuildAction.getReferenceBuild()).isPresent();
         assertThat(coverageBuildAction.getReferenceBuild().get()).isEqualTo(referenceBuild);
      }
-
+    /**
+     * Tests that the reports are  aggregated
+     * * @throws IOException from getLogFromInputStream
+     */
     @Test
     public void reportAggregation() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -548,7 +599,10 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(3306, 3620 - 3306));
     }
-
+    /**
+     * Tests that the reports are not aggregated
+     * * @throws IOException from getLogFromInputStream
+     */
     @Test
     public void reportAggregationFalse() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -574,6 +628,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(3306, 3620 - 3306));
     }
 
+    /**
+     * Tests a freestyle job in a docker agent
+     */
     @Test
     public void agentInDocker() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
@@ -596,6 +653,10 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
+    /**
+     * Tests if the setFailNoReports is set false, the build will succeed
+     * @throws IOException from getLogFromInputStream
+     */
     @Test
     public void failNoReportsFalse() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -615,6 +676,10 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coveragePublisher.isFailNoReports()).isFalse();
     }
 
+    /**
+     * Tests if the setFailNoReports is set true, the build will fail
+     * @throws IOException from getLogFromInputStream
+     */
     @Test
     public void failNoReportsTrue() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -634,6 +699,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coveragePublisher.isFailNoReports()).isTrue();
     }
 
+    /**
+     * Tests that the build will succeed if it passes the quality gate
+     */
     @Test
     public void qualityGatesGlobalThresholdSuccess() {
         FreeStyleProject project = createFreeStyleProject();
@@ -663,7 +731,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
-
+    /**
+     * Tests that the build is unstable
+     */
     @Test
     public void qualityGatesGlobalThresholdUnstable() {
         FreeStyleProject project = createFreeStyleProject();
@@ -691,7 +761,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
-
+    /**
+     * Tests that the build is successful with unhealthy flag set to false
+     */
     @Test
     public void qualityGatesGlobalThresholdSuccessUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -721,7 +793,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
-
+    /**
+     * Tests that the build fails with unhealthy flag set to true
+     */
     @Test
     public void qualityGatesGlobalThresholdFailUnhealthy() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -746,6 +820,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(build.getResult()).isEqualTo(Result.FAILURE);
     }
 
+    /**
+     * Tests that the build succeeds healthy with a setFailUnhealthy flag set to true
+     */
     @Test
     public void qualityGatesAdapterThresholdSuccess() {
         FreeStyleProject project = createFreeStyleProject();
@@ -775,7 +852,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
-
+    /**
+     * Tests that the build is unstable and unhealthy with a setFailUnhealthy flag set to true
+     */
     @Test
     public void qualityGatesAdapterThresholdUnstable() {
         FreeStyleProject project = createFreeStyleProject();
@@ -804,7 +883,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
         assertThat(coverageResult.getBranchCoverage())
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
-
+    /**
+     * Tests that the build succeeds unhealthy with a setFailUnhealthy flag set to false
+     */
     @Test
     public void qualityGatesAdapterThresholdSuccessUnhealthy() {
         FreeStyleProject project = createFreeStyleProject();
@@ -834,6 +915,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
                 .isEqualTo(new Coverage(1661, 1875 - 1661));
     }
 
+    /**
+     * Tests that the build fails unhealthy with a setFailUnhealthy flag set to true
+     */
     @Test
     public void qualityGatesAdapterThresholdFailUnhealthy() throws IOException {
         FreeStyleProject project = createFreeStyleProject();
@@ -887,7 +971,9 @@ public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerS
             throw new AssumptionViolatedException("Failed to create docker container", e);
         }
     }
-
+    /**
+     * Tests source code rendering and copying
+     */
     @Test
     public void sourceCodeRenderingAndCopying() {
         FreeStyleProject project = createFreeStyleProject();
