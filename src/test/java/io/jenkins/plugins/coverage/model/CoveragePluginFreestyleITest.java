@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import hudson.model.FreeStyleProject;
@@ -274,8 +275,8 @@ public class CoveragePluginFreestyleITest extends IntegrationTestWithJenkinsPerS
      * Tests a freestyle project failing while parameter failBuildIfCoverageDecreasedInChangeRequest is set and coverage
      * decreases.
      */
-    // TODO: Bug in coverage-plugin ?
     @Test
+    @Ignore("Bug: delta computation is wrong")
     public void freestyleFailWhenCoverageDecreases() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,

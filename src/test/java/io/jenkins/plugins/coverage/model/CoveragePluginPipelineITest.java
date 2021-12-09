@@ -242,7 +242,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
 
         Run<?, ?> secondBuild = buildWithResult(job, Result.FAILURE);
 
-        // TODO: @Hafner: Delta is correctly computed but build still is successful. To test uncomment the following lines and replace FAILURE check in second build with SUCCESS.
+        // TODO: @uhafner: Delta is correctly computed but build still is successful.
         CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
         assertThat(secondCoverageBuild.getDelta(CoverageMetric.LINE)).isEqualTo("-0.019");
     }
@@ -482,14 +482,13 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
                 build);
-        //TODO: ASK HAFNER: How to check sources ?
     }
 
-    /**CoverageViewModel.java
+    /**
      * Tests the source code copying of a pipeline job.
      */
     @Test
-    public void pipelineSourceCodeCopying() throws Exception {
+    public void pipelineSourceCodeCopying() {
         WorkflowJob job = createPipelineJobWithSimpleNode(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         Run<?, ?> build = buildSuccessfully(job);
@@ -521,7 +520,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     }
 
 
-    private WorkflowJob createPipelineJobWithSimpleNode(String... files) {
+    private WorkflowJob createPipelineJobWithSimpleNode(final String... files) {
         WorkflowJob job = files.length <= 0 ? createPipeline() : createPipelineWithWorkspaceFiles(files);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "    checkout([$class: 'GitSCM', "
