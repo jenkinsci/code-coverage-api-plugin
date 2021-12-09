@@ -36,8 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Johannes Walter, Katharina Winkler
  */
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
-
-    private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final String JACOCO_BIG_DATA = "jacoco-analysis-model.xml";
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";
@@ -58,18 +56,18 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     public void noJacocoFile() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
-                + "}", true));
+            + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
+            + "}", true));
 
-       Run<?, ?> build = buildSuccessfully(job);
-       assertThat(build.getNumber()).isEqualTo(1);
+        Run<?, ?> build = buildSuccessfully(job);
+        assertThat(build.getNumber()).isEqualTo(1);
     }
 
     /**
      * Tests the Pipeline with Jacoco Adapter and one input files.
      */
     @Test
-    public void oneJacocoFile(){
+    public void oneJacocoFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')]"
@@ -214,7 +212,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void healthReportingUnstable() {
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
                 + "globalThresholds: [[failUnhealthy: true, thresholdTarget: 'Line', unhealthyThreshold: 90.0, unstableThreshold: 96.0]]"
@@ -232,17 +230,17 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void healthReportingUnhealthySuccess() {
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
                 + "globalThresholds: [[failUnhealthy: false, thresholdTarget: 'Line', unhealthyThreshold: 96.0]]"
                 + "}", true));
 
-       Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
-       HealthReportingAction x = build.getAction(HealthReportingAction.class);
+        Run<?, ?> build = buildWithResult(workflowJob, Result.SUCCESS);
+        HealthReportingAction x = build.getAction(HealthReportingAction.class);
 
-       assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
-       assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
+        assertThat(build.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(x.getBuildHealth().getScore()).isEqualTo(0);
     }
 
     /**
@@ -250,7 +248,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      */
     @Test
     public void healthReportingUnhealthyFailure() {
-        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
+        WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
                 + "failUnstable: true,"
@@ -546,7 +544,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      * @throws IOException from getLogFromInputStream {@link InputStream}
      */
     @Test
-    public void skipPublishingChecksTrue () throws IOException {
+    public void skipPublishingChecksTrue() throws IOException {
         WorkflowJob workflowJob = createPipelineWithWorkspaceFiles(JACOCO_BIG_DATA);
         workflowJob.setDefinition(new CpsFlowDefinition("node {"
                 + "publishCoverage adapters: [jacocoAdapter('**/*.xml')],"
