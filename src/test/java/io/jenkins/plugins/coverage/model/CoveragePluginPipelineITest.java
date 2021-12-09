@@ -329,7 +329,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "node {"
                         + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')\n"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
+                        + "}", Result.SUCCESS,
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         CoverageBuildAction secondCoverageBuild = secondBuild.getAction(CoverageBuildAction.class);
 
@@ -351,7 +352,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 "node {"
                         + "   discoverReferenceBuild(referenceJob:'" + firstBuild.getParent().getName() + "')\n"
                         + "   publishCoverage adapters: [jacocoAdapter(path: '*.xml')], sourceFileResolver: sourceFiles('NEVER_STORE')"
-                        + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
+                        + "}", Result.SUCCESS,
+                CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
         CoverageBuildAction secondCoverageResult = secondBuild.getAction(CoverageBuildAction.class);
 
@@ -383,9 +385,13 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     public void pipelineMultipleInvocationWithTags() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '"
+                        + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME
+                        + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
                         + "   tag: 'tag-1'\n"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '"
+                        + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME
+                        + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
                         + "   tag: 'tag-2'\n"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
                 CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
@@ -402,8 +408,12 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
     public void pipelineMultipleInvocationWithoutTags() {
         Run<?, ?> build = createPipelineJobAndAssertBuildResult(
                 "node {"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
-                        + "   publishCoverage adapters: [jacocoAdapter(path: '" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '"
+                        + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME
+                        + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
+                        + "   publishCoverage adapters: [jacocoAdapter(path: '"
+                        + CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME
+                        + "')], sourceFileResolver: sourceFiles('NEVER_STORE'),\n"
                         + "}", Result.SUCCESS, CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME,
                 CoveragePluginITestUtil.JACOCO_CODING_STYLE_DECREASED_LINE_COVERAGE_FILE_NAME);
 
@@ -453,7 +463,8 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                         + "    stages {\n"
                         + "        stage('first-stage') {\n"
                         + "            steps {\n"
-                        + "                    publishCoverage(adapters: [jacocoAdapter('" + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
+                        + "                    publishCoverage(adapters: [jacocoAdapter('"
+                        + CoveragePluginITestUtil.JACOCO_CODING_STYLE_FILE_NAME + "')]"
                         + "            )}\n"
                         + "        }\n"
                         + "    }\n"
@@ -469,7 +480,7 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
      *         JenkinsRule)}
      */
     @Test
-    public void pipelineOnAgentNode() throws Exception {
+    public void pipelineWithDockerAgent() throws Exception {
         DumbSlave agent = CoveragePluginITestUtil.createDockerContainerAgent(javaDockerRule.get(), getJenkins());
         WorkflowJob job = createPipelineJobWithDockerNode();
 
@@ -482,14 +493,13 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_TOTAL),
                 Collections.singletonList(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_LINES_COVERED),
                 build);
-        //TODO: ASK HAFNER: How to check sources ?
     }
 
-    /**CoverageViewModel.java
+    /**
      * Tests the source code copying of a pipeline job.
      */
     @Test
-    public void pipelineSourceCodeCopying() throws Exception {
+    public void pipelineSourceCodeCopying() {
         WorkflowJob job = createPipelineJobWithSimpleNode(CoveragePluginITestUtil.JACOCO_ANALYSIS_MODEL_FILE_NAME);
 
         Run<?, ?> build = buildSuccessfully(job);
@@ -519,7 +529,6 @@ public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSu
                 + "}", true));
         return job;
     }
-
 
     private WorkflowJob createPipelineJobWithSimpleNode(String... files) {
         WorkflowJob job = files.length <= 0 ? createPipeline() : createPipelineWithWorkspaceFiles(files);
