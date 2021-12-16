@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Pipeline integration tests for the CoveragePlugin.
  *
- * @author Johannes Walter, Katharina Winkler
+ * @author Johannes Walter
  */
 public class CoveragePluginPipelineITest extends IntegrationTestWithJenkinsPerSuite {
-
+    
     private static final String JACOCO_BIG_DATA = "jacoco-analysis-model.xml";
     private static final String JACOCO_SMALL_DATA = "jacoco.xml";
     private static final String JACOCO_MINI_DATA = "jacocoModifiedMini.xml";

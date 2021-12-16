@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 /**
  * Pipeline integration tests with docker for the CoveragePlugin.
  *
- * @author Johannes Walter, Katharina Winkler
+ * @author Johannes Walter
  */
 public class CoveragePluginPipelineDockerITest extends IntegrationTestWithJenkinsPerSuite {
 

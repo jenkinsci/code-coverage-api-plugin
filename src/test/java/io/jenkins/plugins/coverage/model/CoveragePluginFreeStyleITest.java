@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * FreeStyle integration tests for the CoveragePlugin.
- * @author Johannes Walter, Katharina Winkler
+ * @author Katharina Winkler
  */
 public class CoveragePluginFreeStyleITest extends IntegrationTestWithJenkinsPerSuite {
 

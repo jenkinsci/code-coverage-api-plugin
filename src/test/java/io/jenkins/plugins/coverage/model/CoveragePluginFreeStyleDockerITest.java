@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * FreeStyle integration tests with docker for the CoveragePlugin.
- * @author Johannes Walter, Katharina Winkler
+ * @author Katharina Winkler
  */
 public class CoveragePluginFreeStyleDockerITest extends IntegrationTestWithJenkinsPerSuite {
 
