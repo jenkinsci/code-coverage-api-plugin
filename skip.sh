@@ -9,7 +9,7 @@ mvn clean install -Pskip || { echo "Build failed"; exit 1; }
 echo "Installing plugin in $JENKINS_HOME"
 
 rm -rf $JENKINS_HOME/plugins/code-coverage-api*
-cp -fv target/code-coverage-api.hpi $JENKINS_HOME/plugins/code-coverage-api.jpi
+cp -fv plugin/target/code-coverage-api.hpi $JENKINS_HOME/plugins/code-coverage-api.jpi
 
 CURRENT_UID="$(id -u):$(id -g)"
 export CURRENT_UID
