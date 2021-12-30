@@ -45,7 +45,6 @@ public class CoverageNode implements Serializable {
     private CoverageNode parent;
     private int[] uncoveredLines = EMPTY_ARRAY;
 
-
     /**
      * Creates a new coverage item node with the given name.
      *
@@ -88,7 +87,6 @@ public class CoverageNode implements Serializable {
         }
 
         return localPath;
-
     }
 
     /**
@@ -374,7 +372,7 @@ public class CoverageNode implements Serializable {
         if (!metric.equals(searchMetric)) {
             return false;
         }
-        return name.hashCode() == searchNameHashCode;
+        return name.hashCode() == searchNameHashCode || getPath().hashCode() == searchNameHashCode;
     }
 
     /**

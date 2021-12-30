@@ -99,7 +99,8 @@ public class CoverageProcessor {
      *         global threshold specified by user
      */
     public void performCoverageReport(final List<CoverageReportAdapter> reportAdapters,
-            final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds)
+            final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds,
+            final Set<String> sourceDirectories, final String sourceCodeEncoding)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
@@ -143,7 +144,7 @@ public class CoverageProcessor {
 
         // Invoke the transformation to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
-        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener);
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, sourceDirectories, sourceCodeEncoding);
     }
 
     private CoverageAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
@@ -191,7 +192,8 @@ public class CoverageProcessor {
         }
     }
 
-    private Optional<Run<?, ?>> setDiffInCoverageForChangeRequest(final CoverageResult coverageReport, final FilteredLog log) {
+    private Optional<Run<?, ?>> setDiffInCoverageForChangeRequest(final CoverageResult coverageReport,
+            final FilteredLog log) {
         log.logInfo("Computing coverage delta report");
 
         ReferenceFinder referenceFinder = new ReferenceFinder();
@@ -246,7 +248,8 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult) throws CoverageException {
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult)
+            throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
             throw new CoverageException(
@@ -263,7 +266,8 @@ public class CoverageProcessor {
      *
      * @return {@link CoverageResult} for each report
      */
-    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(final List<CoverageReportAdapter> adapters,
+    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(
+            final List<CoverageReportAdapter> adapters,
             final List<ReportDetector> reportDetectors)
             throws IOException, InterruptedException, CoverageException {
         PrintStream logger = listener.getLogger();
@@ -540,7 +544,8 @@ public class CoverageProcessor {
      *
      * @return Coverage report that have all coverage results
      */
-    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter, final List<CoverageResult> results) {
+    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter,
+            final List<CoverageResult> results) {
         CoverageResult report = new CoverageResult(CoverageElement.REPORT, null,
                 adapter.getDescriptor().getDisplayName() + ": " + adapter.getPath());
 
@@ -665,7 +670,8 @@ public class CoverageProcessor {
         return failBuildIfCoverageDecreasedInChangeRequest;
     }
 
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(
+            final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 

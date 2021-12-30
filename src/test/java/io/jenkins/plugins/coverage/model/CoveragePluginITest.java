@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
@@ -43,9 +44,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
-    /** Example integration test for a pipeline with code coverage. */
+    /** Integration test with source code painting. */
     @Test
-    public void coveragePluginPipelineHelloWorld() {
+    public void coveragePluginPipelineWithSourceCode() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "timestamps {\n"
@@ -54,12 +55,33 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
                 + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "                    relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], \n"
+                + "         sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), \n"
+                + "         sourceCodeEncoding: 'UTF-8', \n"
+                + "         sourceDirectories: [[path: 'checkout/src/main/java']]"
                 + "}"
                 + "}", true));
 
-        verifySimpleCoverageNode(job);
+        Run<?, ?> build = buildSuccessfully(job);
+
+        assertThat(getConsoleLog(build))
+                .contains("-> finished painting successfully");
+
+        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+        assertThat(action.getLineCoverage())
+                .isEqualTo(new Coverage(6083, 6368 - 6083));
+
+        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, "AcuCobolParser.java");
+        assertThat(fileNode).isNotEmpty()
+                .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
+                        "edu/hm/hafner/analysis/parser/AcuCobolParser.java"));
+
+        String link = String.valueOf(fileNode.get().getPath().hashCode());
+        SourceViewModel model = action.getTarget().getDynamic(link, null, null);
+        assertThat(model.getDisplayName()).contains("AcuCobolParser.java");
+
+        assertThat(model.getSourceFileContent())
+                .contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
     }
 
     /** Example integration test for a freestyle build with code coverage. */

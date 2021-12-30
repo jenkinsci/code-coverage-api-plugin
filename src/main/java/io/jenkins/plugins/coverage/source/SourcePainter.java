@@ -5,20 +5,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.hm.hafner.util.FilteredLog;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
@@ -26,6 +28,7 @@ import jenkins.MasterToSlaveFileCallable;
 
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
+import io.jenkins.plugins.prism.SourceDirectoryFilter;
 
 /**
  * Paints a collection of files with the recorded coverage information and stores all files in a temporary directory.
@@ -40,16 +43,19 @@ public class SourcePainter implements Serializable {
             the painting.
      */
     private static final long serialVersionUID = -7390586016893061868L;
+
+    /** Filename of the archive with the source files that is being sent to the controller. */
     public static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
 
-    public void paintSources(final List<PaintedNode> paintedFiles, final FilteredLog log, final FilePath workspace,
-            final Collection<String> sourceFolders, final Charset sourceEncoding) {
+    public void paintSources(final List<PaintedNode> paintedFiles, final FilePath workspace,
+            final Set<String> sourceDirectories, final Charset sourceEncoding, final FilteredLog log) {
         try {
             FilePath outputFolder = getSourcesFolder(workspace);
             outputFolder.mkdirs();
 
             int count = paintedFiles.parallelStream().mapToInt(
-                    f -> paintFile(f, workspace, sourceFolders, log, sourceEncoding)).sum();
+                    f -> paintSource(f, workspace, sourceDirectories, log, sourceEncoding)).sum();
+
             if (count == paintedFiles.size()) {
                 log.logInfo("-> finished painting successfully");
             }
@@ -57,6 +63,7 @@ public class SourcePainter implements Serializable {
                 log.logInfo("-> finished painting (%d files have been painted, %d files failed)",
                         count, paintedFiles.size() - count);
             }
+
             FilePath zipFile = workspace.child(COVERAGE_SOURCES_ZIP);
             outputFolder.zip(zipFile);
             log.logInfo("-> zipping sources from folder '%s' as '%s'", outputFolder, zipFile);
@@ -71,10 +78,10 @@ public class SourcePainter implements Serializable {
         }
     }
 
-    private int paintFile(final PaintedNode fileNode, final FilePath workspace,
-            final Collection<String> sourceFolders, final FilteredLog log, final Charset sourceEncoding) {
+    private int paintSource(final PaintedNode fileNode, final FilePath workspace,
+            final Set<String> sourceDirectories, final FilteredLog log, final Charset sourceEncoding) {
         String sourcePath = fileNode.getNode().getPath();
-        return findSourceFile(workspace, sourcePath, sourceFolders, log)
+        return findSourceFile(workspace, sourcePath, sourceDirectories, log)
                 .map(path -> paint(fileNode.getPaint(), sourcePath, path, sourceEncoding, workspace, log))
                 .orElse(0);
     }
@@ -144,7 +151,6 @@ public class SourcePainter implements Serializable {
                         "&nbsp;")
                 .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>\n");
         output.write("</tr>\n");
-
     }
 
     /**
@@ -160,7 +166,7 @@ public class SourcePainter implements Serializable {
     }
 
     private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
-            final Collection<String> sourceFolders, final FilteredLog log) {
+            final Set<String> sourceDirectories, final FilteredLog log) {
         try {
             FilePath absolutePath = new FilePath(new File(fileName));
             if (absolutePath.exists()) {
@@ -172,7 +178,7 @@ public class SourcePainter implements Serializable {
                 return Optional.of(relativePath);
             }
 
-            for (String sourceFolder : sourceFolders) {
+            for (String sourceFolder : sourceDirectories) {
                 FilePath sourcePath = workspace.child(sourceFolder).child(fileName);
                 if (sourcePath.exists()) {
                     return Optional.of(sourcePath);
@@ -191,11 +197,31 @@ public class SourcePainter implements Serializable {
         private static final long serialVersionUID = 3966282357309568323L;
 
         private final List<PaintedNode> paintedFiles;
+        private final Set<String> permittedSourceDirectories;
+        private final Set<String> requestedSourceDirectories;
+        private final String sourceCodeEncoding;
 
-        public AgentPainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles) {
+        public AgentPainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+                final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
+                final String sourceCodeEncoding) {
             this.paintedFiles = paintedFiles.stream()
                     .map(e -> new PaintedNode(e.getKey(), e.getValue()))
                     .collect(Collectors.toList());
+            this.permittedSourceDirectories = permittedSourceDirectories;
+            this.requestedSourceDirectories = requestedSourceDirectories;
+            this.sourceCodeEncoding = sourceCodeEncoding;
+        }
+
+        private Charset getCharset(@CheckForNull final String charset) {
+            try {
+                if (StringUtils.isNotBlank(charset)) {
+                    return Charset.forName(charset);
+                }
+            }
+            catch (UnsupportedCharsetException | IllegalCharsetNameException exception) {
+                // ignore and return default
+            }
+            return Charset.defaultCharset();
         }
 
         @Override
@@ -204,10 +230,18 @@ public class SourcePainter implements Serializable {
             FilteredLog log = new FilteredLog("Errors during source code painting:");
 
             SourcePainter sourcePainter = new SourcePainter();
-            sourcePainter.paintSources(paintedFiles, log, new FilePath(workspace),
-                    Arrays.asList("checkout/src/main/java"), StandardCharsets.UTF_8); // TODO: parameters
+            sourcePainter.paintSources(paintedFiles, new FilePath(workspace), filterSourceDirectories(workspace),
+                    getCharset(sourceCodeEncoding), log);
 
             return log;
+        }
+
+        private Set<String> filterSourceDirectories(final File workspace) {
+            SourceDirectoryFilter filter = new SourceDirectoryFilter();
+            return filter.getPermittedSourceDirectories(
+                    new FilePath(workspace), permittedSourceDirectories, requestedSourceDirectories).stream()
+                    .map(FilePath::getRemote)
+                    .collect(Collectors.toSet());
         }
     }
 

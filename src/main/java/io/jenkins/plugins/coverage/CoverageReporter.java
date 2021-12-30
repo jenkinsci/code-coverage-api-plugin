@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
 
@@ -20,6 +21,8 @@ import io.jenkins.plugins.coverage.source.SourcePainter.AgentPainter;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
+import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
+import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.util.LogHandler;
 
 /**
@@ -29,7 +32,7 @@ import io.jenkins.plugins.util.LogHandler;
  */
 public class CoverageReporter {
     void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener) throws InterruptedException {
+            final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding) throws InterruptedException {
         rootResult.stripGroup();
 
         LogHandler logHandler = new LogHandler(listener, "Coverage");
@@ -44,7 +47,14 @@ public class CoverageReporter {
         log.logInfo("Painting %d source files on agent", paintedFiles.size());
 
         try {
-            FilteredLog agentLog = workspace.act(new AgentPainter(paintedFiles));
+            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
+                    .getSourceDirectories()
+                    .stream()
+                    .map(PermittedSourceCodeDirectory::getPath)
+                    .collect(Collectors.toSet());
+
+            FilteredLog agentLog = workspace.act(
+                    new AgentPainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories, sourceCodeEncoding));
             log.merge(agentLog);
         }
         catch (IOException exception) {
