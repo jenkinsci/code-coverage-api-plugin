@@ -44,8 +44,8 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import io.jenkins.plugins.prism.SourceCodeConfigurationValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
+import io.jenkins.plugins.prism.SourceEncodingValidation;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
@@ -291,7 +291,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Extension @Symbol("publishCoverage")
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-        private final SourceCodeConfigurationValidation validation = new SourceCodeConfigurationValidation();
+
+        private final SourceEncodingValidation validation = new SourceEncodingValidation();
 
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);

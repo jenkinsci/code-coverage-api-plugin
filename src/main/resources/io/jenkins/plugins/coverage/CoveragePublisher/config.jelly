@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/controls">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/prism">
 
   <f:block>
     <f:hetero-list name="adapters" descriptors="${descriptor.listCoverageReportAdapterDescriptors}"
@@ -30,20 +30,7 @@
       </f:repeatableProperty>
     </f:entry>
     <f:property field="sourceFileResolver" propertyDescriptor="${descriptor.getSourceFileResolverDescriptor()}"/>
-    <f:entry title="${%title.sourceCodeEncoding}" field="sourceCodeEncoding">
-      <c:safe-combobox/>
-    </f:entry>
-    <f:entry title="${%title.sourceDirectories}" description="${%description.sourceDirectories}">
-      <div id="sourceDirectories">
-        <f:repeatableProperty field="sourceDirectories">
-          <f:entry title="">
-            <div align="right">
-              <f:repeatableDeleteButton/>
-            </div>
-          </f:entry>
-        </f:repeatableProperty>
-      </div>
-    </f:entry>
+    <p:sourceConfig/>
 
   </f:advanced>
 </j:jelly>
