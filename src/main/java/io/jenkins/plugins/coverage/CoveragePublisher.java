@@ -44,6 +44,7 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
+import io.jenkins.plugins.prism.SourceCodeConfigurationValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.util.JenkinsFacade;
 
@@ -290,7 +291,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Extension @Symbol("publishCoverage")
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-        private final ModelValidation model = new ModelValidation();
+        private final SourceCodeConfigurationValidation validation = new SourceCodeConfigurationValidation();
 
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);
@@ -306,7 +307,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         @POST
         public ComboBoxModel doFillSourceCodeEncodingItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
-                return model.getAllCharsets();
+                return validation.getAllCharsets();
             }
             return new ComboBoxModel();
         }
@@ -328,7 +329,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
                 return FormValidation.ok();
             }
 
-            return model.validateCharset(sourceCodeEncoding);
+            return validation.validateCharset(sourceCodeEncoding);
         }
 
         @SuppressWarnings("unchecked")
