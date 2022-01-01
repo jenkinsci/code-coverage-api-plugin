@@ -46,6 +46,8 @@ public class SourcePainter implements Serializable {
 
     /** Filename of the archive with the source files that is being sent to the controller. */
     public static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
+    /** Directory in the build folder of the controller that contains the zipped source files. */
+    public static final String COVERAGE_SOURCES_DIRECTORY = "coverage-sources";
 
     public void paintSources(final List<PaintedNode> paintedFiles, final FilePath workspace,
             final Set<String> sourceDirectories, final Charset sourceEncoding, final FilteredLog log) {
@@ -90,7 +92,7 @@ public class SourcePainter implements Serializable {
             final FilePath workspace, final FilteredLog log) {
         FilePath outputPath = getSourcesFolder(workspace).child(getTempName(fileName));
         try {
-            Path paintedFilesFolder = Files.createTempDirectory("coverage-sources");
+            Path paintedFilesFolder = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
             Path fullSourcePath = paintedFilesFolder.resolve(getTempName(fileName).replace(".zip", ".source"));
             try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
                 List<String> lines = Files.readAllLines(Paths.get(inputPath.getRemote()), charset);
@@ -110,7 +112,7 @@ public class SourcePainter implements Serializable {
     }
 
     private FilePath getSourcesFolder(final FilePath workspace) {
-        return workspace.child("coverage-sources");
+        return workspace.child(COVERAGE_SOURCES_DIRECTORY);
     }
 
     private void paintLine(final int line, final String content, final CoveragePaint paint,

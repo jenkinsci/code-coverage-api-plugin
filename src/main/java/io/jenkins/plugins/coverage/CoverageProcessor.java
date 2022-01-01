@@ -44,11 +44,13 @@ import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
+import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
 public class CoverageProcessor {
@@ -111,23 +113,6 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
-        if (sourceFileResolver != null) {
-//            Set<String> possiblePaths = new HashSet<>();
-//            coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
-//                Set<String> paths = coverageResult.getAdditionalProperty(
-//                        CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH);
-//                if (paths != null) {
-//                    possiblePaths.addAll(paths);
-//                }
-//            });
-//
-//            if (possiblePaths.size() > 0) {
-//                sourceFileResolver.setPossiblePaths(possiblePaths);
-//            }
-//
-//            sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
-        }
-
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
         Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
@@ -144,7 +129,18 @@ public class CoverageProcessor {
 
         // Invoke the transformation to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
-        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, sourceDirectories, sourceCodeEncoding);
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
+                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
+    }
+
+    private SourceCodeRetention mapSourceCodeRetention() {
+        if (sourceFileResolver.getLevel() == SourceFileResolverLevel.STORE_LAST_BUILD) {
+            return SourceCodeRetention.LAST_BUILD;
+        }
+        if (sourceFileResolver.getLevel() == SourceFileResolverLevel.NEVER_STORE) {
+            return SourceCodeRetention.NEVER;
+        }
+        return SourceCodeRetention.EVERY_BUILD;
     }
 
     private CoverageAction convertResultToAction(final CoverageResult coverageReport) throws IOException {

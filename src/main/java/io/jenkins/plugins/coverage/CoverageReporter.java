@@ -23,6 +23,7 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
+import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
 /**
@@ -32,7 +33,8 @@ import io.jenkins.plugins.util.LogHandler;
  */
 public class CoverageReporter {
     void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding) throws InterruptedException {
+            final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
+            final SourceCodeRetention sourceCodeRetention) throws InterruptedException {
         rootResult.stripGroup();
 
         LogHandler logHandler = new LogHandler(listener, "Coverage");
@@ -66,6 +68,9 @@ public class CoverageReporter {
 
         copySourcesToBuildFolder(build, workspace, log);
 
+        logHandler.log(log);
+
+        sourceCodeRetention.cleanup(build, SourcePainter.COVERAGE_SOURCES_DIRECTORY, log);
         logHandler.log(log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
