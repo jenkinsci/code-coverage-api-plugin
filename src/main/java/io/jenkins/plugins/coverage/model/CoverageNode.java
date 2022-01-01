@@ -60,7 +60,7 @@ public class CoverageNode implements Serializable {
 
     CoverageNode getParent() {
         if (parent == null) {
-            throw new NullPointerException("Parent is not set");
+            throw new IllegalStateException("Parent is not set");
         }
         return parent;
     }

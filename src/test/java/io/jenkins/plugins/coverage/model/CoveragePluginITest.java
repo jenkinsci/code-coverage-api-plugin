@@ -84,15 +84,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 .contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
     }
 
-    /** Example integration test for a freestyle build with code coverage. */
+    /** Freestyle job integration test for a simple build with code coverage. */
     @Test
     public void coveragePluginFreestyleHelloWorld() {
-        // automatisch 1. Jenkins starten
-        // automatisch 2. Plugin deployen
-        // 3a. Job erzeugen
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, FILE_NAME);
-        // 3b. Job konfigurieren// 3a. Job erzeugen
+
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
@@ -101,7 +98,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySimpleCoverageNode(project);
     }
 
-    /** Example integration test for a freestyle build with code coverage that runs on an agent. */
+    /** Integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
     public void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
@@ -117,7 +114,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySimpleCoverageNode(project);
     }
 
-    /** Example integration test for a pipeline with code coverage that runs on an agent. */
+    /** Integration test for a pipeline with code coverage that runs on an agent. */
     @Test
     public void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
         DumbSlave agent = createDockerContainerAgent(javaDockerRule.get());
@@ -176,11 +173,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
-        // 4. Jacoco XML File in den Workspace legen (Stub für einen Build)
-        // 5. Jenkins Build starten
         Run<?, ?> build = buildSuccessfully(project);
-        // 6. Mit Assertions Ergebnisse überprüfen
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);

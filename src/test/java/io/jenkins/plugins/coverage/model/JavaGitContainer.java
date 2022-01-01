@@ -13,8 +13,10 @@ public class JavaGitContainer extends SshdContainer {
     /**
      * Creates a new instance of {@link JavaGitContainer}.
      */
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
     public JavaGitContainer() {
         super();
+
         // required for dependency injection
     }
 }

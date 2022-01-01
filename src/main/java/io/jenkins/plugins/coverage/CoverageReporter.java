@@ -27,7 +27,8 @@ import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
 /**
- * FIXME: preliminary place for the reporter code.
+ * Transforms the old model to the new model and invokes all steps that work on the new model. Currently,
+ * only the source code painting and copying has been moved to this new reporter class.
  *
  * @author Ullrich Hafner
  */
@@ -35,33 +36,19 @@ public class CoverageReporter {
     void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention) throws InterruptedException {
-        rootResult.stripGroup();
-
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        CoverageNodeConverter converter = new CoverageNodeConverter();
+        rootResult.stripGroup();
 
+        CoverageNodeConverter converter = new CoverageNodeConverter();
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
         Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
         log.logInfo("Painting %d source files on agent", paintedFiles.size());
 
-        try {
-            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
-                    .getSourceDirectories()
-                    .stream()
-                    .map(PermittedSourceCodeDirectory::getPath)
-                    .collect(Collectors.toSet());
-
-            FilteredLog agentLog = workspace.act(
-                    new AgentPainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories, sourceCodeEncoding));
-            log.merge(agentLog);
-        }
-        catch (IOException exception) {
-            log.logException(exception, "Can't paint and zip sources on the agent");
-        }
+        paintFilesOnAgent(workspace, paintedFiles, requestedSourceDirectories, sourceCodeEncoding, log);
 
         log.logInfo("Copying painted sources from agent to build folder");
         logHandler.log(log);
@@ -71,6 +58,7 @@ public class CoverageReporter {
         logHandler.log(log);
 
         sourceCodeRetention.cleanup(build, SourcePainter.COVERAGE_SOURCES_DIRECTORY, log);
+
         logHandler.log(log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
@@ -88,6 +76,26 @@ public class CoverageReporter {
             action = new CoverageBuildAction(build, rootNode);
         }
         build.addOrReplaceAction(action);
+    }
+
+    private void paintFilesOnAgent(final FilePath workspace, final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+            final Set<String> requestedSourceDirectories,
+            final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
+        try {
+            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
+                    .getSourceDirectories()
+                    .stream()
+                    .map(PermittedSourceCodeDirectory::getPath)
+                    .collect(Collectors.toSet());
+
+            FilteredLog agentLog = workspace.act(
+                    new AgentPainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
+                            sourceCodeEncoding));
+            log.merge(agentLog);
+        }
+        catch (IOException exception) {
+            log.logException(exception, "Can't paint and zip sources on the agent");
+        }
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

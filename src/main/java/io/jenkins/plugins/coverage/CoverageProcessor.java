@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Sets;
 
 import edu.hm.hafner.util.FilteredLog;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jvnet.localizer.Localizable;
@@ -71,6 +72,7 @@ public class CoverageProcessor {
 
     private boolean failBuildIfCoverageDecreasedInChangeRequest;
 
+    @CheckForNull
     private SourceFileResolver sourceFileResolver;
 
     /**
@@ -127,18 +129,18 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        // Invoke the transformation to the new model
+        // Transform the old model to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
         coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
                 sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {
+        if (sourceFileResolver == null || sourceFileResolver.getLevel() == SourceFileResolverLevel.NEVER_STORE) {
+            return SourceCodeRetention.NEVER;
+        }
         if (sourceFileResolver.getLevel() == SourceFileResolverLevel.STORE_LAST_BUILD) {
             return SourceCodeRetention.LAST_BUILD;
-        }
-        if (sourceFileResolver.getLevel() == SourceFileResolverLevel.NEVER_STORE) {
-            return SourceCodeRetention.NEVER;
         }
         return SourceCodeRetention.EVERY_BUILD;
     }

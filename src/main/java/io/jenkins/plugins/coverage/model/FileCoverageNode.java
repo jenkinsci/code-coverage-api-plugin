@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -31,5 +33,25 @@ public class FileCoverageNode extends CoverageNode {
     @Override
     public String getPath() {
         return mergePath(sourcePath);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        FileCoverageNode that = (FileCoverageNode) o;
+        return Objects.equals(sourcePath, that.sourcePath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), sourcePath);
     }
 }

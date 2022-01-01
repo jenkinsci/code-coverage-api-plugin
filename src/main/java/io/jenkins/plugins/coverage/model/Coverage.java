@@ -2,11 +2,9 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.Serializable;
 
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-
 /**
  * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
- * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageElement}.
+ * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageMetric}.
  *
  * @author Ullrich Hafner
  */

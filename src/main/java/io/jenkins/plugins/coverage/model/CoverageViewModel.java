@@ -22,7 +22,6 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourcePainter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
@@ -204,8 +203,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     private static File createFileInBuildFolder(final File buildFolder, final String fileName) {
-        return new File(buildFolder,
-                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY + fileName);
+        File sourceFolder = new File(buildFolder, SourcePainter.COVERAGE_SOURCES_DIRECTORY);
+        return new File(sourceFolder, fileName);
     }
 
     private static String sanitizeFilename(final String inputName) {
