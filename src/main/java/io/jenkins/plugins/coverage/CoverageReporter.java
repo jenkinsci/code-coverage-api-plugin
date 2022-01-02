@@ -45,17 +45,18 @@ public class CoverageReporter {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
-        Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
-        log.logInfo("Painting %d source files on agent", paintedFiles.size());
+        if (sourceCodeRetention != SourceCodeRetention.NEVER) {
+            Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
+            log.logInfo("Painting %d source files on agent", paintedFiles.size());
+            logHandler.log(log);
 
-        paintFilesOnAgent(workspace, paintedFiles, requestedSourceDirectories, sourceCodeEncoding, log);
+            paintFilesOnAgent(workspace, paintedFiles, requestedSourceDirectories, sourceCodeEncoding, log);
+            log.logInfo("Copying painted sources from agent to build folder");
+            logHandler.log(log);
 
-        log.logInfo("Copying painted sources from agent to build folder");
-        logHandler.log(log);
-
-        copySourcesToBuildFolder(build, workspace, log);
-
-        logHandler.log(log);
+            copySourcesToBuildFolder(build, workspace, log);
+            logHandler.log(log);
+        }
 
         sourceCodeRetention.cleanup(build, SourcePainter.COVERAGE_SOURCES_DIRECTORY, log);
 

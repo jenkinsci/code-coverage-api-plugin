@@ -38,6 +38,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
+    private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
+    private static final String NO_SOURCE_CODE = "n/a";
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
@@ -48,7 +50,37 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void coveragePluginPipelineWithSourceCode() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
-        job.setDefinition(new CpsFlowDefinition("node {"
+
+        String sourceCodeRetention = "STORE_ALL_BUILD";
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention));
+
+        Run<?, ?> build = buildSuccessfully(job);
+
+        assertThat(getConsoleLog(build))
+                .contains("-> finished painting successfully");
+
+        verifySourceCodeInBuild(build, ACU_COBOL_PARSER);
+
+        Run<?, ?> secondBuild = buildSuccessfully(job);
+        verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(build, ACU_COBOL_PARSER); // should be still available
+
+        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD"));
+        Run<?, ?> thirdBuild = buildSuccessfully(job);
+        verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(build, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
+
+        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE"));
+        Run<?, ?> lastBuild = buildSuccessfully(job);
+        verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
+        verifySourceCodeInBuild(build, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
+    }
+
+    private CpsFlowDefinition createPipelineWithSourceCode(final String sourceCodeRetention) {
+        return new CpsFlowDefinition("node {"
                 + "timestamps {\n"
                 + "    checkout([$class: 'GitSCM', "
                 + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
@@ -56,17 +88,20 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "                    relativeTargetDir: 'checkout']]])\n"
                 + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], \n"
-                + "         sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), \n"
+                + "         sourceFileResolver: sourceFiles('" + sourceCodeRetention + "'), \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
                 + "         sourceDirectories: [[path: 'checkout/src/main/java']]"
                 + "}"
-                + "}", true));
+                + "}", true);
+    }
 
-        Run<?, ?> build = buildSuccessfully(job);
+    private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
+        SourceViewModel model = verifySourceModel(build);
 
-        assertThat(getConsoleLog(build))
-                .contains("-> finished painting successfully");
+        assertThat(model.getSourceFileContent()).contains(sourceCodeSnippet);
+    }
 
+    private SourceViewModel verifySourceModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action.getLineCoverage())
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
@@ -79,9 +114,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         String link = String.valueOf(fileNode.get().getPath().hashCode());
         SourceViewModel model = action.getTarget().getDynamic(link, null, null);
         assertThat(model.getDisplayName()).contains("AcuCobolParser.java");
-
-        assertThat(model.getSourceFileContent())
-                .contains("public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{");
+        return model;
     }
 
     /** Freestyle job integration test for a simple build with code coverage. */
