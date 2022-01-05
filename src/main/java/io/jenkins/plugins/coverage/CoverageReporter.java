@@ -16,8 +16,7 @@ import hudson.model.TaskListener;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.source.SourcePainter;
-import io.jenkins.plugins.coverage.source.SourcePainter.AgentPainter;
+import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
@@ -58,7 +57,7 @@ public class CoverageReporter {
             logHandler.log(log);
         }
 
-        sourceCodeRetention.cleanup(build, SourcePainter.COVERAGE_SOURCES_DIRECTORY, log);
+        sourceCodeRetention.cleanup(build, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY, log);
 
         logHandler.log(log);
 
@@ -90,7 +89,7 @@ public class CoverageReporter {
                     .collect(Collectors.toSet());
 
             FilteredLog agentLog = workspace.act(
-                    new AgentPainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
+                    new AgentCoveragePainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
                             sourceCodeEncoding));
             log.merge(agentLog);
         }
@@ -151,8 +150,8 @@ public class CoverageReporter {
             throws InterruptedException {
         try {
             FilePath buildFolder = new FilePath(build.getRootDir());
-            FilePath buildZip = buildFolder.child(SourcePainter.COVERAGE_SOURCES_ZIP);
-            workspace.child(SourcePainter.COVERAGE_SOURCES_ZIP).copyTo(buildZip);
+            FilePath buildZip = buildFolder.child(AgentCoveragePainter.COVERAGE_SOURCES_ZIP);
+            workspace.child(AgentCoveragePainter.COVERAGE_SOURCES_ZIP).copyTo(buildZip);
             log.logInfo("-> extracting...");
             buildZip.unzip(buildFolder);
             buildZip.delete();

@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -17,10 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import edu.hm.hafner.util.FilteredLog;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
@@ -28,35 +23,81 @@ import jenkins.MasterToSlaveFileCallable;
 
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
+import io.jenkins.plugins.prism.CharsetValidation;
+import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
 
-/**
- * Paints a collection of files with the recorded coverage information and stores all files in a temporary directory.
- *
- * @author Ullrich Hafner
+/*
+ TODO:  ideally we would scan for coverage reports on the agent and covert the reports there as well. Then we
+        can simply create the painted files on the agent without transferring the list of nodes that will be painted.
+        Additionally we could strip the node tree at the file level, since the lower nodes are only required for
+        the painting.
  */
-public class SourcePainter implements Serializable {
-    /*
-     TODO:  ideally we would scan for coverage reports on the agent and covert the reports there as well. Then we
-            can simply create the painted files on the agent without transferring the list of nodes that will be painted.
-            Additionally we could strip the node tree at the file level, since the lower nodes are only required for
-            the painting.
-     */
-    private static final long serialVersionUID = -7390586016893061868L;
+/**
+ * Paints source code files on the agent using the recorded coverage information.
+ */
+public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog> {
+    private static final long serialVersionUID = 3966282357309568323L;
 
     /** Filename of the archive with the source files that is being sent to the controller. */
     public static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
     /** Directory in the build folder of the controller that contains the zipped source files. */
     public static final String COVERAGE_SOURCES_DIRECTORY = "coverage-sources";
 
-    public void paintSources(final List<PaintedNode> paintedFiles, final FilePath workspace,
-            final Set<String> sourceDirectories, final Charset sourceEncoding, final FilteredLog log) {
+    /**
+     * Returns a file name for a temporary file that will hold the contents of the source.
+     *
+     * @param fileName
+     *         the file name to convert
+     *
+     * @return the temporary name
+     */
+    public static String getTempName(final String fileName) {
+        return Integer.toHexString(fileName.hashCode()) + ".zip";
+    }
+
+    private final List<PaintedNode> paintedFiles;
+    private final Set<String> permittedSourceDirectories;
+    private final Set<String> requestedSourceDirectories;
+
+    private final String sourceCodeEncoding;
+
+    /**
+     * Creates a new instance of {@link AgentCoveragePainter}.
+     *
+     * @param paintedFiles
+     *         the model for the file painting for each coverage node
+     * @param permittedSourceDirectories
+     *         the permitted source code directories (in Jenkins global configuration)
+     * @param requestedSourceDirectories
+     *         the requested relative and absolute source directories (in the step configuration)
+     * @param sourceCodeEncoding
+     *         the encoding of the source code files
+     */
+    public AgentCoveragePainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+            final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
+            final String sourceCodeEncoding) {
+        this.paintedFiles = paintedFiles.stream()
+                .map(e -> new PaintedNode(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        this.permittedSourceDirectories = permittedSourceDirectories;
+        this.requestedSourceDirectories = requestedSourceDirectories;
+        this.sourceCodeEncoding = sourceCodeEncoding;
+    }
+
+    @Override
+    public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel)
+            throws IOException, InterruptedException {
+        FilteredLog log = new FilteredLog("Errors during source code painting:");
+        Set<String> sourceDirectories = filterSourceDirectories(workspaceFile);
+        FilePath workspace = new FilePath(workspaceFile);
+
         try {
             FilePath outputFolder = getSourcesFolder(workspace);
             outputFolder.mkdirs();
 
             int count = paintedFiles.parallelStream().mapToInt(
-                    f -> paintSource(f, workspace, sourceDirectories, log, sourceEncoding)).sum();
+                    f -> paintSource(f, workspace, sourceDirectories, log, new CharsetValidation().getCharset(sourceCodeEncoding))).sum();
 
             if (count == paintedFiles.size()) {
                 log.logInfo("-> finished painting successfully");
@@ -66,7 +107,7 @@ public class SourcePainter implements Serializable {
                         count, paintedFiles.size() - count);
             }
 
-            FilePath zipFile = workspace.child(COVERAGE_SOURCES_ZIP);
+            FilePath zipFile = workspace.child(AgentCoveragePainter.COVERAGE_SOURCES_ZIP);
             outputFolder.zip(zipFile);
             log.logInfo("-> zipping sources from folder '%s' as '%s'", outputFolder, zipFile);
         }
@@ -78,6 +119,16 @@ public class SourcePainter implements Serializable {
             log.logException(exception,
                     "Processing has been interrupted: skipping zipping of source files", workspace);
         }
+
+        return log;
+    }
+
+    private Set<String> filterSourceDirectories(final File workspace) {
+        SourceDirectoryFilter filter = new SourceDirectoryFilter();
+        return filter.getPermittedSourceDirectories(new FilePath(workspace),
+                        permittedSourceDirectories, requestedSourceDirectories).stream()
+                .map(FilePath::getRemote)
+                .collect(Collectors.toSet());
     }
 
     private int paintSource(final PaintedNode fileNode, final FilePath workspace,
@@ -90,10 +141,11 @@ public class SourcePainter implements Serializable {
 
     private int paint(final CoveragePaint paint, final String fileName, final FilePath inputPath, final Charset charset,
             final FilePath workspace, final FilteredLog log) {
-        FilePath outputPath = getSourcesFolder(workspace).child(getTempName(fileName));
+        FilePath outputPath = getSourcesFolder(workspace).child(AgentCoveragePainter.getTempName(fileName));
         try {
-            Path paintedFilesFolder = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
-            Path fullSourcePath = paintedFilesFolder.resolve(getTempName(fileName).replace(".zip", ".source"));
+            Path paintedFilesFolder = Files.createTempDirectory(AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
+            Path fullSourcePath = paintedFilesFolder.resolve(
+                    AgentCoveragePainter.getTempName(fileName).replace(".zip", ".source"));
             try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
                 List<String> lines = Files.readAllLines(Paths.get(inputPath.getRemote()), charset);
                 for (int line = 0; line < lines.size(); line++) {
@@ -112,7 +164,7 @@ public class SourcePainter implements Serializable {
     }
 
     private FilePath getSourcesFolder(final FilePath workspace) {
-        return workspace.child(COVERAGE_SOURCES_DIRECTORY);
+        return workspace.child(AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
     }
 
     private void paintLine(final int line, final String content, final CoveragePaint paint,
@@ -155,35 +207,23 @@ public class SourcePainter implements Serializable {
         output.write("</tr>\n");
     }
 
-    /**
-     * Returns a file name for a temporary file that will hold the contents of the source.
-     *
-     * @param fileName
-     *         the file name to convert
-     *
-     * @return the temporary name
-     */
-    public static String getTempName(final String fileName) {
-        return Integer.toHexString(fileName.hashCode()) + ".zip";
-    }
-
     private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
             final Set<String> sourceDirectories, final FilteredLog log) {
         try {
             FilePath absolutePath = new FilePath(new File(fileName));
             if (absolutePath.exists()) {
-                return Optional.of(absolutePath);
+                return enforcePermissionFor(absolutePath, workspace, sourceDirectories, log);
             }
 
             FilePath relativePath = workspace.child(fileName);
             if (relativePath.exists()) {
-                return Optional.of(relativePath);
+                return enforcePermissionFor(relativePath, workspace, sourceDirectories, log);
             }
 
             for (String sourceFolder : sourceDirectories) {
                 FilePath sourcePath = workspace.child(sourceFolder).child(fileName);
                 if (sourcePath.exists()) {
-                    return Optional.of(sourcePath);
+                    return enforcePermissionFor(sourcePath, workspace, sourceDirectories, log);
                 }
             }
 
@@ -195,59 +235,18 @@ public class SourcePainter implements Serializable {
         return Optional.empty();
     }
 
-    public static class AgentPainter extends MasterToSlaveFileCallable<FilteredLog> {
-        private static final long serialVersionUID = 3966282357309568323L;
-
-        private final List<PaintedNode> paintedFiles;
-        private final Set<String> permittedSourceDirectories;
-        private final Set<String> requestedSourceDirectories;
-        private final String sourceCodeEncoding;
-
-        public AgentPainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
-                final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
-                final String sourceCodeEncoding) {
-            this.paintedFiles = paintedFiles.stream()
-                    .map(e -> new PaintedNode(e.getKey(), e.getValue()))
-                    .collect(Collectors.toList());
-            this.permittedSourceDirectories = permittedSourceDirectories;
-            this.requestedSourceDirectories = requestedSourceDirectories;
-            this.sourceCodeEncoding = sourceCodeEncoding;
+    private Optional<FilePath> enforcePermissionFor(final FilePath absolutePath, final FilePath workspace,
+            final Set<String> sourceDirectories, final FilteredLog log) {
+        FilePermissionEnforcer enforcer = new FilePermissionEnforcer();
+        if (enforcer.isInWorkspace(absolutePath.getRemote(), workspace, sourceDirectories)) {
+            log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
+                    absolutePath.getRemote());
+            return Optional.of(absolutePath);
         }
-
-        private Charset getCharset(@CheckForNull final String charset) {
-            try {
-                if (StringUtils.isNotBlank(charset)) {
-                    return Charset.forName(charset);
-                }
-            }
-            catch (UnsupportedCharsetException | IllegalCharsetNameException exception) {
-                // ignore and return default
-            }
-            return Charset.defaultCharset();
-        }
-
-        @Override
-        public FilteredLog invoke(final File workspace, final VirtualChannel channel)
-                throws IOException, InterruptedException {
-            FilteredLog log = new FilteredLog("Errors during source code painting:");
-
-            SourcePainter sourcePainter = new SourcePainter();
-            sourcePainter.paintSources(paintedFiles, new FilePath(workspace), filterSourceDirectories(workspace),
-                    getCharset(sourceCodeEncoding), log);
-
-            return log;
-        }
-
-        private Set<String> filterSourceDirectories(final File workspace) {
-            SourceDirectoryFilter filter = new SourceDirectoryFilter();
-            return filter.getPermittedSourceDirectories(
-                    new FilePath(workspace), permittedSourceDirectories, requestedSourceDirectories).stream()
-                    .map(FilePath::getRemote)
-                    .collect(Collectors.toSet());
-        }
+        return Optional.empty();
     }
 
-    static class PaintedNode implements Serializable {
+    private static class PaintedNode implements Serializable {
         private static final long serialVersionUID = -6044649044983631852L;
 
         private final CoverageNode node;

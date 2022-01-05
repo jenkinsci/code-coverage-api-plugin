@@ -22,7 +22,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.source.SourcePainter;
+import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -194,7 +194,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return Optional.of(originalFileLocation);
         }
 
-        File hashBasedLocation = createFileInBuildFolder(buildFolder, SourcePainter.getTempName(path));
+        File hashBasedLocation = createFileInBuildFolder(buildFolder, AgentCoveragePainter.getTempName(path));
         if (hashBasedLocation.canRead()) {
             return Optional.of(hashBasedLocation);
         }
@@ -203,7 +203,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     private static File createFileInBuildFolder(final File buildFolder, final String fileName) {
-        File sourceFolder = new File(buildFolder, SourcePainter.COVERAGE_SOURCES_DIRECTORY);
+        File sourceFolder = new File(buildFolder, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
         return new File(sourceFolder, fileName);
     }
 

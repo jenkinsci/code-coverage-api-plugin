@@ -12,7 +12,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
-import io.jenkins.plugins.coverage.source.SourcePainter;
+import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
 
 /**
  * Server side model that provides the data for the source code view of the coverage results. The layout of the
@@ -44,7 +44,7 @@ public class SourceViewModel extends CoverageViewModel {
             if (sourceFile.isPresent()) {
                 File file = sourceFile.get();
                 if (file.toString().endsWith(".zip")) {
-                    return unzip(file, SourcePainter.getTempName(getNode().getPath()));
+                    return unzip(file, AgentCoveragePainter.getTempName(getNode().getPath()));
                 }
                 return read(file);
             }
