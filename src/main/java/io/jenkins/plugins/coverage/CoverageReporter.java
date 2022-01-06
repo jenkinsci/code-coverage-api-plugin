@@ -113,7 +113,7 @@ public class CoverageReporter {
                 Run<?, ?> fallbackBuild = previousResult.get().getOwner();
                 if (fallbackBuild != referenceBuild) {
                     log.logInfo("-> Reference build has no action, falling back to last build with action: '%s'",
-                            fallbackBuild);
+                            fallbackBuild.getDisplayName());
                 }
             }
         }
@@ -121,7 +121,7 @@ public class CoverageReporter {
             previousResult = getPreviousResult(build.getPreviousBuild());
             previousResult.ifPresent(coverageBuildAction ->
                     log.logInfo("-> No reference build defined, falling back to previous build: '%s'",
-                            coverageBuildAction.getOwner()));
+                            coverageBuildAction.getOwner().getDisplayName()));
         }
 
         if (!previousResult.isPresent()) {
@@ -131,7 +131,7 @@ public class CoverageReporter {
         }
 
         CoverageBuildAction referenceAction = previousResult.get();
-        log.logInfo("-> Found reference result '%s'", referenceAction);
+        log.logInfo("-> Found reference result in build '%s'", referenceAction.getOwner().getDisplayName());
 
         return Optional.of(referenceAction);
     }
