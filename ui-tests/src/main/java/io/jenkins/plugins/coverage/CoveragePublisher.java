@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -19,7 +21,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
 
 
-    Adapter createAdapterPageArea(String adapter) {
+    public Adapter createAdapterPageArea(String adapter) {
 
         String path = createPageArea("adapters", () -> adaptertype.selectDropdownMenu(adapter));
 
@@ -37,15 +39,15 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     }
 
     public static class Adapter extends PageAreaImpl {
-        private final Control reportFilePath = control("adapters/path");
-        private final Control advancedOptionsForAdapter = control("adapters/advanced-button");
+        private final Control reportFilePath = control("path");
+        private final Control advancedOptionsForAdapter = control("advanced-button");
 
         Adapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
 
         }
 
-        void setReportFilePath(String reportFilePath) {
+        public void setReportFilePath(String reportFilePath) {
             this.reportFilePath.set(reportFilePath);
         }
 
