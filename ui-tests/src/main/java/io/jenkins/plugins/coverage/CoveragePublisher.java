@@ -22,6 +22,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     private final Control failBuildIfCoverageDecreasedInChangeRequest = control(
             "failBuildIfCoverageDecreasedInChangeRequest");
     private final Control skipPublishingChecks = control("skipPublishingChecks");
+    private final Control sourceFileStoringLevel = control("sourceFileResolver/level");
 
     private final Control globalThresholds = control("/repeatable-add");
 
@@ -75,12 +76,14 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
 
     public GlobalThreshold createGlobalThresholdsPageArea() {
+        ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalthresholds", () -> this.globalThresholds.click());
         return new GlobalThreshold(this, path);
     }
 
 
     public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold, double unstableThreshold, boolean failUnhealthy) {
+        ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThresholds.click());
         GlobalThreshold threshold = new GlobalThreshold(this, path);
         threshold.setThresholdTarget(thresholdTarget);
@@ -90,6 +93,29 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         return threshold;
     }
 
+    public void setSourceFileResolver(SourceFileResolver storingLevel){
+        ensureAdvancedOptionsIsActivated();
+        sourceFileStoringLevel.select(storingLevel.getName());
+    }
+
+
+    //TODO: austauschen
+    public enum SourceFileResolver {
+        NEVER_SAVE_SOURCE_FILES("never save source files"),
+        SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
+        SAVE_ALL_BUILD_SOURCE_FILES("save all build source files"),
+        ;
+
+        private final String name;
+
+        SourceFileResolver(final String name) {
+            this.name=name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 
     /*public AdvancedOptionsForPublisher createAdvancedOptionsArea() {
 
@@ -165,6 +191,6 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             failUnhealthy.check(failOnUnhealthy);
         }
     }
-    
+
 
 }
