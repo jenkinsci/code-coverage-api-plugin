@@ -2,6 +2,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
   <t:summary icon="/plugin/code-coverage-api/icons/coverage.svg">
     <j:set var="result" value="${it.result}"/>
+    <span id="coverage">
+    <span id="hrefCoverageReport">
     <j:choose>
       <j:when test="${size(result.children) == 1}">
         <a href="coverage/">${%Coverage Report}</a>
@@ -12,6 +14,7 @@
         <j:set var="items" value="${result.metrics}"/>
       </j:otherwise>
     </j:choose>
+    </span>
     <ul>
       <j:forEach var="metric" items="${items}">
         <li>${metric.name}: ${result.getCoverage(metric).printCoveredPercentage()}
@@ -36,5 +39,6 @@
     <j:if test="${failMessage != null}">
       ${failMessage}
     </j:if>
+    </span>
   </t:summary>
 </j:jelly>
