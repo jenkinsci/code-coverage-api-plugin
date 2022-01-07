@@ -23,6 +23,8 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             "failBuildIfCoverageDecreasedInChangeRequest");
     private final Control skipPublishingChecks = control("skipPublishingChecks");
 
+    private final Control globalThresholds = control("/repeatable-add");
+
     private boolean advancedOptionsActivated = false;
 
     public CoveragePublisher(final Job parent, final String path) {
@@ -71,6 +73,24 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         return new Adapter(this, path);
     }
 
+
+    public GlobalThreshold createGlobalThresholdsPageArea() {
+        String path = createPageArea("globalthresholds", () -> this.globalThresholds.click());
+        return new GlobalThreshold(this, path);
+    }
+
+
+    public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold, double unstableThreshold, boolean failUnhealthy) {
+        String path = createPageArea("globalThresholds", () -> this.globalThresholds.click());
+        GlobalThreshold threshold = new GlobalThreshold(this, path);
+        threshold.setThresholdTarget(thresholdTarget);
+        threshold.setUnhealthyThreshold(unhealthyThreshold);
+        threshold.setUnstableThreshold(unstableThreshold);
+        threshold.setFailUnhealthy(failUnhealthy);
+        return threshold;
+    }
+
+
     /*public AdvancedOptionsForPublisher createAdvancedOptionsArea() {
 
         String path = createPageArea("", () -> AdvancedOptionsForPublisher.click());
@@ -104,14 +124,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
 
         AdvancedOptionsForAdapter createAdvancedOptionsForAdapterPageArea(String adapter) {
-
             String path = createPageArea("", () -> advancedOptionsForAdapter.click());
-
-            AdvancedOptionsForAdapter advancedOptionsForAdapter = new AdvancedOptionsForAdapter(this, path);
-            return advancedOptionsForAdapter;
-
+            return new AdvancedOptionsForAdapter(this, path);
         }
-
     }
 
 
@@ -122,5 +137,34 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
 
     }
+
+    public static class GlobalThreshold extends PageAreaImpl {
+
+        private final Control thresholdTarget = control("thresholdTarget"); //DD
+        private final Control unhealthyThreshold = control("unhealthyThreshold"); //input
+        private final Control unstableThreshold = control("unstableThreshold"); //input
+        private final Control failUnhealthy = control("failUnhealthy"); //cbox
+
+        GlobalThreshold(final PageArea reportPublisher, final String path) {
+            super(reportPublisher, path);
+        }
+
+        public void setThresholdTarget(String target){
+            thresholdTarget.select(target);
+        }
+
+        public void setUnhealthyThreshold(double threshold){
+            unhealthyThreshold.set(threshold);
+
+        }
+        public void setUnstableThreshold(double threshold){
+            unstableThreshold.set(threshold);
+        }
+
+        public void setFailUnhealthy(boolean failOnUnhealthy){
+            failUnhealthy.check(failOnUnhealthy);
+        }
+    }
+    
 
 }
