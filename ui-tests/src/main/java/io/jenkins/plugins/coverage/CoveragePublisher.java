@@ -63,9 +63,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     }
 
     private void ensureAdvancedOptionsIsActivated() {
-        if(!advancedOptionsActivated) {
+        if (!advancedOptionsActivated) {
             advancedOptions.click();
-            advancedOptionsActivated =true;
+            advancedOptionsActivated = true;
         }
     }
 
@@ -74,15 +74,14 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         return new Adapter(this, path);
     }
 
-
     public GlobalThreshold createGlobalThresholdsPageArea() {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalthresholds", () -> this.globalThresholds.click());
         return new GlobalThreshold(this, path);
     }
 
-
-    public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold, double unstableThreshold, boolean failUnhealthy) {
+    public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold,
+            double unstableThreshold, boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThresholds.click());
         GlobalThreshold threshold = new GlobalThreshold(this, path);
@@ -93,28 +92,13 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         return threshold;
     }
 
-    public void setSourceFileResolver(SourceFileResolver storingLevel){
+    public void setSourceFileResolver(SourceFileResolver storingLevel) {
         ensureAdvancedOptionsIsActivated();
         sourceFileStoringLevel.select(storingLevel.getName());
     }
 
-
-    //TODO: austauschen
-    public enum SourceFileResolver {
-        NEVER_SAVE_SOURCE_FILES("never save source files"),
-        SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
-        SAVE_ALL_BUILD_SOURCE_FILES("save all build source files"),
-        ;
-
-        private final String name;
-
-        SourceFileResolver(final String name) {
-            this.name=name;
-        }
-
-        public String getName() {
-            return name;
-        }
+    void setAdapter(String adapter) {
+        this.adapter.selectDropdownMenu(adapter);
     }
 
     /*public AdvancedOptionsForPublisher createAdvancedOptionsArea() {
@@ -126,20 +110,35 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
     }*/
 
-    void setAdapter(String adapter) {
-        this.adapter.selectDropdownMenu(adapter);
-    }
-
-    void deleteAdapter(){
+    void deleteAdapter() {
         adapter.click();
     }
 
+    //TODO: austauschen
+    public enum SourceFileResolver {
+        NEVER_SAVE_SOURCE_FILES("never save source files"),
+        SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
+        SAVE_ALL_BUILD_SOURCE_FILES("save all build source files"),
+        ;
 
+        private final String name;
+
+        SourceFileResolver(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 
     public static class Adapter extends PageAreaImpl {
         private final Control reportFilePath = control("path");
         private final Control advancedOptions = control("advanced-button");
-
+        private final Control mergeToOneReport = control("mergeToOneReport"); //DD
+        private final Control thresholds = control("repeatable-add"); //input
+        private final Control advanced = control("repeatable-add"); //input
+        private boolean advancedOptionsActivated = false;
         Adapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
 
@@ -149,14 +148,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             this.reportFilePath.set(reportFilePath);
         }
 
-
-        private final Control mergeToOneReport = control("mergeToOneReport"); //DD
-        private final Control thresholds = control("repeatable-add"); //input
-        private final Control advanced = control("repeatable-add"); //input
-
-        private boolean advancedOptionsActivated = false;
-
-        public void setMergeToOneReport(boolean mergeReports){
+        public void setMergeToOneReport(boolean mergeReports) {
             ensureAdvancedOptionsIsActivated();
             mergeToOneReport.check(mergeReports);
         }
@@ -167,8 +159,8 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             return new GlobalThreshold(this, path);
         }
 
-
-        public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold, double unstableThreshold, boolean failUnhealthy) {
+        public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold,
+                double unstableThreshold, boolean failUnhealthy) {
             ensureAdvancedOptionsIsActivated();
             String path = createPageArea("thresholds", () -> this.thresholds.click());
             GlobalThreshold threshold = new GlobalThreshold(this, path);
@@ -180,16 +172,12 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
 
         private void ensureAdvancedOptionsIsActivated() {
-            if(!advancedOptionsActivated) {
+            if (!advancedOptionsActivated) {
                 advancedOptions.click();
-                advancedOptionsActivated =true;
+                advancedOptionsActivated = true;
             }
         }
     }
-
-
-
-
 
     public static class GlobalThreshold extends PageAreaImpl {
 
@@ -202,22 +190,21 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             super(reportPublisher, path);
         }
 
-        public void setThresholdTarget(String target){
+        public void setThresholdTarget(String target) {
             thresholdTarget.select(target);
         }
 
-        public void setUnhealthyThreshold(double threshold){
+        public void setUnhealthyThreshold(double threshold) {
             unhealthyThreshold.set(threshold);
-
         }
-        public void setUnstableThreshold(double threshold){
+
+        public void setUnstableThreshold(double threshold) {
             unstableThreshold.set(threshold);
         }
 
-        public void setFailUnhealthy(boolean failOnUnhealthy){
+        public void setFailUnhealthy(boolean failOnUnhealthy) {
             failUnhealthy.check(failOnUnhealthy);
         }
     }
-
 
 }
