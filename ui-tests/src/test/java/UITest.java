@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.CoverageSummary;
 import io.jenkins.plugins.coverage.Irgendwie;
 
@@ -49,6 +50,9 @@ public class UITest extends AbstractJUnitTest {
         Build build = buildSuccessfully(job);
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
+        cs.openCoverageReport();
+        CoverageReport cr = new CoverageReport(build, "");
+
         //Irgendwie CodeCoverage = new Irgendwie(build, "coverage");
         //CodeCoverage.open();
     }
