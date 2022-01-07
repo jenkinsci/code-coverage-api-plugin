@@ -1,22 +1,21 @@
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 import org.junit.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.WorkflowJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoverageSummary;
 import io.jenkins.plugins.coverage.Irgendwie;
 
 public class UITest extends AbstractJUnitTest {
@@ -24,9 +23,85 @@ public class UITest extends AbstractJUnitTest {
 
     @SuppressFBWarnings("BC")
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
-    private static final String REPOSITORY_URL = "https://github.com/jenkinsci/git-forensics-plugin.git";
-    
 
+    /**
+     * Creates a first test which returns ...
+     * (-> siehe jelly) //TODO: javadoc hier später anpassen
+     */
+    @Test
+    public void createJob() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        jacocoAdapter.setReportFilePath(FILE_NAME);
+        /*jacocoAdapter.setMergeToOneReport(true);
+        jacocoAdapter.createGlobalThresholdsPageArea("Instruction", 4, 4, false);
+        coveragePublisher.setApplyThresholdRecursively(true);
+        coveragePublisher.setFailUnhealthy(true);
+        coveragePublisher.setFailUnstable(true);
+        coveragePublisher.setSkipPublishingChecks(true);
+        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        coveragePublisher.setFailNoReports(true);
+        coveragePublisher.setFailNoReports(true);
+        coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_SAVE_SOURCE_FILES);*/
+        job.save();
+        Build build = buildSuccessfully(job);
+        build.open();
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
+        //Irgendwie CodeCoverage = new Irgendwie(build, "coverage");
+        //CodeCoverage.open();
+    }
+
+    /**
+     * Copies all files of given resources to workspace of a project.
+     * @param job in whose workspace files should be copies
+     * @param resources of files which should be copied
+     */
+    protected void copyResourceFilesToWorkspace(final Job job, final String... resources) {
+        for (String file : resources) {
+            job.copyResource(file);
+        }
+    }
+
+    /**
+     * Return resource of given path.
+     * @param path which resource is requested
+     * @return resource of given path.
+     */
+    public Resource resource(final String path) {
+        URL resource = this.getClass().getResource(path);
+        if (resource == null) {
+            throw new AssertionError("No such resource " + path + " for " + this.getClass().getName());
+        }
+        else {
+            return new Resource(resource);
+        }
+    }
+
+    /**
+     * Check if Project is build successfully.
+     */
+    protected Build buildSuccessfully(final Job job) {
+        return job.startBuild().waitUntilFinished().shouldSucceed();
+    }
+
+    /*
+    private static final String REPOSITORY_URL = "https://github.com/jenkinsci/git-forensics-plugin.git";
+
+    private WorkflowJob createPipelineJob(final String... resourcesToCopy) {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        //TODO: copy to workspace
+        job.script.set("node {\n"
+                + "  checkout([$class: 'GitSCM', branches: [[name: '28af63def44286729e3b19b03464d100fd1d0587' ]],\n"
+                + "     userRemoteConfigs: [[url: '" + REPOSITORY_URL + "']]])\n"
+                + "  publishCoverage adapters: [jacocoAdapter('TODO: jacoco-analysis-model.xml')] \n"
+                + "} \n");
+        return job;
+    }
+    */
+
+        /*
     private byte[] readAllBytes(final String fileName) {
         try {
             return Files.readAllBytes(getPath(fileName));
@@ -34,9 +109,8 @@ public class UITest extends AbstractJUnitTest {
         catch (IOException | URISyntaxException e) {
             throw new AssertionError("Can't read resource " + fileName, e);
         }
-    }
 
-    Path getPath(final String name) throws URISyntaxException {
+        Path getPath(final String name) throws URISyntaxException {
         URL resource = getClass().getResource(name);
         if (resource == null) {
             throw new AssertionError("Can't find resource " + name);
@@ -44,74 +118,7 @@ public class UITest extends AbstractJUnitTest {
         return Paths.get(resource.toURI());
     }
 
-
-    public Resource resource(String path) {
-        URL resource = this.getClass().getResource(path);
-        if (resource == null) {
-            throw new AssertionError("No such resource " + path + " for " + this.getClass().getName());
-        } else {
-            return new Resource(resource);
-        }
-    }
-
-    @Test
-    public void helloWorld() {
-        // WorkflowJob job = createJob(FILE_NAME);
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-
-        copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/" + "jacoco-analysis-model.xml");
-
-        CoveragePublisher advancedOptionsForPublisher = job.addPublisher(CoveragePublisher.class, publisher -> {
-            publisher.createAdapterPageArea("Jacoco").setReportFilePath("**/*.xml");
-        });
-
-        advancedOptionsForPublisher.setFailUnhealthy(true);
-        advancedOptionsForPublisher.setFailUnstable(true);
-        advancedOptionsForPublisher.setSkipPublishingChecks(true);
-        advancedOptionsForPublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        advancedOptionsForPublisher.setFailNoReports(true);
-
-///publisher[CoveragePublisher]/adapters/advanced-button
-      //  path="/publisher[CoveragePublisher]/advanced-button"
-        job.save();
-        Build build = buildSuccessfully(job);
-        Irgendwie CodeCoverage = new Irgendwie(build, "codecoverage");
-        System.out.println("f");
-        CodeCoverage.open();
-        //assertThat(CodeCoverage.existsCodeCoverageInformation()).isTrue();
-
-    }
-
-
-    protected void copyResourceFilesToWorkspace(final Job job, final String... resources) {
-        for (String file : resources) {
-            job.copyResource(file);
-        }
-    }
-
-
-
-    protected Build buildSuccessfully(final Job job) {
-        return job.startBuild().waitUntilFinished().shouldSucceed();
-    }
-
-    private WorkflowJob createJob(final String... resourcesToCopy) {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-
-      /*  for (String resource : resourcesToCopy) {
-            job.copyResource(CODE_COVERAGE_PLUGIN_PREFIX + resource);
-        }*/
-        //job.sandbox.check();
-        job.script.set("node {\n"
-                + "  checkout([$class: 'GitSCM', branches: [[name: '28af63def44286729e3b19b03464d100fd1d0587' ]],\n"
-                + "     userRemoteConfigs: [[url: '" + REPOSITORY_URL + "']]])\n"
-                + "  publishCoverage adapters: [jacocoAdapter('**/jacoco-analysis-model.xml')] \n"
-                + "} \n");
-
-
-
-        return job;
-    }
+    }*/
 
 }
 
