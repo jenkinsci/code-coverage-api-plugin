@@ -89,7 +89,17 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
     public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel)
             throws IOException, InterruptedException {
         FilteredLog log = new FilteredLog("Errors during source code painting:");
-        Set<String> sourceDirectories = filterSourceDirectories(workspaceFile);
+        Set<String> sourceDirectories = filterSourceDirectories(workspaceFile, log);
+        if (sourceDirectories.isEmpty()) {
+            log.logInfo("Searching for source code files in root of workspace '%s'", workspaceFile);
+        }
+        else if (sourceDirectories.size() == 1) {
+            log.logInfo("Searching for source code files in '%s'", sourceDirectories.iterator().next());
+        }
+        else {
+            log.logInfo("Searching for source code files in:", workspaceFile);
+            sourceDirectories.forEach(dir -> log.logInfo("-> %s", dir));
+        }
         FilePath workspace = new FilePath(workspaceFile);
 
         try {
@@ -123,10 +133,10 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         return log;
     }
 
-    private Set<String> filterSourceDirectories(final File workspace) {
+    private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
         SourceDirectoryFilter filter = new SourceDirectoryFilter();
         return filter.getPermittedSourceDirectories(new FilePath(workspace),
-                        permittedSourceDirectories, requestedSourceDirectories).stream()
+                        permittedSourceDirectories, requestedSourceDirectories, log).stream()
                 .map(FilePath::getRemote)
                 .collect(Collectors.toSet());
     }
@@ -239,10 +249,10 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
             final Set<String> sourceDirectories, final FilteredLog log) {
         FilePermissionEnforcer enforcer = new FilePermissionEnforcer();
         if (enforcer.isInWorkspace(absolutePath.getRemote(), workspace, sourceDirectories)) {
-            log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
-                    absolutePath.getRemote());
             return Optional.of(absolutePath);
         }
+        log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
+                absolutePath.getRemote());
         return Optional.empty();
     }
 

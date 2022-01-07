@@ -1,6 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -19,6 +22,7 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import hudson.model.FreeStyleProject;
 import hudson.model.Run;
+import hudson.model.TopLevelItem;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
@@ -27,6 +31,8 @@ import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
+import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,6 +47,8 @@ import static org.assertj.core.api.Assumptions.*;
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
+    private static final String SOURCE_FILE = "AcuCobolParser.java.txt";
+    private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
@@ -49,50 +57,75 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Integration test with source code painting. */
     @Test
-    public void coveragePluginPipelineWithSourceCode() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(FILE_NAME);
+    public void coveragePluginPipelineWithSourceCode() throws IOException {
+        Path tempDirectory = Files.createTempDirectory("coverage");
+        Path sourceCodeDirectory = tempDirectory.resolve(PACKAGE_PATH);
+        Files.createDirectories(sourceCodeDirectory);
+        Files.copy(getResourceAsFile(SOURCE_FILE), sourceCodeDirectory.resolve("AcuCobolParser.java"),
+                StandardCopyOption.REPLACE_EXISTING);
+        PrismConfiguration.getInstance()
+                .setSourceDirectories(
+                        Collections.singletonList(new PermittedSourceCodeDirectory(tempDirectory.toString())));
+        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", tempDirectory.toString());
+        assertThat(getConsoleLog(externalDirectory)).contains(
+                String.format("Searching for source code files in '%s'", tempDirectory));
+        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
+        assertThat(getConsoleLog(workspace)).contains(
+                String.format("Searching for source code files in root of workspace '%s'",
+                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+        Run<?, ?> relative = runCoverageWithSourceCode("checkout/", "checkout/");
+        assertThat(getConsoleLog(relative)).contains(
+                String.format("Searching for source code files in '%s'",
+                        getWorkspace((TopLevelItem) relative.getParent()).child("checkout").getRemote()));
+    }
+
+    private String getWorkspace(final Run<?, ?> workspace) {
+        return getWorkspace(
+                (TopLevelItem) workspace.getParent()).getRemote();
+    }
+
+    private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
+        String jacocoFileName = "jacoco-acu-cobol-parser.xml";
+        WorkflowJob job = createPipelineWithWorkspaceFiles(jacocoFileName);
+        copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory, jacocoFileName));
 
-        Run<?, ?> build = buildSuccessfully(job);
+        Run<?, ?> firstBuild = buildSuccessfully(job);
 
-        assertThat(getConsoleLog(build))
+        assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting successfully");
 
-        verifySourceCodeInBuild(build, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER);
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
-        verifySourceCodeInBuild(build, ACU_COBOL_PARSER); // should be still available
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD"));
+        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory, jacocoFileName));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
-        verifySourceCodeInBuild(build, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE"));
+        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory, jacocoFileName));
         Run<?, ?> lastBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
-        verifySourceCodeInBuild(build, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
+
+        return firstBuild;
     }
 
-    private CpsFlowDefinition createPipelineWithSourceCode(final String sourceCodeRetention) {
+    private CpsFlowDefinition createPipelineWithSourceCode(final String sourceCodeRetention,
+            final String sourceDirectory, final String jacocoFileName) {
         return new CpsFlowDefinition("node {"
-                + "timestamps {\n"
-                + "    checkout([$class: 'GitSCM', "
-                + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-                + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
-                + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
-                + "                    relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME + "')], \n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + jacocoFileName + "')], \n"
                 + "         sourceFileResolver: sourceFiles('" + sourceCodeRetention + "'), \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
-                + "         sourceDirectories: [[path: 'checkout/src/main/java']]"
-                + "}"
+                + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"
                 + "}", true);
     }
 
@@ -105,7 +138,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private SourceViewModel verifySourceModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action.getLineCoverage())
-                .isEqualTo(new Coverage(6083, 6368 - 6083));
+                .isEqualTo(new Coverage(8, 0));
 
         Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, "AcuCobolParser.java");
         assertThat(fileNode).isNotEmpty()
