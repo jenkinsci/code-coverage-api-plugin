@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assumptions.*;
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
+@SuppressWarnings({"checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
 public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
