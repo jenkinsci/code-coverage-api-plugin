@@ -138,7 +138,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
     public static class Adapter extends PageAreaImpl {
         private final Control reportFilePath = control("path");
-        private final Control advancedOptionsForAdapter = control("advanced-button");
+        private final Control advancedOptions = control("advanced-button");
 
         Adapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
@@ -149,27 +149,54 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             this.reportFilePath.set(reportFilePath);
         }
 
-        AdvancedOptionsForAdapter createAdvancedOptionsForAdapterPageArea(String adapter) {
-            String path = createPageArea("", () -> advancedOptionsForAdapter.click());
-            return new AdvancedOptionsForAdapter(this, path);
+
+        private final Control mergeToOneReport = control("mergeToOneReport"); //DD
+        private final Control thresholds = control("repeatable-add"); //input
+        private final Control advanced = control("repeatable-add"); //input
+
+        private boolean advancedOptionsActivated = false;
+
+        public void setMergeToOneReport(boolean mergeReports){
+            ensureAdvancedOptionsIsActivated();
+            mergeToOneReport.check(mergeReports);
+        }
+
+        public GlobalThreshold createGlobalThresholdsPageArea() {
+            ensureAdvancedOptionsIsActivated();
+            String path = createPageArea("thresholds", () -> this.thresholds.click());
+            return new GlobalThreshold(this, path);
+        }
+
+
+        public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold, double unstableThreshold, boolean failUnhealthy) {
+            ensureAdvancedOptionsIsActivated();
+            String path = createPageArea("thresholds", () -> this.thresholds.click());
+            GlobalThreshold threshold = new GlobalThreshold(this, path);
+            threshold.setThresholdTarget(thresholdTarget);
+            threshold.setUnhealthyThreshold(unhealthyThreshold);
+            threshold.setUnstableThreshold(unstableThreshold);
+            threshold.setFailUnhealthy(failUnhealthy);
+            return threshold;
+        }
+
+        private void ensureAdvancedOptionsIsActivated() {
+            if(!advancedOptionsActivated) {
+                advancedOptions.click();
+                advancedOptionsActivated =true;
+            }
         }
     }
 
 
 
-    public static class AdvancedOptionsForAdapter extends PageAreaImpl {
-        AdvancedOptionsForAdapter(final PageArea reportPublisher, final String path) {
-            super(reportPublisher, path);
-        }
 
-    }
 
     public static class GlobalThreshold extends PageAreaImpl {
 
-        private final Control thresholdTarget = control("thresholdTarget"); //DD
-        private final Control unhealthyThreshold = control("unhealthyThreshold"); //input
-        private final Control unstableThreshold = control("unstableThreshold"); //input
-        private final Control failUnhealthy = control("failUnhealthy"); //cbox
+        private final Control thresholdTarget = control("thresholdTarget");
+        private final Control unhealthyThreshold = control("unhealthyThreshold");
+        private final Control unstableThreshold = control("unstableThreshold");
+        private final Control failUnhealthy = control("failUnhealthy");
 
         GlobalThreshold(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
