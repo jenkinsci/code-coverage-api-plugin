@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
 import org.junit.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -62,10 +61,18 @@ public class UITest extends AbstractJUnitTest {
 
         copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/" + "jacoco-analysis-model.xml");
 
-        job.addPublisher(CoveragePublisher.class, publisher -> {
+        CoveragePublisher advancedOptionsForPublisher = job.addPublisher(CoveragePublisher.class, publisher -> {
             publisher.createAdapterPageArea("Jacoco").setReportFilePath("**/*.xml");
         });
 
+        advancedOptionsForPublisher.setFailUnhealthy(true);
+        advancedOptionsForPublisher.setFailUnstable(true);
+        advancedOptionsForPublisher.setSkipPublishingChecks(true);
+        advancedOptionsForPublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        advancedOptionsForPublisher.setFailNoReports(true);
+
+///publisher[CoveragePublisher]/adapters/advanced-button
+      //  path="/publisher[CoveragePublisher]/advanced-button"
         job.save();
         Build build = buildSuccessfully(job);
         Irgendwie CodeCoverage = new Irgendwie(build, "codecoverage");

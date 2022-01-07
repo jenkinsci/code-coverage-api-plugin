@@ -11,32 +11,84 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 @SuppressWarnings({"unused", "UnusedReturnValue", "PMD.GodClass", "PMD.TooManyFields", "PMD.ExcessivePublicCount"})
 @Describable("Publish Coverage Report")
 public class CoveragePublisher extends AbstractStep implements PostBuildStep {
-    private final Control adaptertype = control("hetero-list-add[adapters]");
+    private final Control adapter = control("hetero-list-add[adapters]");
     private final Control deleteAdapter = control("adapters/repeatable-delete");
-    private final Control AdvancedOptionsForAdapter = control("advanced-button");
+
+    private final Control advancedOptions = control("advanced-button");
+    private final Control applyThresholdRecursively = control("applyThresholdRecursively");
+    private final Control failUnhealthy = control("failUnhealthy");
+    private final Control failUnstable = control("failUnstable");
+    private final Control failNoReports = control("failNoReports");
+    private final Control failBuildIfCoverageDecreasedInChangeRequest = control(
+            "failBuildIfCoverageDecreasedInChangeRequest");
+    private final Control skipPublishingChecks = control("skipPublishingChecks");
+
+    private boolean advancedOptionsActivated = false;
 
     public CoveragePublisher(final Job parent, final String path) {
         super(parent, path);
     }
 
-
-
-    public Adapter createAdapterPageArea(String adapter) {
-
-        String path = createPageArea("adapters", () -> adaptertype.selectDropdownMenu(adapter));
-
-        Adapter adapterp = new Adapter(this, path);
-        return adapterp;
-
+    public void setApplyThresholdRecursively(boolean applyTresholds) {
+        ensureAdvancedOptionsIsActivated();
+        applyThresholdRecursively.check(applyTresholds);
     }
 
+    public void setFailUnhealthy(boolean failOnUnhealthy) {
+        ensureAdvancedOptionsIsActivated();
+        failUnhealthy.check(failOnUnhealthy);
+    }
+
+    public void setFailUnstable(boolean failOnUnstable) {
+        ensureAdvancedOptionsIsActivated();
+        failUnstable.check(failOnUnstable);
+    }
+
+    public void setFailNoReports(boolean failOnNoReports) {
+        ensureAdvancedOptionsIsActivated();
+        failNoReports.check(failOnNoReports);
+    }
+
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failOnCoverageDecreases) {
+        ensureAdvancedOptionsIsActivated();
+        failBuildIfCoverageDecreasedInChangeRequest.check(failOnCoverageDecreases);
+    }
+
+    public void setSkipPublishingChecks(boolean skipPublishing) {
+        ensureAdvancedOptionsIsActivated();
+        skipPublishingChecks.check(skipPublishing);
+    }
+
+    private void ensureAdvancedOptionsIsActivated() {
+        if(!advancedOptionsActivated) {
+            advancedOptions.click();
+            advancedOptionsActivated =true;
+        }
+    }
+
+    public Adapter createAdapterPageArea(String adapter) {
+        String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapter));
+        return new Adapter(this, path);
+    }
+
+    /*public AdvancedOptionsForPublisher createAdvancedOptionsArea() {
+
+        String path = createPageArea("", () -> AdvancedOptionsForPublisher.click());
+
+        AdvancedOptionsForPublisher advancedOptionsForPublisher = new AdvancedOptionsForPublisher(this, path);
+        return advancedOptionsForPublisher;
+
+    }*/
+
     void setAdapter(String adapter) {
-        adaptertype.selectDropdownMenu(adapter);
+        this.adapter.selectDropdownMenu(adapter);
     }
 
     void deleteAdapter(){
-        adaptertype.click();
+        adapter.click();
     }
+
+
 
     public static class Adapter extends PageAreaImpl {
         private final Control reportFilePath = control("path");
@@ -62,36 +114,11 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
     }
 
-    public static class AdvancedOptionsForAdapter extends PageAreaImpl {
-        private final Control failUnhealthy = control("adapters/failUnhealthy");
-        private final Control failUnstable = control("adapters/failNoReports");
-        private final Control failNoReports = control("adapters/failBuildIfCoverageDecreasedInChangeRequest");
-        private final Control failBuildIfCoverageDecreasedInChangeRequest = control(
-                "adapters/failBuildIfCoverageDecreasedInChangeRequest");
-        private final Control skipPublishingChecks = control("adapters/skipPublishingChecks");
 
+
+    public static class AdvancedOptionsForAdapter extends PageAreaImpl {
         AdvancedOptionsForAdapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
-        }
-
-        void setFailUnhealthy(boolean failOnUnhealthy) {
-            failUnhealthy.check(failOnUnhealthy);
-        }
-
-        void setFailUnstable(boolean failOnUnstable) {
-            failUnstable.check(failOnUnstable);
-        }
-
-        void setFailNoReports(boolean failOnNoReports) {
-            failNoReports.check(failOnNoReports);
-        }
-
-        void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failOnCoverageDecreases) {
-            failBuildIfCoverageDecreasedInChangeRequest.check(failOnCoverageDecreases);
-        }
-
-        void setSkipPublishingChecks(boolean skipPublishing) {
-            skipPublishingChecks.check(skipPublishing);
         }
 
     }
