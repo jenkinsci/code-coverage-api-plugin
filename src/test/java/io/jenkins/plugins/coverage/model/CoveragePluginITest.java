@@ -49,34 +49,74 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String NO_SOURCE_CODE = "n/a";
     private static final String SOURCE_FILE = "AcuCobolParser.java.txt";
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
+    private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
+
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
     public DockerRule<JavaGitContainer> javaDockerRule = new DockerRule<>(JavaGitContainer.class);
 
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
-    /** Integration test with source code painting. */
+    /** Verifies that the plugin reads source code from the workspace root. */
     @Test
     public void coveragePluginPipelineWithSourceCode() throws IOException {
+        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
+        assertThat(getConsoleLog(workspace)).contains(
+                String.format("Searching for source code files in root of workspace '%s'",
+                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+    }
+
+    /** Verifies that the plugin reads source code in subdirectories of the workspace.  */
+    @Test
+    public void coveragePluginPipelineWithSourceCodeInSubdirectory() throws IOException {
+        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
+        assertThat(getConsoleLog(workspace)).contains(
+                String.format("Searching for source code files in root of workspace '%s'",
+                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+    }
+
+    /** Verifies that the plugin reads source code in external but approved directories. */
+    @Test
+    public void coveragePluginPipelineWithSourceCodeInPermittedDirectory() throws IOException {
+        Path externalSourceFolder = createExternalSourceFolder();
+        PrismConfiguration.getInstance().setSourceDirectories(Collections.singletonList(
+                new PermittedSourceCodeDirectory(externalSourceFolder.toString())));
+
+        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", externalSourceFolder.toString());
+        assertThat(getConsoleLog(externalDirectory)).contains(
+                String.format("Searching for source code files in '%s'", externalSourceFolder));
+    }
+
+    /** Verifies that the plugin refuses source code in directories that are not approved in Jenkins' configuration. */
+    @Test
+    public void coveragePluginPipelineNotRegisteredSourceCodeDirectory() throws IOException {
+        Path tempDirectory = createExternalSourceFolder();
+        final String sourceDirectory = tempDirectory.toString();
+
+        WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
+        copyFileToWorkspace(job, SOURCE_FILE, "ignore" + PACKAGE_PATH + "AcuCobolParser.java");
+
+        String sourceCodeRetention = "STORE_ALL_BUILD";
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory,
+                ACU_COBOL_PARSER_COVERAGE_REPORT));
+
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+
+        assertThat(getConsoleLog(firstBuild))
+                .contains("-> finished painting (0 files have been painted, 1 files failed)")
+                .contains(String.format("[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
+                        sourceDirectory));
+
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+    }
+
+    private Path createExternalSourceFolder() throws IOException {
         Path tempDirectory = Files.createTempDirectory("coverage");
         Path sourceCodeDirectory = tempDirectory.resolve(PACKAGE_PATH);
         Files.createDirectories(sourceCodeDirectory);
         Files.copy(getResourceAsFile(SOURCE_FILE), sourceCodeDirectory.resolve("AcuCobolParser.java"),
                 StandardCopyOption.REPLACE_EXISTING);
-        PrismConfiguration.getInstance()
-                .setSourceDirectories(
-                        Collections.singletonList(new PermittedSourceCodeDirectory(tempDirectory.toString())));
-        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", tempDirectory.toString());
-        assertThat(getConsoleLog(externalDirectory)).contains(
-                String.format("Searching for source code files in '%s'", tempDirectory));
-        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
-        assertThat(getConsoleLog(workspace)).contains(
-                String.format("Searching for source code files in root of workspace '%s'",
-                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
-        Run<?, ?> relative = runCoverageWithSourceCode("checkout/", "checkout/");
-        assertThat(getConsoleLog(relative)).contains(
-                String.format("Searching for source code files in '%s'",
-                        getWorkspace((TopLevelItem) relative.getParent()).child("checkout").getRemote()));
+        return tempDirectory;
     }
 
     private String getWorkspace(final Run<?, ?> workspace) {
@@ -85,12 +125,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
-        String jacocoFileName = "jacoco-acu-cobol-parser.xml";
-        WorkflowJob job = createPipelineWithWorkspaceFiles(jacocoFileName);
+        WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory, jacocoFileName));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory,
+                ACU_COBOL_PARSER_COVERAGE_REPORT));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -103,13 +143,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory, jacocoFileName));
+        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory,
+                ACU_COBOL_PARSER_COVERAGE_REPORT));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory, jacocoFileName));
+        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory, ACU_COBOL_PARSER_COVERAGE_REPORT));
         Run<?, ?> lastBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
