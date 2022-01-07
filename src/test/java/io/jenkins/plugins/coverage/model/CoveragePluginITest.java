@@ -119,11 +119,6 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         return tempDirectory;
     }
 
-    private String getWorkspace(final Run<?, ?> workspace) {
-        return getWorkspace(
-                (TopLevelItem) workspace.getParent()).getRemote();
-    }
-
     private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
