@@ -97,8 +97,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         copyFileToWorkspace(job, SOURCE_FILE, "ignore" + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory,
-                ACU_COBOL_PARSER_COVERAGE_REPORT));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory
+        ));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -124,8 +124,8 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory,
-                ACU_COBOL_PARSER_COVERAGE_REPORT));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory
+        ));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -138,14 +138,14 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory,
-                ACU_COBOL_PARSER_COVERAGE_REPORT));
+        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory
+        ));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory, ACU_COBOL_PARSER_COVERAGE_REPORT));
+        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory));
         Run<?, ?> lastBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
@@ -156,12 +156,12 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     private CpsFlowDefinition createPipelineWithSourceCode(final String sourceCodeRetention,
-            final String sourceDirectory, final String jacocoFileName) {
+            final String sourceDirectory) {
         return new CpsFlowDefinition("node {"
-                + "    publishCoverage adapters: [jacocoAdapter('" + jacocoFileName + "')], \n"
+                + "    publishCoverage adapters: [jacocoAdapter('" + ACU_COBOL_PARSER_COVERAGE_REPORT + "')], \n"
                 + "         sourceFileResolver: sourceFiles('" + sourceCodeRetention + "'), \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
-                + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"
+                + "         sourceDirectories: [[path: '" + sourceDirectory.replace('\\', '/') + "']]"
                 + "}", true);
     }
 
