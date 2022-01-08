@@ -49,12 +49,48 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build build = buildSuccessfully(job);
         build.open();
-        CoverageSummary cs = new CoverageSummary(build, "coverage");
-        cs.openCoverageReport();
-        CoverageReport cr = new CoverageReport(build, "");
+        CoverageSummary summary = new CoverageSummary(build, "coverage");
+        //cs.openCoverageReport();
+        CoverageReport report = summary.openCoverageReport();
+        report.getActiveTab();
+        report.openCoverageTable();
+        //report.openCoverageTree();
+
+        //report.verfiesOverview();
+        //String coverageTable = report.getCoverageTable();
+        //String coverageDetails = report.getCoverageDetails();
+
+        //String coverageTrend = report.getCoverageTrend();
+        //String coverageOverview = report.getCoverageOverview();
+
+        //boolean coverageTreeVisible = report.isCoverageTreeVisible();
+
+       // cr.verfiesOverview();
 
         //Irgendwie CodeCoverage = new Irgendwie(build, "coverage");
         //CodeCoverage.open();
+    }
+
+
+
+    @Test
+    public void createJobForPreparingFirstTestsOfCoverageReport() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        jacocoAdapter.setReportFilePath(FILE_NAME);
+        job.save();
+        Build build = buildSuccessfully(job);
+        build.open();
+        CoverageSummary summary = new CoverageSummary(build, "coverage");
+        CoverageReport report = summary.openCoverageReport();
+        report.getActiveTab();
+        report.openCoverageTable();
+        report.openCoverageTree();
+        String coverageTrend = report.getCoverageTrend();
+        String coverageOverview = report.getCoverageOverview();
+
     }
 
     /**

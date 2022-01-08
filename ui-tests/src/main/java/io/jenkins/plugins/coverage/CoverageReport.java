@@ -1,60 +1,87 @@
 package io.jenkins.plugins.coverage;
 
 import java.net.URL;
+import java.util.NoSuchElementException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 import com.google.inject.Injector;
 
-
 import org.jenkinsci.test.acceptance.po.PageObject;
 
+enum Tab {
+    PACKAGE_OVERVIEW("coverageTree"),
+    FILE_OVERVIEW("coverageTable");
 
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+    private final String property;
 
+    Tab(final String property) {
+        this.property = property;
+    }
+
+    /**
+     * Returns the enum element that has the specified href property.
+     *
+     * @param href
+     *         the href to select the tab
+     *
+     * @return the tab
+     * @throws NoSuchElementException
+     *         if the tab could not be found
+     */
+    static Tab valueWithHref(final String href) {
+        for (Tab tab : Tab.values()) {
+            if (tab.property.equals(href.substring(1))) {
+                return tab;
+            }
+        }
+        throw new NoSuchElementException("No such tab with href " + href);
+    }
+
+    /**
+     * Returns the selenium {@link By} selector to find the specific tab.
+     *
+     * @return the selenium filter rule
+     */
+    By getXpath() {
+        return By.xpath("//a[@href='#" + property + "']");
+    }
+}
 
 /**
  * {@link PageObject} representing the Coverage Report.
  */
-//@WithPlugins("warnings-ng")
 public class CoverageReport extends PageObject {
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
+    private static final String COVERAGE_TREND_CHART = "coverage-trend";
 
-
-    @SuppressWarnings("unused") // Required to dynamically create page object using reflection
-    public CoverageReport(final Injector injector, final URL url, final String id) {
+    //@SuppressWarnings("unused") // Required to dynamically create page object using reflection
+    public CoverageReport(final Injector injector, final URL url) {
         super(injector, url);
-
     }
 
-    public WebElement getCoverageTrend() {
-        return getElement(By.id("coverage-trend"));
+    /**
+     * Getter for Coverage-Trend-Chart Data.
+     *
+     * @return Json Value of Coverage-Trend Chart
+     */
+    public String getCoverageTrend() {
+        return getChartById(COVERAGE_TREND_CHART);
     }
 
-    public WebElement getCoverageOverview() {
-        return getElement(By.id("coverage-overview"));
-
+    /**
+     * Getter for Coverage-Overview-Chart Data.
+     *
+     * @return Json Value of Coverage-Overview Chart
+     */
+    public String getCoverageOverview() {
+        return getChartById(COVERAGE_OVERVIEW_CHART);
     }
 
-    void getPackageOverview(){
-        ensurePackageOverviewIsActive();
-    }
-
-    private void ensurePackageOverviewIsActive() {
-    }
-
-    void getFileOverview(){
-        ensureFileOverviewIsActive();
-
-    }
-
-    private void ensureFileOverviewIsActive() {
-    }
-
-    public String getChartById(final String elementId) {
+    private String getChartById(final String elementId) {
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\")).getOption())",
@@ -64,9 +91,77 @@ public class CoverageReport extends PageObject {
         return scriptResult.getJavaScriptResult().toString();
     }
 
-    //TOOD: auslagern
-    public void verfiesOverview() {
-        String overview = getChartById("coverage-overview");
-
+    /**
+     * Getter for Coverage-Overview-Chart Data.
+     *
+     * @return Json Value of Coverage-Overview Chart
+     */
+    public CoverageDetails getCoverageDetails() {
+        return null;
     }
+
+    /*
+    //aka package overview
+    public String getCoverageDetails(){
+        ensurePackageOverviewIsActive();
+        return getChartById("coverage-details");
+    }
+
+    //aka file overview
+    public String getCoverageTable(){
+        WebElement table = driver.findElement(By.tagName("coverage-details_wrapper"));
+
+
+        ensureFileOverviewIsActive();
+        return getRecordsFromTable("c");
+    }
+
+    private void ensureFileOverviewIsActive() {
+    }
+
+    private void ensurePackageOverviewIsActive() {
+    }*/
+
+    /**
+     * Returns the active and visible tab that has the focus in the tab bar.
+     *
+     * @return the active tab
+     */
+    public Tab getActiveTab() {
+        WebElement activeTab = find(By.xpath("//a[@role='tab' and contains(@class, 'active')]"));
+        return Tab.valueWithHref(extractRelativeUrl(activeTab.getAttribute("href")));
+    }
+
+    /**
+     * Opens the analysis details page and selects the specified tab.
+     *
+     * @param tab
+     *         the tab that should be selected
+     */
+    private void openTab(final Tab tab) {
+        open();
+        WebElement tabElement = getElement(By.id("tab-details")).findElement(tab.getXpath());
+        tabElement.click();
+    }
+
+    public void openCoverageTree() {
+        openTab(Tab.PACKAGE_OVERVIEW);
+    }
+
+    public void openCoverageTable() {
+        openTab(Tab.FILE_OVERVIEW);
+    }
+
+    /**
+     * Reloads the {@link PageObject}.
+     */
+    public void reload() {
+        open();
+    }
+
+    private String extractRelativeUrl(final String absoluteUrl) {
+        return "#" + StringUtils.substringAfterLast(absoluteUrl, "#");
+    }
+
 }
+
