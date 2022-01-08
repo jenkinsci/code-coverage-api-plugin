@@ -57,6 +57,7 @@ enum Tab {
 public class CoverageReport extends PageObject {
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
     private static final String COVERAGE_TREND_CHART = "coverage-trend";
+    private static final String COVERAGE_TREE_CHART = "coverage-details";
 
     //@SuppressWarnings("unused") // Required to dynamically create page object using reflection
     public CoverageReport(final Injector injector, final URL url) {
@@ -91,14 +92,11 @@ public class CoverageReport extends PageObject {
         return scriptResult.getJavaScriptResult().toString();
     }
 
-    /**
-     * Getter for Coverage-Overview-Chart Data.
-     *
-     * @return Json Value of Coverage-Overview Chart
-     */
-    public CoverageDetails getCoverageDetails() {
-        return null;
+
+    public String getCoverageTree(){
+        return getChartById(COVERAGE_TREE_CHART);
     }
+
 
     /*
     //aka package overview
@@ -144,11 +142,12 @@ public class CoverageReport extends PageObject {
         tabElement.click();
     }
 
-    public void openCoverageTree() {
+
+    public void openTabCoverageTree() {
         openTab(Tab.PACKAGE_OVERVIEW);
     }
 
-    public void openCoverageTable() {
+    public void openTabCoverageTable() {
         openTab(Tab.FILE_OVERVIEW);
     }
 

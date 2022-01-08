@@ -52,7 +52,7 @@ public class CoverageSummary extends PageObject {
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
         String href = link.getAttribute("href");
-        T result = newInstance(type, injector, url(href), id);
+        T result = newInstance(type, injector, url(href));
         link.click();
         return result;
     }

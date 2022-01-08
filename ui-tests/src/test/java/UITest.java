@@ -1,4 +1,3 @@
-import java.net.URISyntaxException;
 import java.net.URL;
 
 
@@ -17,7 +16,6 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.Irgendwie;
 
 public class UITest extends AbstractJUnitTest {
     private static final String SOURCE_VIEW_FOLDER = "/source-view/";
@@ -53,7 +51,7 @@ public class UITest extends AbstractJUnitTest {
         //cs.openCoverageReport();
         CoverageReport report = summary.openCoverageReport();
         report.getActiveTab();
-        report.openCoverageTable();
+        report.openTabCoverageTable();
         //report.openCoverageTree();
 
         //report.verfiesOverview();
@@ -86,8 +84,12 @@ public class UITest extends AbstractJUnitTest {
         CoverageSummary summary = new CoverageSummary(build, "coverage");
         CoverageReport report = summary.openCoverageReport();
         report.getActiveTab();
-        report.openCoverageTable();
-        report.openCoverageTree();
+        report.openTabCoverageTable();
+        report.openTabCoverageTree();
+       // String f = report.getCoverageTree();
+        report.openTabCoverageTable();
+        //String g= report.getCoverageTree();
+       // assertThat(f).isEqualTo(g);
         String coverageTrend = report.getCoverageTrend();
         String coverageOverview = report.getCoverageOverview();
 
