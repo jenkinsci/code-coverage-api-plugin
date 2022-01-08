@@ -78,27 +78,25 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /** Verifies that the plugin reads source code in external but approved directories. */
     @Test
     public void coveragePluginPipelineWithSourceCodeInPermittedDirectory() throws IOException {
-        Path externalSourceFolder = createExternalSourceFolder();
+        String directory = createExternalSourceFolder();
         PrismConfiguration.getInstance().setSourceDirectories(Collections.singletonList(
-                new PermittedSourceCodeDirectory(externalSourceFolder.toString())));
+                new PermittedSourceCodeDirectory(directory)));
 
-        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", externalSourceFolder.toString());
+        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", directory);
         assertThat(getConsoleLog(externalDirectory)).contains(
-                String.format("Searching for source code files in '%s'", externalSourceFolder));
+                String.format("Searching for source code files in '%s'", directory));
     }
 
     /** Verifies that the plugin refuses source code in directories that are not approved in Jenkins' configuration. */
     @Test
     public void coveragePluginPipelineNotRegisteredSourceCodeDirectory() throws IOException {
-        Path tempDirectory = createExternalSourceFolder();
-        final String sourceDirectory = tempDirectory.toString();
+        String sourceDirectory = createExternalSourceFolder();
 
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, "ignore" + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory
-        ));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -110,13 +108,13 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
     }
 
-    private Path createExternalSourceFolder() throws IOException {
+    private String createExternalSourceFolder() throws IOException {
         Path tempDirectory = Files.createTempDirectory("coverage");
         Path sourceCodeDirectory = tempDirectory.resolve(PACKAGE_PATH);
         Files.createDirectories(sourceCodeDirectory);
         Files.copy(getResourceAsFile(SOURCE_FILE), sourceCodeDirectory.resolve("AcuCobolParser.java"),
                 StandardCopyOption.REPLACE_EXISTING);
-        return tempDirectory;
+        return tempDirectory.toString().replace('\\', '/');
     }
 
     private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
@@ -161,7 +159,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                 + "    publishCoverage adapters: [jacocoAdapter('" + ACU_COBOL_PARSER_COVERAGE_REPORT + "')], \n"
                 + "         sourceFileResolver: sourceFiles('" + sourceCodeRetention + "'), \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
-                + "         sourceDirectories: [[path: '" + sourceDirectory.replace('\\', '/') + "']]"
+                + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"
                 + "}", true);
     }
 
