@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 import com.google.inject.Injector;
@@ -99,26 +100,39 @@ public class CoverageReport extends PageObject {
 
 
     /*
-    //aka package overview
-    public String getCoverageDetails(){
-        ensurePackageOverviewIsActive();
-        return getChartById("coverage-details");
-    }
 
     //aka file overview
     public String getCoverageTable(){
-        WebElement table = driver.findElement(By.tagName("coverage-details_wrapper"));
-
-
         ensureFileOverviewIsActive();
+        WebElement table = driver.findElement(By.tagName("coverage-details_wrapper"));
         return getRecordsFromTable("c");
     }
-
-    private void ensureFileOverviewIsActive() {
+*/
+    private void ensureCoverageTableTabIsActive() {
+        if(!getActiveTab().equals(Tab.FILE_OVERVIEW)){
+            openTabCoverageTable();
+        }
     }
 
-    private void ensurePackageOverviewIsActive() {
+    private void ensureCoverTreeTabIsActive() {
+        if(!getActiveTab().equals(Tab.PACKAGE_OVERVIEW)){
+            openTabCoverageTree();
+        }
+    }
+
+
+    /*private void hoverOverCell() {
+
+        Actions action = new Actions(driver);
+        action.moveToElement(cell).perform();
     }*/
+
+    /*public WebElement getFilterInputElementByActiveTab() {
+        WebElement filter = find(By.id(getActiveTab().property + "_filter"));
+        return filter.findElement(By.cssSelector("label > input"));
+    }*/
+
+
 
     /**
      * Returns the active and visible tab that has the focus in the tab bar.

@@ -16,6 +16,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.CoverageSummary;
+import io.jenkins.plugins.coverage.MainPanel;
 
 public class UITest extends AbstractJUnitTest {
     private static final String SOURCE_VIEW_FOLDER = "/source-view/";
@@ -92,6 +93,29 @@ public class UITest extends AbstractJUnitTest {
        // assertThat(f).isEqualTo(g);
         String coverageTrend = report.getCoverageTrend();
         String coverageOverview = report.getCoverageOverview();
+
+    }
+
+
+
+    @Test
+    public void createJobForForGettingProjectStatus() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        jacocoAdapter.setReportFilePath(FILE_NAME);
+        job.save();
+        Build build = buildSuccessfully(job);
+        Build build2 = buildSuccessfully(job);
+        Build build3 = buildSuccessfully(job);
+
+
+        job.open();
+        MainPanel mp = new MainPanel(build3, "");
+        mp.getTrendChart();
+
+
 
     }
 
