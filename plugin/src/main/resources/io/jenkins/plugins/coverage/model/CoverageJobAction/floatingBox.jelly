@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:c="/charts">
-
+<span id="coverage-trendchart">
   <c:trend-chart it="${from}" title="${%Code Coverage Trend}" enableLinks="true" configurationId="default"/>
-
+</span>
 </j:jelly>
