@@ -15,6 +15,7 @@
     </j:choose>
     <ul>
       <j:forEach var="metric" items="${items}">
+      <span id="coverage-value">
         <li>${metric.name}: ${result.getCoverage(metric).printCoveredPercentage()}
           <j:if test="${it.hasDelta(metric)}">
             <j:choose>
@@ -28,6 +29,7 @@
             <span style="color: ${color}">(${it.getDelta(metric)}%)</span>
           </j:if>
         </li>
+        </span>
       </j:forEach>
       <j:if test="${it.referenceBuild.present}">
         <li>Reference build: <j:out value="${it.referenceBuildLink}"/></li>
