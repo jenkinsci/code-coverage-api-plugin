@@ -1,11 +1,15 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
+import com.google.common.base.Function;
 
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
@@ -24,9 +28,6 @@ public class MainPanel extends PageObject {
     /**
      * Checks if the trendChart is visible on the Page.
      *
-     * @param chartName
-     *         id of the Chart we want to evaluate.
-     *
      * @return boolean value, that describes the visibility of the Trendchart.
      */
     public boolean trendChartIsDisplayed() {
@@ -34,6 +35,7 @@ public class MainPanel extends PageObject {
 
 
     public String getTrendChart(){
+        this.waitFor().withTimeout(50L, TimeUnit.SECONDS);
         return getChartById(COVERAGE_TREND_CHART);
     }
 

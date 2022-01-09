@@ -6,6 +6,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.CoverageSummary;
 import io.jenkins.plugins.coverage.MainPanel;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
@@ -14,6 +16,7 @@ import static org.assertj.core.api.Assertions.*;
 public class TrendChartTest extends AbstractJUnitTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
+    private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
     /**
      * Check if the generated TrendChart has the correct number of builds in its axis and the right coverage values for its builds.
@@ -54,7 +57,7 @@ public class TrendChartTest extends AbstractJUnitTest {
      */
     private String getTrendChartFromJobWithMultipleBuilds() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage");
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
@@ -66,6 +69,9 @@ public class TrendChartTest extends AbstractJUnitTest {
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
         job.open();
         MainPanel mp = new MainPanel(build2, "");
+        job.getLastBuild().open();
+        CoverageSummary summary = new CoverageSummary(job.getLastBuild(), "coverage");
+        CoverageReport report = summary.openCoverageReport();
         return mp.getTrendChart();
     }
 
@@ -76,7 +82,7 @@ public class TrendChartTest extends AbstractJUnitTest {
     @Test
     public void verifyNoTrendChartIsGenerated() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER + "/" + JACOCO_ANALYSIS_MODEL_XML);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
