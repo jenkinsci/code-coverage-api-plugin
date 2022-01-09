@@ -51,12 +51,13 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_SAVE_SOURCE_FILES);*/
         job.save();
         Build build = JobCreatorUtils.buildSuccessfully(job);
-        build.open();
-        CoverageSummary summary = new CoverageSummary(build, "coverage");
+        CoverageReport cr = new CoverageReport(build);
+        cr.open();
+        //CoverageSummary summary = new CoverageSummary(build, "coverage");
         //cs.openCoverageReport();
-        CoverageReport report = summary.openCoverageReport();
-        report.getActiveTab();
-        report.openTabCoverageTable();
+        // CoverageReport report = summary.openCoverageReport();
+        //report.getActiveTab();
+        //report.openTabCoverageTable();
         //report.openCoverageTree();
 
         //report.verfiesOverview();
@@ -87,8 +88,8 @@ public class UITest extends AbstractJUnitTest {
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
         Build build3 = JobCreatorUtils.buildSuccessfully(job);
 
-        job.open();
-        MainPanel mp = new MainPanel(build3, "");
+        MainPanel mp = new MainPanel(job);
+        mp.open();
         mp.getTrendChart();
 
     }

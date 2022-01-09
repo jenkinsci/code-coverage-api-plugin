@@ -67,11 +67,10 @@ public class TrendChartTest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
-        job.open();
-        MainPanel mp = new MainPanel(build2, "");
-        job.getLastBuild().open();
-        CoverageSummary summary = new CoverageSummary(job.getLastBuild(), "coverage");
-        CoverageReport report = summary.openCoverageReport();
+
+        MainPanel mp = new MainPanel(job);
+        mp.open();
+
         return mp.getTrendChart();
     }
 
@@ -88,8 +87,9 @@ public class TrendChartTest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         Build build = JobCreatorUtils.buildSuccessfully(job);
-        job.open();
-        MainPanel mp = new MainPanel(build, "");
+
+        MainPanel mp = new MainPanel(job);
+        mp.open();
         assertThat(mp.trendChartIsDisplayed()).isFalse();
     }
 

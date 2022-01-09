@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
@@ -17,11 +18,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class MainPanel extends PageObject {
     private static final String COVERAGE_TREND_CHART = "coverage-trendchart";
-    public MainPanel(final Build parent, final String id) {
-        super(parent, parent.url(id));
-    }
-
-    public MainPanel(final Build parent) {
+    public MainPanel(final Job parent) {
         super(parent, parent.url);
     }
 
@@ -31,11 +28,18 @@ public class MainPanel extends PageObject {
      * @return boolean value, that describes the visibility of the Trendchart.
      */
     public boolean trendChartIsDisplayed() {
-        return driver.findElement(By.id(COVERAGE_TREND_CHART)).isDisplayed(); }
+        return isChartDisplayed(COVERAGE_TREND_CHART);
+        //return driver.findElement(By.id(COVERAGE_TREND_CHART)).isDisplayed();
+        //
+        }
+
+    private boolean isChartDisplayed(final String elementId){
+        return find(By.id(elementId))!=null;
+    }
 
 
     public String getTrendChart(){
-        this.waitFor().withTimeout(50L, TimeUnit.SECONDS);
+        waitFor().until(() -> isChartDisplayed(COVERAGE_TREND_CHART));
         return getChartById(COVERAGE_TREND_CHART);
     }
 

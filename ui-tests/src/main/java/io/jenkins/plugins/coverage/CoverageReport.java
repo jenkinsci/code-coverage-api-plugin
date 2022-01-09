@@ -11,6 +11,7 @@ import org.openqa.selenium.interactions.Actions;
 import com.gargoylesoftware.htmlunit.ScriptResult;
 import com.google.inject.Injector;
 
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 enum Tab {
@@ -59,10 +60,14 @@ public class CoverageReport extends PageObject {
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
     private static final String COVERAGE_TREND_CHART = "coverage-trend";
     private static final String COVERAGE_TREE_CHART = "coverage-details";
+    private static final String RELATIVE_PATH_BUILD_TO_REPORT = "coverage";
 
-    //@SuppressWarnings("unused") // Required to dynamically create page object using reflection
     public CoverageReport(final Injector injector, final URL url) {
         super(injector, url);
+    }
+
+    public CoverageReport(final Build parent) {
+        super(parent, parent.url(RELATIVE_PATH_BUILD_TO_REPORT));
     }
 
     /**
