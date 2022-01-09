@@ -16,8 +16,16 @@ public class CoverageReportTest extends AbstractJUnitTest {
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
+    private static final String COLOR_GREEN = "#c4e4a9";
+    private static final String COLOR_ORANGE = "#fbdea6";
+    private static final String COLOR_RED = "#ef9a9a";
+
+    /**
+     * Builds a project with two different jacoco files, each used in another build. Verifies coverage overview,
+     * coverage trend and package overview in CoverageReport [TODO: verifies file coverage]
+     */
     @Test
-    public void createJobForPreparingFirstTestsOfCoverageReport() {
+    public void checkCoverageReportOfJobWithTwoBuildsAndDifferentJacocoFiles() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
@@ -33,8 +41,24 @@ public class CoverageReportTest extends AbstractJUnitTest {
         CoverageSummary summary = new CoverageSummary(build, "coverage");
         CoverageReport report = summary.openCoverageReport();
 
-        String coverageOverview = report.getCoverageOverview();
+        String coverageTree = report.getCoverageTree();
+        verifyCoverageTree(coverageTree);
 
+        String coverageOverview = report.getCoverageOverview();
+        verifyCoverageOverview(coverageOverview);
+
+        String trendChart = report.getCoverageTrend();
+        verifyTrendchart(trendChart);
+
+        //implement test for FileCoverage Table
+
+    }
+
+    /**
+     * Verifies CoverageOverview of CoverageReport.
+     * @param coverageOverview
+     */
+    private void verifyCoverageOverview(final String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -58,11 +82,46 @@ public class CoverageReportTest extends AbstractJUnitTest {
 
         assertThatJson(coverageOverview).node("series[0].name").isEqualTo("Covered");
         assertThatJson(coverageOverview).node("series[1].name").isEqualTo("Missed");
-
     }
 
+    /**
+     * Verifies CoverageTree of CoverageReport.
+     * @param coverageTree
+     */
+    private void verifyCoverageTree(final String coverageTree) {
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
+                .contains("Ensure.java")
+                .contains("FilteredLog.java")
+                .contains("Generated.java")
+                .contains("NoSuchElementException.java")
+                .contains("PathUtil.java")
+                .contains("PrefixLogger.java")
+                .contains("StringContainsUtils.java")
+                .contains("TreeString.java")
+                .contains("TreeStringBuilder.java")
+                .contains("VisibleForTesting.java");
+
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(10)
+                .contains("[125, 100]")
+                .contains("[34,34]")
+                .contains("[0,0]")
+                .contains("[2,0]")
+                .contains("[43,43]")
+                .contains("[12,12]")
+                .contains("[8,8]")
+                .contains("[46,46]")
+                .contains("[53,51]")
+                .contains("[0,0]");
+
+        //TODO: pick and check items with by using its values and colors
+    }
 
     //implemented twice -> TODO: refactoring
+
+    /**
+     * Verifies CoverageTrend of CoverageReport.
+     * @param trendChart
+     */
     public void verifyTrendchart(final String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
@@ -76,17 +135,13 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .isArray()
                 .hasSize(2);
 
-        assertThatJson(trendChart)
-                .and(
-                        a -> a.node("series[0].name").isEqualTo("Line"),
-                        a -> a.node("series[1].name").isEqualTo("Branch")
-                );
+        assertThatJson(trendChart).node("series[0].name").isEqualTo("Line");
+        assertThatJson(trendChart).node("series[1].name").isEqualTo("Branch");
 
-        assertThatJson(trendChart)
-                .and(
-                        a -> a.node("series[0].data").isArray().contains(95).contains(91),
-                        a -> a.node("series[1].data").isArray().contains(88).contains(93)
-                );
+
+        assertThatJson(trendChart).node("series[0].data").isArray().contains(95).contains(91);
+        assertThatJson(trendChart).node("series[1].data").isArray().contains(88).contains(93);
+
     }
 
 }
