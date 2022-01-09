@@ -11,12 +11,12 @@ import io.jenkins.plugins.coverage.MainPanel;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
-public class TrendChartTest  extends AbstractJUnitTest {
+public class TrendChartTest extends AbstractJUnitTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
 
     /**
-     * Check if the generated TrendChart has the right axis and the right values for its builds.
+     * Check if the generated TrendChart has the correct number of builds in its axis and the right coverage values for its builds.
      */
     @Test
     public void verifyGeneratedTrendChart() {
@@ -28,7 +28,6 @@ public class TrendChartTest  extends AbstractJUnitTest {
                 .hasSize(2)
                 .contains("#1")
                 .contains("#2");
-
 
         assertThatJson(trendChart)
                 .node("series")
@@ -48,27 +47,11 @@ public class TrendChartTest  extends AbstractJUnitTest {
                 );
     }
 
-
     /**
-     * Trend-charts are available for a project with two or more builds.
-     * A Project with only one build should not generate a Trend-chart.
+     * Creates a job with two builds. Each build contains a different Jacoco-File.
+     *
+     * @return trendchart data due too job has at least two builds
      */
-    @Test
-    public void verifyNoTrendChartIsGenerated(){
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
-        job.open();
-        MainPanel mp = new MainPanel(build, "");
-        assertThat(mp.trendChartIsDisplayed()).isFalse();
-    }
-
-
-
     private String getTrendChartFromJobWithMultipleBuilds() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage");
@@ -86,8 +69,22 @@ public class TrendChartTest  extends AbstractJUnitTest {
         return mp.getTrendChart();
     }
 
-
-
-
+    /**
+     * Trend-charts are available for a project with two or more builds. A Project with only one build should not
+     * generate a Trend-chart.
+     */
+    @Test
+    public void verifyNoTrendChartIsGenerated() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build build = JobCreatorUtils.buildSuccessfully(job);
+        job.open();
+        MainPanel mp = new MainPanel(build, "");
+        assertThat(mp.trendChartIsDisplayed()).isFalse();
+    }
 
 }
