@@ -1,22 +1,15 @@
-import java.net.URL;
-
 import org.junit.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Job;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.MainPanel;
-
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import io.jenkins.plugins.coverage.JobStatus;
 
 /**
  * Should in the end contain all tests.
@@ -88,7 +81,7 @@ public class UITest extends AbstractJUnitTest {
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
         Build build3 = JobCreatorUtils.buildSuccessfully(job);
 
-        MainPanel mp = new MainPanel(job);
+        JobStatus mp = new JobStatus(job);
         mp.open();
         mp.getTrendChart();
 

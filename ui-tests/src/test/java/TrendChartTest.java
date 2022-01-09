@@ -6,9 +6,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.MainPanel;
+import io.jenkins.plugins.coverage.JobStatus;
+import io.jenkins.plugins.coverage.Metrics;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
@@ -68,10 +67,10 @@ public class TrendChartTest extends AbstractJUnitTest {
         job.save();
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
 
-        MainPanel mp = new MainPanel(job);
+        JobStatus mp = new JobStatus(job);
         mp.open();
-
         return mp.getTrendChart();
+
     }
 
     /**
@@ -88,7 +87,7 @@ public class TrendChartTest extends AbstractJUnitTest {
         job.save();
         Build build = JobCreatorUtils.buildSuccessfully(job);
 
-        MainPanel mp = new MainPanel(job);
+        JobStatus mp = new JobStatus(job);
         mp.open();
         assertThat(mp.trendChartIsDisplayed()).isFalse();
     }

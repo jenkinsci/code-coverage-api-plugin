@@ -16,9 +16,9 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 /**
  * {@link PageObject} representing the coverage summary on the build page of a job.
  */
-public class MainPanel extends PageObject {
+public class JobStatus extends PageObject {
     private static final String COVERAGE_TREND_CHART = "coverage-trendchart";
-    public MainPanel(final Job parent) {
+    public JobStatus(final Job parent) {
         super(parent, parent.url);
     }
 

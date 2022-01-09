@@ -62,6 +62,7 @@ public class CoverageReport extends PageObject {
     private static final String COVERAGE_TREE_CHART = "coverage-details";
     private static final String RELATIVE_PATH_BUILD_TO_REPORT = "coverage";
 
+    //is currently used //TODO: add warning
     public CoverageReport(final Injector injector, final URL url) {
         super(injector, url);
     }
