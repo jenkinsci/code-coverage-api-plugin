@@ -1,15 +1,10 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
@@ -21,6 +16,8 @@ public class CoverageSummary extends PageObject {
     //TODO: wahrscheinlich weitere Attribute in summary.jelly notwendig
     private final String id;
     private final WebElement coverageReportLink;
+
+    private final List<WebElement> results;
 
     /**
      * Creates a new page object representing the coverage summary on the build page of a job.
@@ -34,11 +31,12 @@ public class CoverageSummary extends PageObject {
         super(parent, parent.url(id));
 
         this.id = id;
-        WebElement coverage = getElement(By.id(id + "-summary"));
+        WebElement summary = getElement(By.id(id + "-summary"));
 
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
         getElement(by.href(id));
         //zuweisen der Werte
+        results = summary.findElements(by.xpath("ul/li"));
     }
 
     public WebElement getCoverageReportLink() {
@@ -48,7 +46,6 @@ public class CoverageSummary extends PageObject {
     public CoverageReport openCoverageReport() {
         return openPage(getCoverageReportLink(), CoverageReport.class);
     }
-
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
         String href = link.getAttribute("href");
