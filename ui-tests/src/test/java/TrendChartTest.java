@@ -8,6 +8,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.MainPanel;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
 public class TrendChartTest  extends AbstractJUnitTest {
@@ -19,8 +20,32 @@ public class TrendChartTest  extends AbstractJUnitTest {
      */
     @Test
     public void verifyGeneratedTrendChart() {
-        getTrendChartFromJobWithMultipleBuilds();
-       // String trendChart = getTrendChartFromJobWithThreeBuilds();
+        String trendChart = getTrendChartFromJobWithMultipleBuilds();
+
+        assertThatJson(trendChart)
+                .inPath("$.xAxis[*].data[*]")
+                .isArray()
+                .hasSize(2)
+                .contains("#1")
+                .contains("#2");
+
+
+        assertThatJson(trendChart)
+                .node("series")
+                .isArray()
+                .hasSize(2);
+
+        assertThatJson(trendChart)
+                .and(
+                        a -> a.node("series[0].name").isEqualTo("Line"),
+                        a -> a.node("series[1].name").isEqualTo("Branch")
+                );
+
+        assertThatJson(trendChart)
+                .and(
+                        a -> a.node("series[0].data").isArray().contains(95).contains(91),
+                        a -> a.node("series[1].data").isArray().contains(88).contains(93)
+                );
     }
 
 
@@ -59,7 +84,6 @@ public class TrendChartTest  extends AbstractJUnitTest {
         job.open();
         MainPanel mp = new MainPanel(build2, "");
         return mp.getTrendChart();
-
     }
 
 
