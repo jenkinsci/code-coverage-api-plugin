@@ -1,5 +1,8 @@
 package io.jenkins.plugins.coverage;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.Build;
@@ -17,6 +20,18 @@ public class MainPanel extends PageObject {
     public MainPanel(final Build parent) {
         super(parent, parent.url);
     }
+
+    /**
+     * Checks if the trendChart is visible on the Page.
+     *
+     * @param chartName
+     *         id of the Chart we want to evaluate.
+     *
+     * @return boolean value, that describes the visibility of the Trendchart.
+     */
+    public boolean trendChartIsDisplayed() {
+        return driver.findElement(By.id(COVERAGE_TREND_CHART)).isDisplayed(); }
+
 
     public String getTrendChart(){
         return getChartById(COVERAGE_TREND_CHART);
