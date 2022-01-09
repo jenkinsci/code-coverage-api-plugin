@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -35,8 +36,8 @@ public class CoverageSummary extends PageObject {
 
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
         getElement(by.href(id));
-        //zuweisen der Werte
-        results = summary.findElements(by.xpath("ul/li"));
+
+        results = summary.findElements(by.id("coverage-value"));
     }
 
     public WebElement getCoverageReportLink() {
@@ -45,6 +46,21 @@ public class CoverageSummary extends PageObject {
 
     public CoverageReport openCoverageReport() {
         return openPage(getCoverageReportLink(), CoverageReport.class);
+    }
+
+    /**
+     * Get coverage of Summary.
+     * @return Hashmap with coverage and value
+     */
+    public HashMap<String, Double> getCoverage() {
+        HashMap<String, Double> coverage = new HashMap<>();
+        for (WebElement result : results) {
+            String message = result.getText();
+            String type = message.substring(0, message.indexOf(":")).trim();
+            Double value = Double.parseDouble(message.substring(message.indexOf(":") + 1, message.indexOf("%")).trim());
+            coverage.put(type, value);
+        }
+        return coverage;
     }
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {

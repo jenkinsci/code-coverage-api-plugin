@@ -2,6 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
   <j:if test="${!it.newActionAvailable}">
     <t:summary icon="graph.png">
+    <span id="coverage-summary">
       <a href="coverage/">${%Coverage Reports}</a>
       <j:set var="result" value="${it.target}"/>
       <j:if test="${result != null}">
@@ -34,9 +35,11 @@
             </div>
           </j:if>
           <j:forEach var="element" items="${result.elements}">
+          <span id="coverage-value">
             <b>${element.name}</b>:
             ${result.getCoverage(element).percentage}%
             &amp;nbsp;
+            </span>
           </j:forEach>
         </div>
         <j:set var="failMessage" value="${it.failMessage}"/>
@@ -46,6 +49,7 @@
           </div>
         </j:if>
       </j:if>
+      </span>
     </t:summary>
   </j:if>
 </j:jelly>
