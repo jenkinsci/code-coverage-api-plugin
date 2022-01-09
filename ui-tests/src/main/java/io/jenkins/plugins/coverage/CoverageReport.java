@@ -83,7 +83,12 @@ public class CoverageReport extends PageObject {
         return getChartById(COVERAGE_OVERVIEW_CHART);
     }
 
+    private boolean isChartDisplayed(final String elementId){
+        return find(By.id(elementId))!=null;
+    }
+
     private String getChartById(final String elementId) {
+        waitFor().until(() -> isChartDisplayed(elementId));
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\")).getOption())",
@@ -100,7 +105,6 @@ public class CoverageReport extends PageObject {
 
 
     /*
-
     //aka file overview
     public String getCoverageTable(){
         ensureFileOverviewIsActive();
@@ -119,18 +123,6 @@ public class CoverageReport extends PageObject {
             openTabCoverageTree();
         }
     }
-
-
-    /*private void hoverOverCell() {
-
-        Actions action = new Actions(driver);
-        action.moveToElement(cell).perform();
-    }*/
-
-    /*public WebElement getFilterInputElementByActiveTab() {
-        WebElement filter = find(By.id(getActiveTab().property + "_filter"));
-        return filter.findElement(By.cssSelector("label > input"));
-    }*/
 
 
 
