@@ -131,6 +131,12 @@ public class CoverageReport extends PageObject {
     }
 
 
+    public FileCoverageTable openFileCoverageTable() {
+        ensureCoverageTableTabIsActive();
+        return new FileCoverageTable( this);
+    }
+
+
 
     /**
      * Returns the active and visible tab that has the focus in the tab bar.

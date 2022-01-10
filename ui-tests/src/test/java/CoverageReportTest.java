@@ -8,8 +8,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.CoverageSummary;
+import io.jenkins.plugins.coverage.FileCoverageTable;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class CoverageReportTest extends AbstractJUnitTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
@@ -40,7 +42,8 @@ public class CoverageReportTest extends AbstractJUnitTest {
         build2.open();
         CoverageSummary summary = new CoverageSummary(build, "coverage");
         CoverageReport report = summary.openCoverageReport();
-
+        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
+        verifyFileCoverageTable(fileCoverageTable);
         String coverageTree = report.getCoverageTree();
         verifyCoverageTree(coverageTree);
 
@@ -52,6 +55,10 @@ public class CoverageReportTest extends AbstractJUnitTest {
 
         //implement test for FileCoverage Table
 
+    }
+
+    private void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
+        //assertThat(fileCoverageTable).getTableRows().get(0).getCellContent("File")
     }
 
     /**

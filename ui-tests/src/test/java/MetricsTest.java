@@ -21,10 +21,14 @@ public class MetricsTest extends AbstractJUnitTest {
     public void verifyMetrics() {
         Build secondBuild = createSecondBuild();
         Metrics metrics = new Metrics(secondBuild);
-
+        metrics.open();
 
     }
 
+    /**
+     * Temporary
+     * @return
+     */
     private Build createSecondBuild() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
