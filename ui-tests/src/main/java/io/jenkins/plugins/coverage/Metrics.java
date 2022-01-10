@@ -17,4 +17,11 @@ public class Metrics extends PageObject {
         super(parent, parent.url(RELATIVE_PATH_BUILD_TO_METRICS));
     }
 
+    //would it be better to use the path from url in metrics?
+    public AvailableMetrics openAvailableMetrics(){
+        AvailableMetrics availableMetrics = new AvailableMetrics(this);
+        availableMetrics.open();
+        return availableMetrics;
+    }
+
 }

@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
+import io.jenkins.plugins.coverage.AvailableMetrics;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.Metrics;
@@ -22,6 +23,7 @@ public class MetricsTest extends AbstractJUnitTest {
         Build secondBuild = createSecondBuild();
         Metrics metrics = new Metrics(secondBuild);
         metrics.open();
+        AvailableMetrics availableMetrics = metrics.openAvailableMetrics();
 
     }
 
