@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -19,8 +20,9 @@ public class CoverageSummary extends PageObject {
     private final WebElement coverageReportLink;
 
     private final WebElement referenceBuild;
-    private final List<WebElement> results;
+    private final List<WebElement> coverage;
     private final WebElement failMsg;
+    private final List<WebElement> coverageChanges;
 
     /**
      * Creates a new page object representing the coverage summary on the build page of a job.
@@ -39,8 +41,9 @@ public class CoverageSummary extends PageObject {
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
         getElement(by.href(id));
         this.referenceBuild = getElement(By.id("coverage-reference"));
-        this.results = summary.findElements(by.id("coverage-value"));
+        this.coverage = summary.findElements(by.id("coverage-value"));
         this.failMsg = getElement(By.id("coverage-fail-msg"));
+        this.coverageChanges = summary.findElements(by.id("coverage-change"));
 
     }
 
@@ -59,13 +62,23 @@ public class CoverageSummary extends PageObject {
      */
     public HashMap<String, Double> getCoverage() {
         HashMap<String, Double> coverage = new HashMap<>();
-        for (WebElement result : results) {
+        for (WebElement result : this.coverage) {
             String message = result.getText();
             String type = message.substring(0, message.indexOf(":")).trim();
-            Double value = Double.parseDouble(message.substring(message.indexOf(":") + 1, message.indexOf("%")).trim());
+            double value = Double.parseDouble(message.substring(message.indexOf(":") + 1, message.indexOf("%")).trim());
             coverage.put(type, value);
         }
         return coverage;
+    }
+
+    public List<Double> getCoverageChanges() {
+        List<Double> changes = new LinkedList<>();
+        for (WebElement result : this.coverageChanges) {
+            String message = result.getText();
+            double value = Double.parseDouble(message.substring(1, message.indexOf("%")).trim());
+            changes.add(value);
+        }
+        return changes;
     }
 
     public String getFailMsg() {

@@ -18,6 +18,7 @@
       <span id="coverage-value">
         <li>${metric.name}: ${result.getCoverage(metric).printCoveredPercentage()}
           <j:if test="${it.hasDelta(metric)}">
+          <span id="coverage-change">
             <j:choose>
               <j:when test="${it.getDelta(metric).startsWith('-')}">
                 <j:set var="color" value="#9d1212"/>
@@ -27,6 +28,7 @@
               </j:otherwise>
             </j:choose>
             <span style="color: ${color}">(${it.getDelta(metric)}%)</span>
+            </span>
           </j:if>
         </li>
         </span>
