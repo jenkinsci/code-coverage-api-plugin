@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -56,6 +57,10 @@ public class SummaryTest extends AbstractJUnitTest {
         Build build2 = JobCreatorUtils.buildSuccessfully(job);
         build2.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
+        List<Double> changes = cs.getCoverageChanges();
+
+        assertThat(changes).contains(-0.045, 0.054);
+
         cs.openReferenceBuild();
 
         assertThat(getCurrentUrl()).isEqualTo(job.url + "1/");
