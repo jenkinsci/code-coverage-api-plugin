@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -246,12 +247,12 @@ public class CoverageProcessor {
 
         CoverageResult referenceCoverageResult = referenceAction.getResult();
 
-        Map<CoverageElement, Float> deltaCoverage = new TreeMap<>();
+        Map<CoverageElement, BigDecimal> deltaCoverage = new TreeMap<>();
         referenceCoverageResult.getResults().forEach((coverageElement, referenceRatio) -> {
             Ratio buildRatio = coverageReport.getCoverage(coverageElement);
 
             if (buildRatio != null) {
-                float diff = buildRatio.getPercentageFloat() - referenceRatio.getPercentageFloat();
+                BigDecimal diff = buildRatio.getPercentageBigDecimal().subtract(referenceRatio.getPercentageBigDecimal());
                 listener.getLogger()
                         .println(coverageElement.getName() + " coverage diff: " + diff + "%. Add to CoverageResult.");
                 deltaCoverage.put(coverageElement, diff);
@@ -274,8 +275,8 @@ public class CoverageProcessor {
     }
 
     private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult) throws CoverageException {
-        float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
-        if (coverageDiff < 0) {
+        BigDecimal coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
+        if (coverageDiff.compareTo(BigDecimal.ZERO) < 0) {
             throw new CoverageException(
                     "Fail build because this change request decreases line coverage by " + coverageDiff);
         }

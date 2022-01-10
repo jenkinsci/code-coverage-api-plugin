@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class CoverageChecksPublisherTest {
                 .build();
 
         Run build = mock(Run.class);
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        CoverageResult result = createCoverageResult( BigDecimal.valueOf(0.6), BigDecimal.valueOf(0.4));
         when(result.getPreviousResult()).thenReturn(null);
         when(result.getOwner()).thenReturn(build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
@@ -197,7 +198,7 @@ public class CoverageChecksPublisherTest {
                         .build())
                 .build();
 
-        CoverageResult result = createCoverageResult((float)0.5, (float)0.3, (float)0.6, (float)0.4, null, 0, -10);
+        CoverageResult result = createCoverageResult(BigDecimal.valueOf(0.5), BigDecimal.valueOf (0.3), BigDecimal.valueOf(0.6),  BigDecimal.valueOf (0.4), null, BigDecimal.ZERO, BigDecimal.valueOf( -10));
         CoverageAction action = new CoverageAction(result);
 
         Localizable localizable = mock(Localizable.class);
@@ -231,7 +232,7 @@ public class CoverageChecksPublisherTest {
                 .build();
 
         Run build = mock(Run.class);
-        CoverageResult result = createCoverageResult((float)0.6, (float)0.4);
+        CoverageResult result = createCoverageResult( BigDecimal.valueOf(0.6) , BigDecimal.valueOf (0.4));
         when(result.getPreviousResult()).thenReturn(null);
         when(result.getOwner()).thenReturn(build);
         when(build.getUrl()).thenReturn(BUILD_LINK);
@@ -285,6 +286,14 @@ public class CoverageChecksPublisherTest {
     private CoverageResult createCoverageResult(final float lastLineCoverage, final float lastConditionCoverage,
             final float lineCoverage, final float conditionCoverage,
             final String targetBuildLink, final float targetLineDiff, final float targetBranchDiff) {
+    	return createCoverageResult( BigDecimal.valueOf(lastLineCoverage), BigDecimal.valueOf(lastConditionCoverage),
+    			BigDecimal.valueOf(lineCoverage), BigDecimal.valueOf(conditionCoverage), targetBuildLink,
+    			BigDecimal.valueOf(targetLineDiff), BigDecimal.valueOf(targetBranchDiff));
+    }
+
+    private CoverageResult createCoverageResult(final BigDecimal lastLineCoverage, final BigDecimal lastConditionCoverage,
+            final BigDecimal lineCoverage, final BigDecimal conditionCoverage,
+            final String targetBuildLink, final BigDecimal targetLineDiff, final BigDecimal targetBranchDiff) {
         Run build = mock(Run.class);
         Run lastBuild = mock(Run.class);
         CoverageResult lastResult = createCoverageResult(lastLineCoverage, lastConditionCoverage);
@@ -302,16 +311,18 @@ public class CoverageChecksPublisherTest {
         return result;
     }
 
-    private CoverageResult createCoverageResult(final float lineCoverage, final float conditionCoverage) {
+
+
+    private CoverageResult createCoverageResult(final BigDecimal lineCoverage, final BigDecimal conditionCoverage) {
         CoverageResult result = mock(CoverageResult.class);
 
         Map<CoverageElement, Ratio> ratios = new HashMap<>(3);
-        ratios.put(CoverageElement.LINE, Ratio.create(lineCoverage, 1));
-        ratios.put(CoverageElement.CONDITIONAL, Ratio.create(conditionCoverage, 1));
+        ratios.put(CoverageElement.LINE, Ratio.create(lineCoverage, BigDecimal.ONE));
+        ratios.put(CoverageElement.CONDITIONAL, Ratio.create(conditionCoverage,  BigDecimal.ONE));
 
         when(result.getResults()).thenReturn(ratios);
-        when(result.getCoverage(CoverageElement.LINE)).thenReturn(Ratio.create(lineCoverage, 1));
-        when(result.getCoverage(CoverageElement.CONDITIONAL)).thenReturn(Ratio.create(conditionCoverage, 1));
+        when(result.getCoverage(CoverageElement.LINE)).thenReturn(Ratio.create(lineCoverage, BigDecimal.ONE));
+        when(result.getCoverage(CoverageElement.CONDITIONAL)).thenReturn(Ratio.create(conditionCoverage,BigDecimal.ONE));
         when(result.getCoverageTrends()).thenReturn(null);
 
         return result;

@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,7 +117,7 @@ class CoverageChecksPublisher {
             float lineCoverage = result.getCoverage(CoverageElement.LINE).getPercentageFloat();
             if (result.getReferenceBuildUrl() != null) {
                 title.append(extractChecksTitle("Line", "target branch", lineCoverage,
-                        result.getCoverageDelta(CoverageElement.LINE)));
+                        result.getCoverageDelta(CoverageElement.LINE).floatValue()));
             } else if (lastRatios.containsKey(CoverageElement.LINE)) {
                 title.append(extractChecksTitle("Line", "last successful build", lineCoverage,
                         lineCoverage - lastRatios.get(CoverageElement.LINE).getPercentageFloat()));
@@ -128,15 +129,13 @@ class CoverageChecksPublisher {
         }
 
         if (result.getCoverage(CoverageElement.CONDITIONAL) != null) {
-            float branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageFloat();
+            BigDecimal branchCoverage = result.getCoverage(CoverageElement.CONDITIONAL).getPercentageBigDecimal();
             if (result.getReferenceBuildUrl() != null) {
-                title.append(extractChecksTitle("Branch", "target branch", branchCoverage,
-                        result.getCoverageDelta(CoverageElement.CONDITIONAL)));
+                title.append(extractChecksTitle("Branch", "target branch", branchCoverage.floatValue(),result.getCoverageDelta(CoverageElement.CONDITIONAL).floatValue()));
             } else if (lastRatios.containsKey(CoverageElement.CONDITIONAL)) {
-                title.append(extractChecksTitle("Branch", "last successful build", branchCoverage,
-                        branchCoverage - lastRatios.get(CoverageElement.CONDITIONAL).getPercentageFloat()));
+                title.append(extractChecksTitle("Branch", "last successful build", branchCoverage.floatValue(), branchCoverage.subtract(lastRatios.get(CoverageElement.CONDITIONAL).getPercentageBigDecimal()).floatValue()));
             } else {
-                title.append(extractChecksTitle("Branch", "", branchCoverage, 0));
+                title.append(extractChecksTitle("Branch", "", branchCoverage.floatValue(), 0));
             }
         }
 

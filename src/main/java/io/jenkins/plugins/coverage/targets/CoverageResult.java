@@ -21,9 +21,13 @@
  */
 package io.jenkins.plugins.coverage.targets;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,21 +46,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.TextFile;
-
 import io.jenkins.plugins.coverage.BuildUtils;
 import io.jenkins.plugins.coverage.CoverageAction;
 import io.jenkins.plugins.coverage.exception.CoverageException;
@@ -103,7 +105,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
     private final Map<CoverageElement, Ratio> localResults = new TreeMap<>();
 
-    private final Map<CoverageElement, Float> deltaResults = new TreeMap<>();
+    private final Map<CoverageElement, BigDecimal> deltaResults = new TreeMap<>();
 
     /**
      * Line-by-line coverage information. Computed lazily, since it's memory intensive.
@@ -186,11 +188,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      * @return the delta result (if available)
      */
     public String getDelta(final CoverageElement coverageElement) {
-        Float delta = deltaResults.get(coverageElement);
+        BigDecimal delta = deltaResults.get(coverageElement);
         if (delta == null) {
             return "n/a";
         }
-        return String.format("%+.3f", delta);
+        return String.format("%+.3f", delta.floatValue());
     }
 
     private String formatCoverage(final CoverageElement coverageElement) {
@@ -435,8 +437,8 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
      *
      * @return the diff coverage or 0, if diff coverage for element is not available.
      */
-    public float getCoverageDelta(final CoverageElement element) {
-        return deltaResults.getOrDefault(element, 0.0F);
+    public BigDecimal getCoverageDelta(final CoverageElement element) {
+        return deltaResults.getOrDefault(element, BigDecimal.ZERO);
     }
 
     /**
@@ -569,11 +571,11 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
         return Collections.unmodifiableMap(aggregateResults);
     }
 
-    public Map<CoverageElement, Float> getDeltaResults() {
+    public Map<CoverageElement, BigDecimal> getDeltaResults() {
         return Collections.unmodifiableMap(deltaResults);
     }
 
-    public void setDeltaResults(final Map<CoverageElement, Float> deltaResults) {
+    public void setDeltaResults(final Map<CoverageElement, BigDecimal> deltaResults) {
         this.deltaResults.clear();
         this.deltaResults.putAll(deltaResults);
     }
@@ -692,14 +694,14 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
 
             Ratio prevTotal = aggregateResults.get(child.getElement());
             if (prevTotal == null) {
-                prevTotal = Ratio.create(0, 0);
+                prevTotal = Ratio.create(ZERO, ZERO);
             }
 
             boolean isChildCovered = child.aggregateResults.entrySet().stream().anyMatch(coverageElementRatioEntry ->
-                    coverageElementRatioEntry.getValue().numerator > 0);
+                    coverageElementRatioEntry.getValue().numerator.compareTo(ZERO) > 0);
 
             aggregateResults.put(child.getElement(),
-                    Ratio.create(prevTotal.numerator + (isChildCovered ? 1 : 0), prevTotal.denominator + 1));
+                    Ratio.create(prevTotal.numerator.add(  (isChildCovered ? ONE : ZERO)), prevTotal.denominator.add(ONE)));
         }
 
         // override any local results

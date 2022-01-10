@@ -48,7 +48,7 @@ public class CoverageNodeConverter {
             for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
                 Ratio ratio = coverage.getValue();
                 CoverageLeaf leaf = new CoverageLeaf(CoverageMetric.valueOf(coverage.getKey().getName()),
-                        new Coverage((int) ratio.numerator, (int) (ratio.denominator - ratio.numerator)));
+                        new Coverage( ratio.numerator.intValue(), (ratio.denominator.subtract(ratio.numerator).intValue())));
                 coverageNode.add(leaf);
             }
             return coverageNode;

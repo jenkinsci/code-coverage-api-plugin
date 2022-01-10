@@ -9,6 +9,7 @@ import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.monitoring.MonitorPortlet;
 import io.jenkins.plugins.monitoring.MonitorPortletFactory;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -92,13 +93,13 @@ public class CoveragePullRequestMonitoringPortlet extends MonitorPortlet {
         data.add("covered", covered);
 
         JsonArray missed = new JsonArray();
-        missed.add(line.denominator - line.numerator);
-        missed.add(conditional.denominator - conditional.numerator);
+        missed.add(line.denominator.subtract(line.numerator).floatValue());
+        missed.add(conditional.denominator.subtract(conditional.numerator).floatValue());
         data.add("missed", missed);
 
         JsonArray coveredPercentage = new JsonArray();
-        coveredPercentage.add(line.denominator == 0 ? 0 : (double) (100 * (covered.get(0).getAsInt() / line.denominator)));
-        coveredPercentage.add(conditional.denominator == 0 ? 0 : (double) (100 * (covered.get(1).getAsInt() / conditional.denominator)));
+        coveredPercentage.add(line.denominator.compareTo(BigDecimal.ZERO) == 0 ? 0.00 : (double) (100 * (covered.get(0).getAsInt() / line.denominator.intValue())));
+        coveredPercentage.add(conditional.denominator.compareTo(BigDecimal.ONE) == 0 ? 0 : (double) (100 * (covered.get(1).getAsInt() / conditional.denominator.intValue())));
         data.add("coveredPercentage", coveredPercentage);
 
         JsonArray missedPercentage = new JsonArray();

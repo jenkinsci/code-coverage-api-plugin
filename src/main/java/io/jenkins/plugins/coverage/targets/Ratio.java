@@ -22,6 +22,7 @@
 package io.jenkins.plugins.coverage.targets;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -35,19 +36,19 @@ import java.text.NumberFormat;
  */
 final public class Ratio implements Serializable {
     /** Null Object. **/
-    public static final Ratio NULL = new Ratio(0, 1);
+    public static final Ratio NULL = new Ratio(BigDecimal.ZERO,BigDecimal.ONE);
 
-    public final float numerator;
-    public final float denominator;
+    public final BigDecimal numerator;
+    public final BigDecimal denominator;
 
-    private Ratio(final float numerator, final float denominator) {
+    private Ratio(final BigDecimal numerator, final BigDecimal denominator) {
         this.numerator = numerator;
         this.denominator = denominator;
     }
 
     @Override
     public String toString() {
-        return getPercentageString() + String.format(" (%d/%d)", (int)numerator, (int)denominator);
+        return getPercentageString() + String.format(" (%d/%d)", (int)numerator.intValue(), (int)denominator.intValue());
     }
 
     private String print(final float f) {
@@ -83,7 +84,21 @@ final public class Ratio implements Serializable {
      * @return percentage
      */
     public float getPercentageFloat() {
-        return denominator == 0 ? (numerator == 0 ? 100.0f : 0.0f) : (100 * numerator / denominator);
+    	return getPercentageBigDecimal().floatValue();
+    }
+
+    /**
+     * Gets the percentage in BigDecimal.
+     * For exceptional cases of 0/0, return 100% as it corresponds to expected ammout.
+     * For error cases of x/0, return 0% as x is unexpected ammout.
+     *
+     * @return percentage
+     */
+    public BigDecimal getPercentageBigDecimal() {
+    	if (denominator.compareTo(BigDecimal.ZERO) == 0) {
+    		return (numerator.compareTo(BigDecimal.ZERO) == 0? BigDecimal.valueOf(100.0) : BigDecimal.ZERO);
+    	}
+    	return numerator.multiply(BigDecimal.valueOf(100L).divide(denominator,2,RoundingMode.HALF_DOWN));
     }
 
     static NumberFormat dataFormat = new DecimalFormat("000.00");
@@ -120,8 +135,8 @@ final public class Ratio implements Serializable {
 
         Ratio ratio = (Ratio) o;
 
-        return Float.compare(ratio.denominator, denominator) == 0
-                && Float.compare(ratio.numerator, numerator) == 0;
+        return denominator.compareTo(ratio.denominator) == 0
+        		&& numerator.compareTo(ratio.numerator) ==0;
 
     }
 
@@ -130,7 +145,9 @@ final public class Ratio implements Serializable {
      */
     public int hashCode() {
         int result;
-        result = numerator != +0.0f ? Float.floatToIntBits(numerator) : 0;
+        float numerator = this.numerator.floatValue();
+        result =  numerator != +0.0f ? Float.floatToIntBits(numerator) : 0;
+        float denominator = this.denominator.floatValue();
         result = 31 * result + denominator != +0.0f ? Float.floatToIntBits(denominator) : 0;
         return result;
     }
@@ -150,7 +167,30 @@ final public class Ratio implements Serializable {
      * @param y denominator
      * @return the ratio
      */
-    public static Ratio create(final float x, final float y) {
+    public static Ratio create(int x, int y) {
+    	return create(BigDecimal.valueOf(x), BigDecimal.valueOf(y));
+    }
+
+
+    /**
+     * Creates a new instance of {@link Ratio}.
+     *
+     * @param x numerator
+     * @param y denominator
+     * @return the ratio
+     */
+    public static Ratio create(long x, long y) {
+    	return create(BigDecimal.valueOf(x), BigDecimal.valueOf(y));
+    }
+
+    /**
+     * Creates a new instance of {@link Ratio}.
+     *
+     * @param x numerator
+     * @param y denominator
+     * @return the ratio
+     */
+    public static Ratio create(final BigDecimal x, final BigDecimal y) {
         // TODO COMMON_INSTANCES seems broken and return the wrong cached ratio, need to be fix.
 //        int xx = (int) x;
 //        int yy = (int) y;
