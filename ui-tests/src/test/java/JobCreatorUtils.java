@@ -43,5 +43,8 @@ class JobCreatorUtils {
         return job.startBuild().waitUntilFinished().shouldSucceed();
     }
 
+    static protected Build buildWithErrors(final Job job) {
+        return job.startBuild().waitUntilFinished().shouldFail();
+    }
 
 }
