@@ -18,7 +18,9 @@ public class CoverageSummary extends PageObject {
     private final String id;
     private final WebElement coverageReportLink;
 
+    private final WebElement referenceBuild;
     private final List<WebElement> results;
+    private final WebElement failMsg;
 
     /**
      * Creates a new page object representing the coverage summary on the build page of a job.
@@ -36,8 +38,10 @@ public class CoverageSummary extends PageObject {
 
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
         getElement(by.href(id));
+        this.referenceBuild = getElement(By.id("coverage-reference"));
+        this.results = summary.findElements(by.id("coverage-value"));
+        this.failMsg = getElement(By.id("coverage-fail-msg"));
 
-        results = summary.findElements(by.id("coverage-value"));
     }
 
     public WebElement getCoverageReportLink() {
@@ -50,6 +54,7 @@ public class CoverageSummary extends PageObject {
 
     /**
      * Get coverage of Summary.
+     *
      * @return Hashmap with coverage and value
      */
     public HashMap<String, Double> getCoverage() {
@@ -61,6 +66,19 @@ public class CoverageSummary extends PageObject {
             coverage.put(type, value);
         }
         return coverage;
+    }
+
+    public String getFailMsg() {
+        return this.failMsg.getText();
+    }
+
+    public String getReferenceBuild() {
+        return this.referenceBuild.getText();
+    }
+
+    public void openReferenceBuild() {
+        WebElement a = this.referenceBuild.findElement(By.tagName("a"));
+        openPage(a, CoverageReport.class);
     }
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {

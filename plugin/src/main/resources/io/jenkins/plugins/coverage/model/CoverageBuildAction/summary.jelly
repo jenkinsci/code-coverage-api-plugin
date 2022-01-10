@@ -32,7 +32,9 @@
         </span>
       </j:forEach>
       <j:if test="${it.referenceBuild.present}">
+      <span id="coverage-reference">
         <li>Reference build: <j:out value="${it.referenceBuildLink}"/></li>
+        </span>
       </j:if>
     </ul>
     <j:set var="failMessage" value="${it.failMessage}"/>

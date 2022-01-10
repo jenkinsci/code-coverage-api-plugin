@@ -44,7 +44,7 @@
         </div>
         <j:set var="failMessage" value="${it.failMessage}"/>
         <j:if test="${failMessage != null}">
-          <div style="margin: 0 0 0 1ex">
+          <div style="margin: 0 0 0 1ex" id="coverage-fail-msg">
             ${failMessage}
           </div>
         </j:if>
