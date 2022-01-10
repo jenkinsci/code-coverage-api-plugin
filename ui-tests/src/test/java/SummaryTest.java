@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.JobStatus;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -20,13 +19,12 @@ public class SummaryTest extends AbstractJUnitTest {
 
     @Test
     public void verifyGeneratedTrendChart() {
-        //createBuildWithCoverage();
-        getTrendChartFromJobWithMultipleBuilds();
+        //firstBuild();
+        referenceBuild();
         //failBuild();
     }
 
-
-    private void createBuildWithCoverage() {
+    private void firstBuild() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
@@ -44,7 +42,7 @@ public class SummaryTest extends AbstractJUnitTest {
                 .containsValues(95.52, 88.59);
     }
 
-    private void getTrendChartFromJobWithMultipleBuilds() {
+    private void referenceBuild() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
@@ -60,7 +58,8 @@ public class SummaryTest extends AbstractJUnitTest {
         CoverageSummary cs = new CoverageSummary(build, "coverage");
         cs.openReferenceBuild();
 
-        System.out.println("HI");
+        assertThat(getCurrentUrl()).isEqualTo(job.url + "1/");
+
     }
 
     private void failBuild() {
@@ -81,6 +80,15 @@ public class SummaryTest extends AbstractJUnitTest {
         job.save();
         Build build = JobCreatorUtils.buildWithErrors(job);
         build.open();
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
+        HashMap<String, Double> coverage = cs.getCoverage();
+
+        assertThat(coverage)
+                .hasSize(9)
+                .containsKeys("Report", "Group", "Package", "File", "Class", "Method", "Instruction", "Line",
+                        "Conditional")
+                .containsValues(100.0, 99.0, 97.0, 96.0, 95.0, 88.0);
+
         System.out.println("HI");
 
     }
