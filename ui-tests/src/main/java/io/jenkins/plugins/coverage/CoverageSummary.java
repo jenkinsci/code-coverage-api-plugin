@@ -13,9 +13,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 /**
  * {@link PageObject} representing the coverage summary on the build page of a job.
  */
-public class CoverageSummary extends PageObject {
-    //TODO: Attribute wie z. B. Liste mit den Metrics inkl. getter und setter. Initialisierung der Werte im Konstruktor
-    //TODO: wahrscheinlich weitere Attribute in summary.jelly notwendig
+public class  CoverageSummary extends PageObject {
     private final String id;
     private final WebElement coverageReportLink;
 

@@ -66,7 +66,8 @@ public class CoverageReport extends PageObject {
     private static final String COVERAGE_TREND_CHART = "coverage-trend";
     private static final String COVERAGE_TREE_CHART = "coverage-details";
 
-    //TODO: add warning; is used
+
+    @SuppressWarnings({"unused"})
     public CoverageReport(final Injector injector, final URL url) {
         super(injector, url);
     }

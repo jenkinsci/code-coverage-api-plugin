@@ -22,70 +22,9 @@ public class UITest extends AbstractJUnitTest {
     @SuppressFBWarnings("BC")
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
-    /**
-     * Creates a first test which returns ... (-> siehe jelly) //TODO: javadoc hier später anpassen
-     */
-    @Test
-    public void createJob() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(FILE_NAME);
-        /*jacocoAdapter.setMergeToOneReport(true);
-        jacocoAdapter.createGlobalThresholdsPageArea("Instruction", 4, 4, false);
-        coveragePublisher.setApplyThresholdRecursively(true);
-        coveragePublisher.setFailUnhealthy(true);
-        coveragePublisher.setFailUnstable(true);
-        coveragePublisher.setSkipPublishingChecks(true);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        coveragePublisher.setFailNoReports(true);
-        coveragePublisher.setFailNoReports(true);
-        coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_SAVE_SOURCE_FILES);*/
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
-        CoverageReport cr = new CoverageReport(build);
-        cr.open();
-        //CoverageSummary summary = new CoverageSummary(build, "coverage");
-        //cs.openCoverageReport();
-        // CoverageReport report = summary.openCoverageReport();
-        //report.getActiveTab();
-        //report.openTabCoverageTable();
-        //report.openCoverageTree();
-
-        //report.verfiesOverview();
-        //String coverageTable = report.getCoverageTable();
-        //String coverageDetails = report.getCoverageDetails();
-
-        //String coverageTrend = report.getCoverageTrend();
-        //String coverageOverview = report.getCoverageOverview();
-
-        //boolean coverageTreeVisible = report.isCoverageTreeVisible();
-
-        // cr.verfiesOverview();
-
-        //Irgendwie CodeCoverage = new Irgendwie(build, "coverage");
-        //CodeCoverage.open();
-    }
 
 
-    @Test
-    public void createJobForForGettingProjectStatus() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, "/io.jenkins.plugins.coverage/jacoco-analysis-model.xml");
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(FILE_NAME);
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
-        Build build2 = JobCreatorUtils.buildSuccessfully(job);
-        Build build3 = JobCreatorUtils.buildSuccessfully(job);
 
-        JobStatus mp = new JobStatus(job);
-        mp.open();
-        mp.getTrendChart();
-
-    }
 
 
 
