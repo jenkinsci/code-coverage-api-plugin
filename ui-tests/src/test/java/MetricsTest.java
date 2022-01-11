@@ -15,23 +15,42 @@ public class MetricsTest extends AbstractJUnitTest {
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
     /**
-     * Creates a job with two builds, each with another jacoco file.
-     * Verifies Project Overview, metrics distribution and metrics details.
+     * Test for checking the Metrics by verifying its project overview, 
+     * metrics distribution and metrics details
+     * Uses a project with two different jacoco files, each one used in another build.
+     * First build uses {@link MetricsTest#JACOCO_ANALYSIS_MODEL_XML},
+     * Second build uses {@link MetricsTest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
-    public void verifyMetrics() {
-        Build secondBuild = createSecondBuild();
+    public void runFullMetricsTest() {
+        Build secondBuild = createSuccessfulJobWithDiffererntJacocos().getLastBuild();
         Metrics metrics = new Metrics(secondBuild);
         metrics.open();
         AvailableMetrics availableMetrics = metrics.openAvailableMetrics();
-
+        
+       
+        verifyProjectOverview("");
+        verifyMetricsDistribution("");
+        verifyMetricsDetails("");
     }
 
+    private void verifyMetricsDetails(final String s) {
+    }
+
+    private void verifyMetricsDistribution(final String s) {
+    }
+
+    private void verifyProjectOverview(final String s) {
+    }
+
+    //TODO: temporary; should later be used for a couple of tests
     /**
-     * Temporary
+     *  Builds a project with two different jacoco files, each one used in another build.
+     *  First build uses {@link MetricsTest#JACOCO_ANALYSIS_MODEL_XML},
+     *  Second build uses {@link MetricsTest#JACOCO_CODINGSTYLE_XML}.
      * @return
      */
-    private Build createSecondBuild() {
+    private FreeStyleJob createSuccessfulJobWithDiffererntJacocos() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
@@ -42,7 +61,8 @@ public class MetricsTest extends AbstractJUnitTest {
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
-        return JobCreatorUtils.buildSuccessfully(job);
+        JobCreatorUtils.buildSuccessfully(job);
+        return job;
     }
 
 }

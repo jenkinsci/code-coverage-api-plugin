@@ -31,12 +31,11 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
-    public void checkCoverageReportOfJobWithTwoBuildsAndDifferentJacocoFiles() {
+    public void runFullCoverageReportTest() {
         FreeStyleJob job = createSuccessfulJobWithDiffererntJacocos();
         Build secondBuild = job.getLastBuild();
-        CoverageSummary summary = new CoverageSummary(secondBuild, "coverage");
-        CoverageReport report = summary.openCoverageReport();   //so sinnvoll?
-
+        CoverageReport report = new CoverageReport(secondBuild);
+        //report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
         verifyFileCoverageTable(fileCoverageTable);
 
