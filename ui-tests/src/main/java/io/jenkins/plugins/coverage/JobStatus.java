@@ -14,7 +14,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * {@link PageObject} representing the coverage summary on the build page of a job.
+ * {@link PageObject} representing the Job status on the build page of a job.
  */
 public class JobStatus extends PageObject {
     private static final String COVERAGE_TREND_CHART = "coverage-trendchart";

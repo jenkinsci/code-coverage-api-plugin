@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * {@link PageObject} representing the coverage summary on the build page of a job.
+ * {@link PageObject} representing the Available Metrics on the build page of a job.
  */
 public class AvailableMetrics extends PageObject {
     //TODO: change path?
