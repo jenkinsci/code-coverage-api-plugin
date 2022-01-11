@@ -35,7 +35,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
         FreeStyleJob job = createSuccessfulJobWithDiffererntJacocos();
         Build secondBuild = job.getLastBuild();
         CoverageReport report = new CoverageReport(secondBuild);
-        //report.open();
+        report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
         verifyFileCoverageTable(fileCoverageTable);
 
