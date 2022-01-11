@@ -11,39 +11,35 @@ import io.jenkins.plugins.coverage.CoverageSummary;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
-import static org.assertj.core.api.Assertions.*;
 
 public class CoverageReportTest extends AbstractJUnitTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
+    //TODO: use or remove
     private static final String COLOR_GREEN = "#c4e4a9";
     private static final String COLOR_ORANGE = "#fbdea6";
     private static final String COLOR_RED = "#ef9a9a";
 
+
     /**
-     * Builds a project with two different jacoco files, each used in another build. Verifies coverage overview,
-     * coverage trend and package overview in CoverageReport [TODO: verifies file coverage]
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
+     * FileCoverageTable and CoverageTrend.
+     * Uses a project with two different jacoco files, each one used in another build.
+     * First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     * Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
     public void checkCoverageReportOfJobWithTwoBuildsAndDifferentJacocoFiles() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        Build build2 = JobCreatorUtils.buildSuccessfully(job);
-        build2.open();
-        CoverageSummary summary = new CoverageSummary(build, "coverage");
-        CoverageReport report = summary.openCoverageReport();
+        FreeStyleJob job = createSuccessfulJobWithDiffererntJacocos();
+        Build secondBuild = job.getLastBuild();
+        CoverageSummary summary = new CoverageSummary(secondBuild, "coverage");
+        CoverageReport report = summary.openCoverageReport();   //so sinnvoll?
+
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
         verifyFileCoverageTable(fileCoverageTable);
+
         String coverageTree = report.getCoverageTree();
         verifyCoverageTree(coverageTree);
 
@@ -52,18 +48,23 @@ public class CoverageReportTest extends AbstractJUnitTest {
 
         String trendChart = report.getCoverageTrend();
         verifyTrendchart(trendChart);
-
-        //implement test for FileCoverage Table
-
     }
 
+    /**
+     * Verifies CoverageTable of CoverageReport of Job with two Builds,
+     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+     * @param fileCoverageTable from second build.
+     */
     private void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
         //assertThat(fileCoverageTable).getTableRows().get(0).getCellContent("File")
     }
 
-    /**
-     * Verifies CoverageOverview of CoverageReport.
-     * @param coverageOverview
+     /**
+     * Verifies CoverageOverview of CoverageReport of Job with two Builds,
+     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+     * @param coverageOverview from second build.
      */
     private void verifyCoverageOverview(final String coverageOverview) {
         assertThatJson(coverageOverview)
@@ -92,8 +93,10 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies CoverageTree of CoverageReport.
-     * @param coverageTree
+     * Verifies CoverageTree of CoverageReport of Job with two Builds,
+     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+     * @param coverageTree from second build.
      */
     private void verifyCoverageTree(final String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
@@ -123,11 +126,12 @@ public class CoverageReportTest extends AbstractJUnitTest {
         //TODO: pick and check items with by using its values and colors
     }
 
-    //implemented twice -> TODO: refactoring
-
+    //TODO: temporary; (also needed for coverage summary)
     /**
-     * Verifies CoverageTrend of CoverageReport.
-     * @param trendChart
+     * Verifies CoverageTrend of CoverageReport of Job with two Builds,
+     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+     * @param trendChart from second build.
      */
     public void verifyTrendchart(final String trendChart) {
         assertThatJson(trendChart)
@@ -148,8 +152,29 @@ public class CoverageReportTest extends AbstractJUnitTest {
 
         assertThatJson(trendChart).node("series[0].data").isArray().contains(95).contains(91);
         assertThatJson(trendChart).node("series[1].data").isArray().contains(88).contains(93);
-
     }
 
+
+    //TODO: temporary; should later be used for a couple of tests
+    /**
+     *  Builds a project with two different jacoco files, each one used in another build.
+     *  First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+     *  Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+     * @return
+     */
+    private FreeStyleJob createSuccessfulJobWithDiffererntJacocos() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        JobCreatorUtils.buildSuccessfully(job);
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        job.save();
+        JobCreatorUtils.buildSuccessfully(job);
+        return job;
+    }
 }
 
