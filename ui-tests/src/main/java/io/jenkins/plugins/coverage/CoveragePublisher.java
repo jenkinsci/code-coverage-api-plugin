@@ -8,6 +8,9 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
+/**
+ * Coverage Publisher which can be added in the configuration of a FreeStyle Project.
+ */
 @SuppressWarnings({"unused", "UnusedReturnValue", "PMD.GodClass", "PMD.TooManyFields", "PMD.ExcessivePublicCount"})
 @Describable("Publish Coverage Report")
 public class CoveragePublisher extends AbstractStep implements PostBuildStep {
@@ -28,40 +31,88 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
     private boolean advancedOptionsActivated = false;
 
+    /**
+     * Constructor for CoveragePublisher.
+     *
+     * @param parent
+     *         is the job which uses the CoveragePublisher
+     * @param path
+     *         on the parent page
+     */
     public CoveragePublisher(final Job parent, final String path) {
         super(parent, path);
     }
 
-    public void setApplyThresholdRecursively(boolean applyTresholds) {
+    /**
+     * Setter for applying threshold recursively.
+     *
+     * @param applyTresholds
+     *         boolean for using applying threshold recursively
+     */
+    public void setApplyThresholdRecursively(final boolean applyTresholds) {
         ensureAdvancedOptionsIsActivated();
         applyThresholdRecursively.check(applyTresholds);
     }
 
-    public void setFailUnhealthy(boolean failOnUnhealthy) {
+    /**
+     * Setter for fail on unhealthy.
+     *
+     * @param failOnUnhealthy
+     *         boolean for failing on unhealthy
+     */
+    public void setFailUnhealthy(final boolean failOnUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         failUnhealthy.check(failOnUnhealthy);
     }
 
-    public void setFailUnstable(boolean failOnUnstable) {
+    /**
+     * Setter for fail on unstable.
+     *
+     * @param failOnUnstable
+     *         boolean for failing on unstable
+     */
+    public void setFailUnstable(final boolean failOnUnstable) {
         ensureAdvancedOptionsIsActivated();
         failUnstable.check(failOnUnstable);
     }
 
-    public void setFailNoReports(boolean failOnNoReports) {
+    /**
+     * Setter for fail on no reports.
+     *
+     * @param failOnNoReports
+     *         boolean for fail on no reports
+     */
+    public void setFailNoReports(final boolean failOnNoReports) {
         ensureAdvancedOptionsIsActivated();
         failNoReports.check(failOnNoReports);
     }
 
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failOnCoverageDecreases) {
+    /**
+     * Setter for fail build if coverage decreased in Change Request.
+     *
+     * @param failOnCoverageDecreases
+     *         boolean for failing if coverage decreased in Change Request
+     */
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failOnCoverageDecreases) {
         ensureAdvancedOptionsIsActivated();
         failBuildIfCoverageDecreasedInChangeRequest.check(failOnCoverageDecreases);
     }
 
-    public void setSkipPublishingChecks(boolean skipPublishing) {
+    /**
+     * Setter for skipping publishing checks.
+     *
+     * @param skipPublishing
+     *         boolean for skipping publishing checks
+     */
+    public void setSkipPublishingChecks(final boolean skipPublishing) {
         ensureAdvancedOptionsIsActivated();
         skipPublishingChecks.check(skipPublishing);
     }
 
+    /**
+     * Ensures advanced options of CoveragePublisher, a status which is stored in {@link
+     * CoveragePublisher#advancedOptionsActivated} is activated.
+     */
     private void ensureAdvancedOptionsIsActivated() {
         if (!advancedOptionsActivated) {
             advancedOptions.click();
@@ -69,19 +120,46 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
-    public Adapter createAdapterPageArea(String adapter) {
+    /**
+     * Creates an {@link Adapter} for {@link CoveragePublisher}.
+     *
+     * @param adapter
+     *         type which should be created, f. e. jacoco or cobertura
+     *
+     * @return added {@link Adapter}
+     */
+    public Adapter createAdapterPageArea(final String adapter) {
         String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapter));
         return new Adapter(this, path);
     }
 
+    /**
+     * Creates {@link GlobalThreshold} for {@link Adapter}.
+     *
+     * @return added {@link Adapter}
+     */
     public GlobalThreshold createGlobalThresholdsPageArea() {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalthresholds", () -> this.globalThresholds.click());
         return new GlobalThreshold(this, path);
     }
 
-    public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold,
-            double unstableThreshold, boolean failUnhealthy) {
+    /**
+     * Creates {@link GlobalThreshold} for {@link Adapter}.
+     *
+     * @param thresholdTarget
+     *         which should be setted
+     * @param unhealthyThreshold
+     *         which should be setted
+     * @param unstableThreshold
+     *         which should be setted
+     * @param failUnhealthy
+     *         boolean for failing build on unhealthy
+     *
+     * @return added {@link Adapter} with setted configuration
+     */
+    public GlobalThreshold createGlobalThresholdsPageArea(final String thresholdTarget, final double unhealthyThreshold,
+            final double unstableThreshold, final boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThresholds.click());
         GlobalThreshold threshold = new GlobalThreshold(this, path);
@@ -92,29 +170,30 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         return threshold;
     }
 
-    public void setSourceFileResolver(SourceFileResolver storingLevel) {
+    /**
+     * Setter for Source File Resolver.
+     *
+     * @param storingLevel
+     *         which should be applied
+     */
+    public void setSourceFileResolver(final SourceFileResolver storingLevel) {
         ensureAdvancedOptionsIsActivated();
         sourceFileStoringLevel.select(storingLevel.getName());
     }
 
-    void setAdapter(String adapter) {
+    //TODO: delete?
+    /*void setAdapter(final String adapter) {
         this.adapter.selectDropdownMenu(adapter);
-    }
-
-    /*public AdvancedOptionsForPublisher createAdvancedOptionsArea() {
-
-        String path = createPageArea("", () -> AdvancedOptionsForPublisher.click());
-
-        AdvancedOptionsForPublisher advancedOptionsForPublisher = new AdvancedOptionsForPublisher(this, path);
-        return advancedOptionsForPublisher;
-
     }*/
 
+    /**
+     * Removes adapter from parent {@link CoveragePublisher}.
+     */
     void deleteAdapter() {
         adapter.click();
     }
 
-    //TODO: austauschen
+    //TODO: austauschen?
     public enum SourceFileResolver {
         NEVER_SAVE_SOURCE_FILES("never save source files"),
         SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
@@ -132,6 +211,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
+    /**
+     * Adapter which can be added in the configuration of the {@link CoveragePublisher} of a FreeStyle Project.
+     */
     public static class Adapter extends PageAreaImpl {
         private final Control reportFilePath = control("path");
         private final Control advancedOptions = control("advanced-button");
@@ -139,28 +221,56 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         private final Control thresholds = control("repeatable-add"); //input
         private final Control advanced = control("repeatable-add"); //input
         private boolean advancedOptionsActivated = false;
+
+
+        /**
+         * Constructor to create {@link Adapter} for {@link CoveragePublisher}.
+         * @param reportPublisher which should be created, f. e. jacoco or cobertura
+         * @param path of parent page
+         */
         Adapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
 
         }
 
-        public void setReportFilePath(String reportFilePath) {
+        /**
+         * Setter for path of report file.
+         * @param reportFilePath path to report file.
+         */
+        public void setReportFilePath(final String reportFilePath) {
             this.reportFilePath.set(reportFilePath);
         }
 
-        public void setMergeToOneReport(boolean mergeReports) {
+        /**
+         * Setter for merging to one report.
+         * @param mergeReports boolean for merging to one report
+         */
+        public void setMergeToOneReport(final boolean mergeReports) {
             ensureAdvancedOptionsIsActivated();
             mergeToOneReport.check(mergeReports);
         }
 
+        /**
+         *
+         * @return
+         */
         public GlobalThreshold createGlobalThresholdsPageArea() {
             ensureAdvancedOptionsIsActivated();
             String path = createPageArea("thresholds", () -> this.thresholds.click());
             return new GlobalThreshold(this, path);
         }
 
-        public GlobalThreshold createGlobalThresholdsPageArea(String thresholdTarget, double unhealthyThreshold,
-                double unstableThreshold, boolean failUnhealthy) {
+        /**
+         *
+         * @param thresholdTarget
+         * @param unhealthyThreshold
+         * @param unstableThreshold
+         * @param failUnhealthy
+         * @return
+         */
+        public GlobalThreshold createGlobalThresholdsPageArea(final String thresholdTarget,
+                final double unhealthyThreshold,
+                final double unstableThreshold, final boolean failUnhealthy) {
             ensureAdvancedOptionsIsActivated();
             String path = createPageArea("thresholds", () -> this.thresholds.click());
             GlobalThreshold threshold = new GlobalThreshold(this, path);
@@ -171,6 +281,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
             return threshold;
         }
 
+        /**
+         *
+         */
         private void ensureAdvancedOptionsIsActivated() {
             if (!advancedOptionsActivated) {
                 advancedOptions.click();
@@ -179,6 +292,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
+    /**
+     *
+     */
     public static class GlobalThreshold extends PageAreaImpl {
 
         private final Control thresholdTarget = control("thresholdTarget");
@@ -186,25 +302,48 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         private final Control unstableThreshold = control("unstableThreshold");
         private final Control failUnhealthy = control("failUnhealthy");
 
+        /**
+         *
+         * @param reportPublisher
+         * @param path
+         */
         GlobalThreshold(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
         }
 
-        public void setThresholdTarget(String target) {
+        /**
+         *
+         * @param target
+         */
+        public void setThresholdTarget(final String target) {
             thresholdTarget.select(target);
         }
 
-        public void setUnhealthyThreshold(double threshold) {
+        /**
+         *
+         * @param threshold
+         */
+        public void setUnhealthyThreshold(final double threshold) {
             unhealthyThreshold.set(threshold);
         }
 
-        public void setUnstableThreshold(double threshold) {
+        /**
+         *
+         * @param threshold
+         */
+        public void setUnstableThreshold(final double threshold) {
             unstableThreshold.set(threshold);
         }
 
-        public void setFailUnhealthy(boolean failOnUnhealthy) {
+
+        /**
+         * Setter for fail on unhealthy.
+         *
+         * @param failOnUnhealthy
+         *         boolean for failing on unhealthy
+         */
+        public void setFailUnhealthy(final boolean failOnUnhealthy) {
             failUnhealthy.check(failOnUnhealthy);
         }
     }
-
 }
