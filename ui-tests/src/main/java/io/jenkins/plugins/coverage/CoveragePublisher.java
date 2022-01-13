@@ -139,6 +139,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      */
     private void ensureAdvancedOptionsIsActivated() {
         if (!advancedOptionsActivated) {
+            //TODO: change condition, use get advanced page area by id
             advancedOptions.click();
             advancedOptionsActivated = true;
         }
@@ -210,15 +211,17 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         this.adapter.selectDropdownMenu(adapter);
     }*/
 
+    //TODO: remove all adapters? -> add adapter.delete()?
     /**
      * Removes adapter from parent {@link CoveragePublisher}.
      */
-    void deleteAdapter() {
+    public void deleteAdapter() {
         adapter.click();
     }
 
     //TODO: austauschen?
     public enum SourceFileResolver {
+        //value
         NEVER_SAVE_SOURCE_FILES("never save source files"),
         SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
         SAVE_ALL_BUILD_SOURCE_FILES("save all build source files"),
@@ -244,6 +247,8 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         private final Control advancedOptions = control("advanced-button");
         private final Control mergeToOneReport = control("mergeToOneReport"); //DD
         private final Control threshold = control("repeatable-add"); //input
+
+        //FIXME
         private final Control advanced = control("repeatable-add"); //input
         private boolean advancedOptionsActivated = false;
 

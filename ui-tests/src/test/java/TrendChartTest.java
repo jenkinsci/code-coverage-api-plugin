@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.JobStatus;
-import io.jenkins.plugins.coverage.Metrics;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
