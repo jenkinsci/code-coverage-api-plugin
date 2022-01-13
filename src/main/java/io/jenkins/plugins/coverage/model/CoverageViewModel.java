@@ -167,7 +167,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
-                Optional<CoverageNode> targetResult = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
+                Optional<CoverageNode> targetResult = getNode().findByHashCode(CoverageMetric.FILE,
+                        Integer.parseInt(link));
                 if (targetResult.isPresent()) {
                     return new SourceViewModel(getOwner(), targetResult.get());
                 }
@@ -189,22 +190,32 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     protected static Optional<File> getSourceFile(final File buildFolder, final String fileName, final String path) {
-        File originalFileLocation = createFileInBuildFolder(buildFolder, sanitizeFilename(fileName));
-        if (originalFileLocation.canRead()) {
-            return Optional.of(originalFileLocation);
+        File oldVersionLocation = getFileForBuildsWithOldVersion(buildFolder, fileName);
+        if (oldVersionLocation.canRead()) {
+            return Optional.of(oldVersionLocation);
         }
 
-        File hashBasedLocation = createFileInBuildFolder(buildFolder, AgentCoveragePainter.getTempName(path));
-        if (hashBasedLocation.canRead()) {
-            return Optional.of(hashBasedLocation);
+        File newVersionLocation = AgentCoveragePainter.createFileInBuildFolder(buildFolder, "coverage", path);
+        if (newVersionLocation.canRead()) {
+            return Optional.of(newVersionLocation);
         }
 
         return Optional.empty();
     }
 
-    private static File createFileInBuildFolder(final File buildFolder, final String fileName) {
-        File sourceFolder = new File(buildFolder, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
-        return new File(sourceFolder, fileName);
+    /**
+     * Returns a file to the sources in release < 2.1.0.
+     *
+     * @param buildFolder
+     *         top-level folder of the build results
+     * @param fileName
+     *         base filename of the coverage node
+     *
+     * @return the file
+     */
+    private static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
+        File sourceFolder = new File(buildFolder, "coverage-sources");
+        return new File(sourceFolder, sanitizeFilename(fileName));
     }
 
     private static String sanitizeFilename(final String inputName) {

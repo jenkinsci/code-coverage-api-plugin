@@ -25,13 +25,15 @@ import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
+import static io.jenkins.plugins.coverage.source.AgentCoveragePainter.*;
+
 /**
  * Transforms the old model to the new model and invokes all steps that work on the new model. Currently,
  * only the source code painting and copying has been moved to this new reporter class.
  *
  * @author Ullrich Hafner
  */
-public class CoverageReporter {
+class CoverageReporter {
     void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention) throws InterruptedException {
@@ -90,7 +92,7 @@ public class CoverageReporter {
 
             FilteredLog agentLog = workspace.act(
                     new AgentCoveragePainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
-                            sourceCodeEncoding));
+                            sourceCodeEncoding, "coverage"));
             log.merge(agentLog);
         }
         catch (IOException exception) {
@@ -144,21 +146,5 @@ public class CoverageReporter {
             }
         }
         return Optional.empty();
-    }
-
-    private void copySourcesToBuildFolder(final Run<?, ?> build, final FilePath workspace, final FilteredLog log)
-            throws InterruptedException {
-        try {
-            FilePath buildFolder = new FilePath(build.getRootDir());
-            FilePath buildZip = buildFolder.child(AgentCoveragePainter.COVERAGE_SOURCES_ZIP);
-            workspace.child(AgentCoveragePainter.COVERAGE_SOURCES_ZIP).copyTo(buildZip);
-            log.logInfo("-> extracting...");
-            buildZip.unzip(buildFolder);
-            buildZip.delete();
-            log.logInfo("-> done");
-        }
-        catch (IOException exception) {
-            log.logException(exception, "Can't copy zipped sources from agent to controller");
-        }
     }
 }

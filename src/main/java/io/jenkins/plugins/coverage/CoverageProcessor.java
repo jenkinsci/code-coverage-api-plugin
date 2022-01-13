@@ -117,7 +117,7 @@ public class CoverageProcessor {
 
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
-        Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
+        setDiffInCoverageForChangeRequest(coverageReport, log);
         logHandler.log(log);
 
         CoverageAction action = convertResultToAction(coverageReport);

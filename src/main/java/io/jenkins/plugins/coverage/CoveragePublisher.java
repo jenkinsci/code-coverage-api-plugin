@@ -108,7 +108,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
         try {
             processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds,
-                    sourceDirectories.stream().map(SourceCodeDirectory::getPath).collect(Collectors.toSet()),
+                    getSourceDirectoriesPaths(),
                     sourceCodeEncoding);
         }
         catch (CoverageException e) {
@@ -123,6 +123,14 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
                 checksPublisher.publishChecks(listener);
             }
         }
+    }
+
+    private Set<String> getSourceDirectoriesPaths() {
+        Set<String> paths = sourceDirectories.stream()
+                .map(SourceCodeDirectory::getPath)
+                .collect(Collectors.toSet());
+        paths.add("src/main/java");
+        return paths;
     }
 
     @Override

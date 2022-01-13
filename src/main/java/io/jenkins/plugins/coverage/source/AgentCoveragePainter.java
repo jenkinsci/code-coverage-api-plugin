@@ -15,10 +15,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;
+import hudson.model.Run;
 import hudson.remoting.VirtualChannel;
+import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
 import io.jenkins.plugins.coverage.model.CoverageNode;
@@ -28,10 +32,9 @@ import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
 
 /*
- TODO:  ideally we would scan for coverage reports on the agent and covert the reports there as well. Then we
-        can simply create the painted files on the agent without transferring the list of nodes that will be painted.
-        Additionally we could strip the node tree at the file level, since the lower nodes are only required for
-        the painting.
+ TODO:  ideally we would scan for coverage reports on the agent and covert the reports to the new model there as well. Then we
+        can simply create the painted files on the agent without transferring the full list of nodes back to the controller.
+        Just those nodes will be stored that are required to show the details view. This should reduce the disk footprint of the plugin dramatically.
  */
 /**
  * Paints source code files on the agent using the recorded coverage information.
@@ -40,20 +43,68 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
     private static final long serialVersionUID = 3966282357309568323L;
 
     /** Filename of the archive with the source files that is being sent to the controller. */
-    public static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
+    private static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
     /** Directory in the build folder of the controller that contains the zipped source files. */
     public static final String COVERAGE_SOURCES_DIRECTORY = "coverage-sources";
+    private static final int MAX_FILENAME_LENGTH = 245;
+    private static final String ZIP_FILE_EXTENSION = ".zip";
+
+    public static boolean canRead(final File file) {
+        return file.toString().endsWith(AgentCoveragePainter.ZIP_FILE_EXTENSION);
+    }
+
+    public static String read(final File zipFile, final String relativePathIdentifier) throws IOException, InterruptedException {
+        Path tempDir = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
+        FilePath unzippedSourcesDir = new FilePath(tempDir.toFile());
+        try {
+            FilePath inputZipFilePath = new FilePath(zipFile);
+            inputZipFilePath.unzip(unzippedSourcesDir);
+            String actualPaintedSourceFileName = StringUtils.removeEnd(sanitizeFilename(relativePathIdentifier), ZIP_FILE_EXTENSION);
+            File sourceFile = tempDir.resolve(actualPaintedSourceFileName).toFile();
+            return new TextFile(sourceFile).read();
+        }
+        finally {
+            unzippedSourcesDir.deleteRecursive();
+        }
+    }
+
+    public static void copySourcesToBuildFolder(final Run<?, ?> build, final FilePath workspace, final FilteredLog log)
+            throws InterruptedException {
+        try {
+            FilePath buildFolder = new FilePath(build.getRootDir()).child(COVERAGE_SOURCES_DIRECTORY);
+            FilePath buildZip = buildFolder.child(COVERAGE_SOURCES_ZIP);
+            workspace.child(COVERAGE_SOURCES_ZIP).copyTo(buildZip);
+            log.logInfo("-> extracting...");
+            buildZip.unzip(buildFolder);
+            buildZip.delete();
+            log.logInfo("-> done");
+        }
+        catch (IOException exception) {
+            log.logException(exception, "Can't copy zipped sources from agent to controller");
+        }
+    }
 
     /**
-     * Returns a file name for a temporary file that will hold the contents of the source.
+     * Returns a file to the sources in release 2.1.0 and newer.
      *
-     * @param fileName
-     *         the file name to convert
+     * @param baseFolder
+     *         top-level folder that will contain the source file
+     * @param id
+     *         if of the coverage results
+     * @param path
+     *         relative path to the coverage node base filename of the coverage node
      *
-     * @return the temporary name
+     * @return the file
      */
-    public static String getTempName(final String fileName) {
-        return Integer.toHexString(fileName.hashCode()) + ".zip";
+    public static File createFileInBuildFolder(final File baseFolder, final String id, final String path) {
+        File sourceFolder = new File(baseFolder, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
+        File elementFolder = new File(sourceFolder, id);
+
+        return new File(elementFolder, sanitizeFilename(path) + ZIP_FILE_EXTENSION);
+    }
+
+    private static String sanitizeFilename(final String inputName) {
+        return StringUtils.right(inputName.replaceAll("[^a-zA-Z0-9-_.]", "_"), MAX_FILENAME_LENGTH);
     }
 
     private final List<PaintedNode> paintedFiles;
@@ -61,6 +112,7 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
     private final Set<String> requestedSourceDirectories;
 
     private final String sourceCodeEncoding;
+    private final String directory;
 
     /**
      * Creates a new instance of {@link AgentCoveragePainter}.
@@ -73,16 +125,19 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
      *         the requested relative and absolute source directories (in the step configuration)
      * @param sourceCodeEncoding
      *         the encoding of the source code files
+     * @param directory
+     *         the subdirectory where the source files will be stored in
      */
     public AgentCoveragePainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
             final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
-            final String sourceCodeEncoding) {
+            final String sourceCodeEncoding, final String directory) {
         this.paintedFiles = paintedFiles.stream()
                 .map(e -> new PaintedNode(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
         this.permittedSourceDirectories = permittedSourceDirectories;
         this.requestedSourceDirectories = requestedSourceDirectories;
         this.sourceCodeEncoding = sourceCodeEncoding;
+        this.directory = directory;
     }
 
     @Override
@@ -103,11 +158,13 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         FilePath workspace = new FilePath(workspaceFile);
 
         try {
-            FilePath outputFolder = getSourcesFolder(workspace);
+            FilePath outputFolder = workspace.child(directory);
             outputFolder.mkdirs();
 
-            int count = paintedFiles.parallelStream().mapToInt(
-                    f -> paintSource(f, workspace, sourceDirectories, log, new CharsetValidation().getCharset(sourceCodeEncoding))).sum();
+            Charset charset = getCharset();
+            int count = paintedFiles.parallelStream()
+                    .mapToInt(file -> paintSource(file, workspace, sourceDirectories, charset, log))
+                    .sum();
 
             if (count == paintedFiles.size()) {
                 log.logInfo("-> finished painting successfully");
@@ -133,6 +190,10 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         return log;
     }
 
+    private Charset getCharset() {
+        return new CharsetValidation().getCharset(sourceCodeEncoding);
+    }
+
     private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
         SourceDirectoryFilter filter = new SourceDirectoryFilter();
         return filter.getPermittedSourceDirectories(new FilePath(workspace),
@@ -142,39 +203,37 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
     }
 
     private int paintSource(final PaintedNode fileNode, final FilePath workspace,
-            final Set<String> sourceDirectories, final FilteredLog log, final Charset sourceEncoding) {
-        String sourcePath = fileNode.getNode().getPath();
-        return findSourceFile(workspace, sourcePath, sourceDirectories, log)
-                .map(path -> paint(fileNode.getPaint(), sourcePath, path, sourceEncoding, workspace, log))
+            final Set<String> sourceSearchDirectories, final Charset sourceEncoding, final FilteredLog log) {
+        String relativePathIdentifier = fileNode.getNode().getPath();
+        FilePath paintedFilesDirectory = workspace.child(directory);
+        return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
+                .map(resolvedPath -> paint(fileNode.getPaint(), relativePathIdentifier, resolvedPath, paintedFilesDirectory,
+                        sourceEncoding, log))
                 .orElse(0);
     }
 
-    private int paint(final CoveragePaint paint, final String fileName, final FilePath inputPath, final Charset charset,
-            final FilePath workspace, final FilteredLog log) {
-        FilePath outputPath = getSourcesFolder(workspace).child(AgentCoveragePainter.getTempName(fileName));
+    private int paint(final CoveragePaint paint, final String relativePathIdentifier, final FilePath resolvedPath,
+            final FilePath paintedFilesDirectory, final Charset charset, final FilteredLog log) {
+        String sanitizedFileName = sanitizeFilename(relativePathIdentifier);
+        FilePath zipOutputPath = paintedFilesDirectory.child(sanitizedFileName + ZIP_FILE_EXTENSION);
         try {
-            Path paintedFilesFolder = Files.createTempDirectory(AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
-            Path fullSourcePath = paintedFilesFolder.resolve(
-                    AgentCoveragePainter.getTempName(fileName).replace(".zip", ".source"));
+            Path paintedFilesFolder = Files.createTempDirectory(directory);
+            Path fullSourcePath = paintedFilesFolder.resolve(sanitizedFileName);
             try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
-                List<String> lines = Files.readAllLines(Paths.get(inputPath.getRemote()), charset);
+                List<String> lines = Files.readAllLines(Paths.get(resolvedPath.getRemote()), charset);
                 for (int line = 0; line < lines.size(); line++) {
                     String content = lines.get(line);
                     paintLine(line, content, paint, output);
                 }
                 paint.setTotalLines(lines.size());
             }
-            new FilePath(fullSourcePath.toFile()).zip(outputPath);
+            new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
             return 1;
         }
         catch (IOException | InterruptedException exception) {
-            log.logException(exception, "Can't write coverage paint of '%s' to source file '%s'", fileName, outputPath);
+            log.logException(exception, "Can't write coverage paint of '%s' to zipped source file '%s'", relativePathIdentifier, zipOutputPath);
             return 0;
         }
-    }
-
-    private FilePath getSourcesFolder(final FilePath workspace) {
-        return workspace.child(AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
     }
 
     private void paintLine(final int line, final String content, final CoveragePaint paint,
