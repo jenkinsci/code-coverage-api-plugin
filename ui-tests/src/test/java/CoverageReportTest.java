@@ -23,30 +23,20 @@ public class CoverageReportTest extends AbstractJUnitTest {
     private static final String COLOR_RED = "#ef9a9a";
 
 
-    /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
-     * FileCoverageTable and CoverageTrend.
-     * Uses a project with two different jacoco files, each one used in another build.
-     * First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     * Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     */
-    @Test
-    public void runFullCoverageReportTest() {
-        FreeStyleJob job = createSuccessfulJobWithDiffererntJacocos();
-        Build secondBuild = job.getLastBuild();
-        CoverageReport report = new CoverageReport(secondBuild);
+    public static void verify(final CoverageReport report) {
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        verifyFileCoverageTable(fileCoverageTable);
+        CoverageReportTest.verifyFileCoverageTable(fileCoverageTable);
 
         String coverageTree = report.getCoverageTree();
-        verifyCoverageTree(coverageTree);
+        CoverageReportTest.verifyCoverageTree(coverageTree);
 
         String coverageOverview = report.getCoverageOverview();
-        verifyCoverageOverview(coverageOverview);
+        CoverageReportTest.verifyCoverageOverview(coverageOverview);
+
 
         String trendChart = report.getCoverageTrend();
-        verifyTrendchart(trendChart);
+        CoverageReportTest.verifyTrendchart(trendChart);
     }
 
     /**
@@ -55,7 +45,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      * @param fileCoverageTable from second build.
      */
-    private void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
+    private static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
         //assertThat(fileCoverageTable).getTableRows().get(0).getCellContent("File")
     }
 
@@ -65,7 +55,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      * @param coverageOverview from second build.
      */
-    private void verifyCoverageOverview(final String coverageOverview) {
+     private static void verifyCoverageOverview(final String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -97,7 +87,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      * @param coverageTree from second build.
      */
-    private void verifyCoverageTree(final String coverageTree) {
+    private static void verifyCoverageTree(final String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
                 .contains("Ensure.java")
                 .contains("FilteredLog.java")
@@ -132,7 +122,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
      * @param trendChart from second build.
      */
-    public void verifyTrendchart(final String trendChart) {
+    private static void verifyTrendchart(final String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
@@ -153,27 +143,5 @@ public class CoverageReportTest extends AbstractJUnitTest {
         assertThatJson(trendChart).node("series[1].data").isArray().contains(88).contains(93);
     }
 
-
-    //TODO: temporary; should later be used for a couple of tests
-    /**
-     *  Builds a project with two different jacoco files, each one used in another build.
-     *  First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     *  Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     * @return
-     */
-    private FreeStyleJob createSuccessfulJobWithDiffererntJacocos() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        JobCreatorUtils.buildSuccessfully(job);
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        JobCreatorUtils.buildSuccessfully(job);
-        return job;
-    }
 }
 

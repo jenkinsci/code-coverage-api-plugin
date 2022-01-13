@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.JobStatus;
 
 /**
@@ -37,6 +38,20 @@ public class UITest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
+
+        /**
+         * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
+         * FileCoverageTable and CoverageTrend.
+         * Uses a project with two different jacoco files, each one used in another build.
+         * First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
+         * Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
+         */
+
+        Build secondBuild = job.getLastBuild();
+        CoverageReport report = new CoverageReport(secondBuild);
+
+        CoverageReportTest.verify(report);
+
 
         /*
         Test Trendcharts, test CoverageReport, test CoverageSummary
