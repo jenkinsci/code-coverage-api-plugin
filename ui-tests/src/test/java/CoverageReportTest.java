@@ -1,28 +1,20 @@
-import org.junit.Test;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.CoverageSummary;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
 public class CoverageReportTest extends AbstractJUnitTest {
-    private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
-    private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
-    private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
-
     //TODO: use or remove
     private static final String COLOR_GREEN = "#c4e4a9";
     private static final String COLOR_ORANGE = "#fbdea6";
     private static final String COLOR_RED = "#ef9a9a";
 
-
+    /**
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
+     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build.
+     */
     public static void verify(final CoverageReport report) {
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
@@ -34,28 +26,27 @@ public class CoverageReportTest extends AbstractJUnitTest {
         String coverageOverview = report.getCoverageOverview();
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
-
         String trendChart = report.getCoverageTrend();
         CoverageReportTest.verifyTrendchart(trendChart);
     }
 
     /**
-     * Verifies CoverageTable of CoverageReport of Job with two Builds,
-     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     * @param fileCoverageTable from second build.
+     * Verifies CoverageTable of CoverageReport of Job with two Builds.
+     *
+     * @param fileCoverageTable
+     *         from second build.
      */
     private static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
         //assertThat(fileCoverageTable).getTableRows().get(0).getCellContent("File")
     }
 
-     /**
-     * Verifies CoverageOverview of CoverageReport of Job with two Builds,
-     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     * @param coverageOverview from second build.
+    /**
+     * Verifies CoverageOverview of CoverageReport of Job with two Builds.
+     *
+     * @param coverageOverview
+     *         from second build.
      */
-     private static void verifyCoverageOverview(final String coverageOverview) {
+    private static void verifyCoverageOverview(final String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -82,10 +73,10 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies CoverageTree of CoverageReport of Job with two Builds,
-     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     * @param coverageTree from second build.
+     * Verifies CoverageTree of CoverageReport of Job with two Builds.
+     *
+     * @param coverageTree
+     *         from second build.
      */
     private static void verifyCoverageTree(final String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
@@ -116,11 +107,12 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     //TODO: temporary; (also needed for coverage summary)
+
     /**
-     * Verifies CoverageTrend of CoverageReport of Job with two Builds,
-     * first build with {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-     * second with  {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-     * @param trendChart from second build.
+     * Verifies CoverageTrend of CoverageReport of Job with two Builds.
+     *
+     * @param trendChart
+     *         from second build.
      */
     private static void verifyTrendchart(final String trendChart) {
         assertThatJson(trendChart)
@@ -137,7 +129,6 @@ public class CoverageReportTest extends AbstractJUnitTest {
 
         assertThatJson(trendChart).node("series[0].name").isEqualTo("Line");
         assertThatJson(trendChart).node("series[1].name").isEqualTo("Branch");
-
 
         assertThatJson(trendChart).node("series[0].data").isArray().contains(95).contains(91);
         assertThatJson(trendChart).node("series[1].data").isArray().contains(88).contains(93);

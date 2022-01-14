@@ -24,13 +24,29 @@ public class UITest extends AbstractJUnitTest {
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
 
-
+    /**
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
+     * FileCoverageTable and CoverageTrend.
+     * Uses a project with two different jacoco files, each one used in another build.
+     * Second build uses {@link UITest#JACOCO_ANALYSIS_MODEL_XML},
+     * Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
+     */
     @Test
-    public void tryChangeingFailBuild() {
+    public void verifyingCoveragePlugin() {
+        //create project with first build failing due to no reports
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        coveragePublisher.setFailNoReports(true);
+        job.save();
+        JobCreatorUtils.buildWithErrors(job);
+
+        //TODO: tests here for fail on no reports (CoverageSummary?)
+        
+
+        //create second and third build (successfully), each one containing another jacoco file
+        job.configure();
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
@@ -39,29 +55,20 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
 
-        /**
-         * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
-         * FileCoverageTable and CoverageTrend.
-         * Uses a project with two different jacoco files, each one used in another build.
-         * First build uses {@link CoverageReportTest#JACOCO_ANALYSIS_MODEL_XML},
-         * Second build uses {@link CoverageReportTest#JACOCO_CODINGSTYLE_XML}.
-         */
 
-        Build secondBuild = job.getLastBuild();
-        CoverageReport report = new CoverageReport(secondBuild);
+        //TODO: test trendcharts
+        //CoverageReportTest.verify()
 
+        //test CoverageReport
+        Build buildContainingTwoCoverageReports = job.getLastBuild();
+        CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
         CoverageReportTest.verify(report);
 
-
-        /*
-        Test Trendcharts, test CoverageReport, test CoverageSummary
-
+        //TODO: test CoverageSummary
         //SummaryTest.verify()
-        //SummaryTest.verify()
-        //CoverageReportTest.verify()
-        //CoverageReportTest.verify()
 
-         */
+        //create fourth build failing due to tresholds not achieved
+        //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
         job.configure();
         jacocoAdapter.createGlobalThresholdsPageArea("Instruction", 4, 4, false);
         coveragePublisher.setApplyThresholdRecursively(true);
@@ -69,31 +76,16 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.setFailUnstable(true);
         coveragePublisher.setSkipPublishingChecks(true);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        coveragePublisher.setFailNoReports(true);
-        coveragePublisher.setFailNoReports(true);
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
         JobCreatorUtils.buildWithErrors(job);
 
-
+        //TODO: testen, aber vorher diesen build splitten, ggf. mit neuem projekt
         //SummaryTest.verify()
-        //SummaryTest.verify()
-        //SummaryTest.verify()
-        //SummaryTest.verify()
-
-
-        // test fail on no report
-        //job.configure();
-        //FIXME
-        //coveragePublisher.setFailNoReports(true);
-        //TODO: refactor
-        //coveragePublisher.deleteAdapter();
-
-
-        job.save();
-        JobCreatorUtils.buildSuccessfully(job);
-
     }
+
+
+
+
 
 
 
