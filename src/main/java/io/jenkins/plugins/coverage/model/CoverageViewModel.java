@@ -22,7 +22,6 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -238,7 +237,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
-        return AgentCoveragePainter.createFileInBuildFolder(rootDir, id, nodePath).canRead();
+        return new SourceCodeFacade().createFileInBuildFolder(rootDir, id, nodePath).canRead();
     }
 
     /**

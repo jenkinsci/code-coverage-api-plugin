@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage;
+package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.Map.Entry;
@@ -13,10 +13,8 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
+import io.jenkins.plugins.coverage.CoverageNodeConverter;
+import io.jenkins.plugins.coverage.model.SourceCodeFacade.AgentCoveragePainter;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
@@ -25,16 +23,36 @@ import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
-import static io.jenkins.plugins.coverage.source.AgentCoveragePainter.*;
-
 /**
- * Transforms the old model to the new model and invokes all steps that work on the new model. Currently,
- * only the source code painting and copying has been moved to this new reporter class.
+ * Transforms the old model to the new model and invokes all steps that work on the new model. Currently, only the
+ * source code painting and copying has been moved to this new reporter class.
  *
  * @author Ullrich Hafner
  */
-class CoverageReporter {
-    void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
+public class CoverageReporter {
+    /**
+     * Transforms the old model to the new model and invokes all steps that work on the new model. In the final
+     * step, a new {@link CoverageBuildAction} will be attached to the build.
+     *
+     * @param rootResult
+     *         the root result obtained from the old coverage API
+     * @param build
+     *         the build that owns these results
+     * @param workspace
+     *         the workspace on the agent that provides access to the source code files
+     * @param listener
+     *         logger
+     * @param requestedSourceDirectories
+     *         the source directories that have been configured in the associated job
+     * @param sourceCodeEncoding
+     *         the encoding of the source code files
+     * @param sourceCodeRetention
+     *         the source code retention strategy
+     *
+     * @throws InterruptedException
+     *         if the build has been aborted
+     */
+    public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention) throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
@@ -46,6 +64,7 @@ class CoverageReporter {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
+        SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
         if (sourceCodeRetention != SourceCodeRetention.NEVER) {
             Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
             log.logInfo("Painting %d source files on agent", paintedFiles.size());
@@ -55,11 +74,10 @@ class CoverageReporter {
             log.logInfo("Copying painted sources from agent to build folder");
             logHandler.log(log);
 
-            copySourcesToBuildFolder(build, workspace, log);
+            sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
             logHandler.log(log);
         }
-
-        sourceCodeRetention.cleanup(build, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY, log);
+        sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
 
         logHandler.log(log);
 

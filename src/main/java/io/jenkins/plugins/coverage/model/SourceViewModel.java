@@ -8,8 +8,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
-import io.jenkins.plugins.coverage.source.AgentCoveragePainter;
-
 /**
  * Server side model that provides the data for the source code view of the coverage results. The layout of the
  * associated view is defined corresponding jelly view 'index.jelly'.
@@ -38,7 +36,7 @@ public class SourceViewModel extends CoverageViewModel {
         try {
             File rootDir = getOwner().getRootDir();
             if (isSourceFileInNewFormatAvailable()) {
-                return AgentCoveragePainter.read(rootDir, getId(), getNode().getPath());
+                return new SourceCodeFacade().read(rootDir, getId(), getNode().getPath());
             }
             if (isSourceFileInOldFormatAvailable()) {
                 return new TextFile(getFileForBuildsWithOldVersion(rootDir, getNode().getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
