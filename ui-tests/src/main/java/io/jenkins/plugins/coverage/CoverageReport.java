@@ -153,11 +153,7 @@ public class CoverageReport extends PageObject {
      * Ensures CoverageReport Page is opened.
      */
     private void ensureCoverageReportPageIsOpen() {
-        //FIXME
-        if(!driver.getCurrentUrl().equals(this.url)) {
-            this.open();
-        }
-        //MatcherAssert.assertThat("coverage report page is open", this.driver.getCurrentUrl(), CoreMatchers.is(this.url));
+        MatcherAssert.assertThat("coverage report page was not opened", this.driver.getCurrentUrl(), CoreMatchers.anyOf(CoreMatchers.containsString(this.url.toString()), CoreMatchers.containsString(this.url+"/")));
     }
 
     /**

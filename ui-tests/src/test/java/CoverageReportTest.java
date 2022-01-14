@@ -119,8 +119,8 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
                 .hasSize(2)
-                .contains("#1")
-                .contains("#2");
+                .contains("#2")
+                .contains("#3");
 
         assertThatJson(trendChart)
                 .node("series")
