@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -37,13 +36,12 @@ public class SourceViewModel extends CoverageViewModel {
      */
     public String getSourceFileContent() {
         try {
-            Optional<File> sourceFile = getSourceFile(getOwner().getRootDir(), getNode().getName(), getNode().getPath());
-            if (sourceFile.isPresent()) {
-                File file = sourceFile.get();
-                if (AgentCoveragePainter.canRead(file)) {
-                    return AgentCoveragePainter.read(file, getNode().getPath());
-                }
-                return new TextFile(file).read(); // fallback with sources persisted using the < 2.1.0 serialization
+            File rootDir = getOwner().getRootDir();
+            if (isSourceFileInNewFormatAvailable()) {
+                return AgentCoveragePainter.read(rootDir, getId(), getNode().getPath());
+            }
+            if (isSourceFileInOldFormatAvailable()) {
+                return new TextFile(getFileForBuildsWithOldVersion(rootDir, getNode().getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
             }
             return "n/a";
         }

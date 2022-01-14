@@ -42,24 +42,52 @@ import io.jenkins.plugins.prism.SourceDirectoryFilter;
 public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog> {
     private static final long serialVersionUID = 3966282357309568323L;
 
-    /** Filename of the archive with the source files that is being sent to the controller. */
-    private static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
-    /** Directory in the build folder of the controller that contains the zipped source files. */
+    /** Toplevel directory in the build folder of the controller that contains the zipped source files. */
     public static final String COVERAGE_SOURCES_DIRECTORY = "coverage-sources";
-    private static final int MAX_FILENAME_LENGTH = 245;
+
+    private static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
+    private static final int MAX_FILENAME_LENGTH = 245; // Windows has limitations on long file names
     private static final String ZIP_FILE_EXTENSION = ".zip";
 
-    public static boolean canRead(final File file) {
-        return file.toString().endsWith(AgentCoveragePainter.ZIP_FILE_EXTENSION);
+    /**
+     * Returns a file to the sources in release 2.1.0 and newer. Note that the file might not exist.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         if of the coverage results
+     * @param path
+     *         relative path to the coverage node base filename of the coverage node
+     *
+     * @return the file
+     */
+    public static File createFileInBuildFolder(final File buildResults, final String id, final String path) {
+        File sourceFolder = new File(buildResults, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
+        File elementFolder = new File(sourceFolder, id);
+
+        return new File(elementFolder, sanitizeFilename(path) + ZIP_FILE_EXTENSION);
     }
 
-    public static String read(final File zipFile, final String relativePathIdentifier) throws IOException, InterruptedException {
+    /**
+     * Reads the contents of the source file of the given coverage node into a String.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         if of the coverage results
+     * @param path
+     *         relative path to the coverage node base filename of the coverage node
+     *
+     * @return the file content as String
+     */
+    public static String read(final File buildResults, final String id, final String path)
+            throws IOException, InterruptedException {
         Path tempDir = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
         FilePath unzippedSourcesDir = new FilePath(tempDir.toFile());
         try {
-            FilePath inputZipFilePath = new FilePath(zipFile);
-            inputZipFilePath.unzip(unzippedSourcesDir);
-            String actualPaintedSourceFileName = StringUtils.removeEnd(sanitizeFilename(relativePathIdentifier), ZIP_FILE_EXTENSION);
+            FilePath inputZipFile = new FilePath(createFileInBuildFolder(buildResults, id, path));
+            inputZipFile.unzip(unzippedSourcesDir);
+            String actualPaintedSourceFileName = StringUtils.removeEnd(sanitizeFilename(path), ZIP_FILE_EXTENSION);
             File sourceFile = tempDir.resolve(actualPaintedSourceFileName).toFile();
             return new TextFile(sourceFile).read();
         }
@@ -68,6 +96,20 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         }
     }
 
+    /**
+     * Copies the zipped source files from the agent to the controller and unpacks them in the coverage-sources folder
+     * of the current build.
+     *
+     * @param build
+     *         the build with the coverage result
+     * @param workspace
+     *         the workspace on the agent that created the ZIP file
+     * @param log
+     *         the log
+     *
+     * @throws InterruptedException
+     *         in case the user terminated the job
+     */
     public static void copySourcesToBuildFolder(final Run<?, ?> build, final FilePath workspace, final FilteredLog log)
             throws InterruptedException {
         try {
@@ -84,34 +126,16 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         }
     }
 
-    /**
-     * Returns a file to the sources in release 2.1.0 and newer.
-     *
-     * @param baseFolder
-     *         top-level folder that will contain the source file
-     * @param id
-     *         if of the coverage results
-     * @param path
-     *         relative path to the coverage node base filename of the coverage node
-     *
-     * @return the file
-     */
-    public static File createFileInBuildFolder(final File baseFolder, final String id, final String path) {
-        File sourceFolder = new File(baseFolder, AgentCoveragePainter.COVERAGE_SOURCES_DIRECTORY);
-        File elementFolder = new File(sourceFolder, id);
-
-        return new File(elementFolder, sanitizeFilename(path) + ZIP_FILE_EXTENSION);
-    }
-
     private static String sanitizeFilename(final String inputName) {
         return StringUtils.right(inputName.replaceAll("[^a-zA-Z0-9-_.]", "_"), MAX_FILENAME_LENGTH);
     }
 
     private final List<PaintedNode> paintedFiles;
     private final Set<String> permittedSourceDirectories;
-    private final Set<String> requestedSourceDirectories;
 
+    private final Set<String> requestedSourceDirectories;
     private final String sourceCodeEncoding;
+
     private final String directory;
 
     /**
@@ -207,7 +231,8 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
         String relativePathIdentifier = fileNode.getNode().getPath();
         FilePath paintedFilesDirectory = workspace.child(directory);
         return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
-                .map(resolvedPath -> paint(fileNode.getPaint(), relativePathIdentifier, resolvedPath, paintedFilesDirectory,
+                .map(resolvedPath -> paint(fileNode.getPaint(), relativePathIdentifier, resolvedPath,
+                        paintedFilesDirectory,
                         sourceEncoding, log))
                 .orElse(0);
     }
@@ -231,7 +256,8 @@ public class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog>
             return 1;
         }
         catch (IOException | InterruptedException exception) {
-            log.logException(exception, "Can't write coverage paint of '%s' to zipped source file '%s'", relativePathIdentifier, zipOutputPath);
+            log.logException(exception, "Can't write coverage paint of '%s' to zipped source file '%s'",
+                    relativePathIdentifier, zipOutputPath);
             return 0;
         }
     }

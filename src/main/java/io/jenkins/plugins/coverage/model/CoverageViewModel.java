@@ -47,6 +47,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
+    private final String id;
 
     /**
      * Creates a new view model instance.
@@ -61,6 +62,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         this.owner = owner;
         this.node = node;
+        id = "coverage"; // TODO: this needs to be a parameter
+    }
+
+    public String getId() {
+        return id;
     }
 
     public Run<?, ?> getOwner() {
@@ -97,14 +103,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
      * is shown in the view, so the ID is not used.
      *
-     * @param id
+     * @param tableId
      *         ID of the table model
      *
      * @return the table model with the specified ID
      */
     @Override
-    public TableModel getTableModel(final String id) {
-        return new CoverageTableModel(getNode(), getOwner().getRootDir());
+    public TableModel getTableModel(final String tableId) {
+        return new CoverageTableModel(getNode(), getOwner().getRootDir(), id);
     }
 
     private LinesChartModel createTrendChart(final String configuration) {
@@ -186,25 +192,25 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable() {
-        return getSourceFile(getOwner().getRootDir(), getNode().getName(), getNode().getPath()).isPresent();
-    }
-
-    protected static Optional<File> getSourceFile(final File buildFolder, final String fileName, final String path) {
-        File oldVersionLocation = getFileForBuildsWithOldVersion(buildFolder, fileName);
-        if (oldVersionLocation.canRead()) {
-            return Optional.of(oldVersionLocation);
-        }
-
-        File newVersionLocation = AgentCoveragePainter.createFileInBuildFolder(buildFolder, "coverage", path);
-        if (newVersionLocation.canRead()) {
-            return Optional.of(newVersionLocation);
-        }
-
-        return Optional.empty();
+        return isSourceFileInNewFormatAvailable() || isSourceFileInOldFormatAvailable();
     }
 
     /**
-     * Returns a file to the sources in release < 2.1.0.
+     * Returns whether the source file is available in Jenkins build folder in the old format of the plugin versions
+     * less than 2.1.0.
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    public boolean isSourceFileInOldFormatAvailable() {
+        return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), getNode().getName());
+    }
+
+    static boolean isSourceFileInOldFormatAvailable(final File rootDir, final String nodeName) {
+        return getFileForBuildsWithOldVersion(rootDir, nodeName).canRead();
+    }
+
+    /**
+     * Returns a file to the sources in release in the old format of the plugin versions less than 2.1.0.
      *
      * @param buildFolder
      *         top-level folder of the build results
@@ -213,13 +219,26 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return the file
      */
-    private static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
-        File sourceFolder = new File(buildFolder, "coverage-sources");
-        return new File(sourceFolder, sanitizeFilename(fileName));
+    static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
+        return new File(new File(buildFolder, "coverage-sources"), sanitizeFilename(fileName));
     }
 
     private static String sanitizeFilename(final String inputName) {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
+    }
+
+    /**
+     * Returns whether the source file is available in Jenkins build folder in the new format of the plugin versions
+     * greater or equal than 2.1.0.
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    public boolean isSourceFileInNewFormatAvailable() {
+        return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, getNode().getPath());
+    }
+
+    static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
+        return AgentCoveragePainter.createFileInBuildFolder(rootDir, id, nodePath).canRead();
     }
 
     /**
@@ -270,12 +289,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
         private final File buildFolder;
+        private final String id;
 
-        CoverageTableModel(final CoverageNode root, final File buildFolder) {
+        CoverageTableModel(final CoverageNode root, final File buildFolder, final String id) {
             super();
 
             this.root = root;
             this.buildFolder = buildFolder;
+            this.id = id;
         }
 
         @Override
@@ -300,7 +321,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public List<Object> getRows() {
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder)).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, id))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -310,15 +332,18 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageRow {
         private final CoverageNode root;
         private final File buildFolder;
+        private final String id;
 
-        CoverageRow(final CoverageNode root, final File buildFolder) {
+        CoverageRow(final CoverageNode root, final File buildFolder, final String id) {
             this.root = root;
             this.buildFolder = buildFolder;
+            this.id = id;
         }
 
         public String getFileName() {
             String fileName = root.getName();
-            if (getSourceFile(buildFolder, fileName, root.getPath()).isPresent()) {
+            if (isSourceFileInNewFormatAvailable(buildFolder, id, root.getPath())
+                    || isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
                 return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
             }
             return fileName;
