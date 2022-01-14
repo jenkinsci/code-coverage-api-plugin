@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage;
+package io.jenkins.plugins.coverage.CoveragePublisher;
 
 import java.util.List;
 
@@ -13,10 +13,11 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
-import io.jenkins.plugins.coverage.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.Threshold.AdapterThresholdTarget;
-import io.jenkins.plugins.coverage.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.Threshold.GlobalThresholdTarget;
+
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThresholdTarget;
 
 /**
  * Coverage Publisher which can be added in the configuration of a FreeStyle Project.

@@ -9,11 +9,12 @@ import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.gargoylesoftware.htmlunit.ScriptResult;
 import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
+
+import static io.jenkins.plugins.coverage.utils.TrendchartUtil.*;
 
 /**
  * Tabs of File Coverage Overview Table.
@@ -86,7 +87,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageTrend() {
         ensureCoverageReportPageIsOpen();
-        return getChartById(COVERAGE_TREND_CHART);
+        return getChartsDataById(this, COVERAGE_TREND_CHART);
     }
 
     /**
@@ -95,7 +96,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageOverview() {
         ensureCoverageReportPageIsOpen();
-        return getChartById(COVERAGE_OVERVIEW_CHART);
+        return getChartsDataById(this, COVERAGE_OVERVIEW_CHART);
     }
 
     /**
@@ -104,7 +105,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageTree(){
         ensureCoverageReportPageIsOpen();
-        return getChartById(COVERAGE_TREE_CHART);
+        return getChartsDataById(this, COVERAGE_TREE_CHART);
     }
 
     /**
@@ -115,30 +116,8 @@ public class CoverageReport extends PageObject {
         return openFileCoverageTable();
     }
 
-    /**
-     * Returns if chart is displayed.
-     * @param elementId of chart
-     * @return if chart is displayed
-     */
-    private boolean isChartDisplayed(final String elementId){
-        return find(By.id(elementId))!=null;
-    }
 
-    /**
-     * Returns a chart's data by its id.
-     * @param elementId of chart.
-     * @return data as json.
-     */
-    private String getChartById(final String elementId) {
-        waitFor().until(() -> isChartDisplayed(elementId));
-        Object result = executeScript(String.format(
-                "delete(window.Array.prototype.toJSON) %n"
-                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\")).getOption())",
-                elementId));
-        ScriptResult scriptResult = new ScriptResult(result);
 
-        return scriptResult.getJavaScriptResult().toString();
-    }
 
     /**
      * Ensures the tab is 'File Overview'/FileCoverageTable is active.

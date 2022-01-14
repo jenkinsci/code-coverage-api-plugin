@@ -1,9 +1,8 @@
-package io.jenkins.plugins.coverage.Threshold;
+package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
-import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.Adapter;
 
 public class AdapterThreshold extends AbstractThreshold{
     protected AdapterThreshold(final PageObject context, final String path) {

@@ -7,11 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * Representation of a table row displaying severity and package of an issue.
- *
- * @author Stephan Plöderl
- * @author Anna-Maria Hardi
- * @author Elvira Hauer
+ * Representation of a table row in {@link FileCoverageTable}
  */
 class FileCoverageTableRow {
     private final WebElement row;

@@ -27,7 +27,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
-        CoverageReportTest.verifyTrendchart(trendChart);
+        TrendChartTest.verifyTrendChart(trendChart);
     }
 
     /**
@@ -106,33 +106,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
         //TODO: pick and check items with by using its values and colors
     }
 
-    //TODO: temporary; (also needed for coverage summary)
 
-    /**
-     * Verifies CoverageTrend of CoverageReport of Job with two Builds.
-     *
-     * @param trendChart
-     *         from second build.
-     */
-    private static void verifyTrendchart(final String trendChart) {
-        assertThatJson(trendChart)
-                .inPath("$.xAxis[*].data[*]")
-                .isArray()
-                .hasSize(2)
-                .contains("#2")
-                .contains("#3");
-
-        assertThatJson(trendChart)
-                .node("series")
-                .isArray()
-                .hasSize(2);
-
-        assertThatJson(trendChart).node("series[0].name").isEqualTo("Line");
-        assertThatJson(trendChart).node("series[1].name").isEqualTo("Branch");
-
-        assertThatJson(trendChart).node("series[0].data").isArray().contains(95).contains(91);
-        assertThatJson(trendChart).node("series[1].data").isArray().contains(88).contains(93);
-    }
 
 }
 

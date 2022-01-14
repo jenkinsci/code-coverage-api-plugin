@@ -2,17 +2,17 @@ import org.junit.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoveragePublisher.SourceFileResolver;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.FileCoverageTable;
-import io.jenkins.plugins.coverage.JobStatus;
-import io.jenkins.plugins.coverage.Threshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.MainPanel;
 
 /**
  * Should in the end contain all tests.
@@ -44,7 +44,7 @@ public class UITest extends AbstractJUnitTest {
         JobCreatorUtils.buildWithErrors(job);
 
         //TODO: tests here for fail on no reports (CoverageSummary?)
-        
+
 
         //create second and third build (successfully), each one containing another jacoco file
         job.configure();
@@ -57,16 +57,17 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
 
+        //verify mainPanel
+        MainPanel mainPanel = new MainPanel(job);
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel);
 
-        //TODO: test trendcharts
-        //CoverageReportTest.verify()
-
-        //test CoverageReport
+        //verify coverageReport (three charts, one table)
         Build buildContainingTwoCoverageReports = job.getLastBuild();
         CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
         CoverageReportTest.verify(report);
 
-        //TODO: test CoverageSummary
+
+        //TODO: verify coverageSummary
         //SummaryTest.verify()
 
         //create fourth build failing due to tresholds not achieved
@@ -82,6 +83,30 @@ public class UITest extends AbstractJUnitTest {
         JobCreatorUtils.buildWithErrors(job);
 
         //TODO: testen, aber vorher diesen build splitten, ggf. mit neuem projekt
+        //SummaryTest.verify()
+    }
+
+
+
+    /**
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
+     * FileCoverageTable and CoverageTrend.
+     * Uses a project with two different jacoco files, each one used in another build.
+     * Second build uses {@link UITest#JACOCO_ANALYSIS_MODEL_XML},
+     * Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
+     */
+    @Test
+    public void test() {
+        //create project with first build failing due to no reports
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
+
+        job.save();
+        JobCreatorUtils.buildWithErrors(job);
+
+
         //SummaryTest.verify()
     }
 

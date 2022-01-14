@@ -12,11 +12,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 
 /**
- * Area that represents the issues tables in an {@link CoverageReport} page. Several issue aspects are visualized in
- * different tables so the actual rows are composed in concrete sub-classes.
-
- *
- * @author Stephan Plöderl
+ * Area that represents the file coverage table in a {@link CoverageReport} page.
  */
 @SuppressFBWarnings("EI")
 public

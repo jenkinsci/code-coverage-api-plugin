@@ -1,4 +1,3 @@
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Test;
@@ -7,10 +6,10 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.Threshold.AdapterThresholdTarget;
 
 import static org.assertj.core.api.Assertions.*;
 
