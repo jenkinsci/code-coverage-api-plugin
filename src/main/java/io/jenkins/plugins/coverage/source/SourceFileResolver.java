@@ -15,10 +15,8 @@ import jenkins.model.Jenkins;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 
 public abstract class SourceFileResolver implements ExtensionPoint, Describable<SourceFileResolver> {
-
     private DefaultSourceFileResolver.SourceFileResolverLevel level;
     private Set<String> possiblePaths;
-
 
     public SourceFileResolver(final DefaultSourceFileResolver.SourceFileResolverLevel level) {
         this.level = level;
@@ -39,7 +37,6 @@ public abstract class SourceFileResolver implements ExtensionPoint, Describable<
     public Descriptor<SourceFileResolver> getDescriptor() {
         return Jenkins.get().getDescriptorOrDie(getClass());
     }
-
 
     public DefaultSourceFileResolver.SourceFileResolverLevel getLevel() {
         return level;
@@ -64,6 +61,4 @@ public abstract class SourceFileResolver implements ExtensionPoint, Describable<
             return name;
         }
     }
-
-
 }
