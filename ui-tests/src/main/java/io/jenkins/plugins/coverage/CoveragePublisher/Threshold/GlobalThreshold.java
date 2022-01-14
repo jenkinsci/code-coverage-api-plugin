@@ -23,7 +23,7 @@ public class GlobalThreshold extends AbstractThreshold {
      * @param globalThresholdTarget of threshold
      */
     public void setThresholdTarget(final GlobalThresholdTarget globalThresholdTarget) {
-        this.thresholdTarget.set(globalThresholdTarget.getValue());
+        this.thresholdTarget.select(globalThresholdTarget.getValue());
 
     }
 }

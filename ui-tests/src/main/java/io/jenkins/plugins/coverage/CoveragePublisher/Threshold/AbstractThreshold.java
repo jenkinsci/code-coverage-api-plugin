@@ -13,6 +13,8 @@ public abstract class AbstractThreshold extends PageAreaImpl {
     private final Control unhealthyThreshold = control("unhealthyThreshold");
     private final Control unstableThreshold = control("unstableThreshold");
     private final Control failUnhealthy = control("failUnhealthy");
+    private final Control delete = control("repeatable-delete");
+
 
     /**
      * Constructor of an AbstractThreshold.
@@ -51,4 +53,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
         failUnhealthy.check(failOnUnhealthy);
     }
 
+    public void delete(){
+        delete.click();
+    }
 }

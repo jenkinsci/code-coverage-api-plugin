@@ -147,7 +147,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * so that values like {@link CoveragePublisher#setFailUnhealthy(boolean)} or
      * {@link CoveragePublisher#setFailNoReports(boolean)} are visible and can be set.
      */
-    private void ensureAdvancedOptionsIsActivated() {
+    public void ensureAdvancedOptionsIsActivated() {
         if (advancedOptions.exists()) {
             advancedOptions.click();
         }
@@ -270,7 +270,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
         //FIXME
         private final Control advanced = control("repeatable-add"); //input
-        private boolean advancedOptionsActivated = false;
+
 
 
         /**
@@ -341,10 +341,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         /**
          *
          */
-        private void ensureAdvancedOptionsIsActivated() {
-            if (!advancedOptionsActivated) {
+        public void ensureAdvancedOptionsIsActivated() {
+            if (advancedOptions.exists()) {
                 advancedOptions.click();
-                advancedOptionsActivated = true;
             }
         }
 

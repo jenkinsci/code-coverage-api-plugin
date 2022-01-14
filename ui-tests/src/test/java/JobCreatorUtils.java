@@ -37,10 +37,17 @@ class JobCreatorUtils {
     }
 
     /**
-     * Check if Project is build successfully.
+     * Check if build is successfully.
      */
     static protected Build buildSuccessfully(final Job job) {
         return job.startBuild().waitUntilFinished().shouldSucceed();
+    }
+
+    /**
+     * Check if build is unstable.
+     */
+    static protected Build buildUnstable(final Job job) {
+        return job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
     static protected Build buildWithErrors(final Job job) {
