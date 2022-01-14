@@ -23,6 +23,8 @@ public class UITest extends AbstractJUnitTest {
 
     @SuppressFBWarnings("BC")
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
+    public static final float UNHEALTHY_THRESHOLD = 4;
+    public static final float UNSTABLE_THRESHOLD = 4;
 
     /**
      * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
@@ -74,7 +76,8 @@ public class UITest extends AbstractJUnitTest {
         //create fourth build failing due to tresholds not achieved
         //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
         job.configure();
-        jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, 4, 4, false);
+        jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, UNHEALTHY_THRESHOLD,
+                UNSTABLE_THRESHOLD, false);
         coveragePublisher.setApplyThresholdRecursively(true);
         coveragePublisher.setFailUnhealthy(true);
         coveragePublisher.setFailUnstable(true);
@@ -83,7 +86,7 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build failedBuild = JobCreatorUtils.buildWithErrors(job);
 
-        SummaryTest.testSummaryOnFailedBuild(failedBuild);
+        SummaryTest.testSummaryOnFailedBuild(failedBuild, UNHEALTHY_THRESHOLD, UNSTABLE_THRESHOLD);
     }
 
     /**

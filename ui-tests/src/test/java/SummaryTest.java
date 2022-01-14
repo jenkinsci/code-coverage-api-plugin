@@ -49,10 +49,23 @@ public class SummaryTest extends AbstractJUnitTest {
         assertThat(cr.getCurrentUrl()).contains("/" + (build.getNumber() - 1) + "/");
     }
 
-    public static void testSummaryOnFailedBuild(final Build build) {
+    public static void testSummaryOnFailedBuild(final Build build, final float unhealthyThreshold,
+            final float unstableThreshold) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
+        HashMap<String, Double> coverage = cs.getCoverage();
+        String failMsg = cs.getFailMsg();
 
+        //Expecting actual:
+        //  {"Class"=83.0, "Conditional"=94.0, "File"=70.0, "Group"=100.0, "Instruction"=93.0, "Line"=91.0, "Method"=95.0, "Package"=100.0, "Report"=100.0}
+        //to contain values:
+        //  [99.0, 97.0, 96.0, 88.0]
+        assertThat(coverage).containsKeys("Report", "Group", "Package", "File", "Class", "Method", "Instruction",
+                        "Line", "Conditional")
+                .containsValues(100.0, 99.0, 97.0, 96.0, 95.0, 88.0);
+
+        assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
+                .contains("unhealthyThreshold=" + unhealthyThreshold);
         System.out.println("HI");
     }
 
