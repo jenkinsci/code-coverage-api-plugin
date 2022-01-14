@@ -1,7 +1,5 @@
 import java.util.List;
 
-import org.junit.Test;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -18,7 +16,12 @@ public class SummaryTest extends AbstractJUnitTest {
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
-    @Test
+    public static void testSummaryOnFailedBuild(final Build build) {
+        build.open();
+        // TODO: Das Element existiert nicht, wie soll das getestet werden?
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
+    }
+
     public void verifyGeneratedTrendChart() {
         //firstBuild();
         referenceBuild();
@@ -87,11 +90,9 @@ public class SummaryTest extends AbstractJUnitTest {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
 
-
         System.out.println("HI");
 
     }
-
 
     private FreeStyleJob createSuccessfulJobWithDiffererntJacocos() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
@@ -107,7 +108,5 @@ public class SummaryTest extends AbstractJUnitTest {
         JobCreatorUtils.buildSuccessfully(job);
         return job;
     }
-
-
 
 }

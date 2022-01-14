@@ -2,7 +2,6 @@ import org.junit.Test;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -25,13 +24,10 @@ public class UITest extends AbstractJUnitTest {
     @SuppressFBWarnings("BC")
     private static final String FILE_NAME = "jacoco-analysis-model.xml";
 
-
     /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
-     * FileCoverageTable and CoverageTrend.
-     * Uses a project with two different jacoco files, each one used in another build.
-     * Second build uses {@link UITest#JACOCO_ANALYSIS_MODEL_XML},
-     * Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
+     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
+     * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
     public void verifyingCoveragePlugin() {
@@ -41,10 +37,10 @@ public class UITest extends AbstractJUnitTest {
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setFailNoReports(true);
         job.save();
-        JobCreatorUtils.buildWithErrors(job);
+        Build build = JobCreatorUtils.buildWithErrors(job);
 
         //TODO: tests here for fail on no reports (CoverageSummary?)
-
+        //SummaryTest.testSummaryOnFailedBuild(build);
 
         //create second and third build (successfully), each one containing another jacoco file
         job.configure();
@@ -71,7 +67,6 @@ public class UITest extends AbstractJUnitTest {
         CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
         CoverageReportTest.verify(report);
 
-
         //TODO: verify coverageSummary
         //SummaryTest.verify()
 
@@ -91,14 +86,10 @@ public class UITest extends AbstractJUnitTest {
         //SummaryTest.verify()
     }
 
-
-
     /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview,
-     * FileCoverageTable and CoverageTrend.
-     * Uses a project with two different jacoco files, each one used in another build.
-     * Second build uses {@link UITest#JACOCO_ANALYSIS_MODEL_XML},
-     * Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
+     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
+     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
+     * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
     public void test() {
@@ -111,16 +102,8 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         JobCreatorUtils.buildWithErrors(job);
 
-
         //SummaryTest.verify()
     }
-
-
-
-
-
-
-
 
 }
 
