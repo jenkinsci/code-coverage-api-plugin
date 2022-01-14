@@ -66,7 +66,6 @@ public class SummaryTest extends AbstractJUnitTest {
 
         assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
                 .contains("unhealthyThreshold=" + unhealthyThreshold);
-        System.out.println("HI");
     }
 
 }
