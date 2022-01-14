@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -15,8 +16,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Area that represents the file coverage table in a {@link CoverageReport} page.
  */
 @SuppressFBWarnings("EI")
-public
-class FileCoverageTable  {
+public class FileCoverageTable  {
     private final String ID_OF_FILE_COVERAGE_TABLE = "coverage-details";
     private final CoverageReport coverageReport;
     private final List<FileCoverageTableRow> tableRows = new ArrayList<>();
@@ -132,4 +132,25 @@ class FileCoverageTable  {
 
         updateTableRows();
     }
+
+    /**
+     * Enum representing the headers which should be present in a {@link FileCoverageTable}.
+     */
+    public enum Header {
+        PACKAGE("Package"),
+        FILE("File"),
+        LINE_COVERAGE("Line Coverage"),
+        BRANCH_COVERAGE("Branch Coverage");
+
+        private final String title;
+
+        public String getTitle() {
+            return title;
+        }
+
+        Header(final String property) {
+            title = property;
+        }
+    }
+
 }

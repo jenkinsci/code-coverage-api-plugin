@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -9,7 +8,7 @@ import org.openqa.selenium.WebElement;
 /**
  * Representation of a table row in {@link FileCoverageTable}
  */
-class FileCoverageTableRow {
+public class FileCoverageTableRow {
     private final WebElement row;
     private final FileCoverageTable table;
 
@@ -24,6 +23,22 @@ class FileCoverageTableRow {
 
     final FileCoverageTable getTable() {
         return table;
+    }
+
+    public String getPackage() {
+        return this.row.findElements(By.tagName("td")).get(0).getText();
+    }
+
+    public String getFile() {
+        return this.row.findElements(By.tagName("td")).get(1).getText();
+    }
+
+    public String getLineCoverage() {
+        return this.row.findElements(By.tagName("td")).get(2).getText();
+    }
+
+    public String getBranchCoverage() {
+        return this.row.findElements(By.tagName("td")).get(4).getText();
     }
 
     /**

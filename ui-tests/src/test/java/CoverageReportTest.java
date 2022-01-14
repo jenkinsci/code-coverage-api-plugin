@@ -1,9 +1,16 @@
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
+import io.jenkins.plugins.coverage.FileCoverageTable.Header;
+import io.jenkins.plugins.coverage.FileCoverageTableRow;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class CoverageReportTest extends AbstractJUnitTest {
     //TODO: use or remove
@@ -37,7 +44,23 @@ public class CoverageReportTest extends AbstractJUnitTest {
      *         from second build.
      */
     private static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
-        //assertThat(fileCoverageTable).getTableRows().get(0).getCellContent("File")
+        List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
+        List<String> headers = fileCoverageTable.getHeaders();
+
+        assertThat(headers)
+                .hasSize(6)
+                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
+                        Header.BRANCH_COVERAGE.getTitle());
+
+        for (FileCoverageTableRow row : rows) {
+            String packageName = row.getPackage();
+            String fileName = row.getFile();
+            String lineCoverage = row.getLineCoverage();
+            String branchCoverage = row.getBranchCoverage();
+            System.out.println("HI");
+            //  assertThat(row.getPackage).isEqualTo("Error");
+        }
+
     }
 
     /**
@@ -103,8 +126,6 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains("[53,51]")
                 .contains("[0,0]");
     }
-
-
 
 }
 
