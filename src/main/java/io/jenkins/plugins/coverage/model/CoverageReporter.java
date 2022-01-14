@@ -8,6 +8,7 @@ import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
 import hudson.model.Run;
@@ -156,7 +157,7 @@ public class CoverageReporter {
         return Optional.of(referenceAction);
     }
 
-    private Optional<CoverageBuildAction> getPreviousResult(final Run<?, ?> startSearch) {
+    private Optional<CoverageBuildAction> getPreviousResult(@CheckForNull final Run<?, ?> startSearch) {
         for (Run<?, ?> build = startSearch; build != null; build = build.getPreviousBuild()) {
             CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
             if (action != null) {

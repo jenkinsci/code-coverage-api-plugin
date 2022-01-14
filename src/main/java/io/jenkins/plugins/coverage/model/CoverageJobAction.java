@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.LinesChartModel;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Job;
 
@@ -32,7 +33,7 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
         return Messages.CoverageProjectAction_displayName();
     }
 
-    @Override
+    @Override @NonNull
     public String getUrlName() {
         return "coverage";
     }

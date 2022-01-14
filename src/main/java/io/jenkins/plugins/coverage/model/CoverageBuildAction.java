@@ -43,7 +43,6 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     static final String DETAILS_URL = "coverage";
 
     private HealthReport healthReport;
-    private String failMessage;
 
     private final Coverage lineCoverage;
     private final Coverage branchCoverage;
@@ -192,14 +191,6 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
     public void setHealthReport(final HealthReport healthReport) {
         this.healthReport = healthReport;
-    }
-
-    public String getFailMessage() {
-        return failMessage;
-    }
-
-    public void setFailMessage(final String failMessage) {
-        this.failMessage = failMessage;
     }
 
     @CheckForNull

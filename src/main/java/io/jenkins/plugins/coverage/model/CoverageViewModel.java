@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import j2html.tags.ContainerTag;
 
@@ -169,6 +170,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the new sub-page
      */
     @SuppressWarnings("unused") // Called by jelly view
+    @CheckForNull
     public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
