@@ -8,9 +8,11 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.JobStatus;
+import io.jenkins.plugins.coverage.Threshold.AdapterThresholdTarget;
 
 /**
  * Should in the end contain all tests.
@@ -70,7 +72,7 @@ public class UITest extends AbstractJUnitTest {
         //create fourth build failing due to tresholds not achieved
         //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
         job.configure();
-        jacocoAdapter.createGlobalThresholdsPageArea("Instruction", 4, 4, false);
+        jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, 4, 4, false);
         coveragePublisher.setApplyThresholdRecursively(true);
         coveragePublisher.setFailUnhealthy(true);
         coveragePublisher.setFailUnstable(true);
@@ -82,6 +84,7 @@ public class UITest extends AbstractJUnitTest {
         //TODO: testen, aber vorher diesen build splitten, ggf. mit neuem projekt
         //SummaryTest.verify()
     }
+
 
 
 

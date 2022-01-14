@@ -13,6 +13,11 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
+import io.jenkins.plugins.coverage.Threshold.AdapterThreshold;
+import io.jenkins.plugins.coverage.Threshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.Threshold.GlobalThreshold;
+import io.jenkins.plugins.coverage.Threshold.GlobalThresholdTarget;
+
 /**
  * Coverage Publisher which can be added in the configuration of a FreeStyle Project.
  */
@@ -20,7 +25,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 @Describable("Publish Coverage Report")
 public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     private List<Adapter> adapters = getAdapters();
-    private List<Threshold> globalThresholds = getGlobalThresholds();
+    private List<GlobalThreshold> globalThresholds = getGlobalThresholds();
 
 
     private final Control adapter = control("hetero-list-add[adapters]");
@@ -57,6 +62,11 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param applyTresholds
      *         boolean for using applying threshold recursively
      */
+    public void setApplyThresholdRecursively(final boolean applyTresholds) {
+        ensureAdvancedOptionsIsActivated();
+        applyThresholdRecursively.check(applyTresholds);
+    }
+
 
     /**
      * Getter for all adapters applied in current CoveragePublisher configuration.
@@ -70,14 +80,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     /**
      * Getter for GlobalThresholds of CoveragePublisher.
      */
-    private List<Threshold> getGlobalThresholds() {
+    private List<GlobalThreshold> getGlobalThresholds() {
         //TODO
         return null;
-    }
-
-    public void setApplyThresholdRecursively(final boolean applyTresholds) {
-        ensureAdvancedOptionsIsActivated();
-        applyThresholdRecursively.check(applyTresholds);
     }
 
     /**
@@ -170,18 +175,18 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     }
 
     /**
-     * Creates {@link Threshold} for {@link Adapter}.
+     * Creates {@link GlobalThreshold} for {@link Adapter}.
      *
      * @return added {@link Adapter}
      */
-    public Threshold createGlobalThresholdsPageArea() {
+    public GlobalThreshold createGlobalThresholdsPageArea() {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalthresholds", () -> this.globalThreshold.click());
-        return new Threshold(this, path);
+        return new GlobalThreshold(this, path);
     }
 
     /**
-     * Creates {@link Threshold} for {@link Adapter}.
+     * Creates {@link GlobalThreshold} for {@link Adapter}.
      *
      * @param thresholdTarget
      *         which should be setted
@@ -194,11 +199,11 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *
      * @return added {@link Adapter} with setted configuration
      */
-    public Threshold createGlobalThresholdsPageArea(final String thresholdTarget, final double unhealthyThreshold,
+    public GlobalThreshold createGlobalThresholdsPageArea(final GlobalThresholdTarget thresholdTarget, final double unhealthyThreshold,
             final double unstableThreshold, final boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThreshold.click());
-        Threshold globalThreshold = new Threshold(this, path);
+        GlobalThreshold globalThreshold = new GlobalThreshold(this, path);
         globalThreshold.setThresholdTarget(thresholdTarget);
         globalThreshold.setUnhealthyThreshold(unhealthyThreshold);
         globalThreshold.setUnstableThreshold(unstableThreshold);
@@ -230,12 +235,15 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         adapter.click();
     }
 
-    //TODO: austauschen?
+
+
+
+
     public enum SourceFileResolver {
-        //value
-        NEVER_SAVE_SOURCE_FILES("never save source files"),
-        SAVE_LAST_BUIlD_SOURCE_FILES("save last build source files"),
-        SAVE_ALL_BUILD_SOURCE_FILES("save all build source files"),
+
+        NEVER_STORE("NEVER_STORE"),
+        STORE_LAST_BUIlD("STORE_LAST_BUIlD"),
+        STORE_ALL_BUILD("STORE_ALL_BUILD"),
         ;
 
         private final String name;
@@ -249,11 +257,15 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
+
+
+
+
     /**
      * Adapter which can be added in the configuration of the {@link CoveragePublisher} of a FreeStyle Project.
      */
     public static class Adapter extends PageAreaImpl {
-        private List<Threshold> thresholds = getThresholds();
+        private List<AdapterThreshold> thresholds = getThresholds();
         private final Control reportFilePath = control("path");
         private final Control advancedOptions = control("advanced-button");
         private final Control mergeToOneReport = control("mergeToOneReport"); //DD
@@ -277,7 +289,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         /**
          * Getter for Thresholds of Adapter
          */
-        private List<Threshold> getThresholds() {
+        private List<AdapterThreshold> getThresholds() {
             //TODO
             return null;
         }
@@ -303,10 +315,10 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
          *
          * @return
          */
-        public Threshold createGlobalThresholdsPageArea() {
+        public AdapterThreshold createThresholdsPageArea() {
             ensureAdvancedOptionsIsActivated();
             String path = createPageArea("thresholds", () -> this.threshold.click());
-            return new Threshold(this, path);
+            return new AdapterThreshold(this, path);
         }
 
         /**
@@ -317,12 +329,12 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
          * @param failUnhealthy
          * @return
          */
-        public Threshold createGlobalThresholdsPageArea(final String thresholdTarget,
+        public AdapterThreshold createThresholdsPageArea(final AdapterThresholdTarget thresholdTarget,
                 final double unhealthyThreshold,
                 final double unstableThreshold, final boolean failUnhealthy) {
             ensureAdvancedOptionsIsActivated();
             String path = createPageArea("thresholds", () -> this.threshold.click());
-            Threshold threshold = new Threshold(this, path);
+            AdapterThreshold threshold = new AdapterThreshold(this, path);
             threshold.setThresholdTarget(thresholdTarget);
             threshold.setUnhealthyThreshold(unhealthyThreshold);
             threshold.setUnstableThreshold(unstableThreshold);
@@ -341,58 +353,8 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
-    /**
-     * Used for thresholds and global thresholds.
-     */
-    public static class Threshold extends PageAreaImpl {
-
-        private final Control thresholdTarget = control("thresholdTarget");
-        private final Control unhealthyThreshold = control("unhealthyThreshold");
-        private final Control unstableThreshold = control("unstableThreshold");
-        private final Control failUnhealthy = control("failUnhealthy");
-
-        /**
-         *
-         * @param reportPublisher
-         * @param path
-         */
-        Threshold(final PageArea reportPublisher, final String path) {
-            super(reportPublisher, path);
-        }
-
-        /**
-         *
-         * @param target
-         */
-        public void setThresholdTarget(final String target) {
-            thresholdTarget.select(target);
-        }
-
-        /**
-         *
-         * @param threshold
-         */
-        public void setUnhealthyThreshold(final double threshold) {
-            unhealthyThreshold.set(threshold);
-        }
-
-        /**
-         *
-         * @param threshold
-         */
-        public void setUnstableThreshold(final double threshold) {
-            unstableThreshold.set(threshold);
-        }
 
 
-        /**
-         * Setter for fail on unhealthy.
-         *
-         * @param failOnUnhealthy
-         *         boolean for failing on unhealthy
-         */
-        public void setFailUnhealthy(final boolean failOnUnhealthy) {
-            failUnhealthy.check(failOnUnhealthy);
-        }
-    }
+
+
 }
