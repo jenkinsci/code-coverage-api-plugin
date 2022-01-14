@@ -161,6 +161,8 @@ public class SourceCodeFacade {
         AgentCoveragePainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
                 final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
                 final String sourceCodeEncoding, final String directory) {
+            super();
+
             this.paintedFiles = paintedFiles.stream()
                     .map(e -> new PaintedNode(e.getKey(), e.getValue()))
                     .collect(Collectors.toList());

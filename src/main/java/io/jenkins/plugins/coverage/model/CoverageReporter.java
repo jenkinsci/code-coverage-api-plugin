@@ -131,7 +131,7 @@ public class CoverageReporter {
             previousResult = getPreviousResult(reference.get());
             if (previousResult.isPresent()) {
                 Run<?, ?> fallbackBuild = previousResult.get().getOwner();
-                if (fallbackBuild != referenceBuild) {
+                if (!fallbackBuild.equals(referenceBuild)) {
                     log.logInfo("-> Reference build has no action, falling back to last build with action: '%s'",
                             fallbackBuild.getDisplayName());
                 }
