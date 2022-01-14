@@ -127,7 +127,9 @@ public class SourceCodeFacade {
     }
 
     /**
-     * Paints source code files on the agent using the recorded coverage information.
+     * Paints source code files on the agent using the recorded coverage information. All files are stored as zipped
+     * HTML files that contain the painted source code. In the last step all zipped source files are aggregated into a
+     * single archive to simplify copying to the controller.
      */
     static class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog> {
         private static final long serialVersionUID = 3966282357309568323L;
@@ -228,10 +230,8 @@ public class SourceCodeFacade {
 
         private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
             SourceDirectoryFilter filter = new SourceDirectoryFilter();
-            return filter.getPermittedSourceDirectories(new FilePath(workspace),
-                            permittedSourceDirectories, requestedSourceDirectories, log).stream()
-                    .map(FilePath::getRemote)
-                    .collect(Collectors.toSet());
+            return filter.getPermittedSourceDirectories(workspace.getAbsolutePath(),
+                            permittedSourceDirectories, requestedSourceDirectories, log);
         }
 
         private int paintSource(final PaintedNode fileNode, final FilePath workspace,
