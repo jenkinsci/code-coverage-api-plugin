@@ -87,9 +87,9 @@ public class  CoverageSummary extends PageObject {
         return this.referenceBuild.getText();
     }
 
-    public void openReferenceBuild() {
+    public CoverageReport openReferenceBuild() {
         WebElement a = this.referenceBuild.findElement(By.tagName("a"));
-        openPage(a, CoverageReport.class);
+        return openPage(a, CoverageReport.class);
     }
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {

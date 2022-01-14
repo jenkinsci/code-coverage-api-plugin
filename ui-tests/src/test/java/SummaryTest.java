@@ -1,14 +1,10 @@
+import java.util.HashMap;
 import java.util.List;
-
-import org.junit.Test;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.CoverageSummary;
 
 import static org.assertj.core.api.Assertions.*;
@@ -18,96 +14,59 @@ public class SummaryTest extends AbstractJUnitTest {
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
-    @Test
-    public void verifyGeneratedTrendChart() {
-        //firstBuild();
-        referenceBuild();
-        //failBuild();
+    public static void NAME(final Build build) {
+        build.open();
+        // TODO: Das Element existiert nicht, wie soll das getestet werden?
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
     }
 
-    private void firstBuild() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
+    public static void testSummaryOnFirstSuccessfulBuild(final Build build) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
-        //HashMap<String, Double> coverage = cs.getCoverage();
+        HashMap<String, Double> coverage = cs.getCoverage();
 
-       /* assertThat(coverage)
+        assertThat(coverage)
                 .hasSize(2)
                 .containsKeys("Line", "Branch")
-                .containsValues(95.52, 88.59);*/
+                .containsValues(95.52, 88.59);
     }
 
-    private void referenceBuild() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build build = JobCreatorUtils.buildSuccessfully(job);
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        Build build2 = JobCreatorUtils.buildSuccessfully(job);
-        build2.open();
-        CoverageSummary cs = new CoverageSummary(build, "coverage");
-        List<Double> changes = cs.getCoverageChanges();
-
-        assertThat(changes).contains(-0.045, 0.054);
-
-        cs.openReferenceBuild();
-
-        assertThat(getCurrentUrl()).isEqualTo(job.url + "1/");
-
-    }
-
-    private void failBuild() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        jacocoAdapter.setMergeToOneReport(true);
-        jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, 4, 4, false);
-        coveragePublisher.setApplyThresholdRecursively(true);
-        coveragePublisher.setFailUnhealthy(true);
-        coveragePublisher.setFailUnstable(true);
-        coveragePublisher.setSkipPublishingChecks(true);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        coveragePublisher.setFailNoReports(true);
-        coveragePublisher.setFailNoReports(true);
-        job.save();
-        Build build = JobCreatorUtils.buildWithErrors(job);
+    public static void testSummaryOnSecondSuccessfulBuild(final Build build) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
 
+        HashMap<String, Double> coverage = cs.getCoverage();
+        List<Double> changes = cs.getCoverageChanges();
 
+        assertThat(coverage)
+                .hasSize(2)
+                .containsKeys("Line", "Branch")
+                .containsValues(91.02, 93.97);
+        assertThat(changes).contains(-0.045, 0.054);
+
+        CoverageReport cr = cs.openReferenceBuild();
+
+        assertThat(cr.getCurrentUrl()).contains("/" + (build.getNumber() - 1) + "/");
+    }
+
+    public static void testSummaryOnFailedBuild(final Build build, final float unhealthyThreshold,
+            final float unstableThreshold) {
+        build.open();
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
+        HashMap<String, Double> coverage = cs.getCoverage();
+        String failMsg = cs.getFailMsg();
+
+        //Expecting actual:
+        //  {"Class"=83.0, "Conditional"=94.0, "File"=70.0, "Group"=100.0, "Instruction"=93.0, "Line"=91.0, "Method"=95.0, "Package"=100.0, "Report"=100.0}
+        //to contain values:
+        //  [99.0, 97.0, 96.0, 88.0]
+        assertThat(coverage).containsKeys("Report", "Group", "Package", "File", "Class", "Method", "Instruction",
+                        "Line", "Conditional")
+                .containsValues(100.0, 99.0, 97.0, 96.0, 95.0, 88.0);
+
+        assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
+                .contains("unhealthyThreshold=" + unhealthyThreshold);
         System.out.println("HI");
-
     }
-
-
-    private FreeStyleJob createSuccessfulJobWithDiffererntJacocos() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        JobCreatorUtils.buildSuccessfully(job);
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        JobCreatorUtils.buildSuccessfully(job);
-        return job;
-    }
-
-
 
 }
