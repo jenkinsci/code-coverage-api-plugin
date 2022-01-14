@@ -3,7 +3,9 @@ package io.jenkins.plugins.coverage;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
@@ -21,19 +23,20 @@ public class MainPanel extends PageObject {
     public MainPanel(final Job parent) {
         super(parent, parent.url);
     }
-
+   // WebElement trendchart =  (getElement(By.id("COVERAGE_TREND_CHART"))).findElement(By.className("echarts-trend"));
     /**
      * Getter for Coverage-Overview-Chart Data.
      * @return Json Value of Coverage-Overview Chart
      */
     public String getCoverageTrendChart() {
         ensureMainPanelPageIsOpen();
-        return getTrendChart();
-    }
+
+        //FIXME
+        waitFor().until(()->isChartAvailable() &&  executeScript(String.format(
+                "delete(window.Array.prototype.toJSON) %n"
+                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ))!=null);
 
 
-    public String getTrendChart() {
-        waitFor().until(() -> (TrendchartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART)));
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ));
@@ -42,6 +45,8 @@ public class MainPanel extends PageObject {
 
         return scriptResult.getJavaScriptResult().toString();
     }
+
+
 
 
     public boolean isChartAvailable() {
