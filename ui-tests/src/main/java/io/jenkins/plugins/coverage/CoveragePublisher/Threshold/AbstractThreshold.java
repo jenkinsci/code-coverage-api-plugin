@@ -3,7 +3,6 @@ package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * Used for thresholds and global thresholds.
@@ -15,30 +14,32 @@ public abstract class AbstractThreshold extends PageAreaImpl {
     private final Control unstableThreshold = control("unstableThreshold");
     private final Control failUnhealthy = control("failUnhealthy");
 
-    protected AbstractThreshold(final PageObject context, final String path) {
-        super(context, path);
-    }
-
-    protected AbstractThreshold(final PageArea area, final String path) {
-        super(area, path);
+    /**
+     * Constructor of an AbstractThreshold.
+     * @param parent of threshold
+     * @param path to threshold
+     */
+    protected AbstractThreshold(final PageArea parent, final String path) {
+        super(parent, path);
     }
 
     /**
-     *
+     * Setter for unhealthy-threshold.
      * @param threshold
+     *         for unhealthy
      */
     public void setUnhealthyThreshold(final double threshold) {
         unhealthyThreshold.set(threshold);
     }
 
     /**
-     *
+     * Setter for unstable-threshold.
      * @param threshold
+     *         for unstable
      */
     public void setUnstableThreshold(final double threshold) {
         unstableThreshold.set(threshold);
     }
-
 
     /**
      * Setter for fail on unhealthy.
@@ -49,5 +50,5 @@ public abstract class AbstractThreshold extends PageAreaImpl {
     public void setFailUnhealthy(final boolean failOnUnhealthy) {
         failUnhealthy.check(failOnUnhealthy);
     }
-    
+
 }

@@ -1,21 +1,27 @@
 package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
-import org.jenkinsci.test.acceptance.po.PageObject;
-
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.Adapter;
 
-public class AdapterThreshold extends AbstractThreshold{
-    protected AdapterThreshold(final PageObject context, final String path) {
-        super(context, path);
-    }
+/**
+ * Threshold used in {@link Adapter} in {@CoveragePublisher}.
+ */
+public class AdapterThreshold extends AbstractThreshold {
 
-    public AdapterThreshold(final Adapter adapter,
-            final String path) {
+    /**
+     * Constructor of a Threshold used in {@link Adapter} in {@CoveragePublisher}.
+     * @param adapter of threshold
+     * @param path to threshold
+     */
+    public AdapterThreshold(final Adapter adapter, final String path) {
         super(adapter, path);
     }
 
-    public void setThresholdTarget(final AdapterThresholdTarget target) {
-        this.thresholdTarget.select(target.getName());
+    /**
+     * Setter for target of Threshold using {@link AdapterThresholdTarget}.
+     * @param adapterThresholdTarget of threshold
+     */
+    public void setThresholdTarget(final AdapterThresholdTarget adapterThresholdTarget) {
+        this.thresholdTarget.select(adapterThresholdTarget.getValue());
     }
 }
 

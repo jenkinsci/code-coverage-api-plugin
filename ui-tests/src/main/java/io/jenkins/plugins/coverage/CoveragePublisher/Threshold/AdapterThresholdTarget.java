@@ -1,7 +1,9 @@
 package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
+/**
+ * Enum for Options of {@link AdapterThreshold}.
+ */
 public enum AdapterThresholdTarget {
-
     AGGREGATED_REPORT("Aggregated Report"),
     REPORT("Report"),
     GROUP("Group"),
@@ -14,13 +16,21 @@ public enum AdapterThresholdTarget {
     CONDITIONAL("Conditional"),
     ;
 
-    private final String name;
+    private final String value;
 
-    AdapterThresholdTarget(final String name) {
-        this.name = name;
+    /**
+     * Constructor of enum.
+     * @param value is value-attribute of option-tag.
+     */
+    AdapterThresholdTarget(final String value) {
+        this.value = value;
     }
 
-    public String getName() {
-        return name;
+    /**
+     * Get value of option-tag which should be selected.
+     * @return value of option-tag to select.
+     */
+    public String getValue() {
+        return value;
     }
 }
