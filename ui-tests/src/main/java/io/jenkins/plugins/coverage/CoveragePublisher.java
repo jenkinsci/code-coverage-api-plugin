@@ -2,6 +2,9 @@ package io.jenkins.plugins.coverage;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
+
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -35,7 +38,6 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
 
     private final Control globalThreshold = control("/repeatable-add");
 
-    private boolean advancedOptionsActivated = false;
 
     /**
      * Constructor for CoveragePublisher.
@@ -134,15 +136,24 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     }
 
     /**
-     * Ensures advanced options of CoveragePublisher, a status which is stored in {@link
-     * CoveragePublisher#advancedOptionsActivated} is activated.
+     * Ensures advanced options of CoveragePublisher is activated,
+     * so that values like {@link CoveragePublisher#setFailUnhealthy(boolean)} or
+     * {@link CoveragePublisher#setFailNoReports(boolean)} are visible and can be set.
      */
     private void ensureAdvancedOptionsIsActivated() {
-        if (!advancedOptionsActivated) {
-            //TODO: change condition, use get advanced page area by id
+        if (advancedOptions.exists()) {
             advancedOptions.click();
-            advancedOptionsActivated = true;
         }
+    }
+
+
+    /**
+     * Returns if Element is displayed.
+     * @param elementId of chart
+     * @return if chart is displayed
+     */
+    private boolean isElementDisplayed(final String elementId){
+        return find(By.id(elementId))!=null;
     }
 
     /**
