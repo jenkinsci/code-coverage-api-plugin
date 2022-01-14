@@ -1,5 +1,8 @@
 package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
+/**
+ * Enum for Options of {@link GlobalThreshold}.
+ */
 public enum GlobalThresholdTarget {
 
     AGGREGATED_REPORT("Aggregated Report"),
@@ -16,13 +19,21 @@ public enum GlobalThresholdTarget {
     CONDITIONAL("Conditional"),
     ;
 
-    private final String name;
+    private final String value;
 
-    GlobalThresholdTarget(final String name) {
-        this.name = name;
+    /**
+     * Constructor of enum.
+     * @param value is value-attribute of option-tag.
+     */
+    GlobalThresholdTarget(final String value) {
+        this.value = value;
     }
 
-    public String getName() {
-        return name;
+    /**
+     * Get value of option-tag which should be selected.
+     * @return value of option-tag to select.
+     */
+    public String getValue() {
+        return value;
     }
 }
