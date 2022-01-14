@@ -52,14 +52,19 @@ public class UITest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
+
+        //verify mainPanel not containing trendchart
+        MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
+        MainPanelTest.verifyTrendChartNotDisplayed(mainPanelShouldNotContainTrendchart);
+
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
         JobCreatorUtils.buildSuccessfully(job);
 
-        //verify mainPanel
-        MainPanel mainPanel = new MainPanel(job);
-        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel);
+        //verify mainPanel's trendchart
+        MainPanel mainPanelShouldContainTrendchart = new MainPanel(job);
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanelShouldContainTrendchart);
 
         //verify coverageReport (three charts, one table)
         Build buildContainingTwoCoverageReports = job.getLastBuild();

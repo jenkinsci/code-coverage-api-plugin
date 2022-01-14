@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.openqa.selenium.NoSuchElementException;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
@@ -10,8 +11,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 import io.jenkins.plugins.coverage.utils.TrendchartUtil;
-
-import static io.jenkins.plugins.coverage.utils.TrendchartUtil.*;
 
 /**
  * {@link PageObject} representing the Job status on the build page of a job.
@@ -32,7 +31,8 @@ public class MainPanel extends PageObject {
         return getTrendChart();
     }
 
-    private String getTrendChart() {
+
+    public String getTrendChart() {
         waitFor().until(() -> (TrendchartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART)));
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
@@ -42,6 +42,18 @@ public class MainPanel extends PageObject {
 
         return scriptResult.getJavaScriptResult().toString();
     }
+
+
+    public boolean isChartAvailable() {
+        try {
+            return waitFor().until(() -> (TrendchartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART)));
+
+        }
+        catch(NoSuchElementException exception){
+            return false;
+        }
+    }
+
 
     /**
      * Ensures MainPanel Page is opened.

@@ -102,8 +102,6 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains("[46,46]")
                 .contains("[53,51]")
                 .contains("[0,0]");
-
-        //TODO: pick and check items with by using its values and colors
     }
 
 
