@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.CoveragePublisher;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -55,6 +56,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      */
     public CoveragePublisher(final Job parent, final String path) {
         super(parent, path);
+        this.adapters = new ArrayList<>();
     }
 
     /**
@@ -74,8 +76,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @return all adapters applied
      */
     public List<Adapter> getAdapters() {
-        //TODO:
-        return null;
+       return this.adapters;
     }
 
     /**
@@ -165,14 +166,16 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     /**
      * Creates an {@link Adapter} for {@link CoveragePublisher}.
      *
-     * @param adapter
+     * @param adapterName
      *         type which should be created, f. e. jacoco or cobertura
      *
      * @return added {@link Adapter}
      */
-    public Adapter createAdapterPageArea(final String adapter) {
-        String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapter));
-        return new Adapter(this, path);
+    public Adapter createAdapterPageArea(final String adapterName) {
+        String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapterName));
+        Adapter newAdapter = new Adapter(this, path);
+        adapters.add(newAdapter);
+        return newAdapter;
     }
 
     /**
@@ -228,15 +231,6 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         this.adapter.selectDropdownMenu(adapter);
     }*/
 
-    //TODO: remove all adapters? -> add adapter.delete()?
-    /**
-     * Removes adapter from parent {@link CoveragePublisher}.
-     */
-    public void deleteAdapter() {
-        adapter.click();
-    }
-
-
 
 
 
@@ -266,11 +260,13 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * Adapter which can be added in the configuration of the {@link CoveragePublisher} of a FreeStyle Project.
      */
     public static class Adapter extends PageAreaImpl {
+        private CoveragePublisher parent;
         private List<AdapterThreshold> thresholds = getThresholds();
         private final Control reportFilePath = control("path");
         private final Control advancedOptions = control("advanced-button");
         private final Control mergeToOneReport = control("mergeToOneReport"); //DD
         private final Control threshold = control("repeatable-add"); //input
+        private final Control delete = control("repeatable-delete"); //input
 
         //FIXME
         private final Control advanced = control("repeatable-add"); //input
@@ -284,7 +280,6 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
          */
         public Adapter(final PageArea reportPublisher, final String path) {
             super(reportPublisher, path);
-
         }
 
         /**
@@ -352,6 +347,17 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
                 advancedOptionsActivated = true;
             }
         }
+
+        //TODO: remove all adapters? -> add adapter.delete()?
+        /**
+         * Removes adapter from parent {@link CoveragePublisher}.
+         */
+        public void deleteAdapter() {
+            this.delete.click();
+            //TODO: remove from list?
+        }
+
+
     }
 
 
