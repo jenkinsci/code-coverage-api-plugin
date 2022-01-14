@@ -1,7 +1,5 @@
 import java.util.List;
 
-import org.openqa.selenium.WebElement;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 
 import io.jenkins.plugins.coverage.CoverageReport;
