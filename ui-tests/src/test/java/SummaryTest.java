@@ -9,17 +9,32 @@ import io.jenkins.plugins.coverage.CoverageSummary;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * UI Test for Summary of build.
+ */
 public class SummaryTest extends AbstractJUnitTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
+    /**
+     * Test if summary is not visible if build with no report is enabled.
+     *
+     * @param build
+     *         Build of Project
+     */
     public static void testSummaryOnNoReport(final Build build) {
         build.open();
         // TODO: Das Element existiert nicht, wie soll das getestet werden?
         CoverageSummary cs = new CoverageSummary(build, "coverage");
     }
 
+    /**
+     * Test if summary of first successful build of Project is correct.
+     *
+     * @param build
+     *         Build of Project
+     */
     public static void testSummaryOnFirstSuccessfulBuild(final Build build) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
@@ -31,6 +46,12 @@ public class SummaryTest extends AbstractJUnitTest {
                 .containsValues(95.52, 88.59);
     }
 
+    /**
+     * Test if summary of second successful build of Project is correct and has reference.
+     *
+     * @param build
+     *         Build of Project
+     */
     public static void testSummaryOnSecondSuccessfulBuild(final Build build) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
@@ -49,6 +70,16 @@ public class SummaryTest extends AbstractJUnitTest {
         assertThat(cr.getCurrentUrl()).contains("/" + (build.getNumber() - 1) + "/");
     }
 
+    /**
+     * Test if summary of failed build of Project is correct.
+     *
+     * @param build
+     *         Build of Project
+     * @param unhealthyThreshold
+     *         of project
+     * @param unstableThreshold
+     *         of project
+     */
     public static void testSummaryOnFailedBuild(final Build build, final float unhealthyThreshold,
             final float unstableThreshold) {
         build.open();

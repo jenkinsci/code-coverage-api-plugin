@@ -25,18 +25,38 @@ public class FileCoverageTableRow {
         return table;
     }
 
+    /**
+     * Get package name of table row.
+     *
+     * @return package name
+     */
     public String getPackage() {
         return this.row.findElements(By.tagName("td")).get(0).getText();
     }
 
+    /**
+     * Get package name of table row.
+     *
+     * @return package name
+     */
     public String getFile() {
         return this.row.findElements(By.tagName("td")).get(1).getText();
     }
 
+    /**
+     * Get line coverage of table row.
+     *
+     * @return branch coverage
+     */
     public String getLineCoverage() {
         return this.row.findElements(By.tagName("td")).get(2).getText();
     }
 
+    /**
+     * Get branch coverage of table row.
+     *
+     * @return branch coverage
+     */
     public String getBranchCoverage() {
         return this.row.findElements(By.tagName("td")).get(4).getText();
     }

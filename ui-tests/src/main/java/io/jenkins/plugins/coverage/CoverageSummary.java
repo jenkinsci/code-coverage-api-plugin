@@ -13,7 +13,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 /**
  * {@link PageObject} representing the coverage summary on the build page of a job.
  */
-public class  CoverageSummary extends PageObject {
+public class CoverageSummary extends PageObject {
     private final String id;
     private final WebElement coverageReportLink;
 
@@ -69,6 +69,11 @@ public class  CoverageSummary extends PageObject {
         return coverage;
     }
 
+    /**
+     * Get relative changes of Coverage from previous build to this build.
+     *
+     * @return List of relative changes
+     */
     public List<Double> getCoverageChanges() {
         List<Double> changes = new LinkedList<>();
         for (WebElement result : this.coverageChanges) {
@@ -87,6 +92,11 @@ public class  CoverageSummary extends PageObject {
         return this.referenceBuild.getText();
     }
 
+    /**
+     * Open linked reference build in summary.
+     *
+     * @return {@link CoverageReport} of reference build
+     */
     public CoverageReport openReferenceBuild() {
         WebElement a = this.referenceBuild.findElement(By.tagName("a"));
         return openPage(a, CoverageReport.class);
