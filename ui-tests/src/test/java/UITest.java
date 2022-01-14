@@ -37,17 +37,19 @@ public class UITest extends AbstractJUnitTest {
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setFailNoReports(true);
         job.save();
-        Build build = JobCreatorUtils.buildWithErrors(job);
+        Build buildWithErrors = JobCreatorUtils.buildWithErrors(job);
 
         //TODO: tests here for fail on no reports (CoverageSummary?)
-        //SummaryTest.testSummaryOnFailedBuild(build);
+        //SummaryTest.NAME(build);
 
         //create second and third build (successfully), each one containing another jacoco file
         job.configure();
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
         job.save();
-        JobCreatorUtils.buildSuccessfully(job);
+        Build firstSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
+
+        SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
 
         //verify mainPanel not containing trendchart
         MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
@@ -56,7 +58,9 @@ public class UITest extends AbstractJUnitTest {
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         job.save();
-        JobCreatorUtils.buildSuccessfully(job);
+        Build secondSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
+
+        SummaryTest.testSummaryOnSecondSuccessfulBuild(secondSuccessfulBuild);
 
         //verify mainPanel's trendchart
         MainPanel mainPanelShouldContainTrendchart = new MainPanel(job);
@@ -66,9 +70,6 @@ public class UITest extends AbstractJUnitTest {
         Build buildContainingTwoCoverageReports = job.getLastBuild();
         CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
         CoverageReportTest.verify(report);
-
-        //TODO: verify coverageSummary
-        //SummaryTest.verify()
 
         //create fourth build failing due to tresholds not achieved
         //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
@@ -80,10 +81,9 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.setSkipPublishingChecks(true);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         job.save();
-        JobCreatorUtils.buildWithErrors(job);
+        Build failedBuild = JobCreatorUtils.buildWithErrors(job);
 
-        //TODO: testen, aber vorher diesen build splitten, ggf. mit neuem projekt
-        //SummaryTest.verify()
+        SummaryTest.testSummaryOnFailedBuild(failedBuild);
     }
 
     /**
