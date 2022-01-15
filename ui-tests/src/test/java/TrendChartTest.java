@@ -12,9 +12,9 @@ public class TrendChartTest extends AbstractJUnitTest {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
-                .hasSize(2)
+                .hasSize(3)
                 .contains("#2")
-                .contains("#3");
+                .contains("#5");
 
         assertThatJson(trendChart)
                 .node("series")

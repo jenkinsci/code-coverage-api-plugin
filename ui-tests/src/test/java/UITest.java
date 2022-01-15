@@ -14,6 +14,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdT
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThresholdTarget;
 import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.MainPanel;
 
 /**
@@ -34,7 +35,7 @@ public class UITest extends AbstractJUnitTest {
      * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
      */
     @Test
-    public void newVerifyMethod() {
+    public void verifyingCoveragePlugin() {
         //create project with first build failing due to no reports
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
 
@@ -82,6 +83,24 @@ public class UITest extends AbstractJUnitTest {
                 UNSTABLE_THRESHOLD, false);
         job.save();
         Build fifthBuildUnstable = JobCreatorUtils.buildUnstable(job);
+
+
+        CoverageReport report = new CoverageReport(fifthBuildUnstable);
+        report.open();
+
+        //TODO: hier vielleicht einfachen table-test (anzahl inhalte und 2-3 zeilen) und später nochmal in anderem build
+        // in die table gucken ob mehrer seiten vorhanden sind?
+        //FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
+        //CoverageReportTest.verifyFileCoverageTable(fileCoverageTable);
+
+        String coverageTree = report.getCoverageTree();
+        CoverageReportTest.verifyCoverageTree(coverageTree);
+
+        String coverageOverview = report.getCoverageOverview();
+        CoverageReportTest.verifyCoverageOverview(coverageOverview);
+
+        String trendChart = report.getCoverageTrend();
+        TrendChartTest.verifyTrendChart(trendChart);
 
 
         job.configure();

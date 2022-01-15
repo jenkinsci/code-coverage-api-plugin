@@ -41,7 +41,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * @param fileCoverageTable
      *         from second build.
      */
-    private static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
+    public static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
         List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
         List<String> headers = fileCoverageTable.getHeaders();
 
@@ -67,7 +67,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * @param coverageOverview
      *         from second build.
      */
-    private static void verifyCoverageOverview(final String coverageOverview) {
+    public static void verifyCoverageOverview(final String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -99,7 +99,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * @param coverageTree
      *         from second build.
      */
-    private static void verifyCoverageTree(final String coverageTree) {
+    public static void verifyCoverageTree(final String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
                 .contains("Ensure.java")
                 .contains("FilteredLog.java")
