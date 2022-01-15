@@ -57,9 +57,11 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the associated build that created the statistics
      * @param result
      *         the coverage results to persist with this action
+     * @param healthReport
+     *         health report
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result) {
-        this(owner, result, NO_REFERENCE_BUILD, new TreeMap<>());
+    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport) {
+        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>());
     }
 
     /**
@@ -69,18 +71,20 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the associated build that created the statistics
      * @param result
      *         the coverage results to persist with this action
+     * @param healthReport
+     *         health report
      * @param delta
      *         the delta coverage with respect to the reference build
      * @param referenceBuildId
      *         the ID of the reference build
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
+    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport,
             final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta) {
-        this(owner, result, referenceBuildId, delta, true);
+        this(owner, result, healthReport, referenceBuildId, delta, true);
     }
 
     @VisibleForTesting
-    CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
+    CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport,
             final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
@@ -90,6 +94,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
         this.delta = delta;
         this.referenceBuildId = referenceBuildId;
+        this.healthReport = healthReport;
     }
 
     public Coverage getLineCoverage() {
@@ -177,16 +182,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
     @Override
     public HealthReport getBuildHealth() {
-        return getHealthReport();
+        return healthReport;
     }
 
     @Override
     public CoverageViewModel getTarget() {
         return new CoverageViewModel(getOwner(), getResult());
-    }
-
-    public HealthReport getHealthReport() {
-        return healthReport;
     }
 
     public void setHealthReport(final HealthReport healthReport) {

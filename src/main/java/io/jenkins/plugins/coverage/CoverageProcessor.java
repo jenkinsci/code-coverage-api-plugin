@@ -133,7 +133,7 @@ public class CoverageProcessor {
         // Transform the old model to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
         coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
-                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
+                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention(), healthReport);
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {

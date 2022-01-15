@@ -11,6 +11,7 @@ import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
+import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -32,8 +33,8 @@ import io.jenkins.plugins.util.LogHandler;
  */
 public class CoverageReporter {
     /**
-     * Transforms the old model to the new model and invokes all steps that work on the new model. In the final
-     * step, a new {@link CoverageBuildAction} will be attached to the build.
+     * Transforms the old model to the new model and invokes all steps that work on the new model. In the final step, a
+     * new {@link CoverageBuildAction} will be attached to the build.
      *
      * @param rootResult
      *         the root result obtained from the old coverage API
@@ -49,13 +50,17 @@ public class CoverageReporter {
      *         the encoding of the source code files
      * @param sourceCodeRetention
      *         the source code retention strategy
+     * @param healthReport
+     *         health report
      *
      * @throws InterruptedException
      *         if the build has been aborted
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
-            final SourceCodeRetention sourceCodeRetention) throws InterruptedException {
+            final SourceCodeRetention sourceCodeRetention, final HealthReport healthReport)
+            throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
@@ -91,10 +96,10 @@ public class CoverageReporter {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
             SortedMap<CoverageMetric, Double> delta = rootNode.computeDelta(referenceAction.getResult());
 
-            action = new CoverageBuildAction(build, rootNode, referenceAction.getOwner().getExternalizableId(), delta);
+            action = new CoverageBuildAction(build, rootNode, healthReport, referenceAction.getOwner().getExternalizableId(), delta);
         }
         else {
-            action = new CoverageBuildAction(build, rootNode);
+            action = new CoverageBuildAction(build, rootNode, healthReport);
         }
         build.addOrReplaceAction(action);
     }
