@@ -201,6 +201,7 @@ public class UITest extends AbstractJUnitTest {
 
     }
 
+    /*
     @Test
     @Deprecated
     public void oldVerifyingCoveragePlugin() {
@@ -255,7 +256,7 @@ public class UITest extends AbstractJUnitTest {
         Build failedBuild = JobCreatorUtils.buildWithErrors(job);
 
         SummaryTest.testSummaryOnFailedBuild(failedBuild, UNHEALTHY_THRESHOLD, UNSTABLE_THRESHOLD);
-    }
+    }*/
 
 }
 
