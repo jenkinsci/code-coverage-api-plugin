@@ -15,11 +15,13 @@ public abstract class AbstractThreshold extends PageAreaImpl {
     private final Control failUnhealthy = control("failUnhealthy");
     private final Control delete = control("repeatable-delete");
 
-
     /**
      * Constructor of an AbstractThreshold.
-     * @param parent of threshold
-     * @param path to threshold
+     *
+     * @param parent
+     *         of threshold
+     * @param path
+     *         to threshold
      */
     protected AbstractThreshold(final PageArea parent, final String path) {
         super(parent, path);
@@ -27,19 +29,23 @@ public abstract class AbstractThreshold extends PageAreaImpl {
 
     /**
      * Setter for unhealthy-threshold.
+     *
      * @param threshold
      *         for unhealthy
      */
     public void setUnhealthyThreshold(final double threshold) {
+        //checkControlsAreAvailable()
         unhealthyThreshold.set(threshold);
     }
 
     /**
      * Setter for unstable-threshold.
+     *
      * @param threshold
      *         for unstable
      */
     public void setUnstableThreshold(final double threshold) {
+        //checkControlsAreAvailable()
         unstableThreshold.set(threshold);
     }
 
@@ -50,10 +56,18 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      *         boolean for failing on unhealthy
      */
     public void setFailUnhealthy(final boolean failOnUnhealthy) {
+        //checkControlsAreAvailable()
         failUnhealthy.check(failOnUnhealthy);
     }
 
-    public void delete(){
+    public void delete() {
         delete.click();
     }
+
+    /**
+     * Ensures CoverageReport Page is opened.
+
+     public void checkControlsAreAvailable() {
+     MatcherAssert.assertThat("threshold controls need to be opened", (thresholdTarget.exists() || unhealthyThreshold.exists() || failUnhealthy.exists()));
+     } */
 }

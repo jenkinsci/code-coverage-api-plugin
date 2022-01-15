@@ -20,7 +20,9 @@ public enum AdapterThresholdTarget {
 
     /**
      * Constructor of enum.
-     * @param value is value-attribute of option-tag.
+     *
+     * @param value
+     *         is value-attribute of option-tag.
      */
     AdapterThresholdTarget(final String value) {
         this.value = value;
@@ -28,6 +30,7 @@ public enum AdapterThresholdTarget {
 
     /**
      * Get value of option-tag which should be selected.
+     *
      * @return value of option-tag to select.
      */
     public String getValue() {
