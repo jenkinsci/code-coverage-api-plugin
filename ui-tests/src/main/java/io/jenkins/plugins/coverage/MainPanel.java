@@ -1,18 +1,12 @@
 package io.jenkins.plugins.coverage;
 
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import io.jenkins.plugins.coverage.utils.TrendchartUtil;
 
 /**
  * {@link PageObject} representing the Job status on the build page of a job.
@@ -23,23 +17,25 @@ public class MainPanel extends PageObject {
     public MainPanel(final Job parent) {
         super(parent, parent.url);
     }
-   // WebElement trendchart =  (getElement(By.id("COVERAGE_TREND_CHART"))).findElement(By.className("echarts-trend"));
+
     /**
      * Getter for Coverage-Overview-Chart Data.
+     *
      * @return Json Value of Coverage-Overview Chart
      */
     public String getCoverageTrendChart() {
         ensureMainPanelPageIsOpen();
 
         //FIXME
-        waitFor().until(()->isChartAvailable() &&  executeScript(String.format(
+       /* waitFor().until(()->isChartAvailable() &&  executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ))!=null);
-
+        */
 
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
-                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ));
+                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",
+                COVERAGE_TREND_CHART));
 
         ScriptResult scriptResult = new ScriptResult(result);
 
@@ -47,24 +43,23 @@ public class MainPanel extends PageObject {
     }
 
 
-
-
-    public boolean isChartAvailable() {
+ /*   public boolean isChartAvailable() {
         try {
-            return waitFor().until(() -> (TrendchartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART)));
-
+            WebElement e = find(By.id(COVERAGE_TREND_CHART));
+            return e.isDisplayed();
         }
         catch(NoSuchElementException exception){
             return false;
         }
-    }
-
+    }*/
 
     /**
      * Ensures MainPanel Page is opened.
      */
     private void ensureMainPanelPageIsOpen() {
-        MatcherAssert.assertThat("main panel page was not opened", this.driver.getCurrentUrl(), CoreMatchers.anyOf(CoreMatchers.containsString(this.url.toString()), CoreMatchers.containsString(this.url+"/")));
+        MatcherAssert.assertThat("main panel page was not opened", this.driver.getCurrentUrl(),
+                CoreMatchers.anyOf(CoreMatchers.containsString(this.url.toString()),
+                        CoreMatchers.containsString(this.url + "/")));
     }
 
 }

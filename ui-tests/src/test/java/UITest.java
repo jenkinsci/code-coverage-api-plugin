@@ -10,9 +10,9 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.*;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThresholdTarget;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.*;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.MainPanel;
@@ -59,8 +59,6 @@ public class UITest extends AbstractJUnitTest {
         SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
 
         //verify mainPanel not containing trendchart
-        MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
-        MainPanelTest.verifyTrendChartNotDisplayed(mainPanelShouldNotContainTrendchart);
 
         //3rd build:
         job.configure();
@@ -239,9 +237,6 @@ public class UITest extends AbstractJUnitTest {
 
         SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
 
-        //verify mainPanel not containing trendchart
-        MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
-        MainPanelTest.verifyTrendChartNotDisplayed(mainPanelShouldNotContainTrendchart);
 
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);

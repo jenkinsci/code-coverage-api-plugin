@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.utils;
+package io.jenkins.plugins.coverage;
 
 
 import org.openqa.selenium.By;
@@ -7,7 +7,11 @@ import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-public class TrendchartUtil  {
+/**
+ * The Coverage-TrendChart is displayed twice. Therefore, this util is used in
+ * {@link CoverageReport} and {@link MainPanel}.
+ */
+public class TrendChartUtil {
 
 
     /**
