@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThresholdTarget;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 
 /**
  * Coverage Publisher which can be added in the configuration of a FreeStyle Project.
