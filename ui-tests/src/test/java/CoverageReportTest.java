@@ -23,7 +23,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
     public static void verify(final CoverageReport report) {
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        CoverageReportTest.verifyFileCoverageTable(fileCoverageTable);
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTree(coverageTree);
@@ -36,12 +36,16 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies CoverageTable of CoverageReport of Job with two Builds.
+     * Verifies content of CoverageTable of CoverageReport of Job.
      *
      * @param fileCoverageTable
-     *         from second build.
+     *         of current build
      */
-    public static void verifyFileCoverageTable(final FileCoverageTable fileCoverageTable) {
+    public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable) {
+        String shouldPackage = "edu.hm.hafner.util";
+        String[] shouldFiles = {"Ensure.java", "FilteredLog.java", "Generated.java"};
+        String[] shouldLineCoverages = {"80.00%", "100.00%", "n/a"};
+        String[] shouldBranchCoverages = {"86.96%", "100.00%", "n/a"};
         List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
         List<String> headers = fileCoverageTable.getHeaders();
 
@@ -50,14 +54,26 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
                         Header.BRANCH_COVERAGE.getTitle());
 
-        for (FileCoverageTableRow row : rows) {
-            String packageName = row.getPackage();
-            String fileName = row.getFile();
-            String lineCoverage = row.getLineCoverage();
-            String branchCoverage = row.getBranchCoverage();
-            System.out.println("HI");
-            //  assertThat(row.getPackage).isEqualTo("Error");
+        for (int i = 0; i < 3; i++) {
+            FileCoverageTableRow row = rows.get(i);
+            assertThat(row.getPackage()).isEqualTo(shouldPackage);
+            assertThat(row.getFile()).isEqualTo(shouldFiles[i]);
+            assertThat(row.getLineCoverage()).isEqualTo(shouldLineCoverages[i]);
+            assertThat(row.getBranchCoverage()).isEqualTo(shouldBranchCoverages[i]);
         }
+    }
+
+    /**
+     * Verifies number of maximal entries in {@link FileCoverageTable}.
+     *
+     * @param fileCoverageTable
+     *         of build
+     * @param shouldValue
+     *         number of expected maximal entries
+     */
+    public static void verifyFileCoverageTableNumberOfMaxEntries(final FileCoverageTable fileCoverageTable,
+            final int shouldValue) {
+        assertThat(fileCoverageTable.getNumberOfMaxEntries()).isEqualTo(shouldValue);
 
     }
 
