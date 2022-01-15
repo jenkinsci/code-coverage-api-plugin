@@ -26,8 +26,8 @@ public class UITest extends AbstractJUnitTest {
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
     @SuppressFBWarnings("BC")
-    public static final float UNHEALTHY_THRESHOLD = 80;
-    public static final float UNSTABLE_THRESHOLD = 90;
+    private static final float UNHEALTHY_THRESHOLD = 80;
+    private static final float UNSTABLE_THRESHOLD = 90;
 
     /**
      * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
@@ -90,8 +90,8 @@ public class UITest extends AbstractJUnitTest {
 
         //TODO: hier vielleicht einfachen table-test (anzahl inhalte und 2-3 zeilen) und später nochmal in anderem build
         // in die table gucken ob mehrer seiten vorhanden sind?
-        //FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        //CoverageReportTest.verifyFileCoverageTable(fileCoverageTable);
+        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTree(coverageTree);
