@@ -23,7 +23,6 @@ public class CoverageReportTest extends AbstractJUnitTest {
     public static void verify(final CoverageReport report) {
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTree(coverageTree);
@@ -36,16 +35,22 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies content of CoverageTable of CoverageReport of Job.
+     * Verifies content of CoverageTable of CoverageReport of Job. Arrays must have the same length.
      *
      * @param fileCoverageTable
      *         of current build
+     * @param shouldPackage
+     *         string array of expected values in package column
+     * @param shouldFiles
+     *         string array of expected values in files column
+     * @param shouldLineCoverages
+     *         string array of expected values in line coverage column
+     * @param shouldBranchCoverages
+     *         string array of expected values in branch coverage column
      */
-    public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable) {
-        String shouldPackage = "edu.hm.hafner.util";
-        String[] shouldFiles = {"Ensure.java", "FilteredLog.java", "Generated.java"};
-        String[] shouldLineCoverages = {"80.00%", "100.00%", "n/a"};
-        String[] shouldBranchCoverages = {"86.96%", "100.00%", "n/a"};
+    public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable,
+            final String[] shouldPackage, final String[] shouldFiles, final String[] shouldLineCoverages,
+            final String[] shouldBranchCoverages) {
         List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
         List<String> headers = fileCoverageTable.getHeaders();
 
@@ -54,9 +59,9 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
                         Header.BRANCH_COVERAGE.getTitle());
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < shouldFiles.length; i++) {
             FileCoverageTableRow row = rows.get(i);
-            assertThat(row.getPackage()).isEqualTo(shouldPackage);
+            assertThat(row.getPackage()).isEqualTo(shouldPackage[i]);
             assertThat(row.getFile()).isEqualTo(shouldFiles[i]);
             assertThat(row.getLineCoverage()).isEqualTo(shouldLineCoverages[i]);
             assertThat(row.getBranchCoverage()).isEqualTo(shouldBranchCoverages[i]);
