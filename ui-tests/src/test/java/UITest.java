@@ -30,17 +30,27 @@ public class UITest extends AbstractJUnitTest {
     private static final float UNSTABLE_THRESHOLD = 90;
 
     /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
-     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
-     * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
+     * Test for verifying CoveragePlugin by checking its behaviour in different sitauations, using a project
+     * with two different jacoco files.
+     *
+     * Different scenarios are used in each build, see javadoc.
+     *
+     * Verifies correct build-status depending on its configuration like used thresholds, global thresholds, fail on no report, etc.
+     * Verifies CoverageSummary.
+     * Verifies MainPanel (CoverageTrend).
+     * Verifies CoverageReport (CoverageTrend, CoverageOverview, FileCoverageTable and CoverageTree and its pages).
      */
     @Test
     public void verifyingCoveragePlugin() {
         //create project with first build failing due to no reports
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
 
+
+        //FIXME: uberlegen wo welcher test sinnvoll ist, dann testen und in javadoc ueber build ergaenzen was getestet wird, ggf auch warum
+        
         /**
-         * 1st build: fail no reports found
+         * 1st build: Set setFailNoReports(true) and don't add any report, so that build should fail.
+         * Check if build fails.
          */
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -52,7 +62,9 @@ public class UITest extends AbstractJUnitTest {
         //SummaryTest.NAME(build);
 
         /**
-         * 2nd build: fail if no reports found but one report
+         * 2nd build: Set setFailNoReports(true) and add a report, so that build should succeed.
+         * Check if build is successful.
+         * Check SummaryTest if ....
          */
         job.configure();
         JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
@@ -64,16 +76,22 @@ public class UITest extends AbstractJUnitTest {
 
         //verify mainPanel not containing trendchart
         /**
-         * 3rd build:
+         * 3rd build: Replace report-file in build configuration, set setFailBuildIfCoverageDecreasedInChangeRequest(true),
+         * so that build should fail.
+         * Check if build failed.
+         * Check if ...
          */
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         job.save();
         Build thirdBuildFailed = JobCreatorUtils.buildWithErrors(job);
+        //gibt die summary hier was her?
 
         /**
-         * 4th build:
+         * 4th build: Set setFailBuildIfCoverageDecreasedInChangeRequest(false), so that build should now succeed.
+         * Check if build is successful.
+         * Check if...
          */
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
@@ -83,7 +101,9 @@ public class UITest extends AbstractJUnitTest {
         //SummaryTest.testSummaryOnSecondSuccessfulBuild(fourthBuildSuccessful);
 
         /**
-         * 5th build:
+         * 5th build: Add threshold so that build should be unstable.
+         * Check CoverageReport (FileCoverageTable, CoverageTree, CoverageOverview, TrendChart)
+         * Check MainPanel
          */
         job.configure();
         AdapterThreshold threshold = jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.FILE,
@@ -108,8 +128,11 @@ public class UITest extends AbstractJUnitTest {
         String trendChart = report.getCoverageTrend();
         TrendChartTest.verifyTrendChart(trendChart);
 
+        //TODO: check MainPanel
+
         /**
-         * 6th build:
+         * 6th build: change threshold, setFailUnhealthy(true) so that build should fail.
+         * Check if build failed.
          */
         job.configure();
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
@@ -121,7 +144,8 @@ public class UITest extends AbstractJUnitTest {
         Build sixthBuildFailing = JobCreatorUtils.buildWithErrors(job);
 
         /**
-         * 7th build:
+         * 7th build: Remove thresholds. Set GlobalThresholds, but so that build should still succeed.
+         * Check if build is successful.
          */
         job.configure();
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
@@ -132,7 +156,9 @@ public class UITest extends AbstractJUnitTest {
         Build seventhBuildSuccessfully = JobCreatorUtils.buildSuccessfully(job);
 
         /**
-         * 8th build:
+         * 8th build: Change GlobalThresholds, setFailUnhealthy(false), should still succeed.
+         * Check if build is successful.
+         * //TODO: ggf. rauswerfen, macht der sinn?
          */
         job.configure();
 
@@ -145,7 +171,8 @@ public class UITest extends AbstractJUnitTest {
         Build eighthBuildSuccessfully = JobCreatorUtils.buildSuccessfully(job);
 
         /**
-         * 9th build: 
+         * 9th build  (preperation for 10th build): Change GlobalThresholds, set..
+         * //TODO: build configuration ueberarbeiten (sinnvolle confi?)
          */
         job.configure();
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
@@ -160,6 +187,7 @@ public class UITest extends AbstractJUnitTest {
         /**
          * 10th build: Set globalThresholds and failUnhealthy(true) so that build should fail.
          * Check if build failed.
+         * //TODO: build configuration ueberarbeiten (sinnvolle confi?)
          */
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
