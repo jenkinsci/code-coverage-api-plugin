@@ -1,9 +1,9 @@
 package io.jenkins.plugins.coverage;
 
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -11,29 +11,28 @@ import org.openqa.selenium.WebElement;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-
 /**
  * Area that represents the file coverage table in a {@link CoverageReport} page.
  */
 @SuppressFBWarnings("EI")
-public class FileCoverageTable  {
+public class FileCoverageTable {
     private final String ID_OF_FILE_COVERAGE_TABLE = "coverage-details";
     private final CoverageReport coverageReport;
     private final List<FileCoverageTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
     private final WebElement tableElement;
+    private final WebElement tableInfo;
 
+    FileCoverageTable(final CoverageReport coverageReport) {
+        this.coverageReport = coverageReport;
 
-
-        FileCoverageTable(CoverageReport coverageReport) {
-            this.coverageReport = coverageReport;
-
-
-        tableElement = coverageReport.waitFor(By.xpath("//table[@id='" + ID_OF_FILE_COVERAGE_TABLE + "' and @isLoaded='true']"));
+        tableElement = coverageReport.waitFor(
+                By.xpath("//table[@id='" + ID_OF_FILE_COVERAGE_TABLE + "' and @isLoaded='true']"));
         headers = tableElement.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
+        tableInfo = coverageReport.find(By.id("coverage-details_info"));
 
         updateTableRows();
     }
@@ -57,7 +56,7 @@ public class FileCoverageTable  {
      *
      * @return the table row
      */
-    protected FileCoverageTableRow createRow(WebElement row) {
+    protected FileCoverageTableRow createRow(final WebElement row) {
         return new FileCoverageTableRow(row, this);
     }
 
@@ -78,8 +77,6 @@ public class FileCoverageTable  {
     public List<String> getColumnHeaders() {
         return null; //getHeaders().stream().map(Header::fromTitle).collect(Collectors.toList());
     }
-
-
 
     /**
      * Returns the amount of the headers for this table.
@@ -117,7 +114,6 @@ public class FileCoverageTable  {
         return headers;
     }
 
-
     /**
      * Performs a click on the page button to open the page of the table.
      *
@@ -125,12 +121,30 @@ public class FileCoverageTable  {
      *         the number representing the page to open
      */
     public void openTablePage(final int pageNumber) {
-        WebElement webElement = coverageReport.find(By.xpath("//a[@class='page-link' and @data-dt-idx='" + (pageNumber - 1) + "']"));
+        WebElement webElement = coverageReport.find(
+                By.xpath("//a[@class='page-link' and @data-dt-idx='" + (pageNumber - 1) + "']"));
         webElement.click();
 
-        coverageReport.waitFor(By.xpath("//a[@class='page-link' and @data-dt-idx='" + (pageNumber - 1) + "']/parent::li[contains(@class, 'active')]"));
+        coverageReport.waitFor(By.xpath("//a[@class='page-link' and @data-dt-idx='" + (pageNumber - 1)
+                + "']/parent::li[contains(@class, 'active')]"));
 
         updateTableRows();
+    }
+
+    /**
+     * Get number of maximal entries.
+     *
+     * @return value of maximal entries
+     */
+    public int getNumberOfMaxEntries() {
+        String textOfTableInfo = this.tableInfo.getText();
+        Pattern p = Pattern.compile("\\d+");
+        Matcher m = p.matcher(textOfTableInfo);
+        m.find();
+        m.find();
+        m.find();
+        return Integer.parseInt(m.group());
+
     }
 
     /**
@@ -144,12 +158,12 @@ public class FileCoverageTable  {
 
         private final String title;
 
-        public String getTitle() {
-            return title;
-        }
-
         Header(final String property) {
             title = property;
+        }
+
+        public String getTitle() {
+            return title;
         }
     }
 

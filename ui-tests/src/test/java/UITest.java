@@ -69,7 +69,6 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build thirdBuildFailed = JobCreatorUtils.buildWithErrors(job);
 
-
         //4th build:
         job.configure();
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
@@ -79,19 +78,18 @@ public class UITest extends AbstractJUnitTest {
         //SummaryTest.testSummaryOnSecondSuccessfulBuild(fourthBuildSuccessful);
 
         job.configure();
-        AdapterThreshold threshold =  jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.FILE, UNHEALTHY_THRESHOLD,
+        AdapterThreshold threshold = jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.FILE,
+                UNHEALTHY_THRESHOLD,
                 UNSTABLE_THRESHOLD, false);
         job.save();
         Build fifthBuildUnstable = JobCreatorUtils.buildUnstable(job);
 
-
         CoverageReport report = new CoverageReport(fifthBuildUnstable);
         report.open();
 
-        //TODO: hier vielleicht einfachen table-test (anzahl inhalte und 2-3 zeilen) und später nochmal in anderem build
-        // in die table gucken ob mehrer seiten vorhanden sind?
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
         CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable);
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(fileCoverageTable, 10);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTree(coverageTree);
@@ -101,7 +99,6 @@ public class UITest extends AbstractJUnitTest {
 
         String trendChart = report.getCoverageTrend();
         TrendChartTest.verifyTrendChart(trendChart);
-
 
         job.configure();
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
@@ -115,9 +112,10 @@ public class UITest extends AbstractJUnitTest {
         job.configure();
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
         threshold.delete();
-        GlobalThreshold globalThreshold = coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.FILE, 59, 59, false);
+        GlobalThreshold globalThreshold = coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.FILE,
+                59, 59, false);
         job.save();
-        Build seventhBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+        Build seventhBuildSuccessfully = JobCreatorUtils.buildSuccessfully(job);
 
         job.configure();
 
@@ -139,7 +137,6 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build ninthBuildFailing = JobCreatorUtils.buildWithErrors(job);
 
-
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnhealthy(true);
@@ -148,7 +145,6 @@ public class UITest extends AbstractJUnitTest {
         globalThreshold.setUnstableThreshold(5);
         job.save();
         Build tenthBuildFailing = JobCreatorUtils.buildWithErrors(job);
-
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
@@ -167,7 +163,6 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build twelfthBuildFailing = JobCreatorUtils.buildWithErrors(job);
 
-
         /**
          * 5) normale thresholds ohne fail setter
          * 6) normae thresholds mit fail on ...
@@ -177,8 +172,6 @@ public class UITest extends AbstractJUnitTest {
          * 10/11/12) oder nur 10) set storing level
          * 13) publishing checks :(
          */
-
-
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
@@ -190,21 +183,17 @@ public class UITest extends AbstractJUnitTest {
         job.save();
         Build thirteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
 
-
-
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_LAST_BUIlD);
         job.save();
         Build fourteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
 
-
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_STORE);
         job.save();
         Build fifteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
-
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
@@ -213,8 +202,6 @@ public class UITest extends AbstractJUnitTest {
         Build sixteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
 
     }
-
-
 
     @Test
     @Deprecated
@@ -274,8 +261,6 @@ public class UITest extends AbstractJUnitTest {
 
         SummaryTest.testSummaryOnFailedBuild(failedBuild, UNHEALTHY_THRESHOLD, UNSTABLE_THRESHOLD);
     }
-
-
 
 }
 

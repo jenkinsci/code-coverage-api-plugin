@@ -39,7 +39,7 @@ public class CoverageReportTest extends AbstractJUnitTest {
      * Verifies content of CoverageTable of CoverageReport of Job.
      *
      * @param fileCoverageTable
-     *         of current build.
+     *         of current build
      */
     public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable) {
         String shouldPackage = "edu.hm.hafner.util";
@@ -54,13 +54,27 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
                         Header.BRANCH_COVERAGE.getTitle());
 
-        for (int i = 0; i < rows.size(); i++) {
+        for (int i = 0; i < 3; i++) {
             FileCoverageTableRow row = rows.get(i);
             assertThat(row.getPackage()).isEqualTo(shouldPackage);
             assertThat(row.getFile()).isEqualTo(shouldFiles[i]);
             assertThat(row.getLineCoverage()).isEqualTo(shouldLineCoverages[i]);
             assertThat(row.getBranchCoverage()).isEqualTo(shouldBranchCoverages[i]);
         }
+    }
+
+    /**
+     * Verifies number of maximal entries in {@link FileCoverageTable}.
+     *
+     * @param fileCoverageTable
+     *         of build
+     * @param shouldValue
+     *         number of expected maximal entries
+     */
+    public static void verifyFileCoverageTableNumberOfMaxEntries(final FileCoverageTable fileCoverageTable,
+            final int shouldValue) {
+        assertThat(fileCoverageTable.getNumberOfMaxEntries()).isEqualTo(shouldValue);
+
     }
 
     /**
