@@ -25,7 +25,6 @@ public class UITest extends AbstractJUnitTest {
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
     @SuppressFBWarnings("BC")
-    private static final String FILE_NAME = "jacoco-analysis-model.xml";
     public static final float UNHEALTHY_THRESHOLD = 80;
     public static final float UNSTABLE_THRESHOLD = 90;
 
@@ -34,76 +33,6 @@ public class UITest extends AbstractJUnitTest {
      * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
      * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
      */
-    @Test
-    public void verifyingCoveragePlugin() {
-        //create project with first build failing due to no reports
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setFailNoReports(true);
-        job.save();
-        Build buildWithErrors = JobCreatorUtils.buildWithErrors(job);
-
-        //TODO: tests here for fail on no reports (CoverageSummary?)
-        //SummaryTest.NAME(build);
-
-        //create second and third build (successfully), each one containing another jacoco file
-        job.configure();
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build firstSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
-
-        SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
-
-        //verify mainPanel not containing trendchart
-        MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
-        MainPanelTest.verifyTrendChartNotDisplayed(mainPanelShouldNotContainTrendchart);
-
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        Build secondSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
-
-        SummaryTest.testSummaryOnSecondSuccessfulBuild(secondSuccessfulBuild);
-
-        //verify mainPanel's trendchart
-        MainPanel mainPanelShouldContainTrendchart = new MainPanel(job);
-        MainPanelTest.verifyTrendChartWithTwoReports(mainPanelShouldContainTrendchart);
-
-        //verify coverageReport (three charts, one table)
-        Build buildContainingTwoCoverageReports = job.getLastBuild();
-        CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
-        CoverageReportTest.verify(report);
-
-        //create fourth build failing due to tresholds not achieved
-        //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
-        job.configure();
-        jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, UNHEALTHY_THRESHOLD,
-                UNSTABLE_THRESHOLD, false);
-        coveragePublisher.setApplyThresholdRecursively(true);
-        coveragePublisher.setFailUnhealthy(true);
-        coveragePublisher.setFailUnstable(true);
-        coveragePublisher.setSkipPublishingChecks(true);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        job.save();
-        Build failedBuild = JobCreatorUtils.buildWithErrors(job);
-
-        SummaryTest.testSummaryOnFailedBuild(failedBuild, UNHEALTHY_THRESHOLD, UNSTABLE_THRESHOLD);
-    }
-
-
-
-
-
-
-
-
-        /**
-         * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
-         * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
-         * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
-         */
     @Test
     public void newVerifyMethod() {
         //create project with first build failing due to no reports
@@ -220,6 +149,18 @@ public class UITest extends AbstractJUnitTest {
         Build twelfthBuildFailing = JobCreatorUtils.buildWithErrors(job);
 
 
+        /**
+         * 5) normale thresholds ohne fail setter
+         * 6) normae thresholds mit fail on ...
+         * 7) global thresholds ohne setter
+         * 8) globale mit set fail unhealthy
+         * 9) globale mit set fail unstable
+         * 10/11/12) oder nur 10) set storing level
+         * 13) publishing checks :(
+         */
+
+
+        /*
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
@@ -251,30 +192,55 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.setSkipPublishingChecks(true);
         job.save();
         Build sixteenth = JobCreatorUtils.buildSuccessfully(job);
+        */
+    }
 
 
-        //test trendchart
-        //test coverage report trendchart
-        //test coverage report coverage overview
-        //test coverage report package overview
+
+    @Test
+    @Deprecated
+    public void oldVerifyingCoveragePlugin() {
+        //create project with first build failing due to no reports
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        coveragePublisher.setFailNoReports(true);
+        job.save();
+        Build buildWithErrors = JobCreatorUtils.buildWithErrors(job);
+
+        //TODO: tests here for fail on no reports (CoverageSummary?)
+        //SummaryTest.NAME(build);
+
+        //create second and third build (successfully), each one containing another jacoco file
+        job.configure();
+        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build firstSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
+
+        SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
+
+        //verify mainPanel not containing trendchart
+        MainPanel mainPanelShouldNotContainTrendchart = new MainPanel(job);
+        MainPanelTest.verifyTrendChartNotDisplayed(mainPanelShouldNotContainTrendchart);
+
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        job.save();
+        Build secondSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
+
+        SummaryTest.testSummaryOnSecondSuccessfulBuild(secondSuccessfulBuild);
+
+        //verify mainPanel's trendchart
+        MainPanel mainPanelShouldContainTrendchart = new MainPanel(job);
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanelShouldContainTrendchart);
 
         //verify coverageReport (three charts, one table)
-        //Build buildContainingTwoCoverageReports = job.getLastBuild();
-        //CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
-        //CoverageReportTest.verify(report);
+        Build buildContainingTwoCoverageReports = job.getLastBuild();
+        CoverageReport report = new CoverageReport(buildContainingTwoCoverageReports);
+        CoverageReportTest.verify(report);
 
         //create fourth build failing due to tresholds not achieved
-
-        /**
-         * 5) normale thresholds ohne fail setter
-         * 6) normae thresholds mit fail on ...
-         * 7) global thresholds ohne setter
-         * 8) globale mit set fail unhealthy
-         * 9) globale mit set fail unstable
-         * 10/11/12) oder nur 10) set storing level
-         * 13) publishing checks :(
-         */
-
         //TODO: überarbeiten und splitten in 4/5/6/7ten build (failUnhealty, failUnstable, skipPublishingChecks, failDecreased, appyrecursively?
         job.configure();
         jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION, UNHEALTHY_THRESHOLD,
@@ -291,24 +257,6 @@ public class UITest extends AbstractJUnitTest {
     }
 
 
-    /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
-     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build. Second build uses
-     * {@link UITest#JACOCO_ANALYSIS_MODEL_XML}, Third build uses {@link UITest#JACOCO_CODINGSTYLE_XML}.
-     */
-    @Test
-    public void test() {
-        //create project with first build failing due to no reports
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
-
-        job.save();
-        JobCreatorUtils.buildWithErrors(job);
-
-        //SummaryTest.verify()
-    }
 
 }
 
