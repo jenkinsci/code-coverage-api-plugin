@@ -179,19 +179,21 @@ public class UITest extends AbstractJUnitTest {
          */
 
 
-        /*
-        job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
-        coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
-        job.save();
-        Build thirteenthBuildFailing = JobCreatorUtils.buildUnstable(job);
-
-
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnstable(false);
+        globalThreshold.delete();
 
+        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
+        job.save();
+        Build thirteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+
+
+
+        job.configure();
+        coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_LAST_BUIlD);
         job.save();
         Build fourteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
@@ -199,7 +201,6 @@ public class UITest extends AbstractJUnitTest {
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
-        coveragePublisher.setFailUnstable(false);
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_STORE);
         job.save();
         Build fifteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
@@ -207,11 +208,10 @@ public class UITest extends AbstractJUnitTest {
 
         job.configure();
         coveragePublisher.ensureAdvancedOptionsIsActivated();
-        coveragePublisher.setFailUnstable(false);
         coveragePublisher.setSkipPublishingChecks(true);
         job.save();
-        Build sixteenth = JobCreatorUtils.buildSuccessfully(job);
-        */
+        Build sixteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+
     }
 
 

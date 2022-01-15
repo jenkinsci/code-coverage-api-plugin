@@ -237,7 +237,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     public enum SourceFileResolver {
 
         NEVER_STORE("NEVER_STORE"),
-        STORE_LAST_BUIlD("STORE_LAST_BUIlD"),
+        STORE_LAST_BUIlD("STORE_LAST_BUILD"),
         STORE_ALL_BUILD("STORE_ALL_BUILD"),
         ;
 
