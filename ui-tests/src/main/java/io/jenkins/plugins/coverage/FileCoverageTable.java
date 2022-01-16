@@ -27,7 +27,7 @@ public class FileCoverageTable {
         this.coverageReport = coverageReport;
 
         tableElement = coverageReport.waitFor(
-                By.xpath("//table[@id='" + ID_OF_FILE_COVERAGE_TABLE + "' and @isLoaded='true']"));
+                By.xpath("//table[@id='" + ID_OF_FILE_COVERAGE_TABLE + "' and @isloaded='true']"));
         headers = tableElement.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
@@ -141,7 +141,7 @@ public class FileCoverageTable {
         Pattern p = Pattern.compile("\\d+");
         Matcher m = p.matcher(textOfTableInfo);
         m.find();
-        m.find();
+        m.find(); //FIXME: warum 3 mal?
         m.find();
         return Integer.parseInt(m.group());
 

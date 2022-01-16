@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * UI Test for Summary of build.
  */
-public class SummaryTest extends AbstractJUnitTest {
+public class SummaryTest extends UiTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";

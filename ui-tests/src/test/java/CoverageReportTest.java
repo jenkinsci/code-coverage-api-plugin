@@ -1,7 +1,12 @@
 import java.util.List;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.junit.Test;
 
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+
+import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.FileCoverageTable.Header;
@@ -10,19 +15,37 @@ import io.jenkins.plugins.coverage.FileCoverageTableRow;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
-public class CoverageReportTest extends AbstractJUnitTest {
-    //TODO: use or remove
-    private static final String COLOR_GREEN = "#c4e4a9";
-    private static final String COLOR_ORANGE = "#fbdea6";
-    private static final String COLOR_RED = "#ef9a9a";
+public class CoverageReportTest extends UiTest {
 
-    /**
-     * Test for checking the CoverageReport by verifying its CoverageTrend, CoverageOverview, FileCoverageTable and
-     * CoverageTrend. Uses a project with two different jacoco files, each one used in another build.
-     */
-    public static void verify(final CoverageReport report) {
+    @Test
+    public void verifyCoverageReportNotAvailableForJobWithNoReports(){
+            FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+            job.save();
+            Build build = buildSuccessfully(job);
+            CoverageReport report = new CoverageReport(build);
+            report.open();
+            assertThat(driver.getCurrentUrl().toString()).isNotEqualTo(report.url.toString());
+    }
+
+    @Test
+    public void verifyCoverageReportTestAfterSomeBuildsWithReports() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        buildSuccessfully(job);
+
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        //TODO: insert verifying some table items here
+
+        CoverageReport report = new CoverageReport(secondBuild);
         report.open();
-        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTree(coverageTree);
@@ -31,7 +54,57 @@ public class CoverageReportTest extends AbstractJUnitTest {
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
-        TrendChartTest.verifyTrendChart(trendChart);
+        TrendChartUtil.verifyTrendChart(trendChart, 1, 2);
+
+    }
+
+    @Test
+    public void verifiesCoverageReportAfterOneBuildWithReport() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        CoverageReport report = new CoverageReport(secondBuild);
+        report.open();
+
+
+        FileCoverageTable coverageTable = report.getCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
+
+        String trendChart = report.getCoverageTrend();
+        TrendChartUtil.verifyTrendChartIsEmpty(trendChart);
+
+        String coverageTree = report.getCoverageTree();
+        CoverageReportTest.verifyCoverageTreeNotEmpty(coverageTree);
+
+        String coverageOverview = report.getCoverageOverview();
+        CoverageReportTest.verifyCoverageOverviewNotEmpty(coverageOverview);
+
+
+    }
+
+
+    @Test
+    public void verifiesCoverageTableWithMultiplePages(){
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        CoverageReport report = new CoverageReport(secondBuild);
+        report.open();
+
+        FileCoverageTable coverageTable = report.getCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
+        coverageTable.openTablePage(3);
+        //TODO
     }
 
     /**
@@ -115,6 +188,31 @@ public class CoverageReportTest extends AbstractJUnitTest {
     }
 
     /**
+     * Verifies CoverageOverview of CoverageReport of Job after one build.
+     *
+     * @param coverageOverview from first build.
+     *
+     */
+    public static void verifyCoverageOverviewNotEmpty(final String coverageOverview) {
+        assertThatJson(coverageOverview)
+                .inPath("$.yAxis[0].data[*]")
+                .isArray()
+                .hasSize(7)
+                .contains("Branch")
+                .contains("Instruction")
+                .contains("Line")
+                .contains("Method")
+                .contains("Class")
+                .contains("File")
+                .contains("Package");
+
+        assertThatJson(coverageOverview).inPath("series[0].data").isArray().hasSize(7);
+
+        assertThatJson(coverageOverview).node("series[0].name").isEqualTo("Covered");
+        assertThatJson(coverageOverview).node("series[1].name").isEqualTo("Missed");
+    }
+
+    /**
      * Verifies CoverageTree of CoverageReport of Job with two Builds.
      *
      * @param coverageTree
@@ -145,6 +243,19 @@ public class CoverageReportTest extends AbstractJUnitTest {
                 .contains("[53,51]")
                 .contains("[0,0]");
     }
+
+    /**
+     * Verifies CoverageTree of CoverageReport of Job with two Builds.
+     *
+     * @param coverageTree
+     *         from second build.
+     */
+    public static void verifyCoverageTreeNotEmpty(final String coverageTree) {
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2);
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2);
+    }
+
+
 
 }
 

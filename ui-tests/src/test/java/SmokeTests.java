@@ -1,14 +1,13 @@
+import java.util.List;
+
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.*;
@@ -16,15 +15,17 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.*;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
+import io.jenkins.plugins.coverage.FileCoverageTable.Header;
+import io.jenkins.plugins.coverage.FileCoverageTableRow;
 import io.jenkins.plugins.coverage.MainPanel;
+
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Should in the end contain all tests.
  */
 public class SmokeTests extends UiTest {
-    private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
-    private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
-    private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
 
     /**
@@ -150,11 +151,10 @@ public class SmokeTests extends UiTest {
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
-        TrendChartTest.verifyTrendChart(trendChart);
+        TrendChartUtil.verifyTrendChart(trendChart, 2, 5);
 
         MainPanel mainPanel = new MainPanel(job);
-        //String mainPanelCoverageTrendChart = mainPanel.getCoverageTrendChart();
-        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel);
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel, 2,5);
 
 
         /**
@@ -302,6 +302,9 @@ public class SmokeTests extends UiTest {
          */
 
     }
+
+
+
 
 
 }

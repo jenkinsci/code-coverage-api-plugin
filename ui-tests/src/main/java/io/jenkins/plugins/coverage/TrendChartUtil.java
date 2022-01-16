@@ -22,6 +22,10 @@ public class TrendChartUtil {
      */
     public static String getChartsDataById(final PageObject pageObject, final String elementId) {
         pageObject.waitFor().until(() -> isChartDisplayed(pageObject, elementId));
+        pageObject.waitFor().until(() -> pageObject.executeScript(String.format(
+                "delete(window.Array.prototype.toJSON) %n"
+                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\")).getOption())",
+                elementId))!=null);
         Object result = pageObject.executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\")).getOption())",

@@ -5,7 +5,13 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
+/**
+ * Base class for all UI tests. Provides several helper methods that can be used by all tests.
+ */
 class UiTest extends AbstractJUnitTest {
+    static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
+    static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
+    static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
     /**
      * Build job and check if it is successfully.
