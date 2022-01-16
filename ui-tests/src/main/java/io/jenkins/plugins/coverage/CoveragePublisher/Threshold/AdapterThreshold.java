@@ -26,7 +26,6 @@ public class AdapterThreshold extends AbstractThreshold {
      *         of threshold
      */
     public void setThresholdTarget(final AdapterThresholdTarget adapterThresholdTarget) {
-        //checkControlsAreAvailable();
         this.thresholdTarget.select(adapterThresholdTarget.getValue());
     }
 
