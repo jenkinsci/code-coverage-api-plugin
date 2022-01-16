@@ -1,9 +1,14 @@
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
-import org.jenkinsci.test.acceptance.po.Build;
+import org.junit.Test;
 
-import io.jenkins.plugins.coverage.CoverageReport;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+
+import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoverageSummary;
 
 import static org.assertj.core.api.Assertions.*;
@@ -63,9 +68,9 @@ public class SummaryTest extends UiTest {
         assertThat(coverage).isEqualTo(expectedCoverage);
         assertThat(changes).isEqualTo(expectedChanges);
 
-        CoverageReport cr = cs.openReferenceBuild();
+        String referenceBuild = cs.getReferenceBuild();
 
-        assertThat(cr.getCurrentUrl()).contains("/" + (build.getNumber() - 1) + "/");
+        assertThat(referenceBuild).contains("/" + (build.getNumber() - 1) + "/");
     }
 
     /**
@@ -102,5 +107,52 @@ public class SummaryTest extends UiTest {
         String failMsg = cs.getFailMsg();
         assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
                 .contains("unhealthyThreshold=" + unhealthyThreshold);
+    }
+
+    /**
+     * Tests if coverage is correct if build is successful.
+     */
+    @Test
+    public void testSuccessfulBuild() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build build = buildSuccessfully(job);
+
+        HashMap<String, Double> expectedCoverage = new HashMap<>();
+        expectedCoverage.put("Line", 95.52);
+        expectedCoverage.put("Branch", 88.59);
+
+        verifySummaryOnSuccessfulBuild(build, expectedCoverage);
+    }
+
+    /**
+     * Test if coverage reference is correct if both builds are successful.
+     */
+    @Test
+    public void testReferenceBuild() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        buildSuccessfully(job);
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        job.save();
+        Build build = buildSuccessfully(job);
+
+        HashMap<String, Double> expectedCoverage = new HashMap<>();
+        expectedCoverage.put("Line", 91.02);
+        expectedCoverage.put("Branch", 93.97);
+        List<Double> expectedReferenceCoverage = new LinkedList<>();
+        expectedReferenceCoverage.add(-0.045);
+        expectedReferenceCoverage.add(0.054);
+
+        verifySummaryWithReferenceBuild(build, expectedCoverage, expectedReferenceCoverage);
     }
 }
