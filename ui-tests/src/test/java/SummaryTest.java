@@ -74,6 +74,7 @@ public class SummaryTest extends UiTest {
      * @param build
      *         Build of Project
      * @param expectedCoverage
+     *         expected coverage of build
      */
     public static void verifySummaryOnFailedBuild(final Build build, final HashMap<String, Double> expectedCoverage) {
         build.open();
@@ -85,7 +86,7 @@ public class SummaryTest extends UiTest {
     }
 
     /**
-     * Verifies fail message on summary
+     * Verifies fail message on summary.
      *
      * @param build
      *         current build of project
