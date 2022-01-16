@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.List;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 
 import io.jenkins.plugins.coverage.CoverageReport;
