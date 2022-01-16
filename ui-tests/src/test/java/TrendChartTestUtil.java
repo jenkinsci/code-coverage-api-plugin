@@ -1,11 +1,18 @@
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 
+import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.MainPanel;
+
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
+/**
+ * Due to Coverage TrendChart is displayed twice, in ({@link CoverageReport} and {@link MainPanel},
+ * this helper class provides static verifying methods that can be used in all tests.
+ */
 public class TrendChartTestUtil {
 
     /**
-     * Check if the generated TrendChart has the correct number of builds in its axis and the right coverage values for
+     * Check if a generated TrendChart has the correct number of builds in its axis and the right coverage values for
      * its builds.
      */
     public static void verifyTrendChart(final String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber ) {
@@ -35,10 +42,10 @@ public class TrendChartTestUtil {
 
 
     /**
-     * Check if the generated TrendChart has the correct number of builds in its axis and the right coverage values for
+     * Check if a generated TrendChart has the correct number of builds in its axis and the right coverage values for
      * its builds.
      */
-    public static void verifyTrendChartIsEmpty(final String trendChart) {
+    public static void verifyTrendChartContainsOnlyOneRecord(final String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
