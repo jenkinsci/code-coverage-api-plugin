@@ -5,34 +5,37 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.FileCoverageTable;
-import io.jenkins.plugins.coverage.MainPanel;
 
+//TODO: ueberdenken ob tests so sinn machen & ausreichen
+
+/**
+ * Tests if set options in CoveragePublisher are used and lead to excepted results.
+ */
 public class CoveragePublisherTest extends UiTest {
 
     @Test
-    public void verifyApplyThresholdRecursively() {
+    public void verifiesApplyThresholdRecursively() {
         //TODO
     }
 
+    /**
+     * Verifies that job with no report fails when setFailNoReports(true).
+     */
     @Test
-    public void verifyFailOnNoReport() {
+    public void verifiesFailOnNoReport() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setFailNoReports(true);
         job.save();
-        Build buildWithErrors = buildWithErrors(job);
+        buildWithErrors(job);
     }
 
+    /**
+     * Verifies that job with decreased coverage fails when setFailBuildIfCoverageDecreasedInChangeRequest(true).
+     */
     @Test
-    public void verifyFailOnDecreasedCoverage() {
+    public void verifiesFailOnDecreasedCoverage() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -47,8 +50,9 @@ public class CoveragePublisherTest extends UiTest {
         buildWithErrors(job);
     }
 
+
     @Test
-    public void verifySkipPublishingChecks() {
+    public void verifiesSkipPublishingChecks() {
         //TODO
     }
 
