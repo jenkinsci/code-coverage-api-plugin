@@ -1,10 +1,14 @@
 import org.junit.Test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.*;
@@ -39,7 +43,6 @@ public class SmokeTests extends UiTest {
         //create project with first build failing due to no reports
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
 
-
         //FIXME: uberlegen wo welcher test sinnvoll ist, dann testen und in javadoc ueber build ergaenzen was getestet wird, ggf auch warum
 
         /**
@@ -67,6 +70,29 @@ public class SmokeTests extends UiTest {
         Build firstSuccessfulBuild = buildSuccessfully(job);
 
         SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
+
+        CoverageReport reportOfFirstSuccessfulBuild = new CoverageReport(firstSuccessfulBuild);
+        reportOfFirstSuccessfulBuild.open();
+
+        FileCoverageTable fileCoverageTableOnFirstSuccessfulBuild = reportOfFirstSuccessfulBuild.openFileCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(fileCoverageTableOnFirstSuccessfulBuild, 307);
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTableOnFirstSuccessfulBuild,
+                new String[] {"edu.hm.hafner.analysis.parser.dry", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis.parser.violations"},
+                new String[] {"AbstractDryParser.java", "AbstractPackageDetector.java", "AbstractViolationAdapter.java"},
+                new String[] {"85.71%", "88.24%", "91.67%"},
+                new String[] {"83.33%", "50.00%", "100.00%"});
+        fileCoverageTableOnFirstSuccessfulBuild.openTablePage(2);
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTableOnFirstSuccessfulBuild,
+                new String[] {"edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.parser"},
+                new String[] {"AnsibleLintDescriptor.java", "AnsibleLintParser.java", "AntJavacParser.java"},
+                new String[] {"100.00%", "100.00%", "100.00%"},
+                new String[] {"n/a", "n/a", "100.00%"});
+        fileCoverageTableOnFirstSuccessfulBuild.openTablePage(3);
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTableOnFirstSuccessfulBuild,
+                new String[] {"edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser"},
+                new String[] {"BuckminsterParser.java", "CadenceIncisiveDescriptor.java", "CadenceIncisiveParser.java"},
+                new String[] {"100.00%", "100.00%", "86.49%"},
+                new String[] {"100.00%", "n/a", "66.67%"});
 
         //verify mainPanel not containing trendchart
         /**
@@ -110,7 +136,11 @@ public class SmokeTests extends UiTest {
         report.open();
 
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable);
+        CoverageReportTest.verifyFileCoverageTableContent(fileCoverageTable,
+                new String[] {"edu.hm.hafner.util", "edu.hm.hafner.util", "edu.hm.hafner.util"},
+                new String[] {"Ensure.java", "FilteredLog.java", "Generated.java"},
+                new String[] {"80.00%", "100.00%", "n/a"},
+                new String[] {"86.96%", "100.00%", "n/a"});
         CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(fileCoverageTable, 10);
 
         String coverageTree = report.getCoverageTree();
@@ -272,7 +302,6 @@ public class SmokeTests extends UiTest {
          */
 
     }
-
 
 
 }
