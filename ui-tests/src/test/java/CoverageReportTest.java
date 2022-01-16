@@ -16,122 +16,16 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Acceptance tests for CoverageReport, containing three charts and one table ({@link FileCoverageTable}).
- * Contains static test-methods which can also be used other classes, especially used {@link SmokeTests}.
+ * Acceptance tests for CoverageReport, containing three charts and one table ({@link FileCoverageTable}). Contains
+ * static test-methods which can also be used other classes, especially used {@link SmokeTests}.
  */
 public class CoverageReportTest extends UiTest {
 
     /**
-     * Test for CoverageReport of job with no reports does not exist.
-     * Verifies CoverageReport can't be opened.
-     */
-    @Test
-    public void verifyCoverageReportNotAvailableForJobWithNoReports(){
-            FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-            job.save();
-            Build build = buildSuccessfully(job);
-            CoverageReport report = new CoverageReport(build);
-            report.open();
-            assertThat(driver.getCurrentUrl().toString()).isNotEqualTo(report.url.toString());
-    }
-
-    /**
-     * Test for CoverageReport after some builds with reports.
-     * Verifies some data of charts (TrendChart, CoverageTree and CoverageOverview) as well as
-     * {@link FileCoverageTable}.
-     */
-    @Test
-    public void verifyCoverageReportTestAfterSomeBuildsWithReports() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        buildSuccessfully(job);
-
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        job.save();
-        Build secondBuild = buildSuccessfully(job);
-
-        //TODO: insert verifying some table items here
-
-        CoverageReport report = new CoverageReport(secondBuild);
-        report.open();
-
-        String coverageTree = report.getCoverageTree();
-        CoverageReportTest.verifyCoverageTree(coverageTree);
-
-        String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverview(coverageOverview);
-
-        String trendChart = report.getCoverageTrend();
-        TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
-
-    }
-
-    /**
-     * Test for CoverageReport after first build with a report.
-     * Verifies charts (TrendChart, CoverageTree and CoverageOverview) as well as
-     * {@link FileCoverageTable} are being displayed and verifies some of its data.
+     * Verifies content of CoverageTable of CoverageReport of Job.
      *
-     */
-    @Test
-    public void verifiesCoverageReportAfterOneBuildWithReport() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build secondBuild = buildSuccessfully(job);
-
-        CoverageReport report = new CoverageReport(secondBuild);
-        report.open();
-
-        FileCoverageTable coverageTable = report.getCoverageTable();
-        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
-
-        String trendChart = report.getCoverageTrend();
-        TrendChartTestUtil.verifyTrendChartContainsOnlyOneRecord(trendChart);
-
-        String coverageTree = report.getCoverageTree();
-        CoverageReportTest.verifyCoverageTreeNotEmpty(coverageTree);
-
-        String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverviewNotEmpty(coverageOverview);
-
-
-    }
-
-    /**
-     * Test for CoverageTable which should contain multiple pages.
-     */
-    @Test
-    public void verifiesCoverageTableWithMultiplePages(){
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build secondBuild = buildSuccessfully(job);
-
-        CoverageReport report = new CoverageReport(secondBuild);
-        report.open();
-
-        FileCoverageTable coverageTable = report.getCoverageTable();
-        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
-        coverageTable.openTablePage(3);
-        //TODO
-    }
-
-    /**
-     * Verifies content of CoverageTable of CoverageReport of Job. Arrays must have the same length.
-     *
-     * @param fileCoverageTable
-     *         of current build
+     * @param fileCoverageTableRow
+     *         row of table of current build
      * @param shouldPackage
      *         string array of expected values in package column
      * @param shouldFiles
@@ -141,24 +35,14 @@ public class CoverageReportTest extends UiTest {
      * @param shouldBranchCoverages
      *         string array of expected values in branch coverage column
      */
-    public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable,
-            final String[] shouldPackage, final String[] shouldFiles, final String[] shouldLineCoverages,
-            final String[] shouldBranchCoverages) {
-        List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
-        List<String> headers = fileCoverageTable.getHeaders();
+    public static void verifyFileCoverageTableContent(final FileCoverageTableRow fileCoverageTableRow,
+            final String shouldPackage, final String shouldFiles, final String shouldLineCoverages,
+            final String shouldBranchCoverages) {
 
-        assertThat(headers)
-                .hasSize(6)
-                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
-                        Header.BRANCH_COVERAGE.getTitle());
-
-        for (int i = 0; i < shouldFiles.length; i++) {
-            FileCoverageTableRow row = rows.get(i);
-            assertThat(row.getPackage()).isEqualTo(shouldPackage[i]);
-            assertThat(row.getFile()).isEqualTo(shouldFiles[i]);
-            assertThat(row.getLineCoverage()).isEqualTo(shouldLineCoverages[i]);
-            assertThat(row.getBranchCoverage()).isEqualTo(shouldBranchCoverages[i]);
-        }
+        assertThat(fileCoverageTableRow.getPackage()).isEqualTo(shouldPackage);
+        assertThat(fileCoverageTableRow.getFile()).isEqualTo(shouldFiles);
+        assertThat(fileCoverageTableRow.getLineCoverage()).isEqualTo(shouldLineCoverages);
+        assertThat(fileCoverageTableRow.getBranchCoverage()).isEqualTo(shouldBranchCoverages);
     }
 
     /**
@@ -210,8 +94,8 @@ public class CoverageReportTest extends UiTest {
     /**
      * Verifies CoverageOverview of CoverageReport of Job after one build.
      *
-     * @param coverageOverview from first build.
-     *
+     * @param coverageOverview
+     *         from first build.
      */
     public static void verifyCoverageOverviewNotEmpty(final String coverageOverview) {
         assertThatJson(coverageOverview)
@@ -273,6 +157,136 @@ public class CoverageReportTest extends UiTest {
     public static void verifyCoverageTreeNotEmpty(final String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2);
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2);
+    }
+
+    /**
+     * Test for CoverageReport of job with no reports does not exist. Verifies CoverageReport can't be opened.
+     */
+    @Test
+    public void verifyCoverageReportNotAvailableForJobWithNoReports() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        job.save();
+        Build build = buildSuccessfully(job);
+        CoverageReport report = new CoverageReport(build);
+        report.open();
+        assertThat(driver.getCurrentUrl()).isNotEqualTo(report.url.toString());
+    }
+
+    /**
+     * Test for CoverageReport after some builds with reports. Verifies some data of charts (TrendChart, CoverageTree
+     * and CoverageOverview) as well as {@link FileCoverageTable}.
+     */
+    @Test
+    public void verifyCoverageReportTestAfterSomeBuildsWithReports() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        buildSuccessfully(job);
+
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        //TODO: insert verifying some table items here
+
+        CoverageReport report = new CoverageReport(secondBuild);
+        report.open();
+
+        String coverageTree = report.getCoverageTree();
+        CoverageReportTest.verifyCoverageTree(coverageTree);
+
+        String coverageOverview = report.getCoverageOverview();
+        CoverageReportTest.verifyCoverageOverview(coverageOverview);
+
+        String trendChart = report.getCoverageTrend();
+        TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
+
+    }
+
+    /**
+     * Test for CoverageReport after first build with a report. Verifies charts (TrendChart, CoverageTree and
+     * CoverageOverview) as well as {@link FileCoverageTable} are being displayed and verifies some of its data.
+     */
+    @Test
+    public void verifiesCoverageReportAfterOneBuildWithReport() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        CoverageReport report = new CoverageReport(secondBuild);
+        report.open();
+
+        FileCoverageTable coverageTable = report.getCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
+
+        String trendChart = report.getCoverageTrend();
+        TrendChartTestUtil.verifyTrendChartContainsOnlyOneRecord(trendChart);
+
+        String coverageTree = report.getCoverageTree();
+        CoverageReportTest.verifyCoverageTreeNotEmpty(coverageTree);
+
+        String coverageOverview = report.getCoverageOverview();
+        CoverageReportTest.verifyCoverageOverviewNotEmpty(coverageOverview);
+
+    }
+
+    /**
+     * Test for CoverageTable which should contain multiple pages. Arrays must have the same length.
+     *
+     * @param fileCoverageTable
+     *         table with elements
+     * @param shouldNumberOfEntries
+     *         expected number of entries
+     * @param shouldPackage
+     *         string array of expected values in package column
+     * @param shouldFiles
+     *         string array of expected values in files column
+     * @param shouldLineCoverages
+     *         string array of expected values in line coverage column
+     * @param shouldBranchCoverages
+     *         string array of expected values in branch coverage column
+     */
+    @Test
+    public void verifiesCoverageTableWithMultiplePages(final FileCoverageTable fileCoverageTable,
+            final int shouldNumberOfEntries,
+            final String[] shouldPackage, final String[] shouldFiles, final String[] shouldLineCoverages,
+            final String[] shouldBranchCoverages) {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        Build secondBuild = buildSuccessfully(job);
+
+        CoverageReport report = new CoverageReport(secondBuild);
+        report.open();
+
+        FileCoverageTable coverageTable = report.getCoverageTable();
+        List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
+        List<String> headers = fileCoverageTable.getHeaders();
+
+        assertThat(headers)
+                .hasSize(6)
+                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
+                        Header.BRANCH_COVERAGE.getTitle());
+        CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, shouldNumberOfEntries);
+
+        for (int i = 0; i < shouldFiles.length; i++) {
+            fileCoverageTable.openTablePage(i + 1);
+            FileCoverageTableRow row = rows.get(i);
+            verifyFileCoverageTableContent(row, shouldPackage[i], shouldFiles[i], shouldLineCoverages[i],
+                    shouldBranchCoverages[i]);
+
+        }
     }
 
 }
