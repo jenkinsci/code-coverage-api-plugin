@@ -9,8 +9,7 @@ import io.jenkins.plugins.coverage.CoverageSummary;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Acceptance tests for Summary.
- * Verifies if  ...//TODO: javadoc
+ * Acceptance tests for Summary. Verifies if  ...//TODO: javadoc
  */
 public class SummaryTest extends UiTest {
 
@@ -20,7 +19,7 @@ public class SummaryTest extends UiTest {
      * @param build
      *         Build of Project
      */
-    public static void testSummaryOnNoReport(final Build build) {
+    public static void verifySummaryOnNoReport(final Build build) {
         build.open();
         // TODO: Das Element existiert nicht, wie soll das getestet werden?
         CoverageSummary cs = new CoverageSummary(build, "coverage");
@@ -31,16 +30,16 @@ public class SummaryTest extends UiTest {
      *
      * @param build
      *         Build of Project
+     * @param expectedCoverage
+     *         map of expected values to be present in summary
      */
-    public static void testSummaryOnFirstSuccessfulBuild(final Build build) {
+    public static void verifySummaryOnSuccessfulBuild(final Build build,
+            final HashMap<String, Double> expectedCoverage) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
         HashMap<String, Double> coverage = cs.getCoverage();
 
-        assertThat(coverage)
-                .hasSize(2)
-                .containsKeys("Line", "Branch")
-                .containsValues(95.52, 88.59);
+        assertThat(coverage).isEqualTo(expectedCoverage);
     }
 
     /**
@@ -48,19 +47,21 @@ public class SummaryTest extends UiTest {
      *
      * @param build
      *         Build of Project
+     * @param expectedCoverage
+     *         HashMap of expected values for coverage
+     * @param expectedChanges
+     *         List of expected values for coverage changes
      */
-    public static void testSummaryOnSecondSuccessfulBuild(final Build build) {
+    public static void verifySummaryWithReferenceBuild(final Build build,
+            final HashMap<String, Double> expectedCoverage, final List<Double> expectedChanges) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
 
         HashMap<String, Double> coverage = cs.getCoverage();
         List<Double> changes = cs.getCoverageChanges();
 
-        assertThat(coverage)
-                .hasSize(2)
-                .containsKeys("Line", "Branch")
-                .containsValues(91.02, 93.97);
-        assertThat(changes).contains(-0.045, 0.054);
+        assertThat(coverage).isEqualTo(expectedCoverage);
+        assertThat(changes).isEqualTo(expectedChanges);
 
         CoverageReport cr = cs.openReferenceBuild();
 
@@ -68,28 +69,37 @@ public class SummaryTest extends UiTest {
     }
 
     /**
-     * Verfifies if summary of failed build of Project is correct.
+     * Verifies if summary of failed build of Project is correct.
      *
      * @param build
      *         Build of Project
+     * @param expectedCoverage
+     */
+    public static void verifySummaryOnFailedBuild(final Build build, final HashMap<String, Double> expectedCoverage) {
+        build.open();
+        CoverageSummary cs = new CoverageSummary(build, "coverage");
+        HashMap<String, Double> coverage = cs.getCoverage();
+
+        assertThat(coverage).isEqualTo(expectedCoverage);
+
+    }
+
+    /**
+     * Verifies fail message on summary
+     *
+     * @param build
+     *         current build of project
      * @param unhealthyThreshold
      *         of project
      * @param unstableThreshold
      *         of project
      */
-    public static void testSummaryOnFailedBuild(final Build build, final float unhealthyThreshold,
+    public static void verifyFailMessage(final Build build, final float unhealthyThreshold,
             final float unstableThreshold) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
-        HashMap<String, Double> coverage = cs.getCoverage();
         String failMsg = cs.getFailMsg();
-
-        assertThat(coverage).containsKeys("Report", "Group", "Package", "File", "Class", "Method", "Instruction",
-                        "Line", "Conditional")
-                .containsValues(100.0, 70.0, 83.0, 95.0, 93.0, 91.0, 94.0);
-
         assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
                 .contains("unhealthyThreshold=" + unhealthyThreshold);
     }
-
 }

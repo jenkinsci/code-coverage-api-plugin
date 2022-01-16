@@ -1,43 +1,37 @@
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
 
-
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.*;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.*;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
-import io.jenkins.plugins.coverage.FileCoverageTable.Header;
-import io.jenkins.plugins.coverage.FileCoverageTableRow;
 import io.jenkins.plugins.coverage.MainPanel;
-
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Should in the end contain all tests.
  */
 public class SmokeTests extends UiTest {
 
-
     /**
-     * Test for verifying CoveragePlugin by checking its behaviour in different sitauations, using a project
-     * with two different jacoco files.
-     *
+     * Test for verifying CoveragePlugin by checking its behaviour in different sitauations, using a project with two
+     * different jacoco files.
+     * <p>
      * Different scenarios are used in each build, see javadoc.
-     *
-     * Verifies correct build-status depending on its configuration like used thresholds, global thresholds, fail on no report, etc.
-     * Verifies CoverageSummary.
-     * Verifies MainPanel (CoverageTrend).
-     * Verifies CoverageReport (CoverageTrend, CoverageOverview, FileCoverageTable and CoverageTree and its pages).
+     * <p>
+     * Verifies correct build-status depending on its configuration like used thresholds, global thresholds, fail on no
+     * report, etc. Verifies CoverageSummary. Verifies MainPanel (CoverageTrend). Verifies CoverageReport
+     * (CoverageTrend, CoverageOverview, FileCoverageTable and CoverageTree and its pages).
      */
     @Test
     public void verifyingCoveragePlugin() {
@@ -70,7 +64,10 @@ public class SmokeTests extends UiTest {
         job.save();
         Build firstSuccessfulBuild = buildSuccessfully(job);
 
-        SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
+        HashMap<String, Double> expectedCoverageOnFirstSuccessfulBuild = new HashMap<>();
+        expectedCoverageOnFirstSuccessfulBuild.put("Line", 95.52);
+        expectedCoverageOnFirstSuccessfulBuild.put("Branch", 88.59);
+        SummaryTest.verifySummaryOnSuccessfulBuild(firstSuccessfulBuild, expectedCoverageOnFirstSuccessfulBuild);
 
         CoverageReport reportOfFirstSuccessfulBuild = new CoverageReport(firstSuccessfulBuild);
         reportOfFirstSuccessfulBuild.open();
@@ -107,7 +104,17 @@ public class SmokeTests extends UiTest {
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         job.save();
         Build thirdBuildFailed = buildWithErrors(job);
-        //gibt die summary hier was her?
+        HashMap<String, Double> expectedCoverageThirdBuildFailed = new HashMap<>();
+        expectedCoverageThirdBuildFailed.put("Report", 100.00);
+        expectedCoverageThirdBuildFailed.put("Group", 100.00);
+        expectedCoverageThirdBuildFailed.put("Package", 100.00);
+        expectedCoverageThirdBuildFailed.put("File", 70.00);
+        expectedCoverageThirdBuildFailed.put("Class", 83.00);
+        expectedCoverageThirdBuildFailed.put("Method", 95.00);
+        expectedCoverageThirdBuildFailed.put("Instruction", 93.00);
+        expectedCoverageThirdBuildFailed.put("Line", 91.00);
+        expectedCoverageThirdBuildFailed.put("Conditional", 94.00);
+        SummaryTest.verifySummaryOnFailedBuild(thirdBuildFailed, expectedCoverageThirdBuildFailed);
 
         /**
          * 4th build: Set setFailBuildIfCoverageDecreasedInChangeRequest(false), so that build should now succeed.
@@ -119,7 +126,11 @@ public class SmokeTests extends UiTest {
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(false);
         job.save();
         Build fourthBuildSuccessful = buildSuccessfully(job);
-        //SummaryTest.testSummaryOnSecondSuccessfulBuild(fourthBuildSuccessful);
+
+        HashMap<String, Double> expectedCoverageOnFourthBuild = new HashMap<>();
+        expectedCoverageOnFourthBuild.put("Line", 91.02);
+        expectedCoverageOnFourthBuild.put("Branch", 93.97);
+        SummaryTest.verifySummaryOnSuccessfulBuild(fourthBuildSuccessful, expectedCoverageOnFourthBuild);
 
         /**
          * 5th build: Add threshold so that build should be unstable.
@@ -132,6 +143,15 @@ public class SmokeTests extends UiTest {
                 90, false);
         job.save();
         Build fifthBuildUnstable = buildUnstable(job);
+        HashMap<String, Double> expectedCoverageFifthBuild = new HashMap<>();
+        expectedCoverageFifthBuild.put("Line", 91.02);
+        expectedCoverageFifthBuild.put("Branch", 93.97);
+        List<Double> expectedReferenceCoverageFifthBuild = new LinkedList<>();
+        expectedReferenceCoverageFifthBuild.add(0.00);
+        expectedReferenceCoverageFifthBuild.add(0.00);
+
+        SummaryTest.verifySummaryWithReferenceBuild(fifthBuildUnstable, expectedCoverageFifthBuild,
+                expectedReferenceCoverageFifthBuild);
 
         CoverageReport report = new CoverageReport(fifthBuildUnstable);
         report.open();
@@ -154,14 +174,15 @@ public class SmokeTests extends UiTest {
         TrendChartTestUtil.verifyTrendChart(trendChart, 2, 5);
 
         MainPanel mainPanel = new MainPanel(job);
-        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel, 2,5);
-
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel, 2, 5);
 
         /**
          * 6th build: change threshold, setFailUnhealthy(true) so that build should fail.
          * Check if build failed.
          */
         job.configure();
+        int unhealthyThresholdForSixthBuild = 99;
+        int unstableThresholdForSixthBuild = 5;
         jacocoAdapter.ensureAdvancedOptionsIsActivated();
         threshold.setThresholdTarget(AdapterThresholdTarget.CLASS);
         threshold.setUnhealthyThreshold(99);
@@ -169,6 +190,8 @@ public class SmokeTests extends UiTest {
         threshold.setFailUnhealthy(true);
         job.save();
         Build sixthBuildFailing = buildWithErrors(job);
+        SummaryTest.verifyFailMessage(sixthBuildFailing, unhealthyThresholdForSixthBuild,
+                unstableThresholdForSixthBuild);
 
         /**
          * 7th build: Remove thresholds. Set GlobalThresholds, but so that build should still succeed.
@@ -247,7 +270,6 @@ public class SmokeTests extends UiTest {
         job.save();
         Build twelfthBuildFailing = buildWithErrors(job);
 
-
         /**
          * 13th build: Set SourceFileResolver to {#SourceFileResolver.STORE_ALL_BUILD}
          * Check ..
@@ -302,10 +324,6 @@ public class SmokeTests extends UiTest {
          */
 
     }
-
-
-
-
 
 }
 
