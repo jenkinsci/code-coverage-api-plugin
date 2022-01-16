@@ -1,8 +1,5 @@
 import org.junit.Test;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
@@ -20,14 +17,11 @@ import io.jenkins.plugins.coverage.MainPanel;
 /**
  * Should in the end contain all tests.
  */
-public class UITest extends AbstractJUnitTest {
+public class SmokeTests extends UiTest {
     private static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
     private static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
 
-    @SuppressFBWarnings("BC")
-    private static final float UNHEALTHY_THRESHOLD = 80;
-    private static final float UNSTABLE_THRESHOLD = 90;
 
     /**
      * Test for verifying CoveragePlugin by checking its behaviour in different sitauations, using a project
@@ -47,7 +41,7 @@ public class UITest extends AbstractJUnitTest {
 
 
         //FIXME: uberlegen wo welcher test sinnvoll ist, dann testen und in javadoc ueber build ergaenzen was getestet wird, ggf auch warum
-        
+
         /**
          * 1st build: Set setFailNoReports(true) and don't add any report, so that build should fail.
          * Check if build fails.
@@ -56,7 +50,7 @@ public class UITest extends AbstractJUnitTest {
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setFailNoReports(true);
         job.save();
-        Build buildWithErrors = JobCreatorUtils.buildWithErrors(job);
+        Build buildWithErrors = buildWithErrors(job);
 
         //TODO: tests here for fail on no reports (CoverageSummary?)
         //SummaryTest.NAME(build);
@@ -67,10 +61,10 @@ public class UITest extends AbstractJUnitTest {
          * Check SummaryTest if ....
          */
         job.configure();
-        JobCreatorUtils.copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
         job.save();
-        Build firstSuccessfulBuild = JobCreatorUtils.buildSuccessfully(job);
+        Build firstSuccessfulBuild = buildSuccessfully(job);
 
         SummaryTest.testSummaryOnFirstSuccessfulBuild(firstSuccessfulBuild);
 
@@ -85,7 +79,7 @@ public class UITest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         job.save();
-        Build thirdBuildFailed = JobCreatorUtils.buildWithErrors(job);
+        Build thirdBuildFailed = buildWithErrors(job);
         //gibt die summary hier was her?
 
         /**
@@ -97,7 +91,7 @@ public class UITest extends AbstractJUnitTest {
         jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(false);
         job.save();
-        Build fourthBuildSuccessful = JobCreatorUtils.buildSuccessfully(job);
+        Build fourthBuildSuccessful = buildSuccessfully(job);
         //SummaryTest.testSummaryOnSecondSuccessfulBuild(fourthBuildSuccessful);
 
         /**
@@ -107,10 +101,10 @@ public class UITest extends AbstractJUnitTest {
          */
         job.configure();
         AdapterThreshold threshold = jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.FILE,
-                UNHEALTHY_THRESHOLD,
-                UNSTABLE_THRESHOLD, false);
+                80,
+                90, false);
         job.save();
-        Build fifthBuildUnstable = JobCreatorUtils.buildUnstable(job);
+        Build fifthBuildUnstable = buildUnstable(job);
 
         CoverageReport report = new CoverageReport(fifthBuildUnstable);
         report.open();
@@ -128,7 +122,10 @@ public class UITest extends AbstractJUnitTest {
         String trendChart = report.getCoverageTrend();
         TrendChartTest.verifyTrendChart(trendChart);
 
-        //TODO: check MainPanel
+        MainPanel mainPanel = new MainPanel(job);
+        //String mainPanelCoverageTrendChart = mainPanel.getCoverageTrendChart();
+        MainPanelTest.verifyTrendChartWithTwoReports(mainPanel);
+
 
         /**
          * 6th build: change threshold, setFailUnhealthy(true) so that build should fail.
@@ -141,7 +138,7 @@ public class UITest extends AbstractJUnitTest {
         threshold.setUnstableThreshold(5);
         threshold.setFailUnhealthy(true);
         job.save();
-        Build sixthBuildFailing = JobCreatorUtils.buildWithErrors(job);
+        Build sixthBuildFailing = buildWithErrors(job);
 
         /**
          * 7th build: Remove thresholds. Set GlobalThresholds, but so that build should still succeed.
@@ -153,7 +150,7 @@ public class UITest extends AbstractJUnitTest {
         GlobalThreshold globalThreshold = coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.FILE,
                 59, 59, false);
         job.save();
-        Build seventhBuildSuccessfully = JobCreatorUtils.buildSuccessfully(job);
+        Build seventhBuildSuccessfully = buildSuccessfully(job);
 
         /**
          * 8th build: Change GlobalThresholds, setFailUnhealthy(false), should still succeed.
@@ -168,7 +165,7 @@ public class UITest extends AbstractJUnitTest {
         globalThreshold.setUnstableThreshold(60);
         globalThreshold.setFailUnhealthy(false);
         job.save();
-        Build eighthBuildSuccessfully = JobCreatorUtils.buildSuccessfully(job);
+        Build eighthBuildSuccessfully = buildSuccessfully(job);
 
         /**
          * 9th build  (preperation for 10th build): Change GlobalThresholds, set..
@@ -182,7 +179,7 @@ public class UITest extends AbstractJUnitTest {
         globalThreshold.setUnstableThreshold(5);
         globalThreshold.setFailUnhealthy(true);
         job.save();
-        Build ninthBuildFailing = JobCreatorUtils.buildWithErrors(job);
+        Build ninthBuildFailing = buildWithErrors(job);
 
         /**
          * 10th build: Set globalThresholds and failUnhealthy(true) so that build should fail.
@@ -196,7 +193,7 @@ public class UITest extends AbstractJUnitTest {
         globalThreshold.setUnhealthyThreshold(99);
         globalThreshold.setUnstableThreshold(5);
         job.save();
-        Build tenthBuildFailing = JobCreatorUtils.buildWithErrors(job);
+        Build tenthBuildFailing = buildWithErrors(job);
 
         /**
          * 11th build: Set global Thresholds so that build is unstable.
@@ -208,7 +205,7 @@ public class UITest extends AbstractJUnitTest {
         globalThreshold.setUnhealthyThreshold(0);
         globalThreshold.setUnstableThreshold(95);
         job.save();
-        Build eleventhBuildFailing = JobCreatorUtils.buildUnstable(job);
+        Build eleventhBuildFailing = buildUnstable(job);
 
         /**
          * 12th build: Set fail if build would be unstable.
@@ -218,7 +215,7 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnstable(true);
         job.save();
-        Build twelfthBuildFailing = JobCreatorUtils.buildWithErrors(job);
+        Build twelfthBuildFailing = buildWithErrors(job);
 
 
         /**
@@ -233,7 +230,7 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
         job.save();
-        Build thirteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+        Build thirteenthBuildFailing = buildSuccessfully(job);
 
         /**
          * 14th build: Set SourceFileResolver to {#SourceFileResolver.STORE_ALL_BUILD}
@@ -243,7 +240,7 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_LAST_BUIlD);
         job.save();
-        Build fourteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+        Build fourteenthBuildFailing = buildSuccessfully(job);
 
         /**
          * 15th build: Set SourceFileResolver to {#SourceFileResolver.NEVER_STORE}
@@ -253,7 +250,7 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_STORE);
         job.save();
-        Build fifteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+        Build fifteenthBuildFailing = buildSuccessfully(job);
 
         /**
          * 16th build: should skip publishing checks
@@ -262,7 +259,7 @@ public class UITest extends AbstractJUnitTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSkipPublishingChecks(true);
         job.save();
-        Build sixteenthBuildFailing = JobCreatorUtils.buildSuccessfully(job);
+        Build sixteenthBuildFailing = buildSuccessfully(job);
 
         /* some old notes:
          * 5) normale thresholds ohne fail setter
@@ -275,6 +272,7 @@ public class UITest extends AbstractJUnitTest {
          */
 
     }
+
 
 
 }

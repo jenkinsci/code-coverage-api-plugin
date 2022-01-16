@@ -2,17 +2,18 @@ package io.jenkins.plugins.coverage;
 
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * The Coverage-TrendChart is displayed twice. Therefore, this util is used in
+ * Coverage-TrendChart is displayed twice. Therefore, this util is used in
  * {@link CoverageReport} and {@link MainPanel}.
  */
 public class TrendChartUtil {
-
 
     /**
      * Returns a chart's data by its id.
@@ -36,7 +37,16 @@ public class TrendChartUtil {
      * @return if chart is displayed
      */
     public static boolean isChartDisplayed(final PageObject pageObject, final String elementId){
-        return pageObject.find(By.id(elementId))!=null;
+        try{
+            WebElement chart = pageObject.find(By.id(elementId));
+            if(chart!=null && chart.isDisplayed()){
+                return true;
+            }
+        }
+        catch (NoSuchElementException exception) {
+            return false;
+        }
+        return false;
     }
 
 }

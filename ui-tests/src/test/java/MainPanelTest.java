@@ -15,6 +15,7 @@ public class MainPanelTest extends AbstractJUnitTest {
      */
     public static void verifyTrendChartWithTwoReports(final MainPanel mainPanel) {
         mainPanel.open();
+
         String trendChart = mainPanel.getCoverageTrendChart();
         TrendChartTest.verifyTrendChart(trendChart);
     }

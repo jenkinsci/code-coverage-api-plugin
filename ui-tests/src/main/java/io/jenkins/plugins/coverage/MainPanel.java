@@ -27,10 +27,10 @@ public class MainPanel extends PageObject {
         ensureMainPanelPageIsOpen();
 
         //FIXME
-       /* waitFor().until(()->isChartAvailable() &&  executeScript(String.format(
+        waitFor().until(()-> executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ))!=null);
-        */
+
 
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
@@ -42,16 +42,6 @@ public class MainPanel extends PageObject {
         return scriptResult.getJavaScriptResult().toString();
     }
 
-
- /*   public boolean isChartAvailable() {
-        try {
-            WebElement e = find(By.id(COVERAGE_TREND_CHART));
-            return e.isDisplayed();
-        }
-        catch(NoSuchElementException exception){
-            return false;
-        }
-    }*/
 
     /**
      * Ensures MainPanel Page is opened.
