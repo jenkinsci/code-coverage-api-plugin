@@ -42,7 +42,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     /** Relative URL to the details of the code coverage results. */
     static final String DETAILS_URL = "coverage";
 
-    private HealthReport healthReport;
+    private final HealthReport healthReport;
 
     private final Coverage lineCoverage;
     private final Coverage branchCoverage;
@@ -188,10 +188,6 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @Override
     public CoverageViewModel getTarget() {
         return new CoverageViewModel(getOwner(), getResult());
-    }
-
-    public void setHealthReport(final HealthReport healthReport) {
-        this.healthReport = healthReport;
     }
 
     @CheckForNull

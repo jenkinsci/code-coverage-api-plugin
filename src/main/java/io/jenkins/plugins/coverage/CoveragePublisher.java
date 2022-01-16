@@ -52,8 +52,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
 
-    private String sourceCodeEncoding = StringUtils.EMPTY;
-    private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>(); // @since 9.11.0
+    private String sourceCodeEncoding = StringUtils.EMPTY; // @since 2.1.0
+    private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>(); // @since 2.1.0
 
     private boolean failUnhealthy;
     private boolean failUnstable;
@@ -61,7 +61,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private boolean applyThresholdRecursively;
 
-    // TODO make sourceFileResolver more generic
     private DefaultSourceFileResolver sourceFileResolver;
 
     private String tag;
