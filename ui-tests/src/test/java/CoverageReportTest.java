@@ -269,10 +269,24 @@ public class CoverageReportTest extends UiTest {
         CoverageReport report = new CoverageReport(secondBuild);
         report.open();
 
-        //TODO
-        //bestätigen das es mehr seiten gibt und was testen
-        //anzahl der maximalen elmente mit maximalen seitenanzahl abgleichen
+        FileCoverageTable table = report.openFileCoverageTable();
+        CoverageReportTest.verifyFileCoverageTableContent(table,
+                new String[] {"edu.hm.hafner.analysis.parser.dry", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis.parser.violations"},
+                new String[] {"AbstractDryParser.java", "AbstractPackageDetector.java", "AbstractViolationAdapter.java"},
+                new String[] {"85.71%", "88.24%", "91.67%"},
+                new String[] {"83.33%", "50.00%", "100.00%"});
+        table.openTablePage(2);
+        CoverageReportTest.verifyFileCoverageTableContent(table,
+                new String[] {"edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.parser"},
+                new String[] {"AnsibleLintDescriptor.java", "AnsibleLintParser.java", "AntJavacParser.java"},
+                new String[] {"100.00%", "100.00%", "100.00%"},
+                new String[] {"n/a", "n/a", "100.00%"});
+        table.openTablePage(3);
+        CoverageReportTest.verifyFileCoverageTableContent(table,
+                new String[] {"edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser"},
+                new String[] {"BuckminsterParser.java", "CadenceIncisiveDescriptor.java", "CadenceIncisiveParser.java"},
+                new String[] {"100.00%", "100.00%", "86.49%"},
+                new String[] {"100.00%", "n/a", "66.67%"});
     }
-
 }
 
