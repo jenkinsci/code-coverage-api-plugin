@@ -151,7 +151,7 @@ public class SmokeTests extends UiTest {
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
-        TrendChartUtil.verifyTrendChart(trendChart, 2, 5);
+        TrendChartTestUtil.verifyTrendChart(trendChart, 2, 5);
 
         MainPanel mainPanel = new MainPanel(job);
         MainPanelTest.verifyTrendChartWithTwoReports(mainPanel, 2,5);

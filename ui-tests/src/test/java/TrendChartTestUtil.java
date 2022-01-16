@@ -2,7 +2,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
-public class TrendChartUtil {
+public class TrendChartTestUtil {
 
     /**
      * Check if the generated TrendChart has the correct number of builds in its axis and the right coverage values for

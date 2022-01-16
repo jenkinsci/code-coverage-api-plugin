@@ -52,4 +52,9 @@ public class MainPanel extends PageObject {
                         CoreMatchers.containsString(this.url + "/")));
     }
 
+    public boolean isChartDisplayed(){
+        ensureMainPanelPageIsOpen();
+        return TrendChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);
+    }
+
 }

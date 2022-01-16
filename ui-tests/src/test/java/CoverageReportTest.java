@@ -54,7 +54,7 @@ public class CoverageReportTest extends UiTest {
         CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
-        TrendChartUtil.verifyTrendChart(trendChart, 1, 2);
+        TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
 
     }
 
@@ -76,7 +76,7 @@ public class CoverageReportTest extends UiTest {
         CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
 
         String trendChart = report.getCoverageTrend();
-        TrendChartUtil.verifyTrendChartIsEmpty(trendChart);
+        TrendChartTestUtil.verifyTrendChartIsEmpty(trendChart);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTreeNotEmpty(coverageTree);
