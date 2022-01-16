@@ -84,12 +84,22 @@ public class CoverageSummary extends PageObject {
         return changes;
     }
 
+    /**
+     * Get fail message in coverage summary.
+     *
+     * @return fail message
+     */
     public String getFailMsg() {
         return this.failMsg.getText();
     }
 
+    /**
+     * Get url of reference build.
+     *
+     * @return url of reference build
+     */
     public String getReferenceBuild() {
-        return this.referenceBuild.getText();
+        return this.referenceBuild.findElement(By.tagName("a")).getAttribute("href");
     }
 
     /**
