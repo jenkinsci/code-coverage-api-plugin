@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.openqa.selenium.NoSuchElementException;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
@@ -14,6 +15,12 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public class MainPanel extends PageObject {
     private static final String COVERAGE_TREND_CHART = "coverage-trendchart";
 
+    /**
+     * Constructor to create MainPanel-PageObject out of a job.
+     *
+     * @param parent
+     *         job of wanted MainPanel.
+     */
     public MainPanel(final Job parent) {
         super(parent, parent.url);
     }
@@ -52,6 +59,10 @@ public class MainPanel extends PageObject {
                         CoreMatchers.containsString(this.url + "/")));
     }
 
+    /**
+     * Returns if TrendChart is displayed in MainPanel.
+     * @return if TrendChart is displayed
+     */
     public boolean isChartDisplayed(){
         ensureMainPanelPageIsOpen();
         return TrendChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);

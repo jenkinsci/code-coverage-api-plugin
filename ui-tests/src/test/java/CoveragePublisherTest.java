@@ -1,6 +1,5 @@
 import org.junit.Test;
 
-import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;

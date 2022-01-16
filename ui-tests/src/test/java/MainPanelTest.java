@@ -19,7 +19,7 @@ public class MainPanelTest extends UiTest {
      * Verifies TrendChart in MainPanel is displayed and has correct values.
      */
     @Test
-    public void verifyTrendChartAfterSomeBuildsWithReports() {
+    public void testTrendChartAfterSomeBuildsWithReports() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -44,7 +44,7 @@ public class MainPanelTest extends UiTest {
      * builds with reports.
      */
     @Test
-    public void verifyTrendChartIsNotDisplayedAfterOneBuildContainingReport() {
+    public void testTrendChartIsNotDisplayedAfterOneBuildContainingReport() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");

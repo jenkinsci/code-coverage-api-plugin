@@ -197,4 +197,5 @@ public class CoverageReport extends PageObject {
             return By.xpath("//a[@href='#" + id + "']");
         }
     }
+
 }

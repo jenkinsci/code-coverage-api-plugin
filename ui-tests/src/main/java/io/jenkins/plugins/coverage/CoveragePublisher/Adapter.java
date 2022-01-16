@@ -11,8 +11,6 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.
  * Adapter which can be added in the configuration of the {@link CoveragePublisher} of a FreeStyle Project.
  */
 public class Adapter extends PageAreaImpl {
-    private CoveragePublisher parent;
-
     private final Control reportFilePath = control("path");
     private final Control threshold = control("repeatable-add");
     private final Control mergeToOneReport = control("mergeToOneReport");

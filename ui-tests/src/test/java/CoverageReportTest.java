@@ -26,7 +26,7 @@ public class CoverageReportTest extends UiTest {
      * Verifies CoverageReport can't be opened.
      */
     @Test
-    public void verifyCoverageReportNotAvailableForJobWithNoReports(){
+    public void testCoverageReportNotAvailableForJobWithNoReports(){
             FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
             job.save();
             Build build = buildSuccessfully(job);
@@ -41,7 +41,7 @@ public class CoverageReportTest extends UiTest {
      * {@link FileCoverageTable}.
      */
     @Test
-    public void verifyCoverageReportTestAfterSomeBuildsWithReports() {
+    public void testCoverageReportTestAfterSomeBuildsWithReports() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -78,7 +78,7 @@ public class CoverageReportTest extends UiTest {
      *
      */
     @Test
-    public void verifiesCoverageReportAfterOneBuildWithReport() {
+    public void testCoverageReportAfterOneBuildWithReport() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -109,7 +109,7 @@ public class CoverageReportTest extends UiTest {
      * Test for CoverageTable which should contain multiple pages.
      */
     @Test
-    public void verifiesCoverageTableWithMultiplePages(){
+    public void testCoverageTableWithMultiplePages(){
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
