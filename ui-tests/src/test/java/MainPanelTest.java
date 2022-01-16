@@ -9,11 +9,13 @@ import io.jenkins.plugins.coverage.MainPanel;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * UI-Tests for MainPanel of a project.
+ * Acceptance tests for MainPanel of a project.
+ * Contains static test-methods which can also be used other classes, especially used {@link SmokeTests}.
  */
 public class MainPanelTest extends UiTest {
 
     /**
+     * Test for MainPanel of job with some builds with reports.
      * Verifies TrendChart in MainPanel is displayed and has correct values.
      */
     @Test
@@ -37,7 +39,8 @@ public class MainPanelTest extends UiTest {
     }
 
     /**
-     * Verifies no trendchart is displayed, due to trendchart is not displayed in MainPanel if job has less than two
+     * Test for MainPanel of job with only one build containing report.
+     * Verifies no TrendChart is displayed, due to TrendChart is not displayed in MainPanel if job has less than two
      * builds with reports.
      */
     @Test
@@ -54,11 +57,12 @@ public class MainPanelTest extends UiTest {
         assertThat(mainPanel.isChartDisplayed()).isFalse();
     }
 
+
     /**
-     * Verifies displayed TrendChart.
-     *
-     * @param mainPanel
-     *         of project
+     * Verifies a specific displayed TrendChart.
+     * @param mainPanel of project
+     * @param firstBuildInChartNumber of build visualized in TrendChart
+     * @param lastBuildInChartNumber of build visualized in TrendChart
      */
     public static void verifyTrendChartWithTwoReports(final MainPanel mainPanel, final int firstBuildInChartNumber,
             final int lastBuildInChartNumber) {
