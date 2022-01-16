@@ -10,12 +10,13 @@ import io.jenkins.plugins.coverage.CoverageSummary;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * UI Test for Summary of build.
+ * Acceptance tests for Summary.
+ * Verifies if  ...//TODO: javadoc
  */
 public class SummaryTest extends UiTest {
 
     /**
-     * Test if summary is not visible if build with no report is enabled.
+     * Verifies if summary is not visible if build with no report is enabled.
      *
      * @param build
      *         Build of Project
@@ -27,7 +28,7 @@ public class SummaryTest extends UiTest {
     }
 
     /**
-     * Test if summary of first successful build of Project is correct.
+     * Verifies if summary of first successful build of Project is correct.
      *
      * @param build
      *         Build of Project
@@ -44,7 +45,7 @@ public class SummaryTest extends UiTest {
     }
 
     /**
-     * Test if summary of second successful build of Project is correct and has reference.
+     * Verifies if summary of second successful build of Project is correct and has reference.
      *
      * @param build
      *         Build of Project
@@ -68,7 +69,7 @@ public class SummaryTest extends UiTest {
     }
 
     /**
-     * Test if summary of failed build of Project is correct.
+     * Verfifies if summary of failed build of Project is correct.
      *
      * @param build
      *         Build of Project
