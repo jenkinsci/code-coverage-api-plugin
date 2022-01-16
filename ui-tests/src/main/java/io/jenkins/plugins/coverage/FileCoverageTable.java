@@ -2,10 +2,9 @@ package io.jenkins.plugins.coverage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -132,19 +131,14 @@ public class FileCoverageTable {
     }
 
     /**
-     * Get number of maximal entries.
+     * Get total number of entries.
      *
-     * @return value of maximal entries
+     * @return value of total entries
      */
-    public int getNumberOfMaxEntries() {
+    public int getTotals() {
         String textOfTableInfo = this.tableInfo.getText();
-        Pattern p = Pattern.compile("\\d+");
-        Matcher m = p.matcher(textOfTableInfo);
-        m.find();
-        m.find(); //FIXME: warum 3 mal?
-        m.find();
-        return Integer.parseInt(m.group());
-
+        String total = StringUtils.substringAfter(textOfTableInfo, "of ");
+        return Integer.parseInt(StringUtils.substringBefore(total, " "));
     }
 
     /**
