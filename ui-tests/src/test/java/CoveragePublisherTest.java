@@ -9,7 +9,8 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 //TODO: ueberdenken ob tests so sinn machen & ausreichen
 
 /**
- * Tests if set options in CoveragePublisher are used and lead to excepted results.
+ * Acceptance tests for CoveragePublisher.
+ * Verifies if set options in CoveragePublisher are used and lead to excepted results.
  */
 public class CoveragePublisherTest extends UiTest {
 

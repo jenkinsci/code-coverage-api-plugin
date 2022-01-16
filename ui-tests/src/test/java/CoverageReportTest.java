@@ -15,8 +15,16 @@ import io.jenkins.plugins.coverage.FileCoverageTableRow;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Acceptance tests for CoverageReport, containing three charts and one table ({@link FileCoverageTable}).
+ * Contains static test-methods which can also be used other classes, especially used {@link SmokeTests}.
+ */
 public class CoverageReportTest extends UiTest {
 
+    /**
+     * Test for CoverageReport of job with no reports does not exist.
+     * Verifies CoverageReport can't be opened.
+     */
     @Test
     public void verifyCoverageReportNotAvailableForJobWithNoReports(){
             FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
@@ -27,6 +35,11 @@ public class CoverageReportTest extends UiTest {
             assertThat(driver.getCurrentUrl().toString()).isNotEqualTo(report.url.toString());
     }
 
+    /**
+     * Test for CoverageReport after some builds with reports.
+     * Verifies some data of charts (TrendChart, CoverageTree and CoverageOverview) as well as
+     * {@link FileCoverageTable}.
+     */
     @Test
     public void verifyCoverageReportTestAfterSomeBuildsWithReports() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
@@ -58,6 +71,12 @@ public class CoverageReportTest extends UiTest {
 
     }
 
+    /**
+     * Test for CoverageReport after first build with a report.
+     * Verifies charts (TrendChart, CoverageTree and CoverageOverview) as well as
+     * {@link FileCoverageTable} are being displayed and verifies some of its data.
+     *
+     */
     @Test
     public void verifiesCoverageReportAfterOneBuildWithReport() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
@@ -86,7 +105,9 @@ public class CoverageReportTest extends UiTest {
 
     }
 
-
+    /**
+     * Test for CoverageTable which should contain multiple pages.
+     */
     @Test
     public void verifiesCoverageTableWithMultiplePages(){
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
@@ -253,8 +274,6 @@ public class CoverageReportTest extends UiTest {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2);
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2);
     }
-
-
 
 }
 
