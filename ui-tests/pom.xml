@@ -13,7 +13,7 @@
   <artifactId>code-coverage-api-ui-tests</artifactId>
   <packaging>jar</packaging>
   <version>UNVERSIONED</version>
-  <name>UI Tests of Warnings Plugin</name>
+  <name>UI Tests of Code Coverage Plugin</name>
 
   <properties>
     <jenkins.version>2.310</jenkins.version>
@@ -149,13 +149,13 @@
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
         <configuration>
           <packages combine.children="append">
-            <package>io.jenkins.plugins.analysis.warnings</package>
+            <package>io.jenkins.plugins.coverage</package>
           </packages>
           <excludes>
             <exclude>.*Test</exclude>
             <exclude>.*Table</exclude>
           </excludes>
-          <entryPointClassPackage>io.jenkins.plugins.analysis.warnings</entryPointClassPackage>
+          <entryPointClassPackage>io.jenkins.plugins.coverage</entryPointClassPackage>
         </configuration>
       </plugin>
       <plugin>
@@ -174,7 +174,7 @@
                 <resource>
                   <directory>../plugin/target/</directory>
                   <includes>
-                    <include>warnings-ng.hpi</include>
+                    <include>coverage-ng.hpi</include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
