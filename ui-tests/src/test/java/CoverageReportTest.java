@@ -42,7 +42,7 @@ public class CoverageReportTest extends UiTest {
      * Verifies some data of charts (TrendChart, CoverageTree and CoverageOverview) as well as {@link FileCoverageTable}.
      */
     @Test
-    public void testCoverageReportTestAfterSomeBuildsWithReports() {
+    public void testCoverageReportAfterSomeBuildsWithReports() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -59,18 +59,19 @@ public class CoverageReportTest extends UiTest {
         CoverageReport report = new CoverageReport(secondBuild);
         report.open();
 
-        String coverageTree = report.getCoverageTree();
-        CoverageReportTest.verifyCoverageTree(coverageTree);
-
-        String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverview(coverageOverview);
-
+        //FIXME?
         FileCoverageTable coverageTable = report.getCoverageTable();
         CoverageReportTest.verifyFileCoverageTableContent(coverageTable,
                 new String[] {"edu.hm.hafner.util", "edu.hm.hafner.util", "edu.hm.hafner.util"},
                 new String[] {"Ensure.java", "FilteredLog.java", "Generated.java"},
                 new String[] {"80.00%", "100.00%", "n/a"},
-                new String[] {"86.96%", "100.00%", "n/a%"});
+                new String[] {"86.96%", "100.00%", "n/a"});
+
+        String coverageTree = report.getCoverageTree();
+        CoverageReportTest.verifyCoverageTree(coverageTree);
+
+        String coverageOverview = report.getCoverageOverview();
+        CoverageReportTest.verifyCoverageOverview(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
         TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
