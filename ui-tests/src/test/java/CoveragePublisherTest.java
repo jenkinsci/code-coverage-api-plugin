@@ -53,19 +53,6 @@ public class CoveragePublisherTest extends UiTest {
         buildWithErrors(job);
     }
 
-    // TODO: Auf was soll hier getestet werden. Es gibt keine Änderungen in der UI.
-    @Test
-    public void testSkipPublishingChecks() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setSkipPublishingChecks(false);
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        buildWithErrors(job);
-    }
-
     /**
      * Test if build fails if setFailUnhealthy is true and thresholds set.
      */
