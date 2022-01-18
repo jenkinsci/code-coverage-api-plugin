@@ -23,7 +23,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * @param path
      *         to threshold
      */
-    protected AbstractThreshold(final PageArea parent, final String path) {
+    protected AbstractThreshold(PageArea parent, String path) {
         super(parent, path);
     }
 
@@ -33,7 +33,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * @param threshold
      *         for unhealthy
      */
-    public void setUnhealthyThreshold(final double threshold) {
+    public void setUnhealthyThreshold(double threshold) {
         //checkControlsAreAvailable()
         unhealthyThreshold.set(threshold);
     }
@@ -44,7 +44,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * @param threshold
      *         for unstable
      */
-    public void setUnstableThreshold(final double threshold) {
+    public void setUnstableThreshold(double threshold) {
         //checkControlsAreAvailable()
         unstableThreshold.set(threshold);
     }
@@ -55,7 +55,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * @param failOnUnhealthy
      *         boolean for failing on unhealthy
      */
-    public void setFailUnhealthy(final boolean failOnUnhealthy) {
+    public void setFailUnhealthy(boolean failOnUnhealthy) {
         //checkControlsAreAvailable()
         failUnhealthy.check(failOnUnhealthy);
     }

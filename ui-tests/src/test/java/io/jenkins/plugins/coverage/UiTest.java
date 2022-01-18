@@ -17,7 +17,7 @@ class UiTest extends AbstractJUnitTest {
      * @param job to build
      * @return successful build
      */
-    Build buildSuccessfully(final Job job) {
+    Build buildSuccessfully(Job job) {
         return job.startBuild().waitUntilFinished().shouldSucceed();
     }
 
@@ -26,7 +26,7 @@ class UiTest extends AbstractJUnitTest {
      * @param job to build
      * @return unstable build
      */
-    Build buildUnstable(final Job job) {
+    Build buildUnstable(Job job) {
         return job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
@@ -35,7 +35,7 @@ class UiTest extends AbstractJUnitTest {
      * @param job to build
      * @return failed build
      */
-    Build buildWithErrors(final Job job) {
+    Build buildWithErrors(Job job) {
         return job.startBuild().waitUntilFinished().shouldFail();
     }
 
@@ -44,7 +44,7 @@ class UiTest extends AbstractJUnitTest {
      * @param job in whose workspace files should be copies
      * @param resources of files which should be copied
      */
-    void copyResourceFilesToWorkspace(final Job job, final String... resources) {
+    void copyResourceFilesToWorkspace(Job job, String... resources) {
         for (String file : resources) {
             job.copyResource(file);
         }

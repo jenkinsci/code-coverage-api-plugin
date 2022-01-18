@@ -25,7 +25,7 @@ public class Adapter extends PageAreaImpl {
      * @param path
      *         of parent page
      */
-    public Adapter(final PageArea reportPublisher, final String path) {
+    public Adapter(PageArea reportPublisher, String path) {
         super(reportPublisher, path);
     }
 
@@ -35,7 +35,7 @@ public class Adapter extends PageAreaImpl {
      * @param reportFilePath
      *         path to report file.
      */
-    public void setReportFilePath(final String reportFilePath) {
+    public void setReportFilePath(String reportFilePath) {
         this.reportFilePath.set(reportFilePath);
     }
 
@@ -45,7 +45,7 @@ public class Adapter extends PageAreaImpl {
      * @param mergeReports
      *         boolean for merging to one report
      */
-    public void setMergeToOneReport(final boolean mergeReports) {
+    public void setMergeToOneReport(boolean mergeReports) {
         ensureAdvancedOptionsIsActivated();
         mergeToOneReport.check(mergeReports);
     }
@@ -67,9 +67,9 @@ public class Adapter extends PageAreaImpl {
      * @param failUnhealthy value for setting if build should fail on unhealthy
      * @return
      */
-     public AdapterThreshold createThresholdsPageArea(final AdapterThresholdTarget thresholdTarget,
-            final double unhealthyThreshold,
-            final double unstableThreshold, final boolean failUnhealthy) {
+     public AdapterThreshold createThresholdsPageArea(AdapterThresholdTarget thresholdTarget,
+            double unhealthyThreshold,
+            double unstableThreshold, boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("thresholds", () -> this.threshold.click());
         AdapterThreshold threshold = new AdapterThreshold(this, path);

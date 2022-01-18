@@ -12,7 +12,7 @@ public class FileCoverageTableRow {
     private final WebElement row;
     private final FileCoverageTable table;
 
-    FileCoverageTableRow(final WebElement row, final FileCoverageTable table) {
+    FileCoverageTableRow(WebElement row, FileCoverageTable table) {
         this.row = row;
         this.table = table;
     }
@@ -87,7 +87,7 @@ public class FileCoverageTableRow {
      *
      * @return the WebElement of the table data field
      */
-    final WebElement getCell(final String header) {
+    final WebElement getCell(String header) {
         return getCells().get(getHeaders().indexOf(header));
     }
 
@@ -99,7 +99,7 @@ public class FileCoverageTableRow {
      *
      * @return the String representation of the cell
      */
-    final String getCellContent(final String header) {
+    final String getCellContent(String header) {
         if (!getHeaders().contains(header)) {
             return "-";
         }

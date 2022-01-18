@@ -52,7 +52,7 @@ public class SmokeTests extends UiTest {
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setFailNoReports(true);
         job.save();
-        Build buildWithErrors = buildWithErrors(job);
+        buildWithErrors(job);
 
         //TODO: tests here for fail on no reports (CoverageSummary?)
         //SummaryTest.NAME(build);
@@ -207,7 +207,7 @@ public class SmokeTests extends UiTest {
         GlobalThreshold globalThreshold = coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.FILE,
                 59, 59, false);
         job.save();
-        Build seventhBuildSuccessfully = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /**
          * 8th build: Change GlobalThresholds, setFailUnhealthy(false), should still succeed.
@@ -222,7 +222,7 @@ public class SmokeTests extends UiTest {
         globalThreshold.setUnstableThreshold(60);
         globalThreshold.setFailUnhealthy(false);
         job.save();
-        Build eighthBuildSuccessfully = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /**
          * 9th build  (preperation for 10th build): Change GlobalThresholds, set..
@@ -236,7 +236,7 @@ public class SmokeTests extends UiTest {
         globalThreshold.setUnstableThreshold(5);
         globalThreshold.setFailUnhealthy(true);
         job.save();
-        Build ninthBuildFailing = buildWithErrors(job);
+        buildWithErrors(job);
 
         /**
          * 10th build: Set globalThresholds and failUnhealthy(true) so that build should fail.
@@ -250,7 +250,7 @@ public class SmokeTests extends UiTest {
         globalThreshold.setUnhealthyThreshold(99);
         globalThreshold.setUnstableThreshold(5);
         job.save();
-        Build tenthBuildFailing = buildWithErrors(job);
+        buildWithErrors(job);
 
         /**
          * 11th build: Set global Thresholds so that build is unstable.
@@ -262,7 +262,7 @@ public class SmokeTests extends UiTest {
         globalThreshold.setUnhealthyThreshold(0);
         globalThreshold.setUnstableThreshold(95);
         job.save();
-        Build eleventhBuildFailing = buildUnstable(job);
+        buildUnstable(job);
 
         /**
          * 12th build: Set fail if build would be unstable.
@@ -272,7 +272,7 @@ public class SmokeTests extends UiTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnstable(true);
         job.save();
-        Build twelfthBuildFailing = buildWithErrors(job);
+        buildWithErrors(job);
 
         /**
          * 13th build: Set SourceFileResolver to {#SourceFileResolver.STORE_ALL_BUILD}
@@ -286,7 +286,7 @@ public class SmokeTests extends UiTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
         job.save();
-        Build thirteenthBuildFailing = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /**
          * 14th build: Set SourceFileResolver to {#SourceFileResolver.STORE_ALL_BUILD}
@@ -296,7 +296,7 @@ public class SmokeTests extends UiTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_LAST_BUIlD);
         job.save();
-        Build fourteenthBuildFailing = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /**
          * 15th build: Set SourceFileResolver to {#SourceFileResolver.NEVER_STORE}
@@ -306,7 +306,7 @@ public class SmokeTests extends UiTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_STORE);
         job.save();
-        Build fifteenthBuildFailing = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /**
          * 16th build: should skip publishing checks
@@ -315,7 +315,7 @@ public class SmokeTests extends UiTest {
         coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSkipPublishingChecks(true);
         job.save();
-        Build sixteenthBuildFailing = buildSuccessfully(job);
+        buildSuccessfully(job);
 
         /* some old notes:
          * 5) normale thresholds ohne fail setter

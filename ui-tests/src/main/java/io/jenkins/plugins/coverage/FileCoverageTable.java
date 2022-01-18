@@ -22,7 +22,7 @@ public class FileCoverageTable {
     private final WebElement tableElement;
     private final WebElement tableInfo;
 
-    FileCoverageTable(final CoverageReport coverageReport) {
+    FileCoverageTable(CoverageReport coverageReport) {
         this.coverageReport = coverageReport;
 
         tableElement = coverageReport.waitFor(
@@ -55,7 +55,7 @@ public class FileCoverageTable {
      *
      * @return the table row
      */
-    protected FileCoverageTableRow createRow(final WebElement row) {
+    protected FileCoverageTableRow createRow(WebElement row) {
         return new FileCoverageTableRow(row, this);
     }
 
@@ -69,7 +69,7 @@ public class FileCoverageTable {
      * @return the row
      * @see #createRow(WebElement)
      */
-    public FileCoverageTableRow getRow(final int rowIndex) {
+    public FileCoverageTableRow getRow(int rowIndex) {
         return getTableRows().get(rowIndex);
     }
 
@@ -119,7 +119,7 @@ public class FileCoverageTable {
      * @param pageNumber
      *         the number representing the page to open
      */
-    public void openTablePage(final int pageNumber) {
+    public void openTablePage(int pageNumber) {
         WebElement webElement = coverageReport.find(
                 By.xpath("//a[@class='page-link' and @data-dt-idx='" + (pageNumber - 1) + "']"));
         webElement.click();
@@ -152,7 +152,7 @@ public class FileCoverageTable {
 
         private final String title;
 
-        Header(final String property) {
+        Header(String property) {
             title = property;
         }
 

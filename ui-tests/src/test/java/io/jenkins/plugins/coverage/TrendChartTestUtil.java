@@ -16,7 +16,7 @@ class TrendChartTestUtil {
      * @param firstBuildInChartNumber first buildnumber displayed in TrendChart
      * @param lastBuildInChartNumber last buildnumber displayed in TrendChart
      */
-    static void verifyTrendChart(final String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber) {
+    static void verifyTrendChart(String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
@@ -46,7 +46,7 @@ class TrendChartTestUtil {
      * its builds.
      * @param trendChart which should only contain one record
      */
-    static void verifyTrendChartContainsOnlyOneRecord(final String trendChart) {
+    static void verifyTrendChartContainsOnlyOneRecord(String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()

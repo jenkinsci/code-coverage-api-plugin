@@ -159,9 +159,9 @@ public class CoverageReportTest extends UiTest {
      * @param shouldBranchCoverages
      *         string array of expected values in branch coverage column
      */
-    public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable,
-            final String[] shouldPackage, final String[] shouldFiles, final String[] shouldLineCoverages,
-            final String[] shouldBranchCoverages) {
+    public static void verifyFileCoverageTableContent(FileCoverageTable fileCoverageTable,
+            String[] shouldPackage, String[] shouldFiles, String[] shouldLineCoverages,
+            String[] shouldBranchCoverages) {
         List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
         List<String> headers = fileCoverageTable.getHeaders();
 
@@ -187,8 +187,8 @@ public class CoverageReportTest extends UiTest {
      * @param shouldValue
      *         number of expected maximal entries
      */
-    public static void verifyFileCoverageTableNumberOfMaxEntries(final FileCoverageTable fileCoverageTable,
-            final int shouldValue) {
+    public static void verifyFileCoverageTableNumberOfMaxEntries(FileCoverageTable fileCoverageTable,
+            int shouldValue) {
         assertThat(fileCoverageTable.getTotals()).isEqualTo(shouldValue);
 
     }
@@ -199,7 +199,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageOverview
      *         from second build.
      */
-    public static void verifyCoverageOverview(final String coverageOverview) {
+    public static void verifyCoverageOverview(String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -231,7 +231,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageOverview
      *         from first build.
      */
-    public static void verifyCoverageOverviewNotEmpty(final String coverageOverview) {
+    public static void verifyCoverageOverviewNotEmpty(String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -256,7 +256,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageTree
      *         from second build.
      */
-    public static void verifyCoverageTree(final String coverageTree) {
+    public static void verifyCoverageTree(String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
                 .contains("Ensure.java")
                 .contains("FilteredLog.java")
@@ -288,7 +288,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageTree
      *         from second build.
      */
-    public static void verifyCoverageTreeNotEmpty(final String coverageTree) {
+    public static void verifyCoverageTreeNotEmpty(String coverageTree) {
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2);
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2);
     }

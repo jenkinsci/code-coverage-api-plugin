@@ -16,7 +16,7 @@ public class GlobalThreshold extends AbstractThreshold {
      * @param path
      *         to threshold
      */
-    public GlobalThreshold(final CoveragePublisher coveragePublisher, final String path) {
+    public GlobalThreshold(CoveragePublisher coveragePublisher, String path) {
         super(coveragePublisher, path);
     }
 
@@ -26,7 +26,7 @@ public class GlobalThreshold extends AbstractThreshold {
      * @param globalThresholdTarget
      *         of threshold
      */
-    public void setThresholdTarget(final GlobalThresholdTarget globalThresholdTarget) {
+    public void setThresholdTarget(GlobalThresholdTarget globalThresholdTarget) {
         //checkControlsAreAvailable();
         this.thresholdTarget.select(globalThresholdTarget.getValue());
 
@@ -58,7 +58,7 @@ public class GlobalThreshold extends AbstractThreshold {
          * Constructor of enum.
          * @param value is value-attribute of option-tag.
          */
-        GlobalThresholdTarget(final String value) {
+        GlobalThresholdTarget(String value) {
             this.value = value;
         }
 

@@ -27,10 +27,10 @@ public class SummaryTest extends UiTest {
      * @param build
      *         Build of Project
      */
-    public static void verifySummaryOnNoReport(final Build build) {
+    public static void verifySummaryOnNoReport(Build build) {
         build.open();
         // TODO: Das Element existiert nicht, wie soll das getestet werden?
-        CoverageSummary cs = new CoverageSummary(build, "coverage");
+        //CoverageSummary cs = new CoverageSummary(build, "coverage");
     }
 
     /**
@@ -41,7 +41,7 @@ public class SummaryTest extends UiTest {
      * @param expectedCoverage
      *         map of expected values to be present in summary
      */
-    public static void verifySummaryOnSuccessfulBuild(final Build build,
+    public static void verifySummaryOnSuccessfulBuild(Build build,
             final HashMap<String, Double> expectedCoverage) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
@@ -60,8 +60,8 @@ public class SummaryTest extends UiTest {
      * @param expectedChanges
      *         List of expected values for coverage changes
      */
-    public static void verifySummaryWithReferenceBuild(final Build build,
-            final HashMap<String, Double> expectedCoverage, final List<Double> expectedChanges) {
+    public static void verifySummaryWithReferenceBuild(Build build,
+            final HashMap<String, Double> expectedCoverage, List<Double> expectedChanges) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
 
@@ -84,7 +84,7 @@ public class SummaryTest extends UiTest {
      * @param expectedCoverage
      *         expected coverage of build
      */
-    public static void verifySummaryOnFailedBuild(final Build build, final HashMap<String, Double> expectedCoverage) {
+    public static void verifySummaryOnFailedBuild(Build build, HashMap<String, Double> expectedCoverage) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
         HashMap<String, Double> coverage = cs.getCoverage();
@@ -103,7 +103,7 @@ public class SummaryTest extends UiTest {
      * @param unstableThreshold
      *         of project
      */
-    public static void verifyFailMessage(final Build build, final float unhealthyThreshold,
+    public static void verifyFailMessage(Build build, float unhealthyThreshold,
             final float unstableThreshold) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");

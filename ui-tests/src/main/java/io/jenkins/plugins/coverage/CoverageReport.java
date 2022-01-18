@@ -1,20 +1,16 @@
 package io.jenkins.plugins.coverage;
 
-import java.net.URL;
-import java.util.NoSuchElementException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.google.inject.Injector;
+import java.util.NoSuchElementException;
 
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.PageObject;
-
-import static io.jenkins.plugins.coverage.TrendChartUtil.*;
+import static io.jenkins.plugins.coverage.TrendChartUtil.getChartsDataById;
 
 /**
  * {@link PageObject} representing the Coverage Report.
@@ -29,10 +25,9 @@ public class CoverageReport extends PageObject {
     /**
      * Constructor to create CoverageReport-PageObject out of a build.
      *
-     * @param parent
-     *         build of wanted CoverageReport.
+     * @param parent build of wanted CoverageReport.
      */
-    public CoverageReport(final Build parent) {
+    public CoverageReport(Build parent) {
         super(parent, parent.url(RELATIVE_PATH_BUILD_TO_REPORT));
     }
 
@@ -68,6 +63,7 @@ public class CoverageReport extends PageObject {
 
     /**
      * Opens tab containing {@link FileCoverageTable} and returns it.
+     *
      * @return FileCoverageTable.
      */
     public FileCoverageTable getCoverageTable() {
@@ -94,6 +90,7 @@ public class CoverageReport extends PageObject {
 
     /**
      * Opens File Coverage Table.
+     *
      * @return FileCoverageTable
      */
     public FileCoverageTable openFileCoverageTable() {
@@ -129,10 +126,9 @@ public class CoverageReport extends PageObject {
     /**
      * Opens the specified tab.
      *
-     * @param tab
-     *         that should be selected
+     * @param tab that should be selected
      */
-    private void openTab(final Tab tab) {
+    private void openTab(Tab tab) {
         WebElement tabElement = getElement(By.id("tab-details")).findElement(tab.getXpath());
         tabElement.click();
     }
@@ -140,12 +136,10 @@ public class CoverageReport extends PageObject {
     /**
      * Extract the relative url of a href (of a tab).
      *
-     * @param absoluteUrl
-     *         of href of tab
-     *
+     * @param absoluteUrl of href of tab
      * @return relative url.
      */
-    private String extractRelativeUrl(final String absoluteUrl) {
+    private String extractRelativeUrl(String absoluteUrl) {
         return "#" + StringUtils.substringAfterLast(absoluteUrl, "#");
     }
 
@@ -160,23 +154,21 @@ public class CoverageReport extends PageObject {
 
         /**
          * Constructor for Tab.
-         * @param id
+         *
+         * @param id of tab
          */
-        Tab(final String id) {
+        Tab(String id) {
             this.id = id;
         }
 
         /**
          * Returns the enum element that has the specified href property.
          *
-         * @param href
-         *         to select the tab
-         *
+         * @param href to select the tab
          * @return the tab
-         * @throws NoSuchElementException
-         *         if the tab could not be found
+         * @throws NoSuchElementException if the tab could not be found
          */
-        static Tab valueWithHref(final String href) {
+        static Tab valueWithHref(String href) {
             for (Tab tab : Tab.values()) {
                 if (tab.id.equals(href.substring(1))) {
                     return tab;

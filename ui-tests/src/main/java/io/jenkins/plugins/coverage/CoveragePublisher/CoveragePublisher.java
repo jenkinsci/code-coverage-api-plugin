@@ -35,7 +35,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param path
      *         on the parent page
      */
-    public CoveragePublisher(final Job parent, final String path) {
+    public CoveragePublisher(Job parent, String path) {
         super(parent, path);
     }
 
@@ -45,7 +45,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param applyTresholds
      *         boolean for using applying threshold recursively
      */
-    public void setApplyThresholdRecursively(final boolean applyTresholds) {
+    public void setApplyThresholdRecursively(boolean applyTresholds) {
         ensureAdvancedOptionsIsActivated();
         applyThresholdRecursively.check(applyTresholds);
     }
@@ -56,7 +56,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnUnhealthy
      *         boolean for failing on unhealthy
      */
-    public void setFailUnhealthy(final boolean failOnUnhealthy) {
+    public void setFailUnhealthy(boolean failOnUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         failUnhealthy.check(failOnUnhealthy);
     }
@@ -67,7 +67,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnUnstable
      *         boolean for failing on unstable
      */
-    public void setFailUnstable(final boolean failOnUnstable) {
+    public void setFailUnstable(boolean failOnUnstable) {
         ensureAdvancedOptionsIsActivated();
         failUnstable.check(failOnUnstable);
     }
@@ -78,7 +78,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnNoReports
      *         boolean for fail on no reports
      */
-    public void setFailNoReports(final boolean failOnNoReports) {
+    public void setFailNoReports(boolean failOnNoReports) {
         ensureAdvancedOptionsIsActivated();
         failNoReports.check(failOnNoReports);
     }
@@ -89,7 +89,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnCoverageDecreases
      *         boolean for failing if coverage decreased in Change Request
      */
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failOnCoverageDecreases) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failOnCoverageDecreases) {
         ensureAdvancedOptionsIsActivated();
         failBuildIfCoverageDecreasedInChangeRequest.check(failOnCoverageDecreases);
     }
@@ -100,7 +100,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param skipPublishing
      *         boolean for skipping publishing checks
      */
-    public void setSkipPublishingChecks(final boolean skipPublishing) {
+    public void setSkipPublishingChecks(boolean skipPublishing) {
         ensureAdvancedOptionsIsActivated();
         skipPublishingChecks.check(skipPublishing);
     }
@@ -124,7 +124,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *
      * @return added {@link Adapter}
      */
-    public Adapter createAdapterPageArea(final String adapterName) {
+    public Adapter createAdapterPageArea(String adapterName) {
         String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapterName));
         Adapter newAdapter = new Adapter(this, path);
         return newAdapter;
@@ -155,9 +155,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *
      * @return added {@link Adapter} with setted configuration
      */
-    public GlobalThreshold createGlobalThresholdsPageArea(final GlobalThresholdTarget thresholdTarget,
-            final double unhealthyThreshold,
-            final double unstableThreshold, final boolean failUnhealthy) {
+    public GlobalThreshold createGlobalThresholdsPageArea(GlobalThresholdTarget thresholdTarget,
+            double unhealthyThreshold,
+            double unstableThreshold, boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThreshold.click());
         GlobalThreshold globalThreshold = new GlobalThreshold(this, path);
@@ -175,7 +175,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param storingLevel
      *         which should be applied
      */
-    public void setSourceFileResolver(final SourceFileResolver storingLevel) {
+    public void setSourceFileResolver(SourceFileResolver storingLevel) {
         ensureAdvancedOptionsIsActivated();
         sourceFileResolver.select(storingLevel.getValue());
     }
@@ -197,7 +197,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
          * @param value
          *         is value-attribute of option-tag.
          */
-        SourceFileResolver(final String value) {
+        SourceFileResolver(String value) {
             this.value = value;
         }
 

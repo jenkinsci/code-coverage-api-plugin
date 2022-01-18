@@ -21,7 +21,7 @@ class TrendChartUtil {
      * @param elementId of chart
      * @return data as json
      */
-    static String getChartsDataById(final PageObject pageObject, final String elementId) {
+    static String getChartsDataById(PageObject pageObject, String elementId) {
         if (isChartDisplayed(pageObject, elementId)) {
             Object result = pageObject.executeScript(String.format(
                     "delete(window.Array.prototype.toJSON) %n"
@@ -40,7 +40,7 @@ class TrendChartUtil {
      * @param elementId of chart
      * @return if chart is displayed
      */
-    static boolean isChartDisplayed(final PageObject pageObject, final String elementId) {
+    static boolean isChartDisplayed(PageObject pageObject, String elementId) {
         try {
             WebElement chart = pageObject.find(By.id(elementId));
             return chart != null && chart.isDisplayed();

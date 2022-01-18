@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -14,7 +14,6 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * {@link PageObject} representing the coverage summary on the build page of a job.
  */
 public class CoverageSummary extends PageObject {
-    private final String id;
     private final WebElement coverageReportLink;
 
     private final WebElement referenceBuild;
@@ -30,10 +29,9 @@ public class CoverageSummary extends PageObject {
      * @param id
      *         the type of the result page (e.g. simian, checkstyle, cpd, etc.)
      */
-    public CoverageSummary(final Build parent, final String id) {
+    public CoverageSummary(Build parent, String id) {
         super(parent, parent.url(id));
 
-        this.id = id;
         WebElement summary = getElement(By.id(id + "-summary"));
 
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
@@ -79,7 +77,7 @@ public class CoverageSummary extends PageObject {
      * @return List of relative changes
      */
     public List<Double> getCoverageChanges() {
-        List<Double> changes = new LinkedList<>();
+        List<Double> changes = new ArrayList<>();
         for (WebElement result : this.coverageChanges) {
             String message = result.getText();
             double value = Double.parseDouble(message.substring(1, message.indexOf("%")).trim());
@@ -116,7 +114,7 @@ public class CoverageSummary extends PageObject {
         return openPage(a, CoverageReport.class);
     }
 
-    private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
+    private <T extends PageObject> T openPage(WebElement link, Class<T> type) {
         String href = link.getAttribute("href");
         T result = newInstance(type, url(href));
         link.click();

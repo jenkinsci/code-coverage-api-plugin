@@ -15,7 +15,7 @@ public class AdapterThreshold extends AbstractThreshold {
      * @param path
      *         to threshold
      */
-    public AdapterThreshold(final Adapter adapter, final String path) {
+    public AdapterThreshold(Adapter adapter, String path) {
         super(adapter, path);
     }
 
@@ -25,7 +25,7 @@ public class AdapterThreshold extends AbstractThreshold {
      * @param adapterThresholdTarget
      *         of threshold
      */
-    public void setThresholdTarget(final AdapterThresholdTarget adapterThresholdTarget) {
+    public void setThresholdTarget(AdapterThresholdTarget adapterThresholdTarget) {
         this.thresholdTarget.select(adapterThresholdTarget.getValue());
     }
 
@@ -54,7 +54,7 @@ public class AdapterThreshold extends AbstractThreshold {
          * @param value
          *         is value-attribute of option-tag.
          */
-        AdapterThresholdTarget(final String value) {
+        AdapterThresholdTarget(String value) {
             this.value = value;
         }
 
