@@ -1,14 +1,15 @@
 package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 
 /**
- * Threshold used in {@link Adapter} in {@CoveragePublisher}.
+ * Threshold used in {@link Adapter} in {@link CoveragePublisher}.
  */
 public class AdapterThreshold extends AbstractThreshold {
 
     /**
-     * Constructor of a Threshold used in {@link Adapter} in {@CoveragePublisher}.
+     * Constructor of an AdapterThreshold.
      *
      * @param adapter
      *         of threshold

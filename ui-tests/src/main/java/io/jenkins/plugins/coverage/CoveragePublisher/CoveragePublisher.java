@@ -181,7 +181,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     }
 
     /**
-     * Enum for Options of Source File Storing Level of {@CoveragePublisher}.
+     * Enum for Options of Source File Storing Level of {@link CoveragePublisher}.
      */
     public enum SourceFileResolver {
         NEVER_STORE("NEVER_STORE"),

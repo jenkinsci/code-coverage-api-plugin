@@ -65,7 +65,7 @@ public class Adapter extends PageAreaImpl {
      * @param unhealthyThreshold value to be set
      * @param unstableThreshold value to be set
      * @param failUnhealthy value for setting if build should fail on unhealthy
-     * @return
+     * @return threshold
      */
      public AdapterThreshold createThresholdsPageArea(AdapterThresholdTarget thresholdTarget,
             double unhealthyThreshold,
@@ -81,7 +81,7 @@ public class Adapter extends PageAreaImpl {
     }
 
     /**
-     * Activates advanced options to use setters of {@Adapter}.
+     * Activates advanced options to use setters of {@link Adapter}.
      */
     public void ensureAdvancedOptionsIsActivated() {
         if (advancedOptions.exists()) {
