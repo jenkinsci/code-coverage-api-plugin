@@ -102,12 +102,13 @@ public class CoveragePublisherTest extends UiTest {
     @Test
     public void testSourceFileStoringLevel() {
         String repoUrl = "https://github.com/jenkinsci/code-coverage-api-plugin.git";
+        String commitID= "f52a51691598600e2f42eee354ee6a540e008a72";
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setSkipPublishingChecks(false);
         copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        jacocoAdapter.setReportFilePath(JACOCO_OLD_COMMIT_XML);
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
         job.save();
         buildUnstable(job);

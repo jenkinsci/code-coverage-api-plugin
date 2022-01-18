@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 class UiTest extends AbstractJUnitTest {
     static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
+    static final String JACOCO_OLD_COMMIT_XML = "jacoco-f52a5169.xml";
     static final String RESOURCES_FOLDER = "/";
 
     /**
