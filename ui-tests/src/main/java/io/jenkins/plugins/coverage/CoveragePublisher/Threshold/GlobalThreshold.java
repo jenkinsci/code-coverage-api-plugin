@@ -7,6 +7,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
  */
 public class GlobalThreshold extends AbstractThreshold {
     private CoveragePublisher coveragePublisher;
+
     /**
      * Constructor of a GlobalThreshold in {@link CoveragePublisher}.
      *
@@ -28,7 +29,7 @@ public class GlobalThreshold extends AbstractThreshold {
      */
     public void setThresholdTarget(GlobalThresholdTarget globalThresholdTarget) {
         ensureAdvancedOptionsIsActivated();
-        this.thresholdTarget.select(globalThresholdTarget.getValue());
+        this.getThresholdTarget().select(globalThresholdTarget.getValue());
 
     }
 
@@ -36,7 +37,7 @@ public class GlobalThreshold extends AbstractThreshold {
      * Ensures advanced options are activated so that values can be set.
      */
     @Override
-    protected void ensureAdvancedOptionsIsActivated() {
+    public void ensureAdvancedOptionsIsActivated() {
         this.coveragePublisher.ensureAdvancedOptionsIsActivated();
     }
 
@@ -44,7 +45,6 @@ public class GlobalThreshold extends AbstractThreshold {
      * Enum for Options of {@link GlobalThreshold}.
      */
     public enum GlobalThresholdTarget {
-
         AGGREGATED_REPORT("Aggregated Report"),
         REPORT("Report"),
         GROUP("Group"),
@@ -56,8 +56,7 @@ public class GlobalThreshold extends AbstractThreshold {
         FUNCTION("Function"),
         INSTRUCTION("Instruction"),
         LINE("Line"),
-        CONDITIONAL("Conditional"),
-        ;
+        CONDITIONAL("Conditional");
 
         private final String value;
 
@@ -77,7 +76,5 @@ public class GlobalThreshold extends AbstractThreshold {
             return value;
         }
     }
-
-
 }
 

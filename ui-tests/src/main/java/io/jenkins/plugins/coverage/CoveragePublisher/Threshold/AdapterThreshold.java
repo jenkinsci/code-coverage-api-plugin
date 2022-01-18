@@ -8,6 +8,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
  */
 public class AdapterThreshold extends AbstractThreshold {
     private Adapter adapter;
+
     /**
      * Constructor of an AdapterThreshold.
      *
@@ -29,14 +30,14 @@ public class AdapterThreshold extends AbstractThreshold {
      */
     public void setThresholdTarget(AdapterThresholdTarget adapterThresholdTarget) {
         ensureAdvancedOptionsIsActivated();
-        this.thresholdTarget.select(adapterThresholdTarget.getValue());
+        this.getThresholdTarget().select(adapterThresholdTarget.getValue());
     }
 
     /**
      * Ensures advanced options are activated so that values can be set.
      */
     @Override
-    protected void ensureAdvancedOptionsIsActivated() {
+    public void ensureAdvancedOptionsIsActivated() {
         this.adapter.ensureAdvancedOptionsIsActivated();
     }
 
@@ -53,8 +54,7 @@ public class AdapterThreshold extends AbstractThreshold {
         METHOD("Method"),
         INSTRUCTION("Instruction"),
         LINE("Line"),
-        CONDITIONAL("Conditional"),
-        ;
+        CONDITIONAL("Conditional");
 
         private final String value;
 

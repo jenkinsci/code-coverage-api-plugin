@@ -150,23 +150,22 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *         which should be set
      * @param unstableThreshold
      *         which should be set
-     * @param failUnhealthy
+     * @param failOnUnhealthy
      *         boolean for failing build on unhealthy
      *
      * @return added {@link Adapter} with setted configuration
      */
     public GlobalThreshold createGlobalThresholdsPageArea(GlobalThresholdTarget thresholdTarget,
             double unhealthyThreshold,
-            double unstableThreshold, boolean failUnhealthy) {
+            double unstableThreshold, boolean failOnUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThreshold.click());
-        GlobalThreshold globalThreshold = new GlobalThreshold(this, path);
-
-        globalThreshold.setThresholdTarget(thresholdTarget);
-        globalThreshold.setUnhealthyThreshold(unhealthyThreshold);
-        globalThreshold.setUnstableThreshold(unstableThreshold);
-        globalThreshold.setFailUnhealthy(failUnhealthy);
-        return globalThreshold;
+        GlobalThreshold threshold = new GlobalThreshold(this, path);
+        threshold.setThresholdTarget(thresholdTarget);
+        threshold.setUnhealthyThreshold(unhealthyThreshold);
+        threshold.setUnstableThreshold(unstableThreshold);
+        threshold.setFailUnhealthy(failOnUnhealthy);
+        return threshold;
     }
 
     /**
@@ -186,8 +185,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     public enum SourceFileResolver {
         NEVER_STORE("NEVER_STORE"),
         STORE_LAST_BUIlD("STORE_LAST_BUILD"),
-        STORE_ALL_BUILD("STORE_ALL_BUILD"),
-        ;
+        STORE_ALL_BUILD("STORE_ALL_BUILD");
 
         private final String value;
 

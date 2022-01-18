@@ -7,9 +7,8 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 /**
  * Used for thresholds and global thresholds.
  */
-public abstract class AbstractThreshold extends PageAreaImpl {
-
-    final Control thresholdTarget = control("thresholdTarget");
+abstract class AbstractThreshold extends PageAreaImpl {
+    private final Control thresholdTarget = control("thresholdTarget");
     private final Control unhealthyThreshold = control("unhealthyThreshold");
     private final Control unstableThreshold = control("unstableThreshold");
     private final Control failUnhealthy = control("failUnhealthy");
@@ -22,6 +21,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * @param path
      *         to threshold
      */
+
     protected AbstractThreshold(PageArea parent, String path) {
         super(parent, path);
     }
@@ -68,9 +68,11 @@ public abstract class AbstractThreshold extends PageAreaImpl {
     }
 
     /**
-     * Ensures advanced options are activated so that values can be set.
+     * Ensures advanced options are activated so that Thresholds can be set.
      */
-    protected abstract void ensureAdvancedOptionsIsActivated();
+    public abstract void ensureAdvancedOptionsIsActivated();
 
-
+    Control getThresholdTarget() {
+        return thresholdTarget;
+    }
 }

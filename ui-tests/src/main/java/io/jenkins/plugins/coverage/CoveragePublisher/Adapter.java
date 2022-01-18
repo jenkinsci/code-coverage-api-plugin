@@ -17,6 +17,7 @@ public class Adapter extends PageAreaImpl {
 
     private final Control delete = control("repeatable-delete");
     private final Control advancedOptions = control("advanced-button");
+
     /**
      * Constructor to create {@link Adapter} for {@link CoveragePublisher}.
      *
@@ -52,6 +53,7 @@ public class Adapter extends PageAreaImpl {
 
     /**
      * Adds empty {@link AdapterThreshold}.
+     * @return new Threshold to Adapter
      */
     public AdapterThreshold createThresholdsPageArea() {
         ensureAdvancedOptionsIsActivated();
@@ -67,17 +69,16 @@ public class Adapter extends PageAreaImpl {
      * @param failUnhealthy value for setting if build should fail on unhealthy
      * @return threshold
      */
-     public AdapterThreshold createThresholdsPageArea(AdapterThresholdTarget thresholdTarget,
-            double unhealthyThreshold,
+    public AdapterThreshold createThresholdsPageArea(AdapterThresholdTarget thresholdTarget, double unhealthyThreshold,
             double unstableThreshold, boolean failUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("thresholds", () -> this.threshold.click());
-        AdapterThreshold threshold = new AdapterThreshold(this, path);
-        threshold.setThresholdTarget(thresholdTarget);
-        threshold.setUnhealthyThreshold(unhealthyThreshold);
-        threshold.setUnstableThreshold(unstableThreshold);
-        threshold.setFailUnhealthy(failUnhealthy);
-        return threshold;
+        AdapterThreshold adapterThreshold = new AdapterThreshold(this, path);
+        adapterThreshold.setThresholdTarget(thresholdTarget);
+        adapterThreshold.setUnhealthyThreshold(unhealthyThreshold);
+        adapterThreshold.setUnstableThreshold(unstableThreshold);
+        adapterThreshold.setFailUnhealthy(failUnhealthy);
+        return adapterThreshold;
     }
 
     /**
@@ -94,6 +95,5 @@ public class Adapter extends PageAreaImpl {
      */
     public void deleteAdapter() {
         this.delete.click();
-
     }
 }
