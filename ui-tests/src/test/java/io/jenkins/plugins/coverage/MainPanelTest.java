@@ -58,7 +58,6 @@ public class MainPanelTest extends UiTest {
         assertThat(mainPanel.isChartDisplayed()).isFalse();
     }
 
-
     /**
      * Verifies a specific displayed TrendChart.
      * @param mainPanel of project

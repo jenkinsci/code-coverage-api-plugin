@@ -49,6 +49,10 @@ public class CoverageSummary extends PageObject {
         return coverageReportLink;
     }
 
+    /**
+     * Opens attached {@link CoverageReport}.
+     * @return attached CoverageReport.
+     */
     public CoverageReport openCoverageReport() {
         return openPage(getCoverageReportLink(), CoverageReport.class);
     }

@@ -16,7 +16,6 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 
 import static io.jenkins.plugins.coverage.TrendChartUtil.*;
 
-
 /**
  * {@link PageObject} representing the Coverage Report.
  */
@@ -26,8 +25,6 @@ public class CoverageReport extends PageObject {
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
     private static final String COVERAGE_TREND_CHART = "coverage-trend";
     private static final String COVERAGE_TREE_CHART = "coverage-details";
-
-
 
     /**
      * Constructor to create CoverageReport-PageObject out of a build.
@@ -70,7 +67,8 @@ public class CoverageReport extends PageObject {
     }
 
     /**
-     * Opens and returns FileCoverageTable.
+     * Opens tab containing {@link FileCoverageTable} and returns it.
+     * @return FileCoverageTable.
      */
     public FileCoverageTable getCoverageTable() {
         return openFileCoverageTable();
@@ -95,7 +93,8 @@ public class CoverageReport extends PageObject {
     }
 
     /**
-     * Opens File Coverage Table
+     * Opens File Coverage Table.
+     * @return FileCoverageTable
      */
     public FileCoverageTable openFileCoverageTable() {
         ensureCoverageReportPageIsOpen();
@@ -111,7 +110,7 @@ public class CoverageReport extends PageObject {
     }
 
     /**
-     * Opens tab in CoverageReport which contains the CoverageTable, aka File Overview
+     * Opens tab in CoverageReport which contains the CoverageTable, aka File Overview.
      */
     public void openTabCoverageTable() {
         openTab(Tab.FILE_OVERVIEW);
@@ -161,6 +160,7 @@ public class CoverageReport extends PageObject {
 
         /**
          * Constructor for Tab.
+         * @param id
          */
         Tab(final String id) {
             this.id = id;

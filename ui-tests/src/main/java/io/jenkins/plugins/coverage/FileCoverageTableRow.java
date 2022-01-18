@@ -6,7 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * Representation of a table row in {@link FileCoverageTable}
+ * Representation of a table row in {@link FileCoverageTable}.
  */
 public class FileCoverageTableRow {
     private final WebElement row;

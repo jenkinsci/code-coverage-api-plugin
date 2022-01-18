@@ -1,26 +1,27 @@
 package io.jenkins.plugins.coverage;
 
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.MainPanel;
-
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
 /**
  * Due to Coverage TrendChart is displayed twice, in ({@link CoverageReport} and {@link MainPanel},
  * this helper class provides static verifying methods that can be used in all tests for a specific TrendChart.
  */
-public class TrendChartTestUtil {
+@SuppressWarnings("hideutilityclassconstructor")
+class TrendChartTestUtil {
 
     /**
-     * Verifies if a specific generated TrendChart has the correct number of builds in its axis and the right coverage values for
+     * Verifies if a specific generated TrendChart has the correct buildnumbers in its axis and the right coverage values for
      * its builds.
+     * @param trendChart from coverage report
+     * @param firstBuildInChartNumber first buildnumber displayed in TrendChart
+     * @param lastBuildInChartNumber last buildnumber displayed in TrendChart
      */
-    public static void verifyTrendChart(final String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber ) {
+    static void verifyTrendChart(final String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
-                .contains("#"+firstBuildInChartNumber)
-                .contains("#"+lastBuildInChartNumber);
+                .contains("#" + firstBuildInChartNumber)
+                .contains("#" + lastBuildInChartNumber);
 
         assertThatJson(trendChart)
                 .node("series")
@@ -40,16 +41,16 @@ public class TrendChartTestUtil {
                 );
     }
 
-
     /**
      * Verifies if specific a generated TrendChart has the correct number of builds in its axis and the right coverage values for
      * its builds.
+     * @param trendChart which should only contain one record
      */
-    public static void verifyTrendChartContainsOnlyOneRecord(final String trendChart) {
+    static void verifyTrendChartContainsOnlyOneRecord(final String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
-                .contains("#"+1);
+                .contains("#" + 1);
 
         assertThatJson(trendChart)
                 .node("series")

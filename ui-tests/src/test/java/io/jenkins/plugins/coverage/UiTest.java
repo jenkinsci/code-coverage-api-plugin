@@ -1,9 +1,6 @@
 package io.jenkins.plugins.coverage;
 
-import java.net.URL;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -17,6 +14,8 @@ class UiTest extends AbstractJUnitTest {
 
     /**
      * Build job and check if it is successfully.
+     * @param job to build
+     * @return successful build
      */
     Build buildSuccessfully(final Job job) {
         return job.startBuild().waitUntilFinished().shouldSucceed();
@@ -24,13 +23,17 @@ class UiTest extends AbstractJUnitTest {
 
     /**
      * Build job and check if it is unstable.
+     * @param job to build
+     * @return unstable build
      */
     Build buildUnstable(final Job job) {
         return job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
     /**
-     * Build job and check if it fails.
+     * Build job and check if it failed.
+     * @param job to build
+     * @return failed build
      */
     Build buildWithErrors(final Job job) {
         return job.startBuild().waitUntilFinished().shouldFail();

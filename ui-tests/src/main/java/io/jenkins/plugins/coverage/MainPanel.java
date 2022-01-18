@@ -36,8 +36,7 @@ public class MainPanel extends PageObject {
         //FIXME
         waitFor().until(()-> executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
-                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",COVERAGE_TREND_CHART ))!=null);
-
+                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())", COVERAGE_TREND_CHART)) != null);
 
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
@@ -48,7 +47,6 @@ public class MainPanel extends PageObject {
 
         return scriptResult.getJavaScriptResult().toString();
     }
-
 
     /**
      * Ensures MainPanel Page is opened.
@@ -63,7 +61,7 @@ public class MainPanel extends PageObject {
      * Returns if TrendChart is displayed in MainPanel.
      * @return if TrendChart is displayed
      */
-    public boolean isChartDisplayed(){
+    public boolean isChartDisplayed() {
         ensureMainPanelPageIsOpen();
         return TrendChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);
     }

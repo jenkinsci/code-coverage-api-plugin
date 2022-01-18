@@ -15,7 +15,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @SuppressFBWarnings("EI")
 public class FileCoverageTable {
-    private final String ID_OF_FILE_COVERAGE_TABLE = "coverage-details";
+    private static final String ID_OF_FILE_COVERAGE_TABLE = "coverage-details";
     private final CoverageReport coverageReport;
     private final List<FileCoverageTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
