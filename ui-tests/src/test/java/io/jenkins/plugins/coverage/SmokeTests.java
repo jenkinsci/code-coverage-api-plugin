@@ -16,13 +16,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.FileCoverageTable;
-import io.jenkins.plugins.coverage.MainPanel;
-import io.jenkins.plugins.coverage.MainPanelTest;
-import io.jenkins.plugins.coverage.SummaryTest;
-import io.jenkins.plugins.coverage.TrendChartTestUtil;
-import io.jenkins.plugins.coverage.UiTest;
+import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
 
 /**
  * Should in the end contain all tests.
@@ -187,7 +181,7 @@ public class SmokeTests extends UiTest {
         job.configure();
         int unhealthyThresholdForSixthBuild = 99;
         int unstableThresholdForSixthBuild = 5;
-        jacocoAdapter.ensureAdvancedOptionsIsActivated();
+        //jacocoAdapter.ensureAdvancedOptionsIsActivated();
         threshold.setThresholdTarget(AdapterThresholdTarget.CLASS);
         threshold.setUnhealthyThreshold(99);
         threshold.setUnstableThreshold(5);
@@ -202,7 +196,7 @@ public class SmokeTests extends UiTest {
          * Check if build is successful.
          */
         job.configure();
-        jacocoAdapter.ensureAdvancedOptionsIsActivated();
+        //jacocoAdapter.ensureAdvancedOptionsIsActivated();
         threshold.delete();
         GlobalThreshold globalThreshold = coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.FILE,
                 59, 59, false);
@@ -216,7 +210,7 @@ public class SmokeTests extends UiTest {
          */
         job.configure();
 
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         globalThreshold.setThresholdTarget(GlobalThresholdTarget.FILE);
         globalThreshold.setUnhealthyThreshold(60);
         globalThreshold.setUnstableThreshold(60);
@@ -229,8 +223,8 @@ public class SmokeTests extends UiTest {
          * //TODO: build configuration ueberarbeiten (sinnvolle confi?)
          */
         job.configure();
-        jacocoAdapter.ensureAdvancedOptionsIsActivated();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //jacocoAdapter.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         globalThreshold.setThresholdTarget(GlobalThresholdTarget.CLASS);
         globalThreshold.setUnhealthyThreshold(99);
         globalThreshold.setUnstableThreshold(5);
@@ -257,7 +251,7 @@ public class SmokeTests extends UiTest {
          * Check if build is unstable.
          */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         globalThreshold.setThresholdTarget(GlobalThresholdTarget.CLASS);
         globalThreshold.setUnhealthyThreshold(0);
         globalThreshold.setUnstableThreshold(95);
@@ -269,7 +263,7 @@ public class SmokeTests extends UiTest {
          * Check if build fails due to setFailUnstable(true) and same configuration as build before which was unstable.
          * */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnstable(true);
         job.save();
         buildWithErrors(job);
@@ -279,11 +273,11 @@ public class SmokeTests extends UiTest {
          * Check ..
          */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setFailUnstable(false);
         globalThreshold.delete();
 
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
         job.save();
         buildSuccessfully(job);
@@ -293,7 +287,7 @@ public class SmokeTests extends UiTest {
          * Check ..
          */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_LAST_BUIlD);
         job.save();
         buildSuccessfully(job);
@@ -303,7 +297,7 @@ public class SmokeTests extends UiTest {
          * Check ....
          */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSourceFileResolver(SourceFileResolver.NEVER_STORE);
         job.save();
         buildSuccessfully(job);
@@ -312,7 +306,7 @@ public class SmokeTests extends UiTest {
          * 16th build: should skip publishing checks
          */
         job.configure();
-        coveragePublisher.ensureAdvancedOptionsIsActivated();
+        //coveragePublisher.ensureAdvancedOptionsIsActivated();
         coveragePublisher.setSkipPublishingChecks(true);
         job.save();
         buildSuccessfully(job);

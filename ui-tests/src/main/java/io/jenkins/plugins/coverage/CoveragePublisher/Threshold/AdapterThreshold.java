@@ -7,7 +7,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
  * Threshold used in {@link Adapter} in {@link CoveragePublisher}.
  */
 public class AdapterThreshold extends AbstractThreshold {
-
+    private Adapter adapter;
     /**
      * Constructor of an AdapterThreshold.
      *
@@ -18,6 +18,7 @@ public class AdapterThreshold extends AbstractThreshold {
      */
     public AdapterThreshold(Adapter adapter, String path) {
         super(adapter, path);
+        this.adapter = adapter;
     }
 
     /**
@@ -27,9 +28,17 @@ public class AdapterThreshold extends AbstractThreshold {
      *         of threshold
      */
     public void setThresholdTarget(AdapterThresholdTarget adapterThresholdTarget) {
+        ensureAdvancedOptionsIsActivated();
         this.thresholdTarget.select(adapterThresholdTarget.getValue());
     }
 
+    /**
+     * Ensures advanced options are activated so that values can be set.
+     */
+    @Override
+    protected void ensureAdvancedOptionsIsActivated() {
+        this.adapter.ensureAdvancedOptionsIsActivated();
+    }
 
     /**
      * Enum for Options of {@link AdapterThreshold}.

@@ -10,7 +10,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.NoSuchElementException;
 
-import static io.jenkins.plugins.coverage.TrendChartUtil.getChartsDataById;
+import static io.jenkins.plugins.coverage.util.TrendChartUtil.*;
 
 /**
  * {@link PageObject} representing the Coverage Report.

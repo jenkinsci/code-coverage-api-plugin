@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage;
+package io.jenkins.plugins.coverage.util;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -8,12 +8,15 @@ import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 
+import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.MainPanel;
+
 /**
  * Coverage-TrendChart is displayed twice. Therefore, this util is used in
  * {@link CoverageReport} and {@link MainPanel}.
  */
 @SuppressWarnings("hideutilityclassconstructor")
-class TrendChartUtil {
+public class TrendChartUtil {
 
     /**
      * Returns a chart's data by its id.
@@ -21,7 +24,7 @@ class TrendChartUtil {
      * @param elementId of chart
      * @return data as json
      */
-    static String getChartsDataById(PageObject pageObject, String elementId) {
+    public static String getChartsDataById(PageObject pageObject, String elementId) {
         if (isChartDisplayed(pageObject, elementId)) {
             Object result = pageObject.executeScript(String.format(
                     "delete(window.Array.prototype.toJSON) %n"
@@ -40,7 +43,7 @@ class TrendChartUtil {
      * @param elementId of chart
      * @return if chart is displayed
      */
-    static boolean isChartDisplayed(PageObject pageObject, String elementId) {
+    public static boolean isChartDisplayed(PageObject pageObject, String elementId) {
         try {
             WebElement chart = pageObject.find(By.id(elementId));
             return chart != null && chart.isDisplayed();

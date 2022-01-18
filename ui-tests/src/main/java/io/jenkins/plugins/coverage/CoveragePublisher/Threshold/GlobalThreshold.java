@@ -1,13 +1,12 @@
 package io.jenkins.plugins.coverage.CoveragePublisher.Threshold;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 
 /**
  * Global Threshold used in {@link CoveragePublisher}.
  */
 public class GlobalThreshold extends AbstractThreshold {
-
+    private CoveragePublisher coveragePublisher;
     /**
      * Constructor of a GlobalThreshold in {@link CoveragePublisher}.
      *
@@ -18,6 +17,7 @@ public class GlobalThreshold extends AbstractThreshold {
      */
     public GlobalThreshold(CoveragePublisher coveragePublisher, String path) {
         super(coveragePublisher, path);
+        this.coveragePublisher = coveragePublisher;
     }
 
     /**
@@ -27,11 +27,18 @@ public class GlobalThreshold extends AbstractThreshold {
      *         of threshold
      */
     public void setThresholdTarget(GlobalThresholdTarget globalThresholdTarget) {
-        //checkControlsAreAvailable();
+        ensureAdvancedOptionsIsActivated();
         this.thresholdTarget.select(globalThresholdTarget.getValue());
 
     }
 
+    /**
+     * Ensures advanced options are activated so that values can be set.
+     */
+    @Override
+    protected void ensureAdvancedOptionsIsActivated() {
+        this.coveragePublisher.ensureAdvancedOptionsIsActivated();
+    }
 
     /**
      * Enum for Options of {@link GlobalThreshold}.

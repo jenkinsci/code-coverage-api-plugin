@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
+import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
 
 import static org.assertj.core.api.Assertions.*;
 

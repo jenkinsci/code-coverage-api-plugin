@@ -2,12 +2,13 @@ package io.jenkins.plugins.coverage;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.openqa.selenium.NoSuchElementException;
 
 import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
+
+import io.jenkins.plugins.coverage.util.TrendChartUtil;
 
 /**
  * {@link PageObject} representing the Job status on the build page of a job.

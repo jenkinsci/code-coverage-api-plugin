@@ -9,10 +9,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.FileCoverageTable.Header;
-import io.jenkins.plugins.coverage.FileCoverageTableRow;
+import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;

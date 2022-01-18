@@ -1,4 +1,7 @@
-package io.jenkins.plugins.coverage;
+package io.jenkins.plugins.coverage.util;
+
+import io.jenkins.plugins.coverage.CoverageReport;
+import io.jenkins.plugins.coverage.MainPanel;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
@@ -7,6 +10,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
  * this helper class provides static verifying methods that can be used in all tests for a specific TrendChart.
  */
 @SuppressWarnings("hideutilityclassconstructor")
+public
 class TrendChartTestUtil {
 
     /**
@@ -16,7 +20,7 @@ class TrendChartTestUtil {
      * @param firstBuildInChartNumber first buildnumber displayed in TrendChart
      * @param lastBuildInChartNumber last buildnumber displayed in TrendChart
      */
-    static void verifyTrendChart(String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber) {
+    public static void verifyTrendChart(String trendChart, int firstBuildInChartNumber, int lastBuildInChartNumber) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
@@ -46,7 +50,7 @@ class TrendChartTestUtil {
      * its builds.
      * @param trendChart which should only contain one record
      */
-    static void verifyTrendChartContainsOnlyOneRecord(String trendChart) {
+    public static void verifyTrendChartContainsOnlyOneRecord(String trendChart) {
         assertThatJson(trendChart)
                 .inPath("$.xAxis[*].data[*]")
                 .isArray()
