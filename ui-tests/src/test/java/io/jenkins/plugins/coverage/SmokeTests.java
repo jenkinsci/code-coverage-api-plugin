@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
@@ -150,7 +150,7 @@ public class SmokeTests extends UiTest {
         HashMap<String, Double> expectedCoverageFifthBuild = new HashMap<>();
         expectedCoverageFifthBuild.put("Line", 91.02);
         expectedCoverageFifthBuild.put("Branch", 93.97);
-        List<Double> expectedReferenceCoverageFifthBuild = new LinkedList<>();
+        List<Double> expectedReferenceCoverageFifthBuild = new ArrayList<>();
         expectedReferenceCoverageFifthBuild.add(0.00);
         expectedReferenceCoverageFifthBuild.add(0.00);
 

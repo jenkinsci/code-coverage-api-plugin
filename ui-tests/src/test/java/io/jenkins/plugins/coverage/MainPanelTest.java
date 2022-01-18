@@ -65,7 +65,7 @@ public class MainPanelTest extends UiTest {
      * @param lastBuildInChartNumber of build visualized in TrendChart
      */
     public static void verifyTrendChartWithTwoReports(MainPanel mainPanel, int firstBuildInChartNumber,
-            final int lastBuildInChartNumber) {
+            int lastBuildInChartNumber) {
         mainPanel.open();
         assertThat(mainPanel.isChartDisplayed()).isTrue();
         String trendChart = mainPanel.getCoverageTrendChart();

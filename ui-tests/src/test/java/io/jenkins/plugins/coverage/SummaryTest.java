@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
@@ -11,8 +11,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoverageSummary;
-import io.jenkins.plugins.coverage.UiTest;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -42,7 +40,7 @@ public class SummaryTest extends UiTest {
      *         map of expected values to be present in summary
      */
     public static void verifySummaryOnSuccessfulBuild(Build build,
-            final HashMap<String, Double> expectedCoverage) {
+            HashMap<String, Double> expectedCoverage) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
         HashMap<String, Double> coverage = cs.getCoverage();
@@ -61,7 +59,7 @@ public class SummaryTest extends UiTest {
      *         List of expected values for coverage changes
      */
     public static void verifySummaryWithReferenceBuild(Build build,
-            final HashMap<String, Double> expectedCoverage, List<Double> expectedChanges) {
+            HashMap<String, Double> expectedCoverage, List<Double> expectedChanges) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
 
@@ -104,7 +102,7 @@ public class SummaryTest extends UiTest {
      *         of project
      */
     public static void verifyFailMessage(Build build, float unhealthyThreshold,
-            final float unstableThreshold) {
+            float unstableThreshold) {
         build.open();
         CoverageSummary cs = new CoverageSummary(build, "coverage");
         String failMsg = cs.getFailMsg();
@@ -152,7 +150,7 @@ public class SummaryTest extends UiTest {
         HashMap<String, Double> expectedCoverage = new HashMap<>();
         expectedCoverage.put("Line", 91.02);
         expectedCoverage.put("Branch", 93.97);
-        List<Double> expectedReferenceCoverage = new LinkedList<>();
+        List<Double> expectedReferenceCoverage = new ArrayList<>();
         expectedReferenceCoverage.add(-0.045);
         expectedReferenceCoverage.add(0.054);
 
