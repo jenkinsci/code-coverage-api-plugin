@@ -156,4 +156,36 @@ public class SummaryTest extends UiTest {
 
         verifySummaryWithReferenceBuild(build, expectedCoverage, expectedReferenceCoverage);
     }
+
+    /**
+     * Test if coverage is displayed correct if build fails.
+     */
+    @Test
+    public void testFailedBuild() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        job.save();
+        buildSuccessfully(job);
+        job.configure();
+        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
+        job.save();
+        Build build = buildWithErrors(job);
+
+        HashMap<String, Double> expectedCoverage = new HashMap<>();
+        expectedCoverage.put("Report", 100.00);
+        expectedCoverage.put("Group", 100.00);
+        expectedCoverage.put("Package", 100.00);
+        expectedCoverage.put("File", 70.00);
+        expectedCoverage.put("Class", 83.00);
+        expectedCoverage.put("Method", 95.00);
+        expectedCoverage.put("Instruction", 93.00);
+        expectedCoverage.put("Line", 91.00);
+        expectedCoverage.put("Conditional", 94.00);
+
+        verifySummaryOnFailedBuild(build, expectedCoverage);
+    }
 }
