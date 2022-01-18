@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import org.junit.Test;
 
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -42,12 +44,12 @@ public class CoveragePublisherTest extends UiTest {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        copyResourceFilesToWorkspace(job, UiTest.RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         buildSuccessfully(job);
         job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_CODINGSTYLE_XML);
         coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
         job.save();
         buildWithErrors(job);
@@ -62,8 +64,8 @@ public class CoveragePublisherTest extends UiTest {
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setSkipPublishingChecks(false);
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        copyResourceFilesToWorkspace(job, UiTest.RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_ANALYSIS_MODEL_XML);
         AdapterThreshold threshold = jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION,
                 97,
                 99, false);
@@ -82,8 +84,8 @@ public class CoveragePublisherTest extends UiTest {
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         coveragePublisher.setSkipPublishingChecks(false);
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        copyResourceFilesToWorkspace(job, UiTest.RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_ANALYSIS_MODEL_XML);
         coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.INSTRUCTION,
                 97,
                 99, false);

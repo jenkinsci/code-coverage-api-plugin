@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;

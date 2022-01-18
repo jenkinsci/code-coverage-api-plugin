@@ -1,10 +1,11 @@
+package io.jenkins.plugins.coverage;
+
 import org.junit.Test;
 
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.MainPanel;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -23,13 +24,13 @@ public class MainPanelTest extends UiTest {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        copyResourceFilesToWorkspace(job, UiTest.RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         buildSuccessfully(job);
 
         job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_CODINGSTYLE_XML);
         job.save();
         buildSuccessfully(job);
 
@@ -48,8 +49,8 @@ public class MainPanelTest extends UiTest {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        copyResourceFilesToWorkspace(job, UiTest.RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(UiTest.JACOCO_ANALYSIS_MODEL_XML);
         job.save();
         buildSuccessfully(job);
         MainPanel mainPanel = new MainPanel(job);

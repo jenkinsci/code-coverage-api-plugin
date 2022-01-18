@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.MainPanel;
 

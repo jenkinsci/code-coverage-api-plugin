@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +19,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.G
 import io.jenkins.plugins.coverage.CoverageReport;
 import io.jenkins.plugins.coverage.FileCoverageTable;
 import io.jenkins.plugins.coverage.MainPanel;
+import io.jenkins.plugins.coverage.MainPanelTest;
+import io.jenkins.plugins.coverage.SummaryTest;
+import io.jenkins.plugins.coverage.TrendChartTestUtil;
+import io.jenkins.plugins.coverage.UiTest;
 
 /**
  * Should in the end contain all tests.
@@ -24,10 +30,8 @@ import io.jenkins.plugins.coverage.MainPanel;
 public class SmokeTests extends UiTest {
 
     /**
-     * Test for verifying CoveragePlugin by checking its behaviour in different sitauations, using a project with two
-     * different jacoco files.
-     * <p>
-     * Different scenarios are used in each build, see javadoc.
+     * Test for verifying CoveragePlugin by checking its behaviour in different situations, using a project with two
+     * different jacoco files. Different scenarios are used in each build, see javadoc.
      * <p>
      * Verifies correct build-status depending on its configuration like used thresholds, global thresholds, fail on no
      * report, etc. Verifies CoverageSummary. Verifies MainPanel (CoverageTrend). Verifies CoverageReport

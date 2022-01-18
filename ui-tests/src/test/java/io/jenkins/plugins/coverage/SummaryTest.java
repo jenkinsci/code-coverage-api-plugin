@@ -1,3 +1,5 @@
+package io.jenkins.plugins.coverage;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoverageSummary;
+import io.jenkins.plugins.coverage.UiTest;
 
 import static org.assertj.core.api.Assertions.*;
 
