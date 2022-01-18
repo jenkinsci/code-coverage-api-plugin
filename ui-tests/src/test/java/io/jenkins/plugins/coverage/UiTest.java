@@ -13,7 +13,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 class UiTest extends AbstractJUnitTest {
     static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
-    static final String RESOURCES_FOLDER = "/io.jenkins.plugins.coverage";
+    static final String RESOURCES_FOLDER = "/";
 
     /**
      * Build job and check if it is successfully.
