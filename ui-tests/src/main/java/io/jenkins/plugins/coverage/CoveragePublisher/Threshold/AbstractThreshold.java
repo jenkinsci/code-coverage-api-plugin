@@ -63,6 +63,7 @@ public abstract class AbstractThreshold extends PageAreaImpl {
      * Deletes a threshold.
      */
     public void delete() {
+        ensureAdvancedOptionsIsActivated();
         delete.click();
     }
 
