@@ -55,8 +55,7 @@ public class CoverageReportTest extends UiTest {
 
         CoverageReport report = new CoverageReport(secondBuild);
         report.open();
-
-        //FIXME?
+        
         FileCoverageTable coverageTable = report.getCoverageTable();
         CoverageReportTest.verifyFileCoverageTableContent(coverageTable,
                 new String[] {"edu.hm.hafner.util", "edu.hm.hafner.util", "edu.hm.hafner.util"},
