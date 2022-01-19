@@ -80,13 +80,10 @@ public class CoverageReportTest extends UiTest {
      */
     @Test
     public void testCoverageReportAfterOneBuildWithReport() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build secondBuild = buildSuccessfully(job);
+
+        Build secondBuild = buildSuccessfully(getJobWithReportInConfiguration());
+
+
 
         CoverageReport report = new CoverageReport(secondBuild);
         report.open();
@@ -105,19 +102,16 @@ public class CoverageReportTest extends UiTest {
 
     }
 
+
+
     /**
      * Test for CoverageTable which should contain multiple pages. Verfies {@link FileCoverageTable} with different
      * pages works correctly, by checking some of its {@link FileCoverageTableRow}s on different pages.
      */
     @Test
     public void testCoverageTableWithMultiplePages() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        Build secondBuild = buildSuccessfully(job);
+
+        Build secondBuild = buildSuccessfully(getJobWithReportInConfiguration());
 
         CoverageReport report = new CoverageReport(secondBuild);
         report.open();

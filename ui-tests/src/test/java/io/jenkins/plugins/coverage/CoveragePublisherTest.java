@@ -3,10 +3,7 @@ package io.jenkins.plugins.coverage;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Scm;
-import org.jenkinsci.test.acceptance.po.ScmPolling;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
@@ -34,11 +31,7 @@ public class CoveragePublisherTest extends UiTest {
      */
     @Test
     public void testFailOnNoReport() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setFailNoReports(true);
-        job.save();
+        FreeStyleJob job = getJobWithoutAnyReports(true);
         buildWithErrors(job);
     }
 
@@ -47,17 +40,7 @@ public class CoveragePublisherTest extends UiTest {
      */
     @Test
     public void testFailOnDecreasedCoverage() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        job.save();
-        buildSuccessfully(job);
-        job.configure();
-        jacocoAdapter.setReportFilePath(JACOCO_CODINGSTYLE_XML);
-        coveragePublisher.setFailBuildIfCoverageDecreasedInChangeRequest(true);
-        job.save();
+        FreeStyleJob job = getJobWithFirstBuildAndDifferentReports(true);
         buildWithErrors(job);
     }
 
