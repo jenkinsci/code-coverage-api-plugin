@@ -36,7 +36,7 @@ public class CoveragePublisherTest extends UiTest {
      */
     @Test
     public void testFailOnNoReport() {
-        FreeStyleJob job = getJobWithoutAnyReports(true);
+        FreeStyleJob job = getJobWithoutAnyReports(InCaseNoReportsConfiguration.FAIL);
         buildWithErrors(job);
     }
 
@@ -45,7 +45,7 @@ public class CoveragePublisherTest extends UiTest {
      */
     @Test
     public void testFailOnDecreasedCoverage() {
-        FreeStyleJob job = getJobWithFirstBuildAndDifferentReports(true);
+        FreeStyleJob job = getJobWithFirstBuildAndDifferentReports(InCaseCoverageDecreasedConfiguration.FAIL);
         buildWithErrors(job);
     }
 
