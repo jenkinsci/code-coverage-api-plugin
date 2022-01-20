@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.jenkinsci.test.acceptance.po.Build;
@@ -9,8 +8,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 import io.jenkins.plugins.coverage.util.ChartUtil;
 
@@ -53,19 +50,8 @@ public class CoveragePublisherTest extends UiTest {
      * Test if build fails if setFailUnhealthy is true and thresholds set.
      */
     @Test
-    @Ignore
     public void testAdapterThresholdsAndFailOnUnhealthySetter() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setSkipPublishingChecks(false);
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        AdapterThreshold threshold = jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.INSTRUCTION,
-                97,
-                99, false);
-        threshold.setFailUnhealthy(true);
-        job.save();
+        FreeStyleJob job = getJobWithAdapterThresholdAndFailOnUnhealthySetter(97, 99, true, ThresholdLevel.ADAPTER);
         buildWithErrors(job);
     }
 
@@ -74,19 +60,13 @@ public class CoveragePublisherTest extends UiTest {
      */
     @Test
     public void testGlobalThresholdsAndFailSetter() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
-        coveragePublisher.setSkipPublishingChecks(false);
-        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
-        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
-        coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.INSTRUCTION,
-                97,
-                99, false);
-        job.save();
+        FreeStyleJob job = getJobWithAdapterThresholdAndFailOnUnhealthySetter(97, 99, true, ThresholdLevel.GLOBAL);
         buildUnstable(job);
     }
 
+    /**
+     * Tests if source file storing level and display is correct.
+     */
     @Test
     public void testSourceFileStoringLevel() {
         String repoUrl = "https://github.com/jenkinsci/code-coverage-api-plugin.git";

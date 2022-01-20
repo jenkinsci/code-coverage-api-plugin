@@ -65,7 +65,7 @@ public class SmokeTests extends UiTest {
         HashMap<String, Double> expectedCoverageOnFirstSuccessfulBuild = new HashMap<>();
         expectedCoverageOnFirstSuccessfulBuild.put("Line", 95.52);
         expectedCoverageOnFirstSuccessfulBuild.put("Branch", 88.59);
-        SummaryTest.verifySummaryOnSuccessfulBuild(firstSuccessfulBuild, expectedCoverageOnFirstSuccessfulBuild);
+        CoverageSummaryTest.verifySummaryOnSuccessfulBuild(firstSuccessfulBuild, expectedCoverageOnFirstSuccessfulBuild);
 
         CoverageReport reportOfFirstSuccessfulBuild = new CoverageReport(firstSuccessfulBuild);
         reportOfFirstSuccessfulBuild.open();
@@ -112,7 +112,7 @@ public class SmokeTests extends UiTest {
         expectedCoverageThirdBuildFailed.put("Instruction", 93.00);
         expectedCoverageThirdBuildFailed.put("Line", 91.00);
         expectedCoverageThirdBuildFailed.put("Conditional", 94.00);
-        SummaryTest.verifySummaryOnFailedBuild(thirdBuildFailed, expectedCoverageThirdBuildFailed);
+        CoverageSummaryTest.verifySummaryOnFailedBuild(thirdBuildFailed, expectedCoverageThirdBuildFailed);
 
         /**
          * 4th build: Set setFailBuildIfCoverageDecreasedInChangeRequest(false), so that build should now succeed.
@@ -128,7 +128,7 @@ public class SmokeTests extends UiTest {
         HashMap<String, Double> expectedCoverageOnFourthBuild = new HashMap<>();
         expectedCoverageOnFourthBuild.put("Line", 91.02);
         expectedCoverageOnFourthBuild.put("Branch", 93.97);
-        SummaryTest.verifySummaryOnSuccessfulBuild(fourthBuildSuccessful, expectedCoverageOnFourthBuild);
+        CoverageSummaryTest.verifySummaryOnSuccessfulBuild(fourthBuildSuccessful, expectedCoverageOnFourthBuild);
 
         /**
          * 5th build: Add threshold so that build should be unstable.
@@ -148,7 +148,7 @@ public class SmokeTests extends UiTest {
         expectedReferenceCoverageFifthBuild.add(0.00);
         expectedReferenceCoverageFifthBuild.add(0.00);
 
-        SummaryTest.verifySummaryWithReferenceBuild(fifthBuildUnstable, expectedCoverageFifthBuild,
+        CoverageSummaryTest.verifySummaryWithReferenceBuild(fifthBuildUnstable, expectedCoverageFifthBuild,
                 expectedReferenceCoverageFifthBuild);
 
         CoverageReport report = new CoverageReport(fifthBuildUnstable);
@@ -188,7 +188,7 @@ public class SmokeTests extends UiTest {
         threshold.setFailUnhealthy(true);
         job.save();
         Build sixthBuildFailing = buildWithErrors(job);
-        SummaryTest.verifyFailMessage(sixthBuildFailing, unhealthyThresholdForSixthBuild,
+        CoverageSummaryTest.verifyFailMessage(sixthBuildFailing, unhealthyThresholdForSixthBuild,
                 unstableThresholdForSixthBuild);
 
         /**

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -17,19 +18,8 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Acceptance tests for Summary. Verifies if  ...//TODO: javadoc
  */
-public class SummaryTest extends UiTest {
+public class CoverageSummaryTest extends UiTest {
 
-    /**
-     * Verifies if summary is not visible if build with no report is enabled.
-     *
-     * @param build
-     *         Build of Project
-     */
-    public static void verifySummaryOnNoReport(Build build) {
-        build.open();
-        // TODO: Das Element existiert nicht, wie soll das getestet werden?
-        //CoverageSummary cs = new CoverageSummary(build, "coverage");
-    }
 
     /**
      * Verifies if summary of first successful build of Project is correct.
@@ -109,6 +99,19 @@ public class SummaryTest extends UiTest {
         assertThat(failMsg).contains("unstableThreshold=" + unstableThreshold)
                 .contains("unhealthyThreshold=" + unhealthyThreshold);
     }
+
+    /**
+     * Tests if summary is not visible if build with no report is enabled.
+     */
+    @Test
+    public void testSummaryOnNoReport() {
+        FreeStyleJob job = getJobWithoutAnyReports(InCaseNoReportsConfiguration.FAIL);
+        Build build = buildWithErrors(job);
+        WebDriver open = build.open();
+        assertThat(CoverageSummary.isSummaryDisplayed(open, "coverage")).isFalse();
+
+    }
+
 
     /**
      * Tests if coverage is correct if build is successful.

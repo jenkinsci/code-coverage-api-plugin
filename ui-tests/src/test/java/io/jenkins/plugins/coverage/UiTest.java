@@ -7,6 +7,8 @@ import org.jenkinsci.test.acceptance.po.Job;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
+import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 
 /**
  * Base class for all UI tests. Provides several helper methods that can be used by all tests.
@@ -38,6 +40,41 @@ class UiTest extends AbstractJUnitTest {
      */
     FreeStyleJob getJobWithReportInConfiguration() {
         return createJobWithConfiguration(JobConfiguration.FIRST_BUILD_ONE_JACOCO);
+    }
+
+    /**
+     * Creates {@link FreeStyleJob} with threshold and jacoco adapter.
+     *
+     * @param unhealthyThreshold
+     *         for threshold
+     * @param unstableThreshold
+     *         for threshold
+     * @param failUnhealthy
+     *         should build fail on unhealthy status
+     * @param thresholdLevel
+     *         level of threshold
+     *
+     * @return Job with threshold and jacoco adapter.
+     */
+    FreeStyleJob getJobWithAdapterThresholdAndFailOnUnhealthySetter(int unhealthyThreshold, int unstableThreshold,
+            boolean failUnhealthy, ThresholdLevel thresholdLevel) {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_ANALYSIS_MODEL_XML);
+        if (thresholdLevel == ThresholdLevel.ADAPTER) {
+            jacocoAdapter.createThresholdsPageArea(AdapterThresholdTarget.LINE,
+                    unhealthyThreshold,
+                    unstableThreshold, failUnhealthy);
+        }
+        else if (thresholdLevel == ThresholdLevel.GLOBAL) {
+            coveragePublisher.createGlobalThresholdsPageArea(GlobalThresholdTarget.LINE,
+                    unhealthyThreshold,
+                    unstableThreshold, failUnhealthy);
+        }
+        job.save();
+        return job;
     }
 
     /**
@@ -177,6 +214,14 @@ class UiTest extends AbstractJUnitTest {
     enum InCaseCoverageDecreasedConfiguration {
         FAIL,
         DONT_FAIL
+    }
+
+    /**
+     * Enum for threshold level.
+     */
+    enum ThresholdLevel {
+        ADAPTER,
+        GLOBAL
     }
 
 }

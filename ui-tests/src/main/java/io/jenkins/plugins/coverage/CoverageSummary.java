@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import org.jenkinsci.test.acceptance.po.Build;
@@ -15,7 +17,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class CoverageSummary extends PageObject {
     private final WebElement coverageReportLink;
-
+    private final WebElement summary;
     private final WebElement referenceBuild;
     private final List<WebElement> coverage;
     private final WebElement failMsg;
@@ -32,14 +34,12 @@ public class CoverageSummary extends PageObject {
     public CoverageSummary(Build parent, String id) {
         super(parent, parent.url(id));
 
-        WebElement summary = getElement(By.id(id + "-summary"));
-
+        this.summary = getElement(By.id(id + "-summary"));
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
-        getElement(by.href(id));
         this.referenceBuild = getElement(By.id("coverage-reference"));
-        this.coverage = summary.findElements(by.id("coverage-value"));
+        this.coverage = this.summary.findElements(by.id("coverage-value"));
         this.failMsg = getElement(By.id("coverage-fail-msg"));
-        this.coverageChanges = summary.findElements(by.id("coverage-change"));
+        this.coverageChanges = this.summary.findElements(by.id("coverage-change"));
 
     }
 
@@ -119,6 +119,17 @@ public class CoverageSummary extends PageObject {
         T result = newInstance(type, url(href));
         link.click();
         return result;
+    }
+
+
+    public static boolean isSummaryDisplayed(WebDriver pageObject, String elementId) {
+        try {
+            WebElement summary = pageObject.findElement(By.id(elementId));
+            return summary != null && summary.isDisplayed();
+        }
+        catch (NoSuchElementException exception) {
+            return false;
+        }
     }
 
 }
