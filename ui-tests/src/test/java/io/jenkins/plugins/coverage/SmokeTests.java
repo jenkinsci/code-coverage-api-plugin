@@ -166,7 +166,7 @@ public class SmokeTests extends UiTest {
         CoverageReportTest.verifyCoverageTree(coverageTree);
 
         String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverview(coverageOverview);
+        CoverageReportTest.verifyCoverageOverviewAfterSomeBuilds(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
         TrendChartTestUtil.verifyTrendChart(trendChart, 2, 5);

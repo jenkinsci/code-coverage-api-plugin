@@ -8,13 +8,13 @@ import com.gargoylesoftware.htmlunit.ScriptResult;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import io.jenkins.plugins.coverage.util.TrendChartUtil;
+import io.jenkins.plugins.coverage.util.ChartUtil;
 
 /**
  * {@link PageObject} representing the Job status on the build page of a job.
  */
 public class MainPanel extends PageObject {
-    private static final String COVERAGE_TREND_CHART = "coverage-trendchart";
+    private static final String COVERAGE_TREND_CHART_ID_OF_SPAN_TAG = "coverage-trendchart";
 
     /**
      * Constructor to create MainPanel-PageObject out of a job.
@@ -37,12 +37,13 @@ public class MainPanel extends PageObject {
         //FIXME
         waitFor().until(()-> executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
-                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())", COVERAGE_TREND_CHART)) != null);
+                        + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",
+                COVERAGE_TREND_CHART_ID_OF_SPAN_TAG)) != null);
 
         Object result = executeScript(String.format(
                 "delete(window.Array.prototype.toJSON) %n"
                         + "return JSON.stringify(echarts.getInstanceByDom(document.getElementById(\"%s\").getElementsByClassName(\"echarts-trend\")[0]).getOption())",
-                COVERAGE_TREND_CHART));
+                COVERAGE_TREND_CHART_ID_OF_SPAN_TAG));
 
         ScriptResult scriptResult = new ScriptResult(result);
 
@@ -64,7 +65,7 @@ public class MainPanel extends PageObject {
      */
     public boolean isChartDisplayed() {
         ensureMainPanelPageIsOpen();
-        return TrendChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);
+        return ChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART_ID_OF_SPAN_TAG);
     }
 
 }
