@@ -163,10 +163,10 @@ public class SmokeTests extends UiTest {
         CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(fileCoverageTable, 10);
 
         String coverageTree = report.getCoverageTree();
-        CoverageReportTest.verifyCoverageTree(coverageTree);
+        CoverageReportTest.verifyCoverageTreeAfterSomeBuildsWithReports(coverageTree);
 
         String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverviewAfterSomeBuilds(coverageOverview);
+        CoverageReportTest.verifyCoverageOverviewAfterSomeBuildsWithReports(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
         TrendChartTestUtil.verifyTrendChart(trendChart, 2, 5);
