@@ -7,7 +7,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
  * Threshold used in {@link Adapter} in {@link CoveragePublisher}.
  */
 public class AdapterThreshold extends AbstractThreshold {
-    private Adapter adapter;
+    private final Adapter adapter;
 
     /**
      * Constructor of an AdapterThreshold.

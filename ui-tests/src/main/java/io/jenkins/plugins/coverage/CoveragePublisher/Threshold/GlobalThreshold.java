@@ -6,7 +6,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
  * Global Threshold used in {@link CoveragePublisher}.
  */
 public class GlobalThreshold extends AbstractThreshold {
-    private CoveragePublisher coveragePublisher;
+    private final CoveragePublisher coveragePublisher;
 
     /**
      * Constructor of a GlobalThreshold in {@link CoveragePublisher}.
