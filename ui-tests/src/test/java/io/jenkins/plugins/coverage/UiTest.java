@@ -19,11 +19,11 @@ class UiTest extends AbstractJUnitTest {
 
     /**
      * Returns a job without any reports in its configuration.
-     * @param failOnNoReports if build should fail due to no reports
+     * @param configuration if build should fail due to no reports
      * @return a job without any reports
      */
-    FreeStyleJob getJobWithoutAnyReports(boolean failOnNoReports) {
-        if (failOnNoReports) {
+    FreeStyleJob getJobWithoutAnyReports(InCaseNoReportsConfiguration configuration) {
+        if (configuration== InCaseNoReportsConfiguration.FAIL) {
             return createJobWithConfiguration(JobConfiguration.NO_REPORTS_SHOULD_FAIL);
         }
         else {
@@ -43,13 +43,13 @@ class UiTest extends AbstractJUnitTest {
     /**
      * Returns a job with first build and second configuration, both with different reports.
      *
-     * @param secondShouldFailDueToCoverageDecreased
+     * @param configuration
      *         to set if second build should fail due to decreasing coverage
      *
      * @return a job with first build and second configuration, both with different reports
      */
-    FreeStyleJob getJobWithFirstBuildAndDifferentReports(final boolean secondShouldFailDueToCoverageDecreased) {
-        if (secondShouldFailDueToCoverageDecreased) {
+    FreeStyleJob getJobWithFirstBuildAndDifferentReports(final InCaseCoverageDecreasedConfiguration configuration) {
+        if (configuration == InCaseCoverageDecreasedConfiguration.FAIL) {
             return createJobWithConfiguration(JobConfiguration.SECOND_BUILD_FAILED_DUE_TO_COVERAGE_DECREASED);
         }
         else {
@@ -161,6 +161,22 @@ class UiTest extends AbstractJUnitTest {
         FIRST_BUILD_ONE_JACOCO,
         SECOND_BUILD_SUCCESSFUL_WITH_JACOCO,
         SECOND_BUILD_FAILED_DUE_TO_COVERAGE_DECREASED
+    }
+
+    /**
+     * Enum for Job Configuration in case no reports are found.
+     */
+    enum InCaseNoReportsConfiguration {
+        FAIL,
+        DONT_FAIL
+    }
+
+    /**
+     * Enum for Job Configuration in case coverage decreased in reference build.
+     */
+    enum InCaseCoverageDecreasedConfiguration {
+        FAIL,
+        DONT_FAIL
     }
 
 }
