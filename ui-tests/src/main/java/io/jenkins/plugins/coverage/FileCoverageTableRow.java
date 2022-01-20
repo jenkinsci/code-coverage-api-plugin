@@ -5,6 +5,8 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import org.jenkinsci.test.acceptance.po.Build;
+
 /**
  * Representation of a table row in {@link FileCoverageTable}.
  */
@@ -79,6 +81,15 @@ public class FileCoverageTableRow {
         return getRow().findElements(By.tagName("td"));
     }
 
+    public SourceCodeView openFileLink(Build build) {
+        WebElement link = this.row.findElements(By.tagName("td"))
+                .get(1)
+                .findElement(By.tagName("a"));
+        SourceCodeView sourceCodeView = new SourceCodeView(build,
+                link.getAttribute("href").substring(link.getAttribute("href").lastIndexOf("/") + 1));
+        link.click();
+        return sourceCodeView;
+    }
     /**
      * Returns a specific table data field specified by the header of the column.
      *

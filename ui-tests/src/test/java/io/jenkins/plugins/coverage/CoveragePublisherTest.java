@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
@@ -11,6 +12,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFil
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
+import io.jenkins.plugins.coverage.util.ChartUtil;
+
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 //TODO: ueberdenken ob tests so sinn machen & ausreichen
 
@@ -85,7 +90,7 @@ public class CoveragePublisherTest extends UiTest {
     @Test
     public void testSourceFileStoringLevel() {
         String repoUrl = "https://github.com/jenkinsci/code-coverage-api-plugin.git";
-        String commitID= "f52a51691598600e2f42eee354ee6a540e008a72";
+        String commitID = "f52a51691598600e2f42eee354ee6a540e008a72";
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
         Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
@@ -93,8 +98,30 @@ public class CoveragePublisherTest extends UiTest {
         copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
         jacocoAdapter.setReportFilePath(JACOCO_OLD_COMMIT_XML);
         coveragePublisher.setSourceFileResolver(SourceFileResolver.STORE_ALL_BUILD);
-        job.save();
-        buildUnstable(job);
-    }
+        //job.save();
+        Build build = buildSuccessfully(job);
+        CoverageReport report = new CoverageReport(build);
+        report.open();
+        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
+        SourceCodeView sourceCodeView = fileCoverageTable.getRow(1).openFileLink(build);
+        String json = ChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
 
+        assertThatJson(json)
+                .inPath("$.yAxis[0].data[*]")
+                .isArray()
+                .hasSize(5)
+                .contains("Class", "Method", "Line", "Instruction", "Branch");
+
+        assertThatJson(json)
+                .inPath("$.series[0].data")
+                .isArray()
+                .hasSize(5)
+                .contains(1, 0.6, 0.5833333333333334, 0.25);
+
+        assertThatJson(json).node("series[0].name").isEqualTo("Covered");
+        assertThatJson(json).node("series[1].name").isEqualTo("Missed");
+
+        assertThat(sourceCodeView.isFileTableDisplayed()).isTrue();
+
+    }
 }
