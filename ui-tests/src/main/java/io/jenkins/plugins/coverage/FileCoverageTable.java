@@ -73,10 +73,6 @@ public class FileCoverageTable {
         return getTableRows().get(rowIndex);
     }
 
-    public List<String> getColumnHeaders() {
-        return null; //getHeaders().stream().map(Header::fromTitle).collect(Collectors.toList());
-    }
-
     /**
      * Returns the amount of the headers for this table.
      *

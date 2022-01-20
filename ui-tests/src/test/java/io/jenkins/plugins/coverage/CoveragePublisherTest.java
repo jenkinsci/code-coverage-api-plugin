@@ -103,7 +103,11 @@ public class CoveragePublisherTest extends UiTest {
         CoverageReport report = new CoverageReport(build);
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        SourceCodeView sourceCodeView = fileCoverageTable.getRow(1).openFileLink(build);
+        FileCoverageTableRow fileCoverageTableRow = fileCoverageTable.getRow(1);
+
+        assertThat(fileCoverageTableRow.hasFileLink()).isTrue();
+
+        SourceCodeView sourceCodeView = fileCoverageTableRow.openFileLink(build);
         String json = ChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
 
         assertThatJson(json)

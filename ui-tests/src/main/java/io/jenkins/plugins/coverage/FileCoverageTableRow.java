@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import org.jenkinsci.test.acceptance.po.Build;
@@ -11,6 +12,10 @@ import org.jenkinsci.test.acceptance.po.Build;
  * Representation of a table row in {@link FileCoverageTable}.
  */
 public class FileCoverageTableRow {
+    private static final int PACKAGE = 0;
+    private static final int FILE = 1;
+    private static final int LINE_COVERAGE = 2;
+    private static final int BRANCH_COVERAGE = 4;
     private final WebElement row;
     private final FileCoverageTable table;
 
@@ -33,7 +38,7 @@ public class FileCoverageTableRow {
      * @return package name
      */
     public String getPackage() {
-        return this.row.findElements(By.tagName("td")).get(0).getText();
+        return getRow().findElements(By.tagName("td")).get(PACKAGE).getText();
     }
 
     /**
@@ -42,7 +47,7 @@ public class FileCoverageTableRow {
      * @return package name
      */
     public String getFile() {
-        return this.row.findElements(By.tagName("td")).get(1).getText();
+        return getRow().findElements(By.tagName("td")).get(FILE).getText();
     }
 
     /**
@@ -51,7 +56,7 @@ public class FileCoverageTableRow {
      * @return branch coverage
      */
     public String getLineCoverage() {
-        return this.row.findElements(By.tagName("td")).get(2).getText();
+        return getRow().findElements(By.tagName("td")).get(LINE_COVERAGE).getText();
     }
 
     /**
@@ -60,7 +65,7 @@ public class FileCoverageTableRow {
      * @return branch coverage
      */
     public String getBranchCoverage() {
-        return this.row.findElements(By.tagName("td")).get(4).getText();
+        return getRow().findElements(By.tagName("td")).get(BRANCH_COVERAGE).getText();
     }
 
     /**
@@ -81,43 +86,46 @@ public class FileCoverageTableRow {
         return getRow().findElements(By.tagName("td"));
     }
 
+    /**
+     * Opens new page of file coverage in {@link SourceCodeView}.
+     *
+     * @param build
+     *         current build
+     *
+     * @return Page with coverage of file
+     */
     public SourceCodeView openFileLink(Build build) {
-        WebElement link = this.row.findElements(By.tagName("td"))
-                .get(1)
-                .findElement(By.tagName("a"));
+        WebElement fileLink = getFileLink();
+        String link = fileLink.getAttribute("href");
         SourceCodeView sourceCodeView = new SourceCodeView(build,
-                link.getAttribute("href").substring(link.getAttribute("href").lastIndexOf("/") + 1));
-        link.click();
+                link.substring(link.lastIndexOf("/") + 1));
+        fileLink.click();
         return sourceCodeView;
     }
-    /**
-     * Returns a specific table data field specified by the header of the column.
-     *
-     * @param header
-     *         the header text specifying the column
-     *
-     * @return the WebElement of the table data field
-     */
-    final WebElement getCell(String header) {
-        return getCells().get(getHeaders().indexOf(header));
-    }
 
     /**
-     * Returns the String representation of the table cell.
+     * Checks if file has a clickable link.
      *
-     * @param header
-     *         the header specifying the column
-     *
-     * @return the String representation of the cell
+     * @return if file is clickable.
      */
-    final String getCellContent(String header) {
-        if (!getHeaders().contains(header)) {
-            return "-";
+    public boolean hasFileLink() {
+        try {
+            getFileLink();
+            return true;
         }
-        return getCell(header).getText();
+        catch (NoSuchElementException e) {
+            return false;
+        }
     }
 
-    final boolean isDetailsRow() {
-        return getCells().size() == 1;
+    /**
+     * Get link of file in row.
+     *
+     * @return link of file item
+     */
+    private WebElement getFileLink() {
+        return this.row.findElements(By.tagName("td"))
+                .get(1)
+                .findElement(By.tagName("a"));
     }
 }
