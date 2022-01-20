@@ -8,15 +8,13 @@ import com.gargoylesoftware.htmlunit.ScriptResult;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import io.jenkins.plugins.coverage.CoverageReport;
-import io.jenkins.plugins.coverage.MainPanel;
 
 /**
- * Coverage-TrendChart is displayed twice. Therefore, this util is used in
- * {@link CoverageReport} and {@link MainPanel}.
+ * Charts are displayed one multiple PageObjects.
+ * This util provides some helper methods to deal with charts.
  */
 @SuppressWarnings("hideutilityclassconstructor")
-public class TrendChartUtil {
+public class ChartUtil {
 
     /**
      * Returns a chart's data by its id.

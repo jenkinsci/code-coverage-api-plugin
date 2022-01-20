@@ -67,7 +67,7 @@ public class CoverageReportTest extends UiTest {
         CoverageReportTest.verifyCoverageTree(coverageTree);
 
         String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverview(coverageOverview);
+        CoverageReportTest.verifyCoverageOverviewAfterSomeBuilds(coverageOverview);
 
         String trendChart = report.getCoverageTrend();
         TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
@@ -98,7 +98,7 @@ public class CoverageReportTest extends UiTest {
         CoverageReportTest.verifyCoverageTreeNotEmpty(coverageTree);
 
         String coverageOverview = report.getCoverageOverview();
-        CoverageReportTest.verifyCoverageOverviewNotEmpty(coverageOverview);
+        CoverageReportTest.verifyCoverageOverviewAfterOneBuildWithReport(coverageOverview);
 
     }
 
@@ -190,7 +190,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageOverview
      *         from second build.
      */
-    public static void verifyCoverageOverview(String coverageOverview) {
+    public static void verifyCoverageOverviewAfterSomeBuilds(String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -222,7 +222,7 @@ public class CoverageReportTest extends UiTest {
      * @param coverageOverview
      *         from first build.
      */
-    public static void verifyCoverageOverviewNotEmpty(String coverageOverview) {
+    public static void verifyCoverageOverviewAfterOneBuildWithReport(String coverageOverview) {
         assertThatJson(coverageOverview)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
@@ -235,7 +235,14 @@ public class CoverageReportTest extends UiTest {
                 .contains("File")
                 .contains("Package");
 
-        assertThatJson(coverageOverview).inPath("series[0].data").isArray().hasSize(7);
+        assertThatJson(coverageOverview).inPath("series[0].data").isArray().hasSize(7)
+                .contains("1")
+                .contains("0.996742671009772")
+                .contains("0.9856733524355301")
+                .contains("0.9740400216333153")
+                .contains("0.9552449748743719")
+                .contains("0.9620776748782899")
+                .contains("0.8858666666666667");
 
         assertThatJson(coverageOverview).node("series[0].name").isEqualTo("Covered");
         assertThatJson(coverageOverview).node("series[1].name").isEqualTo("Missed");
@@ -248,6 +255,10 @@ public class CoverageReportTest extends UiTest {
      *         from second build.
      */
     public static void verifyCoverageTree(String coverageTree) {
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].name").isArray().hasSize(1).contains("edu.hm.hafner.util");
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].value").isArray().hasSize(1)
+                .contains("[323, 294]");
+
         assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(10)
                 .contains("Ensure.java")
                 .contains("FilteredLog.java")
@@ -274,14 +285,24 @@ public class CoverageReportTest extends UiTest {
     }
 
     /**
-     * Verifies CoverageTree of CoverageReport of Job with two Builds.
+     * Verifies CoverageTree of CoverageReport of Job with two Builds is not empty.
      *
      * @param coverageTree
      *         from second build.
      */
     public static void verifyCoverageTreeNotEmpty(String coverageTree) {
-        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2);
-        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2);
+
+
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].name").isArray().hasSize(1).contains("edu.hm.hafner");
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].value").isArray().hasSize(1)
+                .contains("[6368, 6083]");
+
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].name").isArray().hasSize(2)
+                .contains("analysis")
+                .contains("util");
+        assertThatJson(coverageTree).inPath("series[*].data[*].children[*].children[*].value").isArray().hasSize(2)
+                .contains("[125, 100]")
+                .contains("[34,34]");
     }
 
 }

@@ -8,7 +8,7 @@ import com.gargoylesoftware.htmlunit.ScriptResult;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import io.jenkins.plugins.coverage.util.TrendChartUtil;
+import io.jenkins.plugins.coverage.util.ChartUtil;
 
 /**
  * {@link PageObject} representing the Job status on the build page of a job.
@@ -64,7 +64,7 @@ public class MainPanel extends PageObject {
      */
     public boolean isChartDisplayed() {
         ensureMainPanelPageIsOpen();
-        return TrendChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);
+        return ChartUtil.isChartDisplayed(this, COVERAGE_TREND_CHART);
     }
 
 }
