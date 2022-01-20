@@ -12,7 +12,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFil
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
-import io.jenkins.plugins.coverage.util.TrendChartUtil;
+import io.jenkins.plugins.coverage.util.ChartUtil;
+
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 //TODO: ueberdenken ob tests so sinn machen & ausreichen
 
@@ -101,14 +104,24 @@ public class CoveragePublisherTest extends UiTest {
         report.open();
         FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
         SourceCodeView sourceCodeView = fileCoverageTable.getRow(1).openFileLink(build);
-        TrendChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
+        String json = ChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
+
+        assertThatJson(json)
+                .inPath("$.yAxis[0].data[*]")
+                .isArray()
+                .hasSize(5)
+                .contains("Class", "Method", "Line", "Instruction", "Branch");
+
+        assertThatJson(json)
+                .inPath("$.series[0].data")
+                .isArray()
+                .hasSize(5)
+                .contains(1, 0.6, 0.5833333333333334, 0.25);
+
+        assertThatJson(json).node("series[0].name").isEqualTo("Covered");
+        assertThatJson(json).node("series[1].name").isEqualTo("Missed");
+
+        assertThat(sourceCodeView.isFileTableDisplayed()).isTrue();
+
     }
-
-    //trendchartutil.getChartById(pageobject, coverageOverview als id)
-    //getChartData
-
-    // webelement.findbyId(file-table)
-    // exception oder nicht
-    // isDisplayed von trendchartUtil.isElementDisplayed
-
 }
