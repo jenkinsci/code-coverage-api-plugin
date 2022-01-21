@@ -9,13 +9,6 @@ import org.junit.Test;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
 
 /**
@@ -27,7 +20,7 @@ public class SmokeTests extends UiTest {
      * Creates two successful builds. Tests the reference values in summary, coverage report and main panel.
      */
     @Test
-    public void verifyingCodeCoveragePlugin() {
+    public void testCodeCoveragePlugin() {
         FreeStyleJob job = getJobWithFirstBuildAndDifferentReports(InCaseCoverageDecreasedConfiguration.DONT_FAIL);
         Build secondBuild = buildSuccessfully(job);
 
