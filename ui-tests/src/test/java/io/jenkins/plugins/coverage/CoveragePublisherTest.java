@@ -95,10 +95,11 @@ public class CoveragePublisherTest extends UiTest {
         FreeStyleJob job = getJobWithReportAndSourceCode(SourceFileResolver.STORE_LAST_BUIlD);
         Build firstBuild = buildSuccessfully(job);
         Build secondBuild = buildSuccessfully(job);
+        Build thirdBuild = buildSuccessfully(job);
 
         verifyClickableFileLink(firstBuild, false);
-
         verifyClickableFileLink(secondBuild, true);
+        verifyClickableFileLink(thirdBuild, true);
     }
 
     /**
