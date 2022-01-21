@@ -25,11 +25,14 @@ class UiTest extends AbstractJUnitTest {
 
     /**
      * Returns a job without any reports in its configuration.
-     * @param configuration if build should fail due to no reports
+     *
+     * @param configuration
+     *         if build should fail due to no reports
+     *
      * @return a job without any reports
      */
     FreeStyleJob getJobWithoutAnyReports(InCaseNoReportsConfiguration configuration) {
-        if (configuration== InCaseNoReportsConfiguration.FAIL) {
+        if (configuration == InCaseNoReportsConfiguration.FAIL) {
             return createJobWithConfiguration(JobConfiguration.NO_REPORTS_SHOULD_FAIL);
         }
         else {
@@ -46,6 +49,14 @@ class UiTest extends AbstractJUnitTest {
         return createJobWithConfiguration(JobConfiguration.FIRST_BUILD_ONE_JACOCO);
     }
 
+    /**
+     * Creates job with source code from a set commit and its jacoco file.
+     *
+     * @param sourceFileResolver
+     *         level of source code storing
+     *
+     * @return job with source code and correct jacoco file
+     */
     FreeStyleJob getJobWithReportAndSourceCode(final SourceFileResolver sourceFileResolver) {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
