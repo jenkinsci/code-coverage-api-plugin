@@ -1,12 +1,14 @@
 package io.jenkins.plugins.coverage;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
+import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.AdapterThreshold.AdapterThresholdTarget;
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 
@@ -16,8 +18,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.G
 class UiTest extends AbstractJUnitTest {
     static final String JACOCO_ANALYSIS_MODEL_XML = "jacoco-analysis-model.xml";
     static final String JACOCO_CODINGSTYLE_XML = "jacoco-codingstyle.xml";
-    static final String JACOCO_OLD_COMMIT_XML = "jacoco-f52a5169.xml";
+    static final String JACOCO_FROM_COMMIT_XML = "jacoco-f52a5169.xml";
     static final String RESOURCES_FOLDER = "/";
+    static final String REPO_URL = "https://github.com/jenkinsci/code-coverage-api-plugin.git";
+    static final String COMMIT_ID = "f52a51691598600e2f42eee354ee6a540e008a72";
 
     /**
      * Returns a job without any reports in its configuration.
@@ -40,6 +44,20 @@ class UiTest extends AbstractJUnitTest {
      */
     FreeStyleJob getJobWithReportInConfiguration() {
         return createJobWithConfiguration(JobConfiguration.FIRST_BUILD_ONE_JACOCO);
+    }
+
+    FreeStyleJob getJobWithReportAndSourceCode(final SourceFileResolver sourceFileResolver) {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        coveragePublisher.setSourceFileResolver(sourceFileResolver);
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
+        copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+        jacocoAdapter.setReportFilePath(JACOCO_FROM_COMMIT_XML);
+        job.useScm(GitScm.class)
+                .url(REPO_URL)
+                .branch(COMMIT_ID);
+        job.save();
+        return job;
     }
 
     /**

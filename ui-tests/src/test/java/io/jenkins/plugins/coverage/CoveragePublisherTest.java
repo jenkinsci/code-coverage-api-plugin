@@ -5,28 +5,17 @@ import org.junit.Test;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
-import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher.SourceFileResolver;
-import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold.GlobalThresholdTarget;
 import io.jenkins.plugins.coverage.util.ChartUtil;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
-
-//TODO: ueberdenken ob tests so sinn machen & ausreichen
 
 /**
  * Acceptance tests for CoveragePublisher. Verifies if set options in CoveragePublisher are used and lead to excepted
  * results.
  */
 public class CoveragePublisherTest extends UiTest {
-    private static final String USERNAME = "gitplugin";
-
-    @Test
-    public void testApplyThresholdRecursively() {
-        //TODO
-    }
 
     /**
      * Verifies that job with no report fails when setFailNoReports(true).
@@ -68,17 +57,14 @@ public class CoveragePublisherTest extends UiTest {
      * Tests if source file storing level and display is correct.
      */
     @Test
-    public void testSourceFileStoringLevel() {
-        String repoUrl = "https://github.com/jenkinsci/code-coverage-api-plugin.git";
-        String commitID = "f52a51691598600e2f42eee354ee6a540e008a72";
-        FreeStyleJob job = getJobWithReportInConfiguration();
+    public void testSourceFileStoringLevelAllBuilds() {
+        FreeStyleJob job = getJobWithReportAndSourceCode(SourceFileResolver.STORE_ALL_BUILD);
         Build build = buildSuccessfully(job);
-        CoverageReport report = new CoverageReport(build);
-        report.open();
-        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
-        FileCoverageTableRow fileCoverageTableRow = fileCoverageTable.getRow(1);
-
-        assertThat(fileCoverageTableRow.hasFileLink()).isTrue();
+        buildSuccessfully(job);
+        buildSuccessfully(job);
+        buildSuccessfully(job);
+        buildSuccessfully(job);
+        FileCoverageTableRow fileCoverageTableRow = verifyClickableFileLink(build, true);
 
         SourceCodeView sourceCodeView = fileCoverageTableRow.openFileLink(build);
         String json = ChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
@@ -86,19 +72,62 @@ public class CoveragePublisherTest extends UiTest {
         assertThatJson(json)
                 .inPath("$.yAxis[0].data[*]")
                 .isArray()
-                .hasSize(5)
-                .contains("Class", "Method", "Line", "Instruction", "Branch");
+                .hasSize(4)
+                .contains("Class", "Method", "Line", "Instruction");
 
         assertThatJson(json)
                 .inPath("$.series[0].data")
                 .isArray()
-                .hasSize(5)
-                .contains(1, 0.6, 0.5833333333333334, 0.25);
+                .hasSize(4)
+                .contains(1, 0.8461538461538461, 0.88);
 
         assertThatJson(json).node("series[0].name").isEqualTo("Covered");
         assertThatJson(json).node("series[1].name").isEqualTo("Missed");
 
         assertThat(sourceCodeView.isFileTableDisplayed()).isTrue();
+    }
 
+    /**
+     * Tests if source file is only available for last build.
+     */
+    @Test
+    public void testSourceFileStoringLevelLastBuild() {
+        FreeStyleJob job = getJobWithReportAndSourceCode(SourceFileResolver.STORE_LAST_BUIlD);
+        Build firstBuild = buildSuccessfully(job);
+        Build secondBuild = buildSuccessfully(job);
+
+        verifyClickableFileLink(firstBuild, false);
+
+        verifyClickableFileLink(secondBuild, true);
+    }
+
+    /**
+     * Tests if source file storing is off.
+     */
+    @Test
+    public void testSourceFileStoringLevelNever() {
+        FreeStyleJob job = getJobWithReportAndSourceCode(SourceFileResolver.NEVER_STORE);
+        Build firstBuild = buildSuccessfully(job);
+
+        verifyClickableFileLink(firstBuild, false);
+    }
+
+    /**
+     * Verifies if a file in a {@link FileCoverageTableRow} is clickable.
+     *
+     * @param build
+     *         current build with file coverage
+     * @param expected
+     *         value if file should be clickable
+     *
+     * @return row of the file
+     */
+    private FileCoverageTableRow verifyClickableFileLink(final Build build, final boolean expected) {
+        CoverageReport report = new CoverageReport(build);
+        report.open();
+        FileCoverageTable fileCoverageTable = report.openFileCoverageTable();
+        FileCoverageTableRow fileCoverageTableRow = fileCoverageTable.getRow(0);
+        assertThat(fileCoverageTableRow.hasFileLink()).isEqualTo(expected);
+        return fileCoverageTableRow;
     }
 }
