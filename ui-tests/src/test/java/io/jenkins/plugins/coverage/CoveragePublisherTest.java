@@ -93,12 +93,11 @@ public class CoveragePublisherTest extends UiTest {
     @Test
     public void testSourceFileStoringLevelLastBuild() {
         FreeStyleJob job = getJobWithReportAndSourceCode(SourceFileResolver.STORE_LAST_BUIlD);
-        Build firstBuild = buildSuccessfully(job);
         Build secondBuild = buildSuccessfully(job);
-
-        verifyClickableFileLink(firstBuild, false);
+        Build thirdBuild = buildSuccessfully(job);
 
         verifyClickableFileLink(secondBuild, true);
+        verifyClickableFileLink(thirdBuild, false);
     }
 
     /**
