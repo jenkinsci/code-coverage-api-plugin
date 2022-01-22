@@ -16,10 +16,9 @@ import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Acceptance tests for Summary. Verifies if  ...//TODO: javadoc
+ * Acceptance tests for Summary.
  */
 public class CoverageSummaryTest extends UiTest {
-
 
     /**
      * Verifies if summary of first successful build of Project is correct.

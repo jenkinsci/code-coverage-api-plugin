@@ -25,7 +25,7 @@ public class SourceCodeView extends PageObject {
     }
 
     /**
-     * Returns if file table is displayed
+     * Returns if file table is displayed.
      *
      * @return if file table is displayed
      */

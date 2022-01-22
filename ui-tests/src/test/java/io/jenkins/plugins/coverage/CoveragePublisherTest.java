@@ -67,7 +67,7 @@ public class CoveragePublisherTest extends UiTest {
         FileCoverageTableRow fileCoverageTableRow = verifyClickableFileLink(build, true);
 
         SourceCodeView sourceCodeView = fileCoverageTableRow.openFileLink(build);
-        String json = ChartUtil.getChartsDataById(sourceCodeView, "coverage-overview");
+        String json = ChartUtil.getChartDataById(sourceCodeView, "coverage-overview");
 
         assertThatJson(json)
                 .inPath("$.yAxis[0].data[*]")

@@ -10,8 +10,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
  * this helper class provides static verifying methods that can be used in all tests for a specific TrendChart.
  */
 @SuppressWarnings("hideutilityclassconstructor")
-public
-class TrendChartTestUtil {
+public class TrendChartTestUtil {
 
     /**
      * Verifies if a specific generated TrendChart has the correct buildnumbers in its axis and the right coverage values for

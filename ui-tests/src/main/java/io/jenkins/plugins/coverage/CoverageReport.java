@@ -38,7 +38,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageTrend() {
         ensureCoverageReportPageIsOpen();
-        return getChartsDataById(this, COVERAGE_TREND_CHART);
+        return getChartDataById(this, COVERAGE_TREND_CHART);
     }
 
     /**
@@ -48,7 +48,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageOverview() {
         ensureCoverageReportPageIsOpen();
-        return getChartsDataById(this, COVERAGE_OVERVIEW_CHART);
+        return getChartDataById(this, COVERAGE_OVERVIEW_CHART);
     }
 
     /**
@@ -58,7 +58,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageTree() {
         ensureCoverageReportPageIsOpen();
-        return getChartsDataById(this, COVERAGE_TREE_CHART);
+        return getChartDataById(this, COVERAGE_TREE_CHART);
     }
 
     /**

@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
 import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
-import io.jenkins.plugins.coverage.util.ChartUtil;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -42,14 +41,18 @@ public class MainPanelTest extends UiTest {
 
     /**
      * Verifies a specific displayed TrendChart.
-     * @param mainPanel of project
-     * @param firstBuildInChartNumber of build visualized in TrendChart
-     * @param lastBuildInChartNumber of build visualized in TrendChart
+     *
+     * @param mainPanel
+     *         of project
+     * @param firstBuildInChartNumber
+     *         of build visualized in TrendChart
+     * @param lastBuildInChartNumber
+     *         of build visualized in TrendChart
      */
-    public static void verifyTrendChartWithTwoReports(MainPanel mainPanel, int firstBuildInChartNumber,
-            int lastBuildInChartNumber) {
+    public static void verifyTrendChartWithTwoReports(final MainPanel mainPanel, final int firstBuildInChartNumber,
+            final int lastBuildInChartNumber) {
         mainPanel.open();
-        assertThat(ChartUtil.isChartDisplayed(mainPanel, "coverage-trendchart"));
+        assertThat(mainPanel.isChartDisplayed()).isTrue();
         String trendChart = mainPanel.getCoverageTrendChart();
         TrendChartTestUtil.verifyTrendChart(trendChart, firstBuildInChartNumber, lastBuildInChartNumber);
     }
