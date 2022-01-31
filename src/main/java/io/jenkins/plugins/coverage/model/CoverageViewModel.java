@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
@@ -225,7 +226,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getCoveredPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
         }
 
         public List<Integer> getMissed() {
@@ -233,7 +234,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedPercentage).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getMissedPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
         }
 
         private Stream<Coverage> streamCoverages() {
@@ -329,7 +330,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             if (branchCoverage.isSet()) {
                 return String.valueOf(branchCoverage.getCoveredPercentage());
             }
-            return "n/a";
+            return Messages.Coverage_Not_Available();
         }
 
         private Coverage getBranchCoverage() {
@@ -352,9 +353,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                     getBarChart("missed", coverage.getMissedPercentage())).render();
         }
 
-        private ContainerTag getBarChart(final String className, final double percentage) {
+        private ContainerTag getBarChart(final String className, final Fraction percentage) {
             return span().withClasses("bar-graph", className, className + "--hover")
-                    .withStyle("width:" + (percentage * 100) + "%").withText(".");
+                    .withStyle("width:" + (percentage.doubleValue() * 100) + "%").withText(".");
         }
     }
 }

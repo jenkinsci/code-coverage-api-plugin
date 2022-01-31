@@ -18,13 +18,9 @@ public class CoverageSeriesBuilder extends SeriesBuilder<CoverageBuildAction> {
     protected Map<String, Integer> computeSeries(final CoverageBuildAction coverageBuildAction) {
         Map<String, Integer> series = new HashMap<>();
 
-        series.put(LINE_COVERAGE, asPercentage(coverageBuildAction.getLineCoverage()));
-        series.put(BRANCH_COVERAGE, asPercentage(coverageBuildAction.getBranchCoverage()));
+        series.put(LINE_COVERAGE, coverageBuildAction.getLineCoverage().getRoundedPercentage());
+        series.put(BRANCH_COVERAGE, coverageBuildAction.getBranchCoverage().getRoundedPercentage());
 
         return series;
-    }
-
-    private int asPercentage(final Coverage coverage) {
-        return (int) (coverage.getCoveredPercentage() * 100);
     }
 }

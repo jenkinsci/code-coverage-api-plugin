@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.Fraction;
 
 import com.google.common.collect.Sets;
 
@@ -165,7 +166,7 @@ public class CoverageProcessor {
             Run<?, ?> referenceBuild = possibleReferenceBuild.get();
             CoverageBuildAction previousAction = referenceBuild.getAction(CoverageBuildAction.class);
             if (previousAction != null) {
-                SortedMap<CoverageMetric, Double> delta = coverageNode.computeDelta(previousAction.getResult());
+                SortedMap<CoverageMetric, Fraction> delta = coverageNode.computeDelta(previousAction.getResult());
                 return new CoverageBuildAction(this.run, coverageNode, referenceBuild.getExternalizableId(), delta);
             }
         }
