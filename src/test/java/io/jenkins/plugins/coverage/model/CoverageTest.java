@@ -1,5 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Locale;
+
+import org.apache.commons.lang3.math.Fraction;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -12,18 +16,23 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageTest {
-    private static final double PRECISION = 0.01;
+    @BeforeAll
+    static void beforeAll() {
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
     @Test
     void shouldProvideNullObject() {
         assertThat(Coverage.NO_COVERAGE).isNotSet()
                 .hasCovered(0)
-                .hasCoveredPercentageCloseTo(0, PRECISION)
+                .hasCoveredPercentage(Fraction.ZERO)
+                .hasRoundedPercentage(0)
                 .hasMissed(0)
-                .hasMissedPercentageCloseTo(0, PRECISION)
-                .hasTotal(0).hasToString(Coverage.COVERAGE_NOT_AVAILABLE);
-        assertThat(Coverage.NO_COVERAGE.printCoveredPercentage()).isEqualTo(Coverage.COVERAGE_NOT_AVAILABLE);
-        assertThat(Coverage.NO_COVERAGE.printMissedPercentage()).isEqualTo(Coverage.COVERAGE_NOT_AVAILABLE);
+                .hasMissedPercentage(Fraction.ZERO)
+                .hasTotal(0)
+                .hasToString(Messages.Coverage_Not_Available());
+        assertThat(Coverage.NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
+        assertThat(Coverage.NO_COVERAGE.formatMissedPercentage()).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.add(Coverage.NO_COVERAGE)).isEqualTo(Coverage.NO_COVERAGE);
     }
 
@@ -32,20 +41,21 @@ class CoverageTest {
         Coverage coverage = new Coverage(6, 4);
         assertThat(coverage).isSet()
                 .hasCovered(6)
-                .hasCoveredPercentageCloseTo(0.60, PRECISION)
+                .hasCoveredPercentage(Fraction.getFraction(6, 10))
+                .hasRoundedPercentage(60)
                 .hasMissed(4)
-                .hasMissedPercentageCloseTo(0.40, PRECISION)
+                .hasMissedPercentage(Fraction.getFraction(4, 10))
                 .hasTotal(10)
-                .hasToString("60.00 (6/10)");
+                .hasToString("60.00% (6/10)");
 
-        assertThat(coverage.printCoveredPercentage()).isEqualTo("60.00%");
-        assertThat(coverage.printMissedPercentage()).isEqualTo("40.00%");
+        assertThat(coverage.formatCoveredPercentage()).isEqualTo("60.00%");
+        assertThat(coverage.formatMissedPercentage()).isEqualTo("40.00%");
 
         assertThat(coverage.add(Coverage.NO_COVERAGE)).isEqualTo(coverage);
         Coverage sum = coverage.add(new Coverage(10, 0));
-        assertThat(sum).isEqualTo(new Coverage(16, 4));
-        assertThat(sum.printCoveredPercentage()).isEqualTo("80.00%");
-        assertThat(sum.printMissedPercentage()).isEqualTo("20.00%");
+        assertThat(sum).isEqualTo(new Coverage(16, 4)).hasRoundedPercentage(80);
+        assertThat(sum.formatCoveredPercentage()).isEqualTo("80.00%");
+        assertThat(sum.formatMissedPercentage()).isEqualTo("20.00%");
     }
 
     @Test

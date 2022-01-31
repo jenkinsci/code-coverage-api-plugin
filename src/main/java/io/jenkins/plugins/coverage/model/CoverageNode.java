@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -16,6 +17,8 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.util.Ensure;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -105,7 +108,7 @@ public final class CoverageNode implements Serializable {
                 .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
     }
 
-    public SortedMap<CoverageMetric, Double> getMetricPercentages() {
+    public SortedMap<CoverageMetric, Fraction> getMetricPercentages() {
         return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(),
                         searchMetric -> getCoverage(searchMetric).getCoveredPercentage(), (o1, o2) -> o1,
@@ -186,15 +189,30 @@ public final class CoverageNode implements Serializable {
     }
 
     /**
-     * Prints the coverage for the specified element.
+     * Prints the coverage for the specified element. Uses {@code Locale.getDefault()} to format the percentage.
      *
      * @param searchMetric
      *         the element to print the coverage for
      *
      * @return coverage ratio in a human-readable format
+     * @see #printCoverageFor(CoverageMetric, Locale)
      */
     public String printCoverageFor(final CoverageMetric searchMetric) {
-        return getCoverage(searchMetric).printCoveredPercentage();
+        return printCoverageFor(searchMetric, Locale.getDefault());
+    }
+
+    /**
+     * Prints the coverage for the specified element.
+     *
+     * @param searchMetric
+     *         the element to print the coverage for
+     * @param locale
+     *         the locale to use when formatting the percentage
+     *
+     * @return coverage ratio in a human-readable format
+     */
+    public String printCoverageFor(final CoverageMetric searchMetric, final Locale locale) {
+        return getCoverage(searchMetric).formatCoveredPercentage(locale);
     }
 
     /**
@@ -239,12 +257,12 @@ public final class CoverageNode implements Serializable {
      *
      * @return the delta coverage for each available metric
      */
-    public SortedMap<CoverageMetric, Double> computeDelta(final CoverageNode reference) {
-        SortedMap<CoverageMetric, Double> deltaPercentages = new TreeMap<>();
-        SortedMap<CoverageMetric, Double> metricPercentages = getMetricPercentages();
-        SortedMap<CoverageMetric, Double> referencePercentages = reference.getMetricPercentages();
+    public SortedMap<CoverageMetric, Fraction> computeDelta(final CoverageNode reference) {
+        SortedMap<CoverageMetric, Fraction> deltaPercentages = new TreeMap<>();
+        SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricPercentages();
+        SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricPercentages();
         metricPercentages.forEach((key, value) ->
-                deltaPercentages.put(key, value - referencePercentages.getOrDefault(key, 0.0)));
+                deltaPercentages.put(key, value.subtract(referencePercentages.getOrDefault(key, Fraction.ZERO))));
         return deltaPercentages;
     }
 
@@ -283,8 +301,7 @@ public final class CoverageNode implements Serializable {
         if (matches(searchMetric, searchName)) {
             return Optional.of(this);
         }
-        return children
-                .stream()
+        return children.stream()
                 .map(child -> child.find(searchMetric, searchName))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
@@ -304,8 +321,7 @@ public final class CoverageNode implements Serializable {
         if (matches(searchMetric, searchNameHashCode)) {
             return Optional.of(this);
         }
-        return children
-                .stream()
+        return children.stream()
                 .map(child -> child.findByHashCode(searchMetric, searchNameHashCode))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
@@ -414,30 +430,15 @@ public final class CoverageNode implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         CoverageNode that = (CoverageNode) o;
-
-        if (!metric.equals(that.metric)) {
-            return false;
-        }
-        if (!name.equals(that.name)) {
-            return false;
-        }
-        if (!children.equals(that.children)) {
-            return false;
-        }
-        if (!leaves.equals(that.leaves)) {
-            return false;
-        }
-        return Arrays.equals(uncoveredLines, that.uncoveredLines);
+        return Objects.equals(metric, that.metric) && Objects.equals(name, that.name)
+                && Objects.equals(children, that.children) && Objects.equals(leaves, that.leaves)
+                && Arrays.equals(uncoveredLines, that.uncoveredLines);
     }
 
     @Override
     public int hashCode() {
-        int result = metric.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + children.hashCode();
-        result = 31 * result + leaves.hashCode();
+        int result = Objects.hash(metric, name, children, leaves);
         result = 31 * result + Arrays.hashCode(uncoveredLines);
         return result;
     }

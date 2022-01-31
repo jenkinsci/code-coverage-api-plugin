@@ -22,7 +22,7 @@ class TreeMapNodeConverter {
         Coverage coverage = node.getCoverage(CoverageMetric.LINE);
 
         TreeMapNode treeNode = new TreeMapNode(node.getName(),
-                assignColor(coverage.getCoveredPercentage() * 100),
+                assignColor(coverage.getRoundedPercentage()),
                 coverage.getTotal(), coverage.getCovered());
         if (node.getMetric().equals(CoverageMetric.FILE)) {
             return treeNode;
