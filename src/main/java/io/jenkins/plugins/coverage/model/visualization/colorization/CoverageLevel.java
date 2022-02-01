@@ -61,22 +61,17 @@ public enum CoverageLevel {
      * @return the blended color
      */
     public static Color getBlendedFillColorOf(final Double coverageLevel) {
-        if (coverageLevel >= 0) {
-            for (int i = 0; i < values().length - 1; i++) {
-                final CoverageLevel level = values()[i];
-                if (coverageLevel == level.coverage) {
-                    return level.fillColor;
+        for (int i = 0; i < values().length - 1; i++) {
+            final CoverageLevel level = values()[i];
+            if (coverageLevel >= level.coverage) {
+                if (i == 0) {
+                    return OVER_95.fillColor;
                 }
-                else if (coverageLevel >= level.coverage) {
-                    if (i == 0) {
-                        return OVER_95.fillColor;
-                    }
-                    final CoverageLevel upperLevel = values()[i - 1];
-                    final double distanceUpper = coverageLevel - level.coverage;
-                    final double distanceLower = upperLevel.coverage - coverageLevel;
-                    return ColorUtils.blendWeightedColors(level.fillColor, upperLevel.fillColor,
-                            distanceLower, distanceUpper);
-                }
+                final CoverageLevel upperLevel = values()[i - 1];
+                final double distanceUpper = coverageLevel - level.coverage;
+                final double distanceLower = upperLevel.coverage - coverageLevel;
+                return ColorUtils.blendWeightedColors(level.fillColor, upperLevel.fillColor,
+                        distanceLower, distanceUpper);
             }
         }
         return NA.fillColor;

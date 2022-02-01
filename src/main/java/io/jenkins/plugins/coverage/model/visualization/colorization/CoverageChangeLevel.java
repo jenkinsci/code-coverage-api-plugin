@@ -63,10 +63,7 @@ public enum CoverageChangeLevel {
     public static Color getBlendedFillColorOf(final Double coverageChange) {
         for (int i = 0; i < values().length - 1; i++) {
             final CoverageChangeLevel level = values()[i];
-            if (coverageChange == level.changeLevel) {
-                return level.fillColor;
-            }
-            else if (coverageChange >= level.changeLevel) {
+            if (coverageChange >= level.changeLevel) {
                 if (i == 0) {
                     return INCREASE_10.fillColor;
                 }

@@ -4,7 +4,8 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -40,6 +41,9 @@ public class CodeCoverageColumn extends ListViewColumn {
     private String coverageType = CoverageType.PROJECT.getType();
     private String coverageMetric = CoverageMetric.FILE.getName();
 
+    /**
+     * Empty constructor.
+     */
     @DataBoundConstructor
     public CodeCoverageColumn() {
         super();
@@ -88,19 +92,6 @@ public class CodeCoverageColumn extends ListViewColumn {
     @DataBoundSetter
     public void setCoverageMetric(final String coverageMetric) {
         this.coverageMetric = coverageMetric;
-    }
-
-    /**
-     * Checks whether a {@link CoverageBuildAction} exists within the passed job.
-     *
-     * @param job
-     *         The processed job
-     *
-     * @return {@code true} whether the action exists, else {@code false}
-     */
-    private boolean hasCoverageAction(final Job<?, ?> job) {
-        final Run<?, ?> lastSuccessfulBuild = job.getLastCompletedBuild();
-        return lastSuccessfulBuild != null && !lastSuccessfulBuild.getActions(CoverageBuildAction.class).isEmpty();
     }
 
     /**
@@ -158,7 +149,10 @@ public class CodeCoverageColumn extends ListViewColumn {
             default:
                 return Optional.empty();
         }
-        return Optional.of(new BigDecimal(coverage).setScale(3, RoundingMode.DOWN).stripTrailingZeros());
+        return Optional.of(
+                new BigDecimal(String.valueOf(coverage))
+                        .setScale(3, RoundingMode.DOWN)
+                        .stripTrailingZeros());
     }
 
     /**
@@ -175,15 +169,14 @@ public class CodeCoverageColumn extends ListViewColumn {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            switch (type) {
-                case PROJECT:
-                    color = CoverageLevel.getCoverageValueOf(coverage.doubleValue()).getLineColor();
-                    break;
-                case PROJECT_DELTA:
-                    color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
-                    break;
-                default:
-                    color = ColorUtils.NA_LINE_COLOR;
+            if (type == CoverageType.PROJECT) {
+                color = CoverageLevel.getCoverageValueOf(coverage.doubleValue()).getLineColor();
+            }
+            else if (type == CoverageType.PROJECT_DELTA) {
+                color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
+            }
+            else {
+                color = ColorUtils.NA_LINE_COLOR;
             }
         }
         else {
@@ -206,15 +199,14 @@ public class CodeCoverageColumn extends ListViewColumn {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            switch (type) {
-                case PROJECT:
-                    color = CoverageLevel.getBlendedFillColorOf(coverage.doubleValue());
-                    break;
-                case PROJECT_DELTA:
-                    color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getFillColor();
-                    break;
-                default:
-                    color = ColorUtils.NA_FILL_COLOR;
+            if (type == CoverageType.PROJECT) {
+                color = CoverageLevel.getBlendedFillColorOf(coverage.doubleValue());
+            }
+            else if (type == CoverageType.PROJECT_DELTA) {
+                color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getFillColor();
+            }
+            else {
+                color = ColorUtils.NA_FILL_COLOR;
             }
         }
         else {
@@ -236,10 +228,26 @@ public class CodeCoverageColumn extends ListViewColumn {
         return "";
     }
 
+    /**
+     * Checks whether a {@link CoverageBuildAction} exists within the passed job.
+     *
+     * @param job
+     *         The processed job
+     *
+     * @return {@code true} whether the action exists, else {@code false}
+     */
+    private boolean hasCoverageAction(final Job<?, ?> job) {
+        final Run<?, ?> lastSuccessfulBuild = job.getLastCompletedBuild();
+        return lastSuccessfulBuild != null && !lastSuccessfulBuild.getActions(CoverageBuildAction.class).isEmpty();
+    }
+
+    /**
+     * Descriptor of the column.
+     */
     @Extension(optional = true)
     public static class CoverageDescriptor extends ListViewColumnDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.Code_Coverage_Column();

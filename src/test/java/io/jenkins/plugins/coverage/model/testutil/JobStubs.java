@@ -49,6 +49,11 @@ public final class JobStubs {
         return job;
     }
 
+    /**
+     * Creates a stub of {@link Run}.
+     *
+     * @return the created stub
+     */
     @VisibleForTesting
     public static Run<?, ?> createBuild() {
         return mock(Run.class);

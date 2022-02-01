@@ -7,6 +7,10 @@ package io.jenkins.plugins.coverage.model.util;
  */
 public class WebUtil {
 
+    private WebUtil() {
+        // prevents instantiation
+    }
+
     /**
      * Relative URL for accessing the default page of the coverage report of a build.
      */

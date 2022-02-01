@@ -18,6 +18,10 @@ public class ColorUtils {
      */
     public static final Color NA_LINE_COLOR = new Color(0, 0, 0);
 
+    private ColorUtils() {
+        // prevents instantiation
+    }
+
     /**
      * Blends two colors.
      *

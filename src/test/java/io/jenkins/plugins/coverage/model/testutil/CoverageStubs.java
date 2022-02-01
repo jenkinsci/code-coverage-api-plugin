@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model.testutil;
 
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import edu.hm.hafner.echarts.Build;
@@ -70,7 +71,7 @@ public final class CoverageStubs {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         Coverage coverage = createCoverage(coveragePercentage);
 
-        TreeMap<CoverageMetric, Double> deltas = mock(TreeMap.class);
+        SortedMap<CoverageMetric, Double> deltas = mock(TreeMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
         when(deltas.containsValue(coverageDelta)).thenReturn(true);
