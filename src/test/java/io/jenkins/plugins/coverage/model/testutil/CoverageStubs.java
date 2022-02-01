@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model.testutil;
 
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
