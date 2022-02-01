@@ -1,6 +1,8 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +79,15 @@ public class CoverageMetric implements Comparable<CoverageMetric>, Serializable 
             return BRANCH;
         }
         return new CoverageMetric(name, DEFAULT_ORDER);
+    }
+
+    /**
+     * Provides all available values of {@link CoverageMetric}.
+     *
+     * @return the available metrics
+     */
+    public static List<CoverageMetric> getAvailableCoverageMetrics() {
+        return Arrays.asList(LINE, BRANCH, INSTRUCTION, METHOD, CLASS, FILE, PACKAGE, MODULE);
     }
 
     /**

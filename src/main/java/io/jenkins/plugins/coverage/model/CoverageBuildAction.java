@@ -102,6 +102,30 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * Returns whether the {@link Coverage} for the passed metric exist.
+     *
+     * @param coverageMetric
+     *         the metric to check
+     *
+     * @return {@code true} if a coverage is available for the specified metric
+     */
+    public boolean hasCoverage(final CoverageMetric coverageMetric) {
+        return getResult().getCoverage(coverageMetric) != null;
+    }
+
+    /**
+     * Gets the {@link Coverage} for the passed metric.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return the coverage
+     */
+    public Coverage getCoverage(final CoverageMetric coverageMetric) {
+        return getResult().getCoverage(coverageMetric);
+    }
+
+    /**
      * Returns the possible reference build that has been used to compute the coverage delta.
      *
      * @return the reference build, if available
