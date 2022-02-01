@@ -11,7 +11,7 @@ import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
 
-import static io.jenkins.plugins.coverage.model.testutil.CoverageResultStubs.*;
+import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
