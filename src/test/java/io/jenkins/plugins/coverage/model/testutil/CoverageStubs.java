@@ -71,7 +71,7 @@ public final class CoverageStubs {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         Coverage coverage = createCoverage(coveragePercentage);
 
-        SortedMap<CoverageMetric, Double> deltas = mock(TreeMap.class);
+        SortedMap<CoverageMetric, Double> deltas = mock(SortedMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
         when(deltas.containsValue(coverageDelta)).thenReturn(true);
