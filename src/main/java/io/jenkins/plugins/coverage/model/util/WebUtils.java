@@ -5,9 +5,9 @@ package io.jenkins.plugins.coverage.model.util;
  *
  * @author Florian Orendi
  */
-public class WebUtil {
+public class WebUtils {
 
-    private WebUtil() {
+    private WebUtils() {
         // prevents instantiation
     }
 

@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test class for {@link WebUtil}.
+ * Test class for {@link WebUtils}.
  *
  * @author Florian Orendi
  */
-class WebUtilTest {
+class WebUtilsTest {
 
     @Test
     void shouldProvideRelativeCoverageDefaultUrl() {
-        assertThat(WebUtil.getRelativeCoverageDefaultUrl()).isEqualTo(WebUtil.COVERAGE_DEFAULT_URL);
+        assertThat(WebUtils.getRelativeCoverageDefaultUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
     }
 }

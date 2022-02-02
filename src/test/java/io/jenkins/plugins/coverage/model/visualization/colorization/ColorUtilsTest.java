@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Florian Orendi
  */
-class ColoUtilsTest {
+class ColorUtilsTest {
 
     @Test
     void shouldBlendColors() {

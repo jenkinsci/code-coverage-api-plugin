@@ -7,7 +7,7 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
 import static org.assertj.core.api.Assertions.*;
@@ -77,6 +77,8 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
      * @return the fill color as a hex string
      */
     private String getNodeColorAsHex(final Double coveredPercentage) {
-        return ColorUtils.colorAsHex(CoverageLevel.getBlendedFillColorOf(coveredPercentage));
+        return ColorUtils.colorAsHex(CoverageColorizationLevel
+                .getDisplayColorsOfCoveragePercentage(coveredPercentage)
+                .getFillColor());
     }
 }

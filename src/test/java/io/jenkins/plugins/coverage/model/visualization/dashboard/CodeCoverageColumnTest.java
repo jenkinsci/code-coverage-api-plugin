@@ -11,10 +11,10 @@ import hudson.model.Job;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageType;
-import io.jenkins.plugins.coverage.model.util.WebUtil;
+import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.model.testutil.JobStubs.*;
@@ -46,7 +46,7 @@ class CodeCoverageColumnTest {
         Job<?, ?> job = createJob();
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         final Optional<BigDecimal> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
         assertThat(column.getFillColor(job, null)).isEqualTo(ColorUtils.colorAsHex(ColorUtils.NA_FILL_COLOR));
@@ -60,7 +60,7 @@ class CodeCoverageColumnTest {
         Job<?, ?> job = createJobWithActions();
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job)).isEmpty();
         assertThat(column.getFillColor(job, null)).isEqualTo(ColorUtils.colorAsHex(ColorUtils.NA_FILL_COLOR));
         assertThat(column.getLineColor(job, null)).isEqualTo(ColorUtils.colorAsHex(ColorUtils.NA_LINE_COLOR));
@@ -90,13 +90,13 @@ class CodeCoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(BigDecimal.ZERO, BigDecimal.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job)).isEmpty();
 
         column.setCoverageType(CoverageType.PROJECT_DELTA.getType());
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job)).isEmpty();
     }
 
@@ -108,16 +108,18 @@ class CodeCoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(BigDecimal.ZERO, coveragePercentage);
 
         assertThat(column.getCoverageText(job)).isEqualTo("50 %");
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(value -> {
                     final BigDecimal coverage = value.get();
                     assertThat(coverage.compareTo(coveragePercentage.multiply(new BigDecimal(100)))).isEqualTo(0);
                     assertThat(column.getFillColor(job, coverage))
-                            .isEqualTo(ColorUtils.colorAsHex(CoverageLevel.OVER_50.getFillColor()));
+                            .isEqualTo(
+                                    ColorUtils.colorAsHex(CoverageColorizationLevel.LVL_50_DECREASE5.getFillColor()));
                     assertThat(column.getLineColor(job, coverage))
-                            .isEqualTo(ColorUtils.colorAsHex(CoverageLevel.OVER_50.getLineColor()));
+                            .isEqualTo(
+                                    ColorUtils.colorAsHex(CoverageColorizationLevel.LVL_50_DECREASE5.getLineColor()));
                 });
     }
 
@@ -130,7 +132,7 @@ class CodeCoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(coverageDelta, BigDecimal.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo("5 %");
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtil.getRelativeCoverageDefaultUrl());
+        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(value -> {

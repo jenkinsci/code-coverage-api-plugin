@@ -102,7 +102,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns whether the {@link Coverage} for the passed metric exist.
+     * Returns whether the {@link Coverage} for the passed metric exists.
      *
      * @param coverageMetric
      *         the metric to check

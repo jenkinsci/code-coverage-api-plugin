@@ -37,7 +37,7 @@ public class ColorUtils {
     }
 
     /**
-     * Blends two colors using weights.
+     * Blends two colors using positive weights.
      *
      * @param color1
      *         The first color

@@ -22,10 +22,10 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageType;
 import io.jenkins.plugins.coverage.model.Messages;
-import io.jenkins.plugins.coverage.model.util.WebUtil;
+import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
@@ -170,10 +170,13 @@ public class CodeCoverageColumn extends ListViewColumn {
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
             if (type == CoverageType.PROJECT) {
-                color = CoverageLevel.getCoverageValueOf(coverage.doubleValue()).getLineColor();
+                color = CoverageColorizationLevel
+                        .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
+                        .getLineColor();
             }
             else if (type == CoverageType.PROJECT_DELTA) {
-                color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
+                color = CoverageChangeTendency
+                        .getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
             }
             else {
                 color = ColorUtils.NA_LINE_COLOR;
@@ -200,7 +203,9 @@ public class CodeCoverageColumn extends ListViewColumn {
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
             if (type == CoverageType.PROJECT) {
-                color = CoverageLevel.getBlendedFillColorOf(coverage.doubleValue());
+                color = CoverageColorizationLevel
+                        .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
+                        .getFillColor();
             }
             else if (type == CoverageType.PROJECT_DELTA) {
                 color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getFillColor();
@@ -223,7 +228,7 @@ public class CodeCoverageColumn extends ListViewColumn {
     public String getRelativeCoverageUrl() {
         if (coverageType.equals(CoverageType.PROJECT.getType())
                 || coverageType.equals(CoverageType.PROJECT_DELTA.getType())) {
-            return WebUtil.getRelativeCoverageDefaultUrl();
+            return WebUtils.getRelativeCoverageDefaultUrl();
         }
         return "";
     }

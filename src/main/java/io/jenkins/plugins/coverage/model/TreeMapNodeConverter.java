@@ -3,7 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import edu.hm.hafner.echarts.TreeMapNode;
 
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
 
 /**
  * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeMapNode ECharts tree map
@@ -25,7 +25,9 @@ class TreeMapNodeConverter {
         Coverage coverage = node.getCoverage(CoverageMetric.LINE);
 
         String color = ColorUtils.colorAsHex(
-                CoverageLevel.getBlendedFillColorOf(coverage.getCoveredPercentage() * 100.0)
+                CoverageColorizationLevel
+                        .getDisplayColorsOfCoveragePercentage(coverage.getCoveredPercentage() * 100.0)
+                        .getFillColor()
         );
 
         TreeMapNode treeNode = new TreeMapNode(node.getName(), color, coverage.getTotal(), coverage.getCovered());
