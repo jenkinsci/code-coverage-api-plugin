@@ -24,7 +24,7 @@
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
     <trove4j.version>3.0.3</trove4j.version>
-    <saxon-he.version>10.6</saxon-he.version>
+    <saxon-he.version>11.1</saxon-he.version>
 
     <echarts-api.version>5.2.2-1</echarts-api.version>
     <data-tables-api.version>1.11.3-4</data-tables-api.version>
