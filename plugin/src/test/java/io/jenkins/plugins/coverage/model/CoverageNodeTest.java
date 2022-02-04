@@ -1,10 +1,15 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
-import org.assertj.core.data.Offset;
+import org.apache.commons.lang3.math.Fraction;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 import io.jenkins.plugins.coverage.CoverageNodeConverter;
 
@@ -17,6 +22,11 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  */
 class CoverageNodeTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
+
+    @BeforeAll
+    static void beforeAll() {
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
     @Test
     void shouldSplitPackagesWithoutPackageNodes() {
@@ -81,14 +91,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 entry(INSTRUCTION, new Coverage(1260, 90)),
                 entry(BRANCH, new Coverage(109, 7)));
         assertThat(tree.getMetricPercentages()).containsExactly(
-                entry(MODULE, 1.0),
-                entry(PACKAGE, 1.0),
-                entry(FILE, 0.7),
-                entry(CLASS, 15.0 / 18),
-                entry(METHOD, 97.0 / 102),
-                entry(LINE, 294.0 / 323),
-                entry(INSTRUCTION, 1260.0 / 1350),
-                entry(BRANCH, 109.0 / 116));
+                entry(MODULE, Fraction.ONE),
+                entry(PACKAGE, Fraction.ONE),
+                entry(FILE, Fraction.getFraction(7, 7 + 3)),
+                entry(CLASS, Fraction.getFraction(15, 15 + 3)),
+                entry(METHOD, Fraction.getFraction(97, 97 + 5)),
+                entry(LINE, Fraction.getFraction(294, 294 + 29)),
+                entry(INSTRUCTION, Fraction.getFraction(1260, 1260 + 90)),
+                entry(BRANCH, Fraction.getFraction(109, 109 + 7)));
 
         assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
                 packageNode -> assertThat(packageNode).hasName("edu.hm.hafner.util")
@@ -98,35 +108,39 @@ class CoverageNodeTest extends AbstractCoverageTest {
     private void verifyCoverageMetrics(final CoverageNode tree) {
         assertThat(tree.getCoverage(LINE)).isSet()
                 .hasCovered(294)
-                .hasCoveredPercentageCloseTo(0.91, PRECISION)
+                .hasCoveredPercentage(Fraction.getFraction(294, 294 + 29))
                 .hasMissed(29)
-                .hasMissedPercentageCloseTo(0.09, PRECISION)
+                .hasMissedPercentage(Fraction.getFraction(29, 294 + 29))
                 .hasTotal(294 + 29);
         assertThat(tree.printCoverageFor(LINE)).isEqualTo("91.02%");
+        assertThat(tree.printCoverageFor(LINE, Locale.GERMAN)).isEqualTo("91,02%");
 
         assertThat(tree.getCoverage(BRANCH)).isSet()
                 .hasCovered(109)
-                .hasCoveredPercentageCloseTo(0.93, PRECISION)
+                .hasCoveredPercentage(Fraction.getFraction(109, 109 + 7))
                 .hasMissed(7)
-                .hasMissedPercentageCloseTo(0.07, PRECISION)
+                .hasMissedPercentage(Fraction.getFraction(7, 109 + 7))
                 .hasTotal(109 + 7);
         assertThat(tree.printCoverageFor(BRANCH)).isEqualTo("93.97%");
+        assertThat(tree.printCoverageFor(BRANCH, Locale.GERMAN)).isEqualTo("93,97%");
 
         assertThat(tree.getCoverage(INSTRUCTION)).isSet()
                 .hasCovered(1260)
-                .hasCoveredPercentageCloseTo(0.93, PRECISION)
+                .hasCoveredPercentage(Fraction.getFraction(1260, 1260 + 90))
                 .hasMissed(90)
-                .hasMissedPercentageCloseTo(0.07, PRECISION)
+                .hasMissedPercentage(Fraction.getFraction(90, 1260 + 90))
                 .hasTotal(1260 + 90);
         assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93.33%");
+        assertThat(tree.printCoverageFor(INSTRUCTION, Locale.GERMAN)).isEqualTo("93,33%");
 
         assertThat(tree.getCoverage(MODULE)).isSet()
                 .hasCovered(1)
-                .hasCoveredPercentageCloseTo(1, PRECISION)
+                .hasCoveredPercentage(Fraction.ONE)
                 .hasMissed(0)
-                .hasMissedPercentageCloseTo(0, PRECISION)
+                .hasMissedPercentage(Fraction.ZERO)
                 .hasTotal(1);
         assertThat(tree.printCoverageFor(MODULE)).isEqualTo("100.00%");
+        assertThat(tree.printCoverageFor(MODULE, Locale.GERMAN)).isEqualTo("100,00%");
 
         assertThat(tree).hasName(PROJECT_NAME)
                 .doesNotHaveParent()
@@ -165,11 +179,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         CoverageNode checkStyle = wrappedCheckStyle.get();
         assertThat(checkStyle.getMetricPercentages())
-                .containsEntry(FILE, 1.0)
-                .containsEntry(CLASS, 1.0)
-                .containsEntry(METHOD, 1.0)
-                .extractingByKey(LINE).satisfies(
-                        p -> assertThat(p).isEqualTo(0.97, Offset.offset(0.01)));
+                .containsEntry(FILE, Fraction.ONE)
+                .containsEntry(CLASS, Fraction.ONE)
+                .containsEntry(METHOD, Fraction.getFraction(6, 6))
+                .containsEntry(LINE, Fraction.getFraction(41, 42))
+                .containsEntry(INSTRUCTION, Fraction.getFraction(180, 187))
+                .containsEntry(BRANCH, Fraction.getFraction(11, 12));
 
         String pmdParser = "PmdParser.java";
         Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParser);
@@ -179,25 +194,28 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         CoverageNode pmd = wrappedPmd.get();
         assertThat(pmd.getMetricPercentages())
-                .containsEntry(FILE, 1.0)
-                .containsEntry(CLASS, 1.0)
-                .containsEntry(METHOD, 1.0)
-                .extractingByKey(LINE).satisfies(
-                        p -> assertThat(p).isEqualTo(0.91, Offset.offset(0.01)));
+                .containsEntry(FILE, Fraction.ONE)
+                .containsEntry(CLASS, Fraction.ONE)
+                .containsEntry(METHOD, Fraction.getFraction(8, 8))
+                .containsEntry(LINE, Fraction.getFraction(72, 79))
+                .containsEntry(INSTRUCTION, Fraction.getFraction(285, 313))
+                .containsEntry(BRANCH, Fraction.getFraction(15, 18));
 
         assertThat(checkStyle.computeDelta(pmd))
-                .containsEntry(FILE, 0.0)
-                .containsEntry(CLASS, 0.0)
-                .containsEntry(METHOD, 0.0)
-                .extractingByKey(LINE).satisfies(
-                        p -> assertThat(p).isEqualTo(0.06, Offset.offset(0.01)));
+                .containsEntry(FILE, Fraction.ZERO)
+                .containsEntry(CLASS, Fraction.ZERO)
+                .containsEntry(METHOD, Fraction.getFraction(0, 12))
+                .containsEntry(LINE, Fraction.getFraction(215, 3318))
+                .containsEntry(INSTRUCTION, Fraction.getFraction(3045, 58_531))
+                .containsEntry(BRANCH, Fraction.getFraction(1, 12));
 
         assertThat(pmd.computeDelta(checkStyle))
-                .containsEntry(FILE, 0.0)
-                .containsEntry(CLASS, 0.0)
-                .containsEntry(METHOD, 0.0)
-                .extractingByKey(LINE).satisfies(
-                        p -> assertThat(p).isEqualTo(-0.06, Offset.offset(0.01)));
+                .containsEntry(FILE, Fraction.ZERO)
+                .containsEntry(CLASS, Fraction.ZERO)
+                .containsEntry(METHOD, Fraction.getFraction(0, 12))
+                .containsEntry(LINE, Fraction.getFraction(-215, 3318))
+                .containsEntry(INSTRUCTION, Fraction.getFraction(-3045, 58_531))
+                .containsEntry(BRANCH, Fraction.getFraction(-1, 12));
     }
 
     @Test
@@ -261,10 +279,9 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 node -> {
                     assertThat(node).hasName(noBranchCoverage).isNotRoot();
                     assertThat(node.getCoverage(BRANCH)).isNotSet();
-                    assertThat(node.printCoverageFor(BRANCH)).isEqualTo(Coverage.COVERAGE_NOT_AVAILABLE);
+                    assertThat(node.printCoverageFor(BRANCH)).isEqualTo(Messages.Coverage_Not_Available());
                 }
         );
-
     }
 
     @Test
@@ -273,23 +290,30 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         String fileName = "Ensure.java";
         assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
-                node -> {
-                    assertThat(node).hasName(fileName)
-                            .hasParentName("edu.hm.hafner.util")
-                            .hasParent()
-                            .isNotRoot();
-                }
+                node -> assertThat(node).hasName(fileName)
+                        .hasParentName("edu.hm.hafner.util")
+                        .hasParent()
+                        .isNotRoot()
         );
 
         tree.splitPackages();
         assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
-                node -> {
-                    assertThat(node).hasName(fileName)
-                            .hasParentName("edu.hm.hafner.util")
-                            .hasParent()
-                            .isNotRoot();
-                }
+                node -> assertThat(node).hasName(fileName)
+                        .hasParentName("edu.hm.hafner.util")
+                        .hasParent()
+                        .isNotRoot()
         );
+    }
+
+    @Test
+    void shouldObeyEqualsContract() {
+        EqualsVerifier.forClass(CoverageNode.class)
+                .withPrefabValues(CoverageNode.class,
+                        new CoverageNode(CoverageMetric.FILE, "file.txt"),
+                        new CoverageNode(CoverageMetric.LINE, "line"))
+                .suppress(Warning.NONFINAL_FIELDS)
+                .withIgnoredFields("parent")
+                .verify();
     }
 
     private CoverageNode readExampleReport() {

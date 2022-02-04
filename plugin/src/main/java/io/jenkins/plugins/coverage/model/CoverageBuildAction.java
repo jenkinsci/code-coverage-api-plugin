@@ -1,8 +1,12 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.apache.commons.lang3.math.Fraction;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -14,13 +18,15 @@ import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
+import one.util.streamex.StreamEx;
+
 import org.kohsuke.stapler.StaplerProxy;
+import hudson.Functions;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
-import io.jenkins.plugins.coverage.Messages;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -49,7 +55,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final Coverage branchCoverage;
 
     private final String referenceBuildId;
-    private final SortedMap<CoverageMetric, Double> delta;
+    private SortedMap<CoverageMetric, Fraction> difference; // since 3.0.0
+    @SuppressWarnings("unused")
+    private SortedMap<CoverageMetric, Double> delta; // not used anymore
 
     /**
      * Creates a new instance of {@link CoverageBuildAction}.
@@ -76,21 +84,29 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the ID of the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta) {
+            final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta) {
         this(owner, result, referenceBuildId, delta, true);
     }
 
     @VisibleForTesting
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageMetric, Double> delta,
+            final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         lineCoverage = result.getCoverage(CoverageMetric.LINE);
         branchCoverage = result.getCoverage(CoverageMetric.BRANCH);
 
-        this.delta = delta;
+        this.difference = delta;
         this.referenceBuildId = referenceBuildId;
+    }
+
+    @Override
+    protected Object readResolve() {
+        if (difference == null) {
+            difference = StreamEx.of(delta.entrySet()).toSortedMap(Entry::getKey, e -> Fraction.getFraction(e.getValue()));
+        }
+        return super.readResolve();
     }
 
     public Coverage getLineCoverage() {
@@ -129,8 +145,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *
      * @return the delta for each available coverage metric
      */
-    public SortedMap<CoverageMetric, Double> getDelta() {
-        return delta;
+    @SuppressWarnings("unused") // Called by jelly view
+    public SortedMap<CoverageMetric, Fraction> getDifference() {
+        return difference;
     }
 
     /**
@@ -142,23 +159,39 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if a delta is available for the specified metric
      */
     public boolean hasDelta(final CoverageMetric metric) {
-        return delta.containsKey(metric);
+        return difference.containsKey(metric);
     }
 
     /**
-     * Returns the delta metric for the specified metric exist.
+     * Returns a formatted and localized String representation of the delta for the specified metric (with
+     * respect to the reference build).
      *
      * @param metric
      *         the metric to get the delta for
      *
      * @return the delta metric
      */
-    // TODO: format percentage on the client side
-    public String getDelta(final CoverageMetric metric) {
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatDelta(final CoverageMetric metric) {
+        Locale clientLocale = Functions.getCurrentLocale();
         if (hasDelta(metric)) {
-            return String.format("%+.3f", delta.get(metric));
+            return String.format(clientLocale, "%+.3f", difference.get(metric).doubleValue());
         }
-        return "n/a";
+        return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
+     * respect to the reference build).
+     *
+     * @param metric
+     *         the metric to get the coverage percentage for
+     *
+     * @return the delta metric
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatCoverage(final CoverageMetric metric) {
+        return getResult().printCoverageFor(metric, Functions.getCurrentLocale());
     }
 
     @Override
@@ -211,7 +244,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @NonNull
     @Override
     public String getDisplayName() {
-        return Messages.CoverageAction_displayName();
+        return Messages.Coverage_Link_Name();
     }
 
     @NonNull

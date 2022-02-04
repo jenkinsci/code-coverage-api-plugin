@@ -1,6 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import org.apache.commons.lang3.math.Fraction;
 
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 
@@ -16,7 +19,7 @@ public final class Coverage implements Serializable {
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
-    static final String COVERAGE_NOT_AVAILABLE = "n/a";
+    private static final Fraction HUNDRED = Fraction.getFraction(100, 1);
 
     private final int covered;
     private final int missed;
@@ -44,24 +47,54 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Returns the covered percentage in the range of {@code [0, 1]}.
+     * Returns the covered percentage as a {@link Fraction} in the range of {@code [0, 1]}.
      *
      * @return the covered percentage
      */
-    public double getCoveredPercentage() {
+    public Fraction getCoveredPercentage() {
         if (getTotal() == 0) {
-            return 0;
+            return Fraction.ZERO;
         }
-        return covered * 1.0 / getTotal();
+        return Fraction.getFraction(covered, getTotal());
     }
 
     /**
-     * Prints the covered percentage as formatted String (with a precision of two digits after the comma).
+     * Returns the covered percentage as rounded integer value in the range of {@code [0, 100]}.
      *
      * @return the covered percentage
      */
-    public String printCoveredPercentage() {
-        return printPercentage(getCoveredPercentage());
+    // TODO: we should make the charts accept float values
+    public int getRoundedPercentage() {
+        if (getTotal() == 0) {
+            return 0;
+        }
+        return getCoveredPercentage()
+                .multiplyBy(Coverage.HUNDRED)
+                .reduce()
+                .getNumerator();
+    }
+
+    /**
+     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses
+     * {@code Locale.getDefault()} to format the percentage.
+     *
+     * @return the covered percentage
+     * @see #formatCoveredPercentage(Locale)
+     */
+    public String formatCoveredPercentage() {
+        return formatCoveredPercentage(Locale.getDefault());
+    }
+
+    /**
+     * Formats the covered percentage as String (with a precision of two digits after the comma).
+     *
+     * @param locale
+     *         the locale to use when formatting the percentage
+     *
+     * @return the covered percentage
+     */
+    public String formatCoveredPercentage(final Locale locale) {
+        return printPercentage(locale, getCoveredPercentage());
     }
 
     /**
@@ -74,31 +107,44 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Returns the missed percentage in the range of {@code [0, 1]}.
+     * Returns the missed percentage as a {@link Fraction} in the range of {@code [0, 1]}.
      *
      * @return the missed percentage
      */
-    public double getMissedPercentage() {
+    public Fraction getMissedPercentage() {
         if (getTotal() == 0) {
-            return 0;
+            return Fraction.ZERO;
         }
-        return 1 - getCoveredPercentage();
+        return Fraction.ONE.subtract(getCoveredPercentage());
     }
 
     /**
-     * Prints the missed percentage as formatted String (with a precision of two digits after the comma).
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses
+     * {@code Locale.getDefault()} to format the percentage.
      *
      * @return the missed percentage
      */
-    public String printMissedPercentage() {
-        return printPercentage(getMissedPercentage());
+    public String formatMissedPercentage() {
+        return formatMissedPercentage(Locale.getDefault());
     }
 
-    private String printPercentage(final double percentage) {
+    /**
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma).
+     *
+     * @param locale
+     *         the locale to use when formatting the percentage
+     *
+     * @return the missed percentage
+     */
+    public String formatMissedPercentage(final Locale locale) {
+        return printPercentage(locale, getMissedPercentage());
+    }
+
+    private String printPercentage(final Locale locale, final Fraction percentage) {
         if (isSet()) {
-            return String.format("%.2f%%", percentage * 100);
+            return String.format(locale, "%.2f%%", percentage.multiplyBy(HUNDRED).doubleValue());
         }
-        return COVERAGE_NOT_AVAILABLE;
+        return Messages.Coverage_Not_Available();
     }
 
     /**
@@ -118,9 +164,9 @@ public final class Coverage implements Serializable {
     public String toString() {
         int total = getTotal();
         if (total > 0) {
-            return String.format("%.2f (%d/%d)", getCoveredPercentage() * 100, covered, total);
+            return String.format("%s (%s)", formatCoveredPercentage(), getCoveredPercentage());
         }
-        return COVERAGE_NOT_AVAILABLE;
+        return Messages.Coverage_Not_Available();
     }
 
     public int getTotal() {

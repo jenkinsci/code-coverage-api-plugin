@@ -38,7 +38,7 @@ public class SourceViewModel extends CoverageViewModel {
             if (sourceFile != null) {
                 return new TextFile(sourceFile).read();
             }
-            return "n/a";
+            return Messages.Coverage_Not_Available();
         }
         catch (IOException exception) {
             return ExceptionUtils.getStackTrace(exception);
