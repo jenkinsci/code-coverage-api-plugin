@@ -12,8 +12,11 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 @SuppressWarnings("hideutilityclassconstructor")
 public class TrendChartTestUtil {
 
+    private static final int LINE_COVERAGE = 96;
+    private static final int BRANCH_COVERAGE = 89;
+
     /**
-     * Verifies if a specific generated TrendChart has the correct buildnumbers in its axis and the right coverage values for
+     * Verifies if a specific generated TrendChart has the correct build numbers in its axis and the right coverage values for
      * its builds.
      * @param trendChart from coverage report
      * @param firstBuildInChartNumber first buildnumber displayed in TrendChart
@@ -39,8 +42,8 @@ public class TrendChartTestUtil {
 
         assertThatJson(trendChart)
                 .and(
-                        a -> a.node("series[0].data").isArray().contains(96).contains(91),
-                        a -> a.node("series[1].data").isArray().contains(89).contains(94)
+                        a -> a.node("series[0].data").isArray().contains(LINE_COVERAGE).contains(91),
+                        a -> a.node("series[1].data").isArray().contains(BRANCH_COVERAGE).contains(94)
                 );
     }
 
@@ -66,7 +69,8 @@ public class TrendChartTestUtil {
                         a -> a.node("series[1].name").isEqualTo("Branch")
                 );
 
-        assertThatJson(trendChart).node("series[0].data").isArray().contains(95);
+        assertThatJson(trendChart).node("series[0].data").isArray().contains(LINE_COVERAGE);
+        assertThatJson(trendChart).node("series[1].data").isArray().contains(BRANCH_COVERAGE);
     }
 
 }
