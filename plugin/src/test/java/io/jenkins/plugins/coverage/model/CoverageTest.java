@@ -1,6 +1,9 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.math.Fraction;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -13,14 +16,21 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageTest {
+    @BeforeAll
+    static void beforeAll() {
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
     @Test
     void shouldProvideNullObject() {
         assertThat(Coverage.NO_COVERAGE).isNotSet()
                 .hasCovered(0)
                 .hasCoveredPercentage(Fraction.ZERO)
+                .hasRoundedPercentage(0)
                 .hasMissed(0)
                 .hasMissedPercentage(Fraction.ZERO)
-                .hasTotal(0).hasToString(Messages.Coverage_Not_Available());
+                .hasTotal(0)
+                .hasToString(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.formatMissedPercentage()).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.add(Coverage.NO_COVERAGE)).isEqualTo(Coverage.NO_COVERAGE);
@@ -32,6 +42,7 @@ class CoverageTest {
         assertThat(coverage).isSet()
                 .hasCovered(6)
                 .hasCoveredPercentage(Fraction.getFraction(6, 10))
+                .hasRoundedPercentage(60)
                 .hasMissed(4)
                 .hasMissedPercentage(Fraction.getFraction(4, 10))
                 .hasTotal(10)
@@ -42,7 +53,7 @@ class CoverageTest {
 
         assertThat(coverage.add(Coverage.NO_COVERAGE)).isEqualTo(coverage);
         Coverage sum = coverage.add(new Coverage(10, 0));
-        assertThat(sum).isEqualTo(new Coverage(16, 4));
+        assertThat(sum).isEqualTo(new Coverage(16, 4)).hasRoundedPercentage(80);
         assertThat(sum.formatCoveredPercentage()).isEqualTo("80.00%");
         assertThat(sum.formatMissedPercentage()).isEqualTo("20.00%");
     }
