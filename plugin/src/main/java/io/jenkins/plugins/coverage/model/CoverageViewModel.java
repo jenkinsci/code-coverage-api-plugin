@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import j2html.tags.ContainerTag;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
@@ -281,8 +283,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         @Override
         public List<Object> getRows() {
+            Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder)).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, browserLocale)).collect(Collectors.toList());
         }
     }
 
@@ -292,10 +295,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageRow {
         private final CoverageNode root;
         private final File buildFolder;
+        private Locale browserLocale;
 
-        CoverageRow(final CoverageNode root, final File buildFolder) {
+        CoverageRow(final CoverageNode root, final File buildFolder, final Locale browserLocale) {
             this.root = root;
             this.buildFolder = buildFolder;
+            this.browserLocale = browserLocale;
         }
 
         public String getFileName() {
@@ -326,9 +331,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return printCoverage(getBranchCoverage());
         }
 
-        private String printCoverage(final Coverage branchCoverage) {
-            if (branchCoverage.isSet()) {
-                return String.valueOf(branchCoverage.getCoveredPercentage());
+        private String printCoverage(final Coverage coverage) {
+            if (coverage.isSet()) {
+                return coverage.formatCoveredPercentage(browserLocale);
             }
             return Messages.Coverage_Not_Available();
         }
