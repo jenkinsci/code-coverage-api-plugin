@@ -39,8 +39,8 @@ public class TrendChartTestUtil {
 
         assertThatJson(trendChart)
                 .and(
-                        a -> a.node("series[0].data").isArray().contains(95).contains(91),
-                        a -> a.node("series[1].data").isArray().contains(88).contains(93)
+                        a -> a.node("series[0].data").isArray().contains(96).contains(91),
+                        a -> a.node("series[1].data").isArray().contains(89).contains(94)
                 );
     }
 
