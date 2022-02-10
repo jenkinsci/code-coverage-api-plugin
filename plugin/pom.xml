@@ -41,6 +41,7 @@
     <workflow-cps.version>2.94</workflow-cps.version>
     <workflow-multibranch.version>2.24</workflow-multibranch.version>
     <streamex.version>0.8.1</streamex.version>
+    <docker-fixtures.version>1.11</docker-fixtures.version>
   </properties>
 
   <developers>
@@ -197,10 +198,52 @@
       <artifactId>workflow-api</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Docker Agents -->
+    <dependency>
+      <groupId>org.jenkins-ci.test</groupId>
+      <artifactId>docker-fixtures</artifactId>
+      <version>${docker-fixtures.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Declarative Pipeline -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>ssh-slaves</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>git</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>git-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Declarative Pipeline -->
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-support</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkinsci.plugins</groupId>
+      <artifactId>pipeline-model-definition</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>cloudbees-folder</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
