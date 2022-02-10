@@ -1,48 +1,50 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
   <t:summary icon="/plugin/code-coverage-api/icons/coverage.svg">
-  <span id="coverage-summary">
-    <j:set var="result" value="${it.result}"/>
-    <j:choose>
-      <j:when test="${size(result.children) == 1}">
-        <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
-        <j:set var="items" value="${result.importantMetrics}"/>
-      </j:when>
-      <j:otherwise>
-        <a href="coverage/">${%Coverage Reports}</a>
-        <j:set var="items" value="${result.metrics}"/>
-      </j:otherwise>
-    </j:choose>
-    <ul>
-      <j:forEach var="metric" items="${items}">
-      <span id="coverage-value">
-        <li>${metric.name}: ${result.getCoverage(metric).printCoveredPercentage()}
-          <j:if test="${it.hasDelta(metric)}">
-          <span id="coverage-change">
-            <j:choose>
-              <j:when test="${it.getDelta(metric).startsWith('-')}">
-                <j:set var="color" value="#9d1212"/>
-              </j:when>
-              <j:otherwise>
-                <j:set var="color" value="#0a5f0e"/>
-              </j:otherwise>
-            </j:choose>
-            <span style="color: ${color}">(${it.getDelta(metric)}%)</span>
-            </span>
-          </j:if>
-        </li>
-        </span>
-      </j:forEach>
-      <j:if test="${it.referenceBuild.present}">
-      <span id="coverage-reference">
-        <li>Reference build: <j:out value="${it.referenceBuildLink}"/></li>
-        </span>
+    <span id="coverage-summary">
+      <j:set var="result" value="${it.result}"/>
+      <j:choose>
+        <j:when test="${size(result.children) == 1}">
+          <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
+          <j:set var="items" value="${result.importantMetrics}"/>
+        </j:when>
+        <j:otherwise>
+          <a href="coverage/">${%Coverage Reports}</a>
+          <j:set var="items" value="${result.metrics}"/>
+        </j:otherwise>
+      </j:choose>
+      <ul>
+        <j:forEach var="metric" items="${items}">
+          <span id="coverage-value">
+            <li>${metric.name}: ${it.formatCoverage(metric)}
+              <j:if test="${it.hasDelta(metric)}">
+                <span id="coverage-change">
+                  <j:choose>
+                    <j:when test="${it.formatDelta(metric).startsWith('-')}">
+                      <j:set var="color" value="#9d1212"/>
+                    </j:when>
+                    <j:otherwise>
+                      <j:set var="color" value="#0a5f0e"/>
+                    </j:otherwise>
+                  </j:choose>
+                  <span style="color: ${color}">(${it.formatDelta(metric)}%)</span>
+                </span>
+              </j:if>
+            </li>
+          </span>
+        </j:forEach>
+        <j:if test="${it.referenceBuild.present}">
+          <span id="coverage-reference">
+            <li>Reference build:
+              <j:out value="${it.referenceBuildLink}"/>
+            </li>
+          </span>
+        </j:if>
+      </ul>
+      <j:set var="failMessage" value="${it.failMessage}"/>
+      <j:if test="${failMessage != null}">
+        ${failMessage}
       </j:if>
-    </ul>
-    <j:set var="failMessage" value="${it.failMessage}"/>
-    <j:if test="${failMessage != null}">
-      ${failMessage}
-    </j:if>
     </span>
   </t:summary>
 </j:jelly>

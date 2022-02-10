@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
 import hudson.model.Run;
@@ -20,7 +21,7 @@ class CoverageBuildActionTest {
     void shouldCreateViewModel() {
         Run<?, ?> build = mock(Run.class);
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
-        SortedMap<CoverageMetric, Double> metrics = new TreeMap<>();
+        SortedMap<CoverageMetric, Fraction> metrics = new TreeMap<>();
 
         CoverageBuildAction action = new CoverageBuildAction(build, root, "-", metrics, false);
 

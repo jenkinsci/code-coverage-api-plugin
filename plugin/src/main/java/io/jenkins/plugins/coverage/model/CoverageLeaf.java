@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A leaf in the coverage hierarchy. A leaf is a non-divisible coverage metric like line or branch coverage.
@@ -58,19 +59,12 @@ public final class CoverageLeaf implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         CoverageLeaf that = (CoverageLeaf) o;
-
-        if (!metric.equals(that.metric)) {
-            return false;
-        }
-        return coverage.equals(that.coverage);
+        return Objects.equals(metric, that.metric) && Objects.equals(coverage, that.coverage);
     }
 
     @Override
     public int hashCode() {
-        int result = metric.hashCode();
-        result = 31 * result + coverage.hashCode();
-        return result;
+        return Objects.hash(metric, coverage);
     }
 }

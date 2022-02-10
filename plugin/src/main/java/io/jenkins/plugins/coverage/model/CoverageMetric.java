@@ -139,10 +139,6 @@ public class CoverageMetric implements Comparable<CoverageMetric>, Serializable 
         return name;
     }
 
-    public int getOrder() {
-        return order;
-    }
-
     public boolean isLeaf() {
         return leaf;
     }

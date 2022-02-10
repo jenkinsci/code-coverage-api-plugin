@@ -3,12 +3,14 @@ package io.jenkins.plugins.coverage.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
@@ -19,6 +21,7 @@ import j2html.tags.ContainerTag;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
@@ -225,7 +228,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getCoveredPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
         }
 
         public List<Integer> getMissed() {
@@ -233,7 +236,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedPercentage).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getMissedPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
         }
 
         private Stream<Coverage> streamCoverages() {
@@ -280,8 +283,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         @Override
         public List<Object> getRows() {
+            Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder)).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, browserLocale)).collect(Collectors.toList());
         }
     }
 
@@ -291,10 +295,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageRow {
         private final CoverageNode root;
         private final File buildFolder;
+        private final Locale browserLocale;
 
-        CoverageRow(final CoverageNode root, final File buildFolder) {
+        CoverageRow(final CoverageNode root, final File buildFolder, final Locale browserLocale) {
             this.root = root;
             this.buildFolder = buildFolder;
+            this.browserLocale = browserLocale;
         }
 
         public String getFileName() {
@@ -325,11 +331,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return printCoverage(getBranchCoverage());
         }
 
-        private String printCoverage(final Coverage branchCoverage) {
-            if (branchCoverage.isSet()) {
-                return String.valueOf(branchCoverage.getCoveredPercentage());
+        private String printCoverage(final Coverage coverage) {
+            if (coverage.isSet()) {
+                return coverage.formatCoveredPercentage(browserLocale);
             }
-            return "n/a";
+            return Messages.Coverage_Not_Available();
         }
 
         private Coverage getBranchCoverage() {
@@ -352,9 +358,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                     getBarChart("missed", coverage.getMissedPercentage())).render();
         }
 
-        private ContainerTag getBarChart(final String className, final double percentage) {
+        private ContainerTag getBarChart(final String className, final Fraction percentage) {
             return span().withClasses("bar-graph", className, className + "--hover")
-                    .withStyle("width:" + (percentage * 100) + "%").withText(".");
+                    .withStyle("width:" + (percentage.doubleValue() * 100) + "%").withText(".");
         }
     }
 }
