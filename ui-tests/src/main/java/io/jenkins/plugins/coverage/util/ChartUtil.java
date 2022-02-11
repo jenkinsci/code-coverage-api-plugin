@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 @SuppressWarnings("hideutilityclassconstructor")
 public class ChartUtil {
+    private static final int MAX_ATTEMPTS = 5;
 
     /**
      * Returns a chart's data by its id.
@@ -46,18 +47,23 @@ public class ChartUtil {
      *
      * @return data as json
      */
-    public static String getDataOfOnlyChartOnPageWithGivenToolAttribute(final PageObject pageObject, final String toolAttribute) {
+    public static String getDataOfOnlyChartOnPageWithGivenToolAttribute(final PageObject pageObject,
+            final String toolAttribute) {
         if (isChartDisplayedByDivToolAttribute(pageObject, toolAttribute)) {
-            Object result = pageObject.executeScript(String.format(
-                    "delete(window.Array.prototype.toJSON) %n"
-                            + "return JSON.stringify(echarts.getInstanceByDom(document.querySelector(\"div [tool='%s']\")).getOption())",
-                    toolAttribute));
+            for (int i = 0; i < MAX_ATTEMPTS; i++) {
+                Object result = pageObject.executeScript(String.format(
+                        "delete(window.Array.prototype.toJSON) %n"
+                                + "return JSON.stringify(echarts.getInstanceByDom(document.querySelector(\"div [tool='%s']\")).getOption())",
+                        toolAttribute));
 
-            ScriptResult scriptResult = new ScriptResult(result);
-
-            return scriptResult.getJavaScriptResult().toString();
+                Object scriptResult = new ScriptResult(result).getJavaScriptResult();
+                if (scriptResult != null) {
+                    return scriptResult.toString();
+                }
+                pageObject.elasticSleep(1000);
+            }
         }
-        return null;
+        throw new java.util.NoSuchElementException("Found no trend chart with ID '%s''" + toolAttribute);
     }
 
     /**

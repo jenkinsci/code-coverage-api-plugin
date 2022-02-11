@@ -30,7 +30,7 @@ public class MainPanel extends PageObject {
      * @return Json Value of Coverage-Overview Chart
      */
     public String getCoverageTrendChart() {
-        waitFor().until(()-> isChartDisplayed());
+        waitFor().until(this::isChartDisplayed);
         return ChartUtil.getDataOfOnlyChartOnPageWithGivenToolAttribute(this, VALUE_OF_TOOL_ATTRIBUTE_IN_CHART);
     }
 
