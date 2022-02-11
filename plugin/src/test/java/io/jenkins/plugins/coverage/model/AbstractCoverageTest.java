@@ -48,7 +48,7 @@ public class AbstractCoverageTest extends ResourceTest {
     }
 
     CoverageNode readNode(final String fileName) {
-        return CoverageNodeConverter.convert(readResult(fileName));
+        return new CoverageNodeConverter().convert(readResult(fileName));
     }
 
     protected CoverageResult readReport(final String fileName) throws CoverageException {

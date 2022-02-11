@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.TreeMap;
 
 import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
@@ -17,6 +18,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerRule;
 import hudson.model.FreeStyleProject;
+import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.DumbSlave;
@@ -33,7 +35,6 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code Rendering and copying works with Docker and if freestyle-projects run successfully with Docker.
  */
-
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
@@ -59,7 +60,6 @@ public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkin
         Run<?, ?> build = verifyGitRepository(project);
 
         verifySourceCode(build);
-
     }
 
     /**
@@ -82,7 +82,8 @@ public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkin
     private void verifySourceCode(final Run<?, ?> build) {
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
 
-        CoverageBuildAction action = new CoverageBuildAction(build, root);
+        CoverageBuildAction action = new CoverageBuildAction(build, root, new HealthReport(), "-",
+                new TreeMap<>(), false);
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);

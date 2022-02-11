@@ -18,17 +18,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.math.Fraction;
 
 import com.google.common.collect.Sets;
 
 import edu.hm.hafner.util.FilteredLog;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jvnet.localizer.Localizable;
@@ -45,16 +44,16 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.CoverageReporter;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
+import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.coverage.targets.Ratio;
 import io.jenkins.plugins.coverage.threshold.Threshold;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
-import io.jenkins.plugins.util.PluginLogger;
+import io.jenkins.plugins.prism.SourceCodeRetention;
+import io.jenkins.plugins.util.LogHandler;
 
 public class CoverageProcessor {
 
@@ -74,6 +73,7 @@ public class CoverageProcessor {
 
     private boolean failBuildIfCoverageDecreasedInChangeRequest;
 
+    @CheckForNull
     private SourceFileResolver sourceFileResolver;
 
     /**
@@ -104,7 +104,8 @@ public class CoverageProcessor {
      *         global threshold specified by user
      */
     public void performCoverageReport(final List<CoverageReportAdapter> reportAdapters,
-            final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds)
+            final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds,
+            final Set<String> sourceDirectories, final String sourceCodeEncoding)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
@@ -115,28 +116,10 @@ public class CoverageProcessor {
 
         coverageReport.setOwner(run);
 
-        if (sourceFileResolver != null) {
-            Set<String> possiblePaths = new HashSet<>();
-            coverageReport.getChildrenReal().forEach((s, coverageResult) -> {
-                Set<String> paths = coverageResult.getAdditionalProperty(
-                        CoverageFeatureConstants.FEATURE_SOURCE_FILE_PATH);
-                if (paths != null) {
-                    possiblePaths.addAll(paths);
-                }
-            });
-
-            if (possiblePaths.size() > 0) {
-                sourceFileResolver.setPossiblePaths(possiblePaths);
-            }
-
-            sourceFileResolver.resolveSourceFiles(run, workspace, listener, coverageReport.getPaintedSources());
-        }
-
-        PluginLogger pluginLogger = new PluginLogger(listener.getLogger(), "Coverage");
+        LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while computing delta coverage:");
-        Optional<Run<?, ?>> possibleReferenceBuild = setDiffInCoverageForChangeRequest(coverageReport, log);
-        pluginLogger.logEachLine(log.getInfoMessages());
-        pluginLogger.logEachLine(log.getErrorMessages());
+        setDiffInCoverageForChangeRequest(coverageReport, log);
+        logHandler.log(log);
 
         CoverageAction action = convertResultToAction(coverageReport);
 
@@ -147,33 +130,20 @@ public class CoverageProcessor {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
 
-        CoverageNode coverageNode = convertCoverageResultToCoverageNode(coverageReport);
-        CoverageBuildAction newBuildAction = createNewBuildAction(coverageNode, possibleReferenceBuild);
-        newBuildAction.setHealthReport(action.getHealthReport());
-        this.run.addOrReplaceAction(newBuildAction);
+        // Transform the old model to the new model
+        CoverageReporter coverageReporter = new CoverageReporter();
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
+                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention(), healthReport);
     }
 
-    private CoverageNode convertCoverageResultToCoverageNode(final CoverageResult coverageReport) {
-        CoverageResult root = coverageReport.getRoot();
-        root.stripGroup();
-        CoverageNode coverageNode = CoverageNodeConverter.convert(root);
-        coverageNode.splitPackages();
-        return coverageNode;
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private CoverageBuildAction createNewBuildAction(final CoverageNode coverageNode,
-            final Optional<Run<?, ?>> possibleReferenceBuild) {
-        if (possibleReferenceBuild.isPresent()) {
-            Run<?, ?> referenceBuild = possibleReferenceBuild.get();
-            CoverageBuildAction previousAction = referenceBuild.getAction(CoverageBuildAction.class);
-            if (previousAction != null) {
-                SortedMap<CoverageMetric, Fraction> delta = coverageNode.computeDelta(previousAction.getResult());
-                return new CoverageBuildAction(this.run, coverageNode, referenceBuild.getExternalizableId(), delta);
-            }
+    private SourceCodeRetention mapSourceCodeRetention() {
+        if (sourceFileResolver == null || sourceFileResolver.getLevel() == SourceFileResolverLevel.NEVER_STORE) {
+            return SourceCodeRetention.NEVER;
         }
-
-        return new CoverageBuildAction(this.run, coverageNode);
+        if (sourceFileResolver.getLevel() == SourceFileResolverLevel.STORE_LAST_BUILD) {
+            return SourceCodeRetention.LAST_BUILD;
+        }
+        return SourceCodeRetention.EVERY_BUILD;
     }
 
     private CoverageAction convertResultToAction(final CoverageResult coverageReport) throws IOException {
@@ -221,7 +191,8 @@ public class CoverageProcessor {
         }
     }
 
-    private Optional<Run<?, ?>> setDiffInCoverageForChangeRequest(final CoverageResult coverageReport, final FilteredLog log) {
+    private Optional<Run<?, ?>> setDiffInCoverageForChangeRequest(final CoverageResult coverageReport,
+            final FilteredLog log) {
         log.logInfo("Computing coverage delta report");
 
         ReferenceFinder referenceFinder = new ReferenceFinder();
@@ -263,7 +234,7 @@ public class CoverageProcessor {
 
         coverageReport.setDeltaResults(deltaCoverage);
 
-        return Optional.of(previousResult.get().getOwner());
+        return Optional.of(referenceAction.getOwner());
     }
 
     private Optional<CoverageAction> getPreviousResult(final Run<?, ?> startSearch) {
@@ -276,7 +247,8 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult) throws CoverageException {
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult)
+            throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
             throw new CoverageException(
@@ -293,7 +265,8 @@ public class CoverageProcessor {
      *
      * @return {@link CoverageResult} for each report
      */
-    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(final List<CoverageReportAdapter> adapters,
+    private Map<CoverageReportAdapter, List<CoverageResult>> convertToResults(
+            final List<CoverageReportAdapter> adapters,
             final List<ReportDetector> reportDetectors)
             throws IOException, InterruptedException, CoverageException {
         PrintStream logger = listener.getLogger();
@@ -570,7 +543,8 @@ public class CoverageProcessor {
      *
      * @return Coverage report that have all coverage results
      */
-    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter, final List<CoverageResult> results) {
+    private CoverageResult aggregateToOneReport(final CoverageReportAdapter adapter,
+            final List<CoverageResult> results) {
         CoverageResult report = new CoverageResult(CoverageElement.REPORT, null,
                 adapter.getDescriptor().getDisplayName() + ": " + adapter.getPath());
 
@@ -695,7 +669,8 @@ public class CoverageProcessor {
         return failBuildIfCoverageDecreasedInChangeRequest;
     }
 
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failBuildIfCoverageDecreasedInChangeRequest) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(
+            final boolean failBuildIfCoverageDecreasedInChangeRequest) {
         this.failBuildIfCoverageDecreasedInChangeRequest = failBuildIfCoverageDecreasedInChangeRequest;
     }
 

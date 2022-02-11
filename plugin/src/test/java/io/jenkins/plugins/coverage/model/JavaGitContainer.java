@@ -10,5 +10,13 @@ import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
  */
 @DockerFixture(id = "java-git", ports = {22, 8080})
 public class JavaGitContainer extends SshdContainer {
+    /**
+     * Creates a new instance of {@link JavaGitContainer}.
+     */
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
+    public JavaGitContainer() {
+        super();
 
+        // required for dependency injection
+    }
 }

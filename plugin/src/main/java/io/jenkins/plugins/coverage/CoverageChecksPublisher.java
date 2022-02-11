@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.util.VisibleForTesting;
 
+import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -58,7 +59,7 @@ class CoverageChecksPublisher {
         CoverageResult result = action.getResult();
         ChecksOutput output = new ChecksOutputBuilder()
                 .withTitle(extractChecksTitle(result))
-                .withSummary(extractComparedBuildsSummary(result) + extractHealthSummary(action))
+                .withSummary(extractComparedBuildsSummary(result) + extractHealthSummary())
                 .withText(extractChecksText(result))
                 .build();
 
@@ -185,16 +186,19 @@ class CoverageChecksPublisher {
         return summary.toString();
     }
 
-    private String extractHealthSummary(final CoverageAction action) {
-        StringBuilder summary = new StringBuilder("## ")
-                .append(action.getHealthReport().getLocalizableDescription().toString())
-                .append(".");
-        if (!StringUtils.isBlank(action.getFailMessage())) {
-            summary.append("\n## ")
-                    .append(action.getFailMessage());
+    private String extractHealthSummary() {
+        HealthReport buildHealth = action.getBuildHealth();
+        if (buildHealth != null) {
+            StringBuilder summary = new StringBuilder("## ")
+                    .append(buildHealth.getLocalizableDescription().toString())
+                    .append(".");
+            if (!StringUtils.isBlank(action.getFailMessage())) {
+                summary.append("\n## ")
+                        .append(action.getFailMessage());
+            }
+            return summary.toString();
         }
-
-        return summary.toString();
+        return StringUtils.EMPTY;
     }
 
     private Map<CoverageElement, Ratio> getLastRatios(final CoverageResult result) {

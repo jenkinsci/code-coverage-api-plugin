@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.util.Ensure;
@@ -29,7 +30,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
  * @author Ullrich Hafner
  */
 @SuppressWarnings("PMD.GodClass")
-public final class CoverageNode implements Serializable {
+public class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 
     private static final Coverage COVERED_NODE = new Coverage(1, 0);
@@ -57,6 +58,37 @@ public final class CoverageNode implements Serializable {
     public CoverageNode(final CoverageMetric metric, final String name) {
         this.metric = metric;
         this.name = name;
+    }
+
+    CoverageNode getParent() {
+        if (parent == null) {
+            throw new IllegalStateException("Parent is not set");
+        }
+        return parent;
+    }
+
+    /**
+     * Returns the source code path of this node.
+     *
+     * @return the element type
+     */
+    public String getPath() {
+        return StringUtils.EMPTY;
+    }
+
+    protected String mergePath(final String localPath) {
+        if (hasParent()) {
+            String parentPath = getParent().getPath();
+            if (StringUtils.isBlank(parentPath)) {
+                return localPath;
+            }
+            if (StringUtils.isBlank(localPath)) {
+                return parentPath;
+            }
+            return parentPath + "/" + localPath;
+        }
+
+        return localPath;
     }
 
     /**
@@ -355,7 +387,7 @@ public final class CoverageNode implements Serializable {
         if (!metric.equals(searchMetric)) {
             return false;
         }
-        return name.hashCode() == searchNameHashCode;
+        return name.hashCode() == searchNameHashCode || getPath().hashCode() == searchNameHashCode;
     }
 
     /**
@@ -400,7 +432,7 @@ public final class CoverageNode implements Serializable {
             }
 
         }
-        CoverageNode newNode = new CoverageNode(CoverageMetric.PACKAGE, childName);
+        CoverageNode newNode = new PackageCoverageNode(childName);
         add(newNode);
         return newNode;
     }

@@ -30,7 +30,6 @@ enum Thresholds { SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOL
  * Integration Test for HealthReports.
  */
 public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
-
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final int UNSTABLE_LINE_THRESHOLD = 100;
 
@@ -125,7 +124,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyHealthReportBasedOnHighOrNoThresholdsSet(final Run<?, ?> build,
             final Thresholds wereThresholdsSet) {
-        HealthReport healthReport = build.getAction(CoverageBuildAction.class).getHealthReport();
+        HealthReport healthReport = build.getAction(CoverageBuildAction.class).getBuildHealth();
         if (wereThresholdsSet == Thresholds.DONT_SET_ANY_THRESHOLDS) {
             assertThat(healthReport.getScore()).isEqualTo(100);
             assertThat(healthReport.getLocalizableDescription().toString()).isEqualTo("Coverage Healthy score is 100%");

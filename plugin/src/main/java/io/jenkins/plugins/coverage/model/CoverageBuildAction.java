@@ -48,8 +48,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     /** Relative URL to the details of the code coverage results. */
     static final String DETAILS_URL = "coverage";
 
-    private HealthReport healthReport;
-    private String failMessage;
+    private final HealthReport healthReport;
 
     private final Coverage lineCoverage;
     private final Coverage branchCoverage;
@@ -66,9 +65,11 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the associated build that created the statistics
      * @param result
      *         the coverage results to persist with this action
+     * @param healthReport
+     *         health report
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result) {
-        this(owner, result, NO_REFERENCE_BUILD, new TreeMap<>());
+    public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport) {
+        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>());
     }
 
     /**
@@ -78,19 +79,21 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the associated build that created the statistics
      * @param result
      *         the coverage results to persist with this action
+     * @param healthReport
+     *         health report
      * @param delta
      *         the delta coverage with respect to the reference build
      * @param referenceBuildId
      *         the ID of the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta) {
-        this(owner, result, referenceBuildId, delta, true);
+            final HealthReport healthReport, final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta) {
+        this(owner, result, healthReport, referenceBuildId, delta, true);
     }
 
     @VisibleForTesting
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta,
+            final HealthReport healthReport, final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
@@ -99,6 +102,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
         this.difference = delta;
         this.referenceBuildId = referenceBuildId;
+        this.healthReport = healthReport;
     }
 
     @Override
@@ -211,28 +215,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
     @Override
     public HealthReport getBuildHealth() {
-        return getHealthReport();
+        return healthReport;
     }
 
     @Override
     public CoverageViewModel getTarget() {
         return new CoverageViewModel(getOwner(), getResult());
-    }
-
-    public HealthReport getHealthReport() {
-        return healthReport;
-    }
-
-    public void setHealthReport(final HealthReport healthReport) {
-        this.healthReport = healthReport;
-    }
-
-    public String getFailMessage() {
-        return failMessage;
-    }
-
-    public void setFailMessage(final String failMessage) {
-        this.failMessage = failMessage;
     }
 
     @CheckForNull

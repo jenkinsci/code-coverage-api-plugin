@@ -21,31 +21,22 @@
  */
 package io.jenkins.plugins.coverage.source;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import java.io.IOException;
+import java.util.Map;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.jenkinsci.Symbol;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
 import hudson.util.ListBoxModel;
-import io.jenkins.plugins.coverage.BuildUtils;
-import io.jenkins.plugins.coverage.exception.CoverageException;
+
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
-import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
+// TODO: This class is deprecated and shoud be deleted if we have a new reporter step
 public class DefaultSourceFileResolver extends SourceFileResolver {
-
     public static final String DEFAULT_SOURCE_CODE_STORE_DIRECTORY = "coverage-sources/";
 
     @DataBoundConstructor
@@ -53,224 +44,29 @@ public class DefaultSourceFileResolver extends SourceFileResolver {
         super(level);
     }
 
-    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener, Map<String, CoveragePaint> paints) throws IOException {
-        if (getLevel() == null || getLevel().equals(SourceFileResolverLevel.NEVER_STORE)) {
-            return;
-        }
-        File runRootDir = run.getRootDir();
-
-        listener.getLogger().printf("Source File Navigation is enabled - Current level: %s%n", getLevel());
-
-        if (getLevel().equals(SourceFileResolverLevel.STORE_LAST_BUILD)) {
-            Run<?, ?> lastBuild = BuildUtils.getPreviousNotFailedCompletedBuild(run);
-
-            // only store source files in this build and the last not failed completed build.
-            if (lastBuild != null) {
-                Run<?, ?> b = BuildUtils.getPreviousNotFailedCompletedBuild(lastBuild);
-                if (b != null) {
-                    File sourceFileDir = new File(b.getRootDir(), "coverage-sources");
-
-                    if (sourceFileDir.exists() && sourceFileDir.isDirectory()) {
-                        FileUtils.deleteDirectory(sourceFileDir);
-                    }
-                }
-            }
-        }
-
-        listener.getLogger().printf("%d source files need to be copied.%n", paints.size());
-
-        final Map<String, FilePath> sourceFileMapping = createSourceFileMapping(workspace, listener);
-
-        paints.forEach((sourceFilePath, paint) -> {
-            final File buildDirSourceFile = new File(runRootDir, DEFAULT_SOURCE_CODE_STORE_DIRECTORY + sanitizeFilename(sourceFilePath));
-
-            try {
-                listener.getLogger().printf("Starting copy source file %s. %n", sourceFilePath);
-
-                Set<String> possibleParentPaths = getPossiblePaths();
-                if (possibleParentPaths == null) {
-                    possibleParentPaths = Collections.emptySet();
-                }
-
-                FileUtils.write(buildDirSourceFile, workspace.act(new SourceFilePainter(
-                        sourceFilePath,
-                        paint,
-                        possibleParentPaths,
-                        sourceFileMapping
-                )), StandardCharsets.UTF_8);
-                listener.getLogger().printf("Copied %s. %n", sourceFilePath);
-
-            } catch (IOException | InterruptedException e) {
-                listener.getLogger().println(e.getMessage());
-            }
-        });
-    }
-
-    private String sanitizeFilename(String inputName) {
-        return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
-    }
-
-    private Map<String, FilePath> createSourceFileMapping(FilePath workspace, TaskListener listener) {
-        try {
-            return Arrays
-                    .stream(workspace.list("**/*"))
-                    .collect(Collectors.toMap(
-                            FilePath::getName,
-                            Function.identity(),
-                            (path1, path2) -> {
-                                return path1;
-                            }
-                    ));
-        } catch (IOException | InterruptedException e) {
-            listener.getLogger().println(e);
-        }
-
-        return Collections.emptyMap();
+    public void resolveSourceFiles(Run<?, ?> run, FilePath workspace, TaskListener listener,
+            Map<String, CoveragePaint> paints) throws IOException {
+        // Code moved to SourceCodeFacade
     }
 
     @Symbol("sourceFiles")
     @Extension
-    //FIXME - Why is this parametrized? T is never used.
-    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver> extends Descriptor<SourceFileResolver> {
-
+    public static final class DefaultSourceFileResolverDescriptor<T extends SourceFileResolver>
+            extends Descriptor<SourceFileResolver> {
         private static final ListBoxModel LEVELS = new ListBoxModel(
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(), SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
-                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(), SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.NEVER_STORE.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_LAST_BUILD.toString()),
+                new ListBoxModel.Option(SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.getName(),
+                        SourceFileResolver.SourceFileResolverLevel.STORE_ALL_BUILD.toString()));
 
         public DefaultSourceFileResolverDescriptor() {
             super(DefaultSourceFileResolver.class);
         }
 
-        //FIXME - This method is never used. Can we delete it?
         public ListBoxModel doFillLevelItems() {
             return LEVELS;
-        }
-    }
-
-    private static class SourceFilePainter extends MasterToSlaveFileCallable<String> {
-        private static final long serialVersionUID = 6548573019315830249L;
-
-        private final String sourceFilePath;
-        private final Set<String> possiblePaths;
-        private final CoveragePaint paint;
-        private final Map<String, FilePath> sourceFileMapping;
-
-        SourceFilePainter(
-                @NonNull String sourceFilePath,
-                @NonNull CoveragePaint paint,
-                @NonNull Set<String> possiblePaths,
-                @NonNull Map<String, FilePath> sourceFileMapping
-        ) {
-            this.sourceFilePath = sourceFilePath;
-            this.paint = paint;
-            this.possiblePaths = possiblePaths;
-            this.sourceFileMapping = sourceFileMapping;
-        }
-
-        @Override
-        public String invoke(File workspace, VirtualChannel channel) throws IOException {
-            FilePath sourceFile = tryFindSourceFile(workspace);
-            if (sourceFile == null) {
-                throw new IOException(
-                        String.format("Unable to find source file %s in workspace %s", sourceFilePath, workspace.getAbsolutePath()));
-            }
-
-            try {
-                return paintSourceCode(sourceFile, paint);
-            } catch (CoverageException e) {
-                throw new IOException(e);
-            }
-        }
-
-        private FilePath tryFindSourceFile(File workspace) {
-            List<File> possibleDirectories = new LinkedList<>();
-
-            // guess its parent directory
-            for (String directory : possiblePaths) {
-                File pathFromRoot = new File(directory);
-                if (pathFromRoot.exists() && pathFromRoot.isDirectory()) {
-                    possibleDirectories.add(pathFromRoot);
-                }
-
-                File pathFromWorkDir = new File(workspace, directory);
-                if (pathFromWorkDir.exists() && pathFromWorkDir.isDirectory() && !pathFromWorkDir.equals(pathFromRoot)) {
-                    possibleDirectories.add(pathFromWorkDir);
-                }
-            }
-
-            // check if we can find source file in workspace
-            File sourceFile = new File(workspace, sourceFilePath);
-            if (isValidSourceFile(sourceFile)) {
-                return new FilePath(sourceFile);
-            }
-
-            // check if we can find source file in the possible parent directories
-            for (File directory : possibleDirectories) {
-                sourceFile = new File(directory, sourceFilePath);
-                if (isValidSourceFile(sourceFile)) {
-                    return new FilePath(sourceFile);
-                }
-            }
-
-            // if sourceFilePath is a absolute path check if it is under the workspace directory
-            if (Paths.get(sourceFilePath).isAbsolute()
-                    && Paths.get(sourceFilePath).normalize().startsWith(workspace.getAbsolutePath())) {
-                sourceFile = new File(sourceFilePath);
-                if (isValidSourceFile(sourceFile)) {
-                    return new FilePath(sourceFile);
-                }
-            }
-
-            // fallback to use the pre-scanned workspace to see if there's a file that matches
-            return sourceFileMapping.get(sourceFilePath);
-        }
-
-        private boolean isValidSourceFile(File sourceFile) {
-            return sourceFile.exists() && sourceFile.isFile() && sourceFile.canRead();
-        }
-
-        private String paintSourceCode(FilePath source, CoveragePaint paint) throws CoverageException {
-            try (StringWriter output = new StringWriter();
-                 BufferedReader input = new BufferedReader(new InputStreamReader(source.read(), StandardCharsets.UTF_8))) {
-                int line = 0;
-                String content;
-                while ((content = input.readLine()) != null) {
-                    line++;
-
-                    if (paint.isPainted(line)) {
-                        final int hits = paint.getHits(line);
-                        final int branchCoverage = paint.getBranchCoverage(line);
-                        final int branchTotal = paint.getBranchTotal(line);
-                        final int coveragePercent = (hits == 0) ? 0 : (int) (branchCoverage * 100.0 / branchTotal);
-                        if (paint.getHits(line) > 0) {
-                            if (branchTotal == branchCoverage) {
-                                output.write("<tr class=\"coverFull\">\n");
-                            } else {
-                                output.write("<tr class=\"coverPart\" title=\"Line " + line + ": Conditional coverage " + coveragePercent + "% ("
-                                        + branchCoverage + "/" + branchTotal + ")\">\n");
-                            }
-                        } else {
-                            output.write("<tr class=\"coverNone\">\n");
-                        }
-                        output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
-                        output.write("<td class=\"hits\">" + hits + "</td>\n");
-                    } else {
-                        output.write("<tr class=\"noCover\">\n");
-                        output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
-                        output.write("<td class=\"hits\"></td>\n");
-                    }
-                    output.write("<td class=\"code\">"
-                            + content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "").replace("\r", "").replace(" ",
-                            "&nbsp;").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>\n");
-                    output.write("</tr>\n");
-                }
-
-                paint.setTotalLines(line);
-                return output.toString();
-            } catch (IOException | InterruptedException e) {
-                throw new CoverageException(e);
-            }
         }
     }
 }

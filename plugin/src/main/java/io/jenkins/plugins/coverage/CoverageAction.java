@@ -37,11 +37,7 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
         return Collections.singleton(new CoverageProjectAction(owner));
     }
 
-
-    /**
-     * @return Health report
-     */
-    @Override
+    @Override @CheckForNull
     public HealthReport getBuildHealth() {
         return getHealthReport();
     }
