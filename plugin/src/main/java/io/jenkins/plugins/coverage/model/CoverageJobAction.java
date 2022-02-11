@@ -1,5 +1,3 @@
-
-
 package io.jenkins.plugins.coverage.model;
 
 import edu.hm.hafner.echarts.BuildResult;
