@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * Charts are displayed one multiple PageObjects. This util provides some helper methods to deal with charts.
  */
 @SuppressWarnings("hideutilityclassconstructor")
+// TODO: Move this code to ATH so we can reuse it from other plugins
 public class ChartUtil {
     private static final int MAX_ATTEMPTS = 5;
 
