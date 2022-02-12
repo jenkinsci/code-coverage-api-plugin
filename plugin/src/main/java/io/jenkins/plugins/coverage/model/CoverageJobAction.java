@@ -3,16 +3,16 @@ package io.jenkins.plugins.coverage.model;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.LinesChartModel;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.Messages;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
 /**
  * Project level action for the coverage results. A job action displays a link on the side panel of a job that refers to
- * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link CoverageResult}
+ * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link CoverageNode}
  * instance). This action also is responsible to render the historical trend via its associated 'floatingBox.jelly'
  * view.
  *
@@ -33,7 +33,7 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
         return Messages.CoverageProjectAction_displayName();
     }
 
-    @Override
+    @Override @NonNull
     public String getUrlName() {
         return "coverage";
     }

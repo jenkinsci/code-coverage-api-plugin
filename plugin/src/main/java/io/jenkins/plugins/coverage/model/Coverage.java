@@ -5,11 +5,9 @@ import java.util.Locale;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import io.jenkins.plugins.coverage.targets.CoverageElement;
-
 /**
  * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
- * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageElement}.
+ * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageMetric}.
  *
  * @author Ullrich Hafner
  */

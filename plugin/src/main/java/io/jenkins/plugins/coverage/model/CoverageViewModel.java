@@ -15,6 +15,7 @@ import org.apache.commons.lang3.math.Fraction;
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import j2html.tags.ContainerTag;
 
@@ -25,7 +26,6 @@ import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -50,6 +50,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
+    private final String id;
 
     /**
      * Creates a new view model instance.
@@ -64,6 +65,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         this.owner = owner;
         this.node = node;
+        id = "coverage"; // TODO: this needs to be a parameter
+    }
+
+    public String getId() {
+        return id;
     }
 
     public Run<?, ?> getOwner() {
@@ -100,14 +106,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
      * is shown in the view, so the ID is not used.
      *
-     * @param id
+     * @param tableId
      *         ID of the table model
      *
      * @return the table model with the specified ID
      */
     @Override
-    public TableModel getTableModel(final String id) {
-        return new CoverageTableModel(getNode(), getOwner().getRootDir());
+    public TableModel getTableModel(final String tableId) {
+        return new CoverageTableModel(getNode(), getOwner().getRootDir(), id);
     }
 
     private LinesChartModel createTrendChart(final String configuration) {
@@ -167,10 +173,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the new sub-page
      */
     @SuppressWarnings("unused") // Called by jelly view
+    @CheckForNull
     public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
-                Optional<CoverageNode> targetResult = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
+                Optional<CoverageNode> targetResult
+                        = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
                 if (targetResult.isPresent()) {
                     return new SourceViewModel(getOwner(), targetResult.get());
                 }
@@ -188,22 +196,53 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable() {
-        return getSourceFile(getOwner().getRootDir(), getNode().getName()) != null;
+        return isSourceFileInNewFormatAvailable() || isSourceFileInOldFormatAvailable();
     }
 
-    protected static File getSourceFile(final File buildFolder, final String fileName) {
-        File sourceFile = new File(buildFolder,
-                DefaultSourceFileResolver.DEFAULT_SOURCE_CODE_STORE_DIRECTORY
-                        + sanitizeFilename(fileName));
-        if (sourceFile.exists()) {
-            return sourceFile;
-        }
+    /**
+     * Returns whether the source file is available in Jenkins build folder in the old format of the plugin versions
+     * less than 2.1.0.
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    public boolean isSourceFileInOldFormatAvailable() {
+        return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), getNode().getName());
+    }
 
-        return null;
+    static boolean isSourceFileInOldFormatAvailable(final File rootDir, final String nodeName) {
+        return getFileForBuildsWithOldVersion(rootDir, nodeName).canRead();
+    }
+
+    /**
+     * Returns a file to the sources in release in the old format of the plugin versions less than 2.1.0.
+     *
+     * @param buildFolder
+     *         top-level folder of the build results
+     * @param fileName
+     *         base filename of the coverage node
+     *
+     * @return the file
+     */
+    static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
+        return new File(new File(buildFolder, "coverage-sources"), sanitizeFilename(fileName));
     }
 
     private static String sanitizeFilename(final String inputName) {
         return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
+    }
+
+    /**
+     * Returns whether the source file is available in Jenkins build folder in the new format of the plugin versions
+     * greater or equal than 2.1.0.
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    public boolean isSourceFileInNewFormatAvailable() {
+        return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, getNode().getPath());
+    }
+
+    static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
+        return new SourceCodeFacade().createFileInBuildFolder(rootDir, id, nodePath).canRead();
     }
 
     /**
@@ -254,12 +293,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
         private final File buildFolder;
+        private final String id;
 
-        CoverageTableModel(final CoverageNode root, final File buildFolder) {
+        CoverageTableModel(final CoverageNode root, final File buildFolder, final String id) {
             super();
 
             this.root = root;
             this.buildFolder = buildFolder;
+            this.id = id;
         }
 
         @Override
@@ -285,7 +326,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, browserLocale)).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, id, browserLocale)).collect(Collectors.toList());
         }
     }
 
@@ -295,17 +336,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageRow {
         private final CoverageNode root;
         private final File buildFolder;
+        private final String id;
         private final Locale browserLocale;
 
-        CoverageRow(final CoverageNode root, final File buildFolder, final Locale browserLocale) {
+        CoverageRow(final CoverageNode root, final File buildFolder, final String id, final Locale browserLocale) {
             this.root = root;
             this.buildFolder = buildFolder;
+            this.id = id;
             this.browserLocale = browserLocale;
         }
 
         public String getFileName() {
             String fileName = root.getName();
-            if (getSourceFile(buildFolder, fileName) != null) {
+            if (isSourceFileInNewFormatAvailable(buildFolder, id, root.getPath())
+                    || isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
                 return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
             }
             return fileName;

@@ -31,7 +31,7 @@ public class CoverageXmlStreamTest extends SerializableTest<CoverageNode> {
             CoverageResult result = parser.getResult(getResourceAsFile("jacoco-codingstyle.xml").toFile());
             result.stripGroup();
 
-            return CoverageNodeConverter.convert(result);
+            return new CoverageNodeConverter().convert(result);
         }
         catch (CoverageException exception) {
             throw new AssertionError(exception);

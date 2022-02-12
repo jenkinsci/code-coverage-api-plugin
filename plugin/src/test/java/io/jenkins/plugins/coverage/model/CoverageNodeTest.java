@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
@@ -169,12 +167,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
     @Test
     void shouldComputeDelta() {
-        CoverageNode tree = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
 
         String checkStyleParser = "CheckStyleParser.java";
         Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageMetric.FILE, checkStyleParser);
         assertThat(wrappedCheckStyle).isNotEmpty().hasValueSatisfying(
-                node -> assertThat(node).hasName(checkStyleParser)
+                node -> assertThat(node)
+                        .hasName(checkStyleParser)
+                        .hasPath("edu/hm/hafner/analysis/parser/checkstyle/CheckStyleParser.java")
         );
 
         CoverageNode checkStyle = wrappedCheckStyle.get();
@@ -189,7 +189,9 @@ class CoverageNodeTest extends AbstractCoverageTest {
         String pmdParser = "PmdParser.java";
         Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParser);
         assertThat(wrappedPmd).isNotEmpty().hasValueSatisfying(
-                node -> assertThat(node).hasName(pmdParser)
+                node -> assertThat(node)
+                        .hasName(pmdParser)
+                        .hasPath("edu/hm/hafner/analysis/parser/pmd/PmdParser.java")
         );
 
         CoverageNode pmd = wrappedPmd.get();
@@ -220,7 +222,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
     @Test
     void shouldSplitComplexPackageStructure() {
-        CoverageNode tree = CoverageNodeConverter.convert(readResult("jacoco-analysis-model.xml"));
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
 
         assertThat(tree.getAll(PACKAGE)).hasSize(18);
 
@@ -233,7 +235,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldNotSplitPackagesIfOnWrongHierarchyNode() {
         CoverageNode tree = readExampleReport();
         CoverageNode packageNode = tree.getChildren().get(0);
-        assertThat(packageNode).hasName("edu.hm.hafner.util");
+        assertThat(packageNode).hasName("edu.hm.hafner.util").hasPath("edu/hm/hafner/util");
 
         List<CoverageNode> files = packageNode.getChildren();
 
@@ -312,11 +314,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
                         new CoverageNode(CoverageMetric.FILE, "file.txt"),
                         new CoverageNode(CoverageMetric.LINE, "line"))
                 .suppress(Warning.NONFINAL_FIELDS)
+                .usingGetClass()
                 .withIgnoredFields("parent")
                 .verify();
     }
 
     private CoverageNode readExampleReport() {
-        return CoverageNodeConverter.convert(readResult("jacoco-codingstyle.xml"));
+        return readNode("jacoco-codingstyle.xml");
     }
 }

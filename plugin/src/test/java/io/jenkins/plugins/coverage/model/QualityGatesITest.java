@@ -40,7 +40,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     public void freeStyleShouldMeetQualityTargets() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(ACHIEVED_UNHEALTHY_THRESHOLD,
                 ACHIEVED_UNSTABLE_THRESHOLD);
-        verifiesBuildStatus(project);
+        buildWithSuccess(project);
     }
 
     /**
@@ -101,7 +101,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     public void pipelineShouldMeetQualityTargets() {
         WorkflowJob job = createPipelineWithLineThreshold(ACHIEVED_UNHEALTHY_THRESHOLD, ACHIEVED_UNSTABLE_THRESHOLD);
-        verifiesBuildStatus(job);
+        buildWithSuccess(job);
     }
 
     /**
@@ -121,10 +121,8 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * @param job
      *         job to fest with
      */
-    private void verifiesBuildStatus(final ParameterizedJob<?, ?> job) {
-        Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
-        String message = build.getAction(CoverageBuildAction.class).getFailMessage();
-        assertThat(message).isEqualTo(null);
+    private void buildWithSuccess(final ParameterizedJob<?, ?> job) {
+        buildWithResult(job, Result.SUCCESS);
     }
 
     /**

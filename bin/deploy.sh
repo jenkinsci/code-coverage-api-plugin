@@ -4,12 +4,9 @@ set -e
 
 JENKINS_HOME=../docker/volumes/jenkins-home
 
-mvn clean install -Pskip || { echo "Build failed"; exit 1; }
-
-echo "Installing plugin in $JENKINS_HOME"
-
-rm -rf $JENKINS_HOME/plugins/code-coverage-api*
-cp -fv plugin/target/code-coverage-api.hpi $JENKINS_HOME/plugins/code-coverage-api.jpi
+echo "Installing plugin ${1} in $JENKINS_HOME"
+rm -rf $JENKINS_HOME/plugins/${1}*
+cp -fv plugin/target/${1}.hpi $JENKINS_HOME/plugins/${1}.jpi
 
 CURRENT_UID="$(id -u):$(id -g)"
 export CURRENT_UID
@@ -18,3 +15,4 @@ if [[ "$IS_RUNNING" != "" ]]; then
     docker-compose restart
     echo "Restarting Jenkins (docker compose with user ID ${CURRENT_UID}) ..."
 fi
+

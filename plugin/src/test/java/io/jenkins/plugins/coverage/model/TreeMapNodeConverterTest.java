@@ -4,10 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.TreeMapNode;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -17,10 +13,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 class TreeMapNodeConverterTest extends AbstractCoverageTest {
     @Test
-    void shouldConvertCodingStyleToTree() throws CoverageException {
-        CoverageResult report = readReport("jacoco-codingstyle.xml");
-
-        CoverageNode tree = CoverageNodeConverter.convert(report);
+    void shouldConvertCodingStyleToTree() {
+        CoverageNode tree = readNode("jacoco-codingstyle.xml");
         tree.splitPackages();
 
         TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
@@ -36,10 +30,8 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
     }
 
     @Test
-    void shouldConvertAnalysisModelToTree() throws CoverageException {
-        CoverageResult report = readReport("jacoco-analysis-model.xml");
-
-        CoverageNode tree = CoverageNodeConverter.convert(report);
+    void shouldConvertAnalysisModelToTree() {
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
         tree.splitPackages();
 
         TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);

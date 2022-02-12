@@ -21,7 +21,6 @@ public class DeclarativePipelineSupportITest extends IntegrationTestWithJenkinsP
      */
     @Test
     public void declarativePipelineSupportJacoco() {
-
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_XML);
 
         job.setDefinition(new CpsFlowDefinition("pipeline {\n"

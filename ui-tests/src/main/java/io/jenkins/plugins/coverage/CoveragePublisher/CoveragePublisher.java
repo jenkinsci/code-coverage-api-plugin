@@ -4,6 +4,8 @@ import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 import io.jenkins.plugins.coverage.CoveragePublisher.Threshold.GlobalThreshold;
@@ -26,6 +28,8 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     private final Control skipPublishingChecks = control("skipPublishingChecks");
     private final Control sourceFileResolver = control("sourceFileResolver/level");
     private final Control globalThreshold = control("repeatable-add");
+    private final Control sourceCodeEncoding = control("sourceCodeEncoding");
+    private final Control sourceDirectories = findRepeatableAddButtonFor("sourceDirectories");
 
     /**
      * Constructor for CoveragePublisher.
@@ -35,8 +39,47 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param path
      *         on the parent page
      */
-    public CoveragePublisher(Job parent, String path) {
+    public CoveragePublisher(final Job parent, final String path) {
         super(parent, path);
+    }
+
+    private Control findRepeatableAddButtonFor(final String propertyName) {
+        return control(by.xpath("//div[@id='" + propertyName + "']//button[contains(@path,'-add')]"));
+    }
+
+    /**
+     * Sets the encoding when reading source code files.
+     *
+     * @param sourceCodeEncoding
+     *         the source code encoding (e.g., UTF-8)
+     *
+     * @return this publisher
+     */
+    public CoveragePublisher setSourceCodeEncoding(final String sourceCodeEncoding) {
+        ensureAdvancedOptionsIsActivated();
+
+        this.sourceCodeEncoding.set(sourceCodeEncoding);
+
+        return this;
+    }
+
+    /**
+     * Adds the path to the folder that contains the source code. If not relative and thus not part of the workspace
+     * then this folder needs to be added in Jenkins global configuration.
+     *
+     * @param sourceDirectory
+     *         a folder containing the source code
+     *
+     * @return this publisher
+     */
+    public CoveragePublisher addSourceDirectory(final String sourceDirectory) {
+        ensureAdvancedOptionsIsActivated();
+
+        String path = createPageArea("sourceDirectories", sourceDirectories::click);
+        SourceCodeDirectoryPanel panel = new SourceCodeDirectoryPanel(this, path);
+        panel.setPath(sourceDirectory);
+
+        return this;
     }
 
     /**
@@ -45,7 +88,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param applyTresholds
      *         boolean for using applying threshold recursively
      */
-    public void setApplyThresholdRecursively(boolean applyTresholds) {
+    public void setApplyThresholdRecursively(final boolean applyTresholds) {
         ensureAdvancedOptionsIsActivated();
         applyThresholdRecursively.check(applyTresholds);
     }
@@ -56,7 +99,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnUnhealthy
      *         boolean for failing on unhealthy
      */
-    public void setFailUnhealthy(boolean failOnUnhealthy) {
+    public void setFailUnhealthy(final boolean failOnUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         failUnhealthy.check(failOnUnhealthy);
     }
@@ -67,7 +110,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnUnstable
      *         boolean for failing on unstable
      */
-    public void setFailUnstable(boolean failOnUnstable) {
+    public void setFailUnstable(final boolean failOnUnstable) {
         ensureAdvancedOptionsIsActivated();
         failUnstable.check(failOnUnstable);
     }
@@ -78,7 +121,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnNoReports
      *         boolean for fail on no reports
      */
-    public void setFailNoReports(boolean failOnNoReports) {
+    public void setFailNoReports(final boolean failOnNoReports) {
         ensureAdvancedOptionsIsActivated();
         failNoReports.check(failOnNoReports);
     }
@@ -89,7 +132,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param failOnCoverageDecreases
      *         boolean for failing if coverage decreased in Change Request
      */
-    public void setFailBuildIfCoverageDecreasedInChangeRequest(boolean failOnCoverageDecreases) {
+    public void setFailBuildIfCoverageDecreasedInChangeRequest(final boolean failOnCoverageDecreases) {
         ensureAdvancedOptionsIsActivated();
         failBuildIfCoverageDecreasedInChangeRequest.check(failOnCoverageDecreases);
     }
@@ -100,7 +143,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param skipPublishing
      *         boolean for skipping publishing checks
      */
-    public void setSkipPublishingChecks(boolean skipPublishing) {
+    public void setSkipPublishingChecks(final boolean skipPublishing) {
         ensureAdvancedOptionsIsActivated();
         skipPublishingChecks.check(skipPublishing);
     }
@@ -124,7 +167,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *
      * @return added {@link Adapter}
      */
-    public Adapter createAdapterPageArea(String adapterName) {
+    public Adapter createAdapterPageArea(final String adapterName) {
         String path = createPageArea("adapters", () -> this.adapter.selectDropdownMenu(adapterName));
         Adapter newAdapter = new Adapter(this, path);
         return newAdapter;
@@ -155,9 +198,9 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      *
      * @return added {@link Adapter} with setted configuration
      */
-    public GlobalThreshold createGlobalThresholdsPageArea(GlobalThresholdTarget thresholdTarget,
-            double unhealthyThreshold,
-            double unstableThreshold, boolean failOnUnhealthy) {
+    public GlobalThreshold createGlobalThresholdsPageArea(final GlobalThresholdTarget thresholdTarget,
+            final double unhealthyThreshold,
+            final double unstableThreshold, final boolean failOnUnhealthy) {
         ensureAdvancedOptionsIsActivated();
         String path = createPageArea("globalThresholds", () -> this.globalThreshold.click());
         GlobalThreshold threshold = new GlobalThreshold(this, path);
@@ -174,7 +217,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
      * @param storingLevel
      *         which should be applied
      */
-    public void setSourceFileResolver(SourceFileResolver storingLevel) {
+    public void setSourceFileResolver(final SourceFileResolver storingLevel) {
         ensureAdvancedOptionsIsActivated();
         sourceFileResolver.select(storingLevel.getValue());
     }
@@ -195,7 +238,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
          * @param value
          *         is value-attribute of option-tag.
          */
-        SourceFileResolver(String value) {
+        SourceFileResolver(final String value) {
             this.value = value;
         }
 
@@ -209,6 +252,20 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
         }
     }
 
+    /**
+     * Page area of a source code path configuration.
+     */
+    private static class SourceCodeDirectoryPanel extends PageAreaImpl {
+        private final Control path = control("path");
+
+        SourceCodeDirectoryPanel(final PageArea area, final String path) {
+            super(area, path);
+        }
+
+        public void setPath(final String path) {
+            this.path.set(path);
+        }
+    }
 }
 
 

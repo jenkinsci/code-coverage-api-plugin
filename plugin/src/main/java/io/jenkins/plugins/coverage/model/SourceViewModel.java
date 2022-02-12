@@ -34,13 +34,16 @@ public class SourceViewModel extends CoverageViewModel {
      */
     public String getSourceFileContent() {
         try {
-            File sourceFile = getSourceFile(getOwner().getRootDir(), getNode().getName());
-            if (sourceFile != null) {
-                return new TextFile(sourceFile).read();
+            File rootDir = getOwner().getRootDir();
+            if (isSourceFileInNewFormatAvailable()) {
+                return new SourceCodeFacade().read(rootDir, getId(), getNode().getPath());
+            }
+            if (isSourceFileInOldFormatAvailable()) {
+                return new TextFile(getFileForBuildsWithOldVersion(rootDir, getNode().getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
             }
             return Messages.Coverage_Not_Available();
         }
-        catch (IOException exception) {
+        catch (IOException | InterruptedException exception) {
             return ExceptionUtils.getStackTrace(exception);
         }
     }
