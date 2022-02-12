@@ -56,7 +56,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final String referenceBuildId;
     private SortedMap<CoverageMetric, Fraction> difference; // since 3.0.0
     @SuppressWarnings("unused")
-    private SortedMap<CoverageMetric, Double> delta; // not used anymore
+    private final transient SortedMap<CoverageMetric, Double> delta = new TreeMap<>(); // not used anymore
 
     /**
      * Creates a new instance of {@link CoverageBuildAction}.
