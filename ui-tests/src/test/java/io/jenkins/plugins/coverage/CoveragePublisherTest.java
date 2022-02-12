@@ -99,7 +99,7 @@ public class CoveragePublisherTest extends UiTest {
         Build thirdBuild = buildSuccessfully(job);
 
         verifyClickableFileLink(firstBuild, false);
-        verifyClickableFileLink(secondBuild, true);
+        verifyClickableFileLink(secondBuild, false);
         verifyClickableFileLink(thirdBuild, true);
     }
 

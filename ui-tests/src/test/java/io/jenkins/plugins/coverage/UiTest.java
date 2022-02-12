@@ -59,15 +59,22 @@ class UiTest extends AbstractJUnitTest {
      */
     FreeStyleJob getJobWithReportAndSourceCode(final SourceFileResolver sourceFileResolver) {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
-        coveragePublisher.setSourceFileResolver(sourceFileResolver);
-        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         copyResourceFilesToWorkspace(job, RESOURCES_FOLDER);
+
+        CoveragePublisher coveragePublisher = job.addPublisher(CoveragePublisher.class);
+        coveragePublisher.setSourceCodeEncoding("UTF-8")
+                .addSourceDirectory("checkout/src/main/java")
+                .setSourceFileResolver(sourceFileResolver);
+
+        Adapter jacocoAdapter = coveragePublisher.createAdapterPageArea("Jacoco");
         jacocoAdapter.setReportFilePath(JACOCO_FROM_COMMIT_XML);
+
         job.useScm(GitScm.class)
                 .url(REPO_URL)
-                .branch(COMMIT_ID);
+                .branch(COMMIT_ID)
+                .localDir("checkout");
         job.save();
+
         return job;
     }
 
