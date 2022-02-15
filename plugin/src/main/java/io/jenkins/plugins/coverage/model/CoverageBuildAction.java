@@ -27,6 +27,7 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
+import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -203,7 +204,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatDelta(final CoverageMetric metric) {
         Locale clientLocale = Functions.getCurrentLocale();
         if (hasDelta(metric)) {
-            return String.format(clientLocale, "%+.3f", difference.get(metric).doubleValue());
+            return FractionFormatter.formatDeltaFraction(difference.get(metric), clientLocale);
         }
         return Messages.Coverage_Not_Available();
     }

@@ -1,9 +1,9 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
 import java.awt.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
+
+import org.apache.commons.lang3.math.Fraction;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 
@@ -11,6 +11,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
 import hudson.Extension;
+import hudson.Functions;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
@@ -22,6 +23,7 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageType;
 import io.jenkins.plugins.coverage.model.Messages;
+import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
@@ -104,9 +106,13 @@ public class CodeCoverageColumn extends ListViewColumn {
      */
     public String getCoverageText(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
-            Optional<BigDecimal> coverageValue = getCoverageValue(job);
+            Optional<Fraction> coverageValue = getCoverageValue(job);
             if (coverageValue.isPresent()) {
-                return coverageValue.get().toPlainString() + " %";
+                final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
+                if (type.equals(CoverageType.PROJECT_DELTA)) {
+                    return FractionFormatter.formatDeltaPercentage(coverageValue.get(), Functions.getCurrentLocale());
+                }
+                return FractionFormatter.formatPercentage(coverageValue.get(), Functions.getCurrentLocale());
             }
         }
         return COVERAGE_NA_TEXT;
@@ -118,9 +124,9 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @param job
      *         The processed job
      *
-     * @return the coverage value
+     * @return the coverage percentage
      */
-    public Optional<BigDecimal> getCoverageValue(final Job<?, ?> job) {
+    public Optional<Fraction> getCoverageValue(final Job<?, ?> job) {
         final Run<?, ?> lastCompletedBuild = job.getLastCompletedBuild();
         if (lastCompletedBuild == null) {
             return Optional.empty();
@@ -130,29 +136,25 @@ public class CodeCoverageColumn extends ListViewColumn {
             return Optional.empty();
         }
         final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-        final double coverage;
-        switch (type) {
-            case PROJECT:
-                if (!action.hasCoverage(CoverageMetric.valueOf(coverageMetric))) {
-                    return Optional.empty();
-                }
-                coverage = action
-                        .getCoverage(CoverageMetric.valueOf(coverageMetric))
-                        .getCoveredPercentage() * 100.0;
-                break;
-            case PROJECT_DELTA:
-                if (!action.hasDelta(CoverageMetric.valueOf(coverageMetric))) {
-                    return Optional.empty();
-                }
-                coverage = action.getDelta().get(CoverageMetric.valueOf(coverageMetric));
-                break;
-            default:
+        final Fraction coverage;
+        if (type.equals(CoverageType.PROJECT)) {
+            if (!action.hasCoverage(CoverageMetric.valueOf(coverageMetric))) {
                 return Optional.empty();
+            }
+            coverage = action
+                    .getCoverage(CoverageMetric.valueOf(coverageMetric))
+                    .getCoveredPercentage();
         }
-        return Optional.of(
-                new BigDecimal(String.valueOf(coverage))
-                        .setScale(3, RoundingMode.DOWN)
-                        .stripTrailingZeros());
+        else if (type.equals(CoverageType.PROJECT_DELTA)) {
+            if (!action.hasDelta(CoverageMetric.valueOf(coverageMetric))) {
+                return Optional.empty();
+            }
+            coverage = action.getDifference().get(CoverageMetric.valueOf(coverageMetric));
+        }
+        else {
+            return Optional.empty();
+        }
+        return Optional.of(FractionFormatter.transformFractionToPercentage(coverage));
     }
 
     /**
@@ -161,20 +163,20 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @param job
      *         The processed job
      * @param coverage
-     *         The coverage value
+     *         The coverage value as percentage
      *
      * @return the line color as hex string
      */
-    public String getLineColor(final Job<?, ?> job, final BigDecimal coverage) {
+    public String getLineColor(final Job<?, ?> job, final Fraction coverage) {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            if (type == CoverageType.PROJECT) {
+            if (type.equals(CoverageType.PROJECT)) {
                 color = CoverageColorizationLevel
                         .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
                         .getLineColor();
             }
-            else if (type == CoverageType.PROJECT_DELTA) {
+            else if (type.equals(CoverageType.PROJECT_DELTA)) {
                 color = CoverageChangeTendency
                         .getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
             }
@@ -194,20 +196,20 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @param job
      *         The processed job
      * @param coverage
-     *         The coverage value
+     *         The coverage value as percentage
      *
      * @return the fill color as hex string
      */
-    public String getFillColor(final Job<?, ?> job, final BigDecimal coverage) {
+    public String getFillColor(final Job<?, ?> job, final Fraction coverage) {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
             final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            if (type == CoverageType.PROJECT) {
+            if (type.equals(CoverageType.PROJECT)) {
                 color = CoverageColorizationLevel
                         .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
                         .getFillColor();
             }
-            else if (type == CoverageType.PROJECT_DELTA) {
+            else if (type.equals(CoverageType.PROJECT_DELTA)) {
                 color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getFillColor();
             }
             else {
@@ -234,7 +236,7 @@ public class CodeCoverageColumn extends ListViewColumn {
     }
 
     /**
-     * Checks whether a {@link CoverageBuildAction} exists within the passed job.
+     * Checks whether a {@link CoverageBuildAction} exists within the completed build.
      *
      * @param job
      *         The processed job
@@ -242,8 +244,8 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @return {@code true} whether the action exists, else {@code false}
      */
     private boolean hasCoverageAction(final Job<?, ?> job) {
-        final Run<?, ?> lastSuccessfulBuild = job.getLastCompletedBuild();
-        return lastSuccessfulBuild != null && !lastSuccessfulBuild.getActions(CoverageBuildAction.class).isEmpty();
+        final Run<?, ?> lastCompletedBuild = job.getLastCompletedBuild();
+        return lastCompletedBuild != null && !lastCompletedBuild.getActions(CoverageBuildAction.class).isEmpty();
     }
 
     /**

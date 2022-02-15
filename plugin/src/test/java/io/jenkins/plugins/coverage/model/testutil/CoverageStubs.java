@@ -2,6 +2,8 @@ package io.jenkins.plugins.coverage.model.testutil;
 
 import java.util.SortedMap;
 
+import org.apache.commons.lang3.math.Fraction;
+
 import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.util.VisibleForTesting;
@@ -57,20 +59,20 @@ public final class CoverageStubs {
      *         The coverage metric
      * @param coverageDelta
      *         The project coverage delta
-     * @param coveragePercentage
-     *         The project coverage percentage
+     * @param coverageFraction
+     *         The project coverage fraction
      *
      * @return the created stub
      */
     @VisibleForTesting
     public static CoverageBuildAction createCoverageBuildAction(
             final CoverageMetric coverageMetric,
-            final double coverageDelta,
-            final double coveragePercentage) {
+            final Fraction coverageDelta,
+            final Fraction coverageFraction) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
-        Coverage coverage = createCoverage(coveragePercentage);
+        Coverage coverage = createCoverage(coverageFraction);
 
-        SortedMap<CoverageMetric, Double> deltas = mock(SortedMap.class);
+        SortedMap<CoverageMetric, Fraction> deltas = mock(SortedMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
         when(deltas.containsValue(coverageDelta)).thenReturn(true);
@@ -78,7 +80,7 @@ public final class CoverageStubs {
 
         when(action.hasDelta(coverageMetric)).thenReturn(true);
         when(action.hasCoverage(coverageMetric)).thenReturn(true);
-        when(action.getDelta()).thenReturn(deltas);
+        when(action.getDifference()).thenReturn(deltas);
         when(action.getCoverage(coverageMetric)).thenReturn(coverage);
 
         return action;
@@ -87,34 +89,34 @@ public final class CoverageStubs {
     /**
      * Creates a stub of {@link Coverage}, which provides the passed coverage percentage.
      *
-     * @param coveragePercentage
-     *         The coverage percentage
+     * @param coverageFraction
+     *         The coverage fraction
      *
      * @return the created stub
      */
     @VisibleForTesting
-    public static Coverage createCoverage(final Double coveragePercentage) {
+    public static Coverage createCoverage(final Fraction coverageFraction) {
         Coverage coverage = mock(Coverage.class);
-        when(coverage.getCoveredPercentage()).thenReturn(coveragePercentage);
+        when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
         return coverage;
     }
 
     /**
      * Creates a stub of {@link CoverageNode}, which provides the passed coverage percentage for the passed metric.
      *
-     * @param coveragePercentage
-     *         The coverage percentage
+     * @param coverageFraction
+     *         The coverage fraction
      * @param coverageMetric
      *         The coverage metric
      *
      * @return the created stub
      */
     @VisibleForTesting
-    public static CoverageNode createCoverageNode(final Double coveragePercentage,
+    public static CoverageNode createCoverageNode(final Fraction coverageFraction,
             final CoverageMetric coverageMetric) {
         CoverageNode coverageNode = mock(CoverageNode.class);
-        Coverage coverage = createCoverage(coveragePercentage);
-        when(coverage.getCoveredPercentage()).thenReturn(coveragePercentage);
+        Coverage coverage = createCoverage(coverageFraction);
+        when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
         when(coverageNode.getCoverage(coverageMetric)).thenReturn(coverage);
         return coverageNode;
     }

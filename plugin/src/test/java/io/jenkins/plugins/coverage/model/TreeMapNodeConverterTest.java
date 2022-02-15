@@ -55,6 +55,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
         assertThat(root.getName()).isEqualTo("Static Analysis Model and Parsers: jacoco-analysis-model.xml");
         assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
+        assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsHex(coveredPercentage));
         assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
                 node -> {
                     assertThat(node.getName()).isEqualTo("edu.hm.hafner");

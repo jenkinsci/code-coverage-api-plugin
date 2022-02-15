@@ -1,16 +1,17 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
+import hudson.Functions;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageType;
+import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
@@ -47,7 +48,7 @@ class CodeCoverageColumnTest {
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
-        final Optional<BigDecimal> coverageValue = column.getCoverageValue(job);
+        final Optional<Fraction> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
         assertThat(column.getFillColor(job, null)).isEqualTo(ColorUtils.colorAsHex(ColorUtils.NA_FILL_COLOR));
         assertThat(column.getLineColor(job, null)).isEqualTo(ColorUtils.colorAsHex(ColorUtils.NA_LINE_COLOR));
@@ -71,14 +72,14 @@ class CodeCoverageColumnTest {
         CodeCoverageColumn column = createColumn();
         column.setCoverageType(CoverageType.UNDEFINED.getType());
 
-        Job<?, ?> job = createJobWithCoverageAction(BigDecimal.ZERO, BigDecimal.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo("");
         assertThat(column.getCoverageValue(job)).isEmpty();
-        assertThat(column.getFillColor(job, BigDecimal.ZERO)).isEqualTo(
+        assertThat(column.getFillColor(job, Fraction.ZERO)).isEqualTo(
                 ColorUtils.colorAsHex(ColorUtils.NA_FILL_COLOR));
-        assertThat(column.getLineColor(job, BigDecimal.ZERO)).isEqualTo(
+        assertThat(column.getLineColor(job, Fraction.ZERO)).isEqualTo(
                 ColorUtils.colorAsHex(ColorUtils.NA_LINE_COLOR));
     }
 
@@ -87,7 +88,7 @@ class CodeCoverageColumnTest {
         CodeCoverageColumn column = createColumn();
         column.setCoverageMetric(CoverageMetric.CLASS.getName());
 
-        Job<?, ?> job = createJobWithCoverageAction(BigDecimal.ZERO, BigDecimal.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
@@ -104,16 +105,20 @@ class CodeCoverageColumnTest {
     void shouldCalculateProjectCoverage() {
         CodeCoverageColumn column = createColumn();
 
-        BigDecimal coveragePercentage = createScaledBigDecimal("0.5");
-        Job<?, ?> job = createJobWithCoverageAction(BigDecimal.ZERO, coveragePercentage);
+        Fraction coverageFraction = Fraction.getFraction(1, 2);
+        Fraction coveragePercentage = FractionFormatter.transformFractionToPercentage(coverageFraction);
+        String coveragePercentageText =
+                FractionFormatter.formatPercentage(coveragePercentage, Functions.getCurrentLocale());
 
-        assertThat(column.getCoverageText(job)).isEqualTo("50 %");
+        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, coverageFraction);
+
+        assertThat(column.getCoverageText(job)).isEqualTo(coveragePercentageText);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(value -> {
-                    final BigDecimal coverage = value.get();
-                    assertThat(coverage.compareTo(coveragePercentage.multiply(new BigDecimal(100)))).isEqualTo(0);
+                    final Fraction coverage = value.get();
+                    assertThat(coverage).isEqualTo(coveragePercentage);
                     assertThat(column.getFillColor(job, coverage))
                             .isEqualTo(
                                     ColorUtils.colorAsHex(CoverageColorizationLevel.LVL_50_DECREASE5.getFillColor()));
@@ -128,16 +133,19 @@ class CodeCoverageColumnTest {
         CodeCoverageColumn column = createColumn();
         column.setCoverageType(CoverageType.PROJECT_DELTA.getType());
 
-        BigDecimal coverageDelta = createScaledBigDecimal("5.0");
-        Job<?, ?> job = createJobWithCoverageAction(coverageDelta, BigDecimal.ZERO);
+        Fraction coverageDelta = Fraction.getFraction(1, 20);
+        Fraction coverageDeltaPercentage = FractionFormatter.transformFractionToPercentage(coverageDelta);
+        String coverageDeltaPercentageText =
+                FractionFormatter.formatDeltaPercentage(coverageDeltaPercentage, Functions.getCurrentLocale());
+        Job<?, ?> job = createJobWithCoverageAction(coverageDelta, Fraction.ZERO);
 
-        assertThat(column.getCoverageText(job)).isEqualTo("5 %");
+        assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(value -> {
-                    final BigDecimal coverage = value.get();
-                    assertThat(coverage.compareTo(coverageDelta)).isEqualTo(0);
+                    final Fraction coverage = value.get();
+                    assertThat(coverage).isEqualTo(coverageDeltaPercentage);
                     assertThat(column.getFillColor(job, coverage))
                             .isEqualTo(ColorUtils.colorAsHex(CoverageChangeTendency.INCREASED.getFillColor()));
                     assertThat(column.getLineColor(job, coverage))
@@ -168,25 +176,9 @@ class CodeCoverageColumnTest {
      *
      * @return the created mock
      */
-    private Job<?, ?> createJobWithCoverageAction(final BigDecimal coverageDelta, final BigDecimal coveragePercentage) {
+    private Job<?, ?> createJobWithCoverageAction(final Fraction coverageDelta, final Fraction coveragePercentage) {
         CoverageBuildAction coverageBuildAction =
-                createCoverageBuildAction(COVERAGE_METRIC, coverageDelta.doubleValue(),
-                        coveragePercentage.doubleValue());
+                createCoverageBuildAction(COVERAGE_METRIC, coverageDelta, coveragePercentage);
         return createJobWithActions(coverageBuildAction);
-    }
-
-    /**
-     * Creates a {@link BigDecimal} which contains the passed value and uses the format which is used for displaying
-     * values within the code coverage column.
-     *
-     * @param value
-     *         The value to be wrapped
-     *
-     * @return the created {@link BigDecimal}
-     */
-    private BigDecimal createScaledBigDecimal(final String value) {
-        return new BigDecimal(value)
-                .setScale(3, RoundingMode.DOWN)
-                .stripTrailingZeros();
     }
 }
