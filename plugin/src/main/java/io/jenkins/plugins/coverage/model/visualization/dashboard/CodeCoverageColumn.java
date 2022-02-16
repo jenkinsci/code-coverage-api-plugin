@@ -105,15 +105,13 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @return the coverage text
      */
     public String getCoverageText(final Job<?, ?> job) {
-        if (hasCoverageAction(job)) {
-            Optional<Fraction> coverageValue = getCoverageValue(job);
-            if (coverageValue.isPresent()) {
-                final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-                if (type.equals(CoverageType.PROJECT_DELTA)) {
-                    return FractionFormatter.formatDeltaPercentage(coverageValue.get(), Functions.getCurrentLocale());
-                }
-                return FractionFormatter.formatPercentage(coverageValue.get(), Functions.getCurrentLocale());
+        Optional<Fraction> coverageValue = getCoverageValue(job);
+        if (coverageValue.isPresent()) {
+            final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
+            if (type.equals(CoverageType.PROJECT_DELTA)) {
+                return FractionFormatter.formatDeltaPercentage(coverageValue.get(), Functions.getCurrentLocale());
             }
+            return FractionFormatter.formatPercentage(coverageValue.get(), Functions.getCurrentLocale());
         }
         return COVERAGE_NA_TEXT;
     }
@@ -127,14 +125,10 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @return the coverage percentage
      */
     public Optional<Fraction> getCoverageValue(final Job<?, ?> job) {
-        final Run<?, ?> lastCompletedBuild = job.getLastCompletedBuild();
-        if (lastCompletedBuild == null) {
+        if (!hasCoverageAction(job)) {
             return Optional.empty();
         }
-        final CoverageBuildAction action = lastCompletedBuild.getAction(CoverageBuildAction.class);
-        if (action == null) {
-            return Optional.empty();
-        }
+        CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
         final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
         final Fraction coverage;
         if (type.equals(CoverageType.PROJECT)) {

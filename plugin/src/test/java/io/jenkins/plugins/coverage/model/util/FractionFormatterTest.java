@@ -37,7 +37,7 @@ class FractionFormatterTest {
     void shouldFormatDeltaFraction() {
         Fraction fraction = Fraction.ONE_HALF;
         Locale locale = Functions.getCurrentLocale();
-        String formattedDelta = String.format(locale, "%+.2f",
+        String formattedDelta = String.format(locale, "%+.2f%%",
                 fraction.multiplyBy(Fraction.getFraction(100)).doubleValue());
 
         assertThat(FractionFormatter.formatDeltaFraction(fraction, locale)).isEqualTo(formattedDelta);
@@ -47,7 +47,7 @@ class FractionFormatterTest {
     void shouldFormatDeltaPercentage() {
         Fraction fraction = Fraction.ONE_HALF;
         Locale locale = Functions.getCurrentLocale();
-        String formattedDelta = String.format(locale, "%+.2f", fraction.doubleValue());
+        String formattedDelta = String.format(locale, "%+.2f%%", fraction.doubleValue());
 
         assertThat(FractionFormatter.formatDeltaPercentage(fraction, locale)).isEqualTo(formattedDelta);
     }

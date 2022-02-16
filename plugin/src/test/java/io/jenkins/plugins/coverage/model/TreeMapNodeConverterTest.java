@@ -4,11 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.TreeMapNode;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
 
 import static org.assertj.core.api.Assertions.*;
 

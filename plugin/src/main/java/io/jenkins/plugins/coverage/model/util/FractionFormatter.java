@@ -5,7 +5,8 @@ import java.util.Locale;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
- * Formats fractions and percentages represented by {@link Fraction}.
+ * Formats fraction and percentage values represented by {@link Fraction} and provides these values as formatted
+ * percentages dependent on the use case.
  *
  * @author Florian Orendi
  */
@@ -44,8 +45,8 @@ public class FractionFormatter {
     }
 
     /**
-     * Formats a delta fraction to its plain text percentage representation with a leading sign and rounds the value to two
-     * decimals.
+     * Formats a delta fraction to its plain text percentage representation with a leading sign and rounds the value to
+     * two decimals.
      *
      * @param fraction
      *         The fraction to be formatted
@@ -55,7 +56,7 @@ public class FractionFormatter {
      * @return the formatted delta fraction as plain text with a leading sign
      */
     public static String formatDeltaFraction(final Fraction fraction, final Locale locale) {
-        return String.format(locale, "%+.2f", transformFractionToPercentage(fraction).doubleValue());
+        return String.format(locale, "%+.2f%%", transformFractionToPercentage(fraction).doubleValue());
     }
 
     /**
@@ -70,6 +71,6 @@ public class FractionFormatter {
      * @return the formatted delta percentage as plain text with a leading sign
      */
     public static String formatDeltaPercentage(final Fraction percentage, final Locale locale) {
-        return String.format(locale, "%+.2f", percentage.doubleValue());
+        return String.format(locale, "%+.2f%%", percentage.doubleValue());
     }
 }
