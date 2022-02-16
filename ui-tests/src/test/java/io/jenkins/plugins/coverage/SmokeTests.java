@@ -29,7 +29,7 @@ public class SmokeTests extends UiTest {
         expectedCoverageFifthBuild.put("Branch", 93.97);
         List<Double> expectedReferenceCoverageFifthBuild = new ArrayList<>();
         expectedReferenceCoverageFifthBuild.add(-4.5);
-        expectedReferenceCoverageFifthBuild.add(5.4);
+        expectedReferenceCoverageFifthBuild.add(5.38);
 
         CoverageSummaryTest.verifySummaryWithReferenceBuild(secondBuild, expectedCoverageFifthBuild,
                 expectedReferenceCoverageFifthBuild);
