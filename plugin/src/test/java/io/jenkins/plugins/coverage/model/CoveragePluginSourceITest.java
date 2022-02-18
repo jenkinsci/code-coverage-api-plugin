@@ -16,6 +16,8 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 
+import edu.hm.hafner.util.PathUtil;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -50,6 +52,7 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
     private static final String SOURCE_FILE = "AcuCobolParser.java.txt";
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
+    private static final PathUtil PATH_UTIL = new PathUtil();
 
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
@@ -77,8 +80,8 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
     }
 
     private String createSingleDirectory(final Run<?, ?> workspace) {
-        return String.format("%s/src/main/java",
-                getWorkspace((TopLevelItem) workspace.getParent()).getRemote());
+        return PATH_UTIL.getAbsolutePath(String.format("%s/src/main/java",
+                getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
     }
 
     /** Verifies that the plugin reads source code in external but approved directories. */
