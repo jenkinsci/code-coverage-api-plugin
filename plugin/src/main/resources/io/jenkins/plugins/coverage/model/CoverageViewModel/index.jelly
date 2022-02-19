@@ -34,7 +34,7 @@
 
       <div class="col d-flex">
 
-        <bs:card title="${%Coverage details}" fontAwesomeIcon="search-plus" class="flex-fill">
+        <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass-plus" class="flex-fill">
           <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
 
             <li class="nav-item">
