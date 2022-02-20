@@ -1,15 +1,17 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.util.SerializableTest;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
+import io.jenkins.plugins.coverage.model.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction.CoverageXmlStream;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -28,7 +30,8 @@ class CoverageXmlStreamTest extends SerializableTest<CoverageNode> {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("unused");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
-            CoverageResult result = parser.getResult(getResourceAsFile("jacoco-codingstyle.xml").toFile());
+            CoverageResult result = parser.getResult(getResourceAsFile(
+                    Paths.get("..", "jacoco-codingstyle.xml").toString()).toFile());
             result.stripGroup();
 
             return new CoverageNodeConverter().convert(result);

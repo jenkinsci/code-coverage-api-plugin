@@ -278,7 +278,7 @@ const CoverageChartGenerator = function ($) {
                         }
                     },
                     width: '100%',
-                    height: '95%',
+                    height: '100%',
                     top: 'top',
                     label: {
                         show: true,
@@ -304,6 +304,11 @@ const CoverageChartGenerator = function ($) {
         window.addEventListener('resize', function () {
             treeChart.resize();
         });
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
+            treeChart.resize();
+        });
+
+        treeChart.resize();
     }
 
     function redrawTrendChart() {
@@ -328,6 +333,24 @@ const CoverageChartGenerator = function ($) {
 
             redrawTrendChart();
         });
+
+        viewProxy.getCoverageTree(function (t) {
+            createFilesTreeMap(t.responseObject(), 'coverage-details');
+        });
+
+        // only required when the change-coverage div is visible
+        if (document.getElementById('change-coverage')) {
+            viewProxy.getChangeCoverageTree(function (t) {
+                createFilesTreeMap(t.responseObject(), 'change-coverage');
+            });
+        }
+
+        // only required when the coverage-changes div is visible
+        if (document.getElementById('coverage-changes')) {
+            viewProxy.getCoverageChangesTree(function (t) {
+                createFilesTreeMap(t.responseObject(), 'coverage-changes');
+            });
+        }
 
         /**
          * Activate the tab that has been visited the last time. If there is no such tab, highlight the first one.
@@ -355,10 +378,6 @@ const CoverageChartGenerator = function ($) {
             const activeTab = $(e.target).attr('href');
             localStorage.setItem('activeTab', activeTab);
         });
-
-        viewProxy.getCoverageTree(function (t) {
-            createFilesTreeMap(t.responseObject(), 'coverage-details');
-        });
     }
 
     /**
@@ -372,10 +391,40 @@ const CoverageChartGenerator = function ($) {
 
         if (selectedTab.length !== 0) {
             const tab = new bootstrap5.Tab(selectedTab[0]);
-            tab.show();
+            tab.show(function () {
+                $(this).trigger('fireResizeEvent');
+            });
         }
     }
 
+    this.hideOverviewColumn = function () {
+        const div = document.getElementById("overview-column");
+        const divTree = document.getElementById("tree-column");
+        const button = $("#hide-button")
+        if (div.style.display === "none") {
+            div.style.display = "block";
+            divTree.classList.add("ms-3")
+            button.text('Hide overview')
+            redrawTrendChart();
+        } else {
+            div.style.display = "none";
+            divTree.classList.remove("ms-3")
+            button.text('Show overview')
+        }
+        this.fireResizeEvent();
+    }
+
+    this.fireResizeEvent = function () {
+        if (typeof(Event) === 'function') {
+            // for modern browsers
+            window.dispatchEvent(new Event('resize'));
+        } else {
+            // for IE and other old browsers
+            const event = window.document.createEvent('UIEvents');
+            event.initUIEvent('resize', true, false, window, 0);
+            window.dispatchEvent(event);
+        }
+    }
 
     this.populateOverview = function () {
         viewProxy.getOverview(function (t) {

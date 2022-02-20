@@ -22,4 +22,16 @@ public class PackageCoverageNode extends CoverageNode {
     public String getPath() {
         return mergePath(getName().replaceAll("\\.", "/"));
     }
+
+    @Override
+    public PackageCoverageNode copyTree(final CoverageNode copiedParent) {
+        PackageCoverageNode copy = new PackageCoverageNode(getName());
+        if (copiedParent != null) {
+            copy.setParent(copiedParent);
+        }
+
+        copyChildrenAndLeaves(this, copy);
+
+        return copy;
+    }
 }

@@ -45,6 +45,7 @@ import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.CoverageReporter;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -132,8 +133,9 @@ public class CoverageProcessor {
 
         // Transform the old model to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
-        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
-                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention(), healthReport);
+        SourceCodeProperties sourceCodeProperties =
+                new SourceCodeProperties(sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, sourceCodeProperties, healthReport);
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {

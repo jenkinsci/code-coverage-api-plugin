@@ -1,10 +1,14 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization;
+
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.model.CoverageViewModel.CoverageOverview;
+import io.jenkins.plugins.coverage.model.AbstractCoverageTest;
+import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel.CoverageOverview;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceViewModel;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
@@ -47,6 +51,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     }
 
     private CoverageViewModel createModel() {
-        return new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
+        return new CoverageViewModel(mock(Run.class),
+                readNode(Paths.get("..", "jacoco-codingstyle.xml").toString()));
     }
 }

@@ -1,11 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.IOException;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -17,14 +13,12 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.model.SourceCodeFacade.AgentCoveragePainter;
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+import io.jenkins.plugins.coverage.model.coverage.FileCoverageProcessor;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
-import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
-import io.jenkins.plugins.prism.PrismConfiguration;
-import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
 /**
@@ -46,12 +40,8 @@ public class CoverageReporter {
      *         the workspace on the agent that provides access to the source code files
      * @param listener
      *         logger
-     * @param requestedSourceDirectories
-     *         the source directories that have been configured in the associated job
-     * @param sourceCodeEncoding
-     *         the encoding of the source code files
-     * @param sourceCodeRetention
-     *         the source code retention strategy
+     * @param sourceCodeProperties
+     *         wraps the required properties for processing source code painting
      * @param healthReport
      *         health report
      *
@@ -60,8 +50,7 @@ public class CoverageReporter {
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
-            final SourceCodeRetention sourceCodeRetention, final HealthReport healthReport)
+            final TaskListener listener, final SourceCodeProperties sourceCodeProperties, final HealthReport healthReport)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -72,23 +61,6 @@ public class CoverageReporter {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
-        SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
-        if (sourceCodeRetention != SourceCodeRetention.NEVER) {
-            Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
-            log.logInfo("Painting %d source files on agent", paintedFiles.size());
-            logHandler.log(log);
-
-            paintFilesOnAgent(workspace, paintedFiles, requestedSourceDirectories, sourceCodeEncoding, log);
-            log.logInfo("Copying painted sources from agent to build folder");
-            logHandler.log(log);
-
-            sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
-            logHandler.log(log);
-        }
-        sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
-
-        logHandler.log(log);
-
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
         logHandler.log(log);
@@ -96,34 +68,32 @@ public class CoverageReporter {
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
-            SortedMap<CoverageMetric, Fraction> delta = rootNode.computeDelta(referenceAction.getResult());
 
-            action = new CoverageBuildAction(build, rootNode, healthReport, referenceAction.getOwner().getExternalizableId(), delta);
+            CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener);
+            codeDeltaCalculator.calculateCodeDeltaInTree(referenceAction.getOwner(), rootNode, log);
+            logHandler.log(log);
+
+            SortedMap<CoverageMetric, Fraction> delta = rootNode.computeDelta(referenceAction.getResult());
+            FileCoverageProcessor fileCoverageProcessor = new FileCoverageProcessor();
+            fileCoverageProcessor.attachUnexpectedCoveragesChanges(rootNode, referenceAction.getResult(), log);
+            logHandler.log(log);
+
+            CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
+            CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
+
+            action = new CoverageBuildAction(build, rootNode, healthReport,
+                    referenceAction.getOwner().getExternalizableId(), delta, changeCoverageRoot.getMetricPercentages());
         }
         else {
             action = new CoverageBuildAction(build, rootNode, healthReport);
         }
+
+        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace, sourceCodeProperties);
+        sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), log);
+
+        logHandler.log(log);
+
         build.addOrReplaceAction(action);
-    }
-
-    private void paintFilesOnAgent(final FilePath workspace, final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
-            final Set<String> requestedSourceDirectories,
-            final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
-        try {
-            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
-                    .getSourceDirectories()
-                    .stream()
-                    .map(PermittedSourceCodeDirectory::getPath)
-                    .collect(Collectors.toSet());
-
-            FilteredLog agentLog = workspace.act(
-                    new AgentCoveragePainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
-                            sourceCodeEncoding, "coverage"));
-            log.merge(agentLog);
-        }
-        catch (IOException exception) {
-            log.logException(exception, "Can't paint and zip sources on the agent");
-        }
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

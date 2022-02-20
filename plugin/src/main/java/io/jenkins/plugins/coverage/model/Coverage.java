@@ -172,6 +172,10 @@ public final class Coverage implements Serializable {
         return getTotal() > 0;
     }
 
+    public Coverage copy() {
+        return new Coverage(covered, missed);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
