@@ -1,6 +1,10 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.tree;
 
 import edu.hm.hafner.echarts.TreeMapNode;
+
+import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoverageNode;
 
 /**
  * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeMapNode ECharts tree
@@ -8,8 +12,9 @@ import edu.hm.hafner.echarts.TreeMapNode;
  *
  * @author Ullrich Hafner
  */
-class TreeMapNodeConverter {
-    TreeMapNode toTeeChartModel(final CoverageNode node) {
+public class TreeMapNodeConverter {
+
+    public TreeMapNode toTeeChartModel(final CoverageNode node) {
         TreeMapNode root = toTreeMapNode(node);
         for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();

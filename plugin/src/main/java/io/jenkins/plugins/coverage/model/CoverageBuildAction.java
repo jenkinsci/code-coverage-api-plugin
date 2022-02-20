@@ -27,6 +27,8 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -42,11 +44,13 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
     private static final long serialVersionUID = -6023811049340671399L;
 
-    static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
+    private static final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
+
+    public static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
     private static final String NO_REFERENCE_BUILD = "-";
 
     /** Relative URL to the details of the code coverage results. */
-    static final String DETAILS_URL = "coverage";
+    public static final String DETAILS_URL = "coverage";
 
     private final HealthReport healthReport;
 
@@ -54,7 +58,11 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final Coverage branchCoverage;
 
     private final String referenceBuildId;
-    private SortedMap<CoverageMetric, Fraction> difference; // since 3.0.0
+
+    // since 3.0.0
+    private SortedMap<CoverageMetric, Fraction> difference;
+    private SortedMap<CoverageMetric, Fraction> changeCoverage;
+
     @SuppressWarnings("unused")
     private final transient SortedMap<CoverageMetric, Double> delta = new TreeMap<>(); // not used anymore
 
@@ -69,7 +77,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         health report
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport) {
-        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>());
+        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>());
     }
 
     /**
@@ -87,13 +95,15 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the ID of the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final HealthReport healthReport, final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta) {
-        this(owner, result, healthReport, referenceBuildId, delta, true);
+            final HealthReport healthReport, final String referenceBuildId,
+            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage) {
+        this(owner, result, healthReport, referenceBuildId, delta, changeCoverage, true);
     }
 
     @VisibleForTesting
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
-            final HealthReport healthReport, final String referenceBuildId, final SortedMap<CoverageMetric, Fraction> delta,
+            final HealthReport healthReport, final String referenceBuildId,
+            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
@@ -101,6 +111,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         branchCoverage = result.getCoverage(CoverageMetric.BRANCH);
 
         this.difference = delta;
+        this.changeCoverage = changeCoverage;
         this.referenceBuildId = referenceBuildId;
         this.healthReport = healthReport;
     }
@@ -109,6 +120,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     protected Object readResolve() {
         if (difference == null) {
             difference = StreamEx.of(delta.entrySet()).toSortedMap(Entry::getKey, e -> Fraction.getFraction(e.getValue()));
+        }
+        if (changeCoverage == null) {
+            changeCoverage = new TreeMap<>();
         }
         return super.readResolve();
     }
@@ -184,6 +198,18 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return Messages.Coverage_Not_Available();
     }
 
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatChangeCoverage(final CoverageMetric metric) {
+        String coverage = Messages.Coverage_Not_Available();
+        if (changeCoverage != null && changeCoverage.containsKey(metric)) {
+            Locale clientLocale = Functions.getCurrentLocale();
+            coverage = String.format(clientLocale, "%.2f%%",
+                    changeCoverage.get(metric).multiplyBy(Fraction.getFraction(100)).doubleValue());
+
+        }
+        return metric.getName() + ": " + coverage;
+    }
+
     /**
      * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
      * respect to the reference build).
@@ -195,7 +221,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatCoverage(final CoverageMetric metric) {
-        return getResult().printCoverageFor(metric, Functions.getCurrentLocale());
+        String coverage = getResult().printCoverageFor(metric, Functions.getCurrentLocale());
+        return metric.getName() + ": " + coverage;
     }
 
     @Override
@@ -204,7 +231,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     @Override
-    protected CoverageJobAction createProjectAction() {
+    public CoverageJobAction createProjectAction() {
         return new CoverageJobAction(getOwner().getParent());
     }
 
@@ -265,8 +292,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         }
     }
 
-    static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
-        CoverageXmlStream() {
+    public static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
+        public CoverageXmlStream() {
             super(CoverageNode.class);
         }
 
@@ -274,6 +301,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         protected void configureXStream(final XStream2 xStream) {
             xStream.alias("node", CoverageNode.class);
             xStream.alias("leaf", CoverageLeaf.class);
+            xStream.alias("coverage", Coverage.class);
             xStream.addImmutableType(CoverageMetric.class, false);
             xStream.registerConverter(new MetricsConverter());
         }

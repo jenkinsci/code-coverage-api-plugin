@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.charts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +10,11 @@ import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
+
+import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.visualization.charts.CoverageSeriesBuilder;
+import io.jenkins.plugins.coverage.model.visualization.charts.CoverageTrendChart;
 
 import static io.jenkins.plugins.coverage.model.ResultStubs.*;
 import static org.assertj.core.api.Assertions.*;

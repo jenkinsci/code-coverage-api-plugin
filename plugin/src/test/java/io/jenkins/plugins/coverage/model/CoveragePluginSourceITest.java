@@ -31,6 +31,7 @@ import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceViewModel;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;

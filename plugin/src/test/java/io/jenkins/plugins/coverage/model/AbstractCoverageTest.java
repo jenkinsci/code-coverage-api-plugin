@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import edu.hm.hafner.util.ResourceTest;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
@@ -34,7 +33,7 @@ public class AbstractCoverageTest extends ResourceTest {
         Locale.setDefault(Locale.ENGLISH);
     }
 
-    CoverageResult readResult(final String fileName) {
+    public CoverageResult readResult(final String fileName) {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("unused");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
@@ -47,7 +46,7 @@ public class AbstractCoverageTest extends ResourceTest {
         }
     }
 
-    CoverageNode readNode(final String fileName) {
+    public CoverageNode readNode(final String fileName) {
         return new CoverageNodeConverter().convert(readResult(fileName));
     }
 

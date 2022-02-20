@@ -1,0 +1,110 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts" xmlns:fa="/font-awesome">
+
+  <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
+
+  <bs:page it="${it}" class="fluid-container d-flex flex-column h-100">
+
+    <st:adjunct includes="io.jenkins.plugins.echarts"/>
+    <st:adjunct includes="io.jenkins.plugins.data-tables"/>
+
+    <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
+    <link rel="stylesheet" href="${resURL}/plugin/font-awesome-api/css/jenkins-style.css"/>
+
+    <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
+
+    <div class="justify-content-md-start">
+      <button id="hide-button" type="button" class="btn btn-light"
+              onclick="coverageChartGenerator.hideOverviewColumn()" title="Hide/Show coverage overview charts">
+        Hide overview
+      </button>
+    </div>
+    <div class="d-flex flex-grow-1 mt-3">
+      <div id="overview-column" class="col-4 flex-column flex-nowrap" style="min-width: 500px;">
+        <div>
+          <bs:card title="${%Coverage overview}" fontAwesomeIcon="chart-bar" class="flex-fill">
+            <div id="coverage-overview" class="graph-cursor-pointer card-chart"/>
+          </bs:card>
+        </div>
+        <div class="mt-3">
+          <bs:card title="${%Coverage trend}" fontAwesomeIcon="chart-line" class="flex-fill">
+            <div id="coverage-trend" class="graph-cursor-pointer card-chart"/>
+          </bs:card>
+        </div>
+      </div>
+
+      <div id="tree-column" class="col-8 flex-column flex-nowrap flex-fill ms-3" style="min-width: 500px;">
+        <bs:card title="${%Coverage details}" fontAwesomeIcon="search-plus"
+                 class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
+          <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
+            <li class="nav-item" id="coverageTreeNav">
+              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTree">Project Coverage</a>
+            </li>
+            <j:if test="${it.getNode().hasChangeCoverage()}">
+              <li class="nav-item" id="changeCoverageTreeNav">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTree">Change Coverage</a>
+              </li>
+            </j:if>
+            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+              <li class="nav-item" id="coverageChangesTreeNav">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTree">Coverage Changes</a>
+              </li>
+            </j:if>
+            <li class="nav-item">
+              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
+            </li>
+            <j:if test="${it.getNode().hasChangeCoverage()}">
+              <li class="nav-item">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">File Change Coverage
+                </a>
+              </li>
+            </j:if>
+            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+              <li class="nav-item">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">File Coverage Changes
+                </a>
+              </li>
+            </j:if>
+          </ul>
+          <div class="tab-content flex-grow-1">
+            <div role="tabpanel" id="coverageTree" class="tab-pane fade h-100">
+              <div id="coverage-details" class="graph-cursor-pointer details-chart h-100"/>
+            </div>
+            <j:if test="${it.getNode().hasChangeCoverage()}">
+              <div role="tabpanel" id="changeCoverageTree" class="tab-pane fade h-100">
+                <div id="change-coverage" class="graph-cursor-pointer details-chart h-100"/>
+              </div>
+            </j:if>
+            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+              <div role="tabpanel" id="coverageChangesTree" class="tab-pane fade h-100">
+                <div id="coverage-changes" class="graph-cursor-pointer details-chart h-100"/>
+              </div>
+            </j:if>
+            <div role="tabpanel" id="coverageTable" class="tab-pane fade">
+              <dt:table model="${it.getTableModel('coverage-details')}"/>
+            </div>
+            <j:if test="${it.getNode().hasChangeCoverage()}">
+              <div role="tabpanel" id="changeCoverageTable" class="tab-pane fade">
+                <dt:table model="${it.getTableModel('change-coverage-details')}"/>
+              </div>
+            </j:if>
+            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+              <div role="tabpanel" id="coverageChangesTable" class="tab-pane fade">
+                <dt:table model="${it.getTableModel('coverage-changes-details')}"/>
+              </div>
+            </j:if>
+          </div>
+        </bs:card>
+      </div>
+    </div>
+  </bs:page>
+
+  <c:chart-setup id="coverage-history"/>
+
+  <script>
+    const viewProxy =<st:bind value="${it}"/>;
+    const coverageChartGenerator = new CoverageChartGenerator(jQuery3);
+    coverageChartGenerator.populateDetailsCharts();
+  </script>
+
+</j:jelly>

@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.code;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import hudson.model.Run;
 import hudson.util.TextFile;
+
+import io.jenkins.plugins.coverage.model.Messages;
+import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 
 /**
  * Server side model that provides the data for the source code view of the coverage results. The layout of the

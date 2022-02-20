@@ -60,7 +60,7 @@ public class CoverageNode implements Serializable {
         this.name = name;
     }
 
-    CoverageNode getParent() {
+    public CoverageNode getParent() {
         if (parent == null) {
             throw new IllegalStateException("Parent is not set");
         }
@@ -77,15 +77,24 @@ public class CoverageNode implements Serializable {
     }
 
     protected String mergePath(final String localPath) {
+        // mind that default packages are named '-'
         if (hasParent()) {
             String parentPath = getParent().getPath();
+
             if (StringUtils.isBlank(parentPath)) {
+                if (localPath.equals("-")) {
+                    return StringUtils.EMPTY;
+                }
                 return localPath;
             }
             if (StringUtils.isBlank(localPath)) {
                 return parentPath;
             }
             return parentPath + "/" + localPath;
+        }
+
+        if (localPath.equals("-")) {
+            return StringUtils.EMPTY;
         }
 
         return localPath;
@@ -153,6 +162,10 @@ public class CoverageNode implements Serializable {
 
     public List<CoverageNode> getChildren() {
         return children;
+    }
+
+    public List<CoverageLeaf> getLeaves() {
+        return leaves;
     }
 
     private void addAll(final List<CoverageNode> nodes) {
@@ -414,6 +427,19 @@ public class CoverageNode implements Serializable {
         }
     }
 
+    public boolean hasChangeCoverage() {
+        return getAll(CoverageMetric.FILE).stream()
+                .map(node -> (FileCoverageNode) node)
+                .anyMatch(node -> node.getCoveragePerLine().keySet().stream()
+                        .anyMatch(line -> node.getChangedCodeLines().contains(line)));
+    }
+
+    public boolean hasUnexpectedCoverageChanges() {
+        return getAll(CoverageMetric.FILE).stream()
+                .map(node -> (FileCoverageNode) node)
+                .anyMatch(node -> !node.getUnexpectedCoverageChanges().isEmpty());
+    }
+
     private void insertPackage(final CoverageNode aPackage, final Deque<String> packageLevels) {
         String nextLevelName = packageLevels.pop();
         CoverageNode subPackage = createChild(nextLevelName);
@@ -435,6 +461,30 @@ public class CoverageNode implements Serializable {
         CoverageNode newNode = new PackageCoverageNode(childName);
         add(newNode);
         return newNode;
+    }
+
+    public CoverageNode copyTree() {
+        return copyTree(null);
+    }
+
+    protected CoverageNode copyTree(final CoverageNode copiedParent) {
+        CoverageNode copy = new CoverageNode(metric, name);
+        if (copiedParent != null) {
+            copy.setParent(copiedParent);
+        }
+
+        copyChildrenAndLeaves(this, copy);
+
+        return copy;
+    }
+
+    protected void copyChildrenAndLeaves(final CoverageNode from, final CoverageNode to) {
+        to.getChildren().addAll(from.getChildren().stream()
+                .map(node -> node.copyTree(from))
+                .collect(Collectors.toList()));
+        to.getLeaves().addAll(from.getLeaves().stream()
+                .map(CoverageLeaf::copyLeaf)
+                .collect(Collectors.toList()));
     }
 
     public void setUncoveredLines(final int... uncoveredLines) {

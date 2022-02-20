@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +26,15 @@ import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.Messages;
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceViewModel;
+import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -47,6 +56,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
     private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
+
+    final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -102,6 +113,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
     }
 
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public TreeMapNode getChangeCoverageTree() {
+        CoverageNode changeCoverageTree = COVERAGE_CALCULATOR.createChangeCoverageTree(getNode());
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTree);
+    }
+
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public TreeMapNode getCoverageChangesTree() {
+        CoverageNode coverageChangesTree = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(getNode());
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(coverageChangesTree);
+    }
+
     /**
      * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
      * is shown in the view, so the ID is not used.
@@ -113,7 +138,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @Override
     public TableModel getTableModel(final String tableId) {
-        return new CoverageTableModel(getNode(), getOwner().getRootDir(), id);
+        CoverageNode root = getNode();
+        if (tableId.equals("change-coverage-details")) {
+            root = COVERAGE_CALCULATOR.createChangeCoverageTree(root);
+        } else if (tableId.equals("coverage-changes-details")) {
+            root = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(root);
+        }
+        return new CoverageTableModel(root, getOwner().getRootDir(), tableId);
     }
 
     private LinesChartModel createTrendChart(final String configuration) {
@@ -223,7 +254,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return the file
      */
-    static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
+    public static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
         return new File(new File(buildFolder, "coverage-sources"), sanitizeFilename(fileName));
     }
 
@@ -305,7 +336,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         @Override
         public String getId() {
-            return "coverage-details";
+            return id;
         }
 
         @Override
@@ -326,7 +357,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, id, browserLocale)).collect(Collectors.toList());
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, id, browserLocale))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -348,7 +380,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public String getFileName() {
             String fileName = root.getName();
-            if (isSourceFileInNewFormatAvailable(buildFolder, id, root.getPath())
+            if (isSourceFileInNewFormatAvailable(buildFolder, "coverage", root.getPath())
                     || isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
                 return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
             }

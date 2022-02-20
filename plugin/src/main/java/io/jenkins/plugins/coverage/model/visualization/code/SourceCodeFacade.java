@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.code;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,6 +25,7 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
+import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
@@ -119,7 +120,7 @@ public class SourceCodeFacade {
      *
      * @return the file
      */
-    File createFileInBuildFolder(final File buildResults, final String id, final String path) {
+    public File createFileInBuildFolder(final File buildResults, final String id, final String path) {
         File sourceFolder = new File(buildResults, COVERAGE_SOURCES_DIRECTORY);
         File elementFolder = new File(sourceFolder, id);
 
@@ -256,7 +257,7 @@ public class SourceCodeFacade {
                     List<String> lines = Files.readAllLines(Paths.get(resolvedPath.getRemote()), charset);
                     for (int line = 0; line < lines.size(); line++) {
                         String content = lines.get(line);
-                        paintLine(line, content, paint, output);
+                        paintLine(line + 1, content, paint, output);
                     }
                     paint.setTotalLines(lines.size());
                 }
@@ -277,7 +278,7 @@ public class SourceCodeFacade {
                 final int branchCoverage = paint.getBranchCoverage(line);
                 final int branchTotal = paint.getBranchTotal(line);
                 final int coveragePercent = (hits == 0) ? 0 : (int) (branchCoverage * 100.0 / branchTotal);
-                if (paint.getHits(line) > 0) {
+                if (hits > 0) {
                     if (branchTotal == branchCoverage) {
                         output.write("<tr class=\"coverFull\">\n");
                     }

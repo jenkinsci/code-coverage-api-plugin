@@ -8,6 +8,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.Messages;
+import io.jenkins.plugins.coverage.model.visualization.charts.CoverageTrendChart;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
 /**
@@ -47,7 +48,7 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
     }
 
     @Override
-    protected LinesChartModel createChartModel(final String configuration) {
+    public LinesChartModel createChartModel(final String configuration) {
         return createChart(createBuildHistory(), configuration);
     }
 

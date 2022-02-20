@@ -1,9 +1,11 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.charts;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.hm.hafner.echarts.SeriesBuilder;
+
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
 /**
  * Builds one x-axis point for the series of a line chart showing the line and branch coverage of a project.

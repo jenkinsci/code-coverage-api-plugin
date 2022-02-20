@@ -46,6 +46,10 @@ public final class CoverageLeaf implements Serializable {
         return Coverage.NO_COVERAGE;
     }
 
+    public CoverageLeaf copyLeaf() {
+        return new CoverageLeaf(metric, coverage.copy());
+    }
+
     @Override
     public String toString() {
         return String.format("[%s]: %s", metric, coverage);

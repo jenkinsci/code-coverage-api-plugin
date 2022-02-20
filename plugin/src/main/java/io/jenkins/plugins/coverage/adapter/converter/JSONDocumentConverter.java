@@ -1,8 +1,10 @@
 package io.jenkins.plugins.coverage.adapter.converter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.jenkins.plugins.coverage.exception.CoverageException;
 import org.w3c.dom.Document;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jenkins.plugins.coverage.exception.CoverageException;
 
 public abstract class JSONDocumentConverter extends DocumentConverter<JsonNode> {
 

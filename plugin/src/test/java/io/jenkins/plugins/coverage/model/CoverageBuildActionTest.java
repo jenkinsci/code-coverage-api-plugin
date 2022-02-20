@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import hudson.model.HealthReport;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -23,8 +25,10 @@ class CoverageBuildActionTest {
         Run<?, ?> build = mock(Run.class);
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
         SortedMap<CoverageMetric, Fraction> metrics = new TreeMap<>();
+        SortedMap<CoverageMetric, Fraction> changeCoverage = new TreeMap<>();
 
-        CoverageBuildAction action = new CoverageBuildAction(build, root, new HealthReport(), "-", metrics, false);
+        CoverageBuildAction action =
+                new CoverageBuildAction(build, root, new HealthReport(), "-", metrics, changeCoverage, false);
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
