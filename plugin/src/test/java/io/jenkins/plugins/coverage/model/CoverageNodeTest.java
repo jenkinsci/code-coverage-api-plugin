@@ -27,6 +27,13 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldReturnEmptyCoverageIfNotFound() {
+        CoverageNode root = readExampleReport();
+
+        assertThat(root.getCoverage(CoverageMetric.valueOf("new"))).isNotSet();
+    }
+
+    @Test
     void shouldSplitPackagesWithoutPackageNodes() {
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "Root");
         assertThat(root.getAll(PACKAGE)).hasSize(0);

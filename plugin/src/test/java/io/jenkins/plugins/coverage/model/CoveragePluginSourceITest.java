@@ -16,6 +16,8 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 
+import edu.hm.hafner.util.PathUtil;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -51,6 +53,7 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
     private static final String SOURCE_FILE = "AcuCobolParser.java.txt";
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
+    private static final PathUtil PATH_UTIL = new PathUtil();
 
     /** Docker container for java-maven builds. Contains also git to check out from an SCM. */
     @Rule
@@ -60,20 +63,26 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
 
     /** Verifies that the plugin reads source code from the workspace root. */
     @Test
-    public void coveragePluginPipelineWithSourceCode() throws IOException {
+    public void coveragePluginPipelineWithSourceCode() {
         Run<?, ?> workspace = runCoverageWithSourceCode("", "");
-        assertThat(getConsoleLog(workspace)).contains(
-                String.format("Searching for source code files in root of workspace '%s'",
-                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+
+        assertThat(getConsoleLog(workspace)).contains(createSingleMessage(workspace));
+    }
+
+    private String createSingleMessage(final Run<?, ?> workspace) {
+        return String.format("Searching for source code files in '%s'", createSingleDirectory(workspace));
     }
 
     /** Verifies that the plugin reads source code in subdirectories of the workspace.  */
     @Test
-    public void coveragePluginPipelineWithSourceCodeInSubdirectory() throws IOException {
+    public void coveragePluginPipelineWithSourceCodeInSubdirectory() {
         Run<?, ?> workspace = runCoverageWithSourceCode("", "");
-        assertThat(getConsoleLog(workspace)).contains(
-                String.format("Searching for source code files in root of workspace '%s'",
-                        getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+        assertThat(getConsoleLog(workspace)).contains(createSingleMessage(workspace));
+    }
+
+    private String createSingleDirectory(final Run<?, ?> workspace) {
+        return PATH_UTIL.getAbsolutePath(String.format("%s/src/main/java",
+                getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
     }
 
     /** Verifies that the plugin reads source code in external but approved directories. */
@@ -84,8 +93,10 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
                 new PermittedSourceCodeDirectory(directory)));
 
         Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", directory);
-        assertThat(getConsoleLog(externalDirectory)).contains(
-                String.format("Searching for source code files in '%s'", directory));
+        assertThat(getConsoleLog(externalDirectory))
+                .contains("Searching for source code files in:",
+                        "-> " + createSingleDirectory(externalDirectory),
+                        "-> " + directory);
     }
 
     /** Verifies that the plugin refuses source code in directories that are not approved in Jenkins' configuration. */
