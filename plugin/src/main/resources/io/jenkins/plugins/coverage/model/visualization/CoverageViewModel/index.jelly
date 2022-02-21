@@ -34,7 +34,7 @@
       </div>
 
       <div id="tree-column" class="col-8 flex-column flex-nowrap flex-fill ms-3" style="min-width: 500px;">
-        <bs:card title="${%Coverage details}" fontAwesomeIcon="search-plus"
+        <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass"
                  class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
           <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
             <li class="nav-item" id="coverageTreeNav">
