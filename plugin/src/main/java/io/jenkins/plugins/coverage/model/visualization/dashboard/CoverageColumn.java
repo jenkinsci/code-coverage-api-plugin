@@ -21,7 +21,7 @@ import jenkins.model.Jenkins;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageType;
+import io.jenkins.plugins.coverage.model.CoverageTypeTmp;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.util.WebUtils;
@@ -40,7 +40,7 @@ public class CodeCoverageColumn extends ListViewColumn {
     static final String COVERAGE_NA_TEXT = "n/a";
 
     private String columnName = Messages.Code_Coverage_Column();
-    private String coverageType = CoverageType.PROJECT.getType();
+    private String coverageType = CoverageTypeTmp.PROJECT.getType();
     private String coverageMetric = CoverageMetric.FILE.getName();
 
     /**
@@ -107,8 +107,8 @@ public class CodeCoverageColumn extends ListViewColumn {
     public String getCoverageText(final Job<?, ?> job) {
         Optional<Fraction> coverageValue = getCoverageValue(job);
         if (coverageValue.isPresent()) {
-            final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            if (type.equals(CoverageType.PROJECT_DELTA)) {
+            final CoverageTypeTmp type = CoverageTypeTmp.getCoverageTypeOf(coverageType);
+            if (type.equals(CoverageTypeTmp.PROJECT_DELTA)) {
                 return FractionFormatter.formatDeltaPercentage(coverageValue.get(), Functions.getCurrentLocale());
             }
             return FractionFormatter.formatPercentage(coverageValue.get(), Functions.getCurrentLocale());
@@ -129,9 +129,9 @@ public class CodeCoverageColumn extends ListViewColumn {
             return Optional.empty();
         }
         CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-        final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
+        final CoverageTypeTmp type = CoverageTypeTmp.getCoverageTypeOf(coverageType);
         final Fraction coverage;
-        if (type.equals(CoverageType.PROJECT)) {
+        if (type.equals(CoverageTypeTmp.PROJECT)) {
             if (!action.hasCoverage(CoverageMetric.valueOf(coverageMetric))) {
                 return Optional.empty();
             }
@@ -139,7 +139,7 @@ public class CodeCoverageColumn extends ListViewColumn {
                     .getCoverage(CoverageMetric.valueOf(coverageMetric))
                     .getCoveredPercentage();
         }
-        else if (type.equals(CoverageType.PROJECT_DELTA)) {
+        else if (type.equals(CoverageTypeTmp.PROJECT_DELTA)) {
             if (!action.hasDelta(CoverageMetric.valueOf(coverageMetric))) {
                 return Optional.empty();
             }
@@ -164,13 +164,13 @@ public class CodeCoverageColumn extends ListViewColumn {
     public String getLineColor(final Job<?, ?> job, final Fraction coverage) {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
-            final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            if (type.equals(CoverageType.PROJECT)) {
+            final CoverageTypeTmp type = CoverageTypeTmp.getCoverageTypeOf(coverageType);
+            if (type.equals(CoverageTypeTmp.PROJECT)) {
                 color = CoverageColorizationLevel
                         .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
                         .getLineColor();
             }
-            else if (type.equals(CoverageType.PROJECT_DELTA)) {
+            else if (type.equals(CoverageTypeTmp.PROJECT_DELTA)) {
                 color = CoverageChangeTendency
                         .getCoverageTendencyOf(coverage.doubleValue()).getLineColor();
             }
@@ -197,13 +197,13 @@ public class CodeCoverageColumn extends ListViewColumn {
     public String getFillColor(final Job<?, ?> job, final Fraction coverage) {
         final Color color;
         if (hasCoverageAction(job) && coverage != null) {
-            final CoverageType type = CoverageType.getCoverageTypeOf(coverageType);
-            if (type.equals(CoverageType.PROJECT)) {
+            final CoverageTypeTmp type = CoverageTypeTmp.getCoverageTypeOf(coverageType);
+            if (type.equals(CoverageTypeTmp.PROJECT)) {
                 color = CoverageColorizationLevel
                         .getDisplayColorsOfCoveragePercentage(coverage.doubleValue())
                         .getFillColor();
             }
-            else if (type.equals(CoverageType.PROJECT_DELTA)) {
+            else if (type.equals(CoverageTypeTmp.PROJECT_DELTA)) {
                 color = CoverageChangeTendency.getCoverageTendencyOf(coverage.doubleValue()).getFillColor();
             }
             else {
@@ -222,8 +222,8 @@ public class CodeCoverageColumn extends ListViewColumn {
      * @return the relative URL or an empty string when there is no matching URL
      */
     public String getRelativeCoverageUrl() {
-        if (coverageType.equals(CoverageType.PROJECT.getType())
-                || coverageType.equals(CoverageType.PROJECT_DELTA.getType())) {
+        if (coverageType.equals(CoverageTypeTmp.PROJECT.getType())
+                || coverageType.equals(CoverageTypeTmp.PROJECT_DELTA.getType())) {
             return WebUtils.getRelativeCoverageDefaultUrl();
         }
         return "";
@@ -263,7 +263,7 @@ public class CodeCoverageColumn extends ListViewColumn {
         public ListBoxModel doFillCoverageTypeItems() {
             ListBoxModel model = new ListBoxModel();
             if (new JenkinsFacade().hasPermission(Jenkins.READ)) {
-                for (CoverageType coverageType : CoverageType.getAvailableCoverageTypes()) {
+                for (CoverageTypeTmp coverageType : CoverageTypeTmp.getAvailableCoverageTypes()) {
                     model.add(coverageType.getType());
                 }
             }

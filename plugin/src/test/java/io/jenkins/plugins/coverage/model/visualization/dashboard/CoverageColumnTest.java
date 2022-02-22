@@ -10,7 +10,7 @@ import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageType;
+import io.jenkins.plugins.coverage.model.CoverageTypeTmp;
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
 class CodeCoverageColumnTest {
 
     private static final String COLUMN_NAME = "Test Column";
-    private static final CoverageType COVERAGE_TYPE = CoverageType.PROJECT;
+    private static final CoverageTypeTmp COVERAGE_TYPE = CoverageTypeTmp.PROJECT;
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     @Test
@@ -70,7 +70,7 @@ class CodeCoverageColumnTest {
     @Test
     void shouldShowNoResultForUnknownCoverageType() {
         CodeCoverageColumn column = createColumn();
-        column.setCoverageType(CoverageType.UNDEFINED.getType());
+        column.setCoverageType(CoverageTypeTmp.UNDEFINED.getType());
 
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
 
@@ -94,7 +94,7 @@ class CodeCoverageColumnTest {
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
         assertThat(column.getCoverageValue(job)).isEmpty();
 
-        column.setCoverageType(CoverageType.PROJECT_DELTA.getType());
+        column.setCoverageType(CoverageTypeTmp.PROJECT_DELTA.getType());
 
         assertThat(column.getCoverageText(job)).isEqualTo(CodeCoverageColumn.COVERAGE_NA_TEXT);
         assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.getRelativeCoverageDefaultUrl());
@@ -131,7 +131,7 @@ class CodeCoverageColumnTest {
     @Test
     void shouldCalculateProjectCoverageDelta() {
         CodeCoverageColumn column = createColumn();
-        column.setCoverageType(CoverageType.PROJECT_DELTA.getType());
+        column.setCoverageType(CoverageTypeTmp.PROJECT_DELTA.getType());
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
         Fraction coverageDeltaPercentage = FractionFormatter.transformFractionToPercentage(coverageDelta);
