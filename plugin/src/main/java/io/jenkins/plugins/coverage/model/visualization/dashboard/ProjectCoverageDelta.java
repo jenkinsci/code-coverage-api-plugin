@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -33,7 +34,7 @@ public class ProjectCoverageDelta extends CoverageColumnType {
     }
 
     @Override
-    public String formatCoverage(final Fraction coverage) {
-        return FractionFormatter.formatDeltaPercentage(coverage, Functions.getCurrentLocale());
+    public String formatCoverage(final Fraction coverage, final Locale locale) {
+        return FractionFormatter.formatDeltaPercentage(coverage, locale);
     }
 }

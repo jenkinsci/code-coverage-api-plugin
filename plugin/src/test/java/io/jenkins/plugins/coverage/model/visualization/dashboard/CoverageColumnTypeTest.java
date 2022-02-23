@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ class CoverageColumnTypeTest {
     protected static final Fraction COVERAGE = Fraction.getFraction(50, 1);
     protected static final Fraction COVERAGE_DELTA = Fraction.getFraction(50, 1);
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
+
+    protected static final Locale LOCALE = Locale.GERMAN;
 
     @Test
     void shouldGetDisplayName() {

@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -36,7 +37,7 @@ public abstract class CoverageColumnType {
 
     public abstract DisplayColors getDisplayColors(final Fraction coverage);
 
-    public abstract String formatCoverage(final Fraction coverage);
+    public abstract String formatCoverage(final Fraction coverage, final Locale locale);
 
     public static List<String> getAvailableCoverageTypeNames() {
         return Arrays.asList(

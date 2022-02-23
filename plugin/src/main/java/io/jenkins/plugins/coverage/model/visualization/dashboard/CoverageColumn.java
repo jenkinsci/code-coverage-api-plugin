@@ -11,6 +11,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
 import hudson.Extension;
+import hudson.Functions;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
@@ -113,7 +114,7 @@ public class CoverageColumn extends ListViewColumn {
     public String getCoverageText(final Job<?, ?> job) {
         Optional<Fraction> coverageValue = getCoverageValue(job);
         if (coverageValue.isPresent()) {
-            return selectedCoverageColumnType.formatCoverage(coverageValue.get());
+            return selectedCoverageColumnType.formatCoverage(coverageValue.get(), Functions.getCurrentLocale());
         }
         return COVERAGE_NA_TEXT;
     }

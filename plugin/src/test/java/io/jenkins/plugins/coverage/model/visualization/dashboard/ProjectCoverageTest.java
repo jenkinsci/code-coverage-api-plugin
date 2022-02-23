@@ -42,7 +42,7 @@ class ProjectCoverageTest extends CoverageColumnTypeTest {
 
     @Test
     void shouldFormatCoverage() {
-        String formattedCoverage = PROJECT_COVERAGE.formatCoverage(COVERAGE);
+        String formattedCoverage = PROJECT_COVERAGE.formatCoverage(COVERAGE, LOCALE);
         assertThat(formattedCoverage).isEqualTo("50,00%");
     }
 }
