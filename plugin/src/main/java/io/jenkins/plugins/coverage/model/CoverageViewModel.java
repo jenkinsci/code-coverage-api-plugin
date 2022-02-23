@@ -26,6 +26,8 @@ import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
@@ -45,7 +47,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
     private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
-    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
+    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
+    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter(COLOR_PROVIDER);
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
 
     private final Run<?, ?> owner;

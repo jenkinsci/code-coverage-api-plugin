@@ -131,7 +131,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if a coverage is available for the specified metric
      */
     public boolean hasCoverage(final CoverageMetric coverageMetric) {
-        return getResult().getCoverage(coverageMetric) != null;
+        return getResult().getCoverage(coverageMetric).isSet();
     }
 
     /**

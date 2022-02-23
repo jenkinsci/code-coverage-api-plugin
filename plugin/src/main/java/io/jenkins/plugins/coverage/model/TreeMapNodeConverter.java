@@ -3,8 +3,8 @@ package io.jenkins.plugins.coverage.model;
 import edu.hm.hafner.echarts.TreeMapNode;
 
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 /**
  * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeMapNode ECharts tree map
@@ -13,6 +13,13 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColo
  * @author Ullrich Hafner
  */
 class TreeMapNodeConverter {
+
+    private final ColorProvider colorProvider;
+
+    TreeMapNodeConverter(final ColorProvider colorProvider) {
+        this.colorProvider = colorProvider;
+    }
+
     TreeMapNode toTeeChartModel(final CoverageNode node) {
         TreeMapNode root = toTreeMapNode(node);
         for (TreeMapNode child : root.getChildren()) {
@@ -29,11 +36,9 @@ class TreeMapNodeConverter {
                 .transformFractionToPercentage(coverage.getCoveredPercentage())
                 .doubleValue();
 
-        String color = ColorUtils.colorAsHex(
-                CoverageColorizationLevel
-                        .getDisplayColorsOfCoveragePercentage(coveragePercentage)
-                        .getFillColor()
-        );
+        String color = CoverageLevel
+                .getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider)
+                .getFillColorAsHex();
 
         TreeMapNode treeNode = new TreeMapNode(node.getName(), color, coverage.getTotal(), coverage.getCovered());
         if (node.getMetric().equals(CoverageMetric.FILE)) {

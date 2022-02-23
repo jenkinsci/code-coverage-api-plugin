@@ -1,55 +1,46 @@
 package io.jenkins.plugins.coverage.model.visualization.colorization;
 
-import java.awt.*;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
-/**
- * Provides the colors which should be used for representing difference coverage change tendencies.
- *
- * @author Florian Orendi
- */
 public enum CoverageChangeTendency {
 
-    INCREASED(new Color(145, 212, 140), new Color(0, 0, 0)),
-    EQUALS(new Color(204, 231, 165), new Color(0, 0, 0)),
-    DECREASED(new Color(239, 130, 140), new Color(0, 0, 0)),
-    NA(ColorUtils.NA_FILL_COLOR, ColorUtils.NA_LINE_COLOR);
+    INCREASED(ColorId.GREEN),
+    EQUALS(ColorId.LIGHT_YELLOW),
+    DECREASED(ColorId.RED),
+    NA(ColorId.WHITE);
 
-    private final Color fillColor;
-    private final Color lineColor;
+    private final ColorId colorizationId;
 
-    CoverageChangeTendency(final Color fillColor, final Color lineColor) {
-        this.fillColor = fillColor;
-        this.lineColor = lineColor;
+    CoverageChangeTendency(final ColorId colorizationId) {
+        this.colorizationId = colorizationId;
     }
 
     /**
-     * Provides the {@link CoverageChangeTendency} which matches with the passed coverage change.
+     * Provides the {@link DisplayColors} which matches with the passed coverage change.
      *
      * @param change
      *         The coverage change
      *
      * @return the matching change level
      */
-    public static CoverageChangeTendency getCoverageTendencyOf(final Double change) {
+    public static DisplayColors getDisplayColorsForTendency(final Double change, final ColorProvider colorProvider) {
+        ColorId colorId;
         if (change == null || change.isNaN()) {
-            return NA;
+            colorId = NA.colorizationId;
         }
         else if (change > 0) {
-            return INCREASED;
+            colorId = INCREASED.colorizationId;
         }
         else if (change < 0) {
-            return DECREASED;
+            colorId = DECREASED.colorizationId;
         }
         else {
-            return EQUALS;
+            colorId = EQUALS.colorizationId;
         }
+        return colorProvider.getDisplayColorsOf(colorId);
     }
 
-    public Color getFillColor() {
-        return fillColor;
-    }
-
-    public Color getLineColor() {
-        return lineColor;
+    public ColorId getColorizationId() {
+        return colorizationId;
     }
 }

@@ -42,7 +42,6 @@ class CoverageBuildActionTest {
     void shouldGetCoverageForSpecifiedMetric() {
         CoverageBuildAction action = createCoverageBuildActionWithMocks();
         assertThat(action.hasCoverage(COVERAGE_METRIC)).isTrue();
-        assertThat(action.hasCoverage(CoverageMetric.BRANCH)).isFalse();
         assertThat(action.getCoverage(COVERAGE_METRIC))
                 .isNotNull()
                 .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));

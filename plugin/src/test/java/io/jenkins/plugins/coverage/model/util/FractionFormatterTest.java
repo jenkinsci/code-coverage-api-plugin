@@ -16,39 +16,27 @@ import static org.assertj.core.api.Assertions.*;
  */
 class FractionFormatterTest {
 
+    private final Fraction COVERAGE = Fraction.ONE_HALF;
+    private final Locale LOCALE = Functions.getCurrentLocale();
+
     @Test
     void shouldTransformFractionToPercentage() {
-        Fraction fraction = Fraction.ONE_HALF;
         Fraction percentage = Fraction.getFraction(50, 1);
-
-        assertThat(FractionFormatter.transformFractionToPercentage(fraction)).isEqualTo(percentage);
+        assertThat(FractionFormatter.transformFractionToPercentage(COVERAGE)).isEqualTo(percentage);
     }
 
     @Test
     void shouldFormatPercentage() {
-        Fraction percentage = Fraction.ONE_HALF;
-        Locale locale = Functions.getCurrentLocale();
-        String formattedPercentage = String.format(locale, "%.2f%%", percentage.doubleValue());
-
-        assertThat(FractionFormatter.formatPercentage(percentage, locale)).isEqualTo(formattedPercentage);
+        assertThat(FractionFormatter.formatPercentage(COVERAGE, LOCALE)).isEqualTo("0,50%");
     }
 
     @Test
     void shouldFormatDeltaFraction() {
-        Fraction fraction = Fraction.ONE_HALF;
-        Locale locale = Functions.getCurrentLocale();
-        String formattedDelta = String.format(locale, "%+.2f%%",
-                fraction.multiplyBy(Fraction.getFraction(100)).doubleValue());
-
-        assertThat(FractionFormatter.formatDeltaFraction(fraction, locale)).isEqualTo(formattedDelta);
+        assertThat(FractionFormatter.formatDeltaFraction(COVERAGE, LOCALE)).isEqualTo("+50,00%");
     }
 
     @Test
     void shouldFormatDeltaPercentage() {
-        Fraction fraction = Fraction.ONE_HALF;
-        Locale locale = Functions.getCurrentLocale();
-        String formattedDelta = String.format(locale, "%+.2f%%", fraction.doubleValue());
-
-        assertThat(FractionFormatter.formatDeltaPercentage(fraction, locale)).isEqualTo(formattedDelta);
+        assertThat(FractionFormatter.formatDeltaPercentage(COVERAGE, LOCALE)).isEqualTo("+0,50%");
     }
 }

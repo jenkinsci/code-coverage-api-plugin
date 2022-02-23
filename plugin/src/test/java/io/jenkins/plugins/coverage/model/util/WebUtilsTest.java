@@ -13,6 +13,6 @@ class WebUtilsTest {
 
     @Test
     void shouldProvideRelativeCoverageDefaultUrl() {
-        assertThat(WebUtils.getRelativeCoverageDefaultUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
+        assertThat(WebUtils.COVERAGE_DEFAULT_URL).isEqualTo("coverage");
     }
 }

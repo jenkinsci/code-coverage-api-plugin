@@ -14,14 +14,5 @@ public class WebUtils {
     /**
      * Relative URL for accessing the default page of the coverage report of a build.
      */
-    static final String COVERAGE_DEFAULT_URL = "coverage";
-
-    /**
-     * Provides the relative URL for accessing the default page of the coverage report of a build.
-     *
-     * @return the relative URL
-     */
-    public static String getRelativeCoverageDefaultUrl() {
-        return COVERAGE_DEFAULT_URL;
-    }
+    public static final String COVERAGE_DEFAULT_URL = "coverage";
 }

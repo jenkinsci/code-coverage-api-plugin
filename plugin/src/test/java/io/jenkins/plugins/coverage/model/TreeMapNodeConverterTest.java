@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.TreeMapNode;
 
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorUtils;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorizationLevel;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,6 +16,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
+    private static final ColorProvider COLOR_PROVIDER = new ColorProvider();
+
     @Test
     void shouldConvertCodingStyleToTree() {
         CoverageNode tree = readNode("jacoco-codingstyle.xml");
@@ -25,7 +27,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         final double coveredLines = 294.0;
         final double coveredPercentage = coveredLines / totalLines * 100.0;
 
-        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
+        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree);
         assertThat(root.getName()).isEqualTo("Java coding style: jacoco-codingstyle.xml");
         assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
         assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsHex(coveredPercentage));
@@ -44,7 +46,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         CoverageNode tree = readNode("jacoco-analysis-model.xml");
         tree.splitPackages();
 
-        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree);
+        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree);
 
         final double totalLines = 6368.0;
         final double coveredLines = 6083.0;
@@ -71,8 +73,8 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
      * @return the fill color as a hex string
      */
     private String getNodeColorAsHex(final Double coveredPercentage) {
-        return ColorUtils.colorAsHex(CoverageColorizationLevel
-                .getDisplayColorsOfCoveragePercentage(coveredPercentage)
-                .getFillColor());
+        return CoverageLevel
+                .getDisplayColorsOfCoverageLevel(coveredPercentage, COLOR_PROVIDER)
+                .getFillColorAsHex();
     }
 }

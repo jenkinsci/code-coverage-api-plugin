@@ -98,6 +98,7 @@ public final class CoverageStubs {
     public static Coverage createCoverage(final Fraction coverageFraction) {
         Coverage coverage = mock(Coverage.class);
         when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
+        when(coverage.isSet()).thenReturn(true);
         return coverage;
     }
 
