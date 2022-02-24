@@ -47,11 +47,11 @@ public enum CoverageChangeLevel {
                 if (i == 0) {
                     return colorProvider.getDisplayColorsOf(level.colorizationId);
                 }
-                CoverageChangeLevel upperLevel = values()[i - 1];
                 double distanceLevel = coverageDifference - level.change;
                 if (distanceLevel == 0) {
                     return colorProvider.getDisplayColorsOf(level.colorizationId);
                 }
+                CoverageChangeLevel upperLevel = values()[i - 1];
                 double distanceUpper = upperLevel.change - coverageDifference;
                 return colorProvider.getBlendedDisplayColors(
                         distanceLevel, distanceUpper,

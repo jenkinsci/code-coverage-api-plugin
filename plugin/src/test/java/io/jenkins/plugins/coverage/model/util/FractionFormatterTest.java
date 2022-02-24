@@ -5,8 +5,6 @@ import java.util.Locale;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import hudson.Functions;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**

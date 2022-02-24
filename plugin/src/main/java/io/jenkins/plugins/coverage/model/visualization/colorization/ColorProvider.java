@@ -105,6 +105,7 @@ public class ColorProvider {
      * @param colorScheme
      *         The color scheme
      */
+    @SuppressWarnings("PMD.UnusedFormalParameter")
     private void loadColors(final ColorScheme colorScheme) {
         // TODO: insert code here in order to load colors dependent on selected scheme
 
