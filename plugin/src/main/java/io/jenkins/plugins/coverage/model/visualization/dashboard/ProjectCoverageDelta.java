@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import hudson.Functions;
-
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.Messages;
@@ -21,6 +19,9 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChan
  */
 public class ProjectCoverageDelta extends CoverageColumnType {
 
+    /**
+     * Creates a column type to be used for representing the project coverage delta.
+     */
     public ProjectCoverageDelta() {
         super(Messages._Project_Coverage_Delta_Type());
     }

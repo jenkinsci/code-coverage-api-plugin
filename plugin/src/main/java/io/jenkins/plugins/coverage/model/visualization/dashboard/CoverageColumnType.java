@@ -23,12 +23,16 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  */
 public abstract class CoverageColumnType {
 
-    protected final Localizable displayName;
+    /**
+     * The localized display name.
+     */
+    private final Localizable displayName;
 
     /**
      * Constructor.
      *
-     * @param displayName The name of the coverage type
+     * @param displayName
+     *         The name of the coverage type
      */
     public CoverageColumnType(final Localizable displayName) {
         this.displayName = displayName;
@@ -43,11 +47,39 @@ public abstract class CoverageColumnType {
         return ColorProviderFactory.createColorProvider();
     }
 
-    public abstract Optional<Fraction> getCoverage(final CoverageBuildAction action, final CoverageMetric metric);
+    /**
+     * Gets the coverage of the passed metric from the passed action.
+     *
+     * @param action
+     *         The {@link CoverageBuildAction action} which contains the coverage
+     * @param metric
+     *         The {@link CoverageMetric coverage metric}
+     *
+     * @return the coverage as optional or an empty optional if no coverage has been found
+     */
+    public abstract Optional<Fraction> getCoverage(CoverageBuildAction action, CoverageMetric metric);
 
-    public abstract DisplayColors getDisplayColors(final Fraction coverage);
+    /**
+     * Gets the {@link DisplayColors display colors} which are used for visualizing the passed coverage.
+     *
+     * @param coverage
+     *         The coverage percentage
+     *
+     * @return the display colors
+     */
+    public abstract DisplayColors getDisplayColors(Fraction coverage);
 
-    public abstract String formatCoverage(final Fraction coverage, final Locale locale);
+    /**
+     * Formats the passed coverage using the passed {@link Locale}.
+     *
+     * @param coverage
+     *         The coverage to be formatted
+     * @param locale
+     *         The locale
+     *
+     * @return the formatted coverage string
+     */
+    public abstract String formatCoverage(Fraction coverage, Locale locale);
 
     /**
      * Gets the names of the available coverage types.

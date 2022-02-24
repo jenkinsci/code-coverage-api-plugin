@@ -19,6 +19,9 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLeve
  */
 public class ProjectCoverage extends CoverageColumnType {
 
+    /**
+     * Creates a column type to be used for representing the project coverage.
+     */
     public ProjectCoverage() {
         super(Messages._Project_Coverage_Type());
     }

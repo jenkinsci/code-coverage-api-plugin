@@ -37,6 +37,8 @@ public enum CoverageLevel {
      *
      * @param coveragePercentage
      *         The coverage percentage
+     * @param colorProvider
+     *         The {@link ColorProvider color provider} to be used
      *
      * @return the display colors
      */
@@ -53,6 +55,8 @@ public enum CoverageLevel {
      *
      * @param coveragePercentage
      *         The coverage percentage
+     * @param colorProvider
+     *         The {@link ColorProvider color provider} to be used
      *
      * @return the blended display colors
      */
@@ -66,10 +70,10 @@ public enum CoverageLevel {
                 }
                 CoverageLevel upperLevel = values()[i - 1];
                 double distanceLevel = coveragePercentage - level.level;
-                double distanceUpper = upperLevel.level - coveragePercentage;
                 if (distanceLevel == 0) {
                     return colorProvider.getDisplayColorsOf(level.colorizationId);
                 }
+                double distanceUpper = upperLevel.level - coveragePercentage;
                 return colorProvider.getBlendedDisplayColors(
                         distanceLevel, distanceUpper,
                         upperLevel.colorizationId,

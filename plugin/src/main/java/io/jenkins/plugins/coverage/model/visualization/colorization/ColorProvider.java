@@ -29,10 +29,19 @@ public class ColorProvider {
      */
     private final Map<ColorId, DisplayColors> availableColors = new HashMap<>();
 
+    /**
+     * Creates a color provider which uses the {@link CoverageColorPalette internal color palette}.
+     */
     public ColorProvider() {
         loadDefaultColors();
     }
 
+    /**
+     * Creates a color provider for the passed {@link ColorScheme scheme}.
+     *
+     * @param colorScheme
+     *         The color scheme to be used
+     */
     public ColorProvider(final ColorScheme colorScheme) {
         loadColors(colorScheme);
     }
@@ -96,7 +105,7 @@ public class ColorProvider {
      * @param colorScheme
      *         The color scheme
      */
-    public void loadColors(final ColorScheme colorScheme) {
+    private void loadColors(final ColorScheme colorScheme) {
         // TODO: insert code here in order to load colors dependent on selected scheme
 
         // Internal fallback if no other schemes exist

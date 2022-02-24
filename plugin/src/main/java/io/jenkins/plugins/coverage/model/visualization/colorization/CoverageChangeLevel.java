@@ -34,6 +34,8 @@ public enum CoverageChangeLevel {
      *
      * @param coverageDifference
      *         The coverage change
+     * @param colorProvider
+     *         The {@link ColorProvider color provider} to be used
      *
      * @return the display colors
      */
@@ -47,10 +49,10 @@ public enum CoverageChangeLevel {
                 }
                 CoverageChangeLevel upperLevel = values()[i - 1];
                 double distanceLevel = coverageDifference - level.change;
-                double distanceUpper = upperLevel.change - coverageDifference;
                 if (distanceLevel == 0) {
                     return colorProvider.getDisplayColorsOf(level.colorizationId);
                 }
+                double distanceUpper = upperLevel.change - coverageDifference;
                 return colorProvider.getBlendedDisplayColors(
                         distanceLevel, distanceUpper,
                         upperLevel.colorizationId,

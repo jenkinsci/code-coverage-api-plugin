@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 class FractionFormatterTest {
 
-    private final Fraction COVERAGE = Fraction.ONE_HALF;
-    private final Locale LOCALE = Locale.GERMAN;
+    private static final Fraction COVERAGE = Fraction.ONE_HALF;
+    private static final Locale LOCALE = Locale.GERMAN;
 
     @Test
     void shouldTransformFractionToPercentage() {

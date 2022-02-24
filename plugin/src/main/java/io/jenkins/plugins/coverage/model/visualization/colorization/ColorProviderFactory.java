@@ -7,6 +7,10 @@ package io.jenkins.plugins.coverage.model.visualization.colorization;
  */
 public class ColorProviderFactory {
 
+    private ColorProviderFactory() {
+        // prevents initialization
+    }
+
     /**
      * Creates a {@link ColorProvider color provider} which uses the internal {@link CoverageColorPalette color
      * palette}.

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Florian Orendi
  */
-abstract class CoverageColumnTypeTest {
+class CoverageColumnTypeTest {
 
     protected static final String PROJECT_COVERAGE_NAME = Messages.Project_Coverage_Type();
     protected static final String PROJECT_COVERAGE_DELTA_NAME = Messages.Project_Coverage_Delta_Type();

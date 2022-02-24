@@ -27,6 +27,8 @@ public enum CoverageChangeTendency {
      *
      * @param change
      *         The coverage change
+     * @param colorProvider
+     *         The {@link ColorProvider color provider} to be used
      *
      * @return the matching change level
      */
