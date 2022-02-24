@@ -17,7 +17,7 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 
 /**
- * Provides functions for different types of how coverage can be represented within a {@link CoverageColumn}.
+ * Provides functions for different types of coverage that can be represented within a {@link CoverageColumn}.
  *
  * @author Florian Orendi
  */
@@ -25,10 +25,20 @@ public abstract class CoverageColumnType {
 
     protected final Localizable displayName;
 
+    /**
+     * Constructor.
+     *
+     * @param displayName The name of the coverage type
+     */
     public CoverageColumnType(final Localizable displayName) {
         this.displayName = displayName;
     }
 
+    /**
+     * Provides a {@link ColorProvider color provider} which is used to determine fill and line colors.
+     *
+     * @return the color provider
+     */
     protected ColorProvider getColorProvider() {
         return ColorProviderFactory.createColorProvider();
     }
@@ -39,6 +49,11 @@ public abstract class CoverageColumnType {
 
     public abstract String formatCoverage(final Fraction coverage, final Locale locale);
 
+    /**
+     * Gets the names of the available coverage types.
+     *
+     * @return the display names
+     */
     public static List<String> getAvailableCoverageTypeNames() {
         return Arrays.asList(
                 Messages.Project_Coverage_Type(),

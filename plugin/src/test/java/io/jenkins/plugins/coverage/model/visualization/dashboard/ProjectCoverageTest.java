@@ -1,15 +1,22 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
-import org.apache.commons.lang3.math.Fraction;
 import java.util.Optional;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorId;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Test class for {@link ProjectCoverage}.
+ *
+ * @author Florian Orendi
+ */
 class ProjectCoverageTest extends CoverageColumnTypeTest {
 
     @Test
@@ -28,17 +35,11 @@ class ProjectCoverageTest extends CoverageColumnTypeTest {
         assertThat(coverage).isEmpty();
     }
 
-    /*@Test
-    void shouldGetFillColor() {
-        String color = PROJECT_COVERAGE.getFillColor(COVERAGE);
-        assertThat(color).isEqualTo(CoverageColorizationLevelValues.LVL_50_DECREASE5.getFillColorAsHex());
-    }
-
     @Test
-    void shouldGetLineColor() {
-        String color = PROJECT_COVERAGE.getLineColor(COVERAGE);
-        assertThat(color).isEqualTo(CoverageColorizationLevelValues.LVL_50_DECREASE5.getLineColorAsHex());
-    }*/
+    void shouldGetDisplayColors() {
+        DisplayColors color = PROJECT_COVERAGE.getDisplayColors(COVERAGE);
+        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.LIGHT_RED));
+    }
 
     @Test
     void shouldFormatCoverage() {

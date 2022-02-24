@@ -14,6 +14,11 @@ import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
 
+/**
+ * Concrete implementation of {@link CoverageColumnType} which represents the project coverage delta.
+ *
+ * @author Florian Orendi
+ */
 public class ProjectCoverageDelta extends CoverageColumnType {
 
     public ProjectCoverageDelta() {

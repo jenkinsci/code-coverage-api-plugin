@@ -10,6 +10,8 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.testutil.CoverageStubs;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -18,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Florian Orendi
  */
-class CoverageColumnTypeTest {
+abstract class CoverageColumnTypeTest {
 
     protected static final String PROJECT_COVERAGE_NAME = Messages.Project_Coverage_Type();
     protected static final String PROJECT_COVERAGE_DELTA_NAME = Messages.Project_Coverage_Delta_Type();
@@ -31,6 +33,7 @@ class CoverageColumnTypeTest {
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;
+    protected static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
 
     @Test
     void shouldGetDisplayName() {
@@ -41,7 +44,8 @@ class CoverageColumnTypeTest {
     @Test
     void shouldGetAvailableCoverageTypeNames() {
         List<String> availableCoverageTypes = CoverageColumnType.getAvailableCoverageTypeNames();
-        assertThat(availableCoverageTypes).containsExactlyInAnyOrder(PROJECT_COVERAGE_NAME, PROJECT_COVERAGE_DELTA_NAME);
+        assertThat(availableCoverageTypes).containsExactlyInAnyOrder(
+                PROJECT_COVERAGE_NAME, PROJECT_COVERAGE_DELTA_NAME);
     }
 
     protected CoverageBuildAction createCoverageBuildAction() {

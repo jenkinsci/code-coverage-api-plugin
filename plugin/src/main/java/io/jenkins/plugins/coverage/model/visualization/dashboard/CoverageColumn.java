@@ -74,7 +74,7 @@ public class CoverageColumn extends ListViewColumn {
      * Defines which coverage type should be shown in the column.
      *
      * @param coverageType
-     *         The {@link CoverageColumnType} to be shown
+     *         The {@link CoverageColumnType type} to be shown
      */
     @DataBoundSetter
     public void setCoverageType(final String coverageType) {
@@ -164,13 +164,17 @@ public class CoverageColumn extends ListViewColumn {
     }
 
     /**
-     * Provides information about whether the coverage text will represent as a percentage without a sign.
+     * Transforms percentages with a ',' decimal separator to a representation using a '.' in order to use the
+     * percentage for styling HTML tags.
      *
-     * @return {@code true} whether the coverage text is shown as a percentage string, else {@code false}
+     * @param percentage
+     *         The text representation of a percentage
+     *
+     * @return the formatted percentage string
      */
-    public String getBackgroundColorFillPercentage(final String text) {
-        if (Pattern.compile("\\d+(,\\d+)?%").matcher(text).matches()) {
-            return text.replace(",", ".");
+    public String getBackgroundColorFillPercentage(final String percentage) {
+        if (Pattern.compile("\\d+(,\\d+)?%").matcher(percentage).matches()) {
+            return percentage.replace(",", ".");
         }
         return "100%";
     }

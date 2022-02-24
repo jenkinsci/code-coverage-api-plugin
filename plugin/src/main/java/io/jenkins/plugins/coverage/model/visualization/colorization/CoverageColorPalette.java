@@ -2,9 +2,15 @@ package io.jenkins.plugins.coverage.model.visualization.colorization;
 
 import java.awt.*;
 
+/**
+ * Provides a color palette which can be used as an plugin internal fallback if no other color schemes have been defined.
+ *
+ * @author Florian Orendi
+ */
 public enum CoverageColorPalette {
 
-    UNDEFINED(ColorId.WHITE, new Color(255, 255, 255), new Color(0, 0, 0)),
+    WHITE(ColorId.WHITE, new Color(255, 255, 255), new Color(0, 0, 0)),
+    BLACK(ColorId.BLACK, new Color(0, 0, 0), new Color(255, 255, 255)),
 
     DARK_RED(ColorId.DARK_RED, new Color(200, 0, 0, 80), new Color(0, 0, 0)),
     RED(ColorId.RED, new Color(255, 0, 0, 80), new Color(0, 0, 0)),

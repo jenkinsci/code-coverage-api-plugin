@@ -33,7 +33,7 @@ class CoverageColumnTest {
     private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
-    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
+    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
 
     @Test
     void shouldHaveWorkingDataGetters() {
@@ -134,7 +134,8 @@ class CoverageColumnTest {
                 .satisfies(coverage -> {
                     assertThat(coverage.get()).isEqualTo(coverageDeltaPercentage);
                     assertThat(column.getDisplayColors(job, coverage))
-                            .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(CoverageChangeTendency.INCREASED.getColorizationId()));
+                            .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(
+                                    CoverageChangeTendency.INCREASED.getColorizationId()));
                 });
     }
 

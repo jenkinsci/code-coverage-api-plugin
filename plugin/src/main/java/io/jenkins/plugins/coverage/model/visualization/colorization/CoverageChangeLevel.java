@@ -1,12 +1,19 @@
 package io.jenkins.plugins.coverage.model.visualization.colorization;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
+/**
+ * Provides the colorization for different coverage change levels.
+ *
+ * @author Florian Orendi
+ */
 public enum CoverageChangeLevel {
 
     INCREASE_5(5.0, ColorId.DARK_GREEN),
     INCREASE_2(2.0, ColorId.GREEN),
-    EQUALS(0.0, ColorId.LIGHT_YELLOW),
+    EQUALS(0.0, ColorId.YELLOW),
     DECREASE_2(-2.0, ColorId.LIGHT_ORANGE),
     DECREASE_5(-5.0, ColorId.DARK_ORANGE),
     DECREASE_10(-10.0, ColorId.LIGHT_RED),
@@ -22,26 +29,28 @@ public enum CoverageChangeLevel {
     }
 
     /**
-     * Gets the display colors for representing the passed coverage difference. If the difference is placed between two
-     * levels, the fill colors are blended.
+     * Gets the {@link DisplayColors display colors} for representing the passed coverage change. If the change
+     * is placed between two levels, the fill colors are blended.
      *
      * @param coverageDifference
-     *         The coverage difference
+     *         The coverage change
      *
-     * @return the {@link DisplayColors display colors}
+     * @return the display colors
      */
     public static DisplayColors getDisplayColorsOfCoverageChange(final Double coverageDifference,
-            final ColorProvider colorProvider) {
-        // TODO: use this to colorize differences between coverage metrics and thresholds e.g.
+            @NonNull final ColorProvider colorProvider) {
         for (int i = 0; i < values().length - 1; i++) {
             CoverageChangeLevel level = values()[i];
             if (coverageDifference >= level.change) {
                 if (i == 0) {
-                    return colorProvider.getDisplayColorsOf(INCREASE_5.colorizationId);
+                    return colorProvider.getDisplayColorsOf(level.colorizationId);
                 }
                 CoverageChangeLevel upperLevel = values()[i - 1];
                 double distanceLevel = coverageDifference - level.change;
                 double distanceUpper = upperLevel.change - coverageDifference;
+                if (distanceLevel == 0) {
+                    return colorProvider.getDisplayColorsOf(level.colorizationId);
+                }
                 return colorProvider.getBlendedDisplayColors(
                         distanceLevel, distanceUpper,
                         upperLevel.colorizationId,
@@ -49,5 +58,13 @@ public enum CoverageChangeLevel {
             }
         }
         return colorProvider.getDisplayColorsOf(NA.colorizationId);
+    }
+
+    public double getChange() {
+        return change;
+    }
+
+    public ColorId getColorizationId() {
+        return colorizationId;
     }
 }

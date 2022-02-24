@@ -1,7 +1,14 @@
 package io.jenkins.plugins.coverage.model.visualization.colorization;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
+/**
+ * Provides the colorization for different coverage levels.
+ *
+ * @author Florian Orendi
+ */
 public enum CoverageLevel {
 
     LVL_95(95.0, ColorId.DARK_GREEN),
@@ -25,16 +32,32 @@ public enum CoverageLevel {
     }
 
     /**
-     * Gets the display colors for representing the passed coverage amount. If the value is placed between two levels,
-     * the fill colors are blended.
+     * Gets the {@link DisplayColors display colors} for representing the passed coverage amount. If the value is placed
+     * between two levels, the fill colors are blended.
      *
      * @param coveragePercentage
      *         The coverage percentage
      *
-     * @return the {@link DisplayColors display colors}
+     * @return the display colors
      */
     public static DisplayColors getDisplayColorsOfCoverageLevel(final Double coveragePercentage,
-            final ColorProvider colorProvider) {
+            @NonNull final ColorProvider colorProvider) {
+        if (coveragePercentage >= 0) {
+            return getBlendedColors(coveragePercentage, colorProvider);
+        }
+        return colorProvider.getDisplayColorsOf(NA.colorizationId);
+    }
+
+    /**
+     * Gets the blended {@link DisplayColors display colors} for representing the passed coverage amount.
+     *
+     * @param coveragePercentage
+     *         The coverage percentage
+     *
+     * @return the blended display colors
+     */
+    private static DisplayColors getBlendedColors(final Double coveragePercentage,
+            @NonNull final ColorProvider colorProvider) {
         for (int i = 0; i < values().length - 1; i++) {
             CoverageLevel level = values()[i];
             if (coveragePercentage >= level.level) {
@@ -44,6 +67,9 @@ public enum CoverageLevel {
                 CoverageLevel upperLevel = values()[i - 1];
                 double distanceLevel = coveragePercentage - level.level;
                 double distanceUpper = upperLevel.level - coveragePercentage;
+                if (distanceLevel == 0) {
+                    return colorProvider.getDisplayColorsOf(level.colorizationId);
+                }
                 return colorProvider.getBlendedDisplayColors(
                         distanceLevel, distanceUpper,
                         upperLevel.colorizationId,

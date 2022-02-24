@@ -7,9 +7,16 @@ import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorId;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Test class for {@link ProjectCoverageDelta}.
+ *
+ * @author Florian Orendi
+ */
 class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
 
     @Test
@@ -28,17 +35,11 @@ class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
         assertThat(coverage).isEmpty();
     }
 
-    /*@Test
-    void shouldGetFillColor() {
-        String color = PROJECT_COVERAGE_DELTA.getFillColor(COVERAGE_DELTA);
-        assertThat(color).isEqualTo(CoverageChangeTendencyValues.INCREASED.getFillColorAsHex());
-    }
-
     @Test
-    void shouldGetLineColor() {
-        String color = PROJECT_COVERAGE_DELTA.getLineColor(COVERAGE_DELTA);
-        assertThat(color).isEqualTo(CoverageChangeTendencyValues.INCREASED.getLineColorAsHex());
-    }*/
+    void shouldGetDisplayColors() {
+        DisplayColors color = PROJECT_COVERAGE_DELTA.getDisplayColors(COVERAGE_DELTA);
+        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.GREEN));
+    }
 
     @Test
     void shouldFormatCoverage() {

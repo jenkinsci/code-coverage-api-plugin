@@ -1,11 +1,18 @@
 package io.jenkins.plugins.coverage.model.visualization.colorization;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 
+/**
+ * Provides the colorization for different coverage change tendencies.
+ *
+ * @author Florian Orendi
+ */
 public enum CoverageChangeTendency {
 
     INCREASED(ColorId.GREEN),
-    EQUALS(ColorId.LIGHT_YELLOW),
+    EQUALS(ColorId.YELLOW),
     DECREASED(ColorId.RED),
     NA(ColorId.WHITE);
 
@@ -16,14 +23,15 @@ public enum CoverageChangeTendency {
     }
 
     /**
-     * Provides the {@link DisplayColors} which matches with the passed coverage change.
+     * Provides the {@link DisplayColors display colors} which match with the passed coverage change tendency.
      *
      * @param change
      *         The coverage change
      *
      * @return the matching change level
      */
-    public static DisplayColors getDisplayColorsForTendency(final Double change, final ColorProvider colorProvider) {
+    public static DisplayColors getDisplayColorsForTendency(final Double change,
+            @NonNull final ColorProvider colorProvider) {
         ColorId colorId;
         if (change == null || change.isNaN()) {
             colorId = NA.colorizationId;

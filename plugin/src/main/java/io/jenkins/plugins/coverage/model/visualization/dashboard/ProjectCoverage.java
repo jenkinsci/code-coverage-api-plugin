@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import hudson.Functions;
-
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.Messages;
@@ -14,6 +12,11 @@ import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
+/**
+ * Concrete implementation of {@link CoverageColumnType} which represents the project coverage.
+ *
+ * @author Florian Orendi
+ */
 public class ProjectCoverage extends CoverageColumnType {
 
     public ProjectCoverage() {
