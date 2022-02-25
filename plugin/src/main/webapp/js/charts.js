@@ -304,7 +304,7 @@ const CoverageChartGenerator = function ($) {
         window.addEventListener('resize', function () {
             treeChart.resize();
         });
-        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
             treeChart.resize();
         });
 
@@ -353,6 +353,20 @@ const CoverageChartGenerator = function ($) {
         }
 
         /**
+         * Store the selected tab in browser's local storage.
+         */
+        const tabToggleLink = $('a[data-bs-toggle="tab"]');
+        tabToggleLink.on('show.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+            const activeTab = $(e.target).attr('href');
+            localStorage.setItem('activeTab', activeTab);
+        });
+
+        initializeTabSelection();
+    }
+
+    function initializeTabSelection() {
+        /**
          * Activate the tab that has been visited the last time. If there is no such tab, highlight the first one.
          * If the user selects the tab using an #anchor prefer this tab.
          */
@@ -368,16 +382,6 @@ const CoverageChartGenerator = function ($) {
                 selectTab('a[href="' + activeTab + '"]');
             }
         }
-
-        /**
-         * Store the selected tab in browser's local storage.
-         */
-        const tabToggleLink = $('a[data-bs-toggle="tab"]');
-        tabToggleLink.on('show.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            const activeTab = $(e.target).attr('href');
-            localStorage.setItem('activeTab', activeTab);
-        });
     }
 
     /**
@@ -385,40 +389,70 @@ const CoverageChartGenerator = function ($) {
      *
      * @param {String} selector - selector of the tab
      */
-    function selectTab (selector) {
-        const detailsTabs = $('#tab-details');
-        const selectedTab = detailsTabs.find(selector);
-
+    function selectTab(selector) {
+        let detailsTabs = $('#tab-tree');
+        let selectedTab = detailsTabs.find(selector);
         if (selectedTab.length !== 0) {
-            const tab = new bootstrap5.Tab(selectedTab[0]);
-            tab.show(function () {
-                $(this).trigger('fireResizeEvent');
-            });
+            performTabSelection(selectedTab);
         }
+        detailsTabs = $('#tab-details');
+        selectedTab = detailsTabs.find(selector);
+        if (selectedTab.length !== 0) {
+            performTabSelection(selectedTab);
+        }
+    }
+
+    function performTabSelection(selectedTab) {
+        const tab = new bootstrap5.Tab(selectedTab[0]);
+        tab.show(function () {
+            $(this).trigger('fireResizeEvent');
+        });
+    }
+
+    this.toggleReportView = function () {
+        const overview = document.getElementById("report-overview");
+        const details = document.getElementById("report-details");
+        const hideOverviewButton = document.getElementById("hide-button");
+        if (overview.classList.contains("d-none")) {
+            hideOverviewButton.style.display = 'block';
+            details.classList.add("d-none");
+            overview.classList.remove("d-none");
+            this.populateDetailsCharts();
+        }
+        else {
+            hideOverviewButton.style.display = 'none';
+            overview.classList.add("d-none");
+            details.classList.remove("d-none");
+            initializeTabSelection();
+        }
+        this.fireResizeEvent();
+    }
+
+    this.loadSourceFile = function () {
+        // TODO
     }
 
     this.hideOverviewColumn = function () {
         const div = document.getElementById("overview-column");
         const divTree = document.getElementById("tree-column");
-        const button = $("#hide-button")
         if (div.style.display === "none") {
             div.style.display = "block";
             divTree.classList.add("ms-3")
-            button.text('Hide overview')
             redrawTrendChart();
-        } else {
+        }
+        else {
             div.style.display = "none";
             divTree.classList.remove("ms-3")
-            button.text('Show overview')
         }
         this.fireResizeEvent();
     }
 
     this.fireResizeEvent = function () {
-        if (typeof(Event) === 'function') {
+        if (typeof (Event) === 'function') {
             // for modern browsers
             window.dispatchEvent(new Event('resize'));
-        } else {
+        }
+        else {
             // for IE and other old browsers
             const event = window.document.createEvent('UIEvents');
             event.initUIEvent('resize', true, false, window, 0);

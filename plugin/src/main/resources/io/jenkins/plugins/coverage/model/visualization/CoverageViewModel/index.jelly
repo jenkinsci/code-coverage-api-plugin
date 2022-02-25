@@ -1,10 +1,11 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts" xmlns:fa="/font-awesome">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts">
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
-  <bs:page it="${it}" class="fluid-container d-flex flex-column h-100">
+  <bs:page it="${it}" notitle="true" class="fluid-container d-flex flex-column h-100">
 
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.data-tables"/>
 
@@ -13,13 +14,45 @@
 
     <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
 
-    <div class="justify-content-md-start">
-      <button id="hide-button" type="button" class="btn btn-light"
-              onclick="coverageChartGenerator.hideOverviewColumn()" title="Hide/Show coverage overview charts">
-        Hide overview
-      </button>
+    <div class="d-flex flex-row align-items-center">
+      <div class="align-items-center">
+        <h1 style="margin-bottom: 0;">${it.displayName}</h1>
+      </div>
+      <div class="btn-group ms-3">
+        <input type="radio" class="btn-check" name="options" id="overviewToggle" autocomplete="off" checked="true"/>
+        <label class="btn btn-outline-secondary" for="overviewToggle"
+               onclick="coverageChartGenerator.toggleReportView()"
+               title="Show coverage overview">
+          <i>
+            <svg class="fa-svg-icon" width="25px" height="25px">
+              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#chart-bar"/>
+            </svg>
+          </i>
+        </label>
+        <input type="radio" class="btn-check" name="options" id="detailToggle" autocomplete="off"/>
+        <label class="btn btn-outline-secondary" for="detailToggle" onclick="coverageChartGenerator.toggleReportView()"
+               title="Show coverage details">
+          <i>
+            <svg class="fa-svg-icon" width="25px" height="25px">
+              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#magnifying-glass"/>
+            </svg>
+          </i>
+        </label>
+      </div>
+      <div id="hide-button" class="vertical-center ms-3">
+        <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off" checked="true"/>
+        <label class="btn btn-outline-secondary" for="btn-check-outlined" title="Hide/Show coverage overview charts"
+               onclick="coverageChartGenerator.hideOverviewColumn()">
+          <i>
+            <svg class="fa-svg-icon" width="25px" height="25px">
+              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#chart-bar"/>
+            </svg>
+          </i>
+        </label>
+      </div>
     </div>
-    <div class="d-flex flex-grow-1 mt-3">
+
+    <div id="report-overview" class="d-flex flex-grow-1 mt-3">
       <div id="overview-column" class="col-4 flex-column flex-nowrap" style="min-width: 500px;">
         <div>
           <bs:card title="${%Coverage overview}" fontAwesomeIcon="chart-bar" class="flex-fill">
@@ -34,9 +67,9 @@
       </div>
 
       <div id="tree-column" class="col-8 flex-column flex-nowrap flex-fill ms-3" style="min-width: 500px;">
-        <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass"
+        <bs:card title="${%Coverage map}" fontAwesomeIcon="magnifying-glass"
                  class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
-          <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
+          <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-tree">
             <li class="nav-item" id="coverageTreeNav">
               <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTree">Project Coverage</a>
             </li>
@@ -48,21 +81,6 @@
             <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
               <li class="nav-item" id="coverageChangesTreeNav">
                 <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTree">Coverage Changes</a>
-              </li>
-            </j:if>
-            <li class="nav-item">
-              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
-            </li>
-            <j:if test="${it.getNode().hasChangeCoverage()}">
-              <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">File Change Coverage
-                </a>
-              </li>
-            </j:if>
-            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
-              <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">File Coverage Changes
-                </a>
               </li>
             </j:if>
           </ul>
@@ -80,6 +98,33 @@
                 <div id="coverage-changes" class="graph-cursor-pointer details-chart h-100"/>
               </div>
             </j:if>
+          </div>
+        </bs:card>
+      </div>
+    </div>
+
+    <div id="report-details" class="d-none d-flex flex-grow-1 mt-3">
+      <div id="tree-column" class="col-5 flex-column flex-nowrap flex-fill" style="min-width: 500px;">
+        <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass"
+                 class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
+          <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
+            <li class="nav-item">
+              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
+            </li>
+            <j:if test="${it.getNode().hasChangeCoverage()}">
+              <li class="nav-item">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">File Change Coverage
+                </a>
+              </li>
+            </j:if>
+            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+              <li class="nav-item">
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">File Coverage Changes
+                </a>
+              </li>
+            </j:if>
+          </ul>
+          <div class="tab-content flex-grow-1">
             <div role="tabpanel" id="coverageTable" class="tab-pane fade">
               <dt:table model="${it.getTableModel('coverage-details')}"/>
             </div>
@@ -96,7 +141,36 @@
           </div>
         </bs:card>
       </div>
+      <div class="col-7 flex-column flex-nowrap flex-fill ms-3" style="min-width: 500px;">
+        <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
+                 class="flex-fill">
+          <div id="source-file-content" class="d-none">
+            <div style="overflow-x:scroll;">
+              <table id="source-file" class="source">
+                Loading...
+              </table>
+            </div>
+          </div>
+          <div id="source-file-unavailable" class="d-none">
+            <p>
+              <b>${%Source code is unavailable.}</b>
+              ${%Some possible reasons are:}
+              <ul>
+                <li>${%reason.1}</li>
+                <li>${%reason.2}</li>
+                <li>${%reason.3}</li>
+              </ul>
+            </p>
+          </div>
+          <div id="source-file-unselected">
+            <p>
+              <b>${%No source code is selected.}</b>
+            </p>
+          </div>
+        </bs:card>
+      </div>
     </div>
+
   </bs:page>
 
   <c:chart-setup id="coverage-history"/>

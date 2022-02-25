@@ -49,8 +49,8 @@ public class FileCoverageNode extends CoverageNode {
         changedCodeLines = changes;
     }
 
-    public void addChangedCodeLines(final Integer... changes) {
-        changedCodeLines.addAll(Arrays.asList(changes));
+    public void addChangedCodeLine(final int line) {
+        changedCodeLines.add(line);
     }
 
     public SortedSet<Integer> getChangedCodeLines() {

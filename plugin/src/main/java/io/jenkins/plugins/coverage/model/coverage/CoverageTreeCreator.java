@@ -42,7 +42,6 @@ public class CoverageTreeCreator {
     }
 
     private boolean calculateChangeCoverageTree(final CoverageNode root) {
-        boolean hasChanged = false;
         if (root instanceof FileCoverageNode) {
             FileCoverageNode fileNode = (FileCoverageNode) root;
             clearChildrenAndLeaves(fileNode);
@@ -51,6 +50,7 @@ public class CoverageTreeCreator {
                     .anyMatch(line -> fileNode.getChangedCodeLines().contains(line));
         }
         Iterator<CoverageNode> nodeIterator = root.getChildren().iterator();
+        boolean hasChanged = false;
         while (nodeIterator.hasNext()) {
             CoverageNode child = nodeIterator.next();
             boolean childHasChanged = calculateChangeCoverageTree(child);
@@ -63,12 +63,12 @@ public class CoverageTreeCreator {
     }
 
     private boolean calculateUnexpectedCoverageChangesTree(final CoverageNode root) {
-        boolean hasChangedCoverage = false;
         if (root instanceof FileCoverageNode) {
             clearChildrenAndLeaves(root);
             return !((FileCoverageNode) root).getUnexpectedCoverageChanges().isEmpty();
         }
         Iterator<CoverageNode> nodeIterator = root.getChildren().iterator();
+        boolean hasChangedCoverage = false;
         while (nodeIterator.hasNext()) {
             CoverageNode child = nodeIterator.next();
             boolean childHasChangedCoverage = calculateUnexpectedCoverageChangesTree(child);

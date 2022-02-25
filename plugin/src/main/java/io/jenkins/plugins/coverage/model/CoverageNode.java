@@ -78,23 +78,20 @@ public class CoverageNode implements Serializable {
 
     protected String mergePath(final String localPath) {
         // mind that default packages are named '-'
+        if ("-".equals(localPath)) {
+            return StringUtils.EMPTY;
+        }
+
         if (hasParent()) {
             String parentPath = getParent().getPath();
 
             if (StringUtils.isBlank(parentPath)) {
-                if (localPath.equals("-")) {
-                    return StringUtils.EMPTY;
-                }
                 return localPath;
             }
             if (StringUtils.isBlank(localPath)) {
                 return parentPath;
             }
             return parentPath + "/" + localPath;
-        }
-
-        if (localPath.equals("-")) {
-            return StringUtils.EMPTY;
         }
 
         return localPath;
@@ -464,7 +461,9 @@ public class CoverageNode implements Serializable {
     }
 
     public CoverageNode copyTree() {
-        return copyTree(null);
+        CoverageNode copy = new CoverageNode(metric, name);
+        copyChildrenAndLeaves(this, copy);
+        return copy;
     }
 
     protected CoverageNode copyTree(final CoverageNode copiedParent) {
@@ -479,12 +478,12 @@ public class CoverageNode implements Serializable {
     }
 
     protected void copyChildrenAndLeaves(final CoverageNode from, final CoverageNode to) {
-        to.getChildren().addAll(from.getChildren().stream()
+        from.getChildren().stream()
                 .map(node -> node.copyTree(from))
-                .collect(Collectors.toList()));
-        to.getLeaves().addAll(from.getLeaves().stream()
+                .forEach(copy -> to.getChildren().add(copy));
+        from.getLeaves().stream()
                 .map(CoverageLeaf::copyLeaf)
-                .collect(Collectors.toList()));
+                .forEach(copy -> to.getLeaves().add(copy));
     }
 
     public void setUncoveredLines(final int... uncoveredLines) {
