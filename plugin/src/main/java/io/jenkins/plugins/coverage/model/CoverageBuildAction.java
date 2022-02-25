@@ -27,7 +27,6 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
-import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
@@ -42,15 +41,14 @@ import io.jenkins.plugins.util.JenkinsFacade;
  * @author Ullrich Hafner
  */
 public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
-    private static final long serialVersionUID = -6023811049340671399L;
-
-    private static final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
-
-    public static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
-    private static final String NO_REFERENCE_BUILD = "-";
 
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
+    public static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
+
+    private static final long serialVersionUID = -6023811049340671399L;
+
+    private static final String NO_REFERENCE_BUILD = "-";
 
     private final HealthReport healthReport;
 
@@ -119,7 +117,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @Override
     protected Object readResolve() {
         if (difference == null) {
-            difference = StreamEx.of(delta.entrySet()).toSortedMap(Entry::getKey, e -> Fraction.getFraction(e.getValue()));
+            difference = StreamEx.of(delta.entrySet())
+                    .toSortedMap(Entry::getKey, e -> Fraction.getFraction(e.getValue()));
         }
         if (changeCoverage == null) {
             changeCoverage = new TreeMap<>();
@@ -181,8 +180,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns a formatted and localized String representation of the delta for the specified metric (with
-     * respect to the reference build).
+     * Returns a formatted and localized String representation of the delta for the specified metric (with respect to
+     * the reference build).
      *
      * @param metric
      *         the metric to get the delta for

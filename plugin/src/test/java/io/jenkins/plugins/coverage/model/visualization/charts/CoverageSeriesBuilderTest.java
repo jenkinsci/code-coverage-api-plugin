@@ -13,8 +13,6 @@ import edu.hm.hafner.echarts.LinesDataSet;
 
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.visualization.charts.CoverageSeriesBuilder;
-import io.jenkins.plugins.coverage.model.visualization.charts.CoverageTrendChart;
 
 import static io.jenkins.plugins.coverage.model.ResultStubs.*;
 import static org.assertj.core.api.Assertions.*;
@@ -42,12 +40,14 @@ class CoverageSeriesBuilderTest {
 
         BuildResult<CoverageBuildAction> smallLineCoverage = createResult(1, new Coverage(1, 1), new Coverage(3, 1));
 
-        LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage), createConfiguration());
+        LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage),
+                createConfiguration());
         verifySeriesDetails(lineCoverage);
 
         BuildResult<CoverageBuildAction> smallBranchCoverage = createResult(1, new Coverage(3, 1), new Coverage(1, 1));
 
-        LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage), createConfiguration());
+        LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage),
+                createConfiguration());
         verifySeriesDetails(branchCoverage);
     }
 

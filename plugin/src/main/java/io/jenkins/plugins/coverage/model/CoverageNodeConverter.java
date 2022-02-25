@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import net.sf.saxon.trans.SymbolicName.F;
 
 import io.jenkins.plugins.coverage.model.coverage.FileCoverageProcessor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;

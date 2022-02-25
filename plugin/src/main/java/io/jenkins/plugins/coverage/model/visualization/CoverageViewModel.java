@@ -26,12 +26,12 @@ import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.Messages;
-import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.Messages;
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceViewModel;
 import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
@@ -57,7 +57,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
 
-    final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
+    private static final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -139,9 +139,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @Override
     public TableModel getTableModel(final String tableId) {
         CoverageNode root = getNode();
-        if (tableId.equals("change-coverage-details")) {
+        if ("change-coverage-details".equals(tableId)) {
             root = COVERAGE_CALCULATOR.createChangeCoverageTree(root);
-        } else if (tableId.equals("coverage-changes-details")) {
+        }
+        else if ("coverage-changes-details".equals(tableId)) {
             root = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(root);
         }
         return new CoverageTableModel(root, getOwner().getRootDir(), tableId);
@@ -187,7 +188,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     public String getUrlForBuild(final String selectedBuildDisplayName, final String currentUrl) {
         return NAVIGATOR.getSameUrlForOtherBuild(owner,
-                        currentUrl, CoverageBuildAction.DETAILS_URL, selectedBuildDisplayName)
+                currentUrl, CoverageBuildAction.DETAILS_URL, selectedBuildDisplayName)
                 .orElse(StringUtils.EMPTY);
     }
 
@@ -298,7 +299,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getCoveredPercentage)
+                    .map(Fraction::doubleValue)
+                    .collect(Collectors.toList());
         }
 
         public List<Integer> getMissed() {
@@ -306,7 +309,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedPercentage).map(Fraction::doubleValue).collect(Collectors.toList());
+            return streamCoverages().map(Coverage::getMissedPercentage)
+                    .map(Fraction::doubleValue)
+                    .collect(Collectors.toList());
         }
 
         private Stream<Coverage> streamCoverages() {
@@ -343,6 +348,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<TableColumn> getColumns() {
             List<TableColumn> columns = new ArrayList<>();
 
+            TableColumn fileHashColumn = new TableColumn("Hash", "fileHash");
+            fileHashColumn.setHeaderClass(ColumnCss.HIDDEN);
+
+            columns.add(fileHashColumn);
             columns.add(new TableColumn("Package", "packageName"));
             columns.add(new TableColumn("File", "fileName"));
             columns.add(new TableColumn("Line Coverage", "lineCoverageValue").setHeaderClass(ColumnCss.PERCENTAGE));
@@ -357,7 +366,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, id, browserLocale))
+                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, browserLocale))
                     .collect(Collectors.toList());
         }
     }
@@ -368,14 +377,16 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static class CoverageRow {
         private final CoverageNode root;
         private final File buildFolder;
-        private final String id;
         private final Locale browserLocale;
 
-        CoverageRow(final CoverageNode root, final File buildFolder, final String id, final Locale browserLocale) {
+        CoverageRow(final CoverageNode root, final File buildFolder, final Locale browserLocale) {
             this.root = root;
             this.buildFolder = buildFolder;
-            this.id = id;
             this.browserLocale = browserLocale;
+        }
+
+        public String getFileHash() {
+            return String.valueOf(root.getName().hashCode());
         }
 
         public String getFileName() {
