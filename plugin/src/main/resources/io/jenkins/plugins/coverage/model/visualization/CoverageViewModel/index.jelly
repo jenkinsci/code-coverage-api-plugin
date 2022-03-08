@@ -7,9 +7,10 @@
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
-    <st:adjunct includes="io.jenkins.plugins.data-tables"/>
+    <st:adjunct includes="io.jenkins.plugins.data-tables-select"/>
 
     <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
+    <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/style.css"/>
     <link rel="stylesheet" href="${resURL}/plugin/font-awesome-api/css/jenkins-style.css"/>
 
     <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
@@ -45,7 +46,7 @@
                onclick="coverageChartGenerator.hideOverviewColumn()">
           <i>
             <svg class="fa-svg-icon" width="25px" height="25px">
-              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#chart-bar"/>
+              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#table-columns"/>
             </svg>
           </i>
         </label>
@@ -126,16 +127,16 @@
           </ul>
           <div class="tab-content flex-grow-1">
             <div role="tabpanel" id="coverageTable" class="tab-pane fade">
-              <dt:table model="${it.getTableModel('coverage-details')}"/>
+              <dt:table model="${it.getTableModel('coverage-table')}"/>
             </div>
             <j:if test="${it.getNode().hasChangeCoverage()}">
               <div role="tabpanel" id="changeCoverageTable" class="tab-pane fade">
-                <dt:table model="${it.getTableModel('change-coverage-details')}"/>
+                <dt:table model="${it.getTableModel('change-coverage-table')}"/>
               </div>
             </j:if>
             <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
               <div role="tabpanel" id="coverageChangesTable" class="tab-pane fade">
-                <dt:table model="${it.getTableModel('coverage-changes-details')}"/>
+                <dt:table model="${it.getTableModel('coverage-changes-table')}"/>
               </div>
             </j:if>
           </div>
@@ -147,7 +148,6 @@
           <div id="source-file-content" class="d-none">
             <div style="overflow-x:scroll;">
               <table id="source-file" class="source">
-                Loading...
               </table>
             </div>
           </div>

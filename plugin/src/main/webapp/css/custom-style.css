@@ -33,3 +33,15 @@
     background-color: #C8E6C9;
 }
 
+/* View selection buttons */
+.btn-outline-secondary {
+    color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+.btn-check:checked + .btn-outline-secondary, .btn-check:active + .btn-outline-secondary, .btn-outline-secondary:active,
+.btn-outline-secondary.active, .btn-outline-secondary.dropdown-toggle.show {
+    color: #fff;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+

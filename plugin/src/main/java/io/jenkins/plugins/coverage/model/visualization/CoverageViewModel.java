@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.model.visualization;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -10,21 +11,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import j2html.tags.ContainerTag;
 
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
+import hudson.util.TextFile;
 
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
@@ -33,11 +33,11 @@ import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
-import io.jenkins.plugins.coverage.model.visualization.code.SourceViewModel;
 import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
+import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableModel;
 import io.jenkins.plugins.datatables.TableModel.DetailedColumnDefinition;
 import io.jenkins.plugins.util.BuildResultNavigator;
@@ -139,13 +139,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @Override
     public TableModel getTableModel(final String tableId) {
         CoverageNode root = getNode();
-        if ("change-coverage-details".equals(tableId)) {
+        if ("change-coverage-table".equals(tableId)) {
             root = COVERAGE_CALCULATOR.createChangeCoverageTree(root);
         }
-        else if ("coverage-changes-details".equals(tableId)) {
+        else if ("coverage-changes-table".equals(tableId)) {
             root = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(root);
         }
-        return new CoverageTableModel(root, getOwner().getRootDir(), tableId);
+        return new CoverageTableModel(root, tableId);
     }
 
     private LinesChartModel createTrendChart(final String configuration) {
@@ -192,34 +192,27 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 .orElse(StringUtils.EMPTY);
     }
 
-    /**
-     * Returns a new sub-page for the selected link.
-     *
-     * @param link
-     *         the link to identify the sub-page to show
-     * @param request
-     *         Stapler request
-     * @param response
-     *         Stapler response
-     *
-     * @return the new sub-page
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    @CheckForNull
-    public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
-        if (StringUtils.isNotEmpty(link)) {
+    @JavaScriptMethod
+    public String getSourceCode(final String fileHash) {
+        Optional<CoverageNode> targetResult
+                = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(fileHash));
+        if (targetResult.isPresent()) {
             try {
-                Optional<CoverageNode> targetResult
-                        = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
-                if (targetResult.isPresent()) {
-                    return new SourceViewModel(getOwner(), targetResult.get());
+                CoverageNode fileNode = targetResult.get();
+                File rootDir = getOwner().getRootDir();
+                if (isSourceFileInNewFormatAvailable(fileNode)) {
+                    return new SourceCodeFacade().read(rootDir, getId(), fileNode.getPath());
+                }
+                if (isSourceFileInOldFormatAvailable(fileNode)) {
+                    return new TextFile(getFileForBuildsWithOldVersion(rootDir,
+                            fileNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
                 }
             }
-            catch (NumberFormatException exception) {
-                // ignore
+            catch (IOException | InterruptedException exception) {
+                return ExceptionUtils.getStackTrace(exception);
             }
         }
-        return null; // fallback on broken URLs
+        return Messages.Coverage_Not_Available();
     }
 
     /**
@@ -227,8 +220,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileAvailable() {
-        return isSourceFileInNewFormatAvailable() || isSourceFileInOldFormatAvailable();
+    public boolean isSourceFileAvailable(final CoverageNode coverageNode) {
+        return isSourceFileInNewFormatAvailable(coverageNode) || isSourceFileInOldFormatAvailable(coverageNode);
     }
 
     /**
@@ -237,8 +230,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileInOldFormatAvailable() {
-        return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), getNode().getName());
+    public boolean isSourceFileInOldFormatAvailable(final CoverageNode coverageNode) {
+        return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), coverageNode.getName());
     }
 
     static boolean isSourceFileInOldFormatAvailable(final File rootDir, final String nodeName) {
@@ -269,8 +262,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileInNewFormatAvailable() {
-        return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, getNode().getPath());
+    public boolean isSourceFileInNewFormatAvailable(final CoverageNode coverageNode) {
+        return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, coverageNode.getPath());
     }
 
     static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
@@ -328,14 +321,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
-        private final File buildFolder;
         private final String id;
 
-        CoverageTableModel(final CoverageNode root, final File buildFolder, final String id) {
+        CoverageTableModel(final CoverageNode root, final String id) {
             super();
 
             this.root = root;
-            this.buildFolder = buildFolder;
             this.id = id;
         }
 
@@ -345,9 +336,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         @Override
+        public TableConfiguration getTableConfiguration() {
+            TableConfiguration tableConfiguration = new TableConfiguration();
+            tableConfiguration.select("single");
+            return tableConfiguration;
+        }
+
+        @Override
         public List<TableColumn> getColumns() {
             List<TableColumn> columns = new ArrayList<>();
 
+            // this column is hidden, but used to access the file hash from the frontend
             TableColumn fileHashColumn = new TableColumn("Hash", "fileHash");
             fileHashColumn.setHeaderClass(ColumnCss.HIDDEN);
 
@@ -366,7 +365,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
             return root.getAll(CoverageMetric.FILE).stream()
-                    .map((CoverageNode file) -> new CoverageRow(file, buildFolder, browserLocale))
+                    .map((CoverageNode file) -> new CoverageRow(file, browserLocale))
                     .collect(Collectors.toList());
         }
     }
@@ -376,12 +375,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private static class CoverageRow {
         private final CoverageNode root;
-        private final File buildFolder;
         private final Locale browserLocale;
 
-        CoverageRow(final CoverageNode root, final File buildFolder, final Locale browserLocale) {
+        CoverageRow(final CoverageNode root, final Locale browserLocale) {
             this.root = root;
-            this.buildFolder = buildFolder;
             this.browserLocale = browserLocale;
         }
 
@@ -390,12 +387,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public String getFileName() {
-            String fileName = root.getName();
-            if (isSourceFileInNewFormatAvailable(buildFolder, "coverage", root.getPath())
-                    || isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
-                return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
-            }
-            return fileName;
+            return root.getName();
         }
 
         public String getPackageName() {
