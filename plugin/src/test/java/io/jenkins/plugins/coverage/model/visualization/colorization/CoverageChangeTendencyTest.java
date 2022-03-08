@@ -16,17 +16,17 @@ class CoverageChangeTendencyTest {
     @Test
     void shouldGetDisplayColorsForTendency() {
         assertThat(CoverageChangeTendency.getDisplayColorsForTendency(1.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.GREEN));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.EXCELLENT));
         assertThat(CoverageChangeTendency.getDisplayColorsForTendency(0.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.YELLOW));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.AVERAGE));
         assertThat(CoverageChangeTendency.getDisplayColorsForTendency(-1.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.RED));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.INSUFFICIENT));
         assertThat(CoverageChangeTendency.getDisplayColorsForTendency(null, COLOR_PROVIDER))
                 .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.WHITE));
     }
 
     @Test
     void shouldGetColorizationId() {
-        assertThat(CoverageChangeTendency.INCREASED.getColorizationId()).isEqualTo(ColorId.GREEN);
+        assertThat(CoverageChangeTendency.INCREASED.getColorizationId()).isEqualTo(ColorId.EXCELLENT);
     }
 }

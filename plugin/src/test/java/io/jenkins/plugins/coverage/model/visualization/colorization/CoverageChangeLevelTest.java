@@ -21,7 +21,7 @@ class CoverageChangeLevelTest {
     void shouldHaveWorkingGetters() {
         CoverageChangeLevel coverageChangeLevel = CoverageChangeLevel.INCREASE_2;
         assertThat(coverageChangeLevel.getChange()).isEqualTo(2.0);
-        assertThat(coverageChangeLevel.getColorizationId()).isEqualTo(ColorId.GREEN);
+        assertThat(coverageChangeLevel.getColorizationId()).isEqualTo(ColorId.EXCELLENT);
     }
 
     @Test
@@ -39,9 +39,9 @@ class CoverageChangeLevelTest {
         assertThat(CoverageChangeLevel.getDisplayColorsOfCoverageChange(-1.0, COLOR_PROVIDER))
                 .isEqualTo(new DisplayColors(blendedLineColor, blendedColorDecreased));
         assertThat(CoverageChangeLevel.getDisplayColorsOfCoverageChange(7.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.DARK_GREEN));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.OUTSTANDING));
         assertThat(CoverageChangeLevel.getDisplayColorsOfCoverageChange(-2.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.LIGHT_ORANGE));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.INADEQUATE));
         assertThat(CoverageChangeLevel.getDisplayColorsOfCoverageChange(-110.0, COLOR_PROVIDER))
                 .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.WHITE));
     }

@@ -20,13 +20,13 @@ class ColorProviderTest {
     void shouldLoadColors() {
         // TODO: this test case is trivial at the moment and needs to get expanded with further color schemes
         ColorProvider colorProvider = new ColorProvider(ColorScheme.DEFAULT);
-        assertThat(colorProvider.containsColorId(ColorId.GREEN)).isTrue();
+        assertThat(colorProvider.containsColorId(ColorId.EXCELLENT)).isTrue();
     }
 
     @Test
     void shouldGetDisplayColorsOfId() {
         ColorProvider colorProvider = createDefaultColorProvider();
-        DisplayColors displayColors = colorProvider.getDisplayColorsOf(ColorId.GREEN);
+        DisplayColors displayColors = colorProvider.getDisplayColorsOf(ColorId.EXCELLENT);
 
         assertThat(displayColors.getFillColor()).isEqualTo(CoverageColorPalette.GREEN.getFillColor());
         assertThat(displayColors.getLineColor()).isEqualTo(CoverageColorPalette.GREEN.getLineColor());
@@ -36,7 +36,7 @@ class ColorProviderTest {
     @Test
     void shouldCheckForExistentColorId() {
         ColorProvider colorProvider = createDefaultColorProvider();
-        assertThat(colorProvider.containsColorId(ColorId.GREEN)).isTrue();
+        assertThat(colorProvider.containsColorId(ColorId.EXCELLENT)).isTrue();
         assertThat(colorProvider.containsColorId(null)).isFalse();
     }
 
@@ -44,9 +44,9 @@ class ColorProviderTest {
     void shouldGetBlendedDisplayColors() {
         ColorProvider colorProvider = createDefaultColorProvider();
 
-        assertThat(colorProvider.getBlendedDisplayColors(1, 1, null, ColorId.GREEN))
+        assertThat(colorProvider.getBlendedDisplayColors(1, 1, null, ColorId.EXCELLENT))
                 .isEqualTo(DEFAULT_COLOR);
-        assertThat(colorProvider.getBlendedDisplayColors(1, 1, ColorId.GREEN, null))
+        assertThat(colorProvider.getBlendedDisplayColors(1, 1, ColorId.EXCELLENT, null))
                 .isEqualTo(DEFAULT_COLOR);
         assertThat(colorProvider.getBlendedDisplayColors(1, 1, null, null))
                 .isEqualTo(DEFAULT_COLOR);

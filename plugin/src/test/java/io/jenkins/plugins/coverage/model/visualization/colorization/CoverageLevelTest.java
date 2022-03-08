@@ -21,7 +21,7 @@ class CoverageLevelTest {
     void shouldHaveWorkingGetters() {
         CoverageLevel coverageLevel = CoverageLevel.LVL_0;
         assertThat(coverageLevel.getLevel()).isEqualTo(0.0);
-        assertThat(coverageLevel.getColorizationId()).isEqualTo(ColorId.DARK_RED);
+        assertThat(coverageLevel.getColorizationId()).isEqualTo(ColorId.INSUFFICIENT);
     }
 
     @Test
@@ -34,9 +34,9 @@ class CoverageLevelTest {
                 .isEqualTo(new DisplayColors(COLOR_PROVIDER.getDisplayColorsOf(ColorId.BLACK).getFillColor(),
                         blendedColor));
         assertThat(CoverageLevel.getDisplayColorsOfCoverageLevel(96.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.DARK_GREEN));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.OUTSTANDING));
         assertThat(CoverageLevel.getDisplayColorsOfCoverageLevel(50.0, COLOR_PROVIDER))
-                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.LIGHT_RED));
+                .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.VERY_BAD));
         assertThat(CoverageLevel.getDisplayColorsOfCoverageLevel(-2.0, COLOR_PROVIDER))
                 .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.WHITE));
     }

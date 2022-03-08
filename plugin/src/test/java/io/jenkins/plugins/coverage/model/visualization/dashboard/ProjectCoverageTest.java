@@ -38,7 +38,7 @@ class ProjectCoverageTest extends CoverageColumnTypeTest {
     @Test
     void shouldGetDisplayColors() {
         DisplayColors color = PROJECT_COVERAGE.getDisplayColors(COVERAGE);
-        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.LIGHT_RED));
+        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.VERY_BAD));
     }
 
     @Test

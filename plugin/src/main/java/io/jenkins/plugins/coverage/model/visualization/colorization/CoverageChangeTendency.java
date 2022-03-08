@@ -11,9 +11,9 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  */
 public enum CoverageChangeTendency {
 
-    INCREASED(ColorId.GREEN),
-    EQUALS(ColorId.YELLOW),
-    DECREASED(ColorId.RED),
+    INCREASED(ColorId.EXCELLENT),
+    EQUALS(ColorId.AVERAGE),
+    DECREASED(ColorId.INSUFFICIENT),
     NA(ColorId.WHITE);
 
     private final ColorId colorizationId;

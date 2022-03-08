@@ -11,13 +11,13 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  */
 public enum CoverageChangeLevel {
 
-    INCREASE_5(5.0, ColorId.DARK_GREEN),
-    INCREASE_2(2.0, ColorId.GREEN),
-    EQUALS(0.0, ColorId.YELLOW),
-    DECREASE_2(-2.0, ColorId.LIGHT_ORANGE),
-    DECREASE_5(-5.0, ColorId.DARK_ORANGE),
-    DECREASE_10(-10.0, ColorId.LIGHT_RED),
-    DECREASE_20(-20.0, ColorId.DARK_RED),
+    INCREASE_5(5.0, ColorId.OUTSTANDING),
+    INCREASE_2(2.0, ColorId.EXCELLENT),
+    EQUALS(0.0, ColorId.AVERAGE),
+    DECREASE_2(-2.0, ColorId.INADEQUATE),
+    DECREASE_5(-5.0, ColorId.BAD),
+    DECREASE_10(-10.0, ColorId.VERY_BAD),
+    DECREASE_20(-20.0, ColorId.INSUFFICIENT),
     NA(-100.0, ColorId.WHITE);
 
     private final double change;

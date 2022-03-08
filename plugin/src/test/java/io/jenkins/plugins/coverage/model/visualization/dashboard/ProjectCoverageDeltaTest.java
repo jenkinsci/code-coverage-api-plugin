@@ -38,7 +38,7 @@ class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
     @Test
     void shouldGetDisplayColors() {
         DisplayColors color = PROJECT_COVERAGE_DELTA.getDisplayColors(COVERAGE_DELTA);
-        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.GREEN));
+        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.EXCELLENT));
     }
 
     @Test
