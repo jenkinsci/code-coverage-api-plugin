@@ -90,7 +90,7 @@ public class SourceCodeFacade {
      *
      * @return the file content as String
      */
-    String read(final File buildResults, final String id, final String path)
+    public String read(final File buildResults, final String id, final String path)
             throws IOException, InterruptedException {
         Path tempDir = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
         FilePath unzippedSourcesDir = new FilePath(tempDir.toFile());

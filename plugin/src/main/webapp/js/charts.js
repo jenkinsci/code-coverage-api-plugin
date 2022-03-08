@@ -363,6 +363,25 @@ const CoverageChartGenerator = function ($) {
         });
 
         initializeTabSelection();
+
+        $(document).ready(function () {
+            const table = $('#coverage-table').DataTable();
+            table.on('select', function (e, dt, type, indexes) {
+                if (type === 'row') {
+                    $('#source-file').html('Loading...');
+                    const rowData = table.rows(indexes).data().toArray();
+                    viewProxy.getSourceCode(rowData[0].fileHash, function (t) {
+                        $('#source-file').html(t.responseObject());
+                    });
+                    document.getElementById('source-file-unselected').classList.add("d-none");
+                    document.getElementById('source-file-content').classList.remove("d-none");
+                }
+                else {
+                    document.getElementById('source-file-content').classList.add("d-none");
+                    document.getElementById('source-file-unselected').classList.remove("d-none");
+                }
+            })
+        });
     }
 
     function initializeTabSelection() {
