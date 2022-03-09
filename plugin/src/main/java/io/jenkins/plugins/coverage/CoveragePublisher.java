@@ -300,7 +300,6 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     @Extension @Symbol("publishCoverage")
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-
         private final CharsetValidation validation = new CharsetValidation();
 
         public CoveragePublisherDescriptor() {
