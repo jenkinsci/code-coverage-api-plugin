@@ -42,7 +42,7 @@ public enum CoverageLevel {
      *
      * @return the display colors
      */
-    public static DisplayColors getDisplayColorsOfCoverageLevel(final Double coveragePercentage,
+    public static DisplayColors getDisplayColorsOfCoverageLevel(final double coveragePercentage,
             @NonNull final ColorProvider colorProvider) {
         if (coveragePercentage >= 0) {
             return getBlendedColors(coveragePercentage, colorProvider);
@@ -60,7 +60,7 @@ public enum CoverageLevel {
      *
      * @return the blended display colors
      */
-    private static DisplayColors getBlendedColors(final Double coveragePercentage,
+    private static DisplayColors getBlendedColors(final double coveragePercentage,
             @NonNull final ColorProvider colorProvider) {
         for (int i = 0; i < values().length - 1; i++) {
             CoverageLevel level = values()[i];

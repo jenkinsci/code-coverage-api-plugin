@@ -11,7 +11,6 @@ import hudson.model.Job;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
@@ -44,6 +43,12 @@ class CoverageColumnTest {
     }
 
     @Test
+    void shouldProvideEmptyCoverageUrlWithoutAction() {
+        CoverageColumn column = createColumn();
+        assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
+    }
+
+    @Test
     void shouldProvideBackgroundColorFillPercentage() {
         CoverageColumn column = createColumn();
         assertThat(column.getBackgroundColorFillPercentage("+5,0%")).isEqualTo("100%");
@@ -57,7 +62,6 @@ class CoverageColumnTest {
         Job<?, ?> job = createJob();
 
         assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
 
         Optional<Fraction> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
@@ -71,7 +75,6 @@ class CoverageColumnTest {
         Job<?, ?> job = createJobWithActions();
 
         assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
         assertThat(column.getCoverageValue(job)).isEmpty();
         assertThat(column.getDisplayColors(job, Optional.empty())).isEqualTo(ColorProvider.DEFAULT_COLOR);
     }
@@ -84,13 +87,11 @@ class CoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
         assertThat(column.getCoverageValue(job)).isEmpty();
 
         column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
 
         assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
         assertThat(column.getCoverageValue(job)).isEmpty();
     }
 
@@ -106,7 +107,6 @@ class CoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, coverageFraction);
 
         assertThat(column.getCoverageText(job)).isEqualTo(coveragePercentageText);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(coverage -> {
@@ -128,7 +128,6 @@ class CoverageColumnTest {
         Job<?, ?> job = createJobWithCoverageAction(coverageDelta, Fraction.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);
-        assertThat(column.getRelativeCoverageUrl()).isEqualTo(WebUtils.COVERAGE_DEFAULT_URL);
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(coverage -> {

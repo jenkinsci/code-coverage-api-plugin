@@ -23,7 +23,6 @@ import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.util.WebUtils;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.util.JenkinsFacade;
@@ -35,7 +34,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
  */
 public class CoverageColumn extends ListViewColumn {
 
-    static final String COVERAGE_NA_TEXT = "n/a";
+    static final String COVERAGE_NA_TEXT = Messages.Coverage_Not_Available();
 
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
@@ -155,12 +154,19 @@ public class CoverageColumn extends ListViewColumn {
     }
 
     /**
-     * Provides the relative URL which can be used for accessing the coverage report for specific coverage types.
+     * Provides the relative URL which can be used for accessing the coverage report.
+     *
+     * @param job
+     *         The processed job
      *
      * @return the relative URL or an empty string when there is no matching URL
      */
-    public String getRelativeCoverageUrl() {
-        return WebUtils.COVERAGE_DEFAULT_URL;
+    public String getRelativeCoverageUrl(final Job<?, ?> job) {
+        if (hasCoverageAction(job)) {
+            CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
+            return action.getUrlName();
+        }
+        return "";
     }
 
     /**

@@ -29,8 +29,8 @@ public enum CoverageChangeLevel {
     }
 
     /**
-     * Gets the {@link DisplayColors display colors} for representing the passed coverage change. If the change
-     * is placed between two levels, the fill colors are blended.
+     * Gets the {@link DisplayColors display colors} for representing the passed coverage change. If the change is
+     * placed between two levels, the fill colors are blended.
      *
      * @param coverageDifference
      *         The coverage change
@@ -39,7 +39,7 @@ public enum CoverageChangeLevel {
      *
      * @return the display colors
      */
-    public static DisplayColors getDisplayColorsOfCoverageChange(final Double coverageDifference,
+    public static DisplayColors getDisplayColorsOfCoverageChange(final double coverageDifference,
             @NonNull final ColorProvider colorProvider) {
         for (int i = 0; i < values().length - 1; i++) {
             CoverageChangeLevel level = values()[i];
