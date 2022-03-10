@@ -322,6 +322,8 @@ const CoverageChartGenerator = function ($) {
     this.populateDetailsCharts = function () {
         const trendConfigurationDialogId = 'chart-configuration-coverage-history';
 
+        initializeReportView();
+
         $('#' + trendConfigurationDialogId).on('hidden.bs.modal', function () {
             redrawTrendChart();
         });
@@ -352,109 +354,227 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
-        /**
-         * Store the selected tab in browser's local storage.
-         */
-        const tabToggleLink = $('a[data-bs-toggle="tab"]');
-        tabToggleLink.on('show.bs.tab', function (e) {
-            window.location.hash = e.target.hash;
-            const activeTab = $(e.target).attr('href');
-            localStorage.setItem('activeTab', activeTab);
-        });
-
-        initializeTabSelection();
-
         $(document).ready(function () {
-            const table = $('#coverage-table').DataTable();
-            table.on('select', function (e, dt, type, indexes) {
-                if (type === 'row') {
-                    $('#source-file').html('Loading...');
-                    const rowData = table.rows(indexes).data().toArray();
-                    viewProxy.getSourceCode(rowData[0].fileHash, function (t) {
-                        $('#source-file').html(t.responseObject());
-                    });
-                    document.getElementById('source-file-unselected').classList.add("d-none");
-                    document.getElementById('source-file-content').classList.remove("d-none");
-                }
-                else {
-                    document.getElementById('source-file-content').classList.add("d-none");
-                    document.getElementById('source-file-unselected').classList.remove("d-none");
-                }
-            })
+            initializeDataTables();
         });
     }
 
-    function initializeTabSelection() {
-        /**
-         * Activate the tab that has been visited the last time. If there is no such tab, highlight the first one.
-         * If the user selects the tab using an #anchor prefer this tab.
-         */
-        selectTab('li:first-child a');
+    ///////////////////////////////////////////////////////////////////////
+    // Report view initialization
+    ///////////////////////////////////////////////////////////////////////
+
+    function initializeReportView() {
+        $('#report-overview a[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+            const activeTab = $(e.target).attr('href');
+            localStorage.setItem('activeTabOverview', activeTab);
+        });
+
+        $('#report-details a[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+            const activeTab = $(e.target).attr('href');
+            localStorage.setItem('activeTabDetails', activeTab);
+        });
+
         const url = document.location.toString();
+        // prefer loading the report by a set anchor
         if (url.match('#')) {
             const tabName = url.split('#')[1];
-            selectTab('a[href="#' + tabName + '"]');
+            const loaded = loadView('#' + tabName);
+            if (!loaded) {
+                // the default
+                loadView('#coverageTree');
+            }
         }
         else {
-            const activeTab = localStorage.getItem('activeTab');
+            let activeTab;
+            if (document.getElementById("report-overview").classList.contains("d-none")) {
+                activeTab = localStorage.getItem('activeTabDetails');
+            }
+            else {
+                activeTab = localStorage.getItem('activeTabOverview');
+            }
             if (activeTab) {
-                selectTab('a[href="' + activeTab + '"]');
+                loadView(activeTab);
+            }
+            else {
+                // the default
+                loadView('#coverageTree');
+            }
+        }
+
+        initializeOverviewColumnVisibility();
+    }
+
+    /**
+     * Initializes the visibility of the #overview-column.
+     */
+    function initializeOverviewColumnVisibility() {
+        const showCharts = localStorage.getItem('showOverviewColumn');
+        if (showCharts) {
+            const show = showCharts === 'true';
+            setOverviewColumnVisibility(show);
+            $('#showOverviewChartsToggle').prop('checked', show);
+        }
+        else {
+            setOverviewColumnVisibility(true);
+            $('#showOverviewChartsToggle').prop('checked', true);
+        }
+    }
+
+    /**
+     * Initializes the datatables.
+     */
+    function initializeDataTables() {
+        initializeSourceCodeSelection($('#coverage-table').DataTable(), 'coverage-table');
+        initializeSourceCodeSelection($('#change-coverage-table').DataTable(), 'change-coverage-table');
+        initializeSourceCodeSelection($('#coverage-changes-table').DataTable(), 'coverage-changes-table');
+    }
+
+    /**
+     * Initializes a selection listener for a datatable which loads the selected source code.
+     *
+     * @param {DataTable} datatable The DataTable
+     * @param {String} id The ID of the DataTable
+     */
+    function initializeSourceCodeSelection(datatable, id) {
+        datatable.on('select', function (e, dt, type, indexes) {
+            if (type === 'row') {
+                $('#source-file').html('Loading...');
+                const rowData = datatable.rows(indexes).data().toArray();
+                // TODO: pass id to load specifically prepared source code
+                viewProxy.getSourceCode(rowData[0].fileHash, function (t) {
+                    $('#source-file').html(t.responseObject());
+                });
+                document.getElementById('source-file-unselected').classList.add("d-none");
+                document.getElementById('source-file-content').classList.remove("d-none");
+            }
+            else {
+                clearSourceCode();
+            }
+        })
+        datatable.on('deselect', function () {
+            clearSourceCode();
+        });
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Report view management
+    ///////////////////////////////////////////////////////////////////////
+
+    /**
+     * Loads a report view by its ID, selected by the user.
+     *
+     * @param {String} id The report view ID
+     */
+    this.loadReportViewById = function (id) {
+        if (id === 'report-overview') {
+            const active = localStorage.getItem('activeTabOverview');
+            if (active) {
+                loadView(active);
+            }
+            else {
+                loadView('#coverageTree');
+            }
+        }
+        else if (id === 'report-details') {
+            const active = localStorage.getItem('activeTabDetails');
+            if (active) {
+                loadView(active);
+            }
+            else {
+                loadView('#coverageTable');
             }
         }
     }
 
     /**
-     * Activates the specified tab.
+     * Loads the report view with the passed id.
      *
-     * @param {String} selector - selector of the tab
+     * @param {String} id The id of the report view
      */
-    function selectTab(selector) {
+    function loadView(id) {
+        location.href = id;
+        const selector = 'a[href="' + id + '"]';
         let detailsTabs = $('#tab-tree');
         let selectedTab = detailsTabs.find(selector);
         if (selectedTab.length !== 0) {
-            performTabSelection(selectedTab);
+            showReportView("report-overview");
+            selectTab(selectedTab);
+            return true;
         }
         detailsTabs = $('#tab-details');
         selectedTab = detailsTabs.find(selector);
         if (selectedTab.length !== 0) {
-            performTabSelection(selectedTab);
+            showReportView("report-details");
+            selectTab(selectedTab);
+            return true;
         }
+        return false;
     }
 
-    function performTabSelection(selectedTab) {
+    /**
+     * Selects the passed Bootstrap tab.
+     *
+     * @param selectedTab The selected tab
+     */
+    function selectTab(selectedTab) {
         const tab = new bootstrap5.Tab(selectedTab[0]);
         tab.show(function () {
-            $(this).trigger('fireResizeEvent');
+            fireResizeEvent();
         });
     }
 
-    this.toggleReportView = function () {
+    /**
+     * Makes the report view with the passed id visible.
+     *
+     * @param {String} id The ID of the report div to be shown
+     */
+    function showReportView(id) {
         const overview = document.getElementById("report-overview");
         const details = document.getElementById("report-details");
         const hideOverviewButton = document.getElementById("hide-button");
-        if (overview.classList.contains("d-none")) {
-            hideOverviewButton.style.display = 'block';
+        const menuSeparator = document.getElementById("menu-separator");
+
+        if (id === overview.id) {
             details.classList.add("d-none");
             overview.classList.remove("d-none");
-            this.populateDetailsCharts();
+            menuSeparator.style.display = 'block';
+            hideOverviewButton.style.display = 'block';
+            $('#overviewToggle').prop('checked', true);
+            $('#detailToggle').prop('checked', false);
+            localStorage.setItem("activeReport", overview.id);
         }
-        else {
+        else if (id === details.id) {
+            menuSeparator.style.display = 'none';
             hideOverviewButton.style.display = 'none';
             overview.classList.add("d-none");
             details.classList.remove("d-none");
-            initializeTabSelection();
+            $('#detailToggle').prop('checked', true);
+            $('#overviewToggle').prop('checked', false);
+            localStorage.setItem("activeReport", details.id);
         }
-        this.fireResizeEvent();
+
+        fireResizeEvent();
     }
 
-    this.loadSourceFile = function () {
-        // TODO
+    /**
+     * Toggles the visibility of the #overview-column, triggered by the user.
+     */
+    this.toggleOverviewColumn = function () {
+        const overview = document.getElementById("overview-column");
+        setOverviewColumnVisibility(overview.style.display === "none");
     }
 
-    this.hideOverviewColumn = function () {
+    /**
+     * Sets the visibility of the #overview-column which contains the overview charts.
+     *
+     * @param {boolean} show true whether the column should be shown
+     */
+    function setOverviewColumnVisibility(show) {
         const div = document.getElementById("overview-column");
         const divTree = document.getElementById("tree-column");
-        if (div.style.display === "none") {
+        if (show) {
             div.style.display = "block";
             divTree.classList.add("ms-3")
             redrawTrendChart();
@@ -463,10 +583,23 @@ const CoverageChartGenerator = function ($) {
             div.style.display = "none";
             divTree.classList.remove("ms-3")
         }
-        this.fireResizeEvent();
+        localStorage.setItem('showOverviewColumn', show);
+        fireResizeEvent();
     }
 
-    this.fireResizeEvent = function () {
+    /**
+     * Clears the source code view within #source-file.
+     */
+    function clearSourceCode() {
+        $('#source-file').html('');
+        document.getElementById('source-file-content').classList.add("d-none");
+        document.getElementById('source-file-unselected').classList.remove("d-none");
+    }
+
+    /**
+     * Manually fires a resize event which is useful for adjusting canvas sizes with resize listeners.
+     */
+    function fireResizeEvent() {
         if (typeof (Event) === 'function') {
             // for modern browsers
             window.dispatchEvent(new Event('resize'));
@@ -477,11 +610,5 @@ const CoverageChartGenerator = function ($) {
             event.initUIEvent('resize', true, false, window, 0);
             window.dispatchEvent(event);
         }
-    }
-
-    this.populateOverview = function () {
-        viewProxy.getOverview(function (t) {
-            createOverview(t.responseObject(), 'coverage-overview');
-        });
     }
 };
