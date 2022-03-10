@@ -33,9 +33,6 @@ import io.jenkins.plugins.util.JenkinsFacade;
  * @author Florian Orendi
  */
 public class CoverageColumn extends ListViewColumn {
-
-    static final String COVERAGE_NA_TEXT = Messages.Coverage_Not_Available();
-
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
     private String columnName = Messages.Coverage_Column();
@@ -115,7 +112,7 @@ public class CoverageColumn extends ListViewColumn {
         if (coverageValue.isPresent()) {
             return selectedCoverageColumnType.formatCoverage(coverageValue.get(), Functions.getCurrentLocale());
         }
-        return COVERAGE_NA_TEXT;
+        return Messages.Coverage_Not_Available();
     }
 
     /**

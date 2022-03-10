@@ -1,8 +1,10 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import hudson.Functions;
@@ -10,6 +12,7 @@ import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
@@ -26,6 +29,10 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class CoverageColumnTest {
+    @BeforeAll
+    static void beforeAll() {
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
     private static final String COLUMN_NAME = "Test Column";
     private static final ProjectCoverage PROJECT_COVERAGE = new ProjectCoverage();
@@ -61,7 +68,7 @@ class CoverageColumnTest {
 
         Job<?, ?> job = createJob();
 
-        assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
+        assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
 
         Optional<Fraction> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
@@ -74,7 +81,7 @@ class CoverageColumnTest {
 
         Job<?, ?> job = createJobWithActions();
 
-        assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
+        assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
         assertThat(column.getDisplayColors(job, Optional.empty())).isEqualTo(ColorProvider.DEFAULT_COLOR);
     }
@@ -86,12 +93,12 @@ class CoverageColumnTest {
 
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
 
-        assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
+        assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
 
         column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
 
-        assertThat(column.getCoverageText(job)).isEqualTo(CoverageColumn.COVERAGE_NA_TEXT);
+        assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
     }
 
