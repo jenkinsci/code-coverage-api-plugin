@@ -257,6 +257,9 @@
     <!--template apply in method element -->
     <xsl:template match="method">
         <method>
+            <xsl:attribute name="line">
+                <xsl:value-of select="@line"/>
+            </xsl:attribute>
             <xsl:attribute name="name">
                 <xsl:value-of select="@name"/>
             </xsl:attribute>

@@ -9,7 +9,9 @@
       </j:choose>
       <ul>
         <li>
-          <b>Project Coverage:</b>
+          <b>
+            <a href="coverage/#coverageTree">Project Coverage:</a>
+          </b>
           <ul>
             <j:forEach var="metric" items="${items}">
               <span id="coverage-value">
@@ -33,7 +35,9 @@
           </ul>
         </li>
         <li>
-          <b>Change Coverage:</b>
+          <b>
+            <a href="coverage/#changeCoverageTree">Change Coverage:</a>
+          </b>
           <ul>
             <j:forEach var="metric" items="${items}">
               <span id="change-coverage">

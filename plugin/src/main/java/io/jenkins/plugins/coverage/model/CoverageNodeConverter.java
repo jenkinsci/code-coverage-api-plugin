@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import io.jenkins.plugins.coverage.model.coverage.FileCoverageProcessor;
@@ -58,6 +59,15 @@ public class CoverageNodeConverter {
     }
 
     private CoverageNode createNode(final CoverageMetric metric, final CoverageResult result) {
+        if (metric.equals(CoverageMetric.METHOD)) {
+            Optional<String> line = result.getAdditionalProperty("lineNumber").stream().findAny();
+            if (line.isPresent() && line.get().matches("\\d+")) {
+                return new MethodCoverageNode(result.getName(), Integer.parseInt(line.get()));
+            }
+            // fallback if method line has not been set properly since this is a temporary workaround
+            // until the adapter structure has been replaced
+            return new MethodCoverageNode(result.getName(), 0);
+        }
         if (metric.equals(CoverageMetric.FILE)) {
             FileCoverageNode fileCoverageNode = new FileCoverageNode(result.getName(), result.getRelativeSourcePath());
             attachCoverageLineMapping(result, fileCoverageNode);

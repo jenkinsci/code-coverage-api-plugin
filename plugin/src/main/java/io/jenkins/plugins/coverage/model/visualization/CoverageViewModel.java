@@ -40,6 +40,7 @@ import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
 import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableModel;
 import io.jenkins.plugins.datatables.TableModel.DetailedColumnDefinition;
+import io.jenkins.plugins.datatables.options.SelectStyle;
 import io.jenkins.plugins.util.BuildResultNavigator;
 
 import static j2html.TagCreator.*;
@@ -338,7 +339,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public TableConfiguration getTableConfiguration() {
             TableConfiguration tableConfiguration = new TableConfiguration();
-            tableConfiguration.select("single");
+            tableConfiguration.select(SelectStyle.SINGLE);
             return tableConfiguration;
         }
 

@@ -34,6 +34,10 @@
 }
 
 /* View selection buttons */
+.btn {
+    outline: none !important;
+    box-shadow: none !important;
+}
 .btn-outline-secondary {
     color: #b4b4b4;
     border-color: #b4b4b4;

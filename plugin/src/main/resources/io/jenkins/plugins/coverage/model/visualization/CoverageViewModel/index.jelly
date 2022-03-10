@@ -22,7 +22,7 @@
       <div class="btn-group ms-3">
         <input type="radio" class="btn-check" name="options" id="overviewToggle" autocomplete="off" checked="true"/>
         <label class="btn btn-outline-secondary" for="overviewToggle"
-               onclick="coverageChartGenerator.toggleReportView()"
+               onclick="coverageChartGenerator.loadReportViewById('report-overview')"
                title="Show coverage overview">
           <i>
             <svg class="fa-svg-icon" width="25px" height="25px">
@@ -31,7 +31,8 @@
           </i>
         </label>
         <input type="radio" class="btn-check" name="options" id="detailToggle" autocomplete="off"/>
-        <label class="btn btn-outline-secondary" for="detailToggle" onclick="coverageChartGenerator.toggleReportView()"
+        <label class="btn btn-outline-secondary" for="detailToggle"
+               onclick="coverageChartGenerator.loadReportViewById('report-details')"
                title="Show coverage details">
           <i>
             <svg class="fa-svg-icon" width="25px" height="25px">
@@ -40,10 +41,11 @@
           </i>
         </label>
       </div>
+      <div id="menu-separator" class="vr ms-3"/>
       <div id="hide-button" class="vertical-center ms-3">
-        <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off" checked="true"/>
-        <label class="btn btn-outline-secondary" for="btn-check-outlined" title="Hide/Show coverage overview charts"
-               onclick="coverageChartGenerator.hideOverviewColumn()">
+        <input type="checkbox" class="btn-check" id="showOverviewChartsToggle" autocomplete="off" checked="true"/>
+        <label class="btn btn-outline-secondary" for="showOverviewChartsToggle" title="Hide/Show coverage overview charts"
+               onclick="coverageChartGenerator.toggleOverviewColumn()">
           <i>
             <svg class="fa-svg-icon" width="25px" height="25px">
               <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#table-columns"/>
