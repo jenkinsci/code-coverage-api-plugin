@@ -27,6 +27,7 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
+import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -122,6 +123,30 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * Returns whether the {@link Coverage} for the passed metric exists.
+     *
+     * @param coverageMetric
+     *         the metric to check
+     *
+     * @return {@code true} if a coverage is available for the specified metric
+     */
+    public boolean hasCoverage(final CoverageMetric coverageMetric) {
+        return getResult().getCoverage(coverageMetric).isSet();
+    }
+
+    /**
+     * Gets the {@link Coverage} for the passed metric.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return the coverage
+     */
+    public Coverage getCoverage(final CoverageMetric coverageMetric) {
+        return getResult().getCoverage(coverageMetric);
+    }
+
+    /**
      * Returns the possible reference build that has been used to compute the coverage delta.
      *
      * @return the reference build, if available
@@ -179,7 +204,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatDelta(final CoverageMetric metric) {
         Locale clientLocale = Functions.getCurrentLocale();
         if (hasDelta(metric)) {
-            return String.format(clientLocale, "%+.3f", difference.get(metric).doubleValue());
+            return FractionFormatter.formatDeltaFraction(difference.get(metric), clientLocale);
         }
         return Messages.Coverage_Not_Available();
     }
