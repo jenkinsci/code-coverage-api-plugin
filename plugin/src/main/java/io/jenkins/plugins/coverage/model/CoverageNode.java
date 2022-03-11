@@ -304,8 +304,30 @@ public class CoverageNode implements Serializable {
         SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricPercentages();
         SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricPercentages();
         metricPercentages.forEach((key, value) ->
-                deltaPercentages.put(key, value.subtract(referencePercentages.getOrDefault(key, Fraction.ZERO))));
+                deltaPercentages.put(key,
+                        saveSubtractFraction(value, referencePercentages.getOrDefault(key, Fraction.ZERO))));
         return deltaPercentages;
+    }
+
+    /**
+     * Calculates the difference between two fraction. Since there might be an arithmetic exception due to an overflow,
+     * the method handles it and calculates the difference based on the double values of the fractions.
+     *
+     * @param nominator
+     *         The nominator as a fraction
+     * @param denominator
+     *         The denominator as a fraction
+     *
+     * @return the difference as a fraction
+     */
+    private Fraction saveSubtractFraction(final Fraction nominator, final Fraction denominator) {
+        try {
+            return nominator.subtract(denominator);
+        }
+        catch (ArithmeticException e) {
+            double diff = nominator.doubleValue() - denominator.doubleValue();
+            return Fraction.getFraction(diff);
+        }
     }
 
     /**
@@ -325,6 +347,22 @@ public class CoverageNode implements Serializable {
                 .flatMap(List::stream).collect(Collectors.toList());
         if (metric.equals(searchMetric)) {
             childNodes.add(this);
+        }
+        return childNodes;
+    }
+
+    /**
+     * Returns recursively all nodes of the instance {@link FileCoverageNode}.
+     *
+     * @return all file coverage nodes
+     */
+    public List<FileCoverageNode> getAllFileCoverageNodes() {
+        List<FileCoverageNode> childNodes = children.stream()
+                .map(CoverageNode::getAllFileCoverageNodes)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        if (this instanceof FileCoverageNode) {
+            childNodes.add((FileCoverageNode) this);
         }
         return childNodes;
     }
@@ -425,15 +463,13 @@ public class CoverageNode implements Serializable {
     }
 
     public boolean hasChangeCoverage() {
-        return getAll(CoverageMetric.FILE).stream()
-                .map(node -> (FileCoverageNode) node)
+        return getAllFileCoverageNodes().stream()
                 .anyMatch(node -> node.getCoveragePerLine().keySet().stream()
                         .anyMatch(line -> node.getChangedCodeLines().contains(line)));
     }
 
     public boolean hasUnexpectedCoverageChanges() {
-        return getAll(CoverageMetric.FILE).stream()
-                .map(node -> (FileCoverageNode) node)
+        return getAllFileCoverageNodes().stream()
                 .anyMatch(node -> !node.getUnexpectedCoverageChanges().isEmpty());
     }
 
