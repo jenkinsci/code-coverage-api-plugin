@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import edu.hm.hafner.util.FilteredLog;
 
 import io.jenkins.plugins.coverage.model.Coverage;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
@@ -19,12 +18,10 @@ public class FileCoverageProcessor {
     public void attachUnexpectedCoveragesChanges(final CoverageNode node, final CoverageNode referenceNode,
             final FilteredLog log) {
         log.logInfo("Obtaining unexpected coverage changes...");
-        Map<String, FileCoverageNode> fileNodes = node.getAll(CoverageMetric.FILE).stream()
-                .map(fileNode -> (FileCoverageNode) fileNode)
+        Map<String, FileCoverageNode> fileNodes = node.getAllFileCoverageNodes().stream()
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
 
-        Map<String, FileCoverageNode> referenceFileNodes = referenceNode.getAll(CoverageMetric.FILE).stream()
-                .map(fileNode -> (FileCoverageNode) fileNode)
+        Map<String, FileCoverageNode> referenceFileNodes = referenceNode.getAllFileCoverageNodes().stream()
                 .filter(reference -> fileNodes.containsKey(reference.getPath()))
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
 

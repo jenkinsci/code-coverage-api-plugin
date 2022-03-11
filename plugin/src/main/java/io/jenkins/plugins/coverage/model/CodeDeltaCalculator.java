@@ -73,8 +73,7 @@ public class CodeDeltaCalculator {
     }
 
     private void setChangedFilesInCoverageTree(final CoverageNode coverageNode, final Delta delta) {
-        Map<String, CoverageNode> nodePathMapping = coverageNode.getAll(CoverageMetric.FILE).stream()
-                .map(node -> (FileCoverageNode) node)
+        Map<String, CoverageNode> nodePathMapping = coverageNode.getAllFileCoverageNodes().stream()
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
 
         delta.getFileChangesMap().values().stream()

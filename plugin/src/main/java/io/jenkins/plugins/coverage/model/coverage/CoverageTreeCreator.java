@@ -81,21 +81,18 @@ public class CoverageTreeCreator {
     }
 
     private void attachUnexpectedCoverageChangesLeaves(final CoverageNode node) {
-        node.getAll(CoverageMetric.FILE).stream()
-                .map(fileNode -> (FileCoverageNode) fileNode)
-                .forEach(fileNode -> {
-                    List<Coverage> changes = fileNode.getCoveragePerLine()
-                            .entrySet().stream()
-                            .filter(entry -> fileNode.getUnexpectedCoverageChanges().containsKey(entry.getKey()))
-                            .map(Entry::getValue)
-                            .collect(Collectors.toList());
-                    createLeaves(fileNode, changes);
-                });
+        node.getAllFileCoverageNodes().forEach(fileNode -> {
+            List<Coverage> changes = fileNode.getCoveragePerLine()
+                    .entrySet().stream()
+                    .filter(entry -> fileNode.getUnexpectedCoverageChanges().containsKey(entry.getKey()))
+                    .map(Entry::getValue)
+                    .collect(Collectors.toList());
+            createLeaves(fileNode, changes);
+        });
     }
 
     private void attachChangeCoverageLeaves(final CoverageNode node) {
-        node.getAll(CoverageMetric.FILE).stream()
-                .map(fileNode -> (FileCoverageNode) fileNode)
+        node.getAllFileCoverageNodes()
                 .forEach(fileNode -> {
                     List<Coverage> changes = fileNode.getCoveragePerLine()
                             .entrySet().stream()

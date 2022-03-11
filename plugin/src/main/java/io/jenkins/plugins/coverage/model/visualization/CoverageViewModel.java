@@ -368,7 +368,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
-            return root.getAll(CoverageMetric.FILE).stream()
+            return root.getAllFileCoverageNodes().stream()
                     .map((CoverageNode file) -> new CoverageRow(file, browserLocale))
                     .collect(Collectors.toList());
         }
