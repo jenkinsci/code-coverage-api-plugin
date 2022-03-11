@@ -6,12 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.TreeMapNode;
 
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
-
 import io.jenkins.plugins.coverage.model.AbstractCoverageTest;
 import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 import static org.assertj.core.api.Assertions.*;
 

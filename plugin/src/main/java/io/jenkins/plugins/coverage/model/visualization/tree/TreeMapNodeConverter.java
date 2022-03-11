@@ -2,13 +2,12 @@ package io.jenkins.plugins.coverage.model.visualization.tree;
 
 import edu.hm.hafner.echarts.TreeMapNode;
 
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
-
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.util.FractionFormatter;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 /**
  * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of {@link TreeMapNode ECharts tree map
@@ -24,7 +23,7 @@ public class TreeMapNodeConverter {
         this.colorProvider = colorProvider;
     }
 
-    TreeMapNode toTeeChartModel(final CoverageNode node) {
+    public TreeMapNode toTeeChartModel(final CoverageNode node) {
         TreeMapNode root = toTreeMapNode(node);
         for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();

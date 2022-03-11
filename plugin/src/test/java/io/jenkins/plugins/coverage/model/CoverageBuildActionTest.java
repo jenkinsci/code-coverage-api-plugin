@@ -11,11 +11,10 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
+import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.model.testutil.JobStubs.*;
-import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -78,6 +77,6 @@ class CoverageBuildActionTest {
         HealthReport healthReport = mock(HealthReport.class);
         TreeMap<CoverageMetric, Fraction> deltas = new TreeMap<>();
         deltas.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
-        return new CoverageBuildAction(build, root, healthReport, "-", deltas, false);
+        return new CoverageBuildAction(build, root, healthReport, "-", deltas, new TreeMap<>(), false);
     }
 }

@@ -14,7 +14,7 @@ import edu.hm.hafner.echarts.LinesDataSet;
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
-import static io.jenkins.plugins.coverage.model.ResultStubs.*;
+import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
