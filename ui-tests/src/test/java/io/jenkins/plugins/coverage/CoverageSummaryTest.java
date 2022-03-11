@@ -153,8 +153,8 @@ public class CoverageSummaryTest extends UiTest {
         expectedCoverage.put("Line", 91.02);
         expectedCoverage.put("Branch", 93.97);
         List<Double> expectedReferenceCoverage = new ArrayList<>();
-        expectedReferenceCoverage.add(-0.045);
-        expectedReferenceCoverage.add(0.054);
+        expectedReferenceCoverage.add(-4.5);
+        expectedReferenceCoverage.add(5.38);
 
         verifySummaryWithReferenceBuild(build, expectedCoverage, expectedReferenceCoverage);
     }

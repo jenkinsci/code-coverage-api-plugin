@@ -26,6 +26,8 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
@@ -55,7 +57,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
     private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
-    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
+    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
+    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter(COLOR_PROVIDER);
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
 
     private static final CoverageTreeCreator COVERAGE_CALCULATOR = new CoverageTreeCreator();
