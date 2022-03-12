@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-import io.jenkins.plugins.coverage.model.coverage.FileCoverageProcessor;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -18,8 +19,6 @@ import io.jenkins.plugins.coverage.targets.Ratio;
  * @author Ullrich Hafner
  */
 public class CoverageNodeConverter {
-
-    private static final FileCoverageProcessor FILE_COVERAGE_PROCESSOR = new FileCoverageProcessor();
 
     private final Map<CoverageNode, CoveragePaint> paintedFiles = new HashMap<>();
 
@@ -84,8 +83,25 @@ public class CoverageNodeConverter {
         if (paint != null) {
             node.setUncoveredLines(paint.getUncoveredLines());
             paintedFiles.put(node, paint);
-            FILE_COVERAGE_PROCESSOR.attachCoveragePerLine(node, paint);
+            attachCoveragePerLine(node, paint);
         }
+    }
+
+    private void attachCoveragePerLine(final FileCoverageNode node, final CoveragePaint paint) {
+        int[] lines = paint.getAllLines();
+        SortedMap<Integer, Coverage> coverageDetails = new TreeMap<>();
+        for (int line : lines) {
+            if (paint.getBranchTotal(line) > 0) {
+                int covered = paint.getBranchCoverage(line);
+                int missed = paint.getBranchTotal(line) - covered;
+                coverageDetails.put(line, new Coverage(paint.getBranchCoverage(line), missed));
+            }
+            else {
+                int covered = paint.getHits(line) > 0 ? 1 : 0;
+                coverageDetails.put(line, new Coverage(covered, 1 - covered));
+            }
+        }
+        node.setCoveragePerLine(coverageDetails);
     }
 
     public Set<Entry<CoverageNode, CoveragePaint>> getPaintedFiles() {

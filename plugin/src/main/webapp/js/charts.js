@@ -576,15 +576,17 @@ const CoverageChartGenerator = function ($) {
         const divTree = document.getElementById("tree-column");
         if (show) {
             div.style.display = "block";
-            divTree.classList.add("ms-3")
-            redrawTrendChart();
+            divTree.classList.add("ms-3");
         }
         else {
             div.style.display = "none";
-            divTree.classList.remove("ms-3")
+            divTree.classList.remove("ms-3");
         }
-        localStorage.setItem('showOverviewColumn', show);
+        localStorage.setItem('showOverviewColumn', '' + show);
         fireResizeEvent();
+        $(document).ready(function () {
+            $('#showOverviewChartsToggle').prop('checked', show);
+        });
     }
 
     /**

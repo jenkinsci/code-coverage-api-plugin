@@ -43,7 +43,7 @@
       </div>
       <div id="menu-separator" class="vr ms-3"/>
       <div id="hide-button" class="vertical-center ms-3">
-        <input type="checkbox" class="btn-check" id="showOverviewChartsToggle" autocomplete="off" checked="true"/>
+        <input type="checkbox" class="btn-check" id="showOverviewChartsToggle" autocomplete="off"/>
         <label class="btn btn-outline-secondary" for="showOverviewChartsToggle" title="Hide/Show coverage overview charts"
                onclick="coverageChartGenerator.toggleOverviewColumn()">
           <i>
