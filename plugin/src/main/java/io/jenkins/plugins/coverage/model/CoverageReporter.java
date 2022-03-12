@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 
@@ -13,11 +14,13 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import io.jenkins.plugins.coverage.model.coverage.CoverageDeltaProcessor;
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
-import io.jenkins.plugins.coverage.model.coverage.FileCoverageProcessor;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.forensics.delta.model.Delta;
+import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.util.LogHandler;
 
@@ -50,7 +53,8 @@ public class CoverageReporter {
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final SourceCodeProperties sourceCodeProperties, final HealthReport healthReport)
+            final TaskListener listener, final SourceCodeProperties sourceCodeProperties,
+            final HealthReport healthReport)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -69,20 +73,34 @@ public class CoverageReporter {
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
 
+            // calculate code delta
             CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener);
-            codeDeltaCalculator.calculateCodeDeltaInTree(referenceAction.getOwner(), rootNode, log);
-            logHandler.log(log);
+            Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
 
-            SortedMap<CoverageMetric, Fraction> delta = rootNode.computeDelta(referenceAction.getResult());
-            FileCoverageProcessor fileCoverageProcessor = new FileCoverageProcessor();
-            fileCoverageProcessor.attachUnexpectedCoveragesChanges(rootNode, referenceAction.getResult(), log);
-            logHandler.log(log);
+            if (delta.isPresent()) {
+                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
+                CoverageDeltaProcessor coverageDeltaProcessor = new CoverageDeltaProcessor();
 
+                // calculate code changes
+                coverageDeltaProcessor.attachChangedCodeLines(rootNode, codeChanges);
+                logHandler.log(log);
+
+                // unexpected coverage changes
+                coverageDeltaProcessor.attachUnexpectedCoveragesChanges(rootNode, referenceAction.getResult(),
+                        codeChanges, log);
+                logHandler.log(log);
+            }
+
+            // filtered coverage tree (only changed files)
             CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
             CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
 
+            // project coverage delta
+            SortedMap<CoverageMetric, Fraction> coverageDelta = rootNode.computeDelta(referenceAction.getResult());
+
             action = new CoverageBuildAction(build, rootNode, healthReport,
-                    referenceAction.getOwner().getExternalizableId(), delta, changeCoverageRoot.getMetricPercentages());
+                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
+                    changeCoverageRoot.getMetricPercentages());
         }
         else {
             action = new CoverageBuildAction(build, rootNode, healthReport);

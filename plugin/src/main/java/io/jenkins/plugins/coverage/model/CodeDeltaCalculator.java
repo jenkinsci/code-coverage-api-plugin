@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,9 +21,8 @@ import hudson.scm.SCM;
 
 import io.jenkins.plugins.forensics.delta.DeltaCalculator;
 import io.jenkins.plugins.forensics.delta.DeltaCalculatorFactory;
-import io.jenkins.plugins.forensics.delta.model.Change;
-import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
 import io.jenkins.plugins.forensics.delta.model.Delta;
+import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.delta.model.FileEditType;
 import io.jenkins.plugins.forensics.git.delta.GitDeltaCalculatorFactory;
 
@@ -41,8 +39,7 @@ public class CodeDeltaCalculator {
         this.listener = listener;
     }
 
-    public void calculateCodeDeltaInTree(final Run<?, ?> referenceBuild, final CoverageNode rootNode,
-            final FilteredLog log) {
+    public Optional<Delta> calculateCodeDeltaToReference(final Run<?, ?> referenceBuild, final FilteredLog log) {
         BuildData buildAction = build.getAction(BuildData.class);
         BuildData previousBuildAction = referenceBuild.getAction(BuildData.class);
 
@@ -51,10 +48,17 @@ public class CodeDeltaCalculator {
             String previousCommit = previousBuildAction.lastBuild.getRevision().getSha1String();
 
             DeltaCalculator deltaCalculator = getDeltaCalculator();
-            Optional<Delta> delta = deltaCalculator.calculateDelta(commit, previousCommit, log);
-
-            delta.ifPresent(value -> setChangedFilesInCoverageTree(rootNode, value));
+            return deltaCalculator.calculateDelta(commit, previousCommit, log);
         }
+        return Optional.empty();
+    }
+
+    public Map<String, FileChanges> getCoverageRelevantChanges(final Delta delta) {
+        return delta.getFileChangesMap().values().stream()
+                .filter(fileChange -> fileChange.getFileEditType().equals(FileEditType.MODIFY)
+                        || fileChange.getFileEditType().equals(FileEditType.ADD))
+                .collect(Collectors.toMap(
+                        fileChange -> getFullyQualifiedFileName(fileChange.getFileName()), Function.identity()));
     }
 
     private DeltaCalculator getDeltaCalculator() {
@@ -72,34 +76,7 @@ public class CodeDeltaCalculator {
                 .findDeltaCalculator(build, Collections.singleton(workspace), listener, log);
     }
 
-    private void setChangedFilesInCoverageTree(final CoverageNode coverageNode, final Delta delta) {
-        Map<String, CoverageNode> nodePathMapping = coverageNode.getAllFileCoverageNodes().stream()
-                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
-
-        delta.getFileChangesMap().values().stream()
-                .filter(fileChange -> fileChange.getFileEditType().equals(FileEditType.MODIFY)
-                        || fileChange.getFileEditType().equals(FileEditType.ADD))
-                .forEach(fileChange -> {
-                    // remove maven default folders if existent since they are not required
-                    String path = fileChange.getFileName()
-                            .replace(Paths.get("src", "main", "java") + File.separator, "");
-                    if (nodePathMapping.containsKey(path)) {
-                        CoverageNode changedNode = nodePathMapping.get(path);
-                        if (changedNode instanceof FileCoverageNode) {
-                            attachChangedCodeLines((FileCoverageNode) changedNode,
-                                    fileChange.getChangesByType(ChangeEditType.INSERT));
-                            attachChangedCodeLines((FileCoverageNode) changedNode,
-                                    fileChange.getChangesByType(ChangeEditType.REPLACE));
-                        }
-                    }
-                });
-    }
-
-    private void attachChangedCodeLines(final FileCoverageNode changedNode, final Set<Change> relevantChanges) {
-        for (Change change : relevantChanges) {
-            for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
-                changedNode.addChangedCodeLine(i);
-            }
-        }
+    private String getFullyQualifiedFileName(final String path) {
+        return path.replace(Paths.get("src", "main", "java") + File.separator, "");
     }
 }
