@@ -46,10 +46,8 @@ public class FileCoverageDeltaProcessor {
             if (nodePathMapping.containsKey(path)) {
                 CoverageNode changedNode = nodePathMapping.get(path);
                 if (changedNode instanceof FileCoverageNode) {
-                    attachChanges((FileCoverageNode) changedNode,
-                            fileChange.getChangesByType(ChangeEditType.INSERT));
-                    attachChanges((FileCoverageNode) changedNode,
-                            fileChange.getChangesByType(ChangeEditType.REPLACE));
+                    attachChanges((FileCoverageNode) changedNode, fileChange.getChangesByType(ChangeEditType.INSERT));
+                    attachChanges((FileCoverageNode) changedNode, fileChange.getChangesByType(ChangeEditType.REPLACE));
                 }
             }
         });
@@ -93,27 +91,32 @@ public class FileCoverageDeltaProcessor {
                 .filter(reference -> fileNodes.containsKey(reference.getPath()))
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
 
-        fileNodes.forEach((path, fileNode) ->
-                getReferenceCoveragePerLine(referenceFileNodes, path).ifPresent(referenceCoveragePerLine -> {
-                    SortedMap<Integer, Coverage> referenceCoverageMapping;
-                    if (codeChanges.containsKey(path)) {
-                        referenceCoverageMapping =
-                                getAdjustedCoveragePerLine(referenceCoveragePerLine, codeChanges.get(path));
-                    }
-                    else {
-                        referenceCoverageMapping = referenceCoveragePerLine;
-                    }
-                    fileNode.getCoveragePerLine().forEach((line, coverage) -> {
-                        if (!fileNode.getChangedCodeLines().contains(line)) {
-                            Coverage referenceCoverage = referenceCoverageMapping.get(line);
-                            int covered = coverage.getCovered();
-                            int referenceCovered = referenceCoverage.getCovered();
-                            if (covered != referenceCovered) {
-                                fileNode.putIndirectCoverageChange(line, covered - referenceCovered);
-                            }
+        for (Map.Entry<String, FileCoverageNode> entry : fileNodes.entrySet()) {
+            String path = entry.getKey();
+            FileCoverageNode fileNode = entry.getValue();
+            Optional<SortedMap<Integer, Coverage>> referenceCoveragePerLine =
+                    getReferenceCoveragePerLine(referenceFileNodes, path);
+            if (referenceCoveragePerLine.isPresent()) {
+                SortedMap<Integer, Coverage> referenceCoverageMapping;
+                if (codeChanges.containsKey(path)) {
+                    referenceCoverageMapping =
+                            getAdjustedCoveragePerLine(referenceCoveragePerLine.get(), codeChanges.get(path));
+                }
+                else {
+                    referenceCoverageMapping = referenceCoveragePerLine.get();
+                }
+                fileNode.getCoveragePerLine().forEach((line, coverage) -> {
+                    if (!fileNode.getChangedCodeLines().contains(line)) {
+                        Coverage referenceCoverage = referenceCoverageMapping.get(line);
+                        int covered = coverage.getCovered();
+                        int referenceCovered = referenceCoverage.getCovered();
+                        if (covered != referenceCovered) {
+                            fileNode.putIndirectCoverageChange(line, covered - referenceCovered);
                         }
-                    });
-                }));
+                    }
+                });
+            }
+        }
     }
 
     /**
