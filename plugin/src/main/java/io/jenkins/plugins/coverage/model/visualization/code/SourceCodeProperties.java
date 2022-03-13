@@ -6,6 +6,11 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 import io.jenkins.plugins.prism.SourceCodeRetention;
 
+/**
+ * Wraps the properties which are required for processing source code files.
+ *
+ * @author Florian Orendi
+ */
 public class SourceCodeProperties {
 
     private final Set<String> requestedSourceDirectories;
@@ -22,7 +27,8 @@ public class SourceCodeProperties {
      * @param sourceCodeRetention
      *         the source code retention strategy
      */
-    public SourceCodeProperties(@NonNull final Set<String> requestedSourceDirectories, @NonNull final String sourceCodeEncoding,
+    public SourceCodeProperties(@NonNull final Set<String> requestedSourceDirectories,
+            @NonNull final String sourceCodeEncoding,
             @NonNull final SourceCodeRetention sourceCodeRetention) {
         this.requestedSourceDirectories = requestedSourceDirectories;
         this.sourceCodeEncoding = sourceCodeEncoding;

@@ -46,6 +46,11 @@ public final class CoverageLeaf implements Serializable {
         return Coverage.NO_COVERAGE;
     }
 
+    /**
+     * Creates a copy of this leaf.
+     *
+     * @return the copy
+     */
     public CoverageLeaf copyLeaf() {
         return new CoverageLeaf(metric, coverage.copy());
     }

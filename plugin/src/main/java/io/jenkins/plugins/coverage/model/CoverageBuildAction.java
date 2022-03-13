@@ -45,6 +45,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
+    /** The coverage report icon. */
     public static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
 
     private static final long serialVersionUID = -6023811049340671399L;
@@ -88,10 +89,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the coverage results to persist with this action
      * @param healthReport
      *         health report
-     * @param delta
-     *         the delta coverage with respect to the reference build
      * @param referenceBuildId
      *         the ID of the reference build
+     * @param delta
+     *         the delta coverage with respect to the reference build
+     * @param changeCoverage
+     *         the change coverage with respect to the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
@@ -222,6 +225,15 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return Messages.Coverage_Not_Available();
     }
 
+    /**
+     * Returns a formatted and localized String representation of the change coverage for the specified metric (with
+     * respect to the reference build).
+     *
+     * @param metric
+     *         the metric to get the coverage for
+     *
+     * @return the change coverage metric
+     */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatChangeCoverage(final CoverageMetric metric) {
         String coverage = Messages.Coverage_Not_Available();
@@ -316,7 +328,14 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         }
     }
 
+    /**
+     * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}.
+     */
     public static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
+
+        /**
+         * Creates a XML stream for {@link CoverageNode}.
+         */
         public CoverageXmlStream() {
             super(CoverageNode.class);
         }

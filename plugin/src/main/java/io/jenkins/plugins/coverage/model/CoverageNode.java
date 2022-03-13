@@ -60,6 +60,13 @@ public class CoverageNode implements Serializable {
         this.name = name;
     }
 
+    /**
+     * Gets the parent node.
+     *
+     * @return the parent, if existent
+     * @throws IllegalStateException
+     *         if no parent exists
+     */
     public CoverageNode getParent() {
         if (parent == null) {
             throw new IllegalStateException("Parent is not set");
@@ -77,7 +84,7 @@ public class CoverageNode implements Serializable {
     }
 
     protected String mergePath(final String localPath) {
-        // mind that default packages are named '-'
+        // default packages are named '-' at the moment
         if ("-".equals(localPath)) {
             return StringUtils.EMPTY;
         }
@@ -462,15 +469,72 @@ public class CoverageNode implements Serializable {
         }
     }
 
+    /**
+     * Checks whether the coverage tree contains a change coverage.
+     *
+     * @return {@code true} whether change coverage exists, else {@code false}
+     */
     public boolean hasChangeCoverage() {
         return getAllFileCoverageNodes().stream()
                 .anyMatch(node -> node.getCoveragePerLine().keySet().stream()
                         .anyMatch(line -> node.getChangedCodeLines().contains(line)));
     }
 
-    public boolean hasUnexpectedCoverageChanges() {
+    /**
+     * Checks whether the coverage tree contains indirect coverage changes.
+     *
+     * @return {@code true} whether indirect coverage changes exist, else {@code false}
+     */
+    public boolean hasIndirectCoverageChanges() {
         return getAllFileCoverageNodes().stream()
-                .anyMatch(node -> !node.getUnexpectedCoverageChanges().isEmpty());
+                .anyMatch(node -> !node.getIndirectCoverageChanges().isEmpty());
+    }
+
+    /**
+     * Creates a deep copy of the coverage tree with this as root node.
+     *
+     * @return the root node of the copied tree
+     */
+    public CoverageNode copyTree() {
+        CoverageNode copy = new CoverageNode(metric, name);
+        copyChildrenAndLeaves(this, copy);
+        return copy;
+    }
+
+    /**
+     * Recursively copies the coverage tree with the passed {@link CoverageNode} as root.
+     *
+     * @param copiedParent
+     *         The root node
+     *
+     * @return the copied tree
+     */
+    protected CoverageNode copyTree(final CoverageNode copiedParent) {
+        CoverageNode copy = new CoverageNode(metric, name);
+        if (copiedParent != null) {
+            copy.setParent(copiedParent);
+        }
+
+        copyChildrenAndLeaves(this, copy);
+
+        return copy;
+    }
+
+    /**
+     * Copies the children and leaves of a {@link CoverageNode} to another one.
+     *
+     * @param from
+     *         The node which values should be copied
+     * @param to
+     *         The node which receives the copied values
+     */
+    protected void copyChildrenAndLeaves(final CoverageNode from, final CoverageNode to) {
+        from.getChildren().stream()
+                .map(node -> node.copyTree(from))
+                .forEach(copy -> to.getChildren().add(copy));
+        from.getLeaves().stream()
+                .map(CoverageLeaf::copyLeaf)
+                .forEach(copy -> to.getLeaves().add(copy));
     }
 
     private void insertPackage(final CoverageNode aPackage, final Deque<String> packageLevels) {
@@ -494,32 +558,6 @@ public class CoverageNode implements Serializable {
         CoverageNode newNode = new PackageCoverageNode(childName);
         add(newNode);
         return newNode;
-    }
-
-    public CoverageNode copyTree() {
-        CoverageNode copy = new CoverageNode(metric, name);
-        copyChildrenAndLeaves(this, copy);
-        return copy;
-    }
-
-    protected CoverageNode copyTree(final CoverageNode copiedParent) {
-        CoverageNode copy = new CoverageNode(metric, name);
-        if (copiedParent != null) {
-            copy.setParent(copiedParent);
-        }
-
-        copyChildrenAndLeaves(this, copy);
-
-        return copy;
-    }
-
-    protected void copyChildrenAndLeaves(final CoverageNode from, final CoverageNode to) {
-        from.getChildren().stream()
-                .map(node -> node.copyTree(from))
-                .forEach(copy -> to.getChildren().add(copy));
-        from.getLeaves().stream()
-                .map(CoverageLeaf::copyLeaf)
-                .forEach(copy -> to.getLeaves().add(copy));
     }
 
     public void setUncoveredLines(final int... uncoveredLines) {

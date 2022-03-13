@@ -14,7 +14,7 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.model.coverage.CoverageDeltaProcessor;
+import io.jenkins.plugins.coverage.model.coverage.FileCoverageDeltaProcessor;
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
@@ -78,15 +78,15 @@ public class CoverageReporter {
             Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
 
             if (delta.isPresent()) {
-                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
-                CoverageDeltaProcessor coverageDeltaProcessor = new CoverageDeltaProcessor();
+                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta.get());
+                FileCoverageDeltaProcessor fileCoverageDeltaProcessor = new FileCoverageDeltaProcessor();
 
                 // calculate code changes
-                coverageDeltaProcessor.attachChangedCodeLines(rootNode, codeChanges);
+                fileCoverageDeltaProcessor.attachChangedCodeLines(rootNode, codeChanges);
                 logHandler.log(log);
 
-                // unexpected coverage changes
-                coverageDeltaProcessor.attachUnexpectedCoveragesChanges(rootNode, referenceAction.getResult(),
+                // indirect coverage changes
+                fileCoverageDeltaProcessor.attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(),
                         codeChanges, log);
                 logHandler.log(log);
             }

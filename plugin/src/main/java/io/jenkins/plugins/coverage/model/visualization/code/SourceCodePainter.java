@@ -18,12 +18,25 @@ import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 
+/**
+ * Processes the source code painting for highlighting code coverage.
+ */
 public class SourceCodePainter {
 
     private final Run<?, ?> build;
     private final FilePath workspace;
     private final SourceCodeProperties sourceCodeProperties;
 
+    /**
+     * Creates a painter for the passed build, using the passed properties.
+     *
+     * @param build
+     *         The build which processes the source code
+     * @param workspace
+     *         The workspace which contains the source code files
+     * @param sourceCodeProperties
+     *         The {@link SourceCodeProperties} properties for processing the painting
+     */
     public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace,
             @NonNull final SourceCodeProperties sourceCodeProperties) {
         this.build = build;
@@ -31,6 +44,17 @@ public class SourceCodePainter {
         this.sourceCodeProperties = sourceCodeProperties;
     }
 
+    /**
+     * Processes the source code painting.
+     *
+     * @param paintedFiles
+     *         The files to be painted together with the information which lines has to be highlighted
+     * @param log
+     *         The log
+     *
+     * @throws InterruptedException
+     *         if the painting process has been interrupted
+     */
     public void processSourceCodePainting(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
             final FilteredLog log)
             throws InterruptedException {

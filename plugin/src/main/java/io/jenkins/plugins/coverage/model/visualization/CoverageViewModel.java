@@ -117,6 +117,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
     }
 
+    /**
+     * Returns the root of the filtered tree of change coverage nodes for the ECharts treemap. This tree is used as
+     * model for the chart on the client side.
+     *
+     * @return the tree of change coverage nodes for the ECharts treemap
+     */
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeMapNode getChangeCoverageTree() {
@@ -124,10 +130,16 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTree);
     }
 
+    /**
+     * Returns the root of the filtered tree of indirect coverage changes for the ECharts treemap. This tree is used as
+     * model for the chart on the client side.
+     *
+     * @return the tree of indirect coverage changes nodes for the ECharts treemap
+     */
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageChangesTree() {
-        CoverageNode coverageChangesTree = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(getNode());
+        CoverageNode coverageChangesTree = COVERAGE_CALCULATOR.createIndirectCoverageChangesTree(getNode());
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(coverageChangesTree);
     }
 
@@ -147,7 +159,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             root = COVERAGE_CALCULATOR.createChangeCoverageTree(root);
         }
         else if ("coverage-changes-table".equals(tableId)) {
-            root = COVERAGE_CALCULATOR.createUnexpectedCoverageChangesTree(root);
+            root = COVERAGE_CALCULATOR.createIndirectCoverageChangesTree(root);
         }
         return new CoverageTableModel(root, tableId);
     }
@@ -196,6 +208,15 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 .orElse(StringUtils.EMPTY);
     }
 
+    /**
+     * Gets the source code of the file which is represented by the passed hash code. The coverage of the source code is
+     * highlighted by using HTML.
+     *
+     * @param fileHash
+     *         The hash code of the requested file
+     *
+     * @return the highlighted source code
+     */
     @JavaScriptMethod
     public String getSourceCode(final String fileHash) {
         Optional<CoverageNode> targetResult
@@ -222,6 +243,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Returns whether the source file is available in Jenkins build folder.
      *
+     * @param coverageNode
+     *         The {@link CoverageNode} which is checked if there is a source file available
+     *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable(final CoverageNode coverageNode) {
@@ -231,6 +255,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Returns whether the source file is available in Jenkins build folder in the old format of the plugin versions
      * less than 2.1.0.
+     *
+     * @param coverageNode
+     *         The {@link CoverageNode} which is checked if there is a source file available
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
@@ -263,6 +290,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Returns whether the source file is available in Jenkins build folder in the new format of the plugin versions
      * greater or equal than 2.1.0.
+     *
+     * @param coverageNode
+     *         The {@link CoverageNode} which is checked if there is a source file available
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */

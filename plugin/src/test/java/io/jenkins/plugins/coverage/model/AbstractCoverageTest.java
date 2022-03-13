@@ -33,6 +33,14 @@ public class AbstractCoverageTest extends ResourceTest {
         Locale.setDefault(Locale.ENGLISH);
     }
 
+    /**
+     * Reads the {@link CoverageResult} from a coverage report.
+     *
+     * @param fileName
+     *         The name of the coverage report file
+     *
+     * @return the parsed coverage results
+     */
     public CoverageResult readResult(final String fileName) {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("unused");
@@ -46,6 +54,14 @@ public class AbstractCoverageTest extends ResourceTest {
         }
     }
 
+    /**
+     * Reads the {@link CoverageNode} from a coverage report.
+     *
+     * @param fileName
+     *         The name of the coverage report file
+     *
+     * @return the parsed coverage tree
+     */
     public CoverageNode readNode(final String fileName) {
         return new CoverageNodeConverter().convert(readResult(fileName));
     }

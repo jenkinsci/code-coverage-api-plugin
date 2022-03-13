@@ -81,9 +81,9 @@
                 <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTree">Change Coverage</a>
               </li>
             </j:if>
-            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+            <j:if test="${it.getNode().hasIndirectCoverageChanges()}">
               <li class="nav-item" id="coverageChangesTreeNav">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTree">Coverage Changes</a>
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTree">Indirect Coverage Changes</a>
               </li>
             </j:if>
           </ul>
@@ -96,7 +96,7 @@
                 <div id="change-coverage" class="graph-cursor-pointer details-chart h-100"/>
               </div>
             </j:if>
-            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+            <j:if test="${it.getNode().hasIndirectCoverageChanges()}">
               <div role="tabpanel" id="coverageChangesTree" class="tab-pane fade h-100">
                 <div id="coverage-changes" class="graph-cursor-pointer details-chart h-100"/>
               </div>
@@ -112,17 +112,17 @@
                  class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
           <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
             <li class="nav-item">
-              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
+              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">Project Coverage</a>
             </li>
             <j:if test="${it.getNode().hasChangeCoverage()}">
               <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">File Change Coverage
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">Change Coverage
                 </a>
               </li>
             </j:if>
-            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+            <j:if test="${it.getNode().hasIndirectCoverageChanges()}">
               <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">File Coverage Changes
+                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">Indirect Coverage Changes
                 </a>
               </li>
             </j:if>
@@ -136,7 +136,7 @@
                 <dt:table model="${it.getTableModel('change-coverage-table')}"/>
               </div>
             </j:if>
-            <j:if test="${it.getNode().hasUnexpectedCoverageChanges()}">
+            <j:if test="${it.getNode().hasIndirectCoverageChanges()}">
               <div role="tabpanel" id="coverageChangesTable" class="tab-pane fade">
                 <dt:table model="${it.getTableModel('coverage-changes-table')}"/>
               </div>
