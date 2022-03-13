@@ -70,8 +70,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the covered percentage
      * @see #formatCoveredPercentage(Locale)
@@ -114,8 +114,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the missed percentage
      */
@@ -155,6 +155,15 @@ public final class Coverage implements Serializable {
                 missed + additional.getMissed());
     }
 
+    /**
+     * Creates a copy of this.
+     *
+     * @return the copy
+     */
+    public Coverage copy() {
+        return new Coverage(covered, missed);
+    }
+
     @Override
     public String toString() {
         int total = getTotal();
@@ -170,10 +179,6 @@ public final class Coverage implements Serializable {
 
     public boolean isSet() {
         return getTotal() > 0;
-    }
-
-    public Coverage copy() {
-        return new Coverage(covered, missed);
     }
 
     @Override
