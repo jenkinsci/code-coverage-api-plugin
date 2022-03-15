@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model.coverage;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -131,7 +132,7 @@ public class CoverageTreeCreator {
                             .filter(entry -> fileNode.getChangedCodeLines().contains(entry.getKey()))
                             .map(Entry::getValue)
                             .collect(Collectors.toList());
-                    createLeaves(fileNode, changes);
+                    createChangeCoverageLeaves(fileNode, changes);
                 });
     }
 
@@ -143,35 +144,72 @@ public class CoverageTreeCreator {
      *         The node which contains indirect coverage changes
      */
     private void attachIndirectCoverageChangesLeaves(final CoverageNode node) {
-        node.getAllFileCoverageNodes().forEach(fileNode -> {
-            List<Coverage> changes = fileNode.getCoveragePerLine()
-                    .entrySet().stream()
-                    .filter(entry -> fileNode.getIndirectCoverageChanges().containsKey(entry.getKey()))
-                    .map(Entry::getValue)
-                    .collect(Collectors.toList());
-            createLeaves(fileNode, changes);
-        });
+        node.getAllFileCoverageNodes().stream()
+                .filter(fileNode -> !fileNode.getIndirectCoverageChanges().isEmpty())
+                .forEach(this::createIndirectCoverageChangesLeaves);
     }
 
     /**
-     * Creates both a line- and a branch-coverage leaf for the passed {@link FileCoverageNode node}.
+     * Creates both a line and a branch change coverage leaf for the passed {@link FileCoverageNode node}.
      *
      * @param fileNode
      *         The node the leaves are attached to
      * @param changes
      *         The {@link Coverage} to be represented by the leaves
      */
-    private void createLeaves(final FileCoverageNode fileNode, final List<Coverage> changes) {
+    private void createChangeCoverageLeaves(final FileCoverageNode fileNode, final List<Coverage> changes) {
         Coverage lineCoverage = Coverage.NO_COVERAGE;
         Coverage branchCoverage = Coverage.NO_COVERAGE;
         for (Coverage change : changes) {
+            int covered = change.getCovered() > 0 ? 1 : 0;
             if (change.getTotal() > 1) {
                 branchCoverage = branchCoverage.add(new Coverage(change.getCovered(), change.getMissed()));
+                lineCoverage = lineCoverage.add(new Coverage(covered, 1 - covered));
             }
-            int covered = change.getCovered() > 0 ? 1 : 0;
-            int missed = change.getMissed() > 0 ? 1 : 0;
-            lineCoverage = lineCoverage.add(new Coverage(covered, missed));
+            else {
+                int missed = change.getMissed() > 0 ? 1 : 0;
+                lineCoverage = lineCoverage.add(new Coverage(covered, missed));
+            }
+        }
+        if (lineCoverage.isSet()) {
+            CoverageLeaf lineCoverageLeaf = new CoverageLeaf(CoverageMetric.LINE, lineCoverage);
+            fileNode.add(lineCoverageLeaf);
+        }
+        if (branchCoverage.isSet()) {
+            CoverageLeaf branchCoverageLeaf = new CoverageLeaf(CoverageMetric.BRANCH, branchCoverage);
+            fileNode.add(branchCoverageLeaf);
+        }
+    }
 
+    /**
+     * Creates both a line and a branch indirect coverage changes leaf for the passed {@link FileCoverageNode node}. The
+     * leaves represent the delta for a file regarding the amount of lines / branches that got hit by tests.
+     *
+     * @param fileNode
+     *         The node the leaves are attached to
+     */
+    private void createIndirectCoverageChangesLeaves(final FileCoverageNode fileNode) {
+        Coverage lineCoverage = Coverage.NO_COVERAGE;
+        Coverage branchCoverage = Coverage.NO_COVERAGE;
+        for (Map.Entry<Integer, Integer> change : fileNode.getIndirectCoverageChanges().entrySet()) {
+            int delta = change.getValue();
+            Coverage currentCoverage = fileNode.getCoveragePerLine().get(change.getKey());
+            if (delta > 0) {
+                if (delta == currentCoverage.getCovered()) {
+                    lineCoverage = lineCoverage.add(new Coverage(1, 0));
+                }
+                if (currentCoverage.getTotal() > 1) {
+                    branchCoverage = branchCoverage.add(new Coverage(delta, 0));
+                }
+            }
+            else if (delta < 0) {
+                if (currentCoverage.getCovered() == 0) {
+                    lineCoverage = lineCoverage.add(new Coverage(0, 1));
+                }
+                if (currentCoverage.getTotal() > 1) {
+                    branchCoverage = branchCoverage.add(new Coverage(0, Math.abs(delta)));
+                }
+            }
         }
         if (lineCoverage.isSet()) {
             CoverageLeaf lineCoverageLeaf = new CoverageLeaf(CoverageMetric.LINE, lineCoverage);

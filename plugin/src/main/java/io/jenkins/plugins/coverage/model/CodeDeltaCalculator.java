@@ -49,6 +49,8 @@ public class CodeDeltaCalculator {
      *         The workspace
      * @param listener
      *         The listener
+     * @param scm
+     *         The selected SCM
      * @param sourceDirectories
      *         All source directories which contain code
      */
@@ -109,11 +111,13 @@ public class CodeDeltaCalculator {
      * @return the fully qualified name of the file
      */
     private String getFullyQualifiedFileName(final String absolutePath) {
+        // required preprocessing since \ requires to be escaped within a regex
+        String fileSeparatorRegex = File.separatorChar == '\\' ? "\\\\" : File.separator;
         for (String path : sourceDirectories) {
             if (absolutePath.startsWith(path)) {
                 String fullyQualifiedName = absolutePath.replaceFirst(path, "");
                 if (fullyQualifiedName.startsWith(File.separator)) {
-                    fullyQualifiedName = fullyQualifiedName.replaceFirst(File.separator, "");
+                    fullyQualifiedName = fullyQualifiedName.replaceFirst(fileSeparatorRegex, "");
                 }
                 return fullyQualifiedName;
             }

@@ -97,13 +97,9 @@ public class FileCoverageDeltaProcessor {
             Optional<SortedMap<Integer, Coverage>> referenceCoveragePerLine =
                     getReferenceCoveragePerLine(referenceFileNodes, path);
             if (referenceCoveragePerLine.isPresent()) {
-                SortedMap<Integer, Coverage> referenceCoverageMapping;
+                SortedMap<Integer, Coverage> referenceCoverageMapping = new TreeMap<>(referenceCoveragePerLine.get());
                 if (codeChanges.containsKey(path)) {
-                    referenceCoverageMapping =
-                            getAdjustedCoveragePerLine(referenceCoveragePerLine.get(), codeChanges.get(path));
-                }
-                else {
-                    referenceCoverageMapping = referenceCoveragePerLine.get();
+                    adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(path));
                 }
                 fileNode.getCoveragePerLine().forEach((line, coverage) -> {
                     if (!fileNode.getChangedCodeLines().contains(line)) {
@@ -146,14 +142,12 @@ public class FileCoverageDeltaProcessor {
      * compared to the coverage-per-line mapping after code changes within the file.
      *
      * @param coveragePerLine
-     *         The coverage-per-line mapping of the file before the changes
+     *         The coverage-per-line mapping of the file before the changes which should be adjusted
      * @param fileChanges
      *         The applied code changes of the file
-     *
-     * @return the adjusted coverage-per-line mapping
      */
-    private SortedMap<Integer, Coverage> getAdjustedCoveragePerLine(
-            final SortedMap<Integer, Coverage> coveragePerLine, final FileChanges fileChanges) {
+    private void adjustedCoveragePerLine(final SortedMap<Integer, Coverage> coveragePerLine,
+            final FileChanges fileChanges) {
         List<List<Coverage>> coverages = coveragePerLine.values().stream()
                 .map(coverage -> new ArrayList<>(Collections.singletonList(coverage)))
                 .collect(Collectors.toList());
@@ -197,13 +191,12 @@ public class FileCoverageDeltaProcessor {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        SortedMap<Integer, Coverage> adjustedCoveragePerLine = new TreeMap<>();
+        coveragePerLine.clear();
         for (int line = 1; line < adjustedCoveragesList.size(); line++) {
             Coverage coverage = adjustedCoveragesList.get(line);
             if (coverage != null) {
-                adjustedCoveragePerLine.put(line, coverage);
+                coveragePerLine.put(line, coverage);
             }
         }
-        return adjustedCoveragePerLine;
     }
 }

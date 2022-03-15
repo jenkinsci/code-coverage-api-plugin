@@ -44,6 +44,12 @@ public class SourceCodePainter {
      *
      * @param paintedFiles
      *         The files to be painted together with the information which lines has to be highlighted
+     * @param sourceDirectories
+     *         the source directories that have been configured in the associated job
+     * @param sourceCodeEncoding
+     *         the encoding of the source code files
+     * @param sourceCodeRetention
+     *         the source code retention strategy
      * @param log
      *         The log
      *
