@@ -28,7 +28,6 @@ import hudson.model.Run;
 import hudson.util.XStream2;
 
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -163,6 +162,15 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * Returns whether indirect coverage changes exist.
+     *
+     * @return {@code true} if indirect coverage changes exist
+     */
+    public boolean hasIndirectCoverageChanges() {
+        return getResult().hasIndirectCoverageChanges();
+    }
+
+    /**
      * Returns the possible reference build that has been used to compute the coverage delta.
      *
      * @return the reference build, if available
@@ -247,6 +255,28 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * Returns a formatted and localized String representation of the indirect coverage changes (with respect to the
+     * reference build).
+     *
+     * @return the formatted representation of the indirect coverage changes
+     */
+    public String formatIndirectCoverageChanges() {
+        int fileAmount = getResult().getNodesWithIndirectCoverageChanges().size();
+        long lineAmount = getResult().getNodesWithIndirectCoverageChanges().stream()
+                .map(FileCoverageNode::getIndirectCoverageChanges)
+                .count();
+        String line = "line";
+        if (lineAmount > 1) {
+            line = "lines";
+        }
+        String file = "file";
+        if (fileAmount > 1) {
+            file = "files";
+        }
+        return String.format("%d %s (%d %s)", lineAmount, line, fileAmount, file);
+    }
+
+    /**
      * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
      * respect to the reference build).
      *
@@ -267,7 +297,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     @Override
-    public CoverageJobAction createProjectAction() {
+    protected CoverageJobAction createProjectAction() {
         return new CoverageJobAction(getOwner().getParent());
     }
 
@@ -331,12 +361,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     /**
      * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}.
      */
-    public static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
+    static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
 
         /**
          * Creates a XML stream for {@link CoverageNode}.
          */
-        public CoverageXmlStream() {
+        CoverageXmlStream() {
             super(CoverageNode.class);
         }
 

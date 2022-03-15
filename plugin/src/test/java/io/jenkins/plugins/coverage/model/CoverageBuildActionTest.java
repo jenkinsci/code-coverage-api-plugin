@@ -11,7 +11,6 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.model.testutil.JobStubs.*;

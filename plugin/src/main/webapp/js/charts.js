@@ -337,7 +337,7 @@ const CoverageChartGenerator = function ($) {
         });
 
         viewProxy.getCoverageTree(function (t) {
-            createFilesTreeMap(t.responseObject(), 'coverage-details');
+            createFilesTreeMap(t.responseObject(), 'project-coverage');
         });
 
         // only required when the change-coverage div is visible

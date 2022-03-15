@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model.visualization;
+package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +26,6 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
-import io.jenkins.plugins.coverage.model.Coverage;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;

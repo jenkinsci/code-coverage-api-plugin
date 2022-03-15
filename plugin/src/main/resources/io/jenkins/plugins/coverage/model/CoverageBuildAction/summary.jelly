@@ -3,6 +3,7 @@
   <t:summary icon="/plugin/code-coverage-api/icons/coverage.svg">
     <span id="coverage-summary">
       <j:set var="result" value="${it.result}"/>
+      <j:set var="referencePresent" value="${it.referenceBuild.present}"/>
       <j:choose>
         <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
         <j:set var="items" value="${result.importantMetrics}"/>
@@ -14,10 +15,11 @@
           </b>
           <ul>
             <j:forEach var="metric" items="${items}">
-              <span id="coverage-value">
+              <span id="project-coverage" title="The overall code coverage">
                 <li>${it.formatCoverage(metric)}
                   <j:if test="${it.hasDelta(metric)}">
-                    <span id="coverage-change">
+                    <span id="project-coverage-delta"
+                          title="The overall code coverage delta against the reference build">
                       <j:choose>
                         <j:when test="${it.formatDelta(metric).startsWith('-')}">
                           <j:set var="color" value="#9d1212"/>
@@ -34,21 +36,36 @@
             </j:forEach>
           </ul>
         </li>
-        <li>
-          <b>
-            <a href="coverage/#changeCoverageTree">Change Coverage:</a>
-          </b>
-          <ul>
-            <j:forEach var="metric" items="${items}">
-              <span id="change-coverage">
-                <li>${it.formatChangeCoverage(metric)}</li>
+        <j:if test="${referencePresent}">
+          <li>
+            <b>
+              <a href="coverage/#changeCoverageTree">Change Coverage:</a>
+            </b>
+            <ul>
+              <j:forEach var="metric" items="${items}">
+                <span id="change-coverage" title="The code coverage of only modified lines of code">
+                  <li>${it.formatChangeCoverage(metric)}</li>
+                </span>
+              </j:forEach>
+            </ul>
+          </li>
+        </j:if>
+        <j:if test="${it.hasIndirectCoverageChanges()}">
+          <li>
+            <b>
+              <a href="coverage/#coverageChangesTree">Indirect coverage changes:</a>
+            </b>
+            <ul>
+              <span id="coverage-changes" title="The amount of unmodified lines which contain coverage changes">
+                <li>${it.formatIndirectCoverageChanges()}</li>
               </span>
-            </j:forEach>
-          </ul>
-        </li>
-        <j:if test="${it.referenceBuild.present}">
+            </ul>
+          </li>
+        </j:if>
+        <j:if test="${referencePresent}">
           <span id="coverage-reference">
-            <li><b>Reference build: </b>
+            <li>
+              <b>Reference build: </b>
               <j:out value="${it.referenceBuildLink}"/>
             </li>
           </span>

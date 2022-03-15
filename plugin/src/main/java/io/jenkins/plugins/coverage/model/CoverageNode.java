@@ -320,19 +320,19 @@ public class CoverageNode implements Serializable {
      * Calculates the difference between two fraction. Since there might be an arithmetic exception due to an overflow,
      * the method handles it and calculates the difference based on the double values of the fractions.
      *
-     * @param nominator
-     *         The nominator as a fraction
-     * @param denominator
-     *         The denominator as a fraction
+     * @param minuend
+     *         The minuend as a fraction
+     * @param subtrahend
+     *         The subtrahend as a fraction
      *
      * @return the difference as a fraction
      */
-    private Fraction saveSubtractFraction(final Fraction nominator, final Fraction denominator) {
+    private Fraction saveSubtractFraction(final Fraction minuend, final Fraction subtrahend) {
         try {
-            return nominator.subtract(denominator);
+            return minuend.subtract(subtrahend);
         }
         catch (ArithmeticException e) {
-            double diff = nominator.doubleValue() - denominator.doubleValue();
+            double diff = minuend.doubleValue() - subtrahend.doubleValue();
             return Fraction.getFraction(diff);
         }
     }
@@ -491,6 +491,17 @@ public class CoverageNode implements Serializable {
     }
 
     /**
+     * Checks whether the coverage tree contains indirect coverage changes.
+     *
+     * @return {@code true} whether indirect coverage changes exist, else {@code false}
+     */
+    public List<FileCoverageNode> getNodesWithIndirectCoverageChanges() {
+        return getAllFileCoverageNodes().stream()
+                .filter(node -> !node.getIndirectCoverageChanges().isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Creates a deep copy of the coverage tree with this as root node.
      *
      * @return the root node of the copied tree
@@ -509,7 +520,7 @@ public class CoverageNode implements Serializable {
      *
      * @return the copied tree
      */
-    protected CoverageNode copyTree(final CoverageNode copiedParent) {
+    protected CoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
         CoverageNode copy = new CoverageNode(metric, name);
         if (copiedParent != null) {
             copy.setParent(copiedParent);
@@ -532,9 +543,7 @@ public class CoverageNode implements Serializable {
         from.getChildren().stream()
                 .map(node -> node.copyTree(from))
                 .forEach(copy -> to.getChildren().add(copy));
-        from.getLeaves().stream()
-                .map(CoverageLeaf::copyLeaf)
-                .forEach(copy -> to.getLeaves().add(copy));
+        from.getLeaves().forEach(leaf -> to.getLeaves().add(leaf));
     }
 
     private void insertPackage(final CoverageNode aPackage, final Deque<String> packageLevels) {

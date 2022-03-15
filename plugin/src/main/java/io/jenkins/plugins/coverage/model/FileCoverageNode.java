@@ -82,7 +82,7 @@ public class FileCoverageNode extends CoverageNode {
      * @param coverage
      *         The coverage
      */
-    public void putCoveragePerLine(final Integer line, final Coverage coverage) {
+    public void putCoveragePerLine(final int line, final Coverage coverage) {
         coveragePerLine.put(line, coverage);
     }
 
@@ -94,7 +94,7 @@ public class FileCoverageNode extends CoverageNode {
      * @param hitsDelta
      *         The delta of the coverage hits before and after the code changes
      */
-    public void putIndirectCoverageChange(final Integer line, final Integer hitsDelta) {
+    public void putIndirectCoverageChange(final int line, final int hitsDelta) {
         indirectCoverageChanges.put(line, hitsDelta);
     }
 
@@ -131,8 +131,7 @@ public class FileCoverageNode extends CoverageNode {
 
         copyChildrenAndLeaves(this, copy);
 
-        SortedMap<Integer, Coverage> copiedCoverageDetails = new TreeMap<>();
-        coveragePerLine.forEach((line, coverage) -> copiedCoverageDetails.put(line, coverage.copy()));
+        SortedMap<Integer, Coverage> copiedCoverageDetails = new TreeMap<>(coveragePerLine);
         copy.setCoveragePerLine(new TreeMap<>(copiedCoverageDetails));
 
         copy.setChangedCodeLines(new TreeSet<>(changedCodeLines));

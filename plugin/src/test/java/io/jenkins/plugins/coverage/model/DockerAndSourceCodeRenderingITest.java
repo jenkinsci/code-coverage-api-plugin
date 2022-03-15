@@ -27,7 +27,6 @@ import hudson.slaves.EnvironmentVariablesNodeProperty.Entry;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.coverage.model.visualization.CoverageViewModel;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;

@@ -95,7 +95,7 @@
           </ul>
           <div class="tab-content flex-grow-1">
             <div role="tabpanel" id="coverageTree" class="tab-pane fade h-100">
-              <div id="coverage-details" class="graph-cursor-pointer details-chart h-100"/>
+              <div id="project-coverage" class="graph-cursor-pointer details-chart h-100"/>
             </div>
             <j:if test="${hasChangeCoverage}">
               <div role="tabpanel" id="changeCoverageTree" class="tab-pane fade h-100">

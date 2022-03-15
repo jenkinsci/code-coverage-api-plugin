@@ -155,15 +155,6 @@ public final class Coverage implements Serializable {
                 missed + additional.getMissed());
     }
 
-    /**
-     * Creates a copy of this.
-     *
-     * @return the copy
-     */
-    public Coverage copy() {
-        return new Coverage(covered, missed);
-    }
-
     @Override
     public String toString() {
         int total = getTotal();
