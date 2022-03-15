@@ -30,6 +30,7 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.scm.SCM;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -53,6 +54,8 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private List<CoverageAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
+
+    private String scm = StringUtils.EMPTY; // @since 3.0.0
 
     private String sourceCodeEncoding = StringUtils.EMPTY; // @since 2.1.0
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>(); // @since 2.1.0
@@ -110,7 +113,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         try {
             processor.performCoverageReport(reportAdapters, reportDetectors, globalThresholds,
                     getSourceDirectoriesPaths(),
-                    sourceCodeEncoding);
+                    sourceCodeEncoding, scm);
         }
         catch (CoverageException e) {
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
@@ -177,6 +180,22 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     public boolean isFailNoReports() {
         return failNoReports;
+    }
+
+    /**
+     * Sets the SCM that should be used to find the reference build for. The the SCM will be selected
+     * based on a substring comparison, there is no need to specify the full name.
+     *
+     * @param scm
+     *         the ID of the SCM to use (a substring of the full ID)
+     */
+    @DataBoundSetter
+    public void setScm(final String scm) {
+        this.scm = scm;
+    }
+
+    public String getScm() {
+        return scm;
     }
 
     @DataBoundSetter
@@ -293,6 +312,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
         if (sourceCodeEncoding == null) {
             sourceCodeEncoding = StringUtils.EMPTY;
+        }
+        if (scm == null) {
+            scm = StringUtils.EMPTY;
         }
         return this;
     }

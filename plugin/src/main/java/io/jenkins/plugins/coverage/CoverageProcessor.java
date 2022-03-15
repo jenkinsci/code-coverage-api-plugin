@@ -45,7 +45,6 @@ import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.CoverageReporter;
-import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -103,10 +102,12 @@ public class CoverageProcessor {
      *         reportDetectors specified by user
      * @param globalThresholds
      *         global threshold specified by user
+     * @param scm
+     *         the SCM which is used for calculating the code delta to a reference build
      */
     public void performCoverageReport(final List<CoverageReportAdapter> reportAdapters,
             final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds,
-            final Set<String> sourceDirectories, final String sourceCodeEncoding)
+            final Set<String> sourceDirectories, final String sourceCodeEncoding, final String scm)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
@@ -133,9 +134,8 @@ public class CoverageProcessor {
 
         // Transform the old model to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
-        SourceCodeProperties sourceCodeProperties =
-                new SourceCodeProperties(sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
-        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, sourceCodeProperties, healthReport);
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, healthReport, scm,
+                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {

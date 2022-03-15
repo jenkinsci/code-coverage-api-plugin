@@ -25,7 +25,6 @@ public class SourceCodePainter {
 
     private final Run<?, ?> build;
     private final FilePath workspace;
-    private final SourceCodeProperties sourceCodeProperties;
 
     /**
      * Creates a painter for the passed build, using the passed properties.
@@ -34,14 +33,10 @@ public class SourceCodePainter {
      *         The build which processes the source code
      * @param workspace
      *         The workspace which contains the source code files
-     * @param sourceCodeProperties
-     *         The {@link SourceCodeProperties} properties for processing the painting
      */
-    public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace,
-            @NonNull final SourceCodeProperties sourceCodeProperties) {
+    public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace) {
         this.build = build;
         this.workspace = workspace;
-        this.sourceCodeProperties = sourceCodeProperties;
     }
 
     /**
@@ -56,20 +51,19 @@ public class SourceCodePainter {
      *         if the painting process has been interrupted
      */
     public void processSourceCodePainting(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
-            final FilteredLog log)
+            final Set<String> sourceDirectories, final String sourceCodeEncoding,
+            final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
             throws InterruptedException {
         SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
-        if (sourceCodeProperties.getSourceCodeRetention() != SourceCodeRetention.NEVER) {
+        if (sourceCodeRetention != SourceCodeRetention.NEVER) {
             log.logInfo("Painting %d source files on agent", paintedFiles.size());
 
-            paintFilesOnAgent(paintedFiles, sourceCodeProperties.getRequestedSourceDirectories(),
-                    sourceCodeProperties.getSourceCodeEncoding(), log);
+            paintFilesOnAgent(paintedFiles, sourceDirectories, sourceCodeEncoding, log);
             log.logInfo("Copying painted sources from agent to build folder");
 
             sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
         }
-        sourceCodeProperties.getSourceCodeRetention()
-                .cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
+        sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
     }
 
     private void paintFilesOnAgent(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,

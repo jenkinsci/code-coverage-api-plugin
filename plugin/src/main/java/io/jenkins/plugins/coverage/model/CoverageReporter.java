@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -14,14 +15,14 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.model.coverage.FileCoverageDeltaProcessor;
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+import io.jenkins.plugins.coverage.model.coverage.FileCoverageDeltaProcessor;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
-import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeProperties;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
+import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
 /**
@@ -43,18 +44,25 @@ public class CoverageReporter {
      *         the workspace on the agent that provides access to the source code files
      * @param listener
      *         logger
-     * @param sourceCodeProperties
-     *         wraps the required properties for processing source code painting
      * @param healthReport
      *         health report
+     * @param scm
+     *         the SCM which is used for calculating the code delta to a reference build
+     * @param sourceDirectories
+     *         the source directories that have been configured in the associated job
+     * @param sourceCodeEncoding
+     *         the encoding of the source code files
+     * @param sourceCodeRetention
+     *         the source code retention strategy
      *
      * @throws InterruptedException
      *         if the build has been aborted
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final SourceCodeProperties sourceCodeProperties,
-            final HealthReport healthReport)
+            final TaskListener listener, final HealthReport healthReport, final String scm,
+            final Set<String> sourceDirectories, final String sourceCodeEncoding,
+            final SourceCodeRetention sourceCodeRetention)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -74,11 +82,13 @@ public class CoverageReporter {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
 
             // calculate code delta
-            CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener);
+            CodeDeltaCalculator codeDeltaCalculator =
+                    new CodeDeltaCalculator(build, workspace, listener, scm, sourceDirectories);
             Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
 
             if (delta.isPresent()) {
-                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta.get());
+                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getChangeCoverageRelevantChanges(
+                        delta.get());
                 FileCoverageDeltaProcessor fileCoverageDeltaProcessor = new FileCoverageDeltaProcessor();
 
                 // calculate code changes
@@ -106,8 +116,9 @@ public class CoverageReporter {
             action = new CoverageBuildAction(build, rootNode, healthReport);
         }
 
-        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace, sourceCodeProperties);
-        sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), log);
+        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
+        sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), sourceDirectories,
+                sourceCodeEncoding, sourceCodeRetention, log);
 
         logHandler.log(log);
 

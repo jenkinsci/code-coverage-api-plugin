@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/prism">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/prism" xmlns:s="/forensics">
 
   <f:block>
     <f:hetero-list name="adapters" descriptors="${descriptor.listCoverageReportAdapterDescriptors}"
@@ -29,6 +29,7 @@
       <f:repeatableProperty field="globalThresholds">
       </f:repeatableProperty>
     </f:entry>
+    <s:scm/>
     <f:property field="sourceFileResolver" propertyDescriptor="${descriptor.getSourceFileResolverDescriptor()}"/>
     <p:sourceConfig/>
 

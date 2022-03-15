@@ -20,7 +20,7 @@ public class CoverageReport extends PageObject {
 
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
     private static final String COVERAGE_TREND_CHART = "coverage-trend";
-    private static final String COVERAGE_TREE_CHART = "coverage-details";
+    private static final String COVERAGE_TREE_CHART = "project-coverage";
 
     /**
      * Constructor to create CoverageReport-PageObject out of a build.
