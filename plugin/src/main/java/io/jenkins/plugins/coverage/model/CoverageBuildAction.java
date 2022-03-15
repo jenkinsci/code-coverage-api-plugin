@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -263,8 +264,9 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatIndirectCoverageChanges() {
         int fileAmount = getResult().getNodesWithIndirectCoverageChanges().size();
         long lineAmount = getResult().getNodesWithIndirectCoverageChanges().stream()
-                .map(FileCoverageNode::getIndirectCoverageChanges)
-                .count();
+                .map(node -> node.getIndirectCoverageChanges().values())
+                .mapToLong(Collection::size)
+                .sum();
         String line = "line";
         if (lineAmount > 1) {
             line = "lines";
