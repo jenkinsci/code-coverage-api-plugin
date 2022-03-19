@@ -5,7 +5,7 @@
   <parent>
     <groupId>edu.hm.hafner</groupId>
     <artifactId>codingstyle-pom</artifactId>
-    <version>2.16.0</version>
+    <version>2.18.0</version>
     <relativePath/>
   </parent>
 
@@ -16,7 +16,7 @@
   <name>UI Tests of Code Coverage Plugin</name>
 
   <properties>
-    <jenkins.version>2.338</jenkins.version>
+    <jenkins.version>2.339</jenkins.version>
     <json-smart.version>2.3</json-smart.version>
     <json-unit-assertj.version>2.32.0</json-unit-assertj.version>
   </properties>
