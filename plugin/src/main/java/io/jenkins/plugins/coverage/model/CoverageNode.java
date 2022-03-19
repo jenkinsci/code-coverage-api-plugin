@@ -24,6 +24,8 @@ import org.apache.commons.lang3.math.Fraction;
 import edu.hm.hafner.util.Ensure;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+
 /**
  * A hierarchical decomposition of coverage results.
  *
@@ -36,6 +38,8 @@ public class CoverageNode implements Serializable {
     private static final Coverage COVERED_NODE = new Coverage(1, 0);
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
     private static final int[] EMPTY_ARRAY = new int[0];
+
+    private static final CoverageTreeCreator COVERAGE_TREE_CREATOR = new CoverageTreeCreator();
 
     static final String ROOT = "^";
 
@@ -84,8 +88,8 @@ public class CoverageNode implements Serializable {
     }
 
     protected String mergePath(final String localPath) {
-        // default packages are named '-' at the moment
-        if ("-".equals(localPath)) {
+        // default packages are named '-'
+        if ("-" .equals(localPath)) {
             return StringUtils.EMPTY;
         }
 
@@ -470,35 +474,70 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Checks whether the coverage tree contains a change coverage.
+     * Checks whether the coverage tree contains a change coverage at all. The method checks if line coverage is
+     * available since it is the basic metric which is always available if changes exist.
      *
-     * @return {@code true} whether change coverage exists, else {@code false}
+     * @return {@code true} whether a change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return getAllFileCoverageNodes().stream()
-                .anyMatch(node -> node.getCoveragePerLine().keySet().stream()
-                        .anyMatch(line -> node.getChangedCodeLines().contains(line)));
+        return hasChangeCoverage(CoverageMetric.LINE);
     }
 
     /**
-     * Checks whether the coverage tree contains indirect coverage changes.
+     * Checks whether the coverage tree contains a change coverage for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} whether a change coverage exist for the coverage metric, else {@code false}
+     */
+    public boolean hasChangeCoverage(final CoverageMetric coverageMetric) {
+        return getChangeCoverageTree()
+                .getCoverage(coverageMetric)
+                .getTotal() > 0;
+    }
+
+    /**
+     * Creates a filtered coverage tree which only contains nodes with code changes. The root of the tree is this.
+     *
+     * @return the filtered coverage tree
+     */
+    public CoverageNode getChangeCoverageTree() {
+        return COVERAGE_TREE_CREATOR.createChangeCoverageTree(this);
+    }
+
+    /**
+     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line coverage is
+     * available since it is the basic metric which is always available if changes exist.
      *
      * @return {@code true} whether indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return getAllFileCoverageNodes().stream()
-                .anyMatch(node -> !node.getIndirectCoverageChanges().isEmpty());
+        return hasIndirectCoverageChanges(CoverageMetric.LINE);
     }
 
     /**
-     * Checks whether the coverage tree contains indirect coverage changes.
+     * Checks whether the coverage tree contains indirect coverage changes for the passed {@link CoverageMetric}.
      *
-     * @return {@code true} whether indirect coverage changes exist, else {@code false}
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} whether indirect coverage changes exist for the coverage metric, else {@code false}
      */
-    public List<FileCoverageNode> getNodesWithIndirectCoverageChanges() {
-        return getAllFileCoverageNodes().stream()
-                .filter(node -> !node.getIndirectCoverageChanges().isEmpty())
-                .collect(Collectors.toList());
+    public boolean hasIndirectCoverageChanges(final CoverageMetric coverageMetric) {
+        return getIndirectCoverageChangesTree()
+                .getCoverage(coverageMetric)
+                .getTotal() > 0;
+    }
+
+    /**
+     * Creates a filtered coverage tree which only contains nodes with indirect coverage changes. The root of the tree
+     * is this.
+     *
+     * @return the filtered coverage tree
+     */
+    public CoverageNode getIndirectCoverageChangesTree() {
+        return COVERAGE_TREE_CREATOR.createIndirectCoverageChangesTree(this);
     }
 
     /**

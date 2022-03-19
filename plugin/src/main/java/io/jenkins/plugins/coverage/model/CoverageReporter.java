@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -82,6 +83,7 @@ public class CoverageReporter {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
 
             // calculate code delta
+            log.logInfo("Calculating the code delta...");
             CodeDeltaCalculator codeDeltaCalculator =
                     new CodeDeltaCalculator(build, workspace, listener, scm, sourceDirectories);
             Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
@@ -92,25 +94,42 @@ public class CoverageReporter {
                 FileCoverageDeltaProcessor fileCoverageDeltaProcessor = new FileCoverageDeltaProcessor();
 
                 // calculate code changes
+                log.logInfo("Obtaining code changes for files...");
                 fileCoverageDeltaProcessor.attachChangedCodeLines(rootNode, codeChanges);
-                logHandler.log(log);
+
+                // file coverage deltas
+                log.logInfo("Obtaining coverage delta for files...");
+                fileCoverageDeltaProcessor.attachFileCoverageDeltas(rootNode, referenceAction.getResult());
 
                 // indirect coverage changes
+                log.logInfo("Obtaining indirect coverage changes...");
                 fileCoverageDeltaProcessor.attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(),
-                        codeChanges, log);
-                logHandler.log(log);
+                        codeChanges);
             }
 
-            // filtered coverage tree (only changed files)
+            logHandler.log(log);
+
+            // filtered coverage trees
             CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
             CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
+            CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
+            CoverageNode referenceChangeCoverageRoot =
+                    coverageTreeCreator.createChangeCoverageTree(referenceAction.getResult());
 
-            // project coverage delta
+            // coverage delta
             SortedMap<CoverageMetric, Fraction> coverageDelta = rootNode.computeDelta(referenceAction.getResult());
+            SortedMap<CoverageMetric, Fraction> changeCoverageDelta;
+            if (changeCoverageRoot.hasChangeCoverage() && referenceChangeCoverageRoot.hasChangeCoverage()) {
+                changeCoverageDelta = changeCoverageRoot.computeDelta(referenceChangeCoverageRoot);
+            }
+            else {
+                changeCoverageDelta = new TreeMap<>();
+            }
 
             action = new CoverageBuildAction(build, rootNode, healthReport,
                     referenceAction.getOwner().getExternalizableId(), coverageDelta,
-                    changeCoverageRoot.getMetricPercentages());
+                    changeCoverageRoot.getMetricPercentages(), changeCoverageDelta,
+                    indirectCoverageChangesTree.getMetricPercentages());
         }
         else {
             action = new CoverageBuildAction(build, rootNode, healthReport);

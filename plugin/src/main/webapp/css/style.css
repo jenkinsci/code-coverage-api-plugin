@@ -15,7 +15,7 @@ table.source td {
 }
 
 table.source .text {
-	margin-top: -1px;
+    margin-top: -1px;
 }
 
 table.source td.line {
@@ -42,7 +42,7 @@ table.source tr.coverFull {
 }
 
 table.source tr.coverPart {
-    background-color: #ffd;
+    background-color: #ff9;
 }
 
 table.source tr.coverPart td.hits, table.source tr.coverNone td.hits {
@@ -58,7 +58,7 @@ table.source tr.noCover {
 }
 
 .center {
-  text-align: center;
+    text-align: center;
 }
 
 /* Bar graph in table */
@@ -67,19 +67,19 @@ table.source tr.noCover {
     color: transparent;
 }
 
-.covered {
+.missed {
     background-color: #FFCDD2;
 }
 
-.covered--hover:hover {
+.missed--hover:hover {
     background-color: #EF9A9A;
 }
 
-.missed {
+.covered {
     background-color: #C8E6C9;
 }
 
-.missed--hover:hover {
+.covered--hover:hover {
     background-color: #A5D6A7;
 }
 
