@@ -311,29 +311,13 @@ const CoverageChartGenerator = function ($) {
         treeChart.resize();
     }
 
-    function redrawTrendChart() {
-        const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
-
-        viewProxy.getTrendChart(configuration, function (t) {
-            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
-        });
-    }
-
     this.populateDetailsCharts = function () {
-        const trendConfigurationDialogId = 'chart-configuration-coverage-history';
-
         initializeReportView();
-
-        $('#' + trendConfigurationDialogId).on('hidden.bs.modal', function () {
-            redrawTrendChart();
-        });
 
         viewProxy.getOverview(function (t) {
             createOverview(t.responseObject(), 'coverage-overview');
 
             $('#coverage-trend').height($('#coverage-overview').height());
-
-            redrawTrendChart();
         });
 
         viewProxy.getCoverageTree(function (t) {
@@ -345,6 +329,10 @@ const CoverageChartGenerator = function ($) {
             viewProxy.getChangeCoverageTree(function (t) {
                 createFilesTreeMap(t.responseObject(), 'change-coverage');
             });
+            viewProxy.getChangeCoverageOverview(function (t) {
+                createOverview(t.responseObject(), 'change-coverage-overview');
+                $('#change-coverage-overview').height($('#coverage-overview').height());
+            });
         }
 
         // only required when the coverage-changes div is visible
@@ -354,14 +342,17 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
-        $(document).ready(function () {
-            initializeDataTables();
+        viewProxy.hasStoredSourceCode(function (t) {
+            if (t.responseObject()) {
+                initializeDataTables();
+            }
         });
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    // Report view initialization
-    ///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+// Report view initialization
+///////////////////////////////////////////////////////////////////////
 
     function initializeReportView() {
         $('#report-overview a[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
@@ -388,18 +379,28 @@ const CoverageChartGenerator = function ($) {
         }
         else {
             let activeTab;
-            if (document.getElementById("report-overview").classList.contains("d-none")) {
-                activeTab = localStorage.getItem('activeTabDetails');
-            }
-            else {
+            let defaultTab;
+            const view = localStorage.getItem("activeReport");
+            if (view === "report-overview") {
                 activeTab = localStorage.getItem('activeTabOverview');
+                defaultTab = '#coverageTree';
             }
-            if (activeTab) {
-                loadView(activeTab);
+            else if (view === "report-details") {
+                activeTab = localStorage.getItem('activeTabDetails');
+                defaultTab = '#coverageTable';
             }
             else {
-                // the default
-                loadView('#coverageTree');
+                if (document.getElementById("report-overview").classList.contains("d-none")) {
+                    activeTab = localStorage.getItem('activeTabDetails');
+                    defaultTab = '#coverageTable';
+                }
+                else {
+                    activeTab = localStorage.getItem('activeTabOverview');
+                    defaultTab = '#coverageTree';
+                }
+            }
+            if (!loadView(activeTab)) {
+                loadView(defaultTab);
             }
         }
 
@@ -426,9 +427,11 @@ const CoverageChartGenerator = function ($) {
      * Initializes the datatables.
      */
     function initializeDataTables() {
-        initializeSourceCodeSelection($('#coverage-table').DataTable(), 'coverage-table');
-        initializeSourceCodeSelection($('#change-coverage-table').DataTable(), 'change-coverage-table');
-        initializeSourceCodeSelection($('#coverage-changes-table').DataTable(), 'coverage-changes-table');
+        $(document).ready(function () {
+            initializeSourceCodeSelection($('#coverage-table').DataTable(), 'coverage-table');
+            initializeSourceCodeSelection($('#change-coverage-table').DataTable(), 'change-coverage-table');
+            initializeSourceCodeSelection($('#coverage-changes-table').DataTable(), 'coverage-changes-table');
+        });
     }
 
     /**
@@ -444,10 +447,20 @@ const CoverageChartGenerator = function ($) {
                 const rowData = datatable.rows(indexes).data().toArray();
                 // TODO: pass id to load specifically prepared source code
                 viewProxy.getSourceCode(rowData[0].fileHash, function (t) {
-                    $('#source-file').html(t.responseObject());
+                    const sourceCode = t.responseObject();
+                    if (sourceCode === "n/a") {
+                        $('#source-file').html("");
+                        document.getElementById('source-file-unselected').classList.add("d-none");
+                        document.getElementById('source-file-content').classList.add("d-none");
+                        document.getElementById('source-file-unavailable').classList.remove("d-none");
+                    }
+                    else {
+                        $('#source-file').html(sourceCode);
+                        document.getElementById('source-file-unselected').classList.add("d-none");
+                        document.getElementById('source-file-unavailable').classList.add("d-none");
+                        document.getElementById('source-file-content').classList.remove("d-none");
+                    }
                 });
-                document.getElementById('source-file-unselected').classList.add("d-none");
-                document.getElementById('source-file-content').classList.remove("d-none");
             }
             else {
                 clearSourceCode();
@@ -458,9 +471,9 @@ const CoverageChartGenerator = function ($) {
         });
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    // Report view management
-    ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+// Report view management
+///////////////////////////////////////////////////////////////////////
 
     /**
      * Loads a report view by its ID, selected by the user.
@@ -468,21 +481,22 @@ const CoverageChartGenerator = function ($) {
      * @param {String} id The report view ID
      */
     this.loadReportViewById = function (id) {
+        let loadedSuccessfully = false;
         if (id === 'report-overview') {
             const active = localStorage.getItem('activeTabOverview');
             if (active) {
-                loadView(active);
+                loadedSuccessfully = loadView(active);
             }
-            else {
+            if (!loadedSuccessfully) {
                 loadView('#coverageTree');
             }
         }
         else if (id === 'report-details') {
             const active = localStorage.getItem('activeTabDetails');
             if (active) {
-                loadView(active);
+                loadedSuccessfully = loadView(active);
             }
-            else {
+            if (!loadedSuccessfully) {
                 loadView('#coverageTable');
             }
         }
@@ -494,13 +508,13 @@ const CoverageChartGenerator = function ($) {
      * @param {String} id The id of the report view
      */
     function loadView(id) {
-        location.href = id;
         const selector = 'a[href="' + id + '"]';
         let detailsTabs = $('#tab-tree');
         let selectedTab = detailsTabs.find(selector);
         if (selectedTab.length !== 0) {
             showReportView("report-overview");
             selectTab(selectedTab);
+            location.href = id;
             return true;
         }
         detailsTabs = $('#tab-details');
@@ -508,6 +522,7 @@ const CoverageChartGenerator = function ($) {
         if (selectedTab.length !== 0) {
             showReportView("report-details");
             selectTab(selectedTab);
+            location.href = id;
             return true;
         }
         return false;
@@ -541,18 +556,22 @@ const CoverageChartGenerator = function ($) {
             overview.classList.remove("d-none");
             menuSeparator.style.display = 'block';
             hideOverviewButton.style.display = 'block';
-            $('#overviewToggle').prop('checked', true);
-            $('#detailToggle').prop('checked', false);
-            localStorage.setItem("activeReport", overview.id);
+            $(document).ready(function () {
+                $('#overviewToggle').prop('checked', true);
+                $('#detailToggle').prop('checked', false);
+                localStorage.setItem("activeReport", overview.id);
+            });
         }
         else if (id === details.id) {
             menuSeparator.style.display = 'none';
             hideOverviewButton.style.display = 'none';
             overview.classList.add("d-none");
             details.classList.remove("d-none");
-            $('#detailToggle').prop('checked', true);
-            $('#overviewToggle').prop('checked', false);
-            localStorage.setItem("activeReport", details.id);
+            $(document).ready(function () {
+                $('#detailToggle').prop('checked', true);
+                $('#overviewToggle').prop('checked', false);
+                localStorage.setItem("activeReport", details.id);
+            });
         }
 
         fireResizeEvent();

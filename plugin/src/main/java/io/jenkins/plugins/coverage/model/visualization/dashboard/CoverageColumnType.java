@@ -89,7 +89,10 @@ public abstract class CoverageColumnType {
     public static List<String> getAvailableCoverageTypeNames() {
         return Arrays.asList(
                 Messages.Project_Coverage_Type(),
-                Messages.Project_Coverage_Delta_Type()
+                Messages.Project_Coverage_Delta_Type(),
+                Messages.Change_Coverage_Type(),
+                Messages.Change_Coverage_Delta_Type(),
+                Messages.Indirect_Coverage_Changes_Type()
         );
     }
 

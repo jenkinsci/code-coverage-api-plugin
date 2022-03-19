@@ -33,9 +33,12 @@ class CoverageBuildActionTest {
         CoverageNode root = new CoverageNode(COVERAGE_METRIC, "top-level");
         SortedMap<CoverageMetric, Fraction> metrics = new TreeMap<>();
         SortedMap<CoverageMetric, Fraction> changeCoverage = new TreeMap<>();
+        SortedMap<CoverageMetric, Fraction> changeCoverageDelta = new TreeMap<>();
+        SortedMap<CoverageMetric, Fraction> indirectCoverageChanges = new TreeMap<>();
 
         CoverageBuildAction action =
-                new CoverageBuildAction(build, root, new HealthReport(), "-", metrics, changeCoverage, false);
+                new CoverageBuildAction(build, root, new HealthReport(), "-", metrics, changeCoverage,
+                        changeCoverageDelta, indirectCoverageChanges, false);
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);
@@ -76,6 +79,7 @@ class CoverageBuildActionTest {
         HealthReport healthReport = mock(HealthReport.class);
         TreeMap<CoverageMetric, Fraction> deltas = new TreeMap<>();
         deltas.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
-        return new CoverageBuildAction(build, root, healthReport, "-", deltas, new TreeMap<>(), false);
+        return new CoverageBuildAction(build, root, healthReport, "-", deltas,
+                new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), false);
     }
 }

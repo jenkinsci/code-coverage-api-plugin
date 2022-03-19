@@ -36,7 +36,7 @@ public class CoverageColumn extends ListViewColumn {
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
     private String columnName = Messages.Coverage_Column();
-    private String coverageMetric = CoverageMetric.FILE.getName();
+    private String coverageMetric = CoverageMetric.LINE.getName();
     private String coverageType = selectedCoverageColumnType.getDisplayName();
 
     /**
@@ -77,6 +77,15 @@ public class CoverageColumn extends ListViewColumn {
         this.coverageType = coverageType;
         if (Messages.Project_Coverage_Delta_Type().equals(coverageType)) {
             selectedCoverageColumnType = new ProjectCoverageDelta();
+        }
+        else if (Messages.Change_Coverage_Type().equals(coverageType)) {
+            selectedCoverageColumnType = new ChangeCoverage();
+        }
+        else if (Messages.Change_Coverage_Delta_Type().equals(coverageType)) {
+            selectedCoverageColumnType = new ChangeCoverageDelta();
+        }
+        else if (Messages.Indirect_Coverage_Changes_Type().equals(coverageType)) {
+            selectedCoverageColumnType = new IndirectCoverageChanges();
         }
         else {
             // the default

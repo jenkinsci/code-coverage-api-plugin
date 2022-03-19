@@ -128,6 +128,24 @@ public class SourceCodeFacade {
     }
 
     /**
+     * Checks whether any source files has been stored. Even if it is wanted, there might have been errors which cause
+     * the absence of any source files.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         id of the coverage results
+     *
+     * @return {@code true} whether source files has been stored, else {@code false}
+     */
+    public boolean hasStoredSourceCode(final File buildResults, final String id) {
+        File sourceFolder = new File(buildResults, COVERAGE_SOURCES_DIRECTORY);
+        File elementFolder = new File(sourceFolder, id);
+        File[] files = elementFolder.listFiles();
+        return files != null && files.length > 0;
+    }
+
+    /**
      * Paints source code files on the agent using the recorded coverage information. All files are stored as zipped
      * HTML files that contain the painted source code. In the last step all zipped source files are aggregated into a
      * single archive to simplify copying to the controller.
@@ -232,7 +250,7 @@ public class SourceCodeFacade {
         private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
             SourceDirectoryFilter filter = new SourceDirectoryFilter();
             return filter.getPermittedSourceDirectories(workspace.getAbsolutePath(),
-                            permittedSourceDirectories, requestedSourceDirectories, log);
+                    permittedSourceDirectories, requestedSourceDirectories, log);
         }
 
         private int paintSource(final PaintedNode fileNode, final FilePath workspace,

@@ -83,7 +83,7 @@ public class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkin
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
 
         CoverageBuildAction action = new CoverageBuildAction(build, root, new HealthReport(), "-",
-                new TreeMap<>(), new TreeMap<>(), false);
+                new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), false);
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);

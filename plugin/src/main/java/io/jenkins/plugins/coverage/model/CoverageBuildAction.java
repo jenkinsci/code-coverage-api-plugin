@@ -1,11 +1,15 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -62,6 +66,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     // since 3.0.0
     private SortedMap<CoverageMetric, Fraction> difference;
     private SortedMap<CoverageMetric, Fraction> changeCoverage;
+    private SortedMap<CoverageMetric, Fraction> changeCoverageDifference;
+    private SortedMap<CoverageMetric, Fraction> indirectCoverageChanges;
 
     @SuppressWarnings("unused")
     private final transient SortedMap<CoverageMetric, Double> delta = new TreeMap<>(); // not used anymore
@@ -77,7 +83,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         health report
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result, final HealthReport healthReport) {
-        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>());
+        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
+                new TreeMap<>(), new TreeMap<>());
     }
 
     /**
@@ -95,18 +102,26 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *         the delta coverage with respect to the reference build
      * @param changeCoverage
      *         the change coverage with respect to the reference build
+     * @param changeCoverageDifference
+     *         the change coverage delta with respect to the reference build
+     * @param indirectCoverageChanges
+     *         the indirect coverage changes with respect to the reference build
      */
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
-            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage) {
-        this(owner, result, healthReport, referenceBuildId, delta, changeCoverage, true);
+            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
+            final SortedMap<CoverageMetric, Fraction> changeCoverageDifference,
+            final SortedMap<CoverageMetric, Fraction> indirectCoverageChanges) {
+        this(owner, result, healthReport, referenceBuildId, delta, changeCoverage,
+                changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
             final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
-            final boolean canSerialize) {
+            final SortedMap<CoverageMetric, Fraction> changeCoverageDifference,
+            final SortedMap<CoverageMetric, Fraction> indirectCoverageChanges, final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         lineCoverage = result.getCoverage(CoverageMetric.LINE);
@@ -114,6 +129,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
 
         this.difference = delta;
         this.changeCoverage = changeCoverage;
+        this.changeCoverageDifference = changeCoverageDifference;
+        this.indirectCoverageChanges = indirectCoverageChanges;
         this.referenceBuildId = referenceBuildId;
         this.healthReport = healthReport;
     }
@@ -126,6 +143,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         }
         if (changeCoverage == null) {
             changeCoverage = new TreeMap<>();
+        }
+        if (changeCoverageDifference == null) {
+            changeCoverageDifference = new TreeMap<>();
+        }
+        if (indirectCoverageChanges == null) {
+            indirectCoverageChanges = new TreeMap<>();
         }
         return super.readResolve();
     }
@@ -163,12 +186,69 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns whether indirect coverage changes exist.
+     * Returns whether a change coverage exists at all.
      *
-     * @return {@code true} if indirect coverage changes exist
+     * @return {@code true} if the change coverage exist, else {@code false}
+     */
+    public boolean hasChangeCoverage() {
+        return hasChangeCoverage(CoverageMetric.LINE);
+    }
+
+    /**
+     * Returns whether a change coverage exists for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} if the change coverage exist for the metric, else {@code false}
+     */
+    public boolean hasChangeCoverage(final CoverageMetric coverageMetric) {
+        return getResult().hasChangeCoverage(coverageMetric);
+    }
+
+    /**
+     * Gets the {@link Coverage change coverage} for the passed metric.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return the change coverage
+     */
+    public Coverage getChangeCoverage(final CoverageMetric coverageMetric) {
+        return getResult().getChangeCoverageTree().getCoverage(coverageMetric);
+    }
+
+    /**
+     * Returns whether indirect coverage changes exist at all.
+     *
+     * @return {@code true} if indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return getResult().hasIndirectCoverageChanges();
+        return hasIndirectCoverageChanges(CoverageMetric.LINE);
+    }
+
+    /**
+     * Returns whether indirect coverage changes exist for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} if indirect coverage changes exist for the metric, else {@code false}
+     */
+    public boolean hasIndirectCoverageChanges(final CoverageMetric coverageMetric) {
+        return getResult().hasIndirectCoverageChanges(coverageMetric);
+    }
+
+    /**
+     * Gets the {@link Coverage indirect coverage changes} for the passed metric.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return the indirect coverage changes
+     */
+    public Coverage getIndirectCoverageChanges(final CoverageMetric coverageMetric) {
+        return getResult().getIndirectCoverageChangesTree().getCoverage(coverageMetric);
     }
 
     /**
@@ -256,26 +336,137 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns a formatted and localized String representation of the indirect coverage changes (with respect to the
-     * reference build).
+     * Returns a formatted and localized String representation of an overview of the indirect coverage changes (with
+     * respect to the reference build).
+     *
+     * @param metric
+     *         the metric to get the delta for
      *
      * @return the formatted representation of the indirect coverage changes
      */
-    public String formatIndirectCoverageChanges() {
-        int fileAmount = getResult().getNodesWithIndirectCoverageChanges().size();
-        long lineAmount = getResult().getNodesWithIndirectCoverageChanges().stream()
-                .map(node -> node.getIndirectCoverageChanges().values())
-                .mapToLong(Collection::size)
-                .sum();
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatIndirectCoverageChanges(final CoverageMetric metric) {
+        String coverage = Messages.Coverage_Not_Available();
+        if (indirectCoverageChanges != null && indirectCoverageChanges.containsKey(metric)) {
+            Locale clientLocale = Functions.getCurrentLocale();
+            coverage = String.format(clientLocale, "%.2f%%",
+                    indirectCoverageChanges.get(metric).multiplyBy(Fraction.getFraction(100)).doubleValue());
+
+        }
+        return metric.getName() + ": " + coverage;
+    }
+
+    /**
+     * Returns the change coverage delta metrics, i.e. the coverage results of the current build minus the same results
+     * of the reference build.
+     *
+     * @return the delta for each available coverage metric
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public SortedMap<CoverageMetric, Fraction> getChangeCoverageDifference() {
+        return changeCoverageDifference;
+    }
+
+    /**
+     * Returns whether a change coverage delta metric for the specified metric exist.
+     *
+     * @param metric
+     *         the metric to check
+     *
+     * @return {@code true} if a delta is available for the specified metric
+     */
+    public boolean hasChangeCoverageDifference(final CoverageMetric metric) {
+        return changeCoverageDifference.containsKey(metric);
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the change coverage delta for the specified metric
+     * (with respect to the reference build).
+     *
+     * @param metric
+     *         the metric to get the delta for
+     *
+     * @return the delta metric
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatChangeCoverageDifference(final CoverageMetric metric) {
+        Locale clientLocale = Functions.getCurrentLocale();
+        if (hasChangeCoverage(metric)) {
+            return FractionFormatter.formatDeltaFraction(changeCoverageDifference.get(metric), clientLocale);
+        }
+        return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Returns a formatted and localized String representation of an overview of how many lines and files are affected
+     * by the change coverage (with respect to the reference build).
+     *
+     * @return the formatted representation of the change coverage
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatChangeCoverageOverview() {
+        if (hasChangeCoverage()) {
+            List<FileCoverageNode> fileNodes = getResult().getChangeCoverageTree().getAllFileCoverageNodes().stream()
+                    .filter(node -> node.getChangedCodeLines()
+                            .stream() // only mention files with changes which affect coverage
+                            .anyMatch(line -> node.getCoveragePerLine().containsKey(line)))
+                    .collect(Collectors.toList());
+            int fileAmount = fileNodes.size();
+            long lineAmount = fileNodes.stream()
+                    .map(node -> { // only mention lines with changes which affect coverage
+                        SortedSet<Integer> filtered = new TreeSet<>(node.getChangedCodeLines());
+                        return filtered.stream()
+                                .filter(line -> node.getCoveragePerLine().containsKey(line))
+                                .collect(Collectors.toSet());
+                    })
+                    .mapToLong(Collection::size)
+                    .sum();
+            return getFormattedChangesOverview(lineAmount, fileAmount);
+        }
+        return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Returns a formatted and localized String representation of an overview of how many lines and files are affected
+     * by the indirect coverage changes (with respect to the reference build).
+     *
+     * @return the formatted representation of the indirect coverage changes
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatIndirectCoverageChangesOverview() {
+        if (hasIndirectCoverageChanges()) {
+            int fileAmount = getResult().getIndirectCoverageChangesTree().getAllFileCoverageNodes().size();
+            long lineAmount = getResult().getIndirectCoverageChangesTree().getAllFileCoverageNodes().stream()
+                    .map(node -> node.getIndirectCoverageChanges().values())
+                    .mapToLong(Collection::size)
+                    .sum();
+            return getFormattedChangesOverview(lineAmount, fileAmount);
+        }
+        return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Gets a formatted String representation of an overview of how many lines in how many files changed.
+     *
+     * @param lineAmount
+     *         The amount of lines
+     * @param fileAmount
+     *         The amount of files
+     *
+     * @return the formatted string
+     */
+    private String getFormattedChangesOverview(final long lineAmount, final int fileAmount) {
+        String affected = "is affected";
         String line = "line";
         if (lineAmount > 1) {
             line = "lines";
+            affected = "are affected";
         }
         String file = "file";
         if (fileAmount > 1) {
             file = "files";
         }
-        return String.format("%d %s (%d %s)", lineAmount, line, fileAmount, file);
+        return String.format("%d %s (%d %s) %s", lineAmount, line, fileAmount, file, affected);
     }
 
     /**

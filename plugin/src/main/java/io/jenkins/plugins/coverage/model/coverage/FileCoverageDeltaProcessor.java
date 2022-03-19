@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model.coverage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,9 +14,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import edu.hm.hafner.util.FilteredLog;
+import org.apache.commons.lang3.math.Fraction;
 
 import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.forensics.delta.model.Change;
@@ -70,6 +72,41 @@ public class FileCoverageDeltaProcessor {
     }
 
     /**
+     * Attaches the delta between the total file coverage of all currently built files against the passed reference.
+     *
+     * @param root
+     *         The root of the coverage tree
+     * @param referenceNode
+     *         The root of the reference coverage tree
+     */
+    public void attachFileCoverageDeltas(final CoverageNode root, final CoverageNode referenceNode) {
+        Map<String, FileCoverageNode> fileNodes = root.getAllFileCoverageNodes().stream()
+                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+        Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
+        root.getAllFileCoverageNodes().stream()
+                .filter(node -> referenceFileNodes.containsKey(node.getPath()))
+                .forEach(node -> attachFileCoverageDelta(node, referenceFileNodes.get(node.getPath())));
+    }
+
+    /**
+     * Attaches the delta between the total coverage of a file against the same file from the reference build.
+     *
+     * @param fileNode
+     *         The {@link FileCoverageNode node} which represents the total coverage of a file
+     * @param referenceNode
+     *         The {@link FileCoverageNode reference node} which represents the coverage of the reference file
+     */
+    private void attachFileCoverageDelta(final FileCoverageNode fileNode, final FileCoverageNode referenceNode) {
+        SortedMap<CoverageMetric, Fraction> referenceCoverage = referenceNode.getMetricPercentages();
+        fileNode.getMetricPercentages().forEach((metric, value) -> {
+            if (referenceCoverage.containsKey(metric)) {
+                Fraction delta = value.subtract(referenceCoverage.get(metric));
+                fileNode.putFileCoverageDelta(metric, delta);
+            }
+        });
+    }
+
+    /**
      * Attaches all found indirect coverage changes within the coverage tree, compared to a reference tree.
      *
      * @param node
@@ -78,18 +115,13 @@ public class FileCoverageDeltaProcessor {
      *         The root of the reference tree
      * @param codeChanges
      *         The code changes that has been applied between the two commits underlying the node and its reference
-     * @param log
-     *         The log
      */
     public void attachIndirectCoveragesChanges(final CoverageNode node, final CoverageNode referenceNode,
-            final Map<String, FileChanges> codeChanges, final FilteredLog log) {
-        log.logInfo("Obtaining indirect coverage changes...");
+            final Map<String, FileChanges> codeChanges) {
         Map<String, FileCoverageNode> fileNodes = node.getAllFileCoverageNodes().stream()
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
 
-        Map<String, FileCoverageNode> referenceFileNodes = referenceNode.getAllFileCoverageNodes().stream()
-                .filter(reference -> fileNodes.containsKey(reference.getPath()))
-                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+        Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
 
         for (Map.Entry<String, FileCoverageNode> entry : fileNodes.entrySet()) {
             String path = entry.getKey();
@@ -102,7 +134,7 @@ public class FileCoverageDeltaProcessor {
                     adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(path));
                 }
                 fileNode.getCoveragePerLine().forEach((line, coverage) -> {
-                    if (!fileNode.getChangedCodeLines().contains(line)) {
+                    if (!fileNode.getChangedCodeLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
                         Coverage referenceCoverage = referenceCoverageMapping.get(line);
                         int covered = coverage.getCovered();
                         int referenceCovered = referenceCoverage.getCovered();
@@ -152,7 +184,17 @@ public class FileCoverageDeltaProcessor {
                 .map(coverage -> new ArrayList<>(Collections.singletonList(coverage)))
                 .collect(Collectors.toList());
 
-        IntStream.range(0, coveragePerLine.lastKey() + 1)
+        // the highest covered line might not be the highest line which contains changes
+        int maxLineNumber = coveragePerLine.lastKey();
+        Optional<Integer> highestLineNumber = fileChanges.getChanges().values().stream()
+                .flatMap(Set::stream)
+                .map(Change::getChangedToLine)
+                .max(Comparator.naturalOrder());
+        if (highestLineNumber.isPresent() && highestLineNumber.get() > maxLineNumber) {
+            maxLineNumber = highestLineNumber.get();
+        }
+
+        IntStream.range(0, maxLineNumber + 1)
                 .filter(line -> !coveragePerLine.containsKey(line))
                 .forEach(line -> {
                     if (line < coverages.size()) {
@@ -198,5 +240,23 @@ public class FileCoverageDeltaProcessor {
                 coveragePerLine.put(line, coverage);
             }
         }
+    }
+
+    /**
+     * Gets all {@link FileCoverageNode file nodes} from a reference coverage tree which also exist in the current
+     * coverage tree. The found nodes are mapped by their path.
+     *
+     * @param nodeMapping
+     *         The file nodes of the current coverage tree, mapped by their paths
+     * @param referenceNode
+     *         The root of the reference coverage tree
+     *
+     * @return the created node mapping
+     */
+    private Map<String, FileCoverageNode> getReferenceFileNodeMapping(
+            final Map<String, FileCoverageNode> nodeMapping, final CoverageNode referenceNode) {
+        return referenceNode.getAllFileCoverageNodes().stream()
+                .filter(reference -> nodeMapping.containsKey(reference.getPath()))
+                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
     }
 }

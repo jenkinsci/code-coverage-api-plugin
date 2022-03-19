@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.Fraction;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -22,6 +23,7 @@ public class FileCoverageNode extends CoverageNode {
     private final String sourcePath;
 
     // new since 3.0.0
+    private SortedMap<CoverageMetric, Fraction> fileCoverageDelta = new TreeMap<>();
     private SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>();
     private SortedMap<Integer, Integer> indirectCoverageChanges = new TreeMap<>();
     private SortedSet<Integer> changedCodeLines = new TreeSet<>();
@@ -52,6 +54,9 @@ public class FileCoverageNode extends CoverageNode {
      *         if the operation failed
      */
     protected Object readResolve() throws ObjectStreamException {
+        if (fileCoverageDelta == null) {
+            fileCoverageDelta = new TreeMap<>();
+        }
         if (indirectCoverageChanges == null) {
             indirectCoverageChanges = new TreeMap<>();
         }
@@ -64,6 +69,14 @@ public class FileCoverageNode extends CoverageNode {
         return this;
     }
 
+    public boolean hasFileCoverageDelta(final CoverageMetric coverageMetric) {
+        return fileCoverageDelta.containsKey(coverageMetric);
+    }
+
+    public Fraction getFileCoverageDelta(final CoverageMetric coverageMetric) {
+        return fileCoverageDelta.get(coverageMetric);
+    }
+
     /**
      * Adds a code line that has been changed.
      *
@@ -72,6 +85,18 @@ public class FileCoverageNode extends CoverageNode {
      */
     public void addChangedCodeLine(final int line) {
         changedCodeLines.add(line);
+    }
+
+    /**
+     * Adds a {@link Fraction file coverage delta} of this file against a reference for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     * @param delta
+     *         The coverage delta
+     */
+    public void putFileCoverageDelta(final CoverageMetric coverageMetric, final Fraction delta) {
+        fileCoverageDelta.put(coverageMetric, delta);
     }
 
     /**
@@ -96,6 +121,14 @@ public class FileCoverageNode extends CoverageNode {
      */
     public void putIndirectCoverageChange(final int line, final int hitsDelta) {
         indirectCoverageChanges.put(line, hitsDelta);
+    }
+
+    public SortedMap<CoverageMetric, Fraction> getFileCoverageDelta() {
+        return fileCoverageDelta;
+    }
+
+    public void setFileCoverageDelta(final SortedMap<CoverageMetric, Fraction> fileCoverageDelta) {
+        this.fileCoverageDelta = fileCoverageDelta;
     }
 
     public void setChangedCodeLines(final SortedSet<Integer> changes) {
@@ -153,6 +186,7 @@ public class FileCoverageNode extends CoverageNode {
         }
         FileCoverageNode that = (FileCoverageNode) o;
         return Objects.equals(sourcePath, that.sourcePath)
+                && Objects.equals(fileCoverageDelta, that.fileCoverageDelta)
                 && Objects.equals(coveragePerLine, that.coveragePerLine)
                 && Objects.equals(changedCodeLines, that.changedCodeLines)
                 && Objects.equals(indirectCoverageChanges, that.indirectCoverageChanges);
@@ -160,6 +194,7 @@ public class FileCoverageNode extends CoverageNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), sourcePath, coveragePerLine, changedCodeLines, indirectCoverageChanges);
+        return Objects.hash(super.hashCode(), sourcePath, fileCoverageDelta,
+                coveragePerLine, changedCodeLines, indirectCoverageChanges);
     }
 }
