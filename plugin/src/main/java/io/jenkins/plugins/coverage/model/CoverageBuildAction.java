@@ -45,6 +45,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("PMD.GodClass")
 public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
 
     /** Relative URL to the details of the code coverage results. */
@@ -107,6 +108,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @param indirectCoverageChanges
      *         the indirect coverage changes with respect to the reference build
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
             final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
@@ -117,6 +119,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     @VisibleForTesting
+    @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
             final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
@@ -327,10 +330,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatChangeCoverage(final CoverageMetric metric) {
         String coverage = Messages.Coverage_Not_Available();
         if (changeCoverage != null && changeCoverage.containsKey(metric)) {
-            Locale clientLocale = Functions.getCurrentLocale();
-            coverage = String.format(clientLocale, "%.2f%%",
-                    changeCoverage.get(metric).multiplyBy(Fraction.getFraction(100)).doubleValue());
-
+            coverage = FractionFormatter
+                    .formatFraction(changeCoverage.get(metric), Functions.getCurrentLocale());
         }
         return metric.getName() + ": " + coverage;
     }
@@ -348,10 +349,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatIndirectCoverageChanges(final CoverageMetric metric) {
         String coverage = Messages.Coverage_Not_Available();
         if (indirectCoverageChanges != null && indirectCoverageChanges.containsKey(metric)) {
-            Locale clientLocale = Functions.getCurrentLocale();
-            coverage = String.format(clientLocale, "%.2f%%",
-                    indirectCoverageChanges.get(metric).multiplyBy(Fraction.getFraction(100)).doubleValue());
-
+            coverage = FractionFormatter
+                    .formatFraction(indirectCoverageChanges.get(metric), Functions.getCurrentLocale());
         }
         return metric.getName() + ": " + coverage;
     }

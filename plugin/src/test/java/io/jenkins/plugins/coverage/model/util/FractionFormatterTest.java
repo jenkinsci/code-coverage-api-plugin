@@ -24,6 +24,11 @@ class FractionFormatterTest {
     }
 
     @Test
+    void shouldFormatFraction() {
+        assertThat(FractionFormatter.formatFraction(COVERAGE, LOCALE)).isEqualTo("50,00%");
+    }
+
+    @Test
     void shouldFormatPercentage() {
         assertThat(FractionFormatter.formatPercentage(COVERAGE, LOCALE)).isEqualTo("0,50%");
     }

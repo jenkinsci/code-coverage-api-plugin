@@ -259,10 +259,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new SourceCodeFacade().hasStoredSourceCode(getOwner().getRootDir(), id);
     }
 
+    /**
+     * Checks whether change coverage exists.
+     *
+     * @return {@code true} whether change coverage exists, else {@code false}
+     */
     public boolean hasChangeCoverage() {
         return getNode().hasChangeCoverage();
     }
 
+    /**
+     * Checks whether indirect coverage changes exist.
+     *
+     * @return {@code true} whether indirect coverage changes exist, else {@code false}
+     */
     public boolean hasIndirectCoverageChanges() {
         return getNode().hasIndirectCoverageChanges();
     }
@@ -381,8 +391,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * UI table model for the coverage details table.
      */
     private static class CoverageTableModel extends TableModel {
-        protected final CoverageNode root;
-        protected final String id;
+        private final CoverageNode root;
+        private final String id;
 
         CoverageTableModel(final CoverageNode root, final String id) {
             super();
@@ -450,9 +460,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public List<Object> getRows() {
             Locale browserLocale = Functions.getCurrentLocale();
-            return root.getAllFileCoverageNodes().stream()
+            return root.getAll(CoverageMetric.FILE).stream()
                     .map(file -> new CoverageRow(file, browserLocale))
                     .collect(Collectors.toList());
+        }
+
+        protected CoverageNode getRoot() {
+            return root;
         }
     }
 
@@ -460,10 +474,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * UI row model for the coverage details table.
      */
     private static class CoverageRow {
-        protected final FileCoverageNode root;
-        protected final Locale browserLocale;
+        private final CoverageNode root;
+        private final Locale browserLocale;
 
-        CoverageRow(final FileCoverageNode root, final Locale browserLocale) {
+        CoverageRow(final CoverageNode root, final Locale browserLocale) {
             this.root = root;
             this.browserLocale = browserLocale;
         }
@@ -562,11 +576,29 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return new DetailedColumnDefinition(tag, sort);
         }
 
+        protected CoverageNode getRoot() {
+            return root;
+        }
+
+        /**
+         * Creates a colored column for visualizing the file coverage delta against a reference for the passed {@link
+         * CoverageMetric}.
+         *
+         * @param coverageMetric
+         *         The coverage metric
+         *
+         * @return the {@link DetailedColumnDefinition}
+         * @since 3.0.0
+         */
         private DetailedColumnDefinition createColoredFileCoverageDeltaColumn(final CoverageMetric coverageMetric) {
-            if (root.hasFileCoverageDelta(coverageMetric)) {
-                Fraction deltaFraction = root.getFileCoverageDelta(coverageMetric);
-                return createColoredCoverageDeltaColumn(deltaFraction,
-                        "The total file coverage delta against the reference build");
+            // this is only available for versions later then 3.0.0 which introduced FileCoverageNode
+            if (root instanceof FileCoverageNode) {
+                FileCoverageNode fileNode = (FileCoverageNode) root;
+                if (fileNode.hasFileCoverageDelta(coverageMetric)) {
+                    Fraction deltaFraction = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
+                    return createColoredCoverageDeltaColumn(deltaFraction,
+                            "The total file coverage delta against the reference build");
+                }
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
         }
@@ -574,6 +606,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * {@link CoverageTableModel} implementation for visualizing the change coverage.
+     *
+     * @since 3.0.0
      */
     private static class ChangeCoverageTable extends CoverageTableModel {
 
@@ -603,7 +637,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         private FileCoverageNode getOriginalNode(final FileCoverageNode fileNode) {
-            Optional<FileCoverageNode> reference = root.getAllFileCoverageNodes().stream()
+            Optional<FileCoverageNode> reference = getRoot().getAllFileCoverageNodes().stream()
                     .filter(node -> node.getPath().equals(fileNode.getPath())
                             && node.getName().equals(fileNode.getName()))
                     .findFirst();
@@ -613,6 +647,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * UI row model for the change coverage details table.
+     *
+     * @since 3.0.0
      */
     private static class ChangeCoverageRow extends CoverageRow {
 
@@ -662,7 +698,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
                 Fraction delta = changeCoverage.getCoveredPercentage()
-                        .subtract(root.getCoverage(coverageMetric).getCoveredPercentage());
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
                 return createColoredCoverageDeltaColumn(delta,
                         "The change coverage within the file against the total file coverage");
             }

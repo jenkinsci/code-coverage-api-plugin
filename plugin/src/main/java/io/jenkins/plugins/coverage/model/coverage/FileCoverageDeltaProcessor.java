@@ -133,18 +133,31 @@ public class FileCoverageDeltaProcessor {
                 if (codeChanges.containsKey(path)) {
                     adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(path));
                 }
-                fileNode.getCoveragePerLine().forEach((line, coverage) -> {
-                    if (!fileNode.getChangedCodeLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
-                        Coverage referenceCoverage = referenceCoverageMapping.get(line);
-                        int covered = coverage.getCovered();
-                        int referenceCovered = referenceCoverage.getCovered();
-                        if (covered != referenceCovered) {
-                            fileNode.putIndirectCoverageChange(line, covered - referenceCovered);
-                        }
-                    }
-                });
+                attachIndirectCoverageChangeForFile(fileNode, referenceCoverageMapping);
             }
         }
+    }
+
+    /**
+     * Attaches the indirect coverage changes for a specific file, represented by the passed {@link FileCoverageNode}.
+     *
+     * @param fileNode
+     *         The file coverage node which represents the processed file
+     * @param referenceCoverageMapping
+     *         A mapping which contains the coverage per line of the reference file
+     */
+    private void attachIndirectCoverageChangeForFile(final FileCoverageNode fileNode,
+            final SortedMap<Integer, Coverage> referenceCoverageMapping) {
+        fileNode.getCoveragePerLine().forEach((line, coverage) -> {
+            if (!fileNode.getChangedCodeLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
+                Coverage referenceCoverage = referenceCoverageMapping.get(line);
+                int covered = coverage.getCovered();
+                int referenceCovered = referenceCoverage.getCovered();
+                if (covered != referenceCovered) {
+                    fileNode.putIndirectCoverageChange(line, covered - referenceCovered);
+                }
+            }
+        });
     }
 
     /**
@@ -180,6 +193,56 @@ public class FileCoverageDeltaProcessor {
      */
     private void adjustedCoveragePerLine(final SortedMap<Integer, Coverage> coveragePerLine,
             final FileChanges fileChanges) {
+        List<List<Coverage>> coverages = transformCoveragePerLine(coveragePerLine, fileChanges);
+
+        fileChanges.getChangesByType(ChangeEditType.DELETE).forEach(change -> {
+            for (int i = change.getChangedFromLine(); i <= change.getChangedToLine(); i++) {
+                coverages.get(i).clear();
+            }
+        });
+
+        fileChanges.getChangesByType(ChangeEditType.INSERT).forEach(change -> {
+            List<Coverage> inserted = coverages.get(change.getChangedFromLine());
+            int changedLinesNumber = change.getToLine() - change.getFromLine() + 1;
+            fillCoverageListWithNull(inserted, changedLinesNumber);
+        });
+
+        fileChanges.getChangesByType(ChangeEditType.REPLACE).forEach(change -> {
+            List<Coverage> replaced = coverages.get(change.getChangedFromLine());
+            replaced.clear(); // coverage of replaced code is irrelevant
+            int changedLinesNumber = change.getToLine() - change.getFromLine() + 1;
+            fillCoverageListWithNull(replaced, changedLinesNumber);
+            for (int i = change.getChangedFromLine() + 1; i <= change.getChangedToLine(); i++) {
+                coverages.get(i).clear();
+            }
+        });
+
+        List<Coverage> adjustedCoveragesList = coverages.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        coveragePerLine.clear();
+        for (int line = 1; line < adjustedCoveragesList.size(); line++) {
+            Coverage coverage = adjustedCoveragesList.get(line);
+            if (coverage != null) {
+                coveragePerLine.put(line, coverage);
+            }
+        }
+    }
+
+    /**
+     * Transforms a coverage-per-line mapping to a list representation which can be expanded without influencing the
+     * original line numbers.
+     *
+     * @param coveragePerLine
+     *         The coverage-per-line mapping of the file before the changes which should be adjusted
+     * @param fileChanges
+     *         The applied code changes of the file
+     *
+     * @return the list expandable list representation of the coverage-per-line mapping
+     */
+    private List<List<Coverage>> transformCoveragePerLine(
+            final SortedMap<Integer, Coverage> coveragePerLine, final FileChanges fileChanges) {
         List<List<Coverage>> coverages = coveragePerLine.values().stream()
                 .map(coverage -> new ArrayList<>(Collections.singletonList(coverage)))
                 .collect(Collectors.toList());
@@ -205,41 +268,7 @@ public class FileCoverageDeltaProcessor {
                     }
                 });
 
-        fileChanges.getChangesByType(ChangeEditType.DELETE).forEach(change -> {
-            for (int i = change.getChangedFromLine(); i <= change.getChangedToLine(); i++) {
-                coverages.get(i).clear();
-            }
-        });
-
-        fileChanges.getChangesByType(ChangeEditType.INSERT).forEach(change -> {
-            List<Coverage> inserted = coverages.get(change.getChangedFromLine());
-            for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
-                inserted.add(null);
-            }
-        });
-
-        fileChanges.getChangesByType(ChangeEditType.REPLACE).forEach(change -> {
-            List<Coverage> replaced = coverages.get(change.getChangedFromLine());
-            replaced.clear(); // coverage of replaced code is irrelevant
-            for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
-                replaced.add(null);
-            }
-            for (int i = change.getChangedFromLine() + 1; i <= change.getChangedToLine(); i++) {
-                coverages.get(i).clear();
-            }
-        });
-
-        List<Coverage> adjustedCoveragesList = coverages.stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-
-        coveragePerLine.clear();
-        for (int line = 1; line < adjustedCoveragesList.size(); line++) {
-            Coverage coverage = adjustedCoveragesList.get(line);
-            if (coverage != null) {
-                coveragePerLine.put(line, coverage);
-            }
-        }
+        return coverages;
     }
 
     /**
@@ -258,5 +287,11 @@ public class FileCoverageDeltaProcessor {
         return referenceNode.getAllFileCoverageNodes().stream()
                 .filter(reference -> nodeMapping.containsKey(reference.getPath()))
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+    }
+
+    private void fillCoverageListWithNull(final List<Coverage> coverageList, final int number) {
+        for (int i = 0; i < number; i++) {
+            coverageList.add(null);
+        }
     }
 }
