@@ -407,18 +407,42 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<TableColumn> getColumns() {
             List<TableColumn> columns = new ArrayList<>();
 
+            // TODO: DataTables API sets options wrong in case of invisible columns (columnDef and <th> number not matching)
+            // TODO: DataTables API requires more granular width options
+
             // this column is hidden, but used to access the file hash from the frontend
             TableColumn fileHashColumn = new TableColumn("Hash", "fileHash");
             fileHashColumn.setHeaderClass(ColumnCss.HIDDEN);
-
+            // fileHashColumn.setWidth(0);
             columns.add(fileHashColumn);
-            columns.add(new TableColumn("Package", "packageName"));
-            columns.add(new TableColumn("File", "fileName"));
 
-            columns.add(new TableColumn("Line", "lineCoverage", "number"));
-            columns.add(new TableColumn("Line Δ", "lineCoverageDelta", "number"));
-            columns.add(new TableColumn("Branch", "branchCoverage", "number"));
-            columns.add(new TableColumn("Branch Δ", "branchCoverageDelta", "number"));
+            TableColumn packageColumn = new TableColumn("Package", "packageName");
+            // packageColumn.setWidth(2);
+            columns.add(packageColumn);
+
+            TableColumn fileColumn = new TableColumn("File", "fileName");
+            // fileColumn.setWidth(2);
+            columns.add(fileColumn);
+
+            TableColumn lineColumn = new TableColumn("Line", "lineCoverage", "number");
+            // lineColumn.setWidth(2);
+            // lineColumn.setHeaderClass(ColumnCss.PERCENTAGE);
+            columns.add(lineColumn);
+
+            TableColumn lineColumnDelta = new TableColumn("Line Δ", "lineCoverageDelta", "number");
+            // lineColumnDelta.setWidth(1);
+            // lineColumnDelta.setHeaderClass(ColumnCss.PERCENTAGE);
+            columns.add(lineColumnDelta);
+
+            TableColumn branchColumn = new TableColumn("Branch", "branchCoverage", "number");
+            // branchColumn.setWidth(2);
+            // branchColumn.setHeaderClass(ColumnCss.PERCENTAGE);
+            columns.add(branchColumn);
+
+            TableColumn branchColumnDelta = new TableColumn("Branch Δ", "branchCoverageDelta", "number");
+            // branchColumnDelta.setWidth(1);
+            // branchColumnDelta.setHeaderClass(ColumnCss.PERCENTAGE);
+            columns.add(branchColumnDelta);
 
             return columns;
         }
@@ -498,7 +522,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         protected DetailedColumnDefinition createColoredCoverageColumn(final Fraction coveragePercentage,
                 final String text, final String tooltip) {
             double percentage = coveragePercentage.doubleValue() * 100.0;
-            String sort = String.valueOf(percentage);
+            String sort = String.valueOf(coveragePercentage.doubleValue());
             DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
             String tag = span()
                     .withTitle(tooltip)
@@ -529,10 +553,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             DisplayColors colors = CoverageChangeTendency
                     .getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
             String tag = span()
-                    .withTitle(tooltip)
-                    .withStyle(String.format("color:%s;background-color:%s;display:block;",
+                    .withClasses("badge", "badge-delta")
+                    .withStyle(String.format("color:%s;background-color:%s;",
                             colors.getLineColorAsHex(), colors.getFillColorAsHex()))
                     .withText(coverageText)
+                    .withTitle(tooltip)
                     .render();
             return new DetailedColumnDefinition(tag, sort);
         }
@@ -543,7 +568,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 return createColoredCoverageDeltaColumn(deltaFraction,
                         "The total file coverage delta against the reference build");
             }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), Messages.Coverage_Not_Available());
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
         }
     }
 
@@ -641,7 +666,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 return createColoredCoverageDeltaColumn(delta,
                         "The change coverage within the file against the total file coverage");
             }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), Messages.Coverage_Not_Available());
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
         }
     }
 }

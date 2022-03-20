@@ -83,3 +83,9 @@ table.source tr.noCover {
     background-color: #A5D6A7;
 }
 
+/* Table Delta Badge */
+.badge-delta {
+    width: 50px !important;
+    vertical-align: text-top !important;
+}
+
