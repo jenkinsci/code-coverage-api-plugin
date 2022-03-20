@@ -23,8 +23,12 @@ public class FileCoverageNode extends CoverageNode {
     private final String sourcePath;
 
     // new since 3.0.0
-    private SortedMap<CoverageMetric, Fraction> fileCoverageDelta = new TreeMap<>();
+    /**
+     * The {@link Coverage} represents both line and branch coverage per line since it can be differentiated by the
+     * total number of covered and missed cases and saves disk space.
+     */
     private SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>();
+    private SortedMap<CoverageMetric, Fraction> fileCoverageDelta = new TreeMap<>();
     private SortedMap<Integer, Integer> indirectCoverageChanges = new TreeMap<>();
     private SortedSet<Integer> changedCodeLines = new TreeSet<>();
 
@@ -69,11 +73,27 @@ public class FileCoverageNode extends CoverageNode {
         return this;
     }
 
+    /**
+     * Checks whether the file coverage delta exists for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} whether the coverage delta exists, else {@code false}
+     */
     public boolean hasFileCoverageDelta(final CoverageMetric coverageMetric) {
         return fileCoverageDelta.containsKey(coverageMetric);
     }
 
-    public Fraction getFileCoverageDelta(final CoverageMetric coverageMetric) {
+    /**
+     * Gets the file coverage delta for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return the file coverage delta
+     */
+    public Fraction getFileCoverageDeltaForMetric(final CoverageMetric coverageMetric) {
         return fileCoverageDelta.get(coverageMetric);
     }
 
@@ -88,7 +108,8 @@ public class FileCoverageNode extends CoverageNode {
     }
 
     /**
-     * Adds a {@link Fraction file coverage delta} of this file against a reference for the passed {@link CoverageMetric}.
+     * Adds a {@link Fraction file coverage delta} of this file against a reference for the passed {@link
+     * CoverageMetric}.
      *
      * @param coverageMetric
      *         The coverage metric
@@ -123,7 +144,7 @@ public class FileCoverageNode extends CoverageNode {
         indirectCoverageChanges.put(line, hitsDelta);
     }
 
-    public SortedMap<CoverageMetric, Fraction> getFileCoverageDelta() {
+    public SortedMap<CoverageMetric, Fraction> getFileCoverageDeltaForMetric() {
         return fileCoverageDelta;
     }
 

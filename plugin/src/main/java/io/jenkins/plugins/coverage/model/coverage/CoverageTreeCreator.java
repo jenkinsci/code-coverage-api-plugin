@@ -188,6 +188,7 @@ public class CoverageTreeCreator {
      * @param fileNode
      *         The node the leaves are attached to
      */
+    @SuppressWarnings("CyclomaticComplexity") // there is no useful possibility for outsourcing code
     private void createIndirectCoverageChangesLeaves(final FileCoverageNode fileNode) {
         Coverage lineCoverage = Coverage.NO_COVERAGE;
         Coverage branchCoverage = Coverage.NO_COVERAGE;
@@ -195,17 +196,21 @@ public class CoverageTreeCreator {
             int delta = change.getValue();
             Coverage currentCoverage = fileNode.getCoveragePerLine().get(change.getKey());
             if (delta > 0) {
+                // the line is fully covered - even in case of branch coverage
                 if (delta == currentCoverage.getCovered()) {
                     lineCoverage = lineCoverage.add(new Coverage(1, 0));
                 }
+                // the branch coverage increased for 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
                     branchCoverage = branchCoverage.add(new Coverage(delta, 0));
                 }
             }
             else if (delta < 0) {
+                // the line is not covered any more
                 if (currentCoverage.getCovered() == 0) {
                     lineCoverage = lineCoverage.add(new Coverage(0, 1));
                 }
+                // the branch coverage is decreased by 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
                     branchCoverage = branchCoverage.add(new Coverage(0, Math.abs(delta)));
                 }

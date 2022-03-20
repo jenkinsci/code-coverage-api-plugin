@@ -89,7 +89,7 @@ public class CoverageNode implements Serializable {
 
     protected String mergePath(final String localPath) {
         // default packages are named '-'
-        if ("-" .equals(localPath)) {
+        if ("-".equals(localPath)) {
             return StringUtils.EMPTY;
         }
 
@@ -366,6 +366,7 @@ public class CoverageNode implements Serializable {
      * Returns recursively all nodes of the instance {@link FileCoverageNode}.
      *
      * @return all file coverage nodes
+     * @since 3.0.0
      */
     public List<FileCoverageNode> getAllFileCoverageNodes() {
         List<FileCoverageNode> childNodes = children.stream()

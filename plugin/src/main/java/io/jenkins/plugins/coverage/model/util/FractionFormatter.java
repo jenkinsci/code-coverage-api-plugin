@@ -31,6 +31,20 @@ public class FractionFormatter {
     }
 
     /**
+     * Formats a coverage fraction to its plain text percentage representation and rounds the value to two decimals.
+     *
+     * @param fraction
+     *         The fraction to be formatted
+     * @param locale
+     *         The used locale
+     *
+     * @return the formatted and rounded coverage fraction as plain text
+     */
+    public static String formatFraction(final Fraction fraction, final Locale locale) {
+        return String.format(locale, "%.2f%%", transformFractionToPercentage(fraction).doubleValue());
+    }
+
+    /**
      * Formats a percentage to plain text and rounds the value to two decimals.
      *
      * @param percentage
