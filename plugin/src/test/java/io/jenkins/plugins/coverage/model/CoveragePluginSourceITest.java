@@ -49,7 +49,8 @@ import static org.assertj.core.api.Assumptions.*;
 public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
-    private static final String SOURCE_FILE = "AcuCobolParser.java.txt";
+    private static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
+    private static final String SOURCE_FILE = SOURCE_FILE_NAME + ".txt";
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
     private static final PathUtil PATH_UTIL = new PathUtil();
@@ -72,7 +73,7 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
         return String.format("Searching for source code files in '%s'", createSingleDirectory(workspace));
     }
 
-    /** Verifies that the plugin reads source code in subdirectories of the workspace.  */
+    /** Verifies that the plugin reads source code in subdirectories of the workspace. */
     @Test
     public void coveragePluginPipelineWithSourceCodeInSubdirectory() {
         Run<?, ?> workspace = runCoverageWithSourceCode("", "");
@@ -113,10 +114,11 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
 
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting (0 files have been painted, 1 files failed)")
-                .contains(String.format("[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
+                .contains(String.format(
+                        "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory));
 
-        //verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
     }
 
     private String createExternalSourceFolder() throws IOException {
@@ -141,25 +143,25 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting successfully");
 
-        //verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER);
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
-        //verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
-        //verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
+        verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
         job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory
         ));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
-        //verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
-        //verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
-        //verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
 
         job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory));
         Run<?, ?> lastBuild = buildSuccessfully(job);
-        //verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
-        //verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
-        //verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
-        //verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
 
         return firstBuild;
     }
@@ -174,27 +176,24 @@ public class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuit
                 + "}", true);
     }
 
-    /*private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
-        SourceViewModel model = verifySourceModel(build);
+    private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
+        CoverageViewModel model = verifyViewModel(build);
 
-        assertThat(model.getSourceFileContent()).contains(sourceCodeSnippet);
+        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_NAME.hashCode()))).contains(sourceCodeSnippet);
     }
 
-    private SourceViewModel verifySourceModel(final Run<?, ?> build) {
+    private CoverageViewModel verifyViewModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action.getLineCoverage())
                 .isEqualTo(new Coverage(8, 0));
 
-        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, "AcuCobolParser.java");
+        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, SOURCE_FILE_NAME);
         assertThat(fileNode).isNotEmpty()
-                .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
-                        "edu/hm/hafner/analysis/parser/AcuCobolParser.java"));
+                .hasValueSatisfying(node ->
+                        assertThat(node.getPath()).isEqualTo(PACKAGE_PATH + SOURCE_FILE_NAME));
 
-        String link = String.valueOf(fileNode.get().getPath().hashCode());
-        SourceViewModel model = action.getTarget().getDynamic(link, null, null);
-        assertThat(model.getDisplayName()).contains("AcuCobolParser.java");
-        return model;
-    }*/
+        return action.getTarget();
+    }
 
     /** Freestyle job integration test for a simple build with code coverage. */
     @Test

@@ -315,6 +315,20 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldRemovePackagesWithoutFiles() {
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
+        tree.splitPackages();
+        int packageNodes = tree.getChildren().size();
+        CoverageNode filteredTree = tree.filterPackageStructure();
+
+        assertThat(filteredTree.getChildren().stream()
+                .noneMatch(node -> node.getChildren().stream()
+                        .noneMatch(child -> child.getMetric().equals(FILE))))
+                .isTrue();
+        assertThat(tree.getChildren().size()).isEqualTo(packageNodes);
+    }
+
+    @Test
     void shouldObeyEqualsContract() {
         EqualsVerifier.forClass(CoverageNode.class)
                 .withPrefabValues(CoverageNode.class,
