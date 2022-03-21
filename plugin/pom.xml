@@ -27,7 +27,7 @@
     <saxon-he.version>10.6</saxon-he.version>
 
     <echarts-api.version>5.3.0-2</echarts-api.version>
-    <data-tables-api.version>1.11.4-3</data-tables-api.version>
+    <data-tables-api.version>1.11.4-4</data-tables-api.version>
     <forensics-api.version>1.12.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <plugin-util-api.version>2.15.0</plugin-util-api.version>
