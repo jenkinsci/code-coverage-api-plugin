@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -472,6 +473,37 @@ public class CoverageNode implements Serializable {
                 }
             }
         }
+    }
+
+    /**
+     * Filters the package structure for only package nodes which contain file nodes. The filtered tree is required in
+     * order to calculate the package coverage. Note that packages without any files are fully removed.
+     *
+     * @return a filtered copy of this {@link CoverageNode}
+     */
+    public CoverageNode filterPackageStructure() {
+        CoverageNode copy = copyTree();
+        if (CoverageMetric.MODULE.equals(metric)) {
+            Set<CoverageNode> packagesWithFiles = copy.getAll(CoverageMetric.PACKAGE).stream()
+                    .filter(node -> node.getChildren().stream()
+                            .anyMatch(child -> child.getMetric().equals(CoverageMetric.FILE)))
+                    .collect(Collectors.toSet());
+            packagesWithFiles.forEach(node -> {
+                node.setParent(copy);
+                Set<CoverageNode> fileChildren = node.getChildren().stream()
+                        .filter(child -> !child.getMetric().equals(CoverageMetric.PACKAGE))
+                        .collect(Collectors.toSet());
+                node.children.clear();
+                node.children.addAll(fileChildren);
+            });
+            Set<CoverageNode> nonePackageChildren = copy.children.stream()
+                    .filter(node -> !node.getMetric().equals(CoverageMetric.PACKAGE))
+                    .collect(Collectors.toSet());
+            copy.children.clear();
+            copy.children.addAll(nonePackageChildren);
+            copy.children.addAll(packagesWithFiles);
+        }
+        return copy;
     }
 
     /**

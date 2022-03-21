@@ -188,7 +188,8 @@ public class CoverageTreeCreator {
      * @param fileNode
      *         The node the leaves are attached to
      */
-    @SuppressWarnings("CyclomaticComplexity") // there is no useful possibility for outsourcing code
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
+    // there is no useful possibility for outsourcing code
     private void createIndirectCoverageChangesLeaves(final FileCoverageNode fileNode) {
         Coverage lineCoverage = Coverage.NO_COVERAGE;
         Coverage branchCoverage = Coverage.NO_COVERAGE;
