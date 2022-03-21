@@ -36,16 +36,14 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         assertThatJson(overview).node("missed").isArray().containsExactly(
                 0, 3, 3, 5, 29, 90, 7
         );
-
-        // assertThat(model.getDynamic("unknown", null, null)).isNull();
     }
 
     @Test
     void shouldReturnEmptySourceViewForExistingLinkButMissingSourceFile() {
         CoverageViewModel model = createModel();
 
-        String link = String.valueOf("PathUtil.java".hashCode());
-        // assertThat(model.getDynamic(link, null, null)).extracting(SourceViewModel::getSourceFileContent).isEqualTo("n/a");
+        String hash = String.valueOf("PathUtil.java".hashCode());
+        assertThat(model.getSourceCode(hash)).isEqualTo("n/a");
     }
 
     private CoverageViewModel createModel() {
