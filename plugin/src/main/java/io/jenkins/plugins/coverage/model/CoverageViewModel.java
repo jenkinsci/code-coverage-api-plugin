@@ -107,12 +107,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     @JavaScriptMethod
     public CoverageOverview getOverview() {
-        return new CoverageOverview(getNode());
+        return new CoverageOverview(getNode().filterPackageStructure());
     }
 
     @JavaScriptMethod
     public CoverageOverview getChangeCoverageOverview() {
-        return new CoverageOverview(changeCoverageTreeRoot);
+        return new CoverageOverview(changeCoverageTreeRoot.filterPackageStructure());
     }
 
     /**

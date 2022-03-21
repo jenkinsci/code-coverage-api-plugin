@@ -13,7 +13,7 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 /**
- * Concrete implementation of {@link CoverageColumnType} which represents the indirect coverage changes
+ * Concrete implementation of {@link CoverageColumnType} which represents the indirect coverage changes.
  *
  * @author Florian Orendi
  */
