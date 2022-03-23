@@ -1,14 +1,15 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.NoSuchElementException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.NoSuchElementException;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.PageObject;
 
 import static io.jenkins.plugins.coverage.util.ChartUtil.*;
 
@@ -18,27 +19,23 @@ import static io.jenkins.plugins.coverage.util.ChartUtil.*;
 public class CoverageReport extends PageObject {
     private static final String RELATIVE_PATH_BUILD_TO_REPORT = "coverage";
 
+    private static final String REPORT_OVERVIEW_TOGGLE = "overviewToggleLabel";
+    private static final String REPORT_DETAILS_TOGGLE = "detailToggleLabel";
+
+    private static final String TAB_NAV_TREE = "tab-tree";
+    private static final String TAB_NAV_DETAILS = "tab-details";
+
     private static final String COVERAGE_OVERVIEW_CHART = "coverage-overview";
-    private static final String COVERAGE_TREND_CHART = "coverage-trend";
     private static final String COVERAGE_TREE_CHART = "project-coverage";
 
     /**
      * Constructor to create CoverageReport-PageObject out of a build.
      *
-     * @param parent build of wanted CoverageReport.
+     * @param parent
+     *         build of wanted CoverageReport.
      */
     public CoverageReport(Build parent) {
         super(parent, parent.url(RELATIVE_PATH_BUILD_TO_REPORT));
-    }
-
-    /**
-     * Getter for Coverage-Trend-Chart Data.
-     *
-     * @return Json Value of Coverage-Trend Chart
-     */
-    public String getCoverageTrend() {
-        ensureCoverageReportPageIsOpen();
-        return getChartDataById(this, COVERAGE_TREND_CHART);
     }
 
     /**
@@ -48,6 +45,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageOverview() {
         ensureCoverageReportPageIsOpen();
+        ensureCoverageTreeTabIsActive();
         return getChartDataById(this, COVERAGE_OVERVIEW_CHART);
     }
 
@@ -58,6 +56,7 @@ public class CoverageReport extends PageObject {
      */
     public String getCoverageTree() {
         ensureCoverageReportPageIsOpen();
+        ensureCoverageTreeTabIsActive();
         return getChartDataById(this, COVERAGE_TREE_CHART);
     }
 
@@ -76,6 +75,15 @@ public class CoverageReport extends PageObject {
     private void ensureCoverageTableTabIsActive() {
         if (!getActiveTab().equals(Tab.FILE_OVERVIEW)) {
             openTabCoverageTable();
+        }
+    }
+
+    /**
+     * Ensures the tab is 'Package Overview'/CoverageTree is active.
+     */
+    private void ensureCoverageTreeTabIsActive() {
+        if (!getActiveTab().equals(Tab.PACKAGE_OVERVIEW)) {
+            openTabCoverageTree();
         }
     }
 
@@ -100,17 +108,19 @@ public class CoverageReport extends PageObject {
     }
 
     /**
-     * Opens tab in CoverageReport which contains the CoverageTree, aka Package Overview.
+     * Opens a tab within the overview section of the CoverageReport which contains the CoverageTree, aka Package
+     * Overview.
      */
     public void openTabCoverageTree() {
-        openTab(Tab.PACKAGE_OVERVIEW);
+        openTab(REPORT_OVERVIEW_TOGGLE, TAB_NAV_TREE, Tab.PACKAGE_OVERVIEW);
     }
 
     /**
-     * Opens tab in CoverageReport which contains the CoverageTable, aka File Overview.
+     * Opens a tab within the detail section of the CoverageReport which contains the CoverageTable, aka Details
+     * Overview.
      */
     public void openTabCoverageTable() {
-        openTab(Tab.FILE_OVERVIEW);
+        openTab(REPORT_DETAILS_TOGGLE, TAB_NAV_DETAILS, Tab.FILE_OVERVIEW);
     }
 
     /**
@@ -126,11 +136,28 @@ public class CoverageReport extends PageObject {
     /**
      * Opens the specified tab.
      *
-     * @param tab that should be selected
+     * @param reportToggleId
+     *         The ID of the report view toggle which opens the required report view
+     * @param tabNavId
+     *         The ID of the navigation bar that redirects to the tab to be selected
+     * @param tab
+     *         The tab that should be selected
      */
-    private void openTab(Tab tab) {
-        WebElement tabElement = getElement(By.id("tab-details")).findElement(tab.getXpath());
+    private void openTab(final String reportToggleId, final String tabNavId, final Tab tab) {
+        toggleReportView(reportToggleId);
+        WebElement tabElement = getElement(By.id(tabNavId)).findElement(tab.getXpath());
         tabElement.click();
+    }
+
+    /**
+     * Toggles the report view using the passed ID.
+     *
+     * @param id
+     *         The ID of the toggle button to be used
+     */
+    private void toggleReportView(final String id) {
+        WebElement viewToggleElement = getElement(By.id(id));
+        viewToggleElement.click();
     }
 
     /**
@@ -141,6 +168,30 @@ public class CoverageReport extends PageObject {
      */
     private String extractRelativeUrl(String absoluteUrl) {
         return "#" + StringUtils.substringAfterLast(absoluteUrl, "#");
+    }
+
+    /**
+     * Returns whether the right source file content is displayed depending on the availability of the source file.
+     *
+     * @param sourceFileAvailable
+     *         {@code true} whether the source file is available and should be displayed
+     *
+     * @return {@code true} whether the expected source file content is displayed
+     */
+    public boolean isExpectedSourceFileContentDisplayed(final boolean sourceFileAvailable) {
+        try {
+            WebElement fileTable;
+            if (sourceFileAvailable) {
+                fileTable = getElement(By.id("source-file"));
+            }
+            else {
+                fileTable = getElement((By.id("source-file-unavailable")));
+            }
+            return fileTable != null && fileTable.isDisplayed();
+        }
+        catch (NoSuchElementException exception) {
+            return false;
+        }
     }
 
     /**

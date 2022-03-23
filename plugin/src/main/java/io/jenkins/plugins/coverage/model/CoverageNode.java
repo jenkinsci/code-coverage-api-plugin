@@ -32,7 +32,7 @@ import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 

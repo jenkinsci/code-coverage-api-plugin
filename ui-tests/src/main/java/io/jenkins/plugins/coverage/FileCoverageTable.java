@@ -15,14 +15,14 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @SuppressFBWarnings("EI")
 public class FileCoverageTable {
-    private static final String ID_OF_FILE_COVERAGE_TABLE = "coverage-details";
+    private static final String ID_OF_FILE_COVERAGE_TABLE = "coverage-table";
     private final CoverageReport coverageReport;
     private final List<FileCoverageTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
     private final WebElement tableElement;
     private final WebElement tableInfo;
 
-    FileCoverageTable(CoverageReport coverageReport) {
+    FileCoverageTable(final CoverageReport coverageReport) {
         this.coverageReport = coverageReport;
 
         tableElement = coverageReport.waitFor(
@@ -31,7 +31,7 @@ public class FileCoverageTable {
                 .stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
-        tableInfo = coverageReport.find(By.id("coverage-details_info"));
+        tableInfo = coverageReport.find(By.id(ID_OF_FILE_COVERAGE_TABLE + "_info"));
 
         updateTableRows();
     }
@@ -143,8 +143,10 @@ public class FileCoverageTable {
     public enum Header {
         PACKAGE("Package"),
         FILE("File"),
-        LINE_COVERAGE("Line Coverage"),
-        BRANCH_COVERAGE("Branch Coverage");
+        LINE_COVERAGE("Line"),
+        LINE_COVERAGE_DELTA("Line Δ"),
+        BRANCH_COVERAGE("Branch"),
+        BRANCH_COVERAGE_DELTA("Branch Δ");
 
         private final String title;
 

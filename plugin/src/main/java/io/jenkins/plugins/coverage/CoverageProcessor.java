@@ -128,14 +128,14 @@ public class CoverageProcessor {
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
 
-        if (failBuildIfCoverageDecreasedInChangeRequest) {
-            failBuildIfChangeRequestDecreasedCoverage(coverageReport);
-        }
-
         // Transform the old model to the new model
         CoverageReporter coverageReporter = new CoverageReporter();
         coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, healthReport, scm,
                 sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
+
+        if (failBuildIfCoverageDecreasedInChangeRequest) {
+            failBuildIfChangeRequestDecreasedCoverage(coverageReport);
+        }
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {
