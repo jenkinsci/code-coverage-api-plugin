@@ -574,6 +574,16 @@ public class CoverageNode implements Serializable {
     }
 
     /**
+     * Checks whether code any changes have been detected no matter if the code coverage is affected or not.
+     *
+     * @return {@code true} whether code changes have been detected
+     */
+    public boolean hasCodeChanges() {
+        return getAllFileCoverageNodes().stream()
+                .anyMatch(fileNode -> !fileNode.getChangedCodeLines().isEmpty());
+    }
+
+    /**
      * Creates a deep copy of the coverage tree with this as root node.
      *
      * @return the root node of the copied tree

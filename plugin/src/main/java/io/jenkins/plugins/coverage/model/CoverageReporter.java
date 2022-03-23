@@ -126,6 +126,10 @@ public class CoverageReporter {
                 changeCoverageDelta = new TreeMap<>();
             }
 
+            if (rootNode.hasCodeChanges() && !rootNode.hasChangeCoverage()) {
+                log.logInfo("No detected code changes affect the code coverage");
+            }
+
             action = new CoverageBuildAction(build, rootNode, healthReport,
                     referenceAction.getOwner().getExternalizableId(), coverageDelta,
                     changeCoverageRoot.getMetricPercentages(), changeCoverageDelta,
