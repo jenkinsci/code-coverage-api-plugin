@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import io.jenkins.plugins.coverage.CoveragePublisher.Adapter;
 import io.jenkins.plugins.coverage.CoveragePublisher.CoveragePublisher;
 import io.jenkins.plugins.coverage.FileCoverageTable.Header;
-import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
@@ -68,10 +67,6 @@ public class CoverageReportTest extends UiTest {
 
         String coverageOverview = report.getCoverageOverview();
         CoverageReportTest.verifyCoverageOverviewAfterSomeBuildsWithReports(coverageOverview);
-
-        String trendChart = report.getCoverageTrend();
-        TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
-
     }
 
     /**
@@ -88,9 +83,6 @@ public class CoverageReportTest extends UiTest {
 
         FileCoverageTable coverageTable = report.getCoverageTable();
         CoverageReportTest.verifyFileCoverageTableNumberOfMaxEntries(coverageTable, 307);
-
-        String trendChart = report.getCoverageTrend();
-        TrendChartTestUtil.verifyTrendChartContainsOnlyOneRecord(trendChart);
 
         String coverageTree = report.getCoverageTree();
         CoverageReportTest.verifyCoverageTreeAfterOneBuildWithReport(coverageTree);
@@ -114,22 +106,22 @@ public class CoverageReportTest extends UiTest {
 
         FileCoverageTable table = report.openFileCoverageTable();
         CoverageReportTest.verifyFileCoverageTableContent(table,
-                new String[] {"edu.hm.hafner.analysis.parser.dry", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis.parser.violations"},
-                new String[] {"AbstractDryParser.java", "AbstractPackageDetector.java", "AbstractViolationAdapter.java"},
-                new String[] {"85.71%", "88.24%", "91.67%"},
-                new String[] {"83.33%", "50.00%", "100.00%"});
+                new String[] {"edu.hm.hafner.analysis", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis"},
+                new String[] {"AbstractPackageDetector.java", "CSharpNamespaceDetector.java", "Categories.java"},
+                new String[] {"88.24%", "100.00%", "100.00%"},
+                new String[] {"50.00%", "n/a", "100.00%"});
         table.openTablePage(2);
         CoverageReportTest.verifyFileCoverageTableContent(table,
-                new String[] {"edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.parser"},
-                new String[] {"AnsibleLintDescriptor.java", "AnsibleLintParser.java", "AntJavacParser.java"},
-                new String[] {"100.00%", "100.00%", "100.00%"},
-                new String[] {"n/a", "n/a", "100.00%"});
+                new String[] {"edu.hm.hafner.analysis", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis"},
+                new String[] {"IssueBuilder.java", "IssueDifference.java", "IssueParser.java"},
+                new String[] {"100.00%", "100.00%", "83.33%"},
+                new String[] {"100.00%", "92.86%", "n/a"});
         table.openTablePage(3);
         CoverageReportTest.verifyFileCoverageTableContent(table,
-                new String[] {"edu.hm.hafner.analysis.parser", "edu.hm.hafner.analysis.registry", "edu.hm.hafner.analysis.parser"},
-                new String[] {"BuckminsterParser.java", "CadenceIncisiveDescriptor.java", "CadenceIncisiveParser.java"},
-                new String[] {"100.00%", "100.00%", "86.49%"},
-                new String[] {"100.00%", "n/a", "66.67%"});
+                new String[] {"edu.hm.hafner.analysis", "edu.hm.hafner.analysis", "edu.hm.hafner.analysis"},
+                new String[] {"PackageDetectors.java", "PackageNameResolver.java", "ParsingCanceledException.java"},
+                new String[] {"92.31%", "100.00%", "0.00%"},
+                new String[] {"100.00%", "83.33%", "n/a"});
     }
 
     /**
@@ -147,15 +139,16 @@ public class CoverageReportTest extends UiTest {
      *         string array of expected values in branch coverage column
      */
     public static void verifyFileCoverageTableContent(final FileCoverageTable fileCoverageTable,
-            final String[] shouldPackage, final String[] shouldFiles, final String[] shouldLineCoverages,
-            final String[] shouldBranchCoverages) {
+            final String[] shouldPackage, final String[] shouldFiles,
+            final String[] shouldLineCoverages, final String[] shouldBranchCoverages) {
         List<FileCoverageTableRow> rows = fileCoverageTable.getTableRows();
         List<String> headers = fileCoverageTable.getHeaders();
 
         assertThat(headers)
                 .hasSize(6)
-                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(), Header.LINE_COVERAGE.getTitle(),
-                        Header.BRANCH_COVERAGE.getTitle());
+                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(),
+                        Header.LINE_COVERAGE.getTitle(), Header.LINE_COVERAGE_DELTA.getTitle(),
+                        Header.BRANCH_COVERAGE.getTitle(), Header.BRANCH_COVERAGE_DELTA.getTitle());
 
         for (int i = 0; i < shouldFiles.length; i++) {
             FileCoverageTableRow row = rows.get(i);

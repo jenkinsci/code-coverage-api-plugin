@@ -111,7 +111,6 @@ public class CoverageSummaryTest extends UiTest {
 
     }
 
-
     /**
      * Tests if coverage is correct if build is successful.
      */
@@ -178,15 +177,8 @@ public class CoverageSummaryTest extends UiTest {
         Build build = buildWithErrors(job);
 
         HashMap<String, Double> expectedCoverage = new HashMap<>();
-        expectedCoverage.put("Report", 100.00);
-        expectedCoverage.put("Group", 100.00);
-        expectedCoverage.put("Package", 100.00);
-        expectedCoverage.put("File", 70.00);
-        expectedCoverage.put("Class", 83.00);
-        expectedCoverage.put("Method", 95.00);
-        expectedCoverage.put("Instruction", 93.00);
-        expectedCoverage.put("Line", 91.00);
-        expectedCoverage.put("Conditional", 94.00);
+        expectedCoverage.put("Line", 91.02);
+        expectedCoverage.put("Branch", 93.97);
 
         verifySummaryOnFailedBuild(build, expectedCoverage);
     }
