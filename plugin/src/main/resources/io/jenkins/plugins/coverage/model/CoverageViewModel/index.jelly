@@ -5,8 +5,8 @@
 
   <bs:page it="${it}" notitle="true" class="fluid-container d-flex flex-column h-100">
 
-    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
+    <st:adjunct includes="io.jenkins.plugins.data-tables-select"/>
 
     <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/custom-style.css"/>
     <link rel="stylesheet" href="${resURL}/plugin/code-coverage-api/css/style.css"/>
@@ -23,7 +23,7 @@
       </div>
       <div class="btn-group ms-3">
         <input type="radio" class="btn-check" name="options" id="overviewToggle" autocomplete="off" checked="true"/>
-        <label class="btn btn-outline-secondary" for="overviewToggle"
+        <label id="overviewToggleLabel" class="btn btn-outline-secondary" for="overviewToggle"
                onclick="coverageChartGenerator.loadReportViewById('report-overview')"
                title="Show coverage overview">
           <i>
@@ -33,7 +33,7 @@
           </i>
         </label>
         <input type="radio" class="btn-check" name="options" id="detailToggle" autocomplete="off"/>
-        <label class="btn btn-outline-secondary" for="detailToggle"
+        <label id="detailToggleLabel" class="btn btn-outline-secondary" for="detailToggle"
                onclick="coverageChartGenerator.loadReportViewById('report-details')"
                title="Show coverage details">
           <i>

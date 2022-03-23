@@ -379,6 +379,16 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * Checks whether any code changes have been detected no matter if the code coverage is affected or not.
+     *
+     * @return {@code true} whether code changes have been detected
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public boolean hasCodeChanges() {
+        return getResult().hasCodeChanges();
+    }
+
+    /**
      * Returns a formatted and localized String representation of the change coverage delta for the specified metric
      * (with respect to the reference build).
      *
