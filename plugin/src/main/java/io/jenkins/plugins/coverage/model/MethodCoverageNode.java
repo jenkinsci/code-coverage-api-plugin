@@ -2,6 +2,8 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Objects;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+
 /**
  * A {@link CoverageNode} for a specific method.
  *
@@ -40,6 +42,18 @@ public class MethodCoverageNode extends CoverageNode {
 
     public int getLineNumber() {
         return lineNumber;
+    }
+
+    @Override
+    protected MethodCoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
+        MethodCoverageNode copy = new MethodCoverageNode(getName(), getLineNumber());
+        if (copiedParent != null) {
+            copy.setParent(copiedParent);
+        }
+
+        copyChildrenAndLeaves(this, copy);
+
+        return copy;
     }
 
     @Override

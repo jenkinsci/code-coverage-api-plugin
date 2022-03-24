@@ -14,8 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.echarts.JacksonFacade;
-import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
 
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -53,13 +51,13 @@ import static j2html.TagCreator.*;
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
     private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
     private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
-    private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
     private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter(COLOR_PROVIDER);
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
+    private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
-    private static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
-    private static final String COVERAGE_CHANGES_TABLE_ID = "coverage-changes-table";
+    static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
+    static final String COVERAGE_CHANGES_TABLE_ID = "coverage-changes-table";
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -172,28 +170,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new CoverageTableModel(root, tableId);
     }
 
-    private LinesChartModel createTrendChart(final String configuration) {
-        Optional<CoverageBuildAction> latestAction = getLatestAction();
-        if (latestAction.isPresent()) {
-            return latestAction.get().createProjectAction().createChartModel(configuration);
-        }
-        return new LinesChartModel();
-    }
-
-    /**
-     * Returns the trend chart configuration.
-     *
-     * @param configuration
-     *         JSON object to configure optional properties for the trend chart
-     *
-     * @return the trend chart model (converted to a JSON string)
-     */
-    @JavaScriptMethod
-    @SuppressWarnings("unused")
-    public String getTrendChart(final String configuration) {
-        return JACKSON_FACADE.toJson(createTrendChart(configuration));
-    }
-
     private Optional<CoverageBuildAction> getLatestAction() {
         return Optional.ofNullable(getOwner().getAction(CoverageBuildAction.class));
     }
@@ -234,7 +210,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 CoverageNode fileNode = targetResult.get();
                 File rootDir = getOwner().getRootDir();
                 if (isSourceFileInNewFormatAvailable(fileNode)) {
-                    return new SourceCodeFacade().read(rootDir, getId(), fileNode.getPath());
+                    return SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
                 }
                 if (isSourceFileInOldFormatAvailable(fileNode)) {
                     return new TextFile(getFileForBuildsWithOldVersion(rootDir,
@@ -256,7 +232,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     public boolean hasStoredSourceCode() {
-        return new SourceCodeFacade().hasStoredSourceCode(getOwner().getRootDir(), id);
+        return SOURCE_CODE_FACADE.hasStoredSourceCode(getOwner().getRootDir(), id);
     }
 
     /**
@@ -338,7 +314,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
-        return new SourceCodeFacade().createFileInBuildFolder(rootDir, id, nodePath).canRead();
+        return SOURCE_CODE_FACADE.createFileInBuildFolder(rootDir, id, nodePath).canRead();
     }
 
     /**
@@ -390,7 +366,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * UI table model for the coverage details table.
      */
-    private static class CoverageTableModel extends TableModel {
+    static class CoverageTableModel extends TableModel {
         private final CoverageNode root;
         private final String id;
 
@@ -436,22 +412,18 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
             TableColumn lineColumn = new TableColumn("Line", "lineCoverage", "number");
             // lineColumn.setWidth(2);
-            // lineColumn.setHeaderClass(ColumnCss.PERCENTAGE);
             columns.add(lineColumn);
 
             TableColumn lineColumnDelta = new TableColumn("Line Δ", "lineCoverageDelta", "number");
             // lineColumnDelta.setWidth(1);
-            // lineColumnDelta.setHeaderClass(ColumnCss.PERCENTAGE);
             columns.add(lineColumnDelta);
 
             TableColumn branchColumn = new TableColumn("Branch", "branchCoverage", "number");
             // branchColumn.setWidth(2);
-            // branchColumn.setHeaderClass(ColumnCss.PERCENTAGE);
             columns.add(branchColumn);
 
             TableColumn branchColumnDelta = new TableColumn("Branch Δ", "branchCoverageDelta", "number");
             // branchColumnDelta.setWidth(1);
-            // branchColumnDelta.setHeaderClass(ColumnCss.PERCENTAGE);
             columns.add(branchColumnDelta);
 
             return columns;
@@ -609,7 +581,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @since 3.0.0
      */
-    private static class ChangeCoverageTable extends CoverageTableModel {
+    static class ChangeCoverageTable extends CoverageTableModel {
 
         private final CoverageNode changeRoot;
 

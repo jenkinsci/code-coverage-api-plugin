@@ -113,13 +113,13 @@ public class CoverageReporter {
             CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
             CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
             CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
-            CoverageNode referenceChangeCoverageRoot =
-                    coverageTreeCreator.createChangeCoverageTree(referenceAction.getResult());
 
             // coverage delta
             SortedMap<CoverageMetric, Fraction> coverageDelta = rootNode.computeDelta(referenceAction.getResult());
             SortedMap<CoverageMetric, Fraction> changeCoverageDelta;
-            if (changeCoverageRoot.hasChangeCoverage() && referenceChangeCoverageRoot.hasChangeCoverage()) {
+            if (rootNode.hasChangeCoverage() && referenceAction.getResult().hasChangeCoverage()) {
+                CoverageNode referenceChangeCoverageRoot =
+                        coverageTreeCreator.createChangeCoverageTree(referenceAction.getResult());
                 changeCoverageDelta = changeCoverageRoot.computeDelta(referenceChangeCoverageRoot);
             }
             else {

@@ -29,7 +29,7 @@ public class ChangeCoverageDelta extends CoverageColumnType {
     @Override
     public Optional<Fraction> getCoverage(final CoverageBuildAction action, final CoverageMetric metric) {
         if (action.hasChangeCoverageDifference(metric)) {
-            return Optional.of(action.getChangeCoverageDifference().get(metric));
+            return Optional.of(action.getChangeCoverageDifference(metric));
         }
         return Optional.empty();
     }

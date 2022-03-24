@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.Locale;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -24,8 +25,13 @@ import static org.mockito.Mockito.*;
  */
 class CoverageBuildActionTest {
 
+    private static final Locale LOCALE = Functions.getCurrentLocale();
+
     private static final Fraction COVERAGE_PERCENTAGE = Fraction.ONE_HALF;
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.LINE;
+
+    private static final int COVERAGE_FILE_CHANGES = 5;
+    private static final long COVERAGE_LINE_CHANGES = 10;
 
     @Test
     void shouldCreateViewModel() {
@@ -67,19 +73,150 @@ class CoverageBuildActionTest {
                         .formatDeltaFraction(COVERAGE_PERCENTAGE, Functions.getCurrentLocale()));
     }
 
+    @Test
+    void shouldGetChangeCoverageDifferences() {
+        CoverageBuildAction action = createCoverageBuildActionWithMocks();
+        assertThat(action.hasChangeCoverageDifference(COVERAGE_METRIC)).isTrue();
+        assertThat(action.getChangeCoverageDifference(COVERAGE_METRIC))
+                .isNotNull()
+                .satisfies(coverage -> assertThat(coverage.compareTo(COVERAGE_PERCENTAGE)).isZero());
+    }
+
+    @Test
+    void shouldGetChangeCoverageForSpecifiedMetric() {
+        CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
+        assertThat(action.hasChangeCoverage()).isTrue();
+        assertThat(action.hasChangeCoverage(COVERAGE_METRIC)).isTrue();
+        assertThat(action.getChangeCoverage(COVERAGE_METRIC))
+                .isNotNull()
+                .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));
+    }
+
+    @Test
+    void shouldGetIndirectCoverageChangesForSpecifiedMetric() {
+        CoverageBuildAction action = createIndirectCoverageChangesBuildActionWithMocks();
+        assertThat(action.hasIndirectCoverageChanges()).isTrue();
+        assertThat(action.hasIndirectCoverageChanges(COVERAGE_METRIC)).isTrue();
+        assertThat(action.getIndirectCoverageChanges(COVERAGE_METRIC))
+                .isNotNull()
+                .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));
+    }
+
+    @Test
+    void shouldFormatChangeCoverage() {
+        CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
+        assertThat(action.formatChangeCoverage(COVERAGE_METRIC)).isEqualTo(getFormattedLineCoverage());
+        assertThat(action.formatChangeCoverageOverview()).isEqualTo(getFormattedLineCoverageOverview());
+    }
+
+    @Test
+    void shouldFormatIndirectCoverageChanges() {
+        CoverageBuildAction action = createIndirectCoverageChangesBuildActionWithMocks();
+        assertThat(action.formatIndirectCoverageChanges(COVERAGE_METRIC)).isEqualTo(getFormattedLineCoverage());
+        assertThat(action.formatIndirectCoverageChangesOverview()).isEqualTo(getFormattedLineCoverageOverview());
+    }
+
+    @Test
+    void shouldFormatChangeCoverageDifference() {
+        CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
+        String expected = FractionFormatter.formatDeltaFraction(COVERAGE_PERCENTAGE, LOCALE);
+        assertThat(action.formatChangeCoverageDifference(COVERAGE_METRIC)).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldFormatNotAvailableCoverageValues() {
+        CoverageNode root = createCoverageNode(COVERAGE_PERCENTAGE, CoverageMetric.BRANCH);
+        when(root.hasChangeCoverage()).thenReturn(false);
+        when(root.hasIndirectCoverageChanges()).thenReturn(false);
+
+        CoverageBuildAction action = createCoverageBuildAction(root);
+
+        assertThat(action.formatChangeCoverage(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
+        assertThat(action.formatChangeCoverageOverview()).isEqualTo("n/a");
+
+        assertThat(action.formatIndirectCoverageChanges(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
+        assertThat(action.formatIndirectCoverageChangesOverview()).isEqualTo("n/a");
+
+        assertThat(action.formatChangeCoverageDifference(CoverageMetric.BRANCH)).isEqualTo("n/a");
+        assertThat(action.formatDelta(CoverageMetric.BRANCH)).isEqualTo("n/a");
+    }
+
     /**
      * Creates a {@link CoverageBuildAction} which represents the coverage for the metric {@link #COVERAGE_METRIC} with
      * the value {@link #COVERAGE_PERCENTAGE}.
      *
-     * @return the creates action
+     * @return the created action
      */
     private CoverageBuildAction createCoverageBuildActionWithMocks() {
-        Run<?, ?> build = createBuild();
         CoverageNode root = createCoverageNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC);
+        return createCoverageBuildAction(root);
+    }
+
+    /**
+     * Creates a {@link CoverageBuildAction} which represents the change coverage for the metric {@link
+     * #COVERAGE_METRIC} with the value {@link #COVERAGE_PERCENTAGE}.
+     *
+     * @return the created action
+     */
+    private CoverageBuildAction createChangeCoverageBuildActionWithMocks() {
+        CoverageNode root = createChangeCoverageNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC,
+                COVERAGE_FILE_CHANGES, COVERAGE_LINE_CHANGES);
+        return createCoverageBuildAction(root);
+    }
+
+    /**
+     * Creates a {@link CoverageBuildAction} which represents the indirect coverage changes for the metric {@link
+     * #COVERAGE_METRIC} with the value {@link #COVERAGE_PERCENTAGE}.
+     *
+     * @return the created action
+     */
+    private CoverageBuildAction createIndirectCoverageChangesBuildActionWithMocks() {
+        CoverageNode root = createIndirectCoverageChangesNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC,
+                COVERAGE_FILE_CHANGES, COVERAGE_LINE_CHANGES);
+        return createCoverageBuildAction(root);
+    }
+
+    /**
+     * Creates a {@link CoverageBuildAction} with the passed {@link CoverageNode result}.
+     *
+     * @param root
+     *         The result of the action
+     *
+     * @return the created action
+     */
+    private CoverageBuildAction createCoverageBuildAction(final CoverageNode root) {
+        Run<?, ?> build = createBuild();
         HealthReport healthReport = mock(HealthReport.class);
+
         TreeMap<CoverageMetric, Fraction> deltas = new TreeMap<>();
         deltas.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
+        TreeMap<CoverageMetric, Fraction> changeCoverage = new TreeMap<>();
+        changeCoverage.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
+        TreeMap<CoverageMetric, Fraction> changeCoverageDifference = new TreeMap<>();
+        changeCoverageDifference.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
+        TreeMap<CoverageMetric, Fraction> indirectCoverageChanges = new TreeMap<>();
+        indirectCoverageChanges.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
+
         return new CoverageBuildAction(build, root, healthReport, "-", deltas,
-                new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), false);
+                changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);
+    }
+
+    /**
+     * Gets a formatted text representation of the line coverage {@link #COVERAGE_PERCENTAGE}.
+     *
+     * @return the formatted text
+     */
+    private String getFormattedLineCoverage() {
+        return "Line: " + FractionFormatter.formatFraction(COVERAGE_PERCENTAGE, LOCALE);
+    }
+
+    /**
+     * Gets a formatted text representation of the line coverage overview of {@link #COVERAGE_LINE_CHANGES} and {@link
+     * #COVERAGE_FILE_CHANGES}.
+     *
+     * @return the formatted text
+     */
+    private String getFormattedLineCoverageOverview() {
+        return COVERAGE_LINE_CHANGES + " lines (" + COVERAGE_FILE_CHANGES + " files) are affected";
     }
 }

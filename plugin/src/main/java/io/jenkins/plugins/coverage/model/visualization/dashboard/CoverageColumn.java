@@ -191,6 +191,10 @@ public class CoverageColumn extends ListViewColumn {
         return "100%";
     }
 
+    public CoverageColumnType getSelectedCoverageColumnType() {
+        return selectedCoverageColumnType;
+    }
+
     /**
      * Checks whether a {@link CoverageBuildAction} exists within the completed build.
      *

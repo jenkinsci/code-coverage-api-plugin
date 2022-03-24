@@ -13,16 +13,16 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test class for {@link ProjectCoverageDelta}.
+ * Test class for {@link ProjectCoverage}.
  *
  * @author Florian Orendi
  */
-class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
+class IndirectCoverageChangesTest extends CoverageColumnTypeTest {
 
     @Test
     void shouldGetCoverage() {
         CoverageBuildAction action = createCoverageBuildAction();
-        Optional<Fraction> coverage = PROJECT_COVERAGE_DELTA.getCoverage(action, COVERAGE_METRIC);
+        Optional<Fraction> coverage = INDIRECT_COVERAGE_CHANGES.getCoverage(action, COVERAGE_METRIC);
 
         assertThat(coverage).isNotEmpty().satisfies(value -> assertThat(value.get()).isEqualTo(COVERAGE));
     }
@@ -30,20 +30,20 @@ class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
     @Test
     void shouldNotReturnNonExistentCoverage() {
         CoverageBuildAction action = createCoverageBuildAction();
-        Optional<Fraction> coverage = PROJECT_COVERAGE_DELTA.getCoverage(action, CoverageMetric.FILE);
+        Optional<Fraction> coverage = INDIRECT_COVERAGE_CHANGES.getCoverage(action, CoverageMetric.FILE);
 
         assertThat(coverage).isEmpty();
     }
 
     @Test
     void shouldGetDisplayColors() {
-        DisplayColors color = PROJECT_COVERAGE_DELTA.getDisplayColors(COVERAGE);
-        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.EXCELLENT));
+        DisplayColors color = INDIRECT_COVERAGE_CHANGES.getDisplayColors(COVERAGE);
+        assertThat(color).isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(ColorId.VERY_BAD));
     }
 
     @Test
     void shouldFormatCoverage() {
-        String formattedCoverage = PROJECT_COVERAGE_DELTA.formatCoverage(COVERAGE, LOCALE);
-        assertThat(formattedCoverage).isEqualTo("+50,00%");
+        String formattedCoverage = INDIRECT_COVERAGE_CHANGES.formatCoverage(COVERAGE, LOCALE);
+        assertThat(formattedCoverage).isEqualTo("50,00%");
     }
 }

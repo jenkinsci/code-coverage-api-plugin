@@ -35,7 +35,6 @@ class CoverageColumnTypeTest {
     protected static final IndirectCoverageChanges INDIRECT_COVERAGE_CHANGES = new IndirectCoverageChanges();
 
     protected static final Fraction COVERAGE = Fraction.getFraction(50, 1);
-    protected static final Fraction COVERAGE_DELTA = Fraction.getFraction(50, 1);
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;
@@ -59,6 +58,6 @@ class CoverageColumnTypeTest {
     }
 
     protected CoverageBuildAction createCoverageBuildAction() {
-        return CoverageStubs.createCoverageBuildAction(COVERAGE_METRIC, COVERAGE_DELTA, COVERAGE);
+        return CoverageStubs.createCoverageBuildAction(COVERAGE_METRIC, COVERAGE);
     }
 }

@@ -1,15 +1,10 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -356,14 +351,16 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns the change coverage delta metrics, i.e. the coverage results of the current build minus the same results
-     * of the reference build.
+     * Returns the change coverage delta for the passed metric, i.e. the coverage results of the current build minus the
+     * same results of the reference build.
+     *
+     * @param coverageMetric
+     *         The change coverage metric
      *
      * @return the delta for each available coverage metric
      */
-    @SuppressWarnings("unused") // Called by jelly view
-    public SortedMap<CoverageMetric, Fraction> getChangeCoverageDifference() {
-        return changeCoverageDifference;
+    public Fraction getChangeCoverageDifference(final CoverageMetric coverageMetric) {
+        return changeCoverageDifference.get(coverageMetric);
     }
 
     /**
@@ -415,21 +412,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @SuppressWarnings("unused") // Called by jelly view
     public String formatChangeCoverageOverview() {
         if (hasChangeCoverage()) {
-            List<FileCoverageNode> fileNodes = getResult().getChangeCoverageTree().getAllFileCoverageNodes().stream()
-                    .filter(node -> node.getChangedCodeLines()
-                            .stream() // only mention files with changes which affect coverage
-                            .anyMatch(line -> node.getCoveragePerLine().containsKey(line)))
-                    .collect(Collectors.toList());
-            int fileAmount = fileNodes.size();
-            long lineAmount = fileNodes.stream()
-                    .map(node -> { // only mention lines with changes which affect coverage
-                        SortedSet<Integer> filtered = new TreeSet<>(node.getChangedCodeLines());
-                        return filtered.stream()
-                                .filter(line -> node.getCoveragePerLine().containsKey(line))
-                                .collect(Collectors.toSet());
-                    })
-                    .mapToLong(Collection::size)
-                    .sum();
+            int fileAmount = getResult().getFileAmountWithChangedCoverage();
+            long lineAmount = getResult().getLineAmountWithChangedCoverage();
             return getFormattedChangesOverview(lineAmount, fileAmount);
         }
         return Messages.Coverage_Not_Available();
@@ -444,11 +428,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @SuppressWarnings("unused") // Called by jelly view
     public String formatIndirectCoverageChangesOverview() {
         if (hasIndirectCoverageChanges()) {
-            int fileAmount = getResult().getIndirectCoverageChangesTree().getAllFileCoverageNodes().size();
-            long lineAmount = getResult().getIndirectCoverageChangesTree().getAllFileCoverageNodes().stream()
-                    .map(node -> node.getIndirectCoverageChanges().values())
-                    .mapToLong(Collection::size)
-                    .sum();
+            int fileAmount = getResult().getFileAmountWithIndirectCoverageChanges();
+            long lineAmount = getResult().getLineAmountWithIndirectCoverageChanges();
             return getFormattedChangesOverview(lineAmount, fileAmount);
         }
         return Messages.Coverage_Not_Available();
