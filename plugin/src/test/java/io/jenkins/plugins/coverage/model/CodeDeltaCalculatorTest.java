@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,9 +34,9 @@ class CodeDeltaCalculatorTest {
     private static final String FILE_NAME_MODIFY = "File2.java";
     private static final String FILE_NAME_DELETE = "File3.java";
 
-    private static final String FILE_PATH_ADD = SOURCE_DIRECTORY_ADD + '\\' + FILE_NAME_ADD;
+    private static final String FILE_PATH_ADD = SOURCE_DIRECTORY_ADD + File.separatorChar + FILE_NAME_ADD;
     private static final String FILE_PATH_MODIFY = FILE_NAME_MODIFY;
-    private static final String FILE_PATH_DELETE = SOURCE_DIRECTORY_UNUSED + '\\' + FILE_NAME_DELETE;
+    private static final String FILE_PATH_DELETE = SOURCE_DIRECTORY_UNUSED + File.separatorChar + FILE_NAME_DELETE;
 
     @Test
     void shouldGetCoverageRelevantChanges() {
