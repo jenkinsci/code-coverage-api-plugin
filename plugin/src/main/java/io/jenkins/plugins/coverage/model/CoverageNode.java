@@ -41,7 +41,8 @@ public class CoverageNode implements Serializable {
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
     private static final int[] EMPTY_ARRAY = new int[0];
 
-    private static CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
+    /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */
+    private final transient CoverageTreeCreator coverageTreeCreator;
 
     static final String ROOT = "^";
 
@@ -62,8 +63,7 @@ public class CoverageNode implements Serializable {
      *         the human-readable name of the node
      */
     public CoverageNode(final CoverageMetric metric, final String name) {
-        this.name = name;
-        this.metric = metric;
+        this(metric, name, new CoverageTreeCreator());
     }
 
     /**
@@ -78,8 +78,9 @@ public class CoverageNode implements Serializable {
      */
     @VisibleForTesting
     public CoverageNode(final CoverageMetric metric, final String name, final CoverageTreeCreator coverageTreeCreator) {
-        this(metric, name);
-        CoverageNode.coverageTreeCreator = coverageTreeCreator;
+        this.metric = metric;
+        this.name = name;
+        this.coverageTreeCreator = coverageTreeCreator;
     }
 
     /**

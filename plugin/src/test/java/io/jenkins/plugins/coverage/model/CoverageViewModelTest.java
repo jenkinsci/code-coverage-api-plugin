@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  * @author Florian Orendi
  */
+@SuppressWarnings("PMD.TooManyStaticImports")
 class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
