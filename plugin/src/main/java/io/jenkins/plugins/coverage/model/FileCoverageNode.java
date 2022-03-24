@@ -58,6 +58,7 @@ public class FileCoverageNode extends CoverageNode {
      *         if the operation failed
      */
     protected Object readResolve() throws ObjectStreamException {
+        super.readResolve();
         if (fileCoverageDelta == null) {
             fileCoverageDelta = new TreeMap<>();
         }
