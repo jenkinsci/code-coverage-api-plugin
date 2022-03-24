@@ -141,10 +141,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return JACKSON_FACADE.toJson(createTrendChart(configuration));
     }
 
-    private Optional<CoverageBuildAction> getLatestAction() {
-        return Optional.ofNullable(getOwner().getAction(CoverageBuildAction.class));
-    }
-
     /**
      * Returns the URL for coverage results of the selected build. Based on the current URL, the new URL will be
      * composed by replacing the current build number with the selected build number.
