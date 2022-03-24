@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class CoverageNode implements Serializable {
     private static final int[] EMPTY_ARRAY = new int[0];
 
     /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */
-    private final transient CoverageTreeCreator coverageTreeCreator;
+    private transient CoverageTreeCreator coverageTreeCreator;
 
     static final String ROOT = "^";
 
@@ -81,6 +82,20 @@ public class CoverageNode implements Serializable {
         this.metric = metric;
         this.name = name;
         this.coverageTreeCreator = coverageTreeCreator;
+    }
+
+    /**
+     * Called after de-serialization to retain backward compatibility.
+     *
+     * @return this
+     * @throws ObjectStreamException
+     *         if the operation failed
+     */
+    protected Object readResolve() throws ObjectStreamException {
+        if (coverageTreeCreator == null) {
+            coverageTreeCreator = new CoverageTreeCreator();
+        }
+        return this;
     }
 
     /**
