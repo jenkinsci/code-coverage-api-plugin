@@ -57,6 +57,7 @@ public class FileCoverageNode extends CoverageNode {
      * @throws ObjectStreamException
      *         if the operation failed
      */
+    @Override
     protected Object readResolve() throws ObjectStreamException {
         super.readResolve();
         if (fileCoverageDelta == null) {
