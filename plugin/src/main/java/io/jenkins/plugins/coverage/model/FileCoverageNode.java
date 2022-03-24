@@ -144,10 +144,6 @@ public class FileCoverageNode extends CoverageNode {
         indirectCoverageChanges.put(line, hitsDelta);
     }
 
-    public SortedMap<CoverageMetric, Fraction> getFileCoverageDeltaForMetric() {
-        return fileCoverageDelta;
-    }
-
     public void setFileCoverageDelta(final SortedMap<CoverageMetric, Fraction> fileCoverageDelta) {
         this.fileCoverageDelta = fileCoverageDelta;
     }
@@ -177,7 +173,7 @@ public class FileCoverageNode extends CoverageNode {
     }
 
     @Override
-    protected FileCoverageNode copyTree(final CoverageNode copiedParent) {
+    protected FileCoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
         FileCoverageNode copy = new FileCoverageNode(getName(), sourcePath);
         if (copiedParent != null) {
             copy.setParent(copiedParent);
@@ -185,11 +181,10 @@ public class FileCoverageNode extends CoverageNode {
 
         copyChildrenAndLeaves(this, copy);
 
-        SortedMap<Integer, Coverage> copiedCoverageDetails = new TreeMap<>(coveragePerLine);
-        copy.setCoveragePerLine(new TreeMap<>(copiedCoverageDetails));
-
+        copy.setCoveragePerLine(new TreeMap<>(coveragePerLine));
         copy.setChangedCodeLines(new TreeSet<>(changedCodeLines));
         copy.setIndirectCoverageChanges(new TreeMap<>(indirectCoverageChanges));
+        copy.setFileCoverageDelta(new TreeMap<>(fileCoverageDelta));
 
         return copy;
     }

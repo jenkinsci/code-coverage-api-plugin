@@ -289,6 +289,14 @@ public class FileCoverageDeltaProcessor {
                 .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
     }
 
+    /**
+     * Adds {@code null} values to the passed list.
+     *
+     * @param coverageList
+     *         The list which should be filled with {@code null}
+     * @param number
+     *         The number of values to be inserted
+     */
     private void fillCoverageListWithNull(final List<Coverage> coverageList, final int number) {
         for (int i = 0; i < number; i++) {
             coverageList.add(null);

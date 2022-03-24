@@ -11,12 +11,16 @@ import org.junit.jupiter.api.Test;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
+import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests the class {@link CoverageNode}.
  *
  * @author Ullrich Hafner
+ * @author Florian Orendi
  */
 class CoverageNodeTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
@@ -24,6 +28,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
     @BeforeAll
     static void beforeAll() {
         Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @Test
+    void shouldProvideEmptyPathForDefaultPackage() {
+        PackageCoverageNode node = new PackageCoverageNode("-");
+        assertThat(node.getPath()).isEqualTo("");
     }
 
     @Test
@@ -329,6 +339,62 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldGetAllFileCoverageNodes() {
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
+        tree.splitPackages();
+        assertThat(tree.getAllFileCoverageNodes())
+                .hasSize(307)
+                .satisfies(nodes -> nodes.forEach(
+                        node -> assertThat(node).isInstanceOf(FileCoverageNode.class)));
+    }
+
+    @Test
+    void shouldProvideExistentChangeCoverage() {
+        CoverageNode tree = createTreeWithMockedTreeCreator();
+        assertThat(tree.hasCodeChanges()).isTrue();
+        assertThat(tree.hasChangeCoverage()).isTrue();
+        assertThat(tree.hasChangeCoverage(LINE)).isTrue();
+        assertThat(tree.getChangeCoverageTree()).isEqualTo(tree);
+        assertThat(tree.getFileAmountWithChangedCoverage()).isOne();
+        assertThat(tree.getLineAmountWithChangedCoverage()).isOne();
+    }
+
+    @Test
+    void shouldProvideExistentIndirectCoverageChanges() {
+        CoverageNode tree = createTreeWithMockedTreeCreator();
+        assertThat(tree.hasIndirectCoverageChanges()).isTrue();
+        assertThat(tree.hasIndirectCoverageChanges(LINE)).isTrue();
+        assertThat(tree.getIndirectCoverageChangesTree()).isEqualTo(tree);
+        assertThat(tree.getFileAmountWithIndirectCoverageChanges()).isOne();
+        assertThat(tree.getLineAmountWithIndirectCoverageChanges()).isOne();
+    }
+
+    @Test
+    void shouldDetermineNotExistentChangeCoverage() {
+        CoverageNode tree = createTreeWithMockedTreeCreatorWithoutChanges();
+        assertThat(tree.hasCodeChanges()).isFalse();
+        assertThat(tree.hasChangeCoverage()).isFalse();
+        assertThat(tree.hasChangeCoverage(LINE)).isFalse();
+        assertThat(tree.getChangeCoverageTree())
+                .hasNoChildren()
+                .hasNoLeaves();
+        assertThat(tree.getFileAmountWithChangedCoverage()).isZero();
+        assertThat(tree.getLineAmountWithChangedCoverage()).isZero();
+    }
+
+    @Test
+    void shouldDetermineNotExistentIndirectCoverageChanges() {
+        CoverageNode tree = createTreeWithMockedTreeCreatorWithoutChanges();
+        assertThat(tree.hasIndirectCoverageChanges()).isFalse();
+        assertThat(tree.hasIndirectCoverageChanges(LINE)).isFalse();
+        assertThat(tree.getIndirectCoverageChangesTree())
+                .hasNoChildren()
+                .hasNoLeaves();
+        assertThat(tree.getFileAmountWithIndirectCoverageChanges()).isZero();
+        assertThat(tree.getLineAmountWithIndirectCoverageChanges()).isZero();
+    }
+
+    @Test
     void shouldObeyEqualsContract() {
         EqualsVerifier.forClass(CoverageNode.class)
                 .withPrefabValues(CoverageNode.class,
@@ -342,5 +408,46 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
     private CoverageNode readExampleReport() {
         return readNode("jacoco-codingstyle.xml");
+    }
+
+    /**
+     * Creates a coverage tree with a mocked {@link CoverageTreeCreator} in order to test calculations for change
+     * coverage and indirect coverage changes.
+     *
+     * @return the {@link CoverageNode root} of the created tree
+     */
+    private CoverageNode createTreeWithMockedTreeCreator() {
+        CoverageTreeCreator coverageTreeCreator = mock(CoverageTreeCreator.class);
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, CoverageNode.ROOT, coverageTreeCreator);
+
+        FileCoverageNode fileNode = new FileCoverageNode("test", "test");
+        fileNode.putCoveragePerLine(1, Coverage.NO_COVERAGE);
+        fileNode.addChangedCodeLine(1);
+        fileNode.addChangedCodeLine(2);
+        fileNode.putIndirectCoverageChange(3, 1);
+        CoverageNode tree = readExampleReport();
+        root.add(tree);
+        root.add(fileNode);
+
+        when(coverageTreeCreator.createChangeCoverageTree(root)).thenReturn(root);
+        when(coverageTreeCreator.createIndirectCoverageChangesTree(root)).thenReturn(root);
+
+        return root;
+    }
+
+    /**
+     * Creates a coverage tree with a mocked {@link CoverageTreeCreator} and without changes in order to test
+     * calculations for non existent change coverage and indirect coverage changes.
+     *
+     * @return the {@link CoverageNode root} of the created tree
+     */
+    private CoverageNode createTreeWithMockedTreeCreatorWithoutChanges() {
+        CoverageTreeCreator coverageTreeCreator = mock(CoverageTreeCreator.class);
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, CoverageNode.ROOT, coverageTreeCreator);
+
+        when(coverageTreeCreator.createChangeCoverageTree(root)).thenReturn(root);
+        when(coverageTreeCreator.createIndirectCoverageChangesTree(root)).thenReturn(root);
+
+        return root;
     }
 }

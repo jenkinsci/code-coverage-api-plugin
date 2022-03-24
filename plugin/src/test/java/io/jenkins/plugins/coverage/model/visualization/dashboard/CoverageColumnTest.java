@@ -50,6 +50,30 @@ class CoverageColumnTest {
     }
 
     @Test
+    void shouldProvideSelectedColumn() {
+        CoverageColumn column = createColumn();
+        column.setCoverageType(Messages.Project_Coverage_Type());
+        assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Type());
+        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverage.class);
+
+        column.setCoverageType(Messages.Project_Coverage_Delta_Type());
+        assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Delta_Type());
+        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverageDelta.class);
+
+        column.setCoverageType(Messages.Change_Coverage_Type());
+        assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Type());
+        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverage.class);
+
+        column.setCoverageType(Messages.Change_Coverage_Delta_Type());
+        assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Delta_Type());
+        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverageDelta.class);
+
+        column.setCoverageType(Messages.Indirect_Coverage_Changes_Type());
+        assertThat(column.getCoverageType()).isEqualTo(Messages.Indirect_Coverage_Changes_Type());
+        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(IndirectCoverageChanges.class);
+    }
+
+    @Test
     void shouldProvideEmptyCoverageUrlWithoutAction() {
         CoverageColumn column = createColumn();
         assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
@@ -91,7 +115,7 @@ class CoverageColumnTest {
         CoverageColumn column = createColumn();
         column.setCoverageMetric(CoverageMetric.CLASS.getName());
 
-        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, Fraction.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
@@ -111,7 +135,7 @@ class CoverageColumnTest {
         String coveragePercentageText =
                 FractionFormatter.formatPercentage(coveragePercentage, Functions.getCurrentLocale());
 
-        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO, coverageFraction);
+        Job<?, ?> job = createJobWithCoverageAction(coverageFraction);
 
         assertThat(column.getCoverageText(job)).isEqualTo(coveragePercentageText);
         assertThat(column.getCoverageValue(job))
@@ -132,7 +156,7 @@ class CoverageColumnTest {
         Fraction coverageDeltaPercentage = FractionFormatter.transformFractionToPercentage(coverageDelta);
         String coverageDeltaPercentageText =
                 FractionFormatter.formatDeltaPercentage(coverageDeltaPercentage, Functions.getCurrentLocale());
-        Job<?, ?> job = createJobWithCoverageAction(coverageDelta, Fraction.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction(coverageDelta);
 
         assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);
         assertThat(column.getCoverageValue(job))
@@ -159,18 +183,16 @@ class CoverageColumnTest {
     }
 
     /**
-     * Creates a mock of {@link CoverageBuildAction} which provides the passed project coverage delta and percentage.
+     * Creates a mock of {@link CoverageBuildAction} which provides all available coverages.
      *
-     * @param coverageDelta
-     *         The project coverage delta
-     * @param coveragePercentage
-     *         The project coverage percentage
+     * @param coverage
+     *         The coverage to be provided
      *
      * @return the created mock
      */
-    private Job<?, ?> createJobWithCoverageAction(final Fraction coverageDelta, final Fraction coveragePercentage) {
+    private Job<?, ?> createJobWithCoverageAction(final Fraction coverage) {
         CoverageBuildAction coverageBuildAction =
-                createCoverageBuildAction(COVERAGE_METRIC, coverageDelta, coveragePercentage);
+                createCoverageBuildAction(COVERAGE_METRIC, coverage);
         return createJobWithActions(coverageBuildAction);
     }
 }

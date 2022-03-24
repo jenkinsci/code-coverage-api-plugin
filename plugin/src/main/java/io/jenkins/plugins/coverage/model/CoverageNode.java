@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.util.Ensure;
+import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
@@ -40,7 +41,7 @@ public class CoverageNode implements Serializable {
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
     private static final int[] EMPTY_ARRAY = new int[0];
 
-    private static final CoverageTreeCreator COVERAGE_TREE_CREATOR = new CoverageTreeCreator();
+    private static CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
 
     static final String ROOT = "^";
 
@@ -61,8 +62,24 @@ public class CoverageNode implements Serializable {
      *         the human-readable name of the node
      */
     public CoverageNode(final CoverageMetric metric, final String name) {
-        this.metric = metric;
         this.name = name;
+        this.metric = metric;
+    }
+
+    /**
+     * Creates a new coverage item node with the given name and a mocked {@link CoverageTreeCreator}.
+     *
+     * @param metric
+     *         the coverage metric this node belongs to
+     * @param name
+     *         the human-readable name of the node
+     * @param coverageTreeCreator
+     *         the coverage tree creator
+     */
+    @VisibleForTesting
+    public CoverageNode(final CoverageMetric metric, final String name, final CoverageTreeCreator coverageTreeCreator) {
+        this(metric, name);
+        CoverageNode.coverageTreeCreator = coverageTreeCreator;
     }
 
     /**
@@ -536,7 +553,48 @@ public class CoverageNode implements Serializable {
      * @return the filtered coverage tree
      */
     public CoverageNode getChangeCoverageTree() {
-        return COVERAGE_TREE_CREATOR.createChangeCoverageTree(this);
+        return coverageTreeCreator.createChangeCoverageTree(this);
+    }
+
+    public int getFileAmountWithChangedCoverage() {
+        return extractFileNodesWithChangeCoverage().size();
+    }
+
+    public long getLineAmountWithChangedCoverage() {
+        return extractFileNodesWithChangeCoverage().stream()
+                .map(node -> { // only mention lines with changes which affect coverage
+                    SortedSet<Integer> filtered = new TreeSet<>(node.getChangedCodeLines());
+                    return filtered.stream()
+                            .filter(line -> node.getCoveragePerLine().containsKey(line))
+                            .collect(Collectors.toSet());
+                })
+                .mapToLong(Collection::size)
+                .sum();
+    }
+
+    private Set<FileCoverageNode> extractFileNodesWithChangeCoverage() {
+        return getChangeCoverageTree().getAllFileCoverageNodes().stream()
+                .filter(node -> node.getChangedCodeLines()
+                        .stream() // only mention files with changes which affect coverage
+                        .anyMatch(line -> node.getCoveragePerLine().containsKey(line)))
+                .collect(Collectors.toSet());
+    }
+
+    public int getFileAmountWithIndirectCoverageChanges() {
+        return extractFileNodesWithIndirectCoverageChanges().size();
+    }
+
+    public long getLineAmountWithIndirectCoverageChanges() {
+        return extractFileNodesWithIndirectCoverageChanges().stream()
+                .map(node -> node.getIndirectCoverageChanges().values())
+                .mapToLong(Collection::size)
+                .sum();
+    }
+
+    private Set<FileCoverageNode> extractFileNodesWithIndirectCoverageChanges() {
+        return getIndirectCoverageChangesTree().getAllFileCoverageNodes().stream()
+                .filter(node -> !node.getIndirectCoverageChanges().isEmpty())
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -570,7 +628,7 @@ public class CoverageNode implements Serializable {
      * @return the filtered coverage tree
      */
     public CoverageNode getIndirectCoverageChangesTree() {
-        return COVERAGE_TREE_CREATOR.createIndirectCoverageChangesTree(this);
+        return coverageTreeCreator.createIndirectCoverageChangesTree(this);
     }
 
     /**
@@ -607,9 +665,8 @@ public class CoverageNode implements Serializable {
         if (copiedParent != null) {
             copy.setParent(copiedParent);
         }
-
+        copy.setUncoveredLines(getUncoveredLines());
         copyChildrenAndLeaves(this, copy);
-
         return copy;
     }
 

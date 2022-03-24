@@ -52,36 +52,43 @@ public final class CoverageStubs {
     }
 
     /**
-     * Creates a stub of {@link CoverageBuildAction}, which provides the project coverage percentage and delta for the
-     * passed metric.
+     * Creates a mock of {@link CoverageBuildAction} which provides all available coverages.
      *
      * @param coverageMetric
      *         The coverage metric
-     * @param coverageDelta
-     *         The project coverage delta
-     * @param coverageFraction
-     *         The project coverage fraction
+     * @param coverageValue
+     *         The coverage value to be provided for all coverage types
      *
      * @return the created stub
      */
     @VisibleForTesting
     public static CoverageBuildAction createCoverageBuildAction(
-            final CoverageMetric coverageMetric,
-            final Fraction coverageDelta,
-            final Fraction coverageFraction) {
+            final CoverageMetric coverageMetric, final Fraction coverageValue) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
-        Coverage coverage = createCoverage(coverageFraction);
+        Coverage coverage = createCoverage(coverageValue);
 
         SortedMap<CoverageMetric, Fraction> deltas = mock(SortedMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
-        when(deltas.containsValue(coverageDelta)).thenReturn(true);
-        when(deltas.get(coverageMetric)).thenReturn(coverageDelta);
+        when(deltas.containsValue(coverageValue)).thenReturn(true);
+        when(deltas.get(coverageMetric)).thenReturn(coverageValue);
 
         when(action.hasDelta(coverageMetric)).thenReturn(true);
-        when(action.hasCoverage(coverageMetric)).thenReturn(true);
         when(action.getDifference()).thenReturn(deltas);
+
+        when(action.hasCoverage(coverageMetric)).thenReturn(true);
         when(action.getCoverage(coverageMetric)).thenReturn(coverage);
+
+        when(action.hasChangeCoverage()).thenReturn(true);
+        when(action.hasChangeCoverage(coverageMetric)).thenReturn(true);
+        when(action.getChangeCoverage(coverageMetric)).thenReturn(coverage);
+
+        when(action.hasIndirectCoverageChanges()).thenReturn(true);
+        when(action.hasIndirectCoverageChanges(coverageMetric)).thenReturn(true);
+        when(action.getIndirectCoverageChanges(coverageMetric)).thenReturn(coverage);
+
+        when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
+        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(coverageValue);
 
         return action;
     }
@@ -117,8 +124,61 @@ public final class CoverageStubs {
             final CoverageMetric coverageMetric) {
         CoverageNode coverageNode = mock(CoverageNode.class);
         Coverage coverage = createCoverage(coverageFraction);
-        when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
         when(coverageNode.getCoverage(coverageMetric)).thenReturn(coverage);
+        return coverageNode;
+    }
+
+    /**
+     * Creates a stub of {@link CoverageNode}, which represents the change coverage and provides information about it.
+     *
+     * @param changeCoverage
+     *         The change coverage
+     * @param metric
+     *         The coverage metric
+     * @param coverageFileChange
+     *         The amount of files which contain indirect coverage changes
+     * @param coverageLineChanges
+     *         The amount of lines which contain indirect coverage changes
+     *
+     * @return the created stub
+     */
+    @VisibleForTesting
+    public static CoverageNode createChangeCoverageNode(final Fraction changeCoverage, final CoverageMetric metric,
+            final int coverageFileChange, final long coverageLineChanges) {
+        CoverageNode coverageNode = createCoverageNode(changeCoverage, metric);
+        when(coverageNode.hasChangeCoverage()).thenReturn(true);
+        when(coverageNode.hasChangeCoverage(metric)).thenReturn(true);
+        when(coverageNode.getChangeCoverageTree()).thenReturn(coverageNode);
+        when(coverageNode.hasCodeChanges()).thenReturn(true);
+        when(coverageNode.getFileAmountWithChangedCoverage()).thenReturn(coverageFileChange);
+        when(coverageNode.getLineAmountWithChangedCoverage()).thenReturn(coverageLineChanges);
+        return coverageNode;
+    }
+
+    /**
+     * Creates a stub of {@link CoverageNode}, which represents indirect coverage changes and provides information about
+     * it.
+     *
+     * @param coverageChanges
+     *         The indirect coverage change
+     * @param metric
+     *         The coverage metric
+     * @param coverageFileChange
+     *         The amount of files which contain indirect coverage changes
+     * @param coverageLineChanges
+     *         The amount of lines which contain indirect coverage changes
+     *
+     * @return the created stub
+     */
+    @VisibleForTesting
+    public static CoverageNode createIndirectCoverageChangesNode(final Fraction coverageChanges,
+            final CoverageMetric metric, final int coverageFileChange, final long coverageLineChanges) {
+        CoverageNode coverageNode = createCoverageNode(coverageChanges, metric);
+        when(coverageNode.hasIndirectCoverageChanges()).thenReturn(true);
+        when(coverageNode.hasIndirectCoverageChanges(metric)).thenReturn(true);
+        when(coverageNode.getIndirectCoverageChangesTree()).thenReturn(coverageNode);
+        when(coverageNode.getFileAmountWithIndirectCoverageChanges()).thenReturn(coverageFileChange);
+        when(coverageNode.getLineAmountWithIndirectCoverageChanges()).thenReturn(coverageLineChanges);
         return coverageNode;
     }
 }
