@@ -96,20 +96,30 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    FileCoverageNode file = (FileCoverageNode) node.get();
-                    assertThat(file.getFileCoverageDeltaForMetric(LINE)
-                            .compareTo(Fraction.getFraction(3, 117))).isZero();
-                    assertThat(file.getFileCoverageDeltaForMetric(BRANCH)
-                            .compareTo(Fraction.getFraction(3, 24))).isZero();
-                    assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)
-                            .compareTo(Fraction.getFraction(90, 999))).isZero();
-                    assertThat(file.getFileCoverageDeltaForMetric(METHOD)
-                            .compareTo(Fraction.getFraction(-4, 30))).isZero();
-                    assertThat(file.getFileCoverageDeltaForMetric(CLASS)
-                            .compareTo(Fraction.ZERO)).isZero();
-                    assertThat(file.getFileCoverageDeltaForMetric(FILE)
-                            .compareTo(Fraction.ZERO)).isZero();
+                    verifyFileCoverageDeltaOfTestFile1((FileCoverageNode) node.get());
                 });
+    }
+
+    /**
+     * Verifies the file coverage delta of {@link #TEST_FILE_1}.
+     *
+     * @param file
+     *         The referencing coverage tree {@link FileCoverageNode node}
+     */
+    private void verifyFileCoverageDeltaOfTestFile1(final FileCoverageNode file) {
+        assertThat(file.getName()).isEqualTo(TEST_FILE_1);
+        assertThat(file.getFileCoverageDeltaForMetric(LINE)
+                .compareTo(Fraction.getFraction(3, 117))).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(BRANCH)
+                .compareTo(Fraction.getFraction(3, 24))).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)
+                .compareTo(Fraction.getFraction(90, 999))).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(METHOD)
+                .compareTo(Fraction.getFraction(-4, 30))).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(CLASS)
+                .compareTo(Fraction.ZERO)).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(FILE)
+                .compareTo(Fraction.ZERO)).isZero();
     }
 
     @Test
