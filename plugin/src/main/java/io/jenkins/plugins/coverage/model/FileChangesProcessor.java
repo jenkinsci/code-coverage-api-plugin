@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model.coverage;
+package io.jenkins.plugins.coverage.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,10 +16,6 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import io.jenkins.plugins.coverage.model.Coverage;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.forensics.delta.model.Change;
 import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
@@ -30,7 +26,7 @@ import io.jenkins.plugins.forensics.delta.model.FileChanges;
  *
  * @author Florian Orendi
  */
-public class FileCoverageDeltaProcessor {
+public class FileChangesProcessor {
 
     /**
      * Attaches the changed code lines to the file nodes of the coverage tree.

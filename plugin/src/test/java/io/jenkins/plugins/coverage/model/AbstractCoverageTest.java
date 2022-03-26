@@ -18,7 +18,6 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  * @author Ullrich Hafner
  */
 public class AbstractCoverageTest extends ResourceTest {
-    static final double PRECISION = 0.01;
     static final CoverageMetric MODULE = CoverageMetric.MODULE;
     static final CoverageMetric PACKAGE = CoverageMetric.PACKAGE;
     static final CoverageMetric FILE = CoverageMetric.FILE;

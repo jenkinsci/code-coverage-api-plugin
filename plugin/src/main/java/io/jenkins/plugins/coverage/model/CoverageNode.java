@@ -27,8 +27,6 @@ import edu.hm.hafner.util.Ensure;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
-import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
-
 /**
  * A hierarchical decomposition of coverage results.
  *
