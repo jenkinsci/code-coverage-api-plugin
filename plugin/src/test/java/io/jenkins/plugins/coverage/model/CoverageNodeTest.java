@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-import io.jenkins.plugins.coverage.model.coverage.CoverageTreeCreator;
-
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -406,6 +404,11 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .verify();
     }
 
+    /**
+     * Reads the coverage tree from the report 'jacoco-codingstyle.xml'.
+     *
+     * @return the {@link CoverageNode} root of the tree
+     */
     private CoverageNode readExampleReport() {
         return readNode("jacoco-codingstyle.xml");
     }

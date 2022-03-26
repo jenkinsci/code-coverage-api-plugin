@@ -1,16 +1,10 @@
-package io.jenkins.plugins.coverage.model.coverage;
+package io.jenkins.plugins.coverage.model;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import io.jenkins.plugins.coverage.model.Coverage;
-import io.jenkins.plugins.coverage.model.CoverageLeaf;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.FileCoverageNode;
 
 /**
  * Creates coverage trees which represent different types of coverage.
