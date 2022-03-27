@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -24,8 +24,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Integration test for QualityGates/thresholds being respected.
  */
-public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
-
+class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
     private static final float NOT_ACHIEVED_UNHEALTHY_THRESHOLD = 99.9f;
     private static final float NOT_ACHIEVED_UNSTABLE_THRESHOLD = 99.9f;
     private static final float ACHIEVED_UNHEALTHY_THRESHOLD = 50f;
@@ -37,7 +36,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if when QualityGates being fulfilled, build returns success without failure message.
      */
     @Test
-    public void freeStyleShouldMeetQualityTargets() {
+    void freeStyleShouldMeetQualityTargets() {
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(ACHIEVED_UNHEALTHY_THRESHOLD,
                 ACHIEVED_UNSTABLE_THRESHOLD);
         buildWithSuccess(project);
@@ -47,7 +46,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if when QualityGates for unstable not being fulfilled, build returns unstable with failure message.
      */
     @Test
-    public void freeStyleShouldNotMeetQualityTargets() {
+    void freeStyleShouldNotMeetQualityTargets() {
 
         FreeStyleProject project = createFreeStyleProjectWithOneLineThresholds(NOT_ACHIEVED_UNHEALTHY_THRESHOLD,
                 NOT_ACHIEVED_UNSTABLE_THRESHOLD);
@@ -99,7 +98,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if build succeeds, when line thresholds within range.
      */
     @Test
-    public void pipelineShouldMeetQualityTargets() {
+    void pipelineShouldMeetQualityTargets() {
         WorkflowJob job = createPipelineWithLineThreshold(ACHIEVED_UNHEALTHY_THRESHOLD, ACHIEVED_UNSTABLE_THRESHOLD);
         buildWithSuccess(job);
     }
@@ -108,7 +107,7 @@ public class QualityGatesITest extends IntegrationTestWithJenkinsPerSuite {
      * Tests if build is unstable, when line thresholds above coverage.
      */
     @Test
-    public void pipelineShouldNotMeetQualityTargets() {
+    void pipelineShouldNotMeetQualityTargets() {
 
         WorkflowJob job = createPipelineWithLineThreshold(NOT_ACHIEVED_UNHEALTHY_THRESHOLD,
                 NOT_ACHIEVED_UNSTABLE_THRESHOLD);

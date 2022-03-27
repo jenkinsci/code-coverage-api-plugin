@@ -3,7 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -14,12 +14,10 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-enum CoverageDecreasedAction { FAIL_BUILD, DONT_FAIL_BUILD}
-
 /**
  * Integration test for checking if build failes when coverage decreases.
  */
-public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkinsPerSuite {
+class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String COBERTURA_HIGHER_COVERAGE = "cobertura-higher-coverage.xml";
     private static final String COBERTURA_LOWER_COVERAGE = "cobertura-lower-coverage.xml";
 
@@ -30,7 +28,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      *         if creating Project throws Exception
      */
     @Test
-    public void freestyleProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() throws IOException {
+    void freestyleProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() throws IOException {
         FreeStyleProject freestyleProjectIfDecreasesSetFailTrue = createFreestyleProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.FAIL_BUILD);
@@ -46,7 +44,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
      * Integration test for pipeline projects for checking if build failes when coverage decreases.
      */
     @Test
-    public void pipelineProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() {
+    void pipelineProjectTestBuildResultDependingOnFailBuildIfCoverageDecreases() {
         WorkflowJob pipelineProjectIfDecreasesSetFailTrue = createPipelineProjectWithDecreasedCoverage(
                 COBERTURA_HIGHER_COVERAGE,
                 COBERTURA_LOWER_COVERAGE, CoverageDecreasedAction.FAIL_BUILD);
@@ -135,6 +133,7 @@ public class FailBuildIfCoverageDecreasesITest extends IntegrationTestWithJenkin
         return job;
     }
 
+    enum CoverageDecreasedAction { FAIL_BUILD, DONT_FAIL_BUILD}
 }
 
 

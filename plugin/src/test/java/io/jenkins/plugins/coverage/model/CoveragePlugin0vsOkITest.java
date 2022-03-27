@@ -2,7 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -15,14 +15,14 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 /**
  * Tests if 0 reports fail vs ok.
  */
-public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite {
+class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
 
     /**
      * Adapter reads no file and failNoReports is set true in freestyle project.
      */
     @Test
-    public void freeStyleNoFileAndFailNoReportsTrue() {
+    void freeStyleNoFileAndFailNoReportsTrue() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(true, "");
 
         buildSuccessfully(project);
@@ -32,7 +32,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads no file and failNoReports is set false in freestyle project.
      */
     @Test
-    public void freeStyleNoFileAndFailNoReportsFalse() {
+    void freeStyleNoFileAndFailNoReportsFalse() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(false, "");
 
         buildSuccessfully(project);
@@ -42,7 +42,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set true in freestyle project.
      */
     @Test
-    public void freeStyleWithFileAndFailNoReportsTrue() {
+    void freeStyleWithFileAndFailNoReportsTrue() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(true, JACOCO_ANALYSIS_MODEL_FILE);
 
         buildSuccessfully(project);
@@ -52,7 +52,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in freestyle project.
      */
     @Test
-    public void freeStyleWithFileAndFailNoReportsFalse() {
+    void freeStyleWithFileAndFailNoReportsFalse() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(false, JACOCO_ANALYSIS_MODEL_FILE);
 
         buildSuccessfully(project);
@@ -62,7 +62,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in freestyle project.
      */
     @Test
-    public void freeStyleWithFileWildcardAndFailNoReportsTrue() {
+    void freeStyleWithFileWildcardAndFailNoReportsTrue() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(true, "**/*.xml");
 
         buildSuccessfully(project);
@@ -72,7 +72,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in freestyle project.
      */
     @Test
-    public void freeStyleWithFileWildcardAndFailNoReportsFalse() {
+    void freeStyleWithFileWildcardAndFailNoReportsFalse() {
         FreeStyleProject project = createFreeStyleProjectWithFailNoReports(false, "**/*.xml");
 
         buildSuccessfully(project);
@@ -82,7 +82,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads no file and failNoReports is set true in pipeline project.
      */
     @Test
-    public void pipelineNoFileAndFailNoReportsTrue() {
+    void pipelineNoFileAndFailNoReportsTrue() {
         WorkflowJob job = getPipelineProjectWithJacoco(true, "");
 
         buildSuccessfully(job);
@@ -92,7 +92,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads no file and failNoReports is set false in pipeline project.
      */
     @Test
-    public void pipelineNoFileAndFailNoReportsFalse() {
+    void pipelineNoFileAndFailNoReportsFalse() {
         WorkflowJob job = getPipelineProjectWithJacoco(false, "");
 
         buildSuccessfully(job);
@@ -102,7 +102,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set true in pipeline project.
      */
     @Test
-    public void pipelineWithFileAndFailNoReportsTrue() {
+    void pipelineWithFileAndFailNoReportsTrue() {
         WorkflowJob job = getPipelineProjectWithJacoco(true, JACOCO_ANALYSIS_MODEL_FILE);
 
         buildSuccessfully(job);
@@ -112,7 +112,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in pipeline project.
      */
     @Test
-    public void pipelineWithFileAndFailNoReportsFalse() {
+    void pipelineWithFileAndFailNoReportsFalse() {
         WorkflowJob job = getPipelineProjectWithJacoco(false, JACOCO_ANALYSIS_MODEL_FILE);
 
         buildSuccessfully(job);
@@ -122,7 +122,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in pipeline project.
      */
     @Test
-    public void pipelineWithFileWildcardAndFailNoReportsTrue() {
+    void pipelineWithFileWildcardAndFailNoReportsTrue() {
         WorkflowJob job = getPipelineProjectWithJacoco(true, "**/*.xml");
 
         buildSuccessfully(job);
@@ -132,7 +132,7 @@ public class CoveragePlugin0vsOkITest extends IntegrationTestWithJenkinsPerSuite
      * Adapter reads one file and failNoReports is set false in pipeline project.
      */
     @Test
-    public void pipelineWithFileWildcardAndFailNoReportsFalse() {
+    void pipelineWithFileWildcardAndFailNoReportsFalse() {
         WorkflowJob job = getPipelineProjectWithJacoco(false, "**/*.xml");
 
         buildSuccessfully(job);
