@@ -8,15 +8,12 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import edu.hm.hafner.util.PathUtil;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
-import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TopLevelItem;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
@@ -28,7 +25,6 @@ import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assumptions.*;
 
 /**
  * Integration tests for the coverage API plugin.
@@ -36,7 +32,6 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Ullrich Hafner
  */
 @SuppressWarnings({"checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
-@Testcontainers
 class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
@@ -44,9 +39,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
     private static final PathUtil PATH_UTIL = new PathUtil();
-    @Container
-    private static final AgentContainer AGENT_CONTAINER = new AgentContainer();
-    private static final String FILE_NAME = "jacoco-analysis-model.xml";
+    static final String FILE_NAME = "jacoco-analysis-model.xml";
 
     /** Verifies that the plugin reads source code from the workspace root. */
     @Test
@@ -92,7 +85,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         String sourceDirectory = createExternalSourceFolder();
 
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
-        copyFileToWorkspace(job, SOURCE_FILE, "ignore" + PACKAGE_PATH + "AcuCobolParser.java");
+        copyFileToWorkspace(job, SOURCE_FILE, "ignore/" + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
         job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
@@ -121,8 +114,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
         String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory
-        ));
+        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -135,8 +127,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory
-        ));
+        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
@@ -198,56 +189,8 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         verifySimpleCoverageNode(project);
     }
 
-    /** Integration test for a freestyle build with code coverage that runs on an agent. */
-    @Test
-    void coverageFreeStyleOnAgent() throws IOException {
-        assumeThat(isWindows()).as("Running on Windows").isFalse();
-
-        Node agent = createDockerAgent(AGENT_CONTAINER);
-        FreeStyleProject project = createFreeStyleProject();
-        project.setAssignedNode(agent);
-
-        copySingleFileToAgentWorkspace(agent, project, FILE_NAME, FILE_NAME);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        verifySimpleCoverageNode(project);
-    }
-
-    /** Integration test for a pipeline with code coverage that runs on an agent. */
-    @Test
-    void coveragePipelineOnAgentNode() {
-        assumeThat(isWindows()).as("Running on Windows").isFalse();
-
-        Node agent = createDockerAgent(AGENT_CONTAINER);
-        WorkflowJob project = createPipelineOnAgent();
-
-        copySingleFileToAgentWorkspace(agent, project, FILE_NAME, FILE_NAME);
-
-        verifySimpleCoverageNode(project);
-    }
-
-    private WorkflowJob createPipelineOnAgent() {
-        WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node('" + DOCKER_AGENT_NAME + "') {"
-                + "timestamps {\n"
-                + "    checkout([$class: 'GitSCM', "
-                + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
-                + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
-                + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
-                + "                    relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + FILE_NAME
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
-                + "}"
-                + "}", true));
-
-        return job;
-    }
-
     @SuppressWarnings("PMD.SystemPrintln")
-    private void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
+    void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
         assertThat(build.getNumber()).isEqualTo(1);
 
