@@ -200,7 +200,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Integration test for a freestyle build with code coverage that runs on an agent. */
     @Test
-    void coverageFreeStyleOnAgent() throws IOException, InterruptedException {
+    void coverageFreeStyleOnAgent() throws IOException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
@@ -218,7 +218,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Integration test for a pipeline with code coverage that runs on an agent. */
     @Test
-    void coveragePipelineOnAgentNode() throws IOException, InterruptedException {
+    void coveragePipelineOnAgentNode() {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
