@@ -231,7 +231,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
 
     private WorkflowJob createPipelineOnAgent() {
         WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition("node('" + SSH_AGENT_NAME + "') {"
+        job.setDefinition(new CpsFlowDefinition("node('" + DOCKER_AGENT_NAME + "') {"
                 + "timestamps {\n"
                 + "    checkout([$class: 'GitSCM', "
                 + "        branches: [[name: '6bd346bbcc9779467ce657b2618ab11e38e28c2c' ]],\n"
@@ -256,5 +256,4 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
                 .isEqualTo(new Coverage(6083, 6368 - 6083));
         System.out.println(getConsoleLog(build));
     }
-
 }
