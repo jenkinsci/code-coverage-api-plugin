@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>5.19.0</version>
+    <version>5.21.0</version>
     <relativePath />
   </parent>
 
@@ -30,7 +30,7 @@
     <data-tables-api.version>1.11.4-4</data-tables-api.version>
     <forensics-api.version>1.12.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
-    <plugin-util-api.version>2.16.0-rc493.d2183b061b77</plugin-util-api.version>
+    <plugin-util-api.version>2.16.0-rc494.25bb2677a986</plugin-util-api.version>
     <fontawesome-api.version>6.0.0-1</fontawesome-api.version>
     <bootstrap5-api.version>5.1.3-6</bootstrap5-api.version>
     <jquery3-api.version>3.6.0-2</jquery3-api.version>

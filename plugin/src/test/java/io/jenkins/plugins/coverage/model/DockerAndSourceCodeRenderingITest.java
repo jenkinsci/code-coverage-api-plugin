@@ -39,7 +39,7 @@ class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSui
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
-        WorkflowJob project = createPipelineWithGitAndJacocoAdapter("node('" + SSH_AGENT_NAME + "')");
+        WorkflowJob project = createPipelineWithGitAndJacocoAdapter("node('" + DOCKER_AGENT_NAME + "')");
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_ANALYSIS_MODEL_FILE);
 
