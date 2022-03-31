@@ -81,6 +81,9 @@ public class CodeDeltaCalculator {
     /**
      * Gets all code changes which are relevant for the change coverage (added and modified files).
      *
+     * @param delta
+     *         The calculated code {@link Delta}
+     *
      * @return the relevant code changes
      */
     public Set<FileChanges> getChangeCoverageRelevantChanges(final Delta delta) {

@@ -43,6 +43,7 @@ import static j2html.TagCreator.*;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
     private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
     private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;

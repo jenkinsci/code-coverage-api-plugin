@@ -111,10 +111,7 @@ class CodeDeltaCalculatorTest {
         assertThatThrownBy(() -> codeDeltaCalculator.mapScmChangesToReportPaths(changes, tree, log))
                 .isInstanceOf(CoverageException.class)
                 .hasMessage(AMBIGUOUS_PATHS_ERROR);
-        assertThat(log.getErrorMessages()).containsExactly(
-                LOG_NAME,
-                AMBIGUOUS_PATHS_ERROR)
-        ;
+        assertThat(log.getErrorMessages()).containsExactly(LOG_NAME, AMBIGUOUS_PATHS_ERROR);
     }
 
     /**
