@@ -165,7 +165,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return new ChangeCoverageTable(root, changeCoverageTreeRoot, tableId);
         }
         else if (COVERAGE_CHANGES_TABLE_ID.equals(tableId)) {
-            root = indirectCoverageChangesTreeRoot;
+            return new IndirectCoverageChangesTable(root, indirectCoverageChangesTreeRoot, tableId);
         }
         return new CoverageTableModel(root, tableId);
     }
@@ -614,6 +614,47 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
+     * {@link CoverageTableModel} implementation for visualizing the indirect coverage changes.
+     *
+     * @since 3.0.0
+     */
+    static class IndirectCoverageChangesTable extends CoverageTableModel {
+
+        private final CoverageNode changeRoot;
+
+        /**
+         * Creates a indirect coverage changes table model.
+         *
+         * @param root
+         *         The root of the origin coverage tree
+         * @param changeRoot
+         *         The root of the indirect coverage changes tree
+         * @param id
+         *         The ID of the table
+         */
+        IndirectCoverageChangesTable(final CoverageNode root, final CoverageNode changeRoot, final String id) {
+            super(root, id);
+            this.changeRoot = changeRoot;
+        }
+
+        @Override
+        public List<Object> getRows() {
+            Locale browserLocale = Functions.getCurrentLocale();
+            return changeRoot.getAllFileCoverageNodes().stream()
+                    .map(file -> new IndirectCoverageChangesRow(getOriginalNode(file), file, browserLocale))
+                    .collect(Collectors.toList());
+        }
+
+        private FileCoverageNode getOriginalNode(final FileCoverageNode fileNode) {
+            Optional<FileCoverageNode> reference = getRoot().getAllFileCoverageNodes().stream()
+                    .filter(node -> node.getPath().equals(fileNode.getPath())
+                            && node.getName().equals(fileNode.getName()))
+                    .findFirst();
+            return reference.orElse(fileNode); // return this as fallback to prevent exceptions
+        }
+    }
+
+    /**
      * UI row model for the change coverage details table.
      *
      * @since 3.0.0
@@ -669,6 +710,68 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                         .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
                 return createColoredCoverageDeltaColumn(delta,
                         "The change coverage within the file against the total file coverage");
+            }
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
+        }
+    }
+
+    /**
+     * UI row model for the indirect coverage changes details table.
+     *
+     * @since 3.0.0
+     */
+    private static class IndirectCoverageChangesRow extends CoverageRow {
+
+        private final FileCoverageNode changedFileNode;
+
+        /**
+         * Creates a table row for visualizing the indirect coverage changes of a file.
+         *
+         * @param root
+         *         The unfiltered node which represents the coverage of the whole file
+         * @param changedFileNode
+         *         The filtered node which represents the indirect coverage changes only
+         * @param browserLocale
+         *         The locale
+         */
+        IndirectCoverageChangesRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
+                final Locale browserLocale) {
+            super(root, browserLocale);
+            this.changedFileNode = changedFileNode;
+        }
+
+        @Override
+        public DetailedColumnDefinition getLineCoverage() {
+            Coverage coverage = changedFileNode.getCoverage(LINE_COVERAGE);
+            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
+                    "The indirect line coverage changes");
+        }
+
+        @Override
+        public DetailedColumnDefinition getBranchCoverage() {
+            Coverage coverage = changedFileNode.getCoverage(BRANCH_COVERAGE);
+            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
+                    "The indirect branch coverage changes");
+        }
+
+        @Override
+        public DetailedColumnDefinition getLineCoverageDelta() {
+            return createColoredChangeCoverageDeltaColumn(LINE_COVERAGE);
+        }
+
+        @Override
+        public DetailedColumnDefinition getBranchCoverageDelta() {
+            return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
+        }
+
+        private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(
+                final CoverageMetric coverageMetric) {
+            Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
+            if (changeCoverage.isSet()) {
+                Fraction delta = changeCoverage.getCoveredPercentage()
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
+                return createColoredCoverageDeltaColumn(delta,
+                        "The indirect coverage changes within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
         }

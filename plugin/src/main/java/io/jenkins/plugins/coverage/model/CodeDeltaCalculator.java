@@ -1,12 +1,12 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.File;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,6 +17,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.forensics.delta.DeltaCalculatorFactory;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
@@ -29,16 +30,13 @@ import io.jenkins.plugins.forensics.delta.model.FileEditType;
  */
 public class CodeDeltaCalculator {
 
+    static final String AMBIGUOUS_PATHS_ERROR =
+            "Failed to map SCM paths with coverage report paths due to ambiguous fully qualified names";
+
     private final Run<?, ?> build;
     private final FilePath workspace;
     private final TaskListener listener;
     private final String scm;
-
-    /**
-     * The source directories are ordered descending by their length in order to grant a maximum match.
-     */
-    private final SortedSet<String> sourceDirectories =
-            new TreeSet<>(Comparator.comparing(String::length, Comparator.reverseOrder()));
 
     /**
      * Creates a code delta calculator for a specific build.
@@ -51,20 +49,17 @@ public class CodeDeltaCalculator {
      *         The listener
      * @param scm
      *         The selected SCM
-     * @param sourceDirectories
-     *         All source directories which contain code
      */
-    public CodeDeltaCalculator(@NonNull final Run<?, ?> build,
+    public CodeDeltaCalculator(
+            @NonNull final Run<?, ?> build,
             @NonNull final FilePath workspace,
             @NonNull final TaskListener listener,
-            @NonNull final String scm,
-            @NonNull final Set<String> sourceDirectories
+            @NonNull final String scm
     ) {
         this.build = build;
         this.workspace = workspace;
         this.listener = listener;
         this.scm = scm;
-        this.sourceDirectories.addAll(sourceDirectories);
     }
 
     /**
@@ -84,44 +79,96 @@ public class CodeDeltaCalculator {
     }
 
     /**
-     * Gets all file changes which are relevant for the change coverage (added and modified files) - mapped by the fully
-     * qualified name of the file.
+     * Gets all code changes which are relevant for the change coverage (added and modified files).
      *
-     * @param delta
-     *         The code delta between the {@link #build} and its reference
-     *
-     * @return the filtered code changes
+     * @return the relevant code changes
      */
-    public Map<String, FileChanges> getChangeCoverageRelevantChanges(final Delta delta) {
+    public Set<FileChanges> getChangeCoverageRelevantChanges(final Delta delta) {
         return delta.getFileChangesMap().values().stream()
                 .filter(fileChange -> fileChange.getFileEditType().equals(FileEditType.MODIFY)
                         || fileChange.getFileEditType().equals(FileEditType.ADD))
-                .collect(Collectors.toMap(
-                        fileChange -> getFullyQualifiedFileName(fileChange.getFileName()), Function.identity()));
+                .collect(Collectors.toSet());
     }
 
     /**
-     * Gets the fully qualified name of a file from the passed absolute path of the file within the workspace. If the
-     * absolute path starts with one of the defined source directories, the maximum matching source directory path
-     * prefix is removed since it does not belong to the fully qualified name of the file.
+     * Maps the passed {@link FileChanges code changes} to the corresponding fully qualified names as they are used by
+     * the coverage reporting tools - usually the fully qualified name of the file.
      *
-     * @param absolutePath
-     *         The path of the file within the project
+     * @param changes
+     *         The code changes
+     * @param root
+     *         The root of the coverage tree
+     * @param log
+     *         The log
      *
-     * @return the fully qualified name of the file
+     * @return the create code changes mapping
+     * @throws CoverageException
+     *         when creating the mapping failed due to ambiguous paths
      */
-    private String getFullyQualifiedFileName(final String absolutePath) {
-        // required preprocessing since \ requires to be escaped within a regex
-        String fileSeparatorRegex = File.separatorChar == '\\' ? "\\\\" : File.separator;
-        for (String path : sourceDirectories) {
-            if (absolutePath.startsWith(path)) {
-                String fullyQualifiedName = absolutePath.replaceFirst(path, "");
-                if (fullyQualifiedName.startsWith(File.separator)) {
-                    fullyQualifiedName = fullyQualifiedName.replaceFirst(fileSeparatorRegex, "");
-                }
-                return fullyQualifiedName;
-            }
+    public Map<String, FileChanges> mapScmChangesToReportPaths(
+            final Set<FileChanges> changes, final CoverageNode root, final FilteredLog log) throws CoverageException {
+        Set<String> reportPaths = root.getAllFileCoverageNodes().stream()
+                .map(FileCoverageNode::getPath)
+                .collect(Collectors.toSet());
+        Set<String> scmPaths = changes.stream()
+                .map(FileChanges::getFileName)
+                .collect(Collectors.toSet());
+
+        Map<String, String> pathMapping = getScmToReportPathMapping(scmPaths, reportPaths);
+        verifyScmToReportPathMapping(pathMapping, log);
+
+        return changes.stream()
+                .filter(change -> reportPaths.contains(pathMapping.get(change.getFileName())))
+                .collect(Collectors.toMap(
+                        fileChange -> pathMapping.get(fileChange.getFileName()), Function.identity()));
+
+    }
+
+    /**
+     * Creates a mapping between SCM paths and the corresponding coverage report paths.
+     *
+     * @param scmPaths
+     *         The SCM paths
+     * @param reportPaths
+     *         The coverage report paths
+     *
+     * @return the created mapping
+     */
+    private Map<String, String> getScmToReportPathMapping(final Set<String> scmPaths, final Set<String> reportPaths) {
+        Map<String, String> pathMapping = new HashMap<>();
+        for (String scmPath : scmPaths) {
+            reportPaths.stream()
+                    .filter(scmPath::endsWith)
+                    .max(Comparator.comparingInt(String::length))
+                    .map(match -> {
+                        pathMapping.put(scmPath, match);
+                        return match;
+                    })
+                    .orElseGet(() -> pathMapping.put(scmPath, ""));
         }
-        return absolutePath;
+        return pathMapping;
+    }
+
+    /**
+     * Verifies the the passed mapping between SCM and coverage report paths.
+     *
+     * @param pathMapping
+     *         The path mapping
+     * @param log
+     *         The log
+     *
+     * @throws CoverageException
+     *         when ambiguous paths has been detected
+     */
+    private void verifyScmToReportPathMapping(final Map<String, String> pathMapping, final FilteredLog log)
+            throws CoverageException {
+        List<String> notEmptyValues = pathMapping.values().stream()
+                .filter(path -> !path.isEmpty())
+                .collect(Collectors.toList());
+        if (notEmptyValues.size() != new HashSet<>(notEmptyValues).size()) {
+            log.logError(AMBIGUOUS_PATHS_ERROR);
+            throw new CoverageException(AMBIGUOUS_PATHS_ERROR);
+        }
+        log.logInfo("Successfully mapped SCM paths to coverage report paths");
     }
 }
