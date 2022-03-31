@@ -16,6 +16,7 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.delta.model.Delta;
@@ -82,27 +83,34 @@ public class CoverageReporter {
 
             // calculate code delta
             log.logInfo("Calculating the code delta...");
-            CodeDeltaCalculator codeDeltaCalculator =
-                    new CodeDeltaCalculator(build, workspace, listener, scm, sourceDirectories);
+            CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener, scm);
             Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
 
             if (delta.isPresent()) {
-                Map<String, FileChanges> codeChanges = codeDeltaCalculator.getChangeCoverageRelevantChanges(
-                        delta.get());
                 FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
-
-                // calculate code changes
-                log.logInfo("Obtaining code changes for files...");
-                fileChangesProcessor.attachChangedCodeLines(rootNode, codeChanges);
 
                 // file coverage deltas
                 log.logInfo("Obtaining coverage delta for files...");
                 fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceAction.getResult());
 
-                // indirect coverage changes
-                log.logInfo("Obtaining indirect coverage changes...");
-                fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(),
-                        codeChanges);
+                try {
+                    Set<FileChanges> changes = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta.get());
+                    Map<String, FileChanges> mappedChanges =
+                            codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
+
+                    // calculate code changes
+                    log.logInfo("Obtaining code changes for files...");
+                    fileChangesProcessor.attachChangedCodeLines(rootNode, mappedChanges);
+
+                    // indirect coverage changes
+                    log.logInfo("Obtaining indirect coverage changes...");
+                    fileChangesProcessor
+                            .attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(), mappedChanges);
+                }
+                catch (CoverageException e) {
+                    log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
+                    log.logError("-> Skipping calculating change coverage and indirect coverage changes");
+                }
             }
 
             logHandler.log(log);
