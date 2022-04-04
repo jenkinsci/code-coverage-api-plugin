@@ -3,8 +3,8 @@ package io.jenkins.plugins.coverage.model;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -24,8 +24,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
 /**
  * Integration test for delta computation of reference builds.
  */
-public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
-
+class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
 
@@ -37,9 +36,9 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      * @throws ClassNotFoundException
      *         when trying to recover coverage result
      */
-    @Ignore
+    @Disabled("Bug")
     @Test
-    public void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
+    void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation()
             throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
 
@@ -108,7 +107,7 @@ public class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJe
      *         when trying to recover coverage result
      */
     @Test
-    public void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
+    void pipelineCreatingReferenceBuildWithDeltaComputation() throws IOException, ClassNotFoundException {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
