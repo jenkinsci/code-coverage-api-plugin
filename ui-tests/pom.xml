@@ -19,6 +19,7 @@
     <jenkins.version>2.339</jenkins.version>
     <json-smart.version>2.3</json-smart.version>
     <json-unit-assertj.version>2.32.0</json-unit-assertj.version>
+    <module.name>${project.groupId}.code.coverage.api.ui.tests</module.name>
   </properties>
 
   <dependencyManagement>
