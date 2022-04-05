@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -21,15 +21,9 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Enum for Thresholds being set or not to get different HealthReports in tests.
- */
-
-enum Thresholds { SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
-
-/**
  * Integration Test for HealthReports.
  */
-public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
+class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILE_NAME = "jacoco-analysis-model.xml";
     private static final int UNSTABLE_LINE_THRESHOLD = 100;
 
@@ -37,7 +31,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      * No Build should succeed, no thresholds set, HealthScore should be 100%.
      */
     @Test
-    public void freestyleProjectShouldReturnSuccess() {
+    void freestyleProjectShouldReturnSuccess() {
         FreeStyleProject project = createFreeStyleProject(Thresholds.DONT_SET_ANY_THRESHOLDS);
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
@@ -49,7 +43,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      * Build should be unstable, thresholds set, HealthScore is 0%.
      */
     @Test
-    public void freestyleProjectShouldReturnUnstable() {
+    void freestyleProjectShouldReturnUnstable() {
         FreeStyleProject project = createFreeStyleProject(Thresholds.SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
@@ -86,7 +80,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      * Build of pipeline project should succeed and HealthScore is 100%.
      */
     @Test
-    public void pipelineShouldReturnSuccess() {
+    void pipelineShouldReturnSuccess() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')],"
@@ -102,7 +96,7 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
      * Build of pipeline project should be unstable and HealthScore is 0%.
      */
     @Test
-    public void pipelineShouldReturnUnstable() {
+    void pipelineShouldReturnUnstable() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_FILE_NAME);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_FILE_NAME + "')],"
@@ -136,4 +130,10 @@ public class HealthReportITest extends IntegrationTestWithJenkinsPerSuite {
             assertThat(healthReport.getIconUrl()).isEqualTo("health-00to19.png");
         }
     }
+
+    /**
+     * Enum for Thresholds being set or not to get different HealthReports in tests.
+     */
+
+    enum Thresholds { SET_THRESHOLDS_TO_RETURN_UNSTABLE_BUILD, DONT_SET_ANY_THRESHOLDS}
 }

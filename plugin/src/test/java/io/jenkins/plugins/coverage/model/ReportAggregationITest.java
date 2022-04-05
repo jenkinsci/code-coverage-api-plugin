@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -25,15 +25,9 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Enum for setting adapter in freestyle and pipeline projects.
- */
-enum UsedAdapter { COBERTURA, JACOCO}
-
-/**
  * Integration test for report aggregation.
  */
-public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
-
+class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String COBERTURA_LOWER_COVERAGE_XML = "cobertura-lower-coverage.xml";
     private static final String COBERTURA_LOTS_OF_DATA_XML = "cobertura-lots-of-data.xml";
 
@@ -49,7 +43,7 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
      *         due to verifyJacocoReportAggregation()
      */
     @Test
-    public void freeStyleProjectCheckReportAggregationWithJacocoFiles() throws ClassNotFoundException, IOException {
+    void freeStyleProjectCheckReportAggregationWithJacocoFiles() throws ClassNotFoundException, IOException {
         FreeStyleProject project = createFreeStyleProjectWithSpecifiedAdapterAndFiles(UsedAdapter.JACOCO,
                 JACOCO_CODINGSTYLE_XML, JACOCO_ANALYSIS_MODEL_XML);
 
@@ -66,7 +60,7 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
      *         due to verifyJacocoReportAggregation()
      */
     @Test
-    public void pipelineProjectCheckReportAggregationWithJacocoFiles() throws IOException, ClassNotFoundException {
+    void pipelineProjectCheckReportAggregationWithJacocoFiles() throws IOException, ClassNotFoundException {
         WorkflowJob job = createPipelineProjectWithSpecifiedAdapterAndFiles(UsedAdapter.JACOCO, JACOCO_CODINGSTYLE_XML,
                 JACOCO_ANALYSIS_MODEL_XML);
 
@@ -102,8 +96,8 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
      *         due to verifyJacocoReportAggregation()
      */
     @Test
-    @Ignore
-    public void freeStyleProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
+    @Disabled("Bug")
+    void freeStyleProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
         FreeStyleProject project = createFreeStyleProjectWithSpecifiedAdapterAndFiles(UsedAdapter.COBERTURA,
                 COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
         Run<?, ?> build = buildSuccessfully(project);
@@ -119,7 +113,7 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
      *         due to verifyCoberturaReportAggregation()
      */
     @Test
-    public void pipelineProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
+    void pipelineProjectCheckReportAggregationWithCoberturaFiles() throws IOException, ClassNotFoundException {
         WorkflowJob job = createPipelineProjectWithSpecifiedAdapterAndFiles(UsedAdapter.COBERTURA,
                 COBERTURA_LOWER_COVERAGE_XML, COBERTURA_LOTS_OF_DATA_XML);
 
@@ -210,4 +204,9 @@ public class ReportAggregationITest extends IntegrationTestWithJenkinsPerSuite {
                 + "}", true));
         return job;
     }
+
+    /**
+     * Enum for setting adapter in freestyle and pipeline projects.
+     */
+    enum UsedAdapter { COBERTURA, JACOCO}
 }
