@@ -234,7 +234,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private String readSourceCode(final CoverageNode fileNode, final String tableId)
             throws IOException, InterruptedException {
-        String content = Messages.Coverage_Not_Available();
+        String content = "";
         File rootDir = getOwner().getRootDir();
         if (isSourceFileInNewFormatAvailable(fileNode)) {
             content = SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
@@ -251,8 +251,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content,
                         (FileCoverageNode) fileNode);
             }
+            else {
+                return content;
+            }
         }
-        return content;
+        return Messages.Coverage_Not_Available();
     }
 
     /**
