@@ -234,7 +234,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     private String readSourceCode(final CoverageNode fileNode, final String tableId)
             throws IOException, InterruptedException {
-        String content = "";
+        String content = Messages.Coverage_Not_Available();
         File rootDir = getOwner().getRootDir();
         if (isSourceFileInNewFormatAvailable(fileNode)) {
             content = SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
