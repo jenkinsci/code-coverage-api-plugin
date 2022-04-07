@@ -47,6 +47,7 @@ import io.jenkins.plugins.prism.SourceDirectoryFilter;
  * instance of this class only.
  *
  * @author Ullrich Hafner
+ * @author Florian Orendi
  */
 public class SourceCodeFacade {
     /** Toplevel directory in the build folder of the controller that contains the zipped source files. */
@@ -275,8 +276,8 @@ public class SourceCodeFacade {
     }
 
     /**
-     * Calculates a mapping of lines which should be shown. The mapping contains the passed line intervals surrounded
-     * by +-3 lines each.
+     * Calculates a mapping of lines which should be shown. The mapping contains the passed line intervals surrounded by
+     * +-3 lines each.
      *
      * @param lines
      *         The lines which build the line intervals to be shown
