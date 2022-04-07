@@ -158,7 +158,8 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
         CoverageViewModel model = verifyViewModel(build);
 
-        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_NAME.hashCode()))).contains(sourceCodeSnippet);
+        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_NAME.hashCode()), "coverage-table"))
+                .contains(sourceCodeSnippet);
     }
 
     private CoverageViewModel verifyViewModel(final Run<?, ?> build) {

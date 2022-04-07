@@ -191,34 +191,68 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * Gets the source code of the file which is represented by the passed hash code. The coverage of the source code is
-     * highlighted by using HTML.
+     * highlighted by using HTML. Depending on the passed table ID, the source code is returned filtered with only the
+     * relevant lines of code.
      *
      * @param fileHash
      *         The hash code of the requested file
+     * @param tableId
+     *         The ID of the source file table
      *
      * @return the highlighted source code
      */
     @JavaScriptMethod
-    public String getSourceCode(final String fileHash) {
+    public String getSourceCode(final String fileHash, final String tableId) {
         Optional<CoverageNode> targetResult
                 = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(fileHash));
         if (targetResult.isPresent()) {
             try {
                 CoverageNode fileNode = targetResult.get();
-                File rootDir = getOwner().getRootDir();
-                if (isSourceFileInNewFormatAvailable(fileNode)) {
-                    return SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
-                }
-                if (isSourceFileInOldFormatAvailable(fileNode)) {
-                    return new TextFile(getFileForBuildsWithOldVersion(rootDir,
-                            fileNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
-                }
+                return readSourceCode(fileNode, tableId);
             }
             catch (IOException | InterruptedException exception) {
                 return ExceptionUtils.getStackTrace(exception);
             }
         }
         return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Reads the sourcecode corresponding to the passed {@link CoverageNode node} and filters the code dependent on the
+     * table ID.
+     *
+     * @param fileNode
+     *         The node
+     * @param tableId
+     *         The table ID
+     *
+     * @return the sourcecode with highlighted coverage
+     * @throws IOException
+     *         if reading failed
+     * @throws InterruptedException
+     *         if reading failed
+     */
+    private String readSourceCode(final CoverageNode fileNode, final String tableId)
+            throws IOException, InterruptedException {
+        String content = "";
+        File rootDir = getOwner().getRootDir();
+        if (isSourceFileInNewFormatAvailable(fileNode)) {
+            content = SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
+        }
+        if (isSourceFileInOldFormatAvailable(fileNode)) {
+            content = new TextFile(getFileForBuildsWithOldVersion(rootDir,
+                    fileNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
+        }
+        if (!content.isEmpty() && fileNode instanceof FileCoverageNode) {
+            if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
+                return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, (FileCoverageNode) fileNode);
+            }
+            else if (COVERAGE_CHANGES_TABLE_ID.equals(tableId)) {
+                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content,
+                        (FileCoverageNode) fileNode);
+            }
+        }
+        return content;
     }
 
     /**

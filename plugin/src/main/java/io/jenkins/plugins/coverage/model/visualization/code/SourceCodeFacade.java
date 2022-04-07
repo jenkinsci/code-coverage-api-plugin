@@ -10,12 +10,22 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
 
 import edu.hm.hafner.util.FilteredLog;
 
@@ -26,6 +36,7 @@ import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
 import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
@@ -143,6 +154,165 @@ public class SourceCodeFacade {
         File elementFolder = new File(sourceFolder, id);
         File[] files = elementFolder.listFiles();
         return files != null && files.length > 0;
+    }
+
+    /**
+     * Filters the sourcecode coverage highlighting for analyzing the change coverage only.
+     *
+     * @param content
+     *         The original HTML content
+     * @param fileNode
+     *         The {@link FileCoverageNode node} which represents the coverage of the file
+     *
+     * @return the filtered HTML sourcecode view
+     */
+    public String calculateChangeCoverageSourceCode(final String content, final FileCoverageNode fileNode) {
+        Set<Integer> lines = fileNode.getChangedCodeLines().stream()
+                .filter(line -> fileNode.getCoveragePerLine().containsKey(line))
+                .collect(Collectors.toSet());
+        Set<String> linesAsText = lines.stream().map(String::valueOf).collect(Collectors.toSet());
+        Document doc = Jsoup.parse(content, Parser.xmlParser());
+        int maxLine = Integer.parseInt(Objects.requireNonNull(
+                doc.select("tr").last()).select("a").text());
+        Map<String, Boolean> linesMapping = calculateLineMapping(lines, maxLine);
+        doc.select("tr").forEach(element -> {
+            String line = element.select("td > a").text();
+            if (linesMapping.containsKey(line)) {
+                if (linesMapping.get(line)) {
+                    changeCodeToSkipLine(element);
+                }
+                else if (!linesAsText.contains(line)) {
+                    element.removeClass(element.className());
+                    element.addClass("noCover");
+                    Objects.requireNonNull(element.select("td.hits").first()).text("");
+                }
+            }
+            else {
+                element.remove();
+            }
+        });
+        return doc.html();
+    }
+
+    /**
+     * Filters the sourcecode coverage highlighting for analyzing indirect coverage changes only.
+     *
+     * @param content
+     *         The original HTML content
+     * @param fileNode
+     *         The {@link FileCoverageNode node} which represents the coverage of the file
+     *
+     * @return the filtered HTML sourcecode view
+     */
+    public String calculateIndirectCoverageChangesSourceCode(final String content, final FileCoverageNode fileNode) {
+        Map<Integer, Integer> lines = fileNode.getIndirectCoverageChanges();
+        Map<String, String> indirectCoverageChangesAsText = lines.entrySet().stream()
+                .collect(Collectors
+                        .toMap(entry -> String.valueOf(entry.getKey()), entry -> String.valueOf(entry.getValue())));
+        Document doc = Jsoup.parse(content, Parser.xmlParser());
+        int maxLine = Integer.parseInt(Objects.requireNonNull(
+                doc.select("tr").last()).select("a").text());
+        Map<String, Boolean> linesMapping = calculateLineMapping(lines.keySet(), maxLine);
+        doc.select("tr").forEach(element -> {
+            String line = element.select("td > a").text();
+            if (linesMapping.containsKey(line)) {
+                colorIndirectCoverageChangeLine(element, line, linesMapping, indirectCoverageChangesAsText);
+            }
+            else {
+                element.remove();
+            }
+        });
+        return doc.html();
+    }
+
+    /**
+     * Highlights a line to be a skip line which represents a bunch of not visible lines.
+     *
+     * @param element
+     *         The HTML element which represents the line
+     */
+    private void changeCodeToSkipLine(final Element element) {
+        element.removeClass(element.className());
+        element.addClass("coverSkip");
+        Objects.requireNonNull(element.select("td.line").first()).text("..");
+        Objects.requireNonNull(element.select("td.hits").first()).text("");
+        Objects.requireNonNull(element.select("td.code").first()).text("");
+    }
+
+    /**
+     * Colors one line within the indirect coverage changes code view.
+     *
+     * @param element
+     *         The HTML element which represents the line
+     * @param line
+     *         The line number
+     * @param linesMapping
+     *         The mapping which classifies how the line should be treated
+     * @param indirectCoverageChangesAsText
+     *         The indirect coverage changes mapping
+     */
+    private void colorIndirectCoverageChangeLine(final Element element, final String line,
+            final Map<String, Boolean> linesMapping, final Map<String, String> indirectCoverageChangesAsText) {
+        if (linesMapping.get(line)) {
+            changeCodeToSkipLine(element);
+        }
+        else if (indirectCoverageChangesAsText.containsKey(line)) {
+            element.removeClass(element.className());
+            String hits = indirectCoverageChangesAsText.get(line);
+            if (hits.startsWith("-")) {
+                element.addClass("coverNone");
+            }
+            else {
+                element.addClass("coverFull");
+            }
+            Objects.requireNonNull(element.select("td.hits").first()).text(hits);
+        }
+        else {
+            element.removeClass(element.className());
+            element.addClass("noCover");
+            Objects.requireNonNull(element.select("td.hits").first()).text("");
+        }
+    }
+
+    /**
+     * Calculates a mapping of lines which should be shown. The mapping contains the passed line intervals surrounded
+     * by +-3 lines each.
+     *
+     * @param lines
+     *         The lines which build the line intervals to be shown
+     * @param maxLine
+     *         The maximum line number
+     *
+     * @return the line mapping as a map with the line number text as key and {@code true} if the line should be marked
+     *         as a filling line, {@code false} if the line shows code
+     */
+    private Map<String, Boolean> calculateLineMapping(final Set<Integer> lines, final int maxLine) {
+        SortedSet<Integer> linesWithSurroundings = new TreeSet<>(lines);
+        lines.forEach(line -> {
+            for (int i = 1; i <= 3; i++) {
+                linesWithSurroundings.add(line + i);
+                linesWithSurroundings.add(line - i);
+            }
+        });
+        List<Integer> sortedLines = linesWithSurroundings.stream()
+                .filter(line -> line >= 1 && line <= maxLine)
+                .collect(Collectors.toList());
+        SortedMap<String, Boolean> linesMapping = new TreeMap<>();
+        for (int i = 0; i < sortedLines.size(); i++) {
+            int line = sortedLines.get(i);
+            linesMapping.put(String.valueOf(line), false);
+            if (i < sortedLines.size() - 1 && line + 1 != sortedLines.get(i + 1)) {
+                linesMapping.put(String.valueOf(line + 1), true);
+            }
+        }
+        int highestLine = sortedLines.get(sortedLines.size() - 1);
+        if (sortedLines.get(0) > 1) {
+            linesMapping.put("1", true);
+        }
+        if (highestLine < maxLine) {
+            linesMapping.put(String.valueOf(highestLine + 1), true);
+        }
+        return linesMapping;
     }
 
     /**

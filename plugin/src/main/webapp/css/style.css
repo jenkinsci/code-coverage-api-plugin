@@ -57,6 +57,10 @@ table.source tr.noCover {
     background-color: #fff;
 }
 
+table.source tr.coverSkip {
+    background-color: #b4b4b4;
+}
+
 .center {
     text-align: center;
 }
