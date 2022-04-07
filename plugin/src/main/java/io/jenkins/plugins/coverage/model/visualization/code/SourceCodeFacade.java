@@ -26,6 +26,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 
 import edu.hm.hafner.util.FilteredLog;
 
@@ -176,7 +177,8 @@ public class SourceCodeFacade {
         int maxLine = Integer.parseInt(Objects.requireNonNull(
                 doc.select("tr").last()).select("a").text());
         Map<String, Boolean> linesMapping = calculateLineMapping(lines, maxLine);
-        doc.select("tr").forEach(element -> {
+        Elements elements = doc.select("tr");
+        for (Element element : elements) {
             String line = element.select("td > a").text();
             if (linesMapping.containsKey(line)) {
                 if (linesMapping.get(line)) {
@@ -191,7 +193,7 @@ public class SourceCodeFacade {
             else {
                 element.remove();
             }
-        });
+        }
         return doc.html();
     }
 
