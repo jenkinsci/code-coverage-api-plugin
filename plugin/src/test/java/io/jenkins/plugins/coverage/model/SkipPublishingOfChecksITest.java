@@ -2,7 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -16,21 +16,16 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Enum to set skipping of publishing of checks.
- */
-enum Checks { PUBLISH_CHECKS, SKIP_CHECKS}
-
-/**
  * Tests if publishing of checks can be skipped.
  */
-public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSuite {
+class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_FILENAME = "jacoco-analysis-model.xml";
 
     /**
      * Tests publishing of checks in freestyle-project when skip publishing checks is false.
      */
     @Test
-    public void freeStylePublishingOfChecks() {
+    void freeStylePublishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.PUBLISH_CHECKS);
         checkConsoleLog(buildSuccessfully(project), Checks.PUBLISH_CHECKS);
     }
@@ -39,7 +34,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      * Tests publishing of checks in pipeline-project when skip publishing checks is false.
      */
     @Test
-    public void pipelinePublishingOfChecks() {
+    void pipelinePublishingOfChecks() {
         WorkflowJob job = getPipelineProjectWithJacoco(Checks.PUBLISH_CHECKS);
         checkConsoleLog(buildSuccessfully(job), Checks.PUBLISH_CHECKS);
     }
@@ -48,7 +43,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      * Tests publishing of checks in freestyle-project is skipped when skip publishing checks is true.
      */
     @Test
-    public void freeStyleSkipPublishingOfChecks() {
+    void freeStyleSkipPublishingOfChecks() {
         FreeStyleProject project = getFreeStyleProjectWithJacoco(Checks.SKIP_CHECKS);
         checkConsoleLog(buildSuccessfully(project), Checks.SKIP_CHECKS);
     }
@@ -57,7 +52,7 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
      * Tests publishing of checks in pipeline-project is skipped when skip publishing checks is true.
      */
     @Test
-    public void pipelineSkipPublishingOfChecks() {
+    void pipelineSkipPublishingOfChecks() {
         WorkflowJob job = getPipelineProjectWithJacoco(Checks.SKIP_CHECKS);
         checkConsoleLog(buildSuccessfully(job), Checks.SKIP_CHECKS);
     }
@@ -134,4 +129,8 @@ public class SkipPublishingOfChecksITest extends IntegrationTestWithJenkinsPerSu
         return job;
     }
 
+    /**
+     * Enum to set skipping of publishing of checks.
+     */
+    enum Checks { PUBLISH_CHECKS, SKIP_CHECKS}
 }

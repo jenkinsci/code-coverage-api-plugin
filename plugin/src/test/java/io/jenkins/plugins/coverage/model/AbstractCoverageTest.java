@@ -17,7 +17,7 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  *
  * @author Ullrich Hafner
  */
-public class AbstractCoverageTest extends ResourceTest {
+public abstract class AbstractCoverageTest extends ResourceTest {
     static final CoverageMetric MODULE = CoverageMetric.MODULE;
     static final CoverageMetric PACKAGE = CoverageMetric.PACKAGE;
     static final CoverageMetric FILE = CoverageMetric.FILE;
