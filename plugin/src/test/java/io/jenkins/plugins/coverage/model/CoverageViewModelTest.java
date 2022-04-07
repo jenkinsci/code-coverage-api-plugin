@@ -28,7 +28,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         CoverageViewModel model = createModel();
 
         String hash = String.valueOf("PathUtil.java".hashCode());
-        assertThat(model.getSourceCode(hash)).isEqualTo("n/a");
+        assertThat(model.getSourceCode(hash, "coverage-table")).isEqualTo("n/a");
     }
 
     @Test
