@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code copying and rendering and copying works on Docker agents.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
