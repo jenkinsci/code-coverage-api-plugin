@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import io.jenkins.plugins.coverage.model.Coverage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -253,9 +252,8 @@ public class CoverageProcessor {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
             String message = "Fail build because this change request decreases line coverage by " + coverageDiff;
-            if (StringUtils.isBlank(action.getFailMessage())) {
-                action.setFailMessage(message);
-            }
+            action.setFailMessage(message);
+
             throw new CoverageException(message);
         }
     }
