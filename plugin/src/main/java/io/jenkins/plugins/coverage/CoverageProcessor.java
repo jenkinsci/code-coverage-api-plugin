@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import io.jenkins.plugins.coverage.model.Coverage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -134,7 +135,7 @@ public class CoverageProcessor {
                 sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
 
         if (failBuildIfCoverageDecreasedInChangeRequest) {
-            failBuildIfChangeRequestDecreasedCoverage(coverageReport);
+            failBuildIfChangeRequestDecreasedCoverage(coverageReport, action);
         }
     }
 
@@ -249,12 +250,15 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult)
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
             throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
-            throw new CoverageException(
-                    "Fail build because this change request decreases line coverage by " + coverageDiff);
+            String message = "Fail build because this change request decreases line coverage by " + coverageDiff;
+            if (StringUtils.isBlank(action.getFailMessage())) {
+                action.setFailMessage(message);
+            }
+            throw new CoverageException(message);
         }
     }
 
