@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerProxy;
 import hudson.model.Action;
 import hudson.model.HealthReport;
@@ -91,7 +92,9 @@ public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAc
     }
 
     public void setFailMessage(final String failMessage) {
-        this.failMessage = failMessage;
+        if (StringUtils.isBlank(this.failMessage)) {
+            this.failMessage = failMessage;
+        }
     }
 
     private synchronized void setOwner(final Run<?, ?> owner) {
