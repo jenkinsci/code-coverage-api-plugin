@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
@@ -20,7 +22,7 @@ class CoverageLeafTest extends AbstractCoverageTest {
 
         assertThat(coverageLeaf).hasMetric(LINE).hasToString("[Line]: 100.00% (1/1)");
         assertThat(coverageLeaf.getCoverage(LINE)).isEqualTo(COVERED);
-        assertThat(coverageLeaf.getCoverage(CoverageMetric.MODULE)).isEqualTo(Coverage.NO_COVERAGE);
+        assertThat(coverageLeaf.getCoverage(CoverageMetric.MODULE)).isEqualTo(CoverageBuilder.NO_COVERAGE);
     }
 
     @Test

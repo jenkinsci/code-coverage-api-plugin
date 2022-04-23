@@ -3,6 +3,8 @@ package io.jenkins.plugins.coverage.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 /**
  * A leaf in the coverage hierarchy. A leaf is a non-divisible coverage metric like line or branch coverage.
  *
@@ -43,7 +45,7 @@ public final class CoverageLeaf implements Serializable {
         if (metric.equals(searchMetric)) {
             return coverage;
         }
-        return Coverage.NO_COVERAGE;
+        return CoverageBuilder.NO_COVERAGE;
     }
 
     @Override
