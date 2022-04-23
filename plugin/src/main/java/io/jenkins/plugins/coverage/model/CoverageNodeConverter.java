@@ -42,7 +42,9 @@ public class CoverageNodeConverter {
             for (Map.Entry<CoverageElement, Ratio> coverage : result.getLocalResults().entrySet()) {
                 Ratio ratio = coverage.getValue();
                 CoverageLeaf leaf = new CoverageLeaf(CoverageMetric.valueOf(coverage.getKey().getName()),
-                        new Coverage((int) ratio.numerator, (int) (ratio.denominator - ratio.numerator)));
+                        new Coverage.CoverageBuilder().setCovered((int) ratio.numerator)
+                                .setMissed((int) (ratio.denominator - ratio.numerator))
+                                .build());
                 coverageNode.add(leaf);
             }
             return coverageNode;
@@ -94,11 +96,14 @@ public class CoverageNodeConverter {
             if (paint.getBranchTotal(line) > 0) {
                 int covered = paint.getBranchCoverage(line);
                 int missed = paint.getBranchTotal(line) - covered;
-                coverageDetails.put(line, new Coverage(paint.getBranchCoverage(line), missed));
+                coverageDetails.put(line, new Coverage.CoverageBuilder().setCovered(paint.getBranchCoverage(line))
+                        .setMissed(missed)
+                        .build());
             }
             else {
                 int covered = paint.getHits(line) > 0 ? 1 : 0;
-                coverageDetails.put(line, new Coverage(covered, 1 - covered));
+                coverageDetails.put(line,
+                        new Coverage.CoverageBuilder().setCovered(covered).setMissed(1 - covered).build());
             }
         }
         node.setCoveragePerLine(coverageDetails);

@@ -11,6 +11,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
@@ -44,7 +46,7 @@ class CoverageTest {
 
     @Test
     void shouldCreatePercentages() {
-        Coverage coverage = new Coverage(6, 4);
+        Coverage coverage = new CoverageBuilder().setCovered(6).setMissed(4).build();
         assertThat(coverage).isSet()
                 .hasCovered(6)
                 .hasCoveredPercentage(Fraction.getFraction(6, 10))
@@ -61,17 +63,46 @@ class CoverageTest {
         assertThat(coverage.formatMissedPercentage()).isEqualTo("40.00%");
 
         assertThat(coverage.add(Coverage.NO_COVERAGE)).isEqualTo(coverage);
-        Coverage sum = coverage.add(new Coverage(10, 0));
-        assertThat(sum).isEqualTo(new Coverage(16, 4)).hasRoundedPercentage(80);
+        Coverage sum = coverage.add(new CoverageBuilder().setCovered(10).setMissed(0).build());
+        assertThat(sum).isEqualTo(new CoverageBuilder().setCovered(16).setMissed(4).build()).hasRoundedPercentage(80);
         assertThat(sum.formatCoveredPercentage()).isEqualTo("80.00%");
         assertThat(sum.formatMissedPercentage()).isEqualTo("20.00%");
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidBuilderArguments() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new CoverageBuilder().setCovered(1).setMissed(1).setTotal(1).build());
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new CoverageBuilder().setCovered(1).build());
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new CoverageBuilder().setMissed(1).build());
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                new CoverageBuilder().setTotal(1).build());
+    }
+
+    @Test
+    void shouldProvideMultipleOptionsToCreateCoverage() {
+        assertThat(new CoverageBuilder().setCovered(1).setMissed(2).build())
+                .hasCovered(1)
+                .hasMissed(2)
+                .hasTotal(3);
+        assertThat(new CoverageBuilder().setCovered(1).setTotal(3).build())
+                .hasCovered(1)
+                .hasMissed(2)
+                .hasTotal(3);
+        assertThat(new CoverageBuilder().setMissed(2).setTotal(3).build())
+                .hasCovered(1)
+                .hasMissed(2)
+                .hasTotal(3);
     }
 
     @ParameterizedTest(name = "[{index}] Illegal coverage serialization = \"{0}\"")
     @ValueSource(strings = {"", "-", "/", "0/", "0/0/0", "/0", "a/1", "1/a", "1.0/1.0", "4/3"})
     @DisplayName("Should throw exception for illegal serializations")
     void shouldThrowExceptionForInvalidCoverages(final String serialization) {
-        assertThatIllegalArgumentException().isThrownBy(() -> Coverage.valueOf(serialization));
+        assertThatIllegalArgumentException().isThrownBy(() -> Coverage.valueOf(serialization))
+                .withMessageContaining(serialization);
     }
 
     @Test

@@ -95,14 +95,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
         assertThat(tree).hasOnlyMetrics(MODULE, PACKAGE, FILE, CLASS, METHOD, LINE, BRANCH, INSTRUCTION)
                 .hasToString("[Module] " + PROJECT_NAME);
         assertThat(tree.getMetricsDistribution()).containsExactly(
-                entry(MODULE, new Coverage(1, 0)),
-                entry(PACKAGE, new Coverage(1, 0)),
-                entry(FILE, new Coverage(7, 3)),
-                entry(CLASS, new Coverage(15, 3)),
-                entry(METHOD, new Coverage(97, 5)),
-                entry(LINE, new Coverage(294, 29)),
-                entry(INSTRUCTION, new Coverage(1260, 90)),
-                entry(BRANCH, new Coverage(109, 7)));
+                entry(MODULE, new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build()),
+                entry(PACKAGE, new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build()),
+                entry(FILE, new Coverage.CoverageBuilder().setCovered(7).setMissed(3).build()),
+                entry(CLASS, new Coverage.CoverageBuilder().setCovered(15).setMissed(3).build()),
+                entry(METHOD, new Coverage.CoverageBuilder().setCovered(97).setMissed(5).build()),
+                entry(LINE, new Coverage.CoverageBuilder().setCovered(294).setMissed(29).build()),
+                entry(INSTRUCTION, new Coverage.CoverageBuilder().setCovered(1260).setMissed(90).build()),
+                entry(BRANCH, new Coverage.CoverageBuilder().setCovered(109).setMissed(7).build()));
         assertThat(tree.getMetricPercentages()).containsExactly(
                 entry(MODULE, Fraction.ONE),
                 entry(PACKAGE, Fraction.ONE),
@@ -171,7 +171,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         assertThat(tree.getAll(PACKAGE)).hasSize(4);
         assertThat(tree.getMetricsDistribution()).contains(
-                entry(PACKAGE, new Coverage(4, 0)));
+                entry(PACKAGE, new Coverage.CoverageBuilder().setCovered(4).setMissed(0).build()));
 
         assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
                 packageNode -> assertThat(packageNode).hasName("edu")

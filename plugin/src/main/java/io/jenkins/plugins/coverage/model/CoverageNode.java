@@ -36,8 +36,8 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 public class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 
-    private static final Coverage COVERED_NODE = new Coverage(1, 0);
-    private static final Coverage MISSED_NODE = new Coverage(0, 1);
+    private static final Coverage COVERED_NODE = new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build();
+    private static final Coverage MISSED_NODE = new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build();
     private static final int[] EMPTY_ARRAY = new int[0];
 
     /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */

@@ -64,8 +64,10 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
-                    assertThat(root.getCoverage(LINE)).isEqualTo(new Coverage(2, 2));
-                    assertThat(root.getCoverage(BRANCH)).isEqualTo(new Coverage(4, 4));
+                    assertThat(root.getCoverage(LINE)).isEqualTo(
+                            new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
+                    assertThat(root.getCoverage(BRANCH)).isEqualTo(
+                            new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
                 });
     }
 
@@ -82,8 +84,10 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
-                    assertThat(root.getCoverage(LINE)).isEqualTo(new Coverage(2, 2));
-                    assertThat(root.getCoverage(BRANCH)).isEqualTo(new Coverage(4, 4));
+                    assertThat(root.getCoverage(LINE)).isEqualTo(
+                            new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
+                    assertThat(root.getCoverage(BRANCH)).isEqualTo(
+                            new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
                 });
     }
 
@@ -158,10 +162,10 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
      */
     private void attachCoveragePerLine(final FileCoverageNode file) {
         SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>();
-        coveragePerLine.put(10, new Coverage(1, 0));
-        coveragePerLine.put(11, new Coverage(0, 4));
-        coveragePerLine.put(12, new Coverage(4, 0));
-        coveragePerLine.put(13, new Coverage(0, 1));
+        coveragePerLine.put(10, new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build());
+        coveragePerLine.put(11, new Coverage.CoverageBuilder().setCovered(0).setMissed(4).build());
+        coveragePerLine.put(12, new Coverage.CoverageBuilder().setCovered(4).setMissed(0).build());
+        coveragePerLine.put(13, new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build());
         file.setCoveragePerLine(coveragePerLine);
     }
 

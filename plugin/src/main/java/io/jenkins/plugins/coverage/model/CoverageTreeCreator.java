@@ -157,12 +157,16 @@ public class CoverageTreeCreator {
         for (Coverage change : changes) {
             int covered = change.getCovered() > 0 ? 1 : 0;
             if (change.getTotal() > 1) {
-                branchCoverage = branchCoverage.add(new Coverage(change.getCovered(), change.getMissed()));
-                lineCoverage = lineCoverage.add(new Coverage(covered, 1 - covered));
+                branchCoverage = branchCoverage.add(new Coverage.CoverageBuilder().setCovered(change.getCovered())
+                        .setMissed(change.getMissed())
+                        .build());
+                lineCoverage = lineCoverage.add(
+                        new Coverage.CoverageBuilder().setCovered(covered).setMissed(1 - covered).build());
             }
             else {
                 int missed = change.getMissed() > 0 ? 1 : 0;
-                lineCoverage = lineCoverage.add(new Coverage(covered, missed));
+                lineCoverage = lineCoverage.add(
+                        new Coverage.CoverageBuilder().setCovered(covered).setMissed(missed).build());
             }
         }
         if (lineCoverage.isSet()) {
@@ -193,21 +197,23 @@ public class CoverageTreeCreator {
             if (delta > 0) {
                 // the line is fully covered - even in case of branch coverage
                 if (delta == currentCoverage.getCovered()) {
-                    lineCoverage = lineCoverage.add(new Coverage(1, 0));
+                    lineCoverage = lineCoverage.add(new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build());
                 }
                 // the branch coverage increased for 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
-                    branchCoverage = branchCoverage.add(new Coverage(delta, 0));
+                    branchCoverage = branchCoverage.add(
+                            new Coverage.CoverageBuilder().setCovered(delta).setMissed(0).build());
                 }
             }
             else if (delta < 0) {
                 // the line is not covered any more
                 if (currentCoverage.getCovered() == 0) {
-                    lineCoverage = lineCoverage.add(new Coverage(0, 1));
+                    lineCoverage = lineCoverage.add(new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build());
                 }
                 // the branch coverage is decreased by 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
-                    branchCoverage = branchCoverage.add(new Coverage(0, Math.abs(delta)));
+                    branchCoverage = branchCoverage.add(
+                            new Coverage.CoverageBuilder().setCovered(0).setMissed(Math.abs(delta)).build());
                 }
             }
         }
