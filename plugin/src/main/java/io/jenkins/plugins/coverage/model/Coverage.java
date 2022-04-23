@@ -3,7 +3,6 @@ package io.jenkins.plugins.coverage.model;
 import java.io.Serializable;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
@@ -22,39 +21,6 @@ public final class Coverage implements Serializable {
 
     private final int covered;
     private final int missed;
-
-    /**
-     * Creates a new {@link Coverage} instance from the provided string representation. The string representation is
-     * expected to contain the number of covered items and the total number of items - separated by a slash, e.g.
-     * "100/345", or "0/0". Whitespace characters will be ignored.
-     *
-     * @param stringRepresentation
-     *         string representation to convert from
-     *
-     * @return the created coverage
-     * @throws IllegalArgumentException
-     *         if the string is not a valid Coverage instance
-     */
-    public static Coverage valueOf(final String stringRepresentation) {
-        try {
-            String cleanedFormat = StringUtils.deleteWhitespace(stringRepresentation);
-            if (StringUtils.contains(cleanedFormat, "/")) {
-                String extractedCovered = StringUtils.substringBefore(cleanedFormat, "/");
-                String extractedTotal = StringUtils.substringAfter(cleanedFormat, "/");
-
-                int covered = Integer.parseInt(extractedCovered);
-                int total = Integer.parseInt(extractedTotal);
-                if (total >= covered) {
-                    return new Coverage(covered, total - covered);
-                }
-            }
-        }
-        catch (NumberFormatException exception) {
-            // ignore and throw a specific exception
-        }
-        throw new IllegalArgumentException(
-                String.format("Cannot convert %s to a valid Coverage instance.", stringRepresentation));
-    }
 
     /**
      * Creates a new code coverage with the specified values.
@@ -104,8 +70,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the covered percentage
      * @see #formatCoveredPercentage(Locale)
@@ -148,8 +114,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the missed percentage
      */
@@ -228,16 +194,5 @@ public final class Coverage implements Serializable {
         int result = covered;
         result = 31 * result + missed;
         return result;
-    }
-
-    /**
-     * Returns a string representation for this {@link Coverage} that can be used to serialize this instance in a simple
-     * but still readable way. The serialization contains the number of covered items and the total number of items -
-     * separated by a slash, e.g. "100/345", or "0/0".
-     *
-     * @return a string representation for this {@link Coverage}
-     */
-    public String serializeToString() {
-        return String.format("%d/%d", getCovered(), getTotal());
     }
 }

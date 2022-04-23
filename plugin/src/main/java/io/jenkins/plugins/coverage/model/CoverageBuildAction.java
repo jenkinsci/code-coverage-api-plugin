@@ -542,30 +542,6 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * {@link Converter} for {@link Coverage} instances so that only the values will be serialized. After
-     * reading the values back from the stream, the string representation will be converted to an actual instance
-     * again.
-     */
-    private static final class CoverageConverter implements Converter {
-        @SuppressWarnings("PMD.NullAssignment")
-        @Override
-        public void marshal(final Object source, final HierarchicalStreamWriter writer,
-                final MarshallingContext context) {
-            writer.setValue(source instanceof Coverage ? ((Coverage) source).serializeToString() : null);
-        }
-
-        @Override
-        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-            return Coverage.valueOf(reader.getValue());
-        }
-
-        @Override
-        public boolean canConvert(final Class type) {
-            return type == Coverage.class;
-        }
-    }
-
-    /**
      * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}.
      */
     static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
@@ -580,15 +556,10 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         @Override
         protected void configureXStream(final XStream2 xStream) {
             xStream.alias("node", CoverageNode.class);
-            xStream.alias("package", PackageCoverageNode.class);
-            xStream.alias("file", FileCoverageNode.class);
-            xStream.alias("method", MethodCoverageNode.class);
             xStream.alias("leaf", CoverageLeaf.class);
             xStream.alias("coverage", Coverage.class);
-            xStream.alias("fraction", Fraction.class);
             xStream.addImmutableType(CoverageMetric.class, false);
             xStream.registerConverter(new MetricsConverter());
-            xStream.registerConverter(new CoverageConverter());
         }
 
         @Override
