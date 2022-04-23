@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -424,7 +426,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, CoverageNode.ROOT, coverageTreeCreator);
 
         FileCoverageNode fileNode = new FileCoverageNode("test", "test");
-        fileNode.putCoveragePerLine(1, Coverage.NO_COVERAGE);
+        fileNode.putCoveragePerLine(1, CoverageBuilder.NO_COVERAGE);
         fileNode.addChangedCodeLine(1);
         fileNode.addChangedCodeLine(2);
         fileNode.putIndirectCoverageChange(3, 1);

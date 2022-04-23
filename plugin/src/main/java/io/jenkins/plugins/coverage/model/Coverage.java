@@ -17,9 +17,6 @@ import edu.hm.hafner.util.VisibleForTesting;
 public final class Coverage implements Serializable {
     private static final long serialVersionUID = -3802318446471137305L;
 
-    /** Null object that indicates that the code coverage has not been measured. */
-    public static final Coverage NO_COVERAGE = new CoverageBuilder().setCovered(0).setMissed(0).build();
-
     private static final Fraction HUNDRED = Fraction.getFraction(100, 1);
 
     private final int covered;
@@ -248,13 +245,6 @@ public final class Coverage implements Serializable {
      * Builder to create an cache new {@link Coverage} instances.
      */
     public static class CoverageBuilder {
-        private int covered;
-        private boolean isCoveredSet;
-        private int missed;
-        private boolean isMissedSet;
-        private int total;
-        private boolean isTotalSet;
-
         @VisibleForTesting
         static final int CACHE_SIZE = 16;
         private static final Coverage[] CACHE = new Coverage[CACHE_SIZE * CACHE_SIZE];
@@ -270,6 +260,16 @@ public final class Coverage implements Serializable {
         private static int getCacheIndex(final int covered, final int missed) {
             return covered * CACHE_SIZE + missed;
         }
+
+        /** Null object that indicates that the code coverage has not been measured. */
+        public static final Coverage NO_COVERAGE = CACHE[0];
+
+        private int covered;
+        private boolean isCoveredSet;
+        private int missed;
+        private boolean isMissedSet;
+        private int total;
+        private boolean isTotalSet;
 
         /**
          * Sets the number of total items.

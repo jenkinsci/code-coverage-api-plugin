@@ -27,6 +27,8 @@ import edu.hm.hafner.util.Ensure;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 /**
  * A hierarchical decomposition of coverage results.
  *
@@ -312,7 +314,7 @@ public class CoverageNode implements Serializable {
         if (searchMetric.isLeaf()) {
             Coverage childrenCoverage = children.stream()
                     .map(node -> node.getCoverage(searchMetric))
-                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+                    .reduce(CoverageBuilder.NO_COVERAGE, Coverage::add);
             return leaves.stream()
                     .map(node -> node.getCoverage(searchMetric))
                     .reduce(childrenCoverage, Coverage::add);
@@ -320,7 +322,7 @@ public class CoverageNode implements Serializable {
         else {
             Coverage childrenCoverage = children.stream()
                     .map(node -> node.getCoverage(searchMetric))
-                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+                    .reduce(CoverageBuilder.NO_COVERAGE, Coverage::add);
 
             if (metric.equals(searchMetric)) {
                 if (getCoverage(CoverageMetric.LINE).getCovered() > 0) {

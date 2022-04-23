@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 /**
  * Creates coverage trees which represent different types of coverage.
  *
@@ -152,8 +154,8 @@ public class CoverageTreeCreator {
      *         The {@link Coverage} to be represented by the leaves
      */
     private void createChangeCoverageLeaves(final FileCoverageNode fileNode, final List<Coverage> changes) {
-        Coverage lineCoverage = Coverage.NO_COVERAGE;
-        Coverage branchCoverage = Coverage.NO_COVERAGE;
+        Coverage lineCoverage = CoverageBuilder.NO_COVERAGE;
+        Coverage branchCoverage = CoverageBuilder.NO_COVERAGE;
         for (Coverage change : changes) {
             int covered = change.getCovered() > 0 ? 1 : 0;
             if (change.getTotal() > 1) {
@@ -189,8 +191,8 @@ public class CoverageTreeCreator {
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     // there is no useful possibility for outsourcing code
     private void createIndirectCoverageChangesLeaves(final FileCoverageNode fileNode) {
-        Coverage lineCoverage = Coverage.NO_COVERAGE;
-        Coverage branchCoverage = Coverage.NO_COVERAGE;
+        Coverage lineCoverage = CoverageBuilder.NO_COVERAGE;
+        Coverage branchCoverage = CoverageBuilder.NO_COVERAGE;
         for (Map.Entry<Integer, Integer> change : fileNode.getIndirectCoverageChanges().entrySet()) {
             int delta = change.getValue();
             Coverage currentCoverage = fileNode.getCoveragePerLine().get(change.getKey());

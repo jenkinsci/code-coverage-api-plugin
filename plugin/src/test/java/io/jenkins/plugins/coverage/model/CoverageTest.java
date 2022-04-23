@@ -29,7 +29,7 @@ class CoverageTest {
 
     @Test
     void shouldProvideNullObject() {
-        assertThat(Coverage.NO_COVERAGE).isNotSet()
+        assertThat(NO_COVERAGE).isNotSet()
                 .hasCovered(0)
                 .hasCoveredPercentage(Fraction.ZERO)
                 .hasRoundedPercentage(0)
@@ -37,12 +37,12 @@ class CoverageTest {
                 .hasMissedPercentage(Fraction.ZERO)
                 .hasTotal(0)
                 .hasToString(Messages.Coverage_Not_Available());
-        assertThat(Coverage.NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
-        assertThat(Coverage.NO_COVERAGE.formatMissedPercentage()).isEqualTo(Messages.Coverage_Not_Available());
-        assertThat(Coverage.NO_COVERAGE.add(Coverage.NO_COVERAGE)).isEqualTo(Coverage.NO_COVERAGE);
+        assertThat(NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
+        assertThat(NO_COVERAGE.formatMissedPercentage()).isEqualTo(Messages.Coverage_Not_Available());
+        assertThat(NO_COVERAGE.add(NO_COVERAGE)).isEqualTo(NO_COVERAGE);
 
-        assertThat(Coverage.NO_COVERAGE.serializeToString()).isEqualTo("0/0");
-        assertThat(Coverage.valueOf("0/0")).isEqualTo(Coverage.NO_COVERAGE);
+        assertThat(NO_COVERAGE.serializeToString()).isEqualTo("0/0");
+        assertThat(Coverage.valueOf("0/0")).isEqualTo(NO_COVERAGE);
     }
 
     @Test
@@ -63,7 +63,7 @@ class CoverageTest {
         assertThat(coverage.formatCoveredPercentage()).isEqualTo("60.00%");
         assertThat(coverage.formatMissedPercentage()).isEqualTo("40.00%");
 
-        assertThat(coverage.add(Coverage.NO_COVERAGE)).isEqualTo(coverage);
+        assertThat(coverage.add(NO_COVERAGE)).isEqualTo(coverage);
         Coverage sum = coverage.add(new CoverageBuilder().setCovered(10).setMissed(0).build());
         assertThat(sum).isEqualTo(new CoverageBuilder().setCovered(16).setMissed(4).build()).hasRoundedPercentage(80);
         assertThat(sum.formatCoveredPercentage()).isEqualTo("80.00%");
