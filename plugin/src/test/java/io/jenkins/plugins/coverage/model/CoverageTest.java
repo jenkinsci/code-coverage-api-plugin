@@ -4,7 +4,10 @@ import java.util.Locale;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
@@ -34,6 +37,9 @@ class CoverageTest {
         assertThat(Coverage.NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.formatMissedPercentage()).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.add(Coverage.NO_COVERAGE)).isEqualTo(Coverage.NO_COVERAGE);
+
+        assertThat(Coverage.NO_COVERAGE.serializeToString()).isEqualTo("0/0");
+        assertThat(Coverage.valueOf("0/0")).isEqualTo(Coverage.NO_COVERAGE);
     }
 
     @Test
@@ -48,6 +54,9 @@ class CoverageTest {
                 .hasTotal(10)
                 .hasToString("60.00% (6/10)");
 
+        assertThat(coverage.serializeToString()).isEqualTo("6/10");
+        assertThat(Coverage.valueOf("6/10")).isEqualTo(coverage);
+
         assertThat(coverage.formatCoveredPercentage()).isEqualTo("60.00%");
         assertThat(coverage.formatMissedPercentage()).isEqualTo("40.00%");
 
@@ -56,6 +65,13 @@ class CoverageTest {
         assertThat(sum).isEqualTo(new Coverage(16, 4)).hasRoundedPercentage(80);
         assertThat(sum.formatCoveredPercentage()).isEqualTo("80.00%");
         assertThat(sum.formatMissedPercentage()).isEqualTo("20.00%");
+    }
+
+    @ParameterizedTest(name = "[{index}] Illegal coverage serialization = \"{0}\"")
+    @ValueSource(strings = {"", "-", "/", "0/", "0/0/0", "/0", "a/1", "1/a", "1.0/1.0", "4/3"})
+    @DisplayName("Should throw exception for illegal serializations")
+    void shouldThrowExceptionForInvalidCoverages(final String serialization) {
+        assertThatIllegalArgumentException().isThrownBy(() -> Coverage.valueOf(serialization));
     }
 
     @Test
