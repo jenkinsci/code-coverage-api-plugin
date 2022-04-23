@@ -342,7 +342,9 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(JACOCO_COVERED_LINES, JACOCO_ALL_LINES - JACOCO_COVERED_LINES));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_COVERED_LINES)
+                        .setMissed(JACOCO_ALL_LINES - JACOCO_COVERED_LINES)
+                        .build());
     }
 
     /**
@@ -356,7 +358,9 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(BOTH_JACOCO_COVERED_LINES, BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(BOTH_JACOCO_COVERED_LINES)
+                        .setMissed(BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES)
+                        .build());
     }
 
     /**
@@ -392,7 +396,9 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(COBERTURA_COVERED_LINES, COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(COBERTURA_COVERED_LINES)
+                        .setMissed(COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES)
+                        .build());
 
     }
 
@@ -406,7 +412,8 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildSuccessfully(project);
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         //FIXME
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(new Coverage(472, 722 - 472));
+        assertThat(coverageResult.getLineCoverage()).isEqualTo(
+                new Coverage.CoverageBuilder().setCovered(472).setMissed(722 - 472).build());
     }
 
     /**
@@ -420,8 +427,9 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(JACOCO_COBERTURA_COVERED_LINES,
-                        JACOCO_COBERTURA_ALL_LINES - JACOCO_COBERTURA_COVERED_LINES));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_COBERTURA_COVERED_LINES)
+                        .setMissed(JACOCO_COBERTURA_ALL_LINES - JACOCO_COBERTURA_COVERED_LINES)
+                        .build());
     }
 
 }

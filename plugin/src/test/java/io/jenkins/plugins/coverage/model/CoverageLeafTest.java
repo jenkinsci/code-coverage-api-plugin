@@ -12,7 +12,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageLeafTest extends AbstractCoverageTest {
-    private static final Coverage COVERED = new Coverage(1, 0);
+    private static final Coverage COVERED = new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build();
 
     @Test
     void shouldCreateLeaf() {

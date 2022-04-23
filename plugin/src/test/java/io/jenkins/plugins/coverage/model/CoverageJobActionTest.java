@@ -97,8 +97,8 @@ class CoverageJobActionTest {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         when(action.getOwner()).thenAnswer(i -> build);
         when(action.getUrlName()).thenReturn("coverage");
-        when(action.getBranchCoverage()).thenReturn(new Coverage(9, 1));
-        when(action.getLineCoverage()).thenReturn(new Coverage(10, 10));
+        when(action.getBranchCoverage()).thenReturn(new Coverage.CoverageBuilder().setCovered(9).setMissed(1).build());
+        when(action.getLineCoverage()).thenReturn(new Coverage.CoverageBuilder().setCovered(10).setMissed(10).build());
         return action;
     }
 }

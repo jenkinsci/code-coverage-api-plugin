@@ -16,7 +16,7 @@ public final class Coverage implements Serializable {
     private static final long serialVersionUID = -3802318446471137305L;
 
     /** Null object that indicates that the code coverage has not been measured. */
-    public static final Coverage NO_COVERAGE = new Coverage(0, 0);
+    public static final Coverage NO_COVERAGE = new CoverageBuilder().setCovered(0).setMissed(0).build();
 
     private final int covered;
     private final int missed;
@@ -43,7 +43,7 @@ public final class Coverage implements Serializable {
                 int covered = Integer.parseInt(extractedCovered);
                 int total = Integer.parseInt(extractedTotal);
                 if (total >= covered) {
-                    return new Coverage(covered, total - covered);
+                    return new CoverageBuilder().setCovered(covered).setMissed(total - covered).build();
                 }
             }
         }
@@ -62,7 +62,7 @@ public final class Coverage implements Serializable {
      * @param missed
      *         the number of missed items
      */
-    public Coverage(final int covered, final int missed) {
+    private Coverage(final int covered, final int missed) {
         this.covered = covered;
         this.missed = missed;
     }
@@ -207,8 +207,9 @@ public final class Coverage implements Serializable {
      * @return the sum of this and the additional coverage
      */
     public Coverage add(final Coverage additional) {
-        return new Coverage(covered + additional.getCovered(),
-                missed + additional.getMissed());
+        return new CoverageBuilder().setCovered(covered + additional.getCovered())
+                .setMissed(missed + additional.getMissed())
+                .build();
     }
 
     @Override
@@ -261,5 +262,85 @@ public final class Coverage implements Serializable {
      */
     public String serializeToString() {
         return String.format("%d/%d", getCovered(), getTotal());
+    }
+
+    /**
+     * Builder to create an cache new {@link Coverage} instances.
+     */
+    public static class CoverageBuilder {
+        private int covered;
+        private boolean isCoveredSet;
+        private int missed;
+        private boolean isMissedSet;
+        private int total;
+        private boolean isTotalSet;
+
+        /**
+         * Sets the number of total items.
+         *
+         * @param total
+         *         the number of total items
+         *
+         * @return this
+         */
+        public CoverageBuilder setTotal(final int total) {
+            this.total = total;
+            isTotalSet = true;
+            return this;
+        }
+
+        /**
+         * Sets the number of covered items.
+         *
+         * @param covered
+         *         the number of covered items
+         *
+         * @return this
+         */
+        public CoverageBuilder setCovered(final int covered) {
+            this.covered = covered;
+            isCoveredSet = true;
+            return this;
+        }
+
+        /**
+         * Sets the number of missed items.
+         *
+         * @param missed
+         *         the number of missed items
+         *
+         * @return this
+         */
+        public CoverageBuilder setMissed(final int missed) {
+            this.missed = missed;
+            isMissedSet = true;
+            return this;
+        }
+
+        /**
+         * Creates the new {@link Coverage} instance.
+         *
+         * @return the new instance
+         */
+        public Coverage build() {
+            if (isCoveredSet && isMissedSet && isTotalSet) {
+                throw new IllegalArgumentException(
+                        "Setting all three values covered, missed, and total is not allowed, just select two of them.");
+            }
+            if (isTotalSet) {
+                if (isCoveredSet) {
+                    return new Coverage(covered, total - covered);
+                }
+                else if (isMissedSet) {
+                    return new Coverage(total - missed, missed);
+                }
+            }
+            else {
+                if (isCoveredSet && isMissedSet) {
+                    return new Coverage(covered, missed);
+                }
+            }
+            throw new IllegalArgumentException("You must set exactly two properties.");
+        }
     }
 }

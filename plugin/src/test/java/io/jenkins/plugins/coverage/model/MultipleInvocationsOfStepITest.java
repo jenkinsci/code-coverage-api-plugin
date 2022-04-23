@@ -39,8 +39,9 @@ class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite 
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 1);
         assertThat(buildAction.get(0).getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE,
-                        JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE)
+                        .setMissed(JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE)
+                        .build());
 
     }
 
@@ -66,8 +67,9 @@ class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite 
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 1);
         assertThat(buildAction.get(0).getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE,
-                        JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE)
+                        .setMissed(JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE)
+                        .build());
     }
 
     /**
@@ -80,11 +82,13 @@ class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite 
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 2);
         assertThat(buildAction.get(0).getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE,
-                        JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE)
+                        .setMissed(JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE)
+                        .build());
         assertThat(buildAction.get(1).getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE,
-                        JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE)
+                        .setMissed(JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE)
+                        .build());
     }
 
     /**
@@ -96,8 +100,9 @@ class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite 
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 1);
         assertThat(buildAction.get(0).getBranchCoverage())
-                .isEqualTo(new Coverage(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE,
-                        JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE)
+                        .setMissed(JACOCO_HIGHER_BRANCH_COVERAGE_MISSED_VALUE)
+                        .build());
     }
 
     /**
