@@ -6,6 +6,8 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
+import edu.hm.hafner.util.VisibleForTesting;
+
 /**
  * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
  * of items (line, instruction, branch, file, etc.) is provided by the companion class {@link CoverageMetric}.
@@ -253,6 +255,22 @@ public final class Coverage implements Serializable {
         private int total;
         private boolean isTotalSet;
 
+        @VisibleForTesting
+        static final int CACHE_SIZE = 16;
+        private static final Coverage[] CACHE = new Coverage[CACHE_SIZE * CACHE_SIZE];
+
+        static {
+            for (int covered = 0; covered < CACHE_SIZE; covered++) {
+                for (int missed = 0; missed < CACHE_SIZE; missed++) {
+                    CACHE[getCacheIndex(covered, missed)] = new Coverage(covered, missed);
+                }
+            }
+        }
+
+        private static int getCacheIndex(final int covered, final int missed) {
+            return covered * CACHE_SIZE + missed;
+        }
+
         /**
          * Sets the number of total items.
          *
@@ -307,18 +325,26 @@ public final class Coverage implements Serializable {
             }
             if (isTotalSet) {
                 if (isCoveredSet) {
-                    return new Coverage(covered, total - covered);
+                    return createOrGetCoverage(covered, total - covered);
                 }
                 else if (isMissedSet) {
-                    return new Coverage(total - missed, missed);
+                    return createOrGetCoverage(total - missed, missed);
                 }
             }
             else {
                 if (isCoveredSet && isMissedSet) {
-                    return new Coverage(covered, missed);
+                    return createOrGetCoverage(covered, missed);
                 }
             }
             throw new IllegalArgumentException("You must set exactly two properties.");
+        }
+
+        @SuppressWarnings({"checkstyle:HiddenField", "ParameterHidesMemberVariable"})
+        private Coverage createOrGetCoverage(final int covered, final int missed) {
+            if (covered < CACHE_SIZE && missed < CACHE_SIZE) {
+                return CACHE[getCacheIndex(covered, missed)];
+            }
+            return new Coverage(covered, missed);
         }
     }
 }

@@ -14,6 +14,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder.*;
 
 /**
  * Tests the class {@link Coverage}.
@@ -95,6 +96,20 @@ class CoverageTest {
                 .hasCovered(1)
                 .hasMissed(2)
                 .hasTotal(3);
+    }
+
+    @Test
+    void shouldCacheValues() {
+        for (int covered = 0; covered < CACHE_SIZE; covered++) {
+            for (int missed = 0; missed < CACHE_SIZE; missed++) {
+                CoverageBuilder builder = new CoverageBuilder().setCovered(covered).setMissed(missed);
+
+                assertThat(builder.build())
+                        .isSameAs(builder.build())
+                        .hasCovered(covered)
+                        .hasMissed(missed);
+            }
+        }
     }
 
     @ParameterizedTest(name = "[{index}] Illegal coverage serialization = \"{0}\"")
