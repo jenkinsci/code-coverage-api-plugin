@@ -340,6 +340,7 @@ public final class Coverage implements Serializable {
          *
          * @return the new instance
          */
+        @SuppressWarnings("PMD.CyclomaticComplexity")
         public Coverage build() {
             if (isCoveredSet && isMissedSet && isTotalSet) {
                 throw new IllegalArgumentException(
