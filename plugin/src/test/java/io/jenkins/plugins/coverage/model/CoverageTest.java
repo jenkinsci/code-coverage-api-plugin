@@ -110,6 +110,15 @@ class CoverageTest {
                         .hasMissed(missed);
             }
         }
+
+        CoverageBuilder coveredOutOfCache = new CoverageBuilder().setCovered(CACHE_SIZE).setMissed(CACHE_SIZE - 1);
+        assertThat(coveredOutOfCache.build())
+                .isNotSameAs(coveredOutOfCache.build())
+                .isEqualTo(coveredOutOfCache.build());
+        CoverageBuilder missedOutOfCache = new CoverageBuilder().setCovered(CACHE_SIZE - 1).setMissed(CACHE_SIZE);
+        assertThat(missedOutOfCache.build())
+                .isNotSameAs(missedOutOfCache.build())
+                .isEqualTo(missedOutOfCache.build());
     }
 
     @ParameterizedTest(name = "[{index}] Illegal coverage serialization = \"{0}\"")
