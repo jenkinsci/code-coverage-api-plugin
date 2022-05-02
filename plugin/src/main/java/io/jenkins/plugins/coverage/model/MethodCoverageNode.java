@@ -2,8 +2,6 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Objects;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-
 /**
  * A {@link CoverageNode} for a specific method.
  *

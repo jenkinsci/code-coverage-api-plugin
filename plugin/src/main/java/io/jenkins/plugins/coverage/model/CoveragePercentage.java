@@ -17,8 +17,8 @@ public final class CoveragePercentage implements Serializable {
 
     private static final long serialVersionUID = 3324942976687883481L;
 
-    protected final int numerator;
-    protected final int denominator;
+    private final int numerator;
+    private final int denominator;
 
     /**
      * Creates an instance of {@link CoveragePercentage}.
