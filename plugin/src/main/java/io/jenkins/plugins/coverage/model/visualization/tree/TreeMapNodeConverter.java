@@ -5,7 +5,6 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 

@@ -76,7 +76,7 @@ public final class Coverage implements Serializable {
         if (getTotal() == 0) {
             return 0;
         }
-        return (int) getCoveredPercentage().getDoubleValue();
+        return (int) Math.round(getCoveredPercentage().getDoubleValue());
     }
 
     /**

@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -9,8 +8,6 @@ import java.util.TreeMap;
 
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-
-import one.util.streamex.StreamEx;
 
 import hudson.FilePath;
 import hudson.model.HealthReport;

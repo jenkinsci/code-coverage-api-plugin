@@ -747,10 +747,6 @@ public class CoverageNode implements Serializable {
         return newNode;
     }
 
-    private int[] copy(final int... values) {
-        return Arrays.copyOf(values, values.length);
-    }
-
     @Override
     public String toString() {
         return String.format("[%s] %s", metric, name);

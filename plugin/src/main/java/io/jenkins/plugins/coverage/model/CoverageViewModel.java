@@ -372,8 +372,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage)
-                    .map(CoveragePercentage::getDoubleValue)
+            return streamCoverages().map(Coverage::getCoveredFraction)
+                    .map(Fraction::doubleValue)
                     .collect(Collectors.toList());
         }
 
@@ -382,8 +382,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage)
-                    .map(CoveragePercentage::getDoubleValue)
+            return streamCoverages().map(Coverage::getMissedFraction)
+                    .map(Fraction::doubleValue)
                     .collect(Collectors.toList());
         }
 
@@ -459,6 +459,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             // branchColumnDelta.setWidth(1);
             columns.add(branchColumnDelta);
 
+            TableColumn loc = new TableColumn("LOC", "loc");
+            // loc.setWidth(1);
+            columns.add(loc);
+
             return columns;
         }
 
@@ -517,6 +521,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public DetailedColumnDefinition getBranchCoverageDelta() {
             return createColoredFileCoverageDeltaColumn(BRANCH_COVERAGE);
+        }
+
+        public String getLoc() {
+            if (root instanceof FileCoverageNode) {
+                return String.valueOf(((FileCoverageNode) root).getCoveragePerLine().size());
+            }
+            return Messages.Coverage_Not_Available();
         }
 
         protected String printCoverage(final Coverage coverage) {
@@ -740,6 +751,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
         }
 
+        @Override
+        public String getLoc() {
+            long amount = changedFileNode.getChangedCodeLines().stream()
+                    .filter(line -> changedFileNode.getCoveragePerLine().containsKey(line))
+                    .count();
+            return String.valueOf(amount);
+        }
+
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(final CoverageMetric coverageMetric) {
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
@@ -799,6 +818,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public DetailedColumnDefinition getBranchCoverageDelta() {
             return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
+        }
+
+        @Override
+        public String getLoc() {
+            return String.valueOf(changedFileNode.getIndirectCoverageChanges().size());
         }
 
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(
