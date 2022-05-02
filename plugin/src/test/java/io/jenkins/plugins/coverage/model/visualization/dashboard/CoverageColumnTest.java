@@ -12,8 +12,8 @@ import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class CoverageColumnTest {
+
     @BeforeAll
     static void beforeAll() {
         Locale.setDefault(Locale.ENGLISH);
@@ -94,7 +95,7 @@ class CoverageColumnTest {
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
 
-        Optional<Fraction> coverageValue = column.getCoverageValue(job);
+        Optional<CoveragePercentage> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
         assertThat(column.getDisplayColors(job, Optional.empty())).isEqualTo(ColorProvider.DEFAULT_COLOR);
     }
@@ -131,9 +132,8 @@ class CoverageColumnTest {
         CoverageColumn column = createColumn();
 
         Fraction coverageFraction = Fraction.getFraction(1, 2);
-        Fraction coveragePercentage = FractionFormatter.transformFractionToPercentage(coverageFraction);
-        String coveragePercentageText =
-                FractionFormatter.formatPercentage(coveragePercentage, Functions.getCurrentLocale());
+        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(coverageFraction);
+        String coveragePercentageText = coveragePercentage.formatPercentage(Functions.getCurrentLocale());
 
         Job<?, ?> job = createJobWithCoverageAction(coverageFraction);
 
@@ -153,9 +153,9 @@ class CoverageColumnTest {
         column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
-        Fraction coverageDeltaPercentage = FractionFormatter.transformFractionToPercentage(coverageDelta);
+        CoveragePercentage coverageDeltaPercentage = CoveragePercentage.getCoveragePercentage(coverageDelta);
         String coverageDeltaPercentageText =
-                FractionFormatter.formatDeltaPercentage(coverageDeltaPercentage, Functions.getCurrentLocale());
+                coverageDeltaPercentage.formatDeltaPercentage(Functions.getCurrentLocale());
         Job<?, ?> job = createJobWithCoverageAction(coverageDelta);
 
         assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);

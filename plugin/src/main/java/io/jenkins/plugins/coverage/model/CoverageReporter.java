@@ -1,22 +1,23 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import one.util.streamex.StreamEx;
 
 import hudson.FilePath;
 import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 import io.jenkins.plugins.forensics.delta.model.Delta;
@@ -107,7 +108,7 @@ public class CoverageReporter {
                     fileChangesProcessor
                             .attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(), mappedChanges);
                 }
-                catch (CoverageException e) {
+                catch (CodeDeltaException e) {
                     log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
                     log.logError("-> Skipping calculating change coverage and indirect coverage changes");
                 }
@@ -121,12 +122,13 @@ public class CoverageReporter {
             CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
 
             // coverage delta
-            SortedMap<CoverageMetric, Fraction> coverageDelta = rootNode.computeDelta(referenceAction.getResult());
-            SortedMap<CoverageMetric, Fraction> changeCoverageDelta;
+            SortedMap<CoverageMetric, CoveragePercentage> coverageDelta =
+                    rootNode.computeDeltaAsPercentage(referenceAction.getResult());
+            SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta;
             if (rootNode.hasChangeCoverage() && referenceAction.getResult().hasChangeCoverage()) {
                 CoverageNode referenceChangeCoverageRoot =
                         coverageTreeCreator.createChangeCoverageTree(referenceAction.getResult());
-                changeCoverageDelta = changeCoverageRoot.computeDelta(referenceChangeCoverageRoot);
+                changeCoverageDelta = changeCoverageRoot.computeDeltaAsPercentage(referenceChangeCoverageRoot);
             }
             else {
                 changeCoverageDelta = new TreeMap<>();
@@ -138,7 +140,8 @@ public class CoverageReporter {
 
             action = new CoverageBuildAction(build, rootNode, healthReport,
                     referenceAction.getOwner().getExternalizableId(), coverageDelta,
-                    changeCoverageRoot.getMetricPercentages(), changeCoverageDelta,
+                    changeCoverageRoot.getMetricPercentages(),
+                    changeCoverageDelta,
                     indirectCoverageChangesTree.getMetricPercentages());
         }
         else {

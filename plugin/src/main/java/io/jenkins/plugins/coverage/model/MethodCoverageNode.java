@@ -45,15 +45,8 @@ public class MethodCoverageNode extends CoverageNode {
     }
 
     @Override
-    protected MethodCoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
-        MethodCoverageNode copy = new MethodCoverageNode(getName(), getLineNumber());
-        if (copiedParent != null) {
-            copy.setParent(copiedParent);
-        }
-
-        copyChildrenAndLeaves(this, copy);
-
-        return copy;
+    protected CoverageNode copyEmpty() {
+        return new MethodCoverageNode(getName(), getLineNumber());
     }
 
     @Override

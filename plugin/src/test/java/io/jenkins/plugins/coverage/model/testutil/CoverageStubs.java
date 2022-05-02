@@ -12,6 +12,7 @@ import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 
 import static org.mockito.Mockito.*;
 
@@ -66,12 +67,13 @@ public final class CoverageStubs {
             final CoverageMetric coverageMetric, final Fraction coverageValue) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         Coverage coverage = createCoverage(coverageValue);
+        CoveragePercentage percentage = CoveragePercentage.getCoveragePercentage(coverageValue);
 
-        SortedMap<CoverageMetric, Fraction> deltas = mock(SortedMap.class);
+        SortedMap<CoverageMetric, CoveragePercentage> deltas = mock(SortedMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
-        when(deltas.containsValue(coverageValue)).thenReturn(true);
-        when(deltas.get(coverageMetric)).thenReturn(coverageValue);
+        when(deltas.containsValue(percentage)).thenReturn(true);
+        when(deltas.get(coverageMetric)).thenReturn(percentage);
 
         when(action.hasDelta(coverageMetric)).thenReturn(true);
         when(action.getDifference()).thenReturn(deltas);
@@ -88,7 +90,7 @@ public final class CoverageStubs {
         when(action.getIndirectCoverageChanges(coverageMetric)).thenReturn(coverage);
 
         when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
-        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(coverageValue);
+        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(percentage);
 
         return action;
     }
@@ -104,7 +106,8 @@ public final class CoverageStubs {
     @VisibleForTesting
     public static Coverage createCoverage(final Fraction coverageFraction) {
         Coverage coverage = mock(Coverage.class);
-        when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
+        when(coverage.getCoveredFraction()).thenReturn(coverageFraction);
+        when(coverage.getCoveredPercentage()).thenReturn(CoveragePercentage.getCoveragePercentage(coverageFraction));
         when(coverage.isSet()).thenReturn(true);
         return coverage;
     }

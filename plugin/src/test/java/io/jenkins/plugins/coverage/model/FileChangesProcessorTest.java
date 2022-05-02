@@ -108,18 +108,18 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
      */
     private void verifyFileCoverageDeltaOfTestFile1(final FileCoverageNode file) {
         assertThat(file.getName()).isEqualTo(TEST_FILE_1);
-        assertThat(file.getFileCoverageDeltaForMetric(LINE)
-                .compareTo(Fraction.getFraction(3, 117))).isZero();
-        assertThat(file.getFileCoverageDeltaForMetric(BRANCH)
-                .compareTo(Fraction.getFraction(3, 24))).isZero();
-        assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)
-                .compareTo(Fraction.getFraction(90, 999))).isZero();
-        assertThat(file.getFileCoverageDeltaForMetric(METHOD)
-                .compareTo(Fraction.getFraction(-4, 30))).isZero();
-        assertThat(file.getFileCoverageDeltaForMetric(CLASS)
-                .compareTo(Fraction.ZERO)).isZero();
-        assertThat(file.getFileCoverageDeltaForMetric(FILE)
-                .compareTo(Fraction.ZERO)).isZero();
+        assertThat(file.getFileCoverageDeltaForMetric(LINE)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(3, 117)));
+        assertThat(file.getFileCoverageDeltaForMetric(BRANCH)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(3, 24)));
+        assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(90, 999)));
+        assertThat(file.getFileCoverageDeltaForMetric(METHOD)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(-4, 30)));
+        assertThat(file.getFileCoverageDeltaForMetric(CLASS)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.ZERO));
+        assertThat(file.getFileCoverageDeltaForMetric(FILE)).isEqualTo(
+                CoveragePercentage.getCoveragePercentage(Fraction.ZERO));
     }
 
     @Test
