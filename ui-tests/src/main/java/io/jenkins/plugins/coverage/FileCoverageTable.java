@@ -146,7 +146,8 @@ public class FileCoverageTable {
         LINE_COVERAGE("Line"),
         LINE_COVERAGE_DELTA("Line Δ"),
         BRANCH_COVERAGE("Branch"),
-        BRANCH_COVERAGE_DELTA("Branch Δ");
+        BRANCH_COVERAGE_DELTA("Branch Δ"),
+        LOC("LOC");
 
         private final String title;
 
