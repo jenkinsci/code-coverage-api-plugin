@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Integration test for different jacoco and cobertura files.
  */
-public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
+class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     /**
      * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
@@ -87,9 +87,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /**
      * Pipeline integration test with no adapter.
      */
-    @Ignore
+    @Disabled("Bug")
     @Test
-    public void pipelineForNoAdapter() {
+    void pipelineForNoAdapter() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: []"
@@ -101,9 +101,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /**
      * Freestyle integration test with no adapter.
      */
-    @Ignore
+    @Disabled("Bug")
     @Test
-    public void freestyleForNoAdapter() {
+    void freestyleForNoAdapter() {
         FreeStyleProject project = createFreeStyleProject();
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         project.getPublishersList().add(coveragePublisher);
@@ -114,7 +114,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with no file.
      */
     @Test
-    public void pipelineForNoJacoco() {
+    void pipelineForNoJacoco() {
         WorkflowJob job = createPipeline();
         job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
 
@@ -123,7 +123,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     /** Example integration test for a pipeline with code coverage. */
     @Test
-    public void pipelineForOneJacoco() {
+    void pipelineForOneJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
 
@@ -134,7 +134,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with two jacoco files.
      */
     @Test
-    public void pipelineForTwoJacoco() {
+    void pipelineForTwoJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
 
@@ -145,7 +145,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with no jacoco file.
      */
     @Test
-    public void freestyleForNoJacoco() {
+    void freestyleForNoJacoco() {
         FreeStyleProject project = createFreeStyleProject();
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -160,7 +160,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with one jacoco file.
      */
     @Test
-    public void freestyleForOneJacoco() {
+    void freestyleForOneJacoco() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -175,7 +175,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with two jacoco files.
      */
     @Test
-    public void freestyleForTwoJacoco() {
+    void freestyleForTwoJacoco() {
 
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
@@ -196,7 +196,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with no cobertura file.
      */
     @Test
-    public void pipelineForNoCobertura() {
+    void pipelineForNoCobertura() {
         WorkflowJob job = createPipeline();
         job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
 
@@ -207,7 +207,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with one cobertura file.
      */
     @Test
-    public void pipelineForOneCobertura() {
+    void pipelineForOneCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
 
@@ -218,7 +218,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with two cobertura files.
      */
     @Test
-    public void pipelineForTwoCobertura() {
+    void pipelineForTwoCobertura() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE,
                 COBERTURA_WITH_LOTS_OF_DATA_FILE);
 
@@ -231,7 +231,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with no cobertura file.
      */
     @Test
-    public void freestyleForNoCobertura() {
+    void freestyleForNoCobertura() {
         FreeStyleProject project = createFreeStyleProject();
 
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -246,7 +246,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with one cobertura file.
      */
     @Test
-    public void freestyleForOneCobertura() {
+    void freestyleForOneCobertura() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -260,10 +260,9 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     /**
      * Freestyle integration test with two cobertura files.
      */
-    @Ignore
+    @Disabled("Bug")
     @Test
-    public void freestyleForTwoCobertura() {
-
+    void freestyleForTwoCobertura() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
         CoveragePublisher coveragePublisher = new CoveragePublisher();
@@ -285,7 +284,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Pipeline integration test with one cobertura and one jacoco file.
      */
     @Test
-    public void pipelineForOneCoberturaAndOneJacoco() {
+    void pipelineForOneCoberturaAndOneJacoco() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(new CpsFlowDefinition("node {"
                 + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
@@ -298,7 +297,7 @@ public class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      * Freestyle integration test with one cobertura and one jacoco file.
      */
     @Test
-    public void freestyleForOneCoberturaAndOneJacoco() {
+    void freestyleForOneCoberturaAndOneJacoco() {
         FreeStyleProject project = createFreeStyleProject();
         copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
 

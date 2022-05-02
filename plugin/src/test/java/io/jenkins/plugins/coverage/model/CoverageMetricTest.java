@@ -21,6 +21,7 @@ class CoverageMetricTest {
         all.add(CoverageMetric.PACKAGE);
         all.add(CoverageMetric.FILE);
         all.add(CoverageMetric.CLASS);
+        all.add(CoverageMetric.METHOD);
         all.add(CoverageMetric.LINE);
         all.add(CoverageMetric.BRANCH);
         all.add(CoverageMetric.INSTRUCTION);
@@ -33,6 +34,7 @@ class CoverageMetricTest {
                 CoverageMetric.BRANCH,
                 CoverageMetric.INSTRUCTION,
                 CoverageMetric.LINE,
+                CoverageMetric.METHOD,
                 CoverageMetric.CLASS,
                 CoverageMetric.FILE,
                 CoverageMetric.PACKAGE,
@@ -42,12 +44,27 @@ class CoverageMetricTest {
         verifyOrder(all);
     }
 
+    @Test
+    void shouldGetAvailableMetrics() {
+        assertThat(CoverageMetric.getAvailableCoverageMetrics()).containsExactlyInAnyOrder(
+                CoverageMetric.BRANCH,
+                CoverageMetric.INSTRUCTION,
+                CoverageMetric.LINE,
+                CoverageMetric.METHOD,
+                CoverageMetric.CLASS,
+                CoverageMetric.FILE,
+                CoverageMetric.PACKAGE,
+                CoverageMetric.MODULE
+        );
+    }
+
     private void verifyOrder(final List<CoverageMetric> all) {
         assertThat(all).containsExactly(
                 CoverageMetric.MODULE,
                 CoverageMetric.PACKAGE,
                 CoverageMetric.FILE,
                 CoverageMetric.CLASS,
+                CoverageMetric.METHOD,
                 CoverageMetric.LINE,
                 CoverageMetric.INSTRUCTION,
                 CoverageMetric.BRANCH

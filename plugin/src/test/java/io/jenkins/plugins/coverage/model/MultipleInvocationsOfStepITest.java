@@ -2,8 +2,8 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Test multiple invocations of step.
  */
-public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite {
+class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_LOWER_BRANCH_COVERAGE = "jacoco-analysis-model.xml";
     private static final String JACOCO_HIGHER_BRANCH_COVERAGE = "jacoco-codingstyle.xml";
     private static final int JACOCO_HIGHER_BRANCH_COVERAGE_COVERED_VALUE = 109;
@@ -29,7 +29,7 @@ public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPe
      * Pipeline with multiple invocations of step, no tag set and higher coverage file first.
      */
     @Test
-    public void withoutTagFirstHigherFile() {
+    void withoutTagFirstHigherFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -56,7 +56,7 @@ public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPe
      * Pipeline with multiple invocations of step, no tag set and lower coverage file first.
      */
     @Test
-    public void withoutTagFirstLowerFile() {
+    void withoutTagFirstLowerFile() {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_LOWER_BRANCH_COVERAGE, JACOCO_HIGHER_BRANCH_COVERAGE);
 
         job.setDefinition(new CpsFlowDefinition("node {"
@@ -74,8 +74,8 @@ public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPe
      * Pipeline with multiple invocations of step and tag set.
      */
     @Test
-    @Ignore
-    public void withDifferentTag() {
+    @Disabled("Bug")
+    void withDifferentTag() {
         WorkflowJob job = createPipelineWithAdaptersAndTags("t2");
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 2);
@@ -91,7 +91,7 @@ public class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPe
      * Pipeline with multiple invocations of step and tag set.
      */
     @Test
-    public void witSameTag() {
+    void witSameTag() {
         WorkflowJob job = createPipelineWithAdaptersAndTags("t1");
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 1);

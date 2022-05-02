@@ -1,0 +1,34 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+
+  <j:set var="coverageText" value="${it.getCoverageText(job)}"/>
+  <j:set var="coverageValue" value="${it.getCoverageValue(job)}"/>
+
+  <j:choose>
+    <j:when test="${coverageValue.isPresent()}">
+      <j:set var="displayColors" value="${it.getDisplayColors(job, coverageValue)}"/>
+      <j:set var="lineColor" value="${displayColors.getLineColorAsHex()}"/>
+      <j:set var="backgroundColor" value="${displayColors.getFillColorAsHex()}"/>
+      <j:set var="url" value="${it.getRelativeCoverageUrl(job)}"/>
+      <j:set var="fillPercentage" value="${it.getBackgroundColorFillPercentage(coverageText)}"/>
+      <td style="color: ${lineColor};
+            background-image: linear-gradient(90deg, ${backgroundColor} ${fillPercentage}, transparent ${fillPercentage});"
+          align="left">
+        <j:choose>
+          <j:when test="${url.isEmpty()}">
+            ${coverageText}
+          </j:when>
+          <j:otherwise>
+            <a style="color:${lineColor}" href="${rootURL}/${job.url}lastSuccessfulBuild/${url}">${coverageText}</a>
+          </j:otherwise>
+        </j:choose>
+      </td>
+    </j:when>
+    <j:otherwise>
+      <td align="left">
+        ${coverageText}
+      </td>
+    </j:otherwise>
+  </j:choose>
+
+</j:jelly>

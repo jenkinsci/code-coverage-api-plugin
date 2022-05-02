@@ -21,7 +21,7 @@ import static io.jenkins.plugins.coverage.model.Assertions.*;
  *
  * @author Ullrich Hafner
  */
-public class CoverageXmlStreamTest extends SerializableTest<CoverageNode> {
+class CoverageXmlStreamTest extends SerializableTest<CoverageNode> {
     @Override
     protected CoverageNode createSerializable() {
         // TODO: replace with actual result

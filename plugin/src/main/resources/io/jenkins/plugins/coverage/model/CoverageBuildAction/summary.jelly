@@ -27,7 +27,7 @@
                       <j:set var="color" value="#0a5f0e"/>
                     </j:otherwise>
                   </j:choose>
-                  <span style="color: ${color}">(${it.formatDelta(metric)}%)</span>
+                  <span style="color: ${color}">(${it.formatDelta(metric)})</span>
                 </span>
               </j:if>
             </li>
