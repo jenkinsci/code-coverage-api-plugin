@@ -5,7 +5,7 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
@@ -49,9 +49,7 @@ public class TreeMapNodeConverter {
     private TreeMapNode toTreeMapNode(final CoverageNode node) {
         Coverage coverage = node.getCoverage(CoverageMetric.LINE);
 
-        double coveragePercentage = FractionFormatter
-                .transformFractionToPercentage(coverage.getCoveredPercentage())
-                .doubleValue();
+        double coveragePercentage = coverage.getCoveredPercentage().getDoubleValue();
 
         String color = CoverageLevel
                 .getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider)

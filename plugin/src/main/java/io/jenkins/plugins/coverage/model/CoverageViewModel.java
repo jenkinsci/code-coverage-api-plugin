@@ -22,7 +22,6 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -151,8 +150,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
-     * is shown in the view, so the ID is not used.
+     * Returns the table model that matches with the passed table ID and shows the files along with the branch and line
+     * coverage.
      *
      * @param tableId
      *         ID of the table model
@@ -374,7 +373,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public List<Double> getCoveredPercentages() {
             return streamCoverages().map(Coverage::getCoveredPercentage)
-                    .map(Fraction::doubleValue)
+                    .map(CoveragePercentage::getDoubleValue)
                     .collect(Collectors.toList());
         }
 
@@ -383,8 +382,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedPercentage)
-                    .map(Fraction::doubleValue)
+            return streamCoverages().map(Coverage::getCoveredPercentage)
+                    .map(CoveragePercentage::getDoubleValue)
                     .collect(Collectors.toList());
         }
 
@@ -530,8 +529,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         /**
          * Creates a table cell which colorizes the shown coverage dependent on the coverage percentage.
          *
-         * @param coveragePercentage
-         *         The coverage percentage
+         * @param coverage
+         *         The coverage as percentage
          * @param text
          *         The text to be shown which represents the coverage
          * @param tooltip
@@ -539,10 +538,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
          *
          * @return the create {@link DetailedColumnDefinition}
          */
-        protected DetailedColumnDefinition createColoredCoverageColumn(final Fraction coveragePercentage,
+        protected DetailedColumnDefinition createColoredCoverageColumn(final CoveragePercentage coverage,
                 final String text, final String tooltip) {
-            double percentage = coveragePercentage.doubleValue() * 100.0;
-            String sort = String.valueOf(coveragePercentage.doubleValue());
+            double percentage = coverage.getDoubleValue();
+            String sort = String.valueOf(percentage);
             DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
             String tag = span()
                     .withTitle(tooltip)
@@ -558,17 +557,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         /**
          * Creates a table cell which colorizes the tendency of the shown coverage delta.
          *
-         * @param coverage
-         *         The coverage delta
+         * @param coveragePercentage
+         *         The coverage delta as percentage
          * @param tooltip
          *         The tooltip which describes the value
          *
          * @return the create {@link DetailedColumnDefinition}
          */
         protected DetailedColumnDefinition createColoredCoverageDeltaColumn(
-                final Fraction coverage, final String tooltip) {
-            double coverageValue = coverage.doubleValue();
-            String coverageText = FractionFormatter.formatDeltaFraction(coverage, browserLocale);
+                final CoveragePercentage coveragePercentage, final String tooltip) {
+            double coverageValue = coveragePercentage.getDoubleValue();
+            String coverageText = coveragePercentage.formatDeltaPercentage(browserLocale);
             String sort = String.valueOf(coverageValue);
             DisplayColors colors = CoverageChangeTendency
                     .getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
@@ -601,8 +600,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             if (root instanceof FileCoverageNode) {
                 FileCoverageNode fileNode = (FileCoverageNode) root;
                 if (fileNode.hasFileCoverageDelta(coverageMetric)) {
-                    Fraction deltaFraction = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
-                    return createColoredCoverageDeltaColumn(deltaFraction,
+                    CoveragePercentage delta = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
+                    return createColoredCoverageDeltaColumn(delta,
                             "The total file coverage delta against the reference build");
                 }
             }
@@ -744,9 +743,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(final CoverageMetric coverageMetric) {
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredPercentage()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
-                return createColoredCoverageDeltaColumn(delta,
+                Fraction delta = changeCoverage.getCoveredFraction()
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
+                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
                         "The change coverage within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
@@ -806,9 +805,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 final CoverageMetric coverageMetric) {
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredPercentage()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
-                return createColoredCoverageDeltaColumn(delta,
+                Fraction delta = changeCoverage.getCoveredFraction()
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
+                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
                         "The indirect coverage changes within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");

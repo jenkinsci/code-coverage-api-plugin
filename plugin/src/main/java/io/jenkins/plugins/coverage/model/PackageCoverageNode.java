@@ -24,14 +24,7 @@ public class PackageCoverageNode extends CoverageNode {
     }
 
     @Override
-    public PackageCoverageNode copyTree(final CoverageNode copiedParent) {
-        PackageCoverageNode copy = new PackageCoverageNode(getName());
-        if (copiedParent != null) {
-            copy.setParent(copiedParent);
-        }
-
-        copyChildrenAndLeaves(this, copy);
-
-        return copy;
+    protected CoverageNode copyEmpty() {
+        return new PackageCoverageNode(getName());
     }
 }

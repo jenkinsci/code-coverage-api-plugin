@@ -18,7 +18,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.delta.model.FileEditType;
@@ -67,7 +67,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldMapScmChangesToReportPaths() throws CoverageException {
+    void shouldMapScmChangesToReportPaths() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         Delta delta = createDeltaWithMockedFileChanges();
         Set<FileChanges> changes = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta);
@@ -86,7 +86,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldCreateEmptyMappingWithoutChanges() throws CoverageException {
+    void shouldCreateEmptyMappingWithoutChanges() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         CoverageNode tree = createMockedCoverageTree();
         FilteredLog log = createFilteredLog();
@@ -109,9 +109,8 @@ class CodeDeltaCalculatorTest {
         when(tree.getAllFileCoverageNodes()).thenReturn(Collections.singletonList(file1));
 
         assertThatThrownBy(() -> codeDeltaCalculator.mapScmChangesToReportPaths(changes, tree, log))
-                .isInstanceOf(CoverageException.class)
+                .isInstanceOf(CodeDeltaException.class)
                 .hasMessage(AMBIGUOUS_PATHS_ERROR);
-        assertThat(log.getErrorMessages()).containsExactly(LOG_NAME, AMBIGUOUS_PATHS_ERROR);
     }
 
     /**

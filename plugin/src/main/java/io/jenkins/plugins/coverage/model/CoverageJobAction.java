@@ -48,7 +48,7 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
     }
 
     @Override
-    public LinesChartModel createChartModel(final String configuration) {
+    protected LinesChartModel createChartModel(final String configuration) {
         return createChart(createBuildHistory(), configuration);
     }
 

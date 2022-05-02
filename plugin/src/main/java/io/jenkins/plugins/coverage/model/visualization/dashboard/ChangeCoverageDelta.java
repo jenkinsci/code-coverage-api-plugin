@@ -3,12 +3,10 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
 
@@ -27,7 +25,7 @@ public class ChangeCoverageDelta extends CoverageColumnType {
     }
 
     @Override
-    public Optional<Fraction> getCoverage(final CoverageBuildAction action, final CoverageMetric metric) {
+    public Optional<CoveragePercentage> getCoverage(final CoverageBuildAction action, final CoverageMetric metric) {
         if (action.hasChangeCoverageDifference(metric)) {
             return Optional.of(action.getChangeCoverageDifference(metric));
         }
@@ -35,12 +33,12 @@ public class ChangeCoverageDelta extends CoverageColumnType {
     }
 
     @Override
-    public DisplayColors getDisplayColors(final Fraction coverage) {
-        return CoverageChangeTendency.getDisplayColorsForTendency(coverage.doubleValue(), getColorProvider());
+    public DisplayColors getDisplayColors(final CoveragePercentage coverage) {
+        return CoverageChangeTendency.getDisplayColorsForTendency(coverage.getDoubleValue(), getColorProvider());
     }
 
     @Override
-    public String formatCoverage(final Fraction coverage, final Locale locale) {
-        return FractionFormatter.formatDeltaPercentage(coverage, locale);
+    public String formatCoverage(final CoveragePercentage coverage, final Locale locale) {
+        return coverage.formatDeltaPercentage(locale);
     }
 }
