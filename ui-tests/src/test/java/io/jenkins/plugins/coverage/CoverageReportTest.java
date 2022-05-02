@@ -145,10 +145,11 @@ public class CoverageReportTest extends UiTest {
         List<String> headers = fileCoverageTable.getHeaders();
 
         assertThat(headers)
-                .hasSize(6)
-                .contains(Header.PACKAGE.getTitle(), Header.FILE.getTitle(),
+                .hasSize(7)
+                .containsExactly(Header.PACKAGE.getTitle(), Header.FILE.getTitle(),
                         Header.LINE_COVERAGE.getTitle(), Header.LINE_COVERAGE_DELTA.getTitle(),
-                        Header.BRANCH_COVERAGE.getTitle(), Header.BRANCH_COVERAGE_DELTA.getTitle());
+                        Header.BRANCH_COVERAGE.getTitle(), Header.BRANCH_COVERAGE_DELTA.getTitle(),
+                        Header.LOC.getTitle());
 
         for (int i = 0; i < shouldFiles.length; i++) {
             FileCoverageTableRow row = rows.get(i);
