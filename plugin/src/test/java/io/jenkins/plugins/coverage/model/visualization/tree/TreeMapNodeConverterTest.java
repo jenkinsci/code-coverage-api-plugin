@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.echarts.TreeMapNode;
 
 import io.jenkins.plugins.coverage.model.AbstractCoverageTest;
+import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
@@ -31,7 +32,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         final double coveredLines = 294.0;
         final double coveredPercentage = coveredLines / totalLines * 100.0;
 
-        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree);
+        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree, CoverageMetric.LINE);
         assertThat(root.getName()).isEqualTo("Java coding style: jacoco-codingstyle.xml");
         assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
         assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsHex(coveredPercentage));
@@ -50,7 +51,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         CoverageNode tree = readNode(Paths.get("..", "..", "jacoco-analysis-model.xml").toString());
         tree.splitPackages();
 
-        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree);
+        TreeMapNode root = new TreeMapNodeConverter(COLOR_PROVIDER).toTeeChartModel(tree, CoverageMetric.LINE);
 
         final double totalLines = 6368.0;
         final double coveredLines = 6083.0;

@@ -115,38 +115,65 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart on the
-     * client side.
+     * client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getCoverageTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
+    public TreeMapNode getCoverageTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric);
     }
 
     /**
      * Returns the root of the filtered tree of change coverage nodes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side.
+     * model for the chart on the client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of change coverage nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getChangeCoverageTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot);
+    public TreeMapNode getChangeCoverageTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric);
     }
 
     /**
      * Returns the root of the filtered tree of indirect coverage changes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side.
+     * model for the chart on the client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of indirect coverage changes nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getCoverageChangesTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot);
+    public TreeMapNode getCoverageChangesTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric);
+    }
+
+    /**
+     * Gets the {@link CoverageMetric} from a String representation used in the frontend. Only 'Line' and 'Branch' is
+     * possible. 'Line' is used as a default.
+     *
+     * @param text
+     *         The coverage metric as String
+     * @return the coverage metric
+     */
+    private CoverageMetric getCoverageMetricFromText(final String text) {
+        if ("Branch".equals(text)) {
+            return CoverageMetric.BRANCH;
+        }
+        return CoverageMetric.LINE;
     }
 
     /**
@@ -459,7 +486,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             // branchColumnDelta.setWidth(1);
             columns.add(branchColumnDelta);
 
-            TableColumn loc = new TableColumn("LOC", "loc");
+            TableColumn loc = new TableColumn("LOC", "loc", "number");
             // loc.setWidth(1);
             columns.add(loc);
 
@@ -523,11 +550,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createColoredFileCoverageDeltaColumn(BRANCH_COVERAGE);
         }
 
-        public String getLoc() {
+        public DetailedColumnDefinition getLoc() {
             if (root instanceof FileCoverageNode) {
-                return String.valueOf(((FileCoverageNode) root).getCoveragePerLine().size());
+                String value = String.valueOf((double) ((FileCoverageNode) root).getCoveragePerLine().size());
+                return new DetailedColumnDefinition(value, value);
             }
-            return Messages.Coverage_Not_Available();
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "0");
         }
 
         protected String printCoverage(final Coverage coverage) {
@@ -752,11 +780,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         @Override
-        public String getLoc() {
-            long amount = changedFileNode.getChangedCodeLines().stream()
+        public DetailedColumnDefinition getLoc() {
+            String value = String.valueOf(changedFileNode.getChangedCodeLines().stream()
                     .filter(line -> changedFileNode.getCoveragePerLine().containsKey(line))
-                    .count();
-            return String.valueOf(amount);
+                    .count());
+            return new DetailedColumnDefinition(value, value);
         }
 
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(final CoverageMetric coverageMetric) {
@@ -821,8 +849,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         @Override
-        public String getLoc() {
-            return String.valueOf(changedFileNode.getIndirectCoverageChanges().size());
+        public DetailedColumnDefinition getLoc() {
+            String value = String.valueOf(changedFileNode.getIndirectCoverageChanges().size());
+            return new DetailedColumnDefinition(value, value);
         }
 
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(
