@@ -123,9 +123,7 @@ public class CoverageReporter {
                     rootNode.computeDeltaAsPercentage(referenceAction.getResult());
             SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta;
             if (rootNode.hasChangeCoverage() && referenceAction.getResult().hasChangeCoverage()) {
-                CoverageNode referenceChangeCoverageRoot =
-                        coverageTreeCreator.createChangeCoverageTree(referenceAction.getResult());
-                changeCoverageDelta = changeCoverageRoot.computeDeltaAsPercentage(referenceChangeCoverageRoot);
+                changeCoverageDelta = changeCoverageRoot.computeDeltaAsPercentage(rootNode);
             }
             else {
                 changeCoverageDelta = new TreeMap<>();
