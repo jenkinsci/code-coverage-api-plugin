@@ -552,7 +552,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public DetailedColumnDefinition getLoc() {
             if (root instanceof FileCoverageNode) {
-                String value = String.valueOf((double) ((FileCoverageNode) root).getCoveragePerLine().size());
+                String value = String.valueOf(((FileCoverageNode) root).getCoveragePerLine().size());
                 return new DetailedColumnDefinition(value, value);
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "0");
