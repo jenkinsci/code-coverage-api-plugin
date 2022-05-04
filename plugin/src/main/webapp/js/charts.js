@@ -312,46 +312,61 @@ const CoverageChartGenerator = function ($) {
     }
 
     this.populateDetailsCharts = function () {
+        generateView();
+    }
+
+    /**
+     * Generates the coverage report view.
+     */
+    function generateView() {
         initializeReportView();
 
         viewProxy.getOverview(function (t) {
             createOverview(t.responseObject(), 'coverage-overview');
-
             $('#coverage-trend').height($('#coverage-overview').height());
-        });
-
-        let coverageMetric = 'Line'
-        if (document.getElementById('coverage-map-metrics').checked) {
-            coverageMetric = 'Branch'
-        }
-
-        viewProxy.getCoverageTree(coverageMetric, function (t) {
-            createFilesTreeMap(t.responseObject(), 'project-coverage', coverageMetric);
         });
 
         // only required when the change-coverage div is visible
         if (document.getElementById('change-coverage')) {
-            viewProxy.getChangeCoverageTree(coverageMetric, function (t) {
-                createFilesTreeMap(t.responseObject(), 'change-coverage', coverageMetric);
-            });
             viewProxy.getChangeCoverageOverview(function (t) {
                 createOverview(t.responseObject(), 'change-coverage-overview');
                 $('#change-coverage-overview').height($('#coverage-overview').height());
             });
         }
 
-        // only required when the coverage-changes div is visible
-        if (document.getElementById('coverage-changes')) {
-            viewProxy.getCoverageChangesTree(coverageMetric, function (t) {
-                createFilesTreeMap(t.responseObject(), 'coverage-changes', coverageMetric);
-            });
-        }
+        loadCoverageTrees();
 
         viewProxy.hasStoredSourceCode(function (t) {
             if (t.responseObject()) {
                 initializeDataTables();
             }
         });
+    }
+
+    /**
+     * Loads the coverage tree data.
+     */
+    function loadCoverageTrees() {
+        let coverageMetric = 'Line';
+        if (document.getElementById('coverage-map-metrics').checked) {
+            coverageMetric = 'Branch';
+        }
+
+        viewProxy.getCoverageTree(coverageMetric, function (t) {
+            createFilesTreeMap(t.responseObject(), 'project-coverage', coverageMetric);
+        });
+        // only required when the change-coverage div is visible
+        if (document.getElementById('change-coverage')) {
+            viewProxy.getChangeCoverageTree(coverageMetric, function (t) {
+                createFilesTreeMap(t.responseObject(), 'change-coverage', coverageMetric);
+            });
+        }
+        // only required when the coverage-changes div is visible
+        if (document.getElementById('coverage-changes')) {
+            viewProxy.getCoverageChangesTree(coverageMetric, function (t) {
+                createFilesTreeMap(t.responseObject(), 'coverage-changes', coverageMetric);
+            });
+        }
     }
 
 
@@ -371,8 +386,6 @@ const CoverageChartGenerator = function ($) {
             const activeTab = $(e.target).attr('href');
             localStorage.setItem('activeTabDetails', activeTab);
         });
-
-        initializeCoverageMapMetric();
 
         const url = document.location.toString();
         // prefer loading the report by a set anchor
@@ -411,6 +424,7 @@ const CoverageChartGenerator = function ($) {
             }
         }
 
+        initializeCoverageMapMetric();
         initializeOverviewColumnVisibility();
     }
 
@@ -429,11 +443,24 @@ const CoverageChartGenerator = function ($) {
             coverageMapToggle.prop('checked', false).change();
         }
         setCoverageMapToggleText();
+
         coverageMapToggle.on('change', function (e) {
             setCoverageMapToggleText();
             localStorage.setItem('coverage-map-toggle-state', e.target.checked);
-            location.reload();
+            loadCoverageTrees();
+            fireResizeEvent();
         });
+    }
+
+    /**
+     * Sets the name of the coverage metric which is currently shown in the coverage tree.
+     */
+    function setCoverageMapToggleText() {
+        let coverageMetric = 'Line Coverage';
+        if (document.getElementById('coverage-map-metrics').checked) {
+            coverageMetric = 'Branch Coverage';
+        }
+        $("#coverage-map-metrics-label").text(coverageMetric);
     }
 
     /**
@@ -635,14 +662,6 @@ const CoverageChartGenerator = function ($) {
         $(document).ready(function () {
             $('#showOverviewChartsToggle').prop('checked', show);
         });
-    }
-
-    function setCoverageMapToggleText() {
-        let coverageMetric = 'Line Coverage';
-        if (document.getElementById('coverage-map-metrics').checked) {
-            coverageMetric = 'Branch Coverage';
-        }
-        $("#coverage-map-metrics-label").text(coverageMetric);
     }
 
     /**
