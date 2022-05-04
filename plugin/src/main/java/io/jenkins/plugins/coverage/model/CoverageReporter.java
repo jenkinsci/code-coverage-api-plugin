@@ -112,6 +112,7 @@ public class CoverageReporter {
             }
 
             logHandler.log(log);
+            log.logInfo("Calculating coverage deltas...");
 
             // filtered coverage trees
             CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
@@ -121,13 +122,8 @@ public class CoverageReporter {
             // coverage delta
             SortedMap<CoverageMetric, CoveragePercentage> coverageDelta =
                     rootNode.computeDeltaAsPercentage(referenceAction.getResult());
-            SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta;
-            if (rootNode.hasChangeCoverage() && referenceAction.getResult().hasChangeCoverage()) {
-                changeCoverageDelta = changeCoverageRoot.computeDeltaAsPercentage(rootNode);
-            }
-            else {
-                changeCoverageDelta = new TreeMap<>();
-            }
+            SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta =
+                    computeChangeCoverageDelta(rootNode, changeCoverageRoot);
 
             if (rootNode.hasCodeChanges() && !rootNode.hasChangeCoverage()) {
                 log.logInfo("No detected code changes affect the code coverage");
@@ -143,13 +139,35 @@ public class CoverageReporter {
             action = new CoverageBuildAction(build, rootNode, healthReport);
         }
 
+        log.logInfo("Executing source code painting...");
         SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
         sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), sourceDirectories,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
+        log.logInfo("Finished coverage processing - adding the action to the build...");
+
         logHandler.log(log);
 
         build.addOrReplaceAction(action);
+    }
+
+    /**
+     * Computes the change coverage delta which represents the difference between the change coverage and the overall
+     * coverage per coverage metric.
+     *
+     * @param rootNode
+     *         The root of the overall coverage tree
+     * @param changeCoverageRoot
+     *         The root of the change coverage tree
+     *
+     * @return the delta per metric
+     */
+    private SortedMap<CoverageMetric, CoveragePercentage> computeChangeCoverageDelta(
+            final CoverageNode rootNode, final CoverageNode changeCoverageRoot) {
+        if (rootNode.hasChangeCoverage()) {
+            return changeCoverageRoot.computeDeltaAsPercentage(rootNode);
+        }
+        return new TreeMap<>();
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {
