@@ -190,7 +190,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if the change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return hasChangeCoverage(CoverageMetric.LINE);
+        return getResult().hasChangeCoverage();
     }
 
     /**
@@ -223,7 +223,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return hasIndirectCoverageChanges(CoverageMetric.LINE);
+        return getResult().hasIndirectCoverageChanges();
     }
 
     /**

@@ -85,6 +85,7 @@ class CoverageBuildActionTest {
     void shouldGetChangeCoverageForSpecifiedMetric() {
         CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
         assertThat(action.hasChangeCoverage()).isTrue();
+        assertThat(action.hasCodeChanges()).isTrue();
         assertThat(action.hasChangeCoverage(COVERAGE_METRIC)).isTrue();
         assertThat(action.getChangeCoverage(COVERAGE_METRIC))
                 .isNotNull()
