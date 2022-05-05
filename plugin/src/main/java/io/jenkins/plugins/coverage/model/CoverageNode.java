@@ -567,13 +567,13 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Checks whether the coverage tree contains a change coverage at all. The method checks if line coverage is
-     * available since it is the basic metric which is always available if changes exist.
+     * Checks whether the coverage tree contains a change coverage at all. The method checks if line or branch coverage
+     * are available since these are the basic metrics which are available if changes exist.
      *
      * @return {@code true} whether a change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return hasChangeCoverage(CoverageMetric.LINE);
+        return hasChangeCoverage(CoverageMetric.LINE) || hasChangeCoverage(CoverageMetric.BRANCH);
     }
 
     /**
@@ -641,13 +641,13 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line coverage is
-     * available since it is the basic metric which is always available if changes exist.
+     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line or branch
+     * coverage are available since these are the basic metrics which are available if changes exist.
      *
      * @return {@code true} whether indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return hasIndirectCoverageChanges(CoverageMetric.LINE);
+        return hasIndirectCoverageChanges(CoverageMetric.LINE) || hasIndirectCoverageChanges(CoverageMetric.BRANCH);
     }
 
     /**
