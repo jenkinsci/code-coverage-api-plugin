@@ -1,27 +1,32 @@
 package io.jenkins.plugins.coverage.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Result;
+import hudson.model.Run;
 
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests the class {@link CoverageRecorder}.
  *
  * @author Ullrich Hafner
  */
-public class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
+class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
     @Test
-    public void pipelineForNoAdapter() {
+    void pipelineForNoAdapter() {
         WorkflowJob job = createPipeline();
         job.setDefinition(new CpsFlowDefinition(
-                "node {"
-                        + "    recordCoverage"
-                        + " }", true));
+                "node {\n"
+                        + "    recordCoverage()\n"
+                        + " }\n", true));
 
-        buildWithResult(job, Result.FAILURE);
+        Run<?, ?> run = buildWithResult(job, Result.SUCCESS);
+
+        assertThat(getConsoleLog(run)).isEqualTo("blub");
     }
 }

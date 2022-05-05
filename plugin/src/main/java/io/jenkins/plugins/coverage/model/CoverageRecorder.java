@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 
-import io.jenkins.plugins.forensics.miner.Messages;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
@@ -57,6 +57,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
     private boolean skipPublishingChecks = false;
     private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.NEVER;
+    private List<CoverageTool> tools;
 
     /**
      * Creates a new instance of {@link  CoverageRecorder}.
@@ -66,6 +67,42 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         super();
 
         // empty constructor required for Stapler
+    }
+
+    /**
+     * Sets the coverage tools that will scan files and create coverage reports.
+     *
+     * @param tools
+     *         the coverage tools
+     */
+    @DataBoundSetter
+    public void setTools(final List<CoverageTool> tools) {
+        this.tools = new ArrayList<>(tools);
+    }
+
+    /**
+     * Sets the coverage tools that will scan files and create coverage reports.
+     *
+     * @param tool
+     *         the static analysis tool
+     * @param additionalTools
+     *         additional static analysis tools (might be empty)
+     *
+     * @see #setTools(List)
+     */
+    public void setTools(final CoverageTool tool, final CoverageTool... additionalTools) {
+        tools = new ArrayList<>();
+        tools.add(tool);
+        Collections.addAll(tools, additionalTools);
+    }
+
+    /**
+     * Returns the static analysis tools that will scan files and create issues.
+     *
+     * @return the static analysis tools
+     */
+    public List<CoverageTool> getTools() {
+        return new ArrayList<>(tools);
     }
 
     /**
@@ -168,6 +205,10 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
             @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while recording code coverage:");
+        log.logInfo("Recording coverage results");
+
+
+
 
         logHandler.log(log);
     }
@@ -189,7 +230,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         @NonNull
         @Override
         public String getDisplayName() {
-            return Messages.Step_Name();
+            return Messages.Coverage_Recorder();
         }
 
         @Override
