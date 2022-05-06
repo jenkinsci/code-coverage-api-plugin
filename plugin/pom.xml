@@ -40,7 +40,7 @@
     <gson.version>2.9.0</gson.version>
     <prism-api.version>1.26.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
-    <testcontainers.version>1.16.3</testcontainers.version>
+    <testcontainers.version>1.17.1</testcontainers.version>
   </properties>
 
   <developers>
