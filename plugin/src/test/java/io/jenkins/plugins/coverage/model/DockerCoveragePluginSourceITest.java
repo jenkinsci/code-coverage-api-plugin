@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assumptions.*;
  *
  * @author Ullrich Hafner
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class DockerCoveragePluginSourceITest extends CoveragePluginSourceITest {
     @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer();
