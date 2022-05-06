@@ -3,8 +3,6 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -21,8 +19,8 @@ import jenkins.model.Jenkins;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.util.JenkinsFacade;
@@ -117,7 +115,7 @@ public class CoverageColumn extends ListViewColumn {
      * @return the coverage text
      */
     public String getCoverageText(final Job<?, ?> job) {
-        Optional<Fraction> coverageValue = getCoverageValue(job);
+        Optional<CoveragePercentage> coverageValue = getCoverageValue(job);
         if (coverageValue.isPresent()) {
             return selectedCoverageColumnType.formatCoverage(coverageValue.get(), Functions.getCurrentLocale());
         }
@@ -132,11 +130,10 @@ public class CoverageColumn extends ListViewColumn {
      *
      * @return the coverage percentage
      */
-    public Optional<Fraction> getCoverageValue(final Job<?, ?> job) {
+    public Optional<CoveragePercentage> getCoverageValue(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
             CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-            return selectedCoverageColumnType.getCoverage(action, CoverageMetric.valueOf(coverageMetric))
-                    .map(FractionFormatter::transformFractionToPercentage);
+            return selectedCoverageColumnType.getCoverage(action, CoverageMetric.valueOf(coverageMetric));
         }
         return Optional.empty();
     }
@@ -152,7 +149,7 @@ public class CoverageColumn extends ListViewColumn {
      * @return the line color as hex string
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<Fraction> coverage) {
+    public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<CoveragePercentage> coverage) {
         if (hasCoverageAction(job) && coverage.isPresent()) {
             return selectedCoverageColumnType.getDisplayColors(coverage.get());
         }

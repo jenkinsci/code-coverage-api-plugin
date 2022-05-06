@@ -93,11 +93,11 @@ public class FileChangesProcessor {
      *         The {@link FileCoverageNode reference node} which represents the coverage of the reference file
      */
     private void attachFileCoverageDelta(final FileCoverageNode fileNode, final FileCoverageNode referenceNode) {
-        SortedMap<CoverageMetric, Fraction> referenceCoverage = referenceNode.getMetricPercentages();
-        fileNode.getMetricPercentages().forEach((metric, value) -> {
+        SortedMap<CoverageMetric, Fraction> referenceCoverage = referenceNode.getMetricFractions();
+        fileNode.getMetricFractions().forEach((metric, value) -> {
             if (referenceCoverage.containsKey(metric)) {
                 Fraction delta = value.subtract(referenceCoverage.get(metric));
-                fileNode.putFileCoverageDelta(metric, delta);
+                fileNode.putFileCoverageDelta(metric, CoveragePercentage.getCoveragePercentage(delta));
             }
         });
     }

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +29,8 @@ import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
+import one.util.streamex.StreamEx;
 
 /**
  * A hierarchical decomposition of coverage results.
@@ -53,7 +56,6 @@ public class CoverageNode implements Serializable {
     private final List<CoverageLeaf> leaves = new ArrayList<>();
     @CheckForNull
     private CoverageNode parent;
-    private int[] uncoveredLines = EMPTY_ARRAY;
 
     /**
      * Creates a new coverage item node with the given name.
@@ -85,7 +87,7 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Called after de-serialization to retain backward compatibility.
+     * Called after de-serialization to restore transient fields.
      *
      * @return this
      * @throws ObjectStreamException
@@ -191,11 +193,26 @@ public class CoverageNode implements Serializable {
                 .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
     }
 
-    public SortedMap<CoverageMetric, Fraction> getMetricPercentages() {
+    /**
+     * Gets the coverage for each available metric as a fraction between 0 and 1.
+     *
+     * @return the coverage fractions mapped by their metric
+     */
+    public SortedMap<CoverageMetric, Fraction> getMetricFractions() {
         return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(),
-                        searchMetric -> getCoverage(searchMetric).getCoveredPercentage(), (o1, o2) -> o1,
+                        searchMetric -> getCoverage(searchMetric).getCoveredFraction(), (o1, o2) -> o1,
                         TreeMap::new));
+    }
+
+    /**
+     * Gets the coverage for each available metric as a percentage between 0 and 100.
+     *
+     * @return the coverage percentages mapped by their metric
+     */
+    public SortedMap<CoverageMetric, CoveragePercentage> getMetricPercentages() {
+        return StreamEx.of(getMetricFractions().entrySet())
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
     }
 
     public String getName() {
@@ -337,21 +354,34 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Computes the coverage delta between this node and the specified reference node.
+     * Computes the coverage delta between this node and the specified reference node as fractions between 0 and 1.
      *
      * @param reference
      *         the reference node
      *
-     * @return the delta coverage for each available metric
+     * @return the delta coverage for each available metric as fraction
      */
     public SortedMap<CoverageMetric, Fraction> computeDelta(final CoverageNode reference) {
         SortedMap<CoverageMetric, Fraction> deltaPercentages = new TreeMap<>();
-        SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricPercentages();
-        SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricPercentages();
+        SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricFractions();
+        SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricFractions();
         metricPercentages.forEach((key, value) ->
                 deltaPercentages.put(key,
                         saveSubtractFraction(value, referencePercentages.getOrDefault(key, Fraction.ZERO))));
         return deltaPercentages;
+    }
+
+    /**
+     * Computes the coverage delta between this node and the specified reference node as percentage between 0 and 100.
+     *
+     * @param reference
+     *         the reference node
+     *
+     * @return the delta coverage for each available metric as percentage
+     */
+    public SortedMap<CoverageMetric, CoveragePercentage> computeDeltaAsPercentage(final CoverageNode reference) {
+        return StreamEx.of(computeDelta(reference).entrySet())
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
     }
 
     /**
@@ -540,13 +570,13 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Checks whether the coverage tree contains a change coverage at all. The method checks if line coverage is
-     * available since it is the basic metric which is always available if changes exist.
+     * Checks whether the coverage tree contains a change coverage at all. The method checks if line or branch coverage
+     * are available since these are the basic metrics which are available if changes exist.
      *
      * @return {@code true} whether a change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return hasChangeCoverage(CoverageMetric.LINE);
+        return hasChangeCoverage(CoverageMetric.LINE) || hasChangeCoverage(CoverageMetric.BRANCH);
     }
 
     /**
@@ -614,13 +644,13 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line coverage is
-     * available since it is the basic metric which is always available if changes exist.
+     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line or branch
+     * coverage are available since these are the basic metrics which are available if changes exist.
      *
      * @return {@code true} whether indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return hasIndirectCoverageChanges(CoverageMetric.LINE);
+        return hasIndirectCoverageChanges(CoverageMetric.LINE) || hasIndirectCoverageChanges(CoverageMetric.BRANCH);
     }
 
     /**
@@ -663,9 +693,7 @@ public class CoverageNode implements Serializable {
      * @return the root node of the copied tree
      */
     public CoverageNode copyTree() {
-        CoverageNode copy = new CoverageNode(metric, name);
-        copyChildrenAndLeaves(this, copy);
-        return copy;
+        return copyTree(null);
     }
 
     /**
@@ -677,28 +705,26 @@ public class CoverageNode implements Serializable {
      * @return the copied tree
      */
     protected CoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
-        CoverageNode copy = new CoverageNode(metric, name);
+        CoverageNode copy = copyEmpty();
         if (copiedParent != null) {
             copy.setParent(copiedParent);
         }
-        copy.setUncoveredLines(getUncoveredLines());
-        copyChildrenAndLeaves(this, copy);
+
+        getChildren().stream()
+                .map(node -> node.copyTree(this))
+                .forEach(copy::add);
+        getLeaves().forEach(copy::add);
+
         return copy;
     }
 
     /**
-     * Copies the children and leaves of a {@link CoverageNode} to another one.
+     * Creates a copied instance of this node that has no children, leaves, and parent yet.
      *
-     * @param from
-     *         The node which values should be copied
-     * @param to
-     *         The node which receives the copied values
+     * @return the new and empty node
      */
-    protected void copyChildrenAndLeaves(final CoverageNode from, final CoverageNode to) {
-        from.getChildren().stream()
-                .map(node -> node.copyTree(from))
-                .forEach(copy -> to.getChildren().add(copy));
-        from.getLeaves().forEach(leaf -> to.getLeaves().add(leaf));
+    protected CoverageNode copyEmpty() {
+        return new CoverageNode(metric, name);
     }
 
     private void insertPackage(final CoverageNode aPackage, final Deque<String> packageLevels) {
@@ -724,18 +750,6 @@ public class CoverageNode implements Serializable {
         return newNode;
     }
 
-    public void setUncoveredLines(final int... uncoveredLines) {
-        this.uncoveredLines = copy(uncoveredLines);
-    }
-
-    public int[] getUncoveredLines() {
-        return copy(uncoveredLines);
-    }
-
-    private int[] copy(final int... values) {
-        return Arrays.copyOf(values, values.length);
-    }
-
     @Override
     public String toString() {
         return String.format("[%s] %s", metric, name);
@@ -751,14 +765,11 @@ public class CoverageNode implements Serializable {
         }
         CoverageNode that = (CoverageNode) o;
         return Objects.equals(metric, that.metric) && Objects.equals(name, that.name)
-                && Objects.equals(children, that.children) && Objects.equals(leaves, that.leaves)
-                && Arrays.equals(uncoveredLines, that.uncoveredLines);
+                && Objects.equals(children, that.children) && Objects.equals(leaves, that.leaves);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(metric, name, children, leaves);
-        result = 31 * result + Arrays.hashCode(uncoveredLines);
-        return result;
+        return Objects.hash(metric, name, children, leaves);
     }
 }

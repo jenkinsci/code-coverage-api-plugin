@@ -5,7 +5,6 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
@@ -34,11 +33,13 @@ public class TreeMapNodeConverter {
      *
      * @param node
      *         The root node of the tree to be converted
+     * @param metric
+     *         The coverage metric that should be represented (line and branch coverage are available)
      *
      * @return the converted tree map representation
      */
-    public TreeMapNode toTeeChartModel(final CoverageNode node) {
-        TreeMapNode root = toTreeMapNode(node);
+    public TreeMapNode toTeeChartModel(final CoverageNode node, final CoverageMetric metric) {
+        TreeMapNode root = toTreeMapNode(node, metric);
         for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
         }
@@ -46,12 +47,10 @@ public class TreeMapNodeConverter {
         return root;
     }
 
-    private TreeMapNode toTreeMapNode(final CoverageNode node) {
-        Coverage coverage = node.getCoverage(CoverageMetric.LINE);
+    private TreeMapNode toTreeMapNode(final CoverageNode node, final CoverageMetric metric) {
+        Coverage coverage = node.getCoverage(metric);
 
-        double coveragePercentage = FractionFormatter
-                .transformFractionToPercentage(coverage.getCoveredPercentage())
-                .doubleValue();
+        double coveragePercentage = coverage.getCoveredPercentage().getDoubleValue();
 
         String color = CoverageLevel
                 .getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider)
@@ -63,7 +62,7 @@ public class TreeMapNodeConverter {
         }
 
         node.getChildren().stream()
-                .map(this::toTreeMapNode)
+                .map(n -> toTreeMapNode(n, metric))
                 .forEach(treeNode::insertNode);
         return treeNode;
     }

@@ -22,7 +22,6 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -116,43 +115,70 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart on the
-     * client side.
+     * client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getCoverageTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode());
+    public TreeMapNode getCoverageTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric);
     }
 
     /**
      * Returns the root of the filtered tree of change coverage nodes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side.
+     * model for the chart on the client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of change coverage nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getChangeCoverageTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot);
+    public TreeMapNode getChangeCoverageTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric);
     }
 
     /**
      * Returns the root of the filtered tree of indirect coverage changes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side.
+     * model for the chart on the client side. The tree is available for line and branch coverage.
+     *
+     * @param coverageMetric
+     *         The used coverage metric - the default is the line coverage
      *
      * @return the tree of indirect coverage changes nodes for the ECharts treemap
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getCoverageChangesTree() {
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot);
+    public TreeMapNode getCoverageChangesTree(final String coverageMetric) {
+        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric);
     }
 
     /**
-     * Returns the table model that shows the files along with the branch and line coverage. Currently, only one table
-     * is shown in the view, so the ID is not used.
+     * Gets the {@link CoverageMetric} from a String representation used in the frontend. Only 'Line' and 'Branch' is
+     * possible. 'Line' is used as a default.
+     *
+     * @param text
+     *         The coverage metric as String
+     * @return the coverage metric
+     */
+    private CoverageMetric getCoverageMetricFromText(final String text) {
+        if ("Branch".equals(text)) {
+            return CoverageMetric.BRANCH;
+        }
+        return CoverageMetric.LINE;
+    }
+
+    /**
+     * Returns the table model that matches with the passed table ID and shows the files along with the branch and line
+     * coverage.
      *
      * @param tableId
      *         ID of the table model
@@ -373,7 +399,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredPercentage)
+            return streamCoverages().map(Coverage::getCoveredFraction)
                     .map(Fraction::doubleValue)
                     .collect(Collectors.toList());
         }
@@ -383,7 +409,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedPercentage)
+            return streamCoverages().map(Coverage::getMissedFraction)
                     .map(Fraction::doubleValue)
                     .collect(Collectors.toList());
         }
@@ -460,6 +486,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             // branchColumnDelta.setWidth(1);
             columns.add(branchColumnDelta);
 
+            TableColumn loc = new TableColumn("LOC", "loc", "number");
+            // loc.setWidth(1);
+            columns.add(loc);
+
             return columns;
         }
 
@@ -520,6 +550,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createColoredFileCoverageDeltaColumn(BRANCH_COVERAGE);
         }
 
+        public DetailedColumnDefinition getLoc() {
+            if (root instanceof FileCoverageNode) {
+                String value = String.valueOf(((FileCoverageNode) root).getCoveragePerLine().size());
+                return new DetailedColumnDefinition(value, value);
+            }
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "0");
+        }
+
         protected String printCoverage(final Coverage coverage) {
             if (coverage.isSet()) {
                 return coverage.formatCoveredPercentage(browserLocale);
@@ -530,8 +568,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         /**
          * Creates a table cell which colorizes the shown coverage dependent on the coverage percentage.
          *
-         * @param coveragePercentage
-         *         The coverage percentage
+         * @param coverage
+         *         The coverage as percentage
          * @param text
          *         The text to be shown which represents the coverage
          * @param tooltip
@@ -539,10 +577,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
          *
          * @return the create {@link DetailedColumnDefinition}
          */
-        protected DetailedColumnDefinition createColoredCoverageColumn(final Fraction coveragePercentage,
+        protected DetailedColumnDefinition createColoredCoverageColumn(final CoveragePercentage coverage,
                 final String text, final String tooltip) {
-            double percentage = coveragePercentage.doubleValue() * 100.0;
-            String sort = String.valueOf(coveragePercentage.doubleValue());
+            double percentage = coverage.getDoubleValue();
+            String sort = String.valueOf(percentage);
             DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
             String tag = span()
                     .withTitle(tooltip)
@@ -558,17 +596,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         /**
          * Creates a table cell which colorizes the tendency of the shown coverage delta.
          *
-         * @param coverage
-         *         The coverage delta
+         * @param coveragePercentage
+         *         The coverage delta as percentage
          * @param tooltip
          *         The tooltip which describes the value
          *
          * @return the create {@link DetailedColumnDefinition}
          */
         protected DetailedColumnDefinition createColoredCoverageDeltaColumn(
-                final Fraction coverage, final String tooltip) {
-            double coverageValue = coverage.doubleValue();
-            String coverageText = FractionFormatter.formatDeltaFraction(coverage, browserLocale);
+                final CoveragePercentage coveragePercentage, final String tooltip) {
+            double coverageValue = coveragePercentage.getDoubleValue();
+            String coverageText = coveragePercentage.formatDeltaPercentage(browserLocale);
             String sort = String.valueOf(coverageValue);
             DisplayColors colors = CoverageChangeTendency
                     .getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
@@ -601,8 +639,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             if (root instanceof FileCoverageNode) {
                 FileCoverageNode fileNode = (FileCoverageNode) root;
                 if (fileNode.hasFileCoverageDelta(coverageMetric)) {
-                    Fraction deltaFraction = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
-                    return createColoredCoverageDeltaColumn(deltaFraction,
+                    CoveragePercentage delta = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
+                    return createColoredCoverageDeltaColumn(delta,
                             "The total file coverage delta against the reference build");
                 }
             }
@@ -741,12 +779,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
         }
 
+        @Override
+        public DetailedColumnDefinition getLoc() {
+            String value = String.valueOf(changedFileNode.getChangedCodeLines().stream()
+                    .filter(line -> changedFileNode.getCoveragePerLine().containsKey(line))
+                    .count());
+            return new DetailedColumnDefinition(value, value);
+        }
+
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(final CoverageMetric coverageMetric) {
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredPercentage()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
-                return createColoredCoverageDeltaColumn(delta,
+                Fraction delta = changeCoverage.getCoveredFraction()
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
+                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
                         "The change coverage within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
@@ -802,13 +848,19 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
         }
 
+        @Override
+        public DetailedColumnDefinition getLoc() {
+            String value = String.valueOf(changedFileNode.getIndirectCoverageChanges().size());
+            return new DetailedColumnDefinition(value, value);
+        }
+
         private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(
                 final CoverageMetric coverageMetric) {
             Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
             if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredPercentage()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredPercentage());
-                return createColoredCoverageDeltaColumn(delta,
+                Fraction delta = changeCoverage.getCoveredFraction()
+                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
+                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
                         "The indirect coverage changes within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");

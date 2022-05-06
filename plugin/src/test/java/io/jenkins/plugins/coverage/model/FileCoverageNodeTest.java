@@ -1,8 +1,8 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 
-import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -21,7 +21,7 @@ class FileCoverageNodeTest {
     private static final int LINE = 5;
     private static final int HIT_DELTA = 10;
     private static final Coverage COVERAGE = new Coverage.CoverageBuilder().setCovered(2).setMissed(3).build();
-    private static final Fraction COVERAGE_DELTA = Fraction.ONE_HALF;
+    private static final CoveragePercentage COVERAGE_DELTA = CoveragePercentage.getCoveragePercentage(0.5);
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.LINE;
 
     @Test
@@ -43,6 +43,17 @@ class FileCoverageNodeTest {
         FileCoverageNode node = createFileCoverageNode();
         CoverageNode root = node.getParent().copyTree();
         assertThat(root.getChildren()).containsExactly(node);
+        assertThat(root.getChildren().get(0))
+                .isInstanceOf(FileCoverageNode.class)
+                .satisfies(n -> {
+                    FileCoverageNode fileNode = (FileCoverageNode) n;
+                    assertThat(fileNode.getPath()).isEqualTo(PATH);
+                    assertThat(fileNode.getCoveragePerLine()).containsExactly(new SimpleEntry<>(LINE, COVERAGE));
+                    assertThat(fileNode.getFileCoverageDeltaForMetric(COVERAGE_METRIC)).isEqualTo(COVERAGE_DELTA);
+                    assertThat(fileNode.getChangedCodeLines()).containsExactly(LINE);
+                    assertThat(fileNode.getIndirectCoverageChanges()).containsExactly(
+                            new SimpleEntry<>(LINE, HIT_DELTA));
+                });
     }
 
     @Test

@@ -83,7 +83,6 @@ public class CoverageNodeConverter {
     private void attachCoverageLineMapping(final CoverageResult result, final FileCoverageNode node) {
         CoveragePaint paint = result.getPaint();
         if (paint != null) {
-            node.setUncoveredLines(paint.getUncoveredLines());
             paintedFiles.put(node, paint);
             attachCoveragePerLine(node, paint);
         }

@@ -1,12 +1,11 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import org.apache.commons.lang3.math.Fraction;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -27,7 +26,6 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -60,10 +58,10 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final String referenceBuildId;
 
     // since 3.0.0
-    private SortedMap<CoverageMetric, Fraction> difference;
-    private SortedMap<CoverageMetric, Fraction> changeCoverage;
-    private SortedMap<CoverageMetric, Fraction> changeCoverageDifference;
-    private SortedMap<CoverageMetric, Fraction> indirectCoverageChanges;
+    private SortedMap<CoverageMetric, CoveragePercentage> difference;
+    private SortedMap<CoverageMetric, CoveragePercentage> changeCoverage;
+    private SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDifference;
+    private SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges;
 
     @SuppressWarnings("unused")
     private final transient SortedMap<CoverageMetric, Double> delta = new TreeMap<>(); // not used anymore
@@ -106,9 +104,10 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
-            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
-            final SortedMap<CoverageMetric, Fraction> changeCoverageDifference,
-            final SortedMap<CoverageMetric, Fraction> indirectCoverageChanges) {
+            final SortedMap<CoverageMetric, CoveragePercentage> delta,
+            final SortedMap<CoverageMetric, CoveragePercentage> changeCoverage,
+            final SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDifference,
+            final SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges) {
         this(owner, result, healthReport, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
@@ -117,9 +116,10 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
             final HealthReport healthReport, final String referenceBuildId,
-            final SortedMap<CoverageMetric, Fraction> delta, final SortedMap<CoverageMetric, Fraction> changeCoverage,
-            final SortedMap<CoverageMetric, Fraction> changeCoverageDifference,
-            final SortedMap<CoverageMetric, Fraction> indirectCoverageChanges, final boolean canSerialize) {
+            final SortedMap<CoverageMetric, CoveragePercentage> delta,
+            final SortedMap<CoverageMetric, CoveragePercentage> changeCoverage,
+            final SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDifference,
+            final SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges, final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         lineCoverage = result.getCoverage(CoverageMetric.LINE);
@@ -137,7 +137,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     protected Object readResolve() {
         if (difference == null) {
             difference = StreamEx.of(delta.entrySet())
-                    .toSortedMap(Entry::getKey, e -> Fraction.getFraction(e.getValue()));
+                    .toSortedMap(Entry::getKey,
+                            e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
         }
         if (changeCoverage == null) {
             changeCoverage = new TreeMap<>();
@@ -189,7 +190,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if the change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return hasChangeCoverage(CoverageMetric.LINE);
+        return getResult().hasChangeCoverage();
     }
 
     /**
@@ -222,7 +223,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return hasIndirectCoverageChanges(CoverageMetric.LINE);
+        return getResult().hasIndirectCoverageChanges();
     }
 
     /**
@@ -278,7 +279,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return the delta for each available coverage metric
      */
     @SuppressWarnings("unused") // Called by jelly view
-    public SortedMap<CoverageMetric, Fraction> getDifference() {
+    public SortedMap<CoverageMetric, CoveragePercentage> getDifference() {
         return difference;
     }
 
@@ -307,7 +308,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatDelta(final CoverageMetric metric) {
         Locale clientLocale = Functions.getCurrentLocale();
         if (hasDelta(metric)) {
-            return FractionFormatter.formatDeltaFraction(difference.get(metric), clientLocale);
+            return difference.get(metric).formatDeltaPercentage(clientLocale);
         }
         return Messages.Coverage_Not_Available();
     }
@@ -317,18 +318,13 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * respect to the reference build).
      *
      * @param metric
-     *         the metric to get the coverage for
+     *         the metric to get the change coverage for
      *
      * @return the change coverage metric
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatChangeCoverage(final CoverageMetric metric) {
-        String coverage = Messages.Coverage_Not_Available();
-        if (changeCoverage != null && changeCoverage.containsKey(metric)) {
-            coverage = FractionFormatter
-                    .formatFraction(changeCoverage.get(metric), Functions.getCurrentLocale());
-        }
-        return metric.getName() + ": " + coverage;
+        return formatCoverageForMetric(metric, changeCoverage);
     }
 
     /**
@@ -336,16 +332,30 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * respect to the reference build).
      *
      * @param metric
-     *         the metric to get the delta for
+     *         the metric to get the indirect coverage changes for
      *
      * @return the formatted representation of the indirect coverage changes
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatIndirectCoverageChanges(final CoverageMetric metric) {
+        return formatCoverageForMetric(metric, indirectCoverageChanges);
+    }
+
+    /**
+     * Returns a formatted and localized String representation of an overview of the passed coverage values.
+     *
+     * @param metric
+     *         the metric to get the coverage for
+     * @param coverages
+     *         the coverage values of a specific type, mapped by their metrics
+     *
+     * @return the formatted text representation of the coverage value corresponding to the passed metric
+     */
+    private String formatCoverageForMetric(final CoverageMetric metric,
+            final Map<CoverageMetric, CoveragePercentage> coverages) {
         String coverage = Messages.Coverage_Not_Available();
-        if (indirectCoverageChanges != null && indirectCoverageChanges.containsKey(metric)) {
-            coverage = FractionFormatter
-                    .formatFraction(indirectCoverageChanges.get(metric), Functions.getCurrentLocale());
+        if (coverages != null && coverages.containsKey(metric)) {
+            coverage = coverages.get(metric).formatPercentage(Functions.getCurrentLocale());
         }
         return metric.getName() + ": " + coverage;
     }
@@ -359,7 +369,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      *
      * @return the delta for each available coverage metric
      */
-    public Fraction getChangeCoverageDifference(final CoverageMetric coverageMetric) {
+    public CoveragePercentage getChangeCoverageDifference(final CoverageMetric coverageMetric) {
         return changeCoverageDifference.get(coverageMetric);
     }
 
@@ -398,7 +408,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     public String formatChangeCoverageDifference(final CoverageMetric metric) {
         Locale clientLocale = Functions.getCurrentLocale();
         if (hasChangeCoverage(metric)) {
-            return FractionFormatter.formatDeltaFraction(changeCoverageDifference.get(metric), clientLocale);
+            return changeCoverageDifference.get(metric).formatDeltaPercentage(clientLocale);
         }
         return Messages.Coverage_Not_Available();
     }
@@ -585,7 +595,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             xStream.alias("method", MethodCoverageNode.class);
             xStream.alias("leaf", CoverageLeaf.class);
             xStream.alias("coverage", Coverage.class);
-            xStream.alias("fraction", Fraction.class);
+            xStream.alias("percentage", CoveragePercentage.class);
             xStream.addImmutableType(CoverageMetric.class, false);
             xStream.registerConverter(new MetricsConverter());
             xStream.registerConverter(new CoverageConverter());

@@ -47,7 +47,7 @@
                     <li>${it.formatChangeCoverage(metric)}
                       <j:if test="${it.hasChangeCoverageDifference(metric)}">
                         <span id="change-coverage-delta"
-                              title="The change code coverage delta against the reference build">
+                              title="The delta of the change coverage against the overall coverage">
                           <j:choose>
                             <j:when test="${it.formatChangeCoverageDifference(metric).startsWith('-')}">
                               <j:set var="color" value="#9d1212"/>

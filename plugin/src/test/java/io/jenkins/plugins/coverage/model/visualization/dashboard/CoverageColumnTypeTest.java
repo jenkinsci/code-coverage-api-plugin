@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.testutil.CoverageStubs;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
@@ -34,7 +35,9 @@ class CoverageColumnTypeTest {
     protected static final ChangeCoverageDelta CHANGE_COVERAGE_DELTA = new ChangeCoverageDelta();
     protected static final IndirectCoverageChanges INDIRECT_COVERAGE_CHANGES = new IndirectCoverageChanges();
 
-    protected static final Fraction COVERAGE = Fraction.getFraction(50, 1);
+    protected static final Fraction COVERAGE_FRACTION = Fraction.getFraction(0.5);
+    protected static final CoveragePercentage COVERAGE_PERCENTAGE =
+            CoveragePercentage.getCoveragePercentage(COVERAGE_FRACTION);
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;
@@ -58,6 +61,6 @@ class CoverageColumnTypeTest {
     }
 
     protected CoverageBuildAction createCoverageBuildAction() {
-        return CoverageStubs.createCoverageBuildAction(COVERAGE_METRIC, COVERAGE);
+        return CoverageStubs.createCoverageBuildAction(COVERAGE_METRIC, COVERAGE_FRACTION);
     }
 }

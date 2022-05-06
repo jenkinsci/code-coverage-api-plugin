@@ -11,8 +11,6 @@ import hudson.Functions;
 import hudson.model.HealthReport;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.model.util.FractionFormatter;
-
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.model.testutil.JobStubs.*;
 import static org.assertj.core.api.Assertions.*;
@@ -27,7 +25,9 @@ class CoverageBuildActionTest {
 
     private static final Locale LOCALE = Functions.getCurrentLocale();
 
-    private static final Fraction COVERAGE_PERCENTAGE = Fraction.ONE_HALF;
+    private static final Fraction COVERAGE_FRACTION = Fraction.ONE_HALF;
+    private static final CoveragePercentage COVERAGE_PERCENTAGE =
+            CoveragePercentage.getCoveragePercentage(COVERAGE_FRACTION);
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.LINE;
 
     private static final int COVERAGE_FILE_CHANGES = 5;
@@ -37,10 +37,10 @@ class CoverageBuildActionTest {
     void shouldCreateViewModel() {
         Run<?, ?> build = mock(Run.class);
         CoverageNode root = new CoverageNode(COVERAGE_METRIC, "top-level");
-        SortedMap<CoverageMetric, Fraction> metrics = new TreeMap<>();
-        SortedMap<CoverageMetric, Fraction> changeCoverage = new TreeMap<>();
-        SortedMap<CoverageMetric, Fraction> changeCoverageDelta = new TreeMap<>();
-        SortedMap<CoverageMetric, Fraction> indirectCoverageChanges = new TreeMap<>();
+        SortedMap<CoverageMetric, CoveragePercentage> metrics = new TreeMap<>();
+        SortedMap<CoverageMetric, CoveragePercentage> changeCoverage = new TreeMap<>();
+        SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta = new TreeMap<>();
+        SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges = new TreeMap<>();
 
         CoverageBuildAction action =
                 new CoverageBuildAction(build, root, new HealthReport(), "-", metrics, changeCoverage,
@@ -69,8 +69,7 @@ class CoverageBuildActionTest {
                 .containsKey(COVERAGE_METRIC)
                 .containsValue(COVERAGE_PERCENTAGE);
         assertThat(action.formatDelta(COVERAGE_METRIC))
-                .isEqualTo(FractionFormatter
-                        .formatDeltaFraction(COVERAGE_PERCENTAGE, Functions.getCurrentLocale()));
+                .isEqualTo(COVERAGE_PERCENTAGE.formatDeltaPercentage(LOCALE));
     }
 
     @Test
@@ -79,13 +78,14 @@ class CoverageBuildActionTest {
         assertThat(action.hasChangeCoverageDifference(COVERAGE_METRIC)).isTrue();
         assertThat(action.getChangeCoverageDifference(COVERAGE_METRIC))
                 .isNotNull()
-                .satisfies(coverage -> assertThat(coverage.compareTo(COVERAGE_PERCENTAGE)).isZero());
+                .satisfies(coverage -> assertThat(coverage).isEqualTo(COVERAGE_PERCENTAGE));
     }
 
     @Test
     void shouldGetChangeCoverageForSpecifiedMetric() {
         CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
         assertThat(action.hasChangeCoverage()).isTrue();
+        assertThat(action.hasCodeChanges()).isTrue();
         assertThat(action.hasChangeCoverage(COVERAGE_METRIC)).isTrue();
         assertThat(action.getChangeCoverage(COVERAGE_METRIC))
                 .isNotNull()
@@ -119,13 +119,13 @@ class CoverageBuildActionTest {
     @Test
     void shouldFormatChangeCoverageDifference() {
         CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
-        String expected = FractionFormatter.formatDeltaFraction(COVERAGE_PERCENTAGE, LOCALE);
+        String expected = COVERAGE_PERCENTAGE.formatDeltaPercentage(LOCALE);
         assertThat(action.formatChangeCoverageDifference(COVERAGE_METRIC)).isEqualTo(expected);
     }
 
     @Test
     void shouldFormatNotAvailableCoverageValues() {
-        CoverageNode root = createCoverageNode(COVERAGE_PERCENTAGE, CoverageMetric.BRANCH);
+        CoverageNode root = createCoverageNode(COVERAGE_FRACTION, CoverageMetric.BRANCH);
         when(root.hasChangeCoverage()).thenReturn(false);
         when(root.hasIndirectCoverageChanges()).thenReturn(false);
 
@@ -148,7 +148,7 @@ class CoverageBuildActionTest {
      * @return the created action
      */
     private CoverageBuildAction createCoverageBuildActionWithMocks() {
-        CoverageNode root = createCoverageNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC);
+        CoverageNode root = createCoverageNode(COVERAGE_FRACTION, COVERAGE_METRIC);
         return createCoverageBuildAction(root);
     }
 
@@ -159,7 +159,7 @@ class CoverageBuildActionTest {
      * @return the created action
      */
     private CoverageBuildAction createChangeCoverageBuildActionWithMocks() {
-        CoverageNode root = createChangeCoverageNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC,
+        CoverageNode root = createChangeCoverageNode(COVERAGE_FRACTION, COVERAGE_METRIC,
                 COVERAGE_FILE_CHANGES, COVERAGE_LINE_CHANGES);
         return createCoverageBuildAction(root);
     }
@@ -171,7 +171,7 @@ class CoverageBuildActionTest {
      * @return the created action
      */
     private CoverageBuildAction createIndirectCoverageChangesBuildActionWithMocks() {
-        CoverageNode root = createIndirectCoverageChangesNode(COVERAGE_PERCENTAGE, COVERAGE_METRIC,
+        CoverageNode root = createIndirectCoverageChangesNode(COVERAGE_FRACTION, COVERAGE_METRIC,
                 COVERAGE_FILE_CHANGES, COVERAGE_LINE_CHANGES);
         return createCoverageBuildAction(root);
     }
@@ -188,13 +188,13 @@ class CoverageBuildActionTest {
         Run<?, ?> build = createBuild();
         HealthReport healthReport = mock(HealthReport.class);
 
-        TreeMap<CoverageMetric, Fraction> deltas = new TreeMap<>();
+        TreeMap<CoverageMetric, CoveragePercentage> deltas = new TreeMap<>();
         deltas.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
-        TreeMap<CoverageMetric, Fraction> changeCoverage = new TreeMap<>();
+        TreeMap<CoverageMetric, CoveragePercentage> changeCoverage = new TreeMap<>();
         changeCoverage.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
-        TreeMap<CoverageMetric, Fraction> changeCoverageDifference = new TreeMap<>();
+        TreeMap<CoverageMetric, CoveragePercentage> changeCoverageDifference = new TreeMap<>();
         changeCoverageDifference.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
-        TreeMap<CoverageMetric, Fraction> indirectCoverageChanges = new TreeMap<>();
+        TreeMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges = new TreeMap<>();
         indirectCoverageChanges.put(COVERAGE_METRIC, COVERAGE_PERCENTAGE);
 
         return new CoverageBuildAction(build, root, healthReport, "-", deltas,
@@ -207,7 +207,7 @@ class CoverageBuildActionTest {
      * @return the formatted text
      */
     private String getFormattedLineCoverage() {
-        return "Line: " + FractionFormatter.formatFraction(COVERAGE_PERCENTAGE, LOCALE);
+        return "Line: " + COVERAGE_PERCENTAGE.formatPercentage(LOCALE);
     }
 
     /**

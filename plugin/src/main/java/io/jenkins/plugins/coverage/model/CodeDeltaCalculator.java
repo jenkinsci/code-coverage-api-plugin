@@ -11,13 +11,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
-import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.exception.CoverageException;
+import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.forensics.delta.DeltaCalculatorFactory;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
@@ -50,12 +49,8 @@ public class CodeDeltaCalculator {
      * @param scm
      *         The selected SCM
      */
-    public CodeDeltaCalculator(
-            @NonNull final Run<?, ?> build,
-            @NonNull final FilePath workspace,
-            @NonNull final TaskListener listener,
-            @NonNull final String scm
-    ) {
+    public CodeDeltaCalculator(final Run<?, ?> build, final FilePath workspace,
+            final TaskListener listener, final String scm) {
         this.build = build;
         this.workspace = workspace;
         this.listener = listener;
@@ -105,11 +100,11 @@ public class CodeDeltaCalculator {
      *         The log
      *
      * @return the create code changes mapping
-     * @throws CoverageException
+     * @throws CodeDeltaException
      *         when creating the mapping failed due to ambiguous paths
      */
     public Map<String, FileChanges> mapScmChangesToReportPaths(
-            final Set<FileChanges> changes, final CoverageNode root, final FilteredLog log) throws CoverageException {
+            final Set<FileChanges> changes, final CoverageNode root, final FilteredLog log) throws CodeDeltaException {
         Set<String> reportPaths = root.getAllFileCoverageNodes().stream()
                 .map(FileCoverageNode::getPath)
                 .collect(Collectors.toSet());
@@ -160,17 +155,16 @@ public class CodeDeltaCalculator {
      * @param log
      *         The log
      *
-     * @throws CoverageException
+     * @throws CodeDeltaException
      *         when ambiguous paths has been detected
      */
     private void verifyScmToReportPathMapping(final Map<String, String> pathMapping, final FilteredLog log)
-            throws CoverageException {
+            throws CodeDeltaException {
         List<String> notEmptyValues = pathMapping.values().stream()
                 .filter(path -> !path.isEmpty())
                 .collect(Collectors.toList());
         if (notEmptyValues.size() != new HashSet<>(notEmptyValues).size()) {
-            log.logError(AMBIGUOUS_PATHS_ERROR);
-            throw new CoverageException(AMBIGUOUS_PATHS_ERROR);
+            throw new CodeDeltaException(AMBIGUOUS_PATHS_ERROR);
         }
         log.logInfo("Successfully mapped SCM paths to coverage report paths");
     }
