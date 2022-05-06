@@ -20,9 +20,6 @@ public final class Coverage implements Serializable {
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new CoverageBuilder().setCovered(0).setMissed(0).build();
 
-    private final int covered;
-    private final int missed;
-
     /**
      * Creates a new {@link Coverage} instance from the provided string representation. The string representation is
      * expected to contain the number of covered items and the total number of items - separated by a slash, e.g.
@@ -55,6 +52,9 @@ public final class Coverage implements Serializable {
         throw new IllegalArgumentException(
                 String.format("Cannot convert %s to a valid Coverage instance.", stringRepresentation));
     }
+
+    private final int covered;
+    private final int missed;
 
     /**
      * Creates a new code coverage with the specified values.
