@@ -565,13 +565,37 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         }
 
         @Override
-        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+        public Coverage unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
             return Coverage.valueOf(reader.getValue());
         }
 
         @Override
         public boolean canConvert(final Class type) {
             return type == Coverage.class;
+        }
+    }
+
+    /**
+     * {@link Converter} for {@link CoveragePercentage} instances so that only the values will be serialized. After
+     * reading the values back from the stream, the string representation will be converted to an actual instance
+     * again.
+     */
+    private static final class PercentageConverter implements Converter {
+        @SuppressWarnings("PMD.NullAssignment")
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof CoveragePercentage ? ((CoveragePercentage) source).serializeToString() : null);
+        }
+
+        @Override
+        public CoveragePercentage unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return CoveragePercentage.valueOf(reader.getValue());
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == CoveragePercentage.class;
         }
     }
 
@@ -598,7 +622,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             xStream.alias("percentage", CoveragePercentage.class);
             xStream.addImmutableType(CoverageMetric.class, false);
             xStream.registerConverter(new MetricsConverter());
-            xStream.registerConverter(new CoverageConverter());
+            xStream.addImmutableType(Coverage.class, false);
+            xStream.registerConverter(new PercentageConverter());
         }
 
         @Override

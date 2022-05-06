@@ -17,6 +17,24 @@ public final class CoveragePercentage implements Serializable {
 
     private static final long serialVersionUID = 3324942976687883481L;
 
+    /**
+     * Creates a new {@link CoveragePercentage} instance from the provided string representation. The string
+     * representation is expected to contain the numerator and the denominator - separated by a slash, e.g. "100/345",
+     * or "0/1". Whitespace characters will be ignored.
+     *
+     * @param stringRepresentation
+     *         string representation to convert from
+     *
+     * @return the created {@link CoveragePercentage}
+     * @throws IllegalArgumentException
+     *         if the string is not a valid CoveragePercentage instance
+     */
+    public static CoveragePercentage valueOf(final String stringRepresentation) {
+        Coverage coverage = Coverage.valueOf(stringRepresentation); // Reuse serialization of coverage
+
+        return new CoveragePercentage(coverage.getCovered(), coverage.getTotal());
+    }
+
     private final int numerator;
     private final int denominator;
 
@@ -116,5 +134,16 @@ public final class CoveragePercentage implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(numerator, denominator);
+    }
+
+    /**
+     * Returns a string representation for this {@link CoveragePercentage} that can be used to serialize this instance
+     * in a simple but still readable way. The serialization contains the numerator and the denominator - separated by a
+     * slash, e.g. "100/345", or "0/1".
+     *
+     * @return a string representation for this {@link CoveragePercentage}
+     */
+    public String serializeToString() {
+        return String.format("%d/%d", getNumerator(), getDenominator());
     }
 }
