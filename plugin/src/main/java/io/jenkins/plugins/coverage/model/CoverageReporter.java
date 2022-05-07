@@ -93,10 +93,12 @@ public class CoverageReporter {
                 fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot);
 
                 try {
+                    log.logInfo("Preprocessing code changes...");
                     Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
-                    log.logInfo("Mapping SCM to report paths...");
                     Map<String, FileChanges> mappedChanges =
                             codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
+                    Map<String, String> oldPathMapping = codeDeltaCalculator.createOldPathMapping(
+                            rootNode, referenceRoot, mappedChanges, log);
 
                     // calculate code changes
                     log.logInfo("Obtaining code changes for files...");
@@ -104,10 +106,6 @@ public class CoverageReporter {
 
                     // indirect coverage changes
                     log.logInfo("Obtaining indirect coverage changes...");
-                    log.logInfo("-> Creating a mapping between current paths and paths before the modifications");
-                    Map<String, String> oldPathMapping = codeDeltaCalculator.createOldPathMapping(
-                            rootNode, referenceRoot, mappedChanges, log);
-                    log.logInfo("-> Calculating indirect coverage changes");
                     fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
                             mappedChanges, oldPathMapping);
                 }

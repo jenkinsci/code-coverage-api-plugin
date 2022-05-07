@@ -24,51 +24,51 @@ class CoveragePercentageTest {
     @Test
     void shouldCreateCoveragePercentageFromFraction() {
         Fraction fraction = Fraction.getFraction(COVERAGE_FRACTION);
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(fraction);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(fraction);
         assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
     }
 
     @Test
     void shouldCreateCoveragePercentageFromDouble() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
     }
 
     @Test
     void shouldCreateCoveragePercentageFromNumeratorAndDenominator() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(50, 1);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(50, 1);
         assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
     }
 
     @Test
     void shouldNotCreateCoveragePercentageFromNumeratorAndZeroDenominator() {
-        assertThatThrownBy(() -> CoveragePercentage.getCoveragePercentage(50, 0))
+        assertThatThrownBy(() -> getCoveragePercentage(50, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(DENOMINATOR_ZERO_MESSAGE);
     }
 
     @Test
     void shouldHaveWorkingGetters() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.getNumerator()).isEqualTo(50);
         assertThat(coveragePercentage.getDenominator()).isEqualTo(1);
     }
 
     @Test
     void shouldGetDoubleValue() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
     }
 
     @Test
     void shouldFormatPercentage() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.formatPercentage(LOCALE)).isEqualTo("50,00%");
     }
 
     @Test
     void shouldFormatDeltaPercentage() {
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
+        CoveragePercentage coveragePercentage = getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.formatDeltaPercentage(LOCALE)).isEqualTo("+50,00%");
     }
 
