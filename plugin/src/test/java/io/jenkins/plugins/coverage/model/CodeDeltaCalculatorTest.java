@@ -200,6 +200,8 @@ class CodeDeltaCalculatorTest {
      *
      * @param filePath
      *         The file path
+     * @param oldFilePath
+     *         The old file path before the modifications
      * @param fileEditType
      *         The {@link FileEditType edit type}
      *
