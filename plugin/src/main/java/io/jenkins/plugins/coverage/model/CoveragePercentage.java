@@ -17,6 +17,8 @@ public final class CoveragePercentage implements Serializable {
 
     private static final long serialVersionUID = 3324942976687883481L;
 
+    static final String DENOMINATOR_ZERO_MESSAGE = "The denominator must not be zero";
+
     private final int numerator;
     private final int denominator;
 
@@ -34,7 +36,7 @@ public final class CoveragePercentage implements Serializable {
     }
 
     /**
-     * Creates an instance of {@link CoveragePercentage} from a {@link Fraction fraction}.
+     * Creates an instance of {@link CoveragePercentage} from a {@link Fraction fraction} within the range [0,1].
      *
      * @param fraction
      *         The coverage as fraction
@@ -57,6 +59,26 @@ public final class CoveragePercentage implements Serializable {
     public static CoveragePercentage getCoveragePercentage(final double percentage) {
         Fraction percentageFraction = Fraction.getFraction(percentage);
         return new CoveragePercentage(percentageFraction.getNumerator(), percentageFraction.getDenominator());
+    }
+
+    /**
+     * Creates an instance of {@link CoveragePercentage} from a numerator and a denominator.
+     *
+     * @param numerator
+     *         The numerator of the fraction which represents the percentage within the range [0,100]
+     * @param denominator
+     *         The denominator of the fraction which represents the percentage within the range [0,100] (must not be
+     *         zero)
+     *
+     * @return the created instance
+     * @throws IllegalArgumentException
+     *         if the denominator is zero
+     */
+    public static CoveragePercentage getCoveragePercentage(final int numerator, final int denominator) {
+        if (denominator != 0) {
+            return new CoveragePercentage(numerator, denominator);
+        }
+        throw new IllegalArgumentException(DENOMINATOR_ZERO_MESSAGE);
     }
 
     /**

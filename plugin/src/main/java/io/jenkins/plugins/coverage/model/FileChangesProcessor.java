@@ -105,29 +105,35 @@ public class FileChangesProcessor {
     /**
      * Attaches all found indirect coverage changes within the coverage tree, compared to a reference tree.
      *
-     * @param node
+     * @param root
      *         The root of the tree in which indirect coverage changes are searched
      * @param referenceNode
      *         The root of the reference tree
      * @param codeChanges
      *         The code changes that has been applied between the two commits underlying the node and its reference
+     * @param oldPathMapping
+     *         A mapping between the report paths of the current and the reference coverage tree
      */
-    public void attachIndirectCoveragesChanges(final CoverageNode node, final CoverageNode referenceNode,
-            final Map<String, FileChanges> codeChanges) {
-        Map<String, FileCoverageNode> fileNodes = node.getAllFileCoverageNodes().stream()
-                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+    public void attachIndirectCoveragesChanges(final CoverageNode root, final CoverageNode referenceNode,
+            final Map<String, FileChanges> codeChanges, final Map<String, String> oldPathMapping) {
+        // current nodes mapped by the corresponding old paths from the reference report
+        Map<String, FileCoverageNode> fileNodes = root.getAllFileCoverageNodes().stream()
+                .filter(node -> oldPathMapping.containsKey(node.getPath()))
+                .collect(Collectors.toMap(node -> oldPathMapping.get(node.getPath()), Function.identity()));
 
         Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
 
         for (Map.Entry<String, FileCoverageNode> entry : fileNodes.entrySet()) {
-            String path = entry.getKey();
+            String referencePath = entry.getKey();
             FileCoverageNode fileNode = entry.getValue();
             Optional<SortedMap<Integer, Coverage>> referenceCoveragePerLine =
-                    getReferenceCoveragePerLine(referenceFileNodes, path);
+                    getReferenceCoveragePerLine(referenceFileNodes, referencePath);
             if (referenceCoveragePerLine.isPresent()) {
                 SortedMap<Integer, Coverage> referenceCoverageMapping = new TreeMap<>(referenceCoveragePerLine.get());
-                if (codeChanges.containsKey(path)) {
-                    adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(path));
+                String currentPath = fileNode.getPath();
+                if (codeChanges.containsKey(currentPath)) {
+                    adjustedCoveragePerLine(referenceCoverageMapping,
+                            codeChanges.get(currentPath));
                 }
                 attachIndirectCoverageChangeForFile(fileNode, referenceCoverageMapping);
             }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
+import static io.jenkins.plugins.coverage.model.CoveragePercentage.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -31,6 +32,19 @@ class CoveragePercentageTest {
     void shouldCreateCoveragePercentageFromDouble() {
         CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(COVERAGE_PERCENTAGE);
         assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
+    }
+
+    @Test
+    void shouldCreateCoveragePercentageFromNumeratorAndDenominator() {
+        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(50, 1);
+        assertThat(coveragePercentage.getDoubleValue()).isEqualTo(50.0);
+    }
+
+    @Test
+    void shouldNotCreateCoveragePercentageFromNumeratorAndZeroDenominator() {
+        assertThatThrownBy(() -> CoveragePercentage.getCoveragePercentage(50, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(DENOMINATOR_ZERO_MESSAGE);
     }
 
     @Test

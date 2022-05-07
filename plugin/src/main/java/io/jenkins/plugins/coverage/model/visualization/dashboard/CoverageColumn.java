@@ -182,8 +182,9 @@ public class CoverageColumn extends ListViewColumn {
      * @return the formatted percentage string
      */
     public String getBackgroundColorFillPercentage(final String percentage) {
-        if (Pattern.compile("\\d+(,\\d+)?%").matcher(percentage).matches()) {
-            return percentage.replace(",", ".");
+        String formattedPercentage = percentage.replace(",", ".");
+        if (Pattern.compile("\\d+(\\.\\d+)?%").matcher(formattedPercentage).matches()) {
+            return formattedPercentage;
         }
         return "100%";
     }
