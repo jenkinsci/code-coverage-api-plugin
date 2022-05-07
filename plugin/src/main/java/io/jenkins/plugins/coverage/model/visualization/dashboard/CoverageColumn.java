@@ -33,6 +33,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
  * @author Florian Orendi
  */
 public class CoverageColumn extends ListViewColumn {
+    private static final Pattern PERCENTAGE = Pattern.compile("\\d+(,\\d+)?%");
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
     private String columnName = Messages.Coverage_Column();
@@ -176,7 +177,7 @@ public class CoverageColumn extends ListViewColumn {
      * @return the formatted percentage string
      */
     public String getBackgroundColorFillPercentage(final String percentage) {
-        if (Pattern.compile("\\d+(,\\d+)?%").matcher(percentage).matches()) {
+        if (PERCENTAGE.matcher(percentage).matches()) {
             return percentage.replace(",", ".");
         }
         return "100%";
