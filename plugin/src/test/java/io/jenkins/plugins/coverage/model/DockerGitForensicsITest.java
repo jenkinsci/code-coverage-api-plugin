@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,10 +46,10 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private static final String JACOCO_REFERENCE_FILE = "forensics_integration_reference.xml";
 
-    private static final String COMMIT = "c18ee99a19717523f564f8d053e98c8512bdf9c5";
-    private static final String COMMIT_REFERENCE = "c934ca8b6a73e1243ccd30ee25df79ebf4f644c7";
+    private static final String COMMIT = "518eebd7cf42e1bf66cea966328c1b8f22183920";
+    private static final String COMMIT_REFERENCE = "fd43cd0eab09d6a96fd21880d228251838a4355a";
 
-    private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
+    private static final String REPOSITORY = "https://github.com/jenkinsci/forensics-api-plugin.git";
 
     @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer();
@@ -59,15 +60,15 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
         String node = "node('" + DOCKER_AGENT_NAME + "')";
-
         WorkflowJob project = createPipeline();
-        project.setDefinition(createFlowDefinitionForCommit(node, COMMIT_REFERENCE, JACOCO_REFERENCE_FILE));
         copySingleFileToAgentWorkspace(agent, project, JACOCO_REFERENCE_FILE, JACOCO_REFERENCE_FILE);
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
+
+        project.setDefinition(createFlowDefinitionForCommit(node, COMMIT_REFERENCE, JACOCO_REFERENCE_FILE));
         Run<?, ?> referenceBuild = buildSuccessfully(project);
         verifyGitRepositoryForCommit(referenceBuild, COMMIT_REFERENCE);
 
         project.setDefinition(createFlowDefinitionForCommit(node, COMMIT, JACOCO_FILE));
-        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
         Run<?, ?> build = buildSuccessfully(project);
         verifyGitRepositoryForCommit(build, COMMIT);
 
@@ -81,15 +82,15 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         Node agent = createDockerAgent(AGENT_CONTAINER);
         FreeStyleProject project = createFreeStyleProject();
         project.setAssignedNode(agent);
-
+        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
         copySingleFileToAgentWorkspace(agent, project, JACOCO_REFERENCE_FILE, JACOCO_REFERENCE_FILE);
+
         setGitScmWithCommitSpecForFreeStyleProject(project, COMMIT_REFERENCE);
-        addCoveragePublisherForFreeStyleProject(project, JACOCO_REFERENCE_FILE);
+        setCoveragePublisherForFreeStyleProject(project, JACOCO_REFERENCE_FILE);
         Run<?, ?> referenceBuild = buildSuccessfully(project);
 
-        copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
         setGitScmWithCommitSpecForFreeStyleProject(project, COMMIT);
-        addCoveragePublisherForFreeStyleProject(project, JACOCO_FILE);
+        setCoveragePublisherForFreeStyleProject(project, JACOCO_FILE);
         Run<?, ?> build = buildSuccessfully(project);
 
         verifyGitIntegration(build, referenceBuild);
@@ -106,7 +107,7 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifyGitRepositoryForCommit(final Run<?, ?> build, final String commit) {
         String consoleLog = getConsoleLog(build);
         assertThat(consoleLog)
-                .contains("git config remote.origin.url " + REPOSITORY)
+                .contains("remote.origin.url " + REPOSITORY)
                 .contains("Checking out Revision " + commit)
                 .contains("checkout -f " + commit);
     }
@@ -151,16 +152,16 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
         assertThat(action.getLineCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(6107);
-            assertThat(coverage.getMissed()).isEqualTo(286);
+            assertThat(coverage.getCovered()).isEqualTo(546);
+            assertThat(coverage.getMissed()).isEqualTo(461);
         });
         assertThat(action.getBranchCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(1673);
-            assertThat(coverage.getMissed()).isEqualTo(214);
+            assertThat(coverage.getCovered()).isEqualTo(136);
+            assertThat(coverage.getMissed()).isEqualTo(94);
         });
-        assertThat(action.getDifference()).containsExactly(
-                new SimpleEntry<>(LINE, CoveragePercentage.getCoveragePercentage(-1_460_300, 40_768_161)),
-                new SimpleEntry<>(BRANCH, CoveragePercentage.getCoveragePercentage(171_200, 3_545_673))
+        assertThat(action.getDifference()).contains(
+                new SimpleEntry<>(LINE, CoveragePercentage.getCoveragePercentage(65_160, 103_721)),
+                new SimpleEntry<>(BRANCH, CoveragePercentage.getCoveragePercentage(0, 1))
         );
     }
 
@@ -172,21 +173,18 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
         assertThat(action.getChangeCoverage(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(19);
-            assertThat(coverage.getMissed()).isEqualTo(4);
-        });
-        assertThat(action.getChangeCoverage(BRANCH)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(13);
+            assertThat(coverage.getCovered()).isEqualTo(1);
             assertThat(coverage.getMissed()).isEqualTo(1);
         });
+        assertThat(action.getChangeCoverage(BRANCH)).satisfies(coverage -> {
+            assertThat(coverage.getCovered()).isEqualTo(0);
+            assertThat(coverage.getMissed()).isEqualTo(0);
+        });
         assertThat(action.getChangeCoverageDifference(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getNumerator()).isEqualTo(1900);
-            assertThat(coverage.getDenominator()).isEqualTo(23);
+            assertThat(coverage.getNumerator()).isEqualTo(-4250);
+            assertThat(coverage.getDenominator()).isEqualTo(1007);
         });
-        assertThat(action.getChangeCoverageDifference(BRANCH)).satisfies(coverage -> {
-            assertThat(coverage.getNumerator()).isEqualTo(650);
-            assertThat(coverage.getDenominator()).isEqualTo(7);
-        });
+        assertThat(action.hasChangeCoverageDifference(BRANCH)).isFalse();
     }
 
     /**
@@ -197,13 +195,10 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyIndirectCoverageChanges(final CoverageBuildAction action) {
         assertThat(action.getIndirectCoverageChanges(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(-1_917_800);
-            assertThat(coverage.getMissed()).isEqualTo(147_039);
+            assertThat(coverage.getCovered()).isEqualTo(4);
+            assertThat(coverage.getMissed()).isEqualTo(0);
         });
-        assertThat(action.getIndirectCoverageChanges(BRANCH)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(54_050);
-            assertThat(coverage.getMissed()).isEqualTo(13_209);
-        });
+        assertThat(action.hasIndirectCoverageChanges(BRANCH)).isFalse();
     }
 
     /**
@@ -219,19 +214,20 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         List<FileCoverageNode> changedFiles = root.getAllFileCoverageNodes().stream()
                 .filter(fileNode -> !fileNode.getChangedCodeLines().isEmpty())
                 .collect(Collectors.toList());
-        assertThat(changedFiles).hasSize(1);
+        assertThat(changedFiles).hasSize(4);
+        assertThat(changedFiles.stream()
+                .map(FileCoverageNode::getChangedCodeLines)
+                .flatMap(Collection::stream))
+                .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
+        assertThat(changedFiles.stream()
+                .map(FileCoverageNode::getName))
+                .containsExactlyInAnyOrder("MinerFactory.java", "RepositoryMinerStep.java",
+                        "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
 
-        FileCoverageNode changedFile = changedFiles.get(0);
-        assertThat(changedFile.getChangedCodeLines()).containsExactly(
-                7, 27, 37, 38, 49, 68, 69, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,
-                99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117,
-                118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-                137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 152, 154, 155
-        );
-        assertThat(changedFile.getFileAmountWithChangedCoverage()).isEqualTo(1);
-        assertThat(changedFile.getFileAmountWithIndirectCoverageChanges()).isEqualTo(1);
-        assertThat(changedFile.getLineAmountWithChangedCoverage()).isEqualTo(23);
-        assertThat(changedFile.getLineAmountWithIndirectCoverageChanges()).isEqualTo(2);
+        assertThat(root.getFileAmountWithChangedCoverage()).isEqualTo(2);
+        assertThat(root.getFileAmountWithIndirectCoverageChanges()).isEqualTo(1);
+        assertThat(root.getLineAmountWithChangedCoverage()).isEqualTo(2);
+        assertThat(root.getLineAmountWithIndirectCoverageChanges()).isEqualTo(4);
     }
 
     /**
@@ -267,11 +263,16 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The Jenkins project
      * @param jacocoXML
      *         The content of the generated JaCoCo coverage report as XML
+     *
+     * @throws IOException
+     *         if removing currently existing coverage publishers failed
      */
-    private void addCoveragePublisherForFreeStyleProject(final FreeStyleProject project, final String jacocoXML) {
+    private void setCoveragePublisherForFreeStyleProject(final FreeStyleProject project, final String jacocoXML)
+            throws IOException {
         CoveragePublisher coveragePublisher = new CoveragePublisher();
         JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(jacocoXML);
         coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
+        project.getPublishersList().removeAll(CoveragePublisher.class);
         project.getPublishersList().add(coveragePublisher);
     }
 
@@ -287,7 +288,7 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
             throws IOException {
         GitSCM scm = new GitSCM(GitSCM.createRepoList(REPOSITORY, null),
                 Collections.singletonList(new BranchSpec(commit)), null, null,
-                Collections.singletonList(new RelativeTargetDirectory("checkout")));
+                Collections.singletonList(new RelativeTargetDirectory("code-coverage-api")));
         project.setScm(scm);
     }
 }
