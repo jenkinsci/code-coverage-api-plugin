@@ -84,7 +84,9 @@ class CoverageColumnTest {
     void shouldProvideBackgroundColorFillPercentage() {
         CoverageColumn column = createColumn();
         assertThat(column.getBackgroundColorFillPercentage("+5,0%")).isEqualTo("100%");
+        assertThat(column.getBackgroundColorFillPercentage("+5.0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("5,00%")).isEqualTo("5.00%");
+        assertThat(column.getBackgroundColorFillPercentage("5.00%")).isEqualTo("5.00%");
     }
 
     @Test
