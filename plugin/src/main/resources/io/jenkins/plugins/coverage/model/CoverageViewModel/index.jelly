@@ -141,7 +141,7 @@
         <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass" class="flex-fill">
           <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
             <li class="nav-item">
-              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">Project Coverage</a>
+              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
             </li>
             <j:if test="${hasChangeCoverage}">
               <li class="nav-item">
