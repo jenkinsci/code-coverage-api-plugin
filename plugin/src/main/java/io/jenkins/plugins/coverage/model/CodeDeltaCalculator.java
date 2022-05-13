@@ -130,8 +130,8 @@ public class CodeDeltaCalculator {
 
     /**
      * Creates a mapping between the currently used coverage report paths and the corresponding paths that has been used
-     * for the same coverage nodes before the modifications. This affects only renamed, modified and untouched files,
-     * since added files did not exist before and deleted files do not exist anymore.
+     * for the same coverage nodes before the modifications. This affects only renamed and untouched / modified files
+     * without a rename, since added files did not exist before and deleted files do not exist anymore.
      *
      * @param root
      *         The root of the coverage tree
@@ -155,30 +155,31 @@ public class CodeDeltaCalculator {
                 .map(FileCoverageNode::getPath)
                 .collect(Collectors.toSet());
         // the affected, currently used report paths and the SCM paths from the reference
-        Map<String, String> oldPathMapping = changes.entrySet().stream()
-                .filter(entry -> FileEditType.RENAME.equals(entry.getValue().getFileEditType())
-                        || FileEditType.MODIFY.equals(entry.getValue().getFileEditType()))
+        Map<String, String> newReportToOldScmPathMapping = changes.entrySet().stream()
+                .filter(entry -> FileEditType.RENAME.equals(entry.getValue().getFileEditType()))
                 .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().getOldFileName()));
         // the SCM paths and the coverage report paths from the reference
-        Map<String, String> oldScmPathMapping = getScmToReportPathMapping(oldPathMapping.values(), oldReportPaths);
-        verifyScmToReportPathMapping(oldPathMapping, log);
+        Map<String, String> oldScmToOldReportPathMapping =
+                getScmToReportPathMapping(newReportToOldScmPathMapping.values(), oldReportPaths);
+        verifyScmToReportPathMapping(newReportToOldScmPathMapping, log);
 
         // replacing the old SCM paths with the old report paths
-        Set<String> reportPaths = oldPathMapping.keySet();
-        oldPathMapping.forEach((reportPath, oldScmPath) -> {
-            String oldReportPath = oldScmPathMapping.get(oldScmPath);
-            oldPathMapping.replace(reportPath, oldReportPath);
+        Set<String> oldReportPathsWithRename = newReportToOldScmPathMapping.keySet();
+        newReportToOldScmPathMapping.forEach((reportPath, oldScmPath) -> {
+            String oldReportPath = oldScmToOldReportPathMapping.get(oldScmPath);
+            newReportToOldScmPathMapping.replace(reportPath, oldReportPath);
         });
-        if (!reportPaths.equals(oldPathMapping.keySet())) {
+        if (!oldReportPathsWithRename.equals(newReportToOldScmPathMapping.keySet())) {
             throw new CodeDeltaException(AMBIGUOUS_OLD_PATHS_ERROR);
         }
 
         // adding the paths, which exist in both trees and contain no changes, to the mapping
         root.getAllFileCoverageNodes().stream()
-                .filter(node -> !oldPathMapping.containsKey(node.getPath()) && oldReportPaths.contains(node.getPath()))
-                .forEach(node -> oldPathMapping.put(node.getPath(), node.getPath()));
+                .filter(node -> !newReportToOldScmPathMapping.containsKey(node.getPath()) && oldReportPaths.contains(
+                        node.getPath()))
+                .forEach(node -> newReportToOldScmPathMapping.put(node.getPath(), node.getPath()));
 
-        return oldPathMapping;
+        return newReportToOldScmPathMapping;
     }
 
     /**
