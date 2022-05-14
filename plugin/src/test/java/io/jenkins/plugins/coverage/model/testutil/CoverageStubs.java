@@ -67,7 +67,7 @@ public final class CoverageStubs {
             final CoverageMetric coverageMetric, final Fraction coverageValue) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         Coverage coverage = createCoverage(coverageValue);
-        CoveragePercentage percentage = CoveragePercentage.getCoveragePercentage(coverageValue);
+        CoveragePercentage percentage = CoveragePercentage.valueOf(coverageValue);
 
         SortedMap<CoverageMetric, CoveragePercentage> deltas = mock(SortedMap.class);
         when(deltas.size()).thenReturn(1);
@@ -107,7 +107,7 @@ public final class CoverageStubs {
     public static Coverage createCoverage(final Fraction coverageFraction) {
         Coverage coverage = mock(Coverage.class);
         when(coverage.getCoveredFraction()).thenReturn(coverageFraction);
-        when(coverage.getCoveredPercentage()).thenReturn(CoveragePercentage.getCoveragePercentage(coverageFraction));
+        when(coverage.getCoveredPercentage()).thenReturn(CoveragePercentage.valueOf(coverageFraction));
         when(coverage.isSet()).thenReturn(true);
         return coverage;
     }

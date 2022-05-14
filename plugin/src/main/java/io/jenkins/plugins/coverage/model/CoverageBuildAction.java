@@ -138,7 +138,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         if (difference == null) {
             difference = StreamEx.of(delta.entrySet())
                     .toSortedMap(Entry::getKey,
-                            e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
+                            e -> CoveragePercentage.valueOf(e.getValue()));
         }
         if (changeCoverage == null) {
             changeCoverage = new TreeMap<>();

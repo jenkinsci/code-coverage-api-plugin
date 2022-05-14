@@ -2,14 +2,16 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import one.util.streamex.StreamEx;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
@@ -25,8 +27,8 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageMetric.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
 
 /**
@@ -35,7 +37,7 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Florian Orendi
  */
 @Testcontainers(disabledWithoutDocker = true)
-class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
+class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
 
     /**
      * The JaCoCo coverage report, generated for the commit {@link #COMMIT}.
@@ -152,16 +154,16 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
         assertThat(action.getLineCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(546);
-            assertThat(coverage.getMissed()).isEqualTo(461);
+            assertThat(coverage).hasCovered(546);
+            assertThat(coverage).hasMissed(461);
         });
         assertThat(action.getBranchCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(136);
-            assertThat(coverage.getMissed()).isEqualTo(94);
+            assertThat(coverage).hasCovered(136);
+            assertThat(coverage).hasMissed(94);
         });
         assertThat(action.getDifference()).contains(
-                new SimpleEntry<>(LINE, CoveragePercentage.getCoveragePercentage(65_160, 103_721)),
-                new SimpleEntry<>(BRANCH, CoveragePercentage.getCoveragePercentage(0, 1))
+                new SimpleEntry<>(LINE, CoveragePercentage.valueOf(65_160, 103_721)),
+                new SimpleEntry<>(BRANCH, CoveragePercentage.valueOf(0, 1))
         );
     }
 
@@ -173,16 +175,16 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
         assertThat(action.getChangeCoverage(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(1);
-            assertThat(coverage.getMissed()).isEqualTo(1);
+            assertThat(coverage).hasCovered(1);
+            assertThat(coverage).hasMissed(1);
         });
         assertThat(action.getChangeCoverage(BRANCH)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(0);
-            assertThat(coverage.getMissed()).isEqualTo(0);
+            assertThat(coverage).hasCovered(0);
+            assertThat(coverage).hasMissed(0);
         });
         assertThat(action.getChangeCoverageDifference(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getNumerator()).isEqualTo(-4250);
-            assertThat(coverage.getDenominator()).isEqualTo(1007);
+            assertThat(coverage).hasNumerator(-4250);
+            assertThat(coverage).hasDenominator(1007);
         });
         assertThat(action.hasChangeCoverageDifference(BRANCH)).isFalse();
     }
@@ -195,8 +197,8 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyIndirectCoverageChanges(final CoverageBuildAction action) {
         assertThat(action.getIndirectCoverageChanges(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(4);
-            assertThat(coverage.getMissed()).isEqualTo(0);
+            assertThat(coverage).hasCovered(4);
+            assertThat(coverage).hasMissed(0);
         });
         assertThat(action.hasIndirectCoverageChanges(BRANCH)).isFalse();
     }
@@ -215,19 +217,16 @@ class DockerGitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
                 .filter(fileNode -> !fileNode.getChangedCodeLines().isEmpty())
                 .collect(Collectors.toList());
         assertThat(changedFiles).hasSize(4);
-        assertThat(changedFiles.stream()
-                .map(FileCoverageNode::getChangedCodeLines)
-                .flatMap(Collection::stream))
-                .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
-        assertThat(changedFiles.stream()
-                .map(FileCoverageNode::getName))
-                .containsExactlyInAnyOrder("MinerFactory.java", "RepositoryMinerStep.java",
+        assertThat(changedFiles).extracting(FileCoverageNode::getName)
+                .containsExactly("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
+        assertThat(changedFiles).extracting(FileCoverageNode::getChangedCodeLines)
+                .containsExactly(StreamEx.of(15, 17, 63, 68, 80, 90, 130).toCollection(TreeSet::new));
 
-        assertThat(root.getFileAmountWithChangedCoverage()).isEqualTo(2);
-        assertThat(root.getFileAmountWithIndirectCoverageChanges()).isEqualTo(1);
-        assertThat(root.getLineAmountWithChangedCoverage()).isEqualTo(2);
-        assertThat(root.getLineAmountWithIndirectCoverageChanges()).isEqualTo(4);
+        assertThat(root).hasFileAmountWithChangedCoverage(2);
+        assertThat(root).hasFileAmountWithIndirectCoverageChanges(1);
+        assertThat(root).hasLineAmountWithChangedCoverage(2);
+        assertThat(root).hasLineAmountWithIndirectCoverageChanges(4);
     }
 
     /**
