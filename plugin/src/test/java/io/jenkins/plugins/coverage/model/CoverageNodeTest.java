@@ -193,6 +193,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldNotReturnCoverageValuesWithoutLeaves() {
+        CoverageNode coverageNode = new CoverageNode(MODULE, "Root");
+        assertThat(coverageNode).isRoot();
+        assertThat(coverageNode.getMetricFractions()).isEmpty();
+        assertThat(coverageNode.getMetricPercentages()).isEmpty();
+    }
+
+    @Test
     void shouldSplitPackages() {
         CoverageNode tree = readExampleReport();
 
