@@ -26,8 +26,7 @@ class CoverageBuildActionTest {
     private static final Locale LOCALE = Functions.getCurrentLocale();
 
     private static final Fraction COVERAGE_FRACTION = Fraction.ONE_HALF;
-    private static final CoveragePercentage COVERAGE_PERCENTAGE =
-            CoveragePercentage.getCoveragePercentage(COVERAGE_FRACTION);
+    private static final CoveragePercentage COVERAGE_PERCENTAGE = CoveragePercentage.valueOf(COVERAGE_FRACTION);
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.LINE;
 
     private static final int COVERAGE_FILE_CHANGES = 5;
@@ -55,8 +54,8 @@ class CoverageBuildActionTest {
         CoverageBuildAction action = createCoverageBuildActionWithMocks();
         assertThat(action.hasCoverage(COVERAGE_METRIC)).isTrue();
         assertThat(action.getCoverage(COVERAGE_METRIC))
-                .isNotNull()
-                .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));
+                .extracting(Coverage::getCoveredPercentage)
+                .isEqualTo(COVERAGE_PERCENTAGE);
     }
 
     @Test
@@ -76,9 +75,7 @@ class CoverageBuildActionTest {
     void shouldGetChangeCoverageDifferences() {
         CoverageBuildAction action = createCoverageBuildActionWithMocks();
         assertThat(action.hasChangeCoverageDifference(COVERAGE_METRIC)).isTrue();
-        assertThat(action.getChangeCoverageDifference(COVERAGE_METRIC))
-                .isNotNull()
-                .satisfies(coverage -> assertThat(coverage).isEqualTo(COVERAGE_PERCENTAGE));
+        assertThat(action.getChangeCoverageDifference(COVERAGE_METRIC)).isEqualTo(COVERAGE_PERCENTAGE);
     }
 
     @Test
@@ -88,8 +85,8 @@ class CoverageBuildActionTest {
         assertThat(action.hasCodeChanges()).isTrue();
         assertThat(action.hasChangeCoverage(COVERAGE_METRIC)).isTrue();
         assertThat(action.getChangeCoverage(COVERAGE_METRIC))
-                .isNotNull()
-                .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));
+                .extracting(Coverage::getCoveredPercentage)
+                .isEqualTo(COVERAGE_PERCENTAGE);
     }
 
     @Test
@@ -98,8 +95,8 @@ class CoverageBuildActionTest {
         assertThat(action.hasIndirectCoverageChanges()).isTrue();
         assertThat(action.hasIndirectCoverageChanges(COVERAGE_METRIC)).isTrue();
         assertThat(action.getIndirectCoverageChanges(COVERAGE_METRIC))
-                .isNotNull()
-                .satisfies(coverage -> assertThat(coverage.getCoveredPercentage()).isEqualTo(COVERAGE_PERCENTAGE));
+                .extracting(Coverage::getCoveredPercentage)
+                .isEqualTo(COVERAGE_PERCENTAGE);
     }
 
     @Test

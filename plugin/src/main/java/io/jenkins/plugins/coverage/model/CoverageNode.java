@@ -199,6 +199,10 @@ public class CoverageNode implements Serializable {
      * @return the coverage fractions mapped by their metric
      */
     public SortedMap<CoverageMetric, Fraction> getMetricFractions() {
+        if (children.isEmpty() && leaves.isEmpty()) {
+            // prevents returning a module coverage of 0% if the tree has no leaves since the coverage is not existent
+            return new TreeMap<>();
+        }
         return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(),
                         searchMetric -> getCoverage(searchMetric).getCoveredFraction(), (o1, o2) -> o1,
@@ -212,7 +216,7 @@ public class CoverageNode implements Serializable {
      */
     public SortedMap<CoverageMetric, CoveragePercentage> getMetricPercentages() {
         return StreamEx.of(getMetricFractions().entrySet())
-                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
     }
 
     public String getName() {
@@ -381,7 +385,7 @@ public class CoverageNode implements Serializable {
      */
     public SortedMap<CoverageMetric, CoveragePercentage> computeDeltaAsPercentage(final CoverageNode reference) {
         return StreamEx.of(computeDelta(reference).entrySet())
-                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
     }
 
     /**

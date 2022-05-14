@@ -501,7 +501,6 @@ const CoverageChartGenerator = function ($) {
             if (type === 'row') {
                 $('#source-file').html('Loading...');
                 const rowData = datatable.rows(indexes).data().toArray();
-                // TODO: pass id to load specifically prepared source code
                 viewProxy.getSourceCode(rowData[0].fileHash, id, function (t) {
                     const sourceCode = t.responseObject();
                     if (sourceCode === "n/a") {

@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 class FileChangesProcessorTest extends AbstractCoverageTest {
 
+    private static final String EMPTY_PATH = "";
+
     private static final String TEST_FILE_1 = "Test1.java";
     private static final String TEST_FILE_2 = "Main.java";
     private static final String TEST_FILE_1_PATH = "test/example/" + TEST_FILE_1;
@@ -44,6 +46,12 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
     private static final Map<String, FileChanges> CODE_CHANGES = new HashMap<>();
 
     /**
+     * The mapping of the used paths between the generation of {@link #TEST_REPORT_BEFORE} and {@link
+     * #TEST_REPORT_AFTER}.
+     */
+    private static final Map<String, String> OLD_PATH_MAPPING = new HashMap<>();
+
+    /**
      * Initializes a map with the inserted {@link #CODE_CHANGES}.
      */
     @BeforeAll
@@ -53,14 +61,17 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         Change insert3 = new Change(ChangeEditType.INSERT, 25, 25, 33, 36);
         Change replace = new Change(ChangeEditType.REPLACE, 10, 11, 20, 22);
         Change delete = new Change(ChangeEditType.DELETE, 16, 19, 26, 26);
-        FileChanges fileChanges = new FileChanges("", "", FileEditType.MODIFY, new HashMap<>());
+        FileChanges fileChanges = new FileChanges(TEST_FILE_1_PATH, EMPTY_PATH,
+                "test", FileEditType.MODIFY, new HashMap<>());
         fileChanges.addChange(insert1);
         fileChanges.addChange(insert2);
         fileChanges.addChange(insert3);
         fileChanges.addChange(replace);
         fileChanges.addChange(delete);
         CODE_CHANGES.put(TEST_FILE_1_PATH, fileChanges);
-        CODE_CHANGES.put(TEST_FILE_2, new FileChanges("", "", FileEditType.MODIFY, new HashMap<>()));
+        CODE_CHANGES.put(TEST_FILE_2,
+                new FileChanges("empty", "empty", "", FileEditType.MODIFY, new HashMap<>()));
+        OLD_PATH_MAPPING.put(TEST_FILE_1_PATH, TEST_FILE_1_PATH);
     }
 
     @Test
@@ -109,17 +120,17 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
     private void verifyFileCoverageDeltaOfTestFile1(final FileCoverageNode file) {
         assertThat(file.getName()).isEqualTo(TEST_FILE_1);
         assertThat(file.getFileCoverageDeltaForMetric(LINE)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(3, 117)));
+                CoveragePercentage.valueOf(Fraction.getFraction(3, 117)));
         assertThat(file.getFileCoverageDeltaForMetric(BRANCH)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(3, 24)));
+                CoveragePercentage.valueOf(Fraction.getFraction(3, 24)));
         assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(90, 999)));
+                CoveragePercentage.valueOf(Fraction.getFraction(90, 999)));
         assertThat(file.getFileCoverageDeltaForMetric(METHOD)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.getFraction(-4, 30)));
+                CoveragePercentage.valueOf(Fraction.getFraction(-4, 30)));
         assertThat(file.getFileCoverageDeltaForMetric(CLASS)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.ZERO));
+                CoveragePercentage.valueOf(Fraction.ZERO));
         assertThat(file.getFileCoverageDeltaForMetric(FILE)).isEqualTo(
-                CoveragePercentage.getCoveragePercentage(Fraction.ZERO));
+                CoveragePercentage.valueOf(Fraction.ZERO));
     }
 
     @Test
@@ -127,7 +138,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
         CoverageNode reference = readCoverageTree(TEST_REPORT_BEFORE);
         CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
-        fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES);
+        fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES, OLD_PATH_MAPPING);
 
         assertThat(tree.findByHashCode(FILE, TEST_FILE_1.hashCode()))
                 .isNotEmpty()

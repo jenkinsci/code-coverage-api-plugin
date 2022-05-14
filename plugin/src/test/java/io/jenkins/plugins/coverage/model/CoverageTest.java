@@ -32,11 +32,11 @@ class CoverageTest {
         assertThat(NO_COVERAGE).isNotSet()
                 .hasCovered(0)
                 .hasCoveredFraction(Fraction.ZERO)
-                .hasCoveredPercentage(CoveragePercentage.getCoveragePercentage(Fraction.ZERO))
+                .hasCoveredPercentage(CoveragePercentage.valueOf(Fraction.ZERO))
                 .hasRoundedPercentage(0)
                 .hasMissed(0)
                 .hasMissedFraction(Fraction.ZERO)
-                .hasMissedPercentage(CoveragePercentage.getCoveragePercentage(Fraction.ZERO))
+                .hasMissedPercentage(CoveragePercentage.valueOf(Fraction.ZERO))
                 .hasTotal(0)
                 .hasToString(Messages.Coverage_Not_Available());
         assertThat(NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
@@ -55,11 +55,11 @@ class CoverageTest {
         assertThat(coverage).isSet()
                 .hasCovered(6)
                 .hasCoveredFraction(coverageFraction)
-                .hasCoveredPercentage(CoveragePercentage.getCoveragePercentage(coverageFraction))
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasRoundedPercentage(60)
                 .hasMissed(4)
                 .hasMissedFraction(missedFraction)
-                .hasMissedPercentage(CoveragePercentage.getCoveragePercentage(missedFraction))
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(10)
                 .hasToString("60.00% (6/10)");
 

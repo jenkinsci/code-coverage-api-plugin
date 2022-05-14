@@ -792,7 +792,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             if (changeCoverage.isSet()) {
                 Fraction delta = changeCoverage.getCoveredFraction()
                         .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
-                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
+                return createColoredCoverageDeltaColumn(CoveragePercentage.valueOf(delta),
                         "The change coverage within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
@@ -860,7 +860,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             if (changeCoverage.isSet()) {
                 Fraction delta = changeCoverage.getCoveredFraction()
                         .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
-                return createColoredCoverageDeltaColumn(CoveragePercentage.getCoveragePercentage(delta),
+                return createColoredCoverageDeltaColumn(CoveragePercentage.valueOf(delta),
                         "The indirect coverage changes within the file against the total file coverage");
             }
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");

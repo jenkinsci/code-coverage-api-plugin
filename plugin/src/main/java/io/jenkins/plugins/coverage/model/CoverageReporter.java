@@ -78,6 +78,7 @@ public class CoverageReporter {
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
+            CoverageNode referenceRoot = referenceAction.getResult();
 
             // calculate code delta
             log.logInfo("Calculating the code delta...");
@@ -89,12 +90,15 @@ public class CoverageReporter {
 
                 // file coverage deltas
                 log.logInfo("Obtaining coverage delta for files...");
-                fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceAction.getResult());
+                fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot);
 
                 try {
-                    Set<FileChanges> changes = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta.get());
+                    log.logInfo("Preprocessing code changes...");
+                    Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
                     Map<String, FileChanges> mappedChanges =
                             codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
+                    Map<String, String> oldPathMapping = codeDeltaCalculator.createOldPathMapping(
+                            rootNode, referenceRoot, mappedChanges, log);
 
                     // calculate code changes
                     log.logInfo("Obtaining code changes for files...");
@@ -102,8 +106,8 @@ public class CoverageReporter {
 
                     // indirect coverage changes
                     log.logInfo("Obtaining indirect coverage changes...");
-                    fileChangesProcessor
-                            .attachIndirectCoveragesChanges(rootNode, referenceAction.getResult(), mappedChanges);
+                    fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
+                            mappedChanges, oldPathMapping);
                 }
                 catch (CodeDeltaException e) {
                     log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
@@ -121,7 +125,7 @@ public class CoverageReporter {
 
             // coverage delta
             SortedMap<CoverageMetric, CoveragePercentage> coverageDelta =
-                    rootNode.computeDeltaAsPercentage(referenceAction.getResult());
+                    rootNode.computeDeltaAsPercentage(referenceRoot);
             SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta =
                     computeChangeCoverageDelta(rootNode, changeCoverageRoot);
 

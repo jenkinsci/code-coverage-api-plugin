@@ -97,9 +97,9 @@ public final class Coverage implements Serializable {
      */
     public CoveragePercentage getCoveredPercentage() {
         if (getTotal() == 0) {
-            return CoveragePercentage.getCoveragePercentage(0);
+            return CoveragePercentage.valueOf(0);
         }
-        return CoveragePercentage.getCoveragePercentage(Fraction.getFraction(covered, getTotal()));
+        return CoveragePercentage.valueOf(Fraction.getFraction(covered, getTotal()));
     }
 
     /**
@@ -166,9 +166,9 @@ public final class Coverage implements Serializable {
      */
     public CoveragePercentage getMissedPercentage() {
         if (getTotal() == 0) {
-            return CoveragePercentage.getCoveragePercentage(0);
+            return CoveragePercentage.valueOf(0);
         }
-        return CoveragePercentage.getCoveragePercentage(getMissedFraction());
+        return CoveragePercentage.valueOf(getMissedFraction());
     }
 
     /**

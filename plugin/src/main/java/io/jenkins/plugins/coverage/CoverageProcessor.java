@@ -134,7 +134,7 @@ public class CoverageProcessor {
                 sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
 
         if (failBuildIfCoverageDecreasedInChangeRequest) {
-            failBuildIfChangeRequestDecreasedCoverage(coverageReport);
+            failBuildIfChangeRequestDecreasedCoverage(coverageReport, action);
         }
     }
 
@@ -249,12 +249,14 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult)
+    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
             throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (coverageDiff < 0) {
-            throw new CoverageException(
-                    "Fail build because this change request decreases line coverage by " + coverageDiff);
+            String message = "Fail build because this change request decreases line coverage by " + coverageDiff;
+            action.setFailMessage(message);
+
+            throw new CoverageException(message);
         }
     }
 

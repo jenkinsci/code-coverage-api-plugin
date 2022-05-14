@@ -84,7 +84,9 @@ class CoverageColumnTest {
     void shouldProvideBackgroundColorFillPercentage() {
         CoverageColumn column = createColumn();
         assertThat(column.getBackgroundColorFillPercentage("+5,0%")).isEqualTo("100%");
+        assertThat(column.getBackgroundColorFillPercentage("+5.0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("5,00%")).isEqualTo("5.00%");
+        assertThat(column.getBackgroundColorFillPercentage("5.00%")).isEqualTo("5.00%");
     }
 
     @Test
@@ -132,7 +134,7 @@ class CoverageColumnTest {
         CoverageColumn column = createColumn();
 
         Fraction coverageFraction = Fraction.getFraction(1, 2);
-        CoveragePercentage coveragePercentage = CoveragePercentage.getCoveragePercentage(coverageFraction);
+        CoveragePercentage coveragePercentage = CoveragePercentage.valueOf(coverageFraction);
         String coveragePercentageText = coveragePercentage.formatPercentage(Functions.getCurrentLocale());
 
         Job<?, ?> job = createJobWithCoverageAction(coverageFraction);
@@ -153,7 +155,7 @@ class CoverageColumnTest {
         column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
-        CoveragePercentage coverageDeltaPercentage = CoveragePercentage.getCoveragePercentage(coverageDelta);
+        CoveragePercentage coverageDeltaPercentage = CoveragePercentage.valueOf(coverageDelta);
         String coverageDeltaPercentageText =
                 coverageDeltaPercentage.formatDeltaPercentage(Functions.getCurrentLocale());
         Job<?, ?> job = createJobWithCoverageAction(coverageDelta);

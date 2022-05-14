@@ -36,12 +36,21 @@ class CodeDeltaCalculatorTest {
 
     private static final String LOG_NAME = "Errors while calculating changes mapping:";
 
+    private static final String EMPTY_PATH = "";
+
+    private static final String OLD_SCM_PATH_RENAME =
+            Paths.get("src", "main", "example", "Test.java").toString();
+    private static final String OLD_REPORT_PATH_RENAME =
+            Paths.get("example", "Test.java").toString();
+
     private static final String REPORT_PATH_ADD_1 =
             Paths.get("test", "Test.java").toString();
     private static final String REPORT_PATH_ADD_2 =
             Paths.get("package", "example", "test", "Test.java").toString();
     private static final String REPORT_PATH_MODIFY =
             Paths.get("example", "test", "Test.java").toString();
+    private static final String REPORT_PATH_RENAME =
+            Paths.get("example", "Test_Renamed.java").toString();
 
     private static final String SCM_PATH_ADD_1 =
             Paths.get("test", "Test.java").toString();
@@ -51,6 +60,8 @@ class CodeDeltaCalculatorTest {
             Paths.get("src", "main", "java", "example", "test", "Test.java").toString();
     private static final String SCM_PATH_DELETE =
             Paths.get("src", "main", "example", "test", "Test.java").toString();
+    private static final String SCM_PATH_RENAME =
+            Paths.get("src", "main", "example", "Test_Renamed.java").toString();
 
     @Test
     void shouldGetCoverageRelevantChanges() {
@@ -58,11 +69,12 @@ class CodeDeltaCalculatorTest {
         Delta delta = createDeltaWithMockedFileChanges();
         Map<String, FileChanges> allChanges = delta.getFileChangesMap();
 
-        assertThat(codeDeltaCalculator.getChangeCoverageRelevantChanges(delta))
+        assertThat(codeDeltaCalculator.getCoverageRelevantChanges(delta))
                 .containsExactlyInAnyOrder(
                         allChanges.get(SCM_PATH_ADD_1),
                         allChanges.get(SCM_PATH_ADD_2),
-                        allChanges.get(SCM_PATH_MODIFY)
+                        allChanges.get(SCM_PATH_MODIFY),
+                        allChanges.get(SCM_PATH_RENAME)
                 );
     }
 
@@ -70,7 +82,7 @@ class CodeDeltaCalculatorTest {
     void shouldMapScmChangesToReportPaths() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         Delta delta = createDeltaWithMockedFileChanges();
-        Set<FileChanges> changes = codeDeltaCalculator.getChangeCoverageRelevantChanges(delta);
+        Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
         Map<String, FileChanges> changesMap = changes.stream()
                 .collect(Collectors.toMap(FileChanges::getFileName, Function.identity()));
         CoverageNode tree = createMockedCoverageTree();
@@ -80,6 +92,7 @@ class CodeDeltaCalculatorTest {
         should.put(REPORT_PATH_ADD_1, changesMap.get(SCM_PATH_ADD_1));
         should.put(REPORT_PATH_ADD_2, changesMap.get(SCM_PATH_ADD_2));
         should.put(REPORT_PATH_MODIFY, changesMap.get(SCM_PATH_MODIFY));
+        should.put(REPORT_PATH_RENAME, changesMap.get(SCM_PATH_RENAME));
 
         assertThat(codeDeltaCalculator.mapScmChangesToReportPaths(changes, tree, log))
                 .containsExactlyInAnyOrderEntriesOf(should);
@@ -113,6 +126,24 @@ class CodeDeltaCalculatorTest {
                 .hasMessage(AMBIGUOUS_PATHS_ERROR);
     }
 
+    @Test
+    void shouldCreateOldPathMapping() throws CodeDeltaException {
+        CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
+        FilteredLog log = createFilteredLog();
+        CoverageNode tree = createMockedCoverageTree();
+        CoverageNode referenceTree = createMockedReferenceCoverageTree();
+        Map<String, FileChanges> changes = new HashMap<>();
+        changes.put(REPORT_PATH_MODIFY, createFileChanges(SCM_PATH_MODIFY, SCM_PATH_MODIFY, FileEditType.MODIFY));
+        changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
+
+        Map<String, String> should = new HashMap<>();
+        should.put(REPORT_PATH_MODIFY, REPORT_PATH_MODIFY);
+        should.put(REPORT_PATH_RENAME, OLD_REPORT_PATH_RENAME);
+
+        assertThat(codeDeltaCalculator.createOldPathMapping(tree, referenceTree, changes, log))
+                .containsExactlyInAnyOrderEntriesOf(should);
+    }
+
     /**
      * Creates an instance of {@link CodeDeltaCalculator}.
      *
@@ -131,14 +162,16 @@ class CodeDeltaCalculatorTest {
     private Delta createDeltaWithMockedFileChanges() {
         Delta delta = mock(Delta.class);
         Map<String, FileChanges> fileChanges = new HashMap<>();
-        FileChanges fileChangesAdd1 = createFileChanges(SCM_PATH_ADD_1, FileEditType.ADD);
-        FileChanges fileChangesAdd2 = createFileChanges(SCM_PATH_ADD_2, FileEditType.ADD);
-        FileChanges fileChangesModify = createFileChanges(SCM_PATH_MODIFY, FileEditType.MODIFY);
-        FileChanges fileChangesDelete = createFileChanges(SCM_PATH_DELETE, FileEditType.DELETE);
+        FileChanges fileChangesAdd1 = createFileChanges(SCM_PATH_ADD_1, EMPTY_PATH, FileEditType.ADD);
+        FileChanges fileChangesAdd2 = createFileChanges(SCM_PATH_ADD_2, EMPTY_PATH, FileEditType.ADD);
+        FileChanges fileChangesModify = createFileChanges(SCM_PATH_MODIFY, SCM_PATH_MODIFY, FileEditType.MODIFY);
+        FileChanges fileChangesDelete = createFileChanges(EMPTY_PATH, SCM_PATH_DELETE, FileEditType.DELETE);
+        FileChanges fileChangesRename = createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME);
         fileChanges.put(fileChangesAdd1.getFileName(), fileChangesAdd1);
         fileChanges.put(fileChangesAdd2.getFileName(), fileChangesAdd2);
         fileChanges.put(fileChangesModify.getFileName(), fileChangesModify);
-        fileChanges.put(fileChangesDelete.getFileName(), fileChangesDelete);
+        fileChanges.put(fileChangesDelete.getOldFileName(), fileChangesDelete);
+        fileChanges.put(fileChangesRename.getFileName(), fileChangesRename);
         when(delta.getFileChangesMap()).thenReturn(fileChanges);
         return delta;
     }
@@ -167,15 +200,19 @@ class CodeDeltaCalculatorTest {
      *
      * @param filePath
      *         The file path
+     * @param oldFilePath
+     *         The old file path before the modifications
      * @param fileEditType
      *         The {@link FileEditType edit type}
      *
      * @return the created mock
      */
-    private FileChanges createFileChanges(final String filePath, final FileEditType fileEditType) {
+    private FileChanges createFileChanges(final String filePath, final String oldFilePath,
+            final FileEditType fileEditType) {
         FileChanges change = mock(FileChanges.class);
         when(change.getFileEditType()).thenReturn(fileEditType);
         when(change.getFileName()).thenReturn(filePath);
+        when(change.getOldFileName()).thenReturn(oldFilePath);
         return change;
     }
 
@@ -192,8 +229,26 @@ class CodeDeltaCalculatorTest {
         when(addFile2.getPath()).thenReturn(REPORT_PATH_ADD_2);
         FileCoverageNode modifyFile = mock(FileCoverageNode.class);
         when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
+        FileCoverageNode renameFile = mock(FileCoverageNode.class);
+        when(renameFile.getPath()).thenReturn(REPORT_PATH_RENAME);
         CoverageNode root = mock(CoverageNode.class);
-        when(root.getAllFileCoverageNodes()).thenReturn(Arrays.asList(addFile1, addFile2, modifyFile));
+        when(root.getAllFileCoverageNodes()).thenReturn(Arrays.asList(addFile1, addFile2, modifyFile, renameFile));
+        return root;
+    }
+
+    /**
+     * Mocks a reference coverage tree which contains file nodes which represent {@link #OLD_REPORT_PATH_RENAME} and
+     * {@link #REPORT_PATH_MODIFY}.
+     *
+     * @return the {@link CoverageNode root} of the tree
+     */
+    private CoverageNode createMockedReferenceCoverageTree() {
+        FileCoverageNode modifyFile = mock(FileCoverageNode.class);
+        when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
+        FileCoverageNode renameFile = mock(FileCoverageNode.class);
+        when(renameFile.getPath()).thenReturn(OLD_REPORT_PATH_RENAME);
+        CoverageNode root = mock(CoverageNode.class);
+        when(root.getAllFileCoverageNodes()).thenReturn(Arrays.asList(renameFile, modifyFile));
         return root;
     }
 
