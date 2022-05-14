@@ -37,7 +37,7 @@ class CoverageColumnTypeTest {
 
     protected static final Fraction COVERAGE_FRACTION = Fraction.getFraction(0.5);
     protected static final CoveragePercentage COVERAGE_PERCENTAGE =
-            CoveragePercentage.getCoveragePercentage(COVERAGE_FRACTION);
+            CoveragePercentage.valueOf(COVERAGE_FRACTION);
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;

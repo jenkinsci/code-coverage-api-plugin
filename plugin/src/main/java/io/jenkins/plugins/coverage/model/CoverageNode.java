@@ -209,7 +209,7 @@ public class CoverageNode implements Serializable {
      */
     public SortedMap<CoverageMetric, CoveragePercentage> getMetricPercentages() {
         return StreamEx.of(getMetricFractions().entrySet())
-                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
     }
 
     public String getName() {
@@ -378,7 +378,7 @@ public class CoverageNode implements Serializable {
      */
     public SortedMap<CoverageMetric, CoveragePercentage> computeDeltaAsPercentage(final CoverageNode reference) {
         return StreamEx.of(computeDelta(reference).entrySet())
-                .toSortedMap(Entry::getKey, e -> CoveragePercentage.getCoveragePercentage(e.getValue()));
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
     }
 
     /**

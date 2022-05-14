@@ -43,7 +43,7 @@ public final class CoveragePercentage implements Serializable {
      *
      * @return the created instance
      */
-    public static CoveragePercentage getCoveragePercentage(final Fraction fraction) {
+    public static CoveragePercentage valueOf(final Fraction fraction) {
         Fraction percentage = fraction.multiplyBy(Fraction.getFraction("100.0"));
         return new CoveragePercentage(percentage.getNumerator(), percentage.getDenominator());
     }
@@ -56,7 +56,7 @@ public final class CoveragePercentage implements Serializable {
      *
      * @return the created instance
      */
-    public static CoveragePercentage getCoveragePercentage(final double percentage) {
+    public static CoveragePercentage valueOf(final double percentage) {
         Fraction percentageFraction = Fraction.getFraction(percentage);
         return new CoveragePercentage(percentageFraction.getNumerator(), percentageFraction.getDenominator());
     }
@@ -74,7 +74,7 @@ public final class CoveragePercentage implements Serializable {
      * @throws IllegalArgumentException
      *         if the denominator is zero
      */
-    public static CoveragePercentage getCoveragePercentage(final int numerator, final int denominator) {
+    public static CoveragePercentage valueOf(final int numerator, final int denominator) {
         if (denominator != 0) {
             return new CoveragePercentage(numerator, denominator);
         }

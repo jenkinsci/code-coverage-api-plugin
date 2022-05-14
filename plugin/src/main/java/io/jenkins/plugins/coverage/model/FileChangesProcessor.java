@@ -97,7 +97,7 @@ public class FileChangesProcessor {
         fileNode.getMetricFractions().forEach((metric, value) -> {
             if (referenceCoverage.containsKey(metric)) {
                 Fraction delta = value.subtract(referenceCoverage.get(metric));
-                fileNode.putFileCoverageDelta(metric, CoveragePercentage.getCoveragePercentage(delta));
+                fileNode.putFileCoverageDelta(metric, CoveragePercentage.valueOf(delta));
             }
         });
     }
