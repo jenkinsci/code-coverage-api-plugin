@@ -1,13 +1,10 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.IOException;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.math.Fraction;
+import java.util.TreeMap;
 
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -17,13 +14,12 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
-import io.jenkins.plugins.coverage.model.SourceCodeFacade.AgentCoveragePainter;
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
+import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
+import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.forensics.delta.model.Delta;
+import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
-import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
-import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
@@ -46,22 +42,25 @@ public class CoverageReporter {
      *         the workspace on the agent that provides access to the source code files
      * @param listener
      *         logger
-     * @param requestedSourceDirectories
+     * @param healthReport
+     *         health report
+     * @param scm
+     *         the SCM which is used for calculating the code delta to a reference build
+     * @param sourceDirectories
      *         the source directories that have been configured in the associated job
      * @param sourceCodeEncoding
      *         the encoding of the source code files
      * @param sourceCodeRetention
      *         the source code retention strategy
-     * @param healthReport
-     *         health report
      *
      * @throws InterruptedException
      *         if the build has been aborted
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final Set<String> requestedSourceDirectories, final String sourceCodeEncoding,
-            final SourceCodeRetention sourceCodeRetention, final HealthReport healthReport)
+            final TaskListener listener, final HealthReport healthReport, final String scm,
+            final Set<String> sourceDirectories, final String sourceCodeEncoding,
+            final SourceCodeRetention sourceCodeRetention)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -72,23 +71,6 @@ public class CoverageReporter {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
-        SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
-        if (sourceCodeRetention != SourceCodeRetention.NEVER) {
-            Set<Entry<CoverageNode, CoveragePaint>> paintedFiles = converter.getPaintedFiles();
-            log.logInfo("Painting %d source files on agent", paintedFiles.size());
-            logHandler.log(log);
-
-            paintFilesOnAgent(workspace, paintedFiles, requestedSourceDirectories, sourceCodeEncoding, log);
-            log.logInfo("Copying painted sources from agent to build folder");
-            logHandler.log(log);
-
-            sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
-            logHandler.log(log);
-        }
-        sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
-
-        logHandler.log(log);
-
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
         logHandler.log(log);
@@ -96,34 +78,100 @@ public class CoverageReporter {
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
-            SortedMap<CoverageMetric, Fraction> delta = rootNode.computeDelta(referenceAction.getResult());
+            CoverageNode referenceRoot = referenceAction.getResult();
 
-            action = new CoverageBuildAction(build, rootNode, healthReport, referenceAction.getOwner().getExternalizableId(), delta);
+            // calculate code delta
+            log.logInfo("Calculating the code delta...");
+            CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener, scm);
+            Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
+
+            if (delta.isPresent()) {
+                FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
+
+                // file coverage deltas
+                log.logInfo("Obtaining coverage delta for files...");
+                fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot);
+
+                try {
+                    log.logInfo("Preprocessing code changes...");
+                    Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
+                    Map<String, FileChanges> mappedChanges =
+                            codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
+                    Map<String, String> oldPathMapping = codeDeltaCalculator.createOldPathMapping(
+                            rootNode, referenceRoot, mappedChanges, log);
+
+                    // calculate code changes
+                    log.logInfo("Obtaining code changes for files...");
+                    fileChangesProcessor.attachChangedCodeLines(rootNode, mappedChanges);
+
+                    // indirect coverage changes
+                    log.logInfo("Obtaining indirect coverage changes...");
+                    fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
+                            mappedChanges, oldPathMapping);
+                }
+                catch (CodeDeltaException e) {
+                    log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
+                    log.logError("-> Skipping calculating change coverage and indirect coverage changes");
+                }
+            }
+
+            logHandler.log(log);
+            log.logInfo("Calculating coverage deltas...");
+
+            // filtered coverage trees
+            CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
+            CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
+            CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
+
+            // coverage delta
+            SortedMap<CoverageMetric, CoveragePercentage> coverageDelta =
+                    rootNode.computeDeltaAsPercentage(referenceRoot);
+            SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta =
+                    computeChangeCoverageDelta(rootNode, changeCoverageRoot);
+
+            if (rootNode.hasCodeChanges() && !rootNode.hasChangeCoverage()) {
+                log.logInfo("No detected code changes affect the code coverage");
+            }
+
+            action = new CoverageBuildAction(build, rootNode, healthReport,
+                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
+                    changeCoverageRoot.getMetricPercentages(),
+                    changeCoverageDelta,
+                    indirectCoverageChangesTree.getMetricPercentages());
         }
         else {
             action = new CoverageBuildAction(build, rootNode, healthReport);
         }
+
+        log.logInfo("Executing source code painting...");
+        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
+        sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), sourceDirectories,
+                sourceCodeEncoding, sourceCodeRetention, log);
+
+        log.logInfo("Finished coverage processing - adding the action to the build...");
+
+        logHandler.log(log);
+
         build.addOrReplaceAction(action);
     }
 
-    private void paintFilesOnAgent(final FilePath workspace, final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
-            final Set<String> requestedSourceDirectories,
-            final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
-        try {
-            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
-                    .getSourceDirectories()
-                    .stream()
-                    .map(PermittedSourceCodeDirectory::getPath)
-                    .collect(Collectors.toSet());
-
-            FilteredLog agentLog = workspace.act(
-                    new AgentCoveragePainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
-                            sourceCodeEncoding, "coverage"));
-            log.merge(agentLog);
+    /**
+     * Computes the change coverage delta which represents the difference between the change coverage and the overall
+     * coverage per coverage metric.
+     *
+     * @param rootNode
+     *         The root of the overall coverage tree
+     * @param changeCoverageRoot
+     *         The root of the change coverage tree
+     *
+     * @return the delta per metric
+     */
+    private SortedMap<CoverageMetric, CoveragePercentage> computeChangeCoverageDelta(
+            final CoverageNode rootNode, final CoverageNode changeCoverageRoot) {
+        if (rootNode.hasChangeCoverage()) {
+            return changeCoverageRoot.computeDeltaAsPercentage(rootNode);
         }
-        catch (IOException exception) {
-            log.logException(exception, "Can't paint and zip sources on the agent");
-        }
+        return new TreeMap<>();
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

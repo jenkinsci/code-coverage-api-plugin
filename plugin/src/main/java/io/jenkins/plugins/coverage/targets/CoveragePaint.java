@@ -278,4 +278,8 @@ public class CoveragePaint implements Serializable {
         Arrays.sort(sorted);
         return sorted;
     }
+
+    public int[] getAllLines() {
+        return lines.keys();
+    }
 }

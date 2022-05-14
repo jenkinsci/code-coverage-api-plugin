@@ -25,10 +25,12 @@ class CoverageTest {
     void shouldProvideNullObject() {
         assertThat(Coverage.NO_COVERAGE).isNotSet()
                 .hasCovered(0)
-                .hasCoveredPercentage(Fraction.ZERO)
+                .hasCoveredFraction(Fraction.ZERO)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(Fraction.ZERO))
                 .hasRoundedPercentage(0)
                 .hasMissed(0)
-                .hasMissedPercentage(Fraction.ZERO)
+                .hasMissedFraction(Fraction.ZERO)
+                .hasMissedPercentage(CoveragePercentage.valueOf(Fraction.ZERO))
                 .hasTotal(0)
                 .hasToString(Messages.Coverage_Not_Available());
         assertThat(Coverage.NO_COVERAGE.formatCoveredPercentage()).isEqualTo(Messages.Coverage_Not_Available());
@@ -39,12 +41,16 @@ class CoverageTest {
     @Test
     void shouldCreatePercentages() {
         Coverage coverage = new Coverage(6, 4);
+        Fraction coverageFraction = Fraction.getFraction(6, 10);
+        Fraction missedFraction = Fraction.getFraction(4, 10);
         assertThat(coverage).isSet()
                 .hasCovered(6)
-                .hasCoveredPercentage(Fraction.getFraction(6, 10))
+                .hasCoveredFraction(coverageFraction)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasRoundedPercentage(60)
                 .hasMissed(4)
-                .hasMissedPercentage(Fraction.getFraction(4, 10))
+                .hasMissedFraction(missedFraction)
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(10)
                 .hasToString("60.00% (6/10)");
 

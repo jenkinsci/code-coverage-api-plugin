@@ -37,9 +37,9 @@ public class CoverageSummary extends PageObject {
         this.summary = getElement(By.id(id + "-summary"));
         this.coverageReportLink = getElement(By.id("coverage-hrefCoverageReport"));
         this.referenceBuild = getElement(By.id("coverage-reference"));
-        this.coverage = this.summary.findElements(by.id("coverage-value"));
+        this.coverage = this.summary.findElements(by.id("project-coverage"));
         this.failMsg = getElement(By.id("coverage-fail-msg"));
-        this.coverageChanges = this.summary.findElements(by.id("coverage-change"));
+        this.coverageChanges = this.summary.findElements(by.id("project-coverage-delta"));
 
     }
 
@@ -49,6 +49,7 @@ public class CoverageSummary extends PageObject {
 
     /**
      * Opens attached {@link CoverageReport}.
+     *
      * @return attached CoverageReport.
      */
     public CoverageReport openCoverageReport() {
@@ -120,7 +121,6 @@ public class CoverageSummary extends PageObject {
         link.click();
         return result;
     }
-
 
     public static boolean isSummaryDisplayed(WebDriver pageObject, String elementId) {
         try {

@@ -17,8 +17,6 @@ public final class Coverage implements Serializable {
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
-    private static final Fraction HUNDRED = Fraction.getFraction(100, 1);
-
     private final int covered;
     private final int missed;
 
@@ -49,11 +47,23 @@ public final class Coverage implements Serializable {
      *
      * @return the covered percentage
      */
-    public Fraction getCoveredPercentage() {
+    public Fraction getCoveredFraction() {
         if (getTotal() == 0) {
             return Fraction.ZERO;
         }
         return Fraction.getFraction(covered, getTotal());
+    }
+
+    /**
+     * Returns the covered percentage as a {@link CoveragePercentage} in the range of {@code [0, 100]}.
+     *
+     * @return the covered percentage
+     */
+    public CoveragePercentage getCoveredPercentage() {
+        if (getTotal() == 0) {
+            return CoveragePercentage.valueOf(0);
+        }
+        return CoveragePercentage.valueOf(Fraction.getFraction(covered, getTotal()));
     }
 
     /**
@@ -66,12 +76,12 @@ public final class Coverage implements Serializable {
         if (getTotal() == 0) {
             return 0;
         }
-        return (int) Math.round(getCoveredPercentage().multiplyBy(Coverage.HUNDRED).doubleValue());
+        return (int) Math.round(getCoveredPercentage().getDoubleValue());
     }
 
     /**
-     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the covered percentage
      * @see #formatCoveredPercentage(Locale)
@@ -106,16 +116,28 @@ public final class Coverage implements Serializable {
      *
      * @return the missed percentage
      */
-    public Fraction getMissedPercentage() {
+    public Fraction getMissedFraction() {
         if (getTotal() == 0) {
             return Fraction.ZERO;
         }
-        return Fraction.ONE.subtract(getCoveredPercentage());
+        return Fraction.ONE.subtract(getCoveredFraction());
     }
 
     /**
-     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses
-     * {@code Locale.getDefault()} to format the percentage.
+     * Returns the missed percentage as a {@link CoveragePercentage} in the range of {@code [0, 100]}.
+     *
+     * @return the missed percentage
+     */
+    public CoveragePercentage getMissedPercentage() {
+        if (getTotal() == 0) {
+            return CoveragePercentage.valueOf(0);
+        }
+        return CoveragePercentage.valueOf(getMissedFraction());
+    }
+
+    /**
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses {@code
+     * Locale.getDefault()} to format the percentage.
      *
      * @return the missed percentage
      */
@@ -135,9 +157,9 @@ public final class Coverage implements Serializable {
         return printPercentage(locale, getMissedPercentage());
     }
 
-    private String printPercentage(final Locale locale, final Fraction percentage) {
+    private String printPercentage(final Locale locale, final CoveragePercentage coverage) {
         if (isSet()) {
-            return String.format(locale, "%.2f%%", percentage.multiplyBy(HUNDRED).doubleValue());
+            return coverage.formatPercentage(locale);
         }
         return Messages.Coverage_Not_Available();
     }
@@ -159,7 +181,7 @@ public final class Coverage implements Serializable {
     public String toString() {
         int total = getTotal();
         if (total > 0) {
-            return String.format("%s (%s)", formatCoveredPercentage(), getCoveredPercentage());
+            return String.format("%s (%s)", formatCoveredPercentage(), getCoveredFraction());
         }
         return Messages.Coverage_Not_Available();
     }

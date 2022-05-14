@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.charts;
 
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
@@ -9,6 +9,8 @@ import edu.hm.hafner.echarts.LineSeries.StackedMode;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
 import edu.hm.hafner.echarts.Palette;
+
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
 /**
  * Builds the Java side model for a trend chart showing the line and branch coverage of a project.
@@ -30,7 +32,7 @@ public class CoverageTrendChart {
      *
      * @return the chart model, ready to be serialized to JSON
      */
-    LinesChartModel create(final Iterable<? extends BuildResult<CoverageBuildAction>> results,
+    public LinesChartModel create(final Iterable<? extends BuildResult<CoverageBuildAction>> results,
             final ChartModelConfiguration configuration) {
         CoverageSeriesBuilder builder = new CoverageSeriesBuilder();
         LinesDataSet dataSet = builder.createDataSet(configuration, results);

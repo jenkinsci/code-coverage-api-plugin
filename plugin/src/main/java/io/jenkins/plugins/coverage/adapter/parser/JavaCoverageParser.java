@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.adapter.parser;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,11 +81,11 @@ public class JavaCoverageParser extends CoverageParser {
             case "method":
                 String name = getAttribute(current, "name", "");
                 String signature = getAttribute(current, "signature", "");
-
                 String methodName = buildMethodName(name, signature);
-
                 result = new CoverageResult(CoverageElement.get("Method"), parentResult, methodName);
-
+                // TODO: workaround -> better rework whole parser
+                String line = getAttribute(current, "line", "");
+                result.addAdditionalProperty("lineNumber", line);
                 break;
             case "line":
                 processLine(current, parentResult);

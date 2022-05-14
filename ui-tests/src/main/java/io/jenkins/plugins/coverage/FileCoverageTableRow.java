@@ -3,10 +3,7 @@ package io.jenkins.plugins.coverage;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import org.jenkinsci.test.acceptance.po.Build;
 
 /**
  * Representation of a table row in {@link FileCoverageTable}.
@@ -87,45 +84,11 @@ public class FileCoverageTableRow {
     }
 
     /**
-     * Opens new page of file coverage in {@link SourceCodeView}.
-     *
-     * @param build
-     *         current build
-     *
-     * @return Page with coverage of file
+     * Opens the source code of the file that is represented by this row.
      */
-    public SourceCodeView openFileLink(Build build) {
-        WebElement fileLink = getFileLink();
-        String link = fileLink.getAttribute("href");
-        SourceCodeView sourceCodeView = new SourceCodeView(build,
-                link.substring(link.lastIndexOf("/") + 1));
-        fileLink.click();
-        return sourceCodeView;
-    }
-
-    /**
-     * Checks if file has a clickable link.
-     *
-     * @return if file is clickable.
-     */
-    public boolean hasFileLink() {
-        try {
-            getFileLink();
-            return true;
-        }
-        catch (NoSuchElementException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Get link of file in row.
-     *
-     * @return link of file item
-     */
-    private WebElement getFileLink() {
-        return this.row.findElements(By.tagName("td"))
+    public void openSourceCode() {
+        this.row.findElements(By.tagName("td"))
                 .get(1)
-                .findElement(By.tagName("a"));
+                .click();
     }
 }

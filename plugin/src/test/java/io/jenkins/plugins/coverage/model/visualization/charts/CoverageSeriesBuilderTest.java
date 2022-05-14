@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.model.visualization.charts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +10,9 @@ import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
+
+import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static org.assertj.core.api.Assertions.*;
@@ -37,12 +40,14 @@ class CoverageSeriesBuilderTest {
 
         BuildResult<CoverageBuildAction> smallLineCoverage = createResult(1, new Coverage(1, 1), new Coverage(3, 1));
 
-        LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage), createConfiguration());
+        LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage),
+                createConfiguration());
         verifySeriesDetails(lineCoverage);
 
         BuildResult<CoverageBuildAction> smallBranchCoverage = createResult(1, new Coverage(3, 1), new Coverage(1, 1));
 
-        LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage), createConfiguration());
+        LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage),
+                createConfiguration());
         verifySeriesDetails(branchCoverage);
     }
 

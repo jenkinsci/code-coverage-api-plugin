@@ -8,6 +8,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.Messages;
+import io.jenkins.plugins.coverage.model.visualization.charts.CoverageTrendChart;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
 /**

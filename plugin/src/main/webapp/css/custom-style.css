@@ -33,3 +33,32 @@
     background-color: #C8E6C9;
 }
 
+/* View selection buttons */
+.btn {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn-outline-secondary {
+    color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+.btn-check:checked + .btn-outline-secondary, .btn-check:active + .btn-outline-secondary, .btn-outline-secondary:active,
+.btn-outline-secondary.active, .btn-outline-secondary.dropdown-toggle.show {
+    color: #fff;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+
+/* Coverage map switch */
+.form-switch .form-check-input {
+    box-shadow: none;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:focus {
+    box-shadow: none;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+}

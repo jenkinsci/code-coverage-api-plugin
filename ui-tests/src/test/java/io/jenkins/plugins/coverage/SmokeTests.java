@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import io.jenkins.plugins.coverage.util.TrendChartTestUtil;
-
 /**
  * Smoke Test to test the most used features of Code Coverage api plugin.
  */
@@ -50,9 +48,6 @@ public class SmokeTests extends UiTest {
 
         String coverageOverview = report.getCoverageOverview();
         CoverageReportTest.verifyCoverageOverviewAfterSomeBuildsWithReports(coverageOverview);
-
-        String trendChart = report.getCoverageTrend();
-        TrendChartTestUtil.verifyTrendChart(trendChart, 1, 2);
 
         MainPanel mainPanel = new MainPanel(job);
         MainPanelTest.verifyTrendChartWithTwoReports(mainPanel, 1, 2);

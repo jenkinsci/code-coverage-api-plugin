@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assumptions.*;
 /**
  * Tests if source code copying and rendering and copying works on Docker agents.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
@@ -73,7 +73,7 @@ class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSui
         CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
 
         CoverageBuildAction action = new CoverageBuildAction(build, root, new HealthReport(), "-",
-                new TreeMap<>(), false);
+                new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), false);
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isEqualTo(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isEqualTo(build);

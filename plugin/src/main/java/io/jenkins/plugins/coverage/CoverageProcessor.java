@@ -102,10 +102,12 @@ public class CoverageProcessor {
      *         reportDetectors specified by user
      * @param globalThresholds
      *         global threshold specified by user
+     * @param scm
+     *         the SCM which is used for calculating the code delta to a reference build
      */
     public void performCoverageReport(final List<CoverageReportAdapter> reportAdapters,
             final List<ReportDetector> reportDetectors, final List<Threshold> globalThresholds,
-            final Set<String> sourceDirectories, final String sourceCodeEncoding)
+            final Set<String> sourceDirectories, final String sourceCodeEncoding, final String scm)
             throws IOException, InterruptedException, CoverageException {
         Map<CoverageReportAdapter, List<CoverageResult>> results = convertToResults(reportAdapters, reportDetectors);
 
@@ -126,14 +128,14 @@ public class CoverageProcessor {
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
 
+        // Transform the old model to the new model
+        CoverageReporter coverageReporter = new CoverageReporter();
+        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, healthReport, scm,
+                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
+
         if (failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport);
         }
-
-        // Transform the old model to the new model
-        CoverageReporter coverageReporter = new CoverageReporter();
-        coverageReporter.run(coverageReport.getRoot(), run, workspace, listener,
-                sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention(), healthReport);
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {

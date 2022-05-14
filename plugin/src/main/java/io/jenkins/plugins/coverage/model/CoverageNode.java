@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -8,8 +9,10 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -22,20 +25,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.util.Ensure;
+import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import one.util.streamex.StreamEx;
 
 /**
  * A hierarchical decomposition of coverage results.
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 
     private static final Coverage COVERED_NODE = new Coverage(1, 0);
     private static final Coverage MISSED_NODE = new Coverage(0, 1);
-    private static final int[] EMPTY_ARRAY = new int[0];
+
+    /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */
+    private transient CoverageTreeCreator coverageTreeCreator;
 
     static final String ROOT = "^";
 
@@ -45,7 +53,6 @@ public class CoverageNode implements Serializable {
     private final List<CoverageLeaf> leaves = new ArrayList<>();
     @CheckForNull
     private CoverageNode parent;
-    private int[] uncoveredLines = EMPTY_ARRAY;
 
     /**
      * Creates a new coverage item node with the given name.
@@ -56,11 +63,48 @@ public class CoverageNode implements Serializable {
      *         the human-readable name of the node
      */
     public CoverageNode(final CoverageMetric metric, final String name) {
-        this.metric = metric;
-        this.name = name;
+        this(metric, name, new CoverageTreeCreator());
     }
 
-    CoverageNode getParent() {
+    /**
+     * Creates a new coverage item node with the given name and a mocked {@link CoverageTreeCreator}.
+     *
+     * @param metric
+     *         the coverage metric this node belongs to
+     * @param name
+     *         the human-readable name of the node
+     * @param coverageTreeCreator
+     *         the coverage tree creator
+     */
+    @VisibleForTesting
+    public CoverageNode(final CoverageMetric metric, final String name, final CoverageTreeCreator coverageTreeCreator) {
+        this.metric = metric;
+        this.name = name;
+        this.coverageTreeCreator = coverageTreeCreator;
+    }
+
+    /**
+     * Called after de-serialization to restore transient fields.
+     *
+     * @return this
+     * @throws ObjectStreamException
+     *         if the operation failed
+     */
+    protected Object readResolve() throws ObjectStreamException {
+        if (coverageTreeCreator == null) {
+            coverageTreeCreator = new CoverageTreeCreator();
+        }
+        return this;
+    }
+
+    /**
+     * Gets the parent node.
+     *
+     * @return the parent, if existent
+     * @throws IllegalStateException
+     *         if no parent exists
+     */
+    public CoverageNode getParent() {
         if (parent == null) {
             throw new IllegalStateException("Parent is not set");
         }
@@ -77,8 +121,14 @@ public class CoverageNode implements Serializable {
     }
 
     protected String mergePath(final String localPath) {
+        // default packages are named '-'
+        if ("-".equals(localPath)) {
+            return StringUtils.EMPTY;
+        }
+
         if (hasParent()) {
             String parentPath = getParent().getPath();
+
             if (StringUtils.isBlank(parentPath)) {
                 return localPath;
             }
@@ -140,11 +190,30 @@ public class CoverageNode implements Serializable {
                 .collect(Collectors.toMap(Function.identity(), this::getCoverage, (o1, o2) -> o1, TreeMap::new));
     }
 
-    public SortedMap<CoverageMetric, Fraction> getMetricPercentages() {
+    /**
+     * Gets the coverage for each available metric as a fraction between 0 and 1.
+     *
+     * @return the coverage fractions mapped by their metric
+     */
+    public SortedMap<CoverageMetric, Fraction> getMetricFractions() {
+        if (children.isEmpty() && leaves.isEmpty()) {
+            // prevents returning a module coverage of 0% if the tree has no leaves since the coverage is not existent
+            return new TreeMap<>();
+        }
         return getMetrics().stream()
                 .collect(Collectors.toMap(Function.identity(),
-                        searchMetric -> getCoverage(searchMetric).getCoveredPercentage(), (o1, o2) -> o1,
+                        searchMetric -> getCoverage(searchMetric).getCoveredFraction(), (o1, o2) -> o1,
                         TreeMap::new));
+    }
+
+    /**
+     * Gets the coverage for each available metric as a percentage between 0 and 100.
+     *
+     * @return the coverage percentages mapped by their metric
+     */
+    public SortedMap<CoverageMetric, CoveragePercentage> getMetricPercentages() {
+        return StreamEx.of(getMetricFractions().entrySet())
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
     }
 
     public String getName() {
@@ -153,6 +222,10 @@ public class CoverageNode implements Serializable {
 
     public List<CoverageNode> getChildren() {
         return children;
+    }
+
+    public List<CoverageLeaf> getLeaves() {
+        return leaves;
     }
 
     private void addAll(final List<CoverageNode> nodes) {
@@ -282,20 +355,55 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Computes the coverage delta between this node and the specified reference node.
+     * Computes the coverage delta between this node and the specified reference node as fractions between 0 and 1.
      *
      * @param reference
      *         the reference node
      *
-     * @return the delta coverage for each available metric
+     * @return the delta coverage for each available metric as fraction
      */
     public SortedMap<CoverageMetric, Fraction> computeDelta(final CoverageNode reference) {
         SortedMap<CoverageMetric, Fraction> deltaPercentages = new TreeMap<>();
-        SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricPercentages();
-        SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricPercentages();
+        SortedMap<CoverageMetric, Fraction> metricPercentages = getMetricFractions();
+        SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricFractions();
         metricPercentages.forEach((key, value) ->
-                deltaPercentages.put(key, value.subtract(referencePercentages.getOrDefault(key, Fraction.ZERO))));
+                deltaPercentages.put(key,
+                        saveSubtractFraction(value, referencePercentages.getOrDefault(key, Fraction.ZERO))));
         return deltaPercentages;
+    }
+
+    /**
+     * Computes the coverage delta between this node and the specified reference node as percentage between 0 and 100.
+     *
+     * @param reference
+     *         the reference node
+     *
+     * @return the delta coverage for each available metric as percentage
+     */
+    public SortedMap<CoverageMetric, CoveragePercentage> computeDeltaAsPercentage(final CoverageNode reference) {
+        return StreamEx.of(computeDelta(reference).entrySet())
+                .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
+    }
+
+    /**
+     * Calculates the difference between two fraction. Since there might be an arithmetic exception due to an overflow,
+     * the method handles it and calculates the difference based on the double values of the fractions.
+     *
+     * @param minuend
+     *         The minuend as a fraction
+     * @param subtrahend
+     *         The subtrahend as a fraction
+     *
+     * @return the difference as a fraction
+     */
+    private Fraction saveSubtractFraction(final Fraction minuend, final Fraction subtrahend) {
+        try {
+            return minuend.subtract(subtrahend);
+        }
+        catch (ArithmeticException e) {
+            double diff = minuend.doubleValue() - subtrahend.doubleValue();
+            return Fraction.getFraction(diff);
+        }
     }
 
     /**
@@ -315,6 +423,23 @@ public class CoverageNode implements Serializable {
                 .flatMap(List::stream).collect(Collectors.toList());
         if (metric.equals(searchMetric)) {
             childNodes.add(this);
+        }
+        return childNodes;
+    }
+
+    /**
+     * Returns recursively all nodes of the instance {@link FileCoverageNode}.
+     *
+     * @return all file coverage nodes
+     * @since 3.0.0
+     */
+    public List<FileCoverageNode> getAllFileCoverageNodes() {
+        List<FileCoverageNode> childNodes = children.stream()
+                .map(CoverageNode::getAllFileCoverageNodes)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        if (this instanceof FileCoverageNode) {
+            childNodes.add((FileCoverageNode) this);
         }
         return childNodes;
     }
@@ -414,6 +539,195 @@ public class CoverageNode implements Serializable {
         }
     }
 
+    /**
+     * Filters the package structure for only package nodes which contain file nodes. The filtered tree is required in
+     * order to calculate the package coverage. Note that packages without any files are fully removed.
+     *
+     * @return a filtered copy of this {@link CoverageNode}
+     */
+    public CoverageNode filterPackageStructure() {
+        CoverageNode copy = copyTree();
+        if (CoverageMetric.MODULE.equals(metric)) {
+            Set<CoverageNode> packagesWithFiles = copy.getAll(CoverageMetric.PACKAGE).stream()
+                    .filter(node -> node.getChildren().stream()
+                            .anyMatch(child -> child.getMetric().equals(CoverageMetric.FILE)))
+                    .collect(Collectors.toSet());
+            packagesWithFiles.forEach(node -> {
+                node.setParent(copy);
+                Set<CoverageNode> fileChildren = node.getChildren().stream()
+                        .filter(child -> !child.getMetric().equals(CoverageMetric.PACKAGE))
+                        .collect(Collectors.toSet());
+                node.children.clear();
+                node.children.addAll(fileChildren);
+            });
+            Set<CoverageNode> nonePackageChildren = copy.children.stream()
+                    .filter(node -> !node.getMetric().equals(CoverageMetric.PACKAGE))
+                    .collect(Collectors.toSet());
+            copy.children.clear();
+            copy.children.addAll(nonePackageChildren);
+            copy.children.addAll(packagesWithFiles);
+        }
+        return copy;
+    }
+
+    /**
+     * Checks whether the coverage tree contains a change coverage at all. The method checks if line or branch coverage
+     * are available since these are the basic metrics which are available if changes exist.
+     *
+     * @return {@code true} whether a change coverage exist, else {@code false}
+     */
+    public boolean hasChangeCoverage() {
+        return hasChangeCoverage(CoverageMetric.LINE) || hasChangeCoverage(CoverageMetric.BRANCH);
+    }
+
+    /**
+     * Checks whether the coverage tree contains a change coverage for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} whether a change coverage exist for the coverage metric, else {@code false}
+     */
+    public boolean hasChangeCoverage(final CoverageMetric coverageMetric) {
+        return getChangeCoverageTree()
+                .getCoverage(coverageMetric)
+                .getTotal() > 0;
+    }
+
+    /**
+     * Creates a filtered coverage tree which only contains nodes with code changes. The root of the tree is this.
+     *
+     * @return the filtered coverage tree
+     */
+    public CoverageNode getChangeCoverageTree() {
+        return coverageTreeCreator.createChangeCoverageTree(this);
+    }
+
+    public int getFileAmountWithChangedCoverage() {
+        return extractFileNodesWithChangeCoverage().size();
+    }
+
+    public long getLineAmountWithChangedCoverage() {
+        return extractFileNodesWithChangeCoverage().stream()
+                .map(node -> { // only mention lines with changes which affect coverage
+                    SortedSet<Integer> filtered = new TreeSet<>(node.getChangedCodeLines());
+                    return filtered.stream()
+                            .filter(line -> node.getCoveragePerLine().containsKey(line))
+                            .collect(Collectors.toSet());
+                })
+                .mapToLong(Collection::size)
+                .sum();
+    }
+
+    private Set<FileCoverageNode> extractFileNodesWithChangeCoverage() {
+        return getChangeCoverageTree().getAllFileCoverageNodes().stream()
+                .filter(node -> node.getChangedCodeLines()
+                        .stream() // only mention files with changes which affect coverage
+                        .anyMatch(line -> node.getCoveragePerLine().containsKey(line)))
+                .collect(Collectors.toSet());
+    }
+
+    public int getFileAmountWithIndirectCoverageChanges() {
+        return extractFileNodesWithIndirectCoverageChanges().size();
+    }
+
+    public long getLineAmountWithIndirectCoverageChanges() {
+        return extractFileNodesWithIndirectCoverageChanges().stream()
+                .map(node -> node.getIndirectCoverageChanges().values())
+                .mapToLong(Collection::size)
+                .sum();
+    }
+
+    private Set<FileCoverageNode> extractFileNodesWithIndirectCoverageChanges() {
+        return getIndirectCoverageChangesTree().getAllFileCoverageNodes().stream()
+                .filter(node -> !node.getIndirectCoverageChanges().isEmpty())
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Checks whether the coverage tree contains indirect coverage changes at all. The method checks if line or branch
+     * coverage are available since these are the basic metrics which are available if changes exist.
+     *
+     * @return {@code true} whether indirect coverage changes exist, else {@code false}
+     */
+    public boolean hasIndirectCoverageChanges() {
+        return hasIndirectCoverageChanges(CoverageMetric.LINE) || hasIndirectCoverageChanges(CoverageMetric.BRANCH);
+    }
+
+    /**
+     * Checks whether the coverage tree contains indirect coverage changes for the passed {@link CoverageMetric}.
+     *
+     * @param coverageMetric
+     *         The coverage metric
+     *
+     * @return {@code true} whether indirect coverage changes exist for the coverage metric, else {@code false}
+     */
+    public boolean hasIndirectCoverageChanges(final CoverageMetric coverageMetric) {
+        return getIndirectCoverageChangesTree()
+                .getCoverage(coverageMetric)
+                .getTotal() > 0;
+    }
+
+    /**
+     * Creates a filtered coverage tree which only contains nodes with indirect coverage changes. The root of the tree
+     * is this.
+     *
+     * @return the filtered coverage tree
+     */
+    public CoverageNode getIndirectCoverageChangesTree() {
+        return coverageTreeCreator.createIndirectCoverageChangesTree(this);
+    }
+
+    /**
+     * Checks whether code any changes have been detected no matter if the code coverage is affected or not.
+     *
+     * @return {@code true} whether code changes have been detected
+     */
+    public boolean hasCodeChanges() {
+        return getAllFileCoverageNodes().stream()
+                .anyMatch(fileNode -> !fileNode.getChangedCodeLines().isEmpty());
+    }
+
+    /**
+     * Creates a deep copy of the coverage tree with this as root node.
+     *
+     * @return the root node of the copied tree
+     */
+    public CoverageNode copyTree() {
+        return copyTree(null);
+    }
+
+    /**
+     * Recursively copies the coverage tree with the passed {@link CoverageNode} as root.
+     *
+     * @param copiedParent
+     *         The root node
+     *
+     * @return the copied tree
+     */
+    protected CoverageNode copyTree(@CheckForNull final CoverageNode copiedParent) {
+        CoverageNode copy = copyEmpty();
+        if (copiedParent != null) {
+            copy.setParent(copiedParent);
+        }
+
+        getChildren().stream()
+                .map(node -> node.copyTree(this))
+                .forEach(copy::add);
+        getLeaves().forEach(copy::add);
+
+        return copy;
+    }
+
+    /**
+     * Creates a copied instance of this node that has no children, leaves, and parent yet.
+     *
+     * @return the new and empty node
+     */
+    protected CoverageNode copyEmpty() {
+        return new CoverageNode(metric, name);
+    }
+
     private void insertPackage(final CoverageNode aPackage, final Deque<String> packageLevels) {
         String nextLevelName = packageLevels.pop();
         CoverageNode subPackage = createChild(nextLevelName);
@@ -437,18 +751,6 @@ public class CoverageNode implements Serializable {
         return newNode;
     }
 
-    public void setUncoveredLines(final int... uncoveredLines) {
-        this.uncoveredLines = copy(uncoveredLines);
-    }
-
-    public int[] getUncoveredLines() {
-        return copy(uncoveredLines);
-    }
-
-    private int[] copy(final int... values) {
-        return Arrays.copyOf(values, values.length);
-    }
-
     @Override
     public String toString() {
         return String.format("[%s] %s", metric, name);
@@ -464,14 +766,11 @@ public class CoverageNode implements Serializable {
         }
         CoverageNode that = (CoverageNode) o;
         return Objects.equals(metric, that.metric) && Objects.equals(name, that.name)
-                && Objects.equals(children, that.children) && Objects.equals(leaves, that.leaves)
-                && Arrays.equals(uncoveredLines, that.uncoveredLines);
+                && Objects.equals(children, that.children) && Objects.equals(leaves, that.leaves);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(metric, name, children, leaves);
-        result = 31 * result + Arrays.hashCode(uncoveredLines);
-        return result;
+        return Objects.hash(metric, name, children, leaves);
     }
 }

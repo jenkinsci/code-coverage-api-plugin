@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import edu.hm.hafner.util.ResourceTest;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
@@ -19,7 +18,6 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  * @author Ullrich Hafner
  */
 public abstract class AbstractCoverageTest extends ResourceTest {
-    static final double PRECISION = 0.01;
     static final CoverageMetric MODULE = CoverageMetric.MODULE;
     static final CoverageMetric PACKAGE = CoverageMetric.PACKAGE;
     static final CoverageMetric FILE = CoverageMetric.FILE;
@@ -34,7 +32,15 @@ public abstract class AbstractCoverageTest extends ResourceTest {
         Locale.setDefault(Locale.ENGLISH);
     }
 
-    CoverageResult readResult(final String fileName) {
+    /**
+     * Reads the {@link CoverageResult} from a coverage report.
+     *
+     * @param fileName
+     *         The name of the coverage report file
+     *
+     * @return the parsed coverage results
+     */
+    public CoverageResult readResult(final String fileName) {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("unused");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
@@ -47,7 +53,15 @@ public abstract class AbstractCoverageTest extends ResourceTest {
         }
     }
 
-    CoverageNode readNode(final String fileName) {
+    /**
+     * Reads the {@link CoverageNode} from a coverage report.
+     *
+     * @param fileName
+     *         The name of the coverage report file
+     *
+     * @return the parsed coverage tree
+     */
+    public CoverageNode readNode(final String fileName) {
         return new CoverageNodeConverter().convert(readResult(fileName));
     }
 

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.util.SerializableTest;
 
-import io.jenkins.plugins.coverage.CoverageNodeConverter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;

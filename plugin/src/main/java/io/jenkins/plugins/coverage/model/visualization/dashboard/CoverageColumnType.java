@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import org.jvnet.localizer.Localizable;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 import io.jenkins.plugins.coverage.model.CoverageMetric;
+import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -57,7 +56,7 @@ public abstract class CoverageColumnType {
      *
      * @return the coverage as optional or an empty optional if no coverage has been found
      */
-    public abstract Optional<Fraction> getCoverage(CoverageBuildAction action, CoverageMetric metric);
+    public abstract Optional<CoveragePercentage> getCoverage(CoverageBuildAction action, CoverageMetric metric);
 
     /**
      * Gets the {@link DisplayColors display colors} which are used for visualizing the passed coverage.
@@ -67,7 +66,7 @@ public abstract class CoverageColumnType {
      *
      * @return the display colors
      */
-    public abstract DisplayColors getDisplayColors(Fraction coverage);
+    public abstract DisplayColors getDisplayColors(CoveragePercentage coverage);
 
     /**
      * Formats the passed coverage using the passed {@link Locale}.
@@ -79,7 +78,7 @@ public abstract class CoverageColumnType {
      *
      * @return the formatted coverage string
      */
-    public abstract String formatCoverage(Fraction coverage, Locale locale);
+    public abstract String formatCoverage(CoveragePercentage coverage, Locale locale);
 
     /**
      * Gets the names of the available coverage types.
@@ -89,7 +88,10 @@ public abstract class CoverageColumnType {
     public static List<String> getAvailableCoverageTypeNames() {
         return Arrays.asList(
                 Messages.Project_Coverage_Type(),
-                Messages.Project_Coverage_Delta_Type()
+                Messages.Project_Coverage_Delta_Type(),
+                Messages.Change_Coverage_Type(),
+                Messages.Change_Coverage_Delta_Type(),
+                Messages.Indirect_Coverage_Changes_Type()
         );
     }
 

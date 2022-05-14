@@ -12,11 +12,13 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests the class {@link CoverageNode}.
  *
  * @author Ullrich Hafner
+ * @author Florian Orendi
  */
 class CoverageNodeTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
@@ -24,6 +26,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
     @BeforeAll
     static void beforeAll() {
         Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @Test
+    void shouldProvideEmptyPathForDefaultPackage() {
+        PackageCoverageNode node = new PackageCoverageNode("-");
+        assertThat(node.getPath()).isEqualTo("");
     }
 
     @Test
@@ -95,7 +103,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 entry(LINE, new Coverage(294, 29)),
                 entry(INSTRUCTION, new Coverage(1260, 90)),
                 entry(BRANCH, new Coverage(109, 7)));
-        assertThat(tree.getMetricPercentages()).containsExactly(
+        assertThat(tree.getMetricFractions()).containsExactly(
                 entry(MODULE, Fraction.ONE),
                 entry(PACKAGE, Fraction.ONE),
                 entry(FILE, Fraction.getFraction(7, 7 + 3)),
@@ -104,6 +112,21 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 entry(LINE, Fraction.getFraction(294, 294 + 29)),
                 entry(INSTRUCTION, Fraction.getFraction(1260, 1260 + 90)),
                 entry(BRANCH, Fraction.getFraction(109, 109 + 7)));
+        assertThat(tree.getMetricPercentages()).containsExactly(
+                entry(MODULE, CoveragePercentage.valueOf(Fraction.ONE)),
+                entry(PACKAGE, CoveragePercentage.valueOf(Fraction.ONE)),
+                entry(FILE, CoveragePercentage.valueOf(
+                        Fraction.getFraction(7, 7 + 3))),
+                entry(CLASS, CoveragePercentage.valueOf(
+                        Fraction.getFraction(15, 15 + 3))),
+                entry(METHOD, CoveragePercentage.valueOf(
+                        Fraction.getFraction(97, 97 + 5))),
+                entry(LINE, CoveragePercentage.valueOf(
+                        Fraction.getFraction(294, 294 + 29))),
+                entry(INSTRUCTION, CoveragePercentage.valueOf(
+                        Fraction.getFraction(1260, 1260 + 90))),
+                entry(BRANCH, CoveragePercentage.valueOf(
+                        Fraction.getFraction(109, 109 + 7))));
 
         assertThat(tree.getChildren()).hasSize(1).element(0).satisfies(
                 packageNode -> assertThat(packageNode).hasName("edu.hm.hafner.util")
@@ -111,38 +134,54 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     private void verifyCoverageMetrics(final CoverageNode tree) {
+        Fraction coverageFraction = Fraction.getFraction(294, 294 + 29);
+        Fraction missedFraction = Fraction.getFraction(29, 294 + 29);
         assertThat(tree.getCoverage(LINE)).isSet()
                 .hasCovered(294)
-                .hasCoveredPercentage(Fraction.getFraction(294, 294 + 29))
+                .hasCoveredFraction(coverageFraction)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasMissed(29)
-                .hasMissedPercentage(Fraction.getFraction(29, 294 + 29))
+                .hasMissedFraction(missedFraction)
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(294 + 29);
         assertThat(tree.printCoverageFor(LINE)).isEqualTo("91.02%");
         assertThat(tree.printCoverageFor(LINE, Locale.GERMAN)).isEqualTo("91,02%");
 
+        coverageFraction = Fraction.getFraction(109, 109 + 7);
+        missedFraction = Fraction.getFraction(7, 109 + 7);
         assertThat(tree.getCoverage(BRANCH)).isSet()
                 .hasCovered(109)
-                .hasCoveredPercentage(Fraction.getFraction(109, 109 + 7))
+                .hasCoveredFraction(coverageFraction)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasMissed(7)
-                .hasMissedPercentage(Fraction.getFraction(7, 109 + 7))
+                .hasMissedFraction(missedFraction)
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(109 + 7);
         assertThat(tree.printCoverageFor(BRANCH)).isEqualTo("93.97%");
         assertThat(tree.printCoverageFor(BRANCH, Locale.GERMAN)).isEqualTo("93,97%");
 
+        coverageFraction = Fraction.getFraction(1260, 1260 + 90);
+        missedFraction = Fraction.getFraction(90, 1260 + 90);
         assertThat(tree.getCoverage(INSTRUCTION)).isSet()
                 .hasCovered(1260)
-                .hasCoveredPercentage(Fraction.getFraction(1260, 1260 + 90))
+                .hasCoveredFraction(coverageFraction)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasMissed(90)
-                .hasMissedPercentage(Fraction.getFraction(90, 1260 + 90))
+                .hasMissedFraction(missedFraction)
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(1260 + 90);
         assertThat(tree.printCoverageFor(INSTRUCTION)).isEqualTo("93.33%");
         assertThat(tree.printCoverageFor(INSTRUCTION, Locale.GERMAN)).isEqualTo("93,33%");
 
+        coverageFraction = Fraction.ONE;
+        missedFraction = Fraction.ZERO;
         assertThat(tree.getCoverage(MODULE)).isSet()
                 .hasCovered(1)
-                .hasCoveredPercentage(Fraction.ONE)
+                .hasCoveredFraction(coverageFraction)
+                .hasCoveredPercentage(CoveragePercentage.valueOf(coverageFraction))
                 .hasMissed(0)
-                .hasMissedPercentage(Fraction.ZERO)
+                .hasMissedFraction(missedFraction)
+                .hasMissedPercentage(CoveragePercentage.valueOf(missedFraction))
                 .hasTotal(1);
         assertThat(tree.printCoverageFor(MODULE)).isEqualTo("100.00%");
         assertThat(tree.printCoverageFor(MODULE, Locale.GERMAN)).isEqualTo("100,00%");
@@ -151,6 +190,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .doesNotHaveParent()
                 .isRoot()
                 .hasMetric(MODULE).hasParentName(CoverageNode.ROOT);
+    }
+
+    @Test
+    void shouldNotReturnCoverageValuesWithoutLeaves() {
+        CoverageNode coverageNode = new CoverageNode(MODULE, "Root");
+        assertThat(coverageNode).isRoot();
+        assertThat(coverageNode.getMetricFractions()).isEmpty();
+        assertThat(coverageNode.getMetricPercentages()).isEmpty();
     }
 
     @Test
@@ -185,7 +232,14 @@ class CoverageNodeTest extends AbstractCoverageTest {
         );
 
         CoverageNode checkStyle = wrappedCheckStyle.get();
-        assertThat(checkStyle.getMetricPercentages())
+        assertThat(checkStyle.getMetricFractions())
+                .containsEntry(FILE, Fraction.ONE)
+                .containsEntry(CLASS, Fraction.ONE)
+                .containsEntry(METHOD, Fraction.getFraction(6, 6))
+                .containsEntry(LINE, Fraction.getFraction(41, 42))
+                .containsEntry(INSTRUCTION, Fraction.getFraction(180, 187))
+                .containsEntry(BRANCH, Fraction.getFraction(11, 12));
+        assertThat(checkStyle.getMetricFractions())
                 .containsEntry(FILE, Fraction.ONE)
                 .containsEntry(CLASS, Fraction.ONE)
                 .containsEntry(METHOD, Fraction.getFraction(6, 6))
@@ -202,13 +256,24 @@ class CoverageNodeTest extends AbstractCoverageTest {
         );
 
         CoverageNode pmd = wrappedPmd.get();
-        assertThat(pmd.getMetricPercentages())
+        assertThat(pmd.getMetricFractions())
                 .containsEntry(FILE, Fraction.ONE)
                 .containsEntry(CLASS, Fraction.ONE)
                 .containsEntry(METHOD, Fraction.getFraction(8, 8))
                 .containsEntry(LINE, Fraction.getFraction(72, 79))
                 .containsEntry(INSTRUCTION, Fraction.getFraction(285, 313))
                 .containsEntry(BRANCH, Fraction.getFraction(15, 18));
+        assertThat(pmd.getMetricPercentages())
+                .containsEntry(FILE, CoveragePercentage.valueOf(Fraction.ONE))
+                .containsEntry(CLASS, CoveragePercentage.valueOf(Fraction.ONE))
+                .containsEntry(METHOD, CoveragePercentage.valueOf(
+                        Fraction.getFraction(8, 8)))
+                .containsEntry(LINE, CoveragePercentage.valueOf(
+                        Fraction.getFraction(72, 79)))
+                .containsEntry(INSTRUCTION, CoveragePercentage.valueOf(
+                        Fraction.getFraction(285, 313)))
+                .containsEntry(BRANCH, CoveragePercentage.valueOf(
+                        Fraction.getFraction(15, 18)));
 
         assertThat(checkStyle.computeDelta(pmd))
                 .containsEntry(FILE, Fraction.ZERO)
@@ -217,6 +282,17 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .containsEntry(LINE, Fraction.getFraction(215, 3318))
                 .containsEntry(INSTRUCTION, Fraction.getFraction(3045, 58_531))
                 .containsEntry(BRANCH, Fraction.getFraction(1, 12));
+        assertThat(checkStyle.computeDeltaAsPercentage(pmd))
+                .containsEntry(FILE, CoveragePercentage.valueOf(Fraction.ZERO))
+                .containsEntry(CLASS, CoveragePercentage.valueOf(Fraction.ZERO))
+                .containsEntry(METHOD, CoveragePercentage.valueOf(
+                        Fraction.getFraction(0, 12)))
+                .containsEntry(LINE, CoveragePercentage.valueOf(
+                        Fraction.getFraction(215, 3318)))
+                .containsEntry(INSTRUCTION, CoveragePercentage.valueOf(
+                        Fraction.getFraction(3045, 58_531)))
+                .containsEntry(BRANCH, CoveragePercentage.valueOf(
+                        Fraction.getFraction(1, 12)));
 
         assertThat(pmd.computeDelta(checkStyle))
                 .containsEntry(FILE, Fraction.ZERO)
@@ -225,6 +301,17 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .containsEntry(LINE, Fraction.getFraction(-215, 3318))
                 .containsEntry(INSTRUCTION, Fraction.getFraction(-3045, 58_531))
                 .containsEntry(BRANCH, Fraction.getFraction(-1, 12));
+        assertThat(pmd.computeDeltaAsPercentage(checkStyle))
+                .containsEntry(FILE, CoveragePercentage.valueOf(Fraction.ZERO))
+                .containsEntry(CLASS, CoveragePercentage.valueOf(Fraction.ZERO))
+                .containsEntry(METHOD, CoveragePercentage.valueOf(
+                        Fraction.getFraction(0, 12)))
+                .containsEntry(LINE, CoveragePercentage.valueOf(
+                        Fraction.getFraction(-215, 3318)))
+                .containsEntry(INSTRUCTION, CoveragePercentage.valueOf(
+                        Fraction.getFraction(-3045, 58_531)))
+                .containsEntry(BRANCH, CoveragePercentage.valueOf(
+                        Fraction.getFraction(-1, 12)));
     }
 
     @Test
@@ -274,12 +361,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
 
         String fileName = "Ensure.java";
         assertThat(tree.findByHashCode(FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
-                node -> {
-                    assertThat(node).hasName(fileName).isNotRoot().hasUncoveredLines(
-                            78, 138, 139, 153, 154, 240, 245, 303, 340, 390, 395, 444, 476,
-                            483, 555, 559, 568, 600, 626, 627, 628, 650, 653, 690, 720);
-                }
-        );
+                node -> assertThat(node).hasName(fileName).isNotRoot());
         assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
         assertThat(tree.findByHashCode(FILE, "not-found".hashCode())).isEmpty();
 
@@ -315,6 +397,76 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldRemovePackagesWithoutFiles() {
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
+        tree.splitPackages();
+        int packageNodes = tree.getChildren().size();
+        CoverageNode filteredTree = tree.filterPackageStructure();
+
+        assertThat(filteredTree.getChildren().stream()
+                .noneMatch(node -> node.getChildren().stream()
+                        .noneMatch(child -> child.getMetric().equals(FILE))))
+                .isTrue();
+        assertThat(tree.getChildren().size()).isEqualTo(packageNodes);
+    }
+
+    @Test
+    void shouldGetAllFileCoverageNodes() {
+        CoverageNode tree = readNode("jacoco-analysis-model.xml");
+        tree.splitPackages();
+        assertThat(tree.getAllFileCoverageNodes())
+                .hasSize(307)
+                .satisfies(nodes -> nodes.forEach(
+                        node -> assertThat(node).isInstanceOf(FileCoverageNode.class)));
+    }
+
+    @Test
+    void shouldProvideExistentChangeCoverage() {
+        CoverageNode tree = createTreeWithMockedTreeCreator();
+        assertThat(tree.hasCodeChanges()).isTrue();
+        assertThat(tree.hasChangeCoverage()).isTrue();
+        assertThat(tree.hasChangeCoverage(LINE)).isTrue();
+        assertThat(tree.getChangeCoverageTree()).isEqualTo(tree);
+        assertThat(tree.getFileAmountWithChangedCoverage()).isOne();
+        assertThat(tree.getLineAmountWithChangedCoverage()).isOne();
+    }
+
+    @Test
+    void shouldProvideExistentIndirectCoverageChanges() {
+        CoverageNode tree = createTreeWithMockedTreeCreator();
+        assertThat(tree.hasIndirectCoverageChanges()).isTrue();
+        assertThat(tree.hasIndirectCoverageChanges(LINE)).isTrue();
+        assertThat(tree.getIndirectCoverageChangesTree()).isEqualTo(tree);
+        assertThat(tree.getFileAmountWithIndirectCoverageChanges()).isOne();
+        assertThat(tree.getLineAmountWithIndirectCoverageChanges()).isOne();
+    }
+
+    @Test
+    void shouldDetermineNotExistentChangeCoverage() {
+        CoverageNode tree = createTreeWithMockedTreeCreatorWithoutChanges();
+        assertThat(tree.hasCodeChanges()).isFalse();
+        assertThat(tree.hasChangeCoverage()).isFalse();
+        assertThat(tree.hasChangeCoverage(LINE)).isFalse();
+        assertThat(tree.getChangeCoverageTree())
+                .hasNoChildren()
+                .hasNoLeaves();
+        assertThat(tree.getFileAmountWithChangedCoverage()).isZero();
+        assertThat(tree.getLineAmountWithChangedCoverage()).isZero();
+    }
+
+    @Test
+    void shouldDetermineNotExistentIndirectCoverageChanges() {
+        CoverageNode tree = createTreeWithMockedTreeCreatorWithoutChanges();
+        assertThat(tree.hasIndirectCoverageChanges()).isFalse();
+        assertThat(tree.hasIndirectCoverageChanges(LINE)).isFalse();
+        assertThat(tree.getIndirectCoverageChangesTree())
+                .hasNoChildren()
+                .hasNoLeaves();
+        assertThat(tree.getFileAmountWithIndirectCoverageChanges()).isZero();
+        assertThat(tree.getLineAmountWithIndirectCoverageChanges()).isZero();
+    }
+
+    @Test
     void shouldObeyEqualsContract() {
         EqualsVerifier.forClass(CoverageNode.class)
                 .withPrefabValues(CoverageNode.class,
@@ -326,7 +478,53 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .verify();
     }
 
+    /**
+     * Reads the coverage tree from the report 'jacoco-codingstyle.xml'.
+     *
+     * @return the {@link CoverageNode} root of the tree
+     */
     private CoverageNode readExampleReport() {
         return readNode("jacoco-codingstyle.xml");
+    }
+
+    /**
+     * Creates a coverage tree with a mocked {@link CoverageTreeCreator} in order to test calculations for change
+     * coverage and indirect coverage changes.
+     *
+     * @return the {@link CoverageNode root} of the created tree
+     */
+    private CoverageNode createTreeWithMockedTreeCreator() {
+        CoverageTreeCreator coverageTreeCreator = mock(CoverageTreeCreator.class);
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, CoverageNode.ROOT, coverageTreeCreator);
+
+        FileCoverageNode fileNode = new FileCoverageNode("test", "test");
+        fileNode.putCoveragePerLine(1, Coverage.NO_COVERAGE);
+        fileNode.addChangedCodeLine(1);
+        fileNode.addChangedCodeLine(2);
+        fileNode.putIndirectCoverageChange(3, 1);
+        CoverageNode tree = readExampleReport();
+        root.add(tree);
+        root.add(fileNode);
+
+        when(coverageTreeCreator.createChangeCoverageTree(root)).thenReturn(root);
+        when(coverageTreeCreator.createIndirectCoverageChangesTree(root)).thenReturn(root);
+
+        return root;
+    }
+
+    /**
+     * Creates a coverage tree with a mocked {@link CoverageTreeCreator} and without changes in order to test
+     * calculations for non existent change coverage and indirect coverage changes.
+     *
+     * @return the {@link CoverageNode root} of the created tree
+     */
+    private CoverageNode createTreeWithMockedTreeCreatorWithoutChanges() {
+        CoverageTreeCreator coverageTreeCreator = mock(CoverageTreeCreator.class);
+        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, CoverageNode.ROOT, coverageTreeCreator);
+
+        when(coverageTreeCreator.createChangeCoverageTree(root)).thenReturn(root);
+        when(coverageTreeCreator.createIndirectCoverageChangesTree(root)).thenReturn(root);
+
+        return root;
     }
 }
