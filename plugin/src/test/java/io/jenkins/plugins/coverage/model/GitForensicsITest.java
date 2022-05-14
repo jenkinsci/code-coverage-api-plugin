@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import one.util.streamex.StreamEx;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
@@ -220,8 +217,8 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(changedFiles).extracting(FileCoverageNode::getName)
                 .containsExactly("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
-        assertThat(changedFiles).extracting(FileCoverageNode::getChangedCodeLines)
-                .containsExactly(StreamEx.of(15, 17, 63, 68, 80, 90, 130).toCollection(TreeSet::new));
+        assertThat(changedFiles).flatExtracting(FileCoverageNode::getChangedCodeLines)
+                .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
 
         assertThat(root).hasFileAmountWithChangedCoverage(2);
         assertThat(root).hasFileAmountWithIndirectCoverageChanges(1);
