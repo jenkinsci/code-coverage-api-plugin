@@ -43,7 +43,6 @@ public class CoverageNode implements Serializable {
 
     private static final Coverage COVERED_NODE = new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build();
     private static final Coverage MISSED_NODE = new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build();
-    private static final int[] EMPTY_ARRAY = new int[0];
 
     /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */
     private transient CoverageTreeCreator coverageTreeCreator;
