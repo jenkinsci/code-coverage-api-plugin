@@ -32,7 +32,7 @@
     <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
     <streamex.version>0.8.1</streamex.version>
     <gson.version>2.9.0</gson.version>
-    <jsoup.version>1.14.3</jsoup.version>
+    <jsoup.version>1.15.1</jsoup.version>
     <prism-api.version>1.26.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.1</testcontainers.version>
