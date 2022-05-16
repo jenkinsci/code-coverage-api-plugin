@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
+import static io.jenkins.plugins.coverage.model.Assertions.assertThat;
 import static io.jenkins.plugins.coverage.model.CoveragePercentage.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,7 +17,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class CoveragePercentageTest {
-
     private static final double COVERAGE_FRACTION = 0.5;
     private static final double COVERAGE_PERCENTAGE = 50.0;
     private static final Locale LOCALE = Locale.GERMAN;
@@ -75,5 +75,17 @@ class CoveragePercentageTest {
     @Test
     void shouldObeyEqualsContract() {
         EqualsVerifier.forClass(CoveragePercentage.class).verify();
+    }
+
+    @Test
+    void shouldSerializeInstance() {
+        CoveragePercentage percentage = CoveragePercentage.valueOf(49, 1);
+        assertThat(percentage.serializeToString())
+                .isEqualTo("49/1");
+        assertThat(CoveragePercentage.valueOf("49/1")).isEqualTo(percentage)
+                .hasToString("49.00%");
+
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> Coverage.valueOf("1/0"));
     }
 }
