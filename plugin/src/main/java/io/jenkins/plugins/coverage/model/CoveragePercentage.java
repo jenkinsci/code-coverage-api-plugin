@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
@@ -14,7 +15,6 @@ import org.apache.commons.lang3.math.Fraction;
  * @author Florian Orendi
  */
 public final class CoveragePercentage implements Serializable {
-
     private static final long serialVersionUID = 3324942976687883481L;
 
     static final String DENOMINATOR_ZERO_MESSAGE = "The denominator must not be zero";
@@ -59,16 +59,13 @@ public final class CoveragePercentage implements Serializable {
      *         if the denominator is zero
      */
     public static CoveragePercentage valueOf(final int numerator, final int denominator) {
-        if (denominator != 0) {
-            return new CoveragePercentage(numerator, denominator);
-        }
-        throw new IllegalArgumentException(DENOMINATOR_ZERO_MESSAGE);
+        return new CoveragePercentage(numerator, denominator);
     }
 
     /**
      * Creates a new {@link CoveragePercentage} instance from the provided string representation. The string
-     * representation is expected to contain the numerator and the denominator - separated by a slash, e.g. "100/345",
-     * or "0/1". Whitespace characters will be ignored.
+     * representation is expected to contain the numerator and the denominator - separated by a slash, e.g. "500/345",
+     * or "100/1". Whitespace characters will be ignored.
      *
      * @param stringRepresentation
      *         string representation to convert from
@@ -78,9 +75,22 @@ public final class CoveragePercentage implements Serializable {
      *         if the string is not a valid CoveragePercentage instance
      */
     public static CoveragePercentage valueOf(final String stringRepresentation) {
-        Coverage coverage = Coverage.valueOf(stringRepresentation); // Reuse serialization of coverage
+        try {
+            String cleanedFormat = StringUtils.deleteWhitespace(stringRepresentation);
+            if (StringUtils.contains(cleanedFormat, "/")) {
+                String extractedNumerator = StringUtils.substringBefore(cleanedFormat, "/");
+                String extractedDenominator = StringUtils.substringAfter(cleanedFormat, "/");
 
-        return new CoveragePercentage(coverage.getCovered(), coverage.getTotal());
+                int numerator = Integer.parseInt(extractedNumerator);
+                int denominator = Integer.parseInt(extractedDenominator);
+                return new CoveragePercentage(numerator, denominator);
+            }
+        }
+        catch (NumberFormatException exception) {
+            // ignore and throw a specific exception
+        }
+        throw new IllegalArgumentException(
+                String.format("Cannot convert %s to a valid CoveragePercentage instance.", stringRepresentation));
     }
 
     private final int numerator;
@@ -95,6 +105,9 @@ public final class CoveragePercentage implements Serializable {
      *         The denominator of the fraction which represents the percentage
      */
     private CoveragePercentage(final int numerator, final int denominator) {
+        if (denominator == 0) {
+            throw new IllegalArgumentException(DENOMINATOR_ZERO_MESSAGE);
+        }
         this.numerator = numerator;
         this.denominator = denominator;
     }
@@ -167,5 +180,10 @@ public final class CoveragePercentage implements Serializable {
      */
     public String serializeToString() {
         return String.format("%d/%d", getNumerator(), getDenominator());
+    }
+
+    @Override
+    public String toString() {
+        return formatPercentage(Locale.ENGLISH);
     }
 }

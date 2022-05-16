@@ -580,7 +580,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * reading the values back from the stream, the string representation will be converted to an actual instance
      * again.
      */
-    private static final class PercentageConverter implements Converter {
+    private static final class CoveragePercentageConverter implements Converter {
         @SuppressWarnings("PMD.NullAssignment")
         @Override
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
@@ -622,10 +622,10 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             xStream.alias("percentage", CoveragePercentage.class);
             xStream.addImmutableType(CoverageMetric.class, false);
             xStream.addImmutableType(Coverage.class, false);
-            xStream.addImmutableType(PercentageConverter.class, false);
+            xStream.addImmutableType(CoveragePercentageConverter.class, false);
             xStream.registerConverter(new CoverageMetricConverter());
             xStream.registerConverter(new CoverageConverter());
-            xStream.registerConverter(new PercentageConverter());
+            xStream.registerConverter(new CoveragePercentageConverter());
         }
 
         @Override
