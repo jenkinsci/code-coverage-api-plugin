@@ -88,10 +88,6 @@ public class CoverageReporter {
             if (delta.isPresent()) {
                 FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
 
-                // file coverage deltas
-                log.logInfo("Obtaining coverage delta for files...");
-                fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot);
-
                 try {
                     log.logInfo("Preprocessing code changes...");
                     Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
@@ -108,6 +104,10 @@ public class CoverageReporter {
                     log.logInfo("Obtaining indirect coverage changes...");
                     fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
                             mappedChanges, oldPathMapping);
+
+                    // file coverage deltas
+                    log.logInfo("Obtaining coverage delta for files...");
+                    fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
                 }
                 catch (CodeDeltaException e) {
                     log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
