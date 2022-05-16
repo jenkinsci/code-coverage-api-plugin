@@ -39,8 +39,8 @@
         <counter type="METHOD" missed="1" covered="1"/>
         <counter type="CLASS" missed="0" covered="1"/>
     </package>
-    <package name="test/example">
-        <class name="test/example/Test1" sourcefilename="Test1.java">
+    <package name="test/example/old">
+        <class name="test/example/old/Test1" sourcefilename="Test1.java">
             <method name="&lt;init&gt;" desc="()V" line="3">
                 <counter type="INSTRUCTION" missed="0" covered="3"/>
                 <counter type="LINE" missed="0" covered="1"/>
