@@ -79,10 +79,10 @@ class CoveragePercentageTest {
 
     @Test
     void shouldSerializeInstance() {
-        CoveragePercentage percentage = CoveragePercentage.valueOf(49, 1);
+        CoveragePercentage percentage = valueOf(49, 1);
         assertThat(percentage.serializeToString())
                 .isEqualTo("49/1");
-        assertThat(CoveragePercentage.valueOf("49/1")).isEqualTo(percentage)
+        assertThat(valueOf("49/1")).isEqualTo(percentage)
                 .hasToString("49.00%");
 
         assertThatIllegalArgumentException().isThrownBy(
