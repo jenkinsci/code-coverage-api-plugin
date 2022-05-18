@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -26,6 +29,7 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 import hudson.util.XStream2;
 
+import io.jenkins.plugins.coverage.model.CoverageBuildAction.LineMapConverter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -552,9 +556,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * {@link Converter} for {@link Coverage} instances so that only the values will be serialized. After
-     * reading the values back from the stream, the string representation will be converted to an actual instance
-     * again.
+     * {@link Converter} for {@link Coverage} instances so that only the values will be serialized. After reading the
+     * values back from the stream, the string representation will be converted to an actual instance again.
      */
     private static final class CoverageConverter implements Converter {
         @SuppressWarnings("PMD.NullAssignment")
@@ -585,7 +588,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         @Override
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
                 final MarshallingContext context) {
-            writer.setValue(source instanceof CoveragePercentage ? ((CoveragePercentage) source).serializeToString() : null);
+            writer.setValue(
+                    source instanceof CoveragePercentage ? ((CoveragePercentage) source).serializeToString() : null);
         }
 
         @Override
@@ -600,12 +604,71 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
+     * {@link Converter} for a {@link SortedMap} of coverages per line. Stores the mapping in the condensed format
+     * {@code key1: covered1/missed1, key2: covered2/missed2, ...}.
+     */
+    static final class LineMapConverter implements Converter {
+        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof TreeMap ? (marshal((TreeMap) source)) : null);
+        }
+
+        String marshal(final SortedMap<Integer, Coverage> source) {
+            return source.entrySet()
+                    .stream()
+                    .map(e -> String.format("%d: %s", e.getKey(), e.getValue().serializeToString()))
+                    .collect(Collectors.joining(", "));
+        }
+
+        @Override
+        public SortedMap<Integer, Coverage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return unmarshal(reader.getValue());
+        }
+
+        SortedMap<Integer, Coverage> unmarshal(final String value) {
+            TreeMap<Integer, Coverage> map = new TreeMap<>();
+
+            String cleanInput = StringUtils.deleteWhitespace(value);
+
+            if (!StringUtils.containsAny(cleanInput, ',', ':')) {
+                return map;
+            }
+
+            String[] entries = StringUtils.split(cleanInput, ",");
+            for (String entry : entries) {
+                if (StringUtils.contains(entry, ":")) {
+                    addMapping(map, entry);
+                }
+            }
+            return map;
+        }
+
+        private void addMapping(final TreeMap<Integer, Coverage> map,
+                final String entry) {
+            try {
+                Integer key = Integer.valueOf(StringUtils.substringBefore(entry, ':'));
+                Coverage coverage = Coverage.valueOf(StringUtils.substringAfter(entry, ':'));
+                map.put(key, coverage);
+            }
+            catch (IllegalArgumentException exception) {
+                // ignore
+            }
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == TreeMap.class;
+        }
+    }
+
+    /**
      * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}.
      */
     static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
-
         /**
-         * Creates a XML stream for {@link CoverageNode}.
+         * Creates an XML stream for {@link CoverageNode}.
          */
         CoverageXmlStream() {
             super(CoverageNode.class);
@@ -626,6 +689,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             xStream.registerConverter(new CoverageMetricConverter());
             xStream.registerConverter(new CoverageConverter());
             xStream.registerConverter(new CoveragePercentageConverter());
+            xStream.registerLocalConverter(FileCoverageNode.class, "coveragePerLine", new LineMapConverter());
         }
 
         @Override
