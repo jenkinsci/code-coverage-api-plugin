@@ -1,8 +1,12 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -125,31 +129,41 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
     }
 
     /**
-     * {@link Converter} for a {@link SortedMap} of coverages per line. Stores the mapping in the condensed format
-     * {@code key1: covered1/missed1, key2: covered2/missed2, ...}.
+     * {@link Converter} base class for {@link TreeMap} instance. Stores the mappings in a condensed format
+     * {@code key1: value1, key2: value2, ...}.
+     *
+     * @param <K>
+     *         the type of keys maintained by this map
+     * @param <V>
+     *         the type of mapped values
      */
-    static final class LineMapConverter implements Converter {
-        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
+    abstract static class TreeMapConverter<K extends Comparable<K>, V> implements Converter {
         @Override
+        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
                 final MarshallingContext context) {
-            writer.setValue(source instanceof SortedMap ? marshal((NavigableMap<Integer, Coverage>) source) : null);
+            writer.setValue(source instanceof SortedMap ? marshal((NavigableMap<K, V>) source) : null);
         }
 
-        String marshal(final SortedMap<Integer, Coverage> source) {
+        String marshal(final SortedMap<K, V> source) {
             return source.entrySet()
                     .stream()
-                    .map(e -> String.format("%d: %s", e.getKey(), e.getValue().serializeToString()))
+                    .map(createMapEntry())
                     .collect(Collectors.joining(", "));
         }
 
         @Override
-        public NavigableMap<Integer, Coverage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+        public boolean canConvert(final Class type) {
+            return type == TreeMap.class;
+        }
+
+        @Override
+        public NavigableMap<K, V> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
             return unmarshal(reader.getValue());
         }
 
-        NavigableMap<Integer, Coverage> unmarshal(final String value) {
-            NavigableMap<Integer, Coverage> map = new TreeMap<>();
+        NavigableMap<K, V> unmarshal(final String value) {
+            NavigableMap<K, V> map = new TreeMap<>();
 
             String cleanInput = StringUtils.deleteWhitespace(value);
 
@@ -158,89 +172,63 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
             }
 
             String[] entries = StringUtils.split(cleanInput, ",");
-            for (String entry : entries) {
-                if (StringUtils.contains(entry, ":")) {
-                    addMapping(map, entry);
+            for (String marshalledValue : entries) {
+                if (StringUtils.contains(marshalledValue, ":")) {
+                    try {
+                        Entry<K, V> entry = createMapping(marshalledValue);
+                        map.put(entry.getKey(), entry.getValue());
+                    }
+                    catch (IllegalArgumentException exception) {
+                        // ignore
+                    }
                 }
             }
             return map;
         }
 
-        private void addMapping(final NavigableMap<Integer, Coverage> map,
-                final String entry) {
-            try {
-                Integer key = Integer.valueOf(StringUtils.substringBefore(entry, ':'));
-                Coverage coverage = Coverage.valueOf(StringUtils.substringAfter(entry, ':'));
-                map.put(key, coverage);
-            }
-            catch (IllegalArgumentException exception) {
-                // ignore
-            }
-        }
+        protected abstract Function<Entry<K, V>, String> createMapEntry();
 
-        @Override
-        public boolean canConvert(final Class type) {
-            return type == TreeMap.class;
+        protected abstract Map.Entry<K, V> createMapping(String entry);
+
+        protected SimpleEntry<K, V> entry(final K key, final V value) {
+            return new SimpleEntry<>(key, value);
         }
     }
 
     /**
-     * {@link Converter} for a {@link SortedMap} of coverage percentages per metric. Stores the mapping in the condensed format
-     * {@code metric1: numerator1/denominator1, metric2: numerator2/denominator2, ...}.
+     * {@link Converter} for a {@link SortedMap} of coverages per line. Stores the mapping in the condensed format
+     * {@code key1: covered1/missed1, key2: covered2/missed2, ...}.
      */
-    static final class MetricPercentageMapConverter implements Converter {
-        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
-        @Override
-        public void marshal(final Object source, final HierarchicalStreamWriter writer,
-                final MarshallingContext context) {
-            writer.setValue(source instanceof SortedMap ? marshal((NavigableMap<CoverageMetric, CoveragePercentage>) source) : null);
-        }
-
-        String marshal(final NavigableMap<CoverageMetric, CoveragePercentage> source) {
-            return source.entrySet()
-                    .stream()
-                    .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue().serializeToString()))
-                    .collect(Collectors.joining(", "));
+    static final class LineMapConverter extends TreeMapConverter<Integer, Coverage> {
+        protected Function<Entry<Integer, Coverage>, String> createMapEntry() {
+            return e -> String.format("%d: %s", e.getKey(), e.getValue().serializeToString());
         }
 
         @Override
-        public NavigableMap<CoverageMetric, CoveragePercentage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-            return unmarshal(reader.getValue());
+        protected Entry<Integer, Coverage> createMapping(final String entry) {
+            Integer key = Integer.valueOf(StringUtils.substringBefore(entry, ':'));
+            Coverage value = Coverage.valueOf(StringUtils.substringAfter(entry, ':'));
+
+            return entry(key, value);
         }
+    }
 
-        NavigableMap<CoverageMetric, CoveragePercentage> unmarshal(final String value) {
-            TreeMap<CoverageMetric, CoveragePercentage> map = new TreeMap<>();
-
-            String cleanInput = StringUtils.deleteWhitespace(value);
-
-            if (!StringUtils.containsAny(cleanInput, ',', ':')) {
-                return map;
-            }
-
-            String[] entries = StringUtils.split(cleanInput, ",");
-            for (String entry : entries) {
-                if (StringUtils.contains(entry, ":")) {
-                    addMapping(map, entry);
-                }
-            }
-            return map;
-        }
-
-        private void addMapping(final NavigableMap<CoverageMetric, CoveragePercentage> map,
-                final String entry) {
-            try {
-                CoverageMetric key = CoverageMetric.valueOf(StringUtils.substringBefore(entry, ':'));
-                CoveragePercentage coverage = CoveragePercentage.valueOf(StringUtils.substringAfter(entry, ':'));
-                map.put(key, coverage);
-            }
-            catch (IllegalArgumentException exception) {
-                // ignore
-            }
+    /**
+     * {@link Converter} for a {@link SortedMap} of coverage percentages per metric. Stores the mapping in the condensed
+     * format {@code metric1: numerator1/denominator1, metric2: numerator2/denominator2, ...}.
+     */
+    static final class MetricPercentageMapConverter extends TreeMapConverter<CoverageMetric, CoveragePercentage> {
+        @Override
+        protected Function<Entry<CoverageMetric, CoveragePercentage>, String> createMapEntry() {
+            return e -> String.format("%s: %s", e.getKey().getName(), e.getValue().serializeToString());
         }
 
         @Override
-        public boolean canConvert(final Class type) {
-            return type == TreeMap.class;
+        protected Entry<CoverageMetric, CoveragePercentage> createMapping(final String entry) {
+            CoverageMetric key = CoverageMetric.valueOf(StringUtils.substringBefore(entry, ':'));
+            CoveragePercentage value = CoveragePercentage.valueOf(StringUtils.substringAfter(entry, ':'));
+
+            return entry(key, value);
         }
     }
 }
