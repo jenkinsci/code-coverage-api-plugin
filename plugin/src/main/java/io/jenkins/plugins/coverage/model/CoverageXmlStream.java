@@ -1,12 +1,17 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +30,14 @@ import io.jenkins.plugins.util.AbstractXmlStream;
  * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}s.
  */
 class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
+    private static final Collector<CharSequence, ?, String> ARRAY_JOINER = Collectors.joining(", ", "[", "]");
+
+    private static String[] toArray(final String value) {
+        String cleanInput = StringUtils.removeEnd(StringUtils.removeStart(StringUtils.deleteWhitespace(value), "["), "]");
+
+        return StringUtils.split(cleanInput, ",");
+    }
+
     /**
      * Creates an XML stream for {@link CoverageNode}.
      */
@@ -49,6 +62,8 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         xStream.registerConverter(new CoveragePercentageConverter());
         xStream.registerLocalConverter(FileCoverageNode.class, "coveragePerLine", new LineMapConverter());
         xStream.registerLocalConverter(FileCoverageNode.class, "fileCoverageDelta", new MetricPercentageMapConverter());
+        xStream.registerLocalConverter(FileCoverageNode.class, "indirectCoverageChanges", new HitsMapConverter());
+        xStream.registerLocalConverter(FileCoverageNode.class, "changedCodeLines", new IntegerSetConverter());
     }
 
     @Override
@@ -129,6 +144,38 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
     }
 
     /**
+     * {@link Converter} for a {@link TreeSet} of integers that serializes just the values. After
+     * reading the values back from the stream, the string representation will be converted to an actual instance
+     * again.
+     */
+    static final class IntegerSetConverter implements Converter {
+        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof TreeSet ? marshal((TreeSet<Integer>) source) : null);
+        }
+
+        String marshal(final Set<Integer> lines) {
+            return lines.stream().map(String::valueOf).collect(ARRAY_JOINER);
+        }
+
+        @Override
+        public NavigableSet<Integer> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return unmarshal(reader.getValue());
+        }
+
+        NavigableSet<Integer> unmarshal(final String value) {
+            return Arrays.stream(toArray(value)).map(Integer::valueOf).collect(Collectors.toCollection(TreeSet::new));
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == TreeSet.class;
+        }
+    }
+
+    /**
      * {@link Converter} base class for {@link TreeMap} instance. Stores the mappings in a condensed format
      * {@code key1: value1, key2: value2, ...}.
      *
@@ -149,7 +196,7 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
             return source.entrySet()
                     .stream()
                     .map(createMapEntry())
-                    .collect(Collectors.joining(", "));
+                    .collect(ARRAY_JOINER);
         }
 
         @Override
@@ -165,17 +212,12 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         NavigableMap<K, V> unmarshal(final String value) {
             NavigableMap<K, V> map = new TreeMap<>();
 
-            String cleanInput = StringUtils.deleteWhitespace(value);
-
-            if (!StringUtils.containsAny(cleanInput, ',', ':')) {
-                return map;
-            }
-
-            String[] entries = StringUtils.split(cleanInput, ",");
-            for (String marshalledValue : entries) {
+            for (String marshalledValue : toArray(value)) {
                 if (StringUtils.contains(marshalledValue, ":")) {
                     try {
-                        Entry<K, V> entry = createMapping(marshalledValue);
+                        Entry<K, V> entry = createMapping(
+                                StringUtils.substringBefore(marshalledValue, ':'),
+                                StringUtils.substringAfter(marshalledValue, ':'));
                         map.put(entry.getKey(), entry.getValue());
                     }
                     catch (IllegalArgumentException exception) {
@@ -188,7 +230,7 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
 
         protected abstract Function<Entry<K, V>, String> createMapEntry();
 
-        protected abstract Map.Entry<K, V> createMapping(String entry);
+        protected abstract Map.Entry<K, V> createMapping(String key, String value);
 
         protected SimpleEntry<K, V> entry(final K key, final V value) {
             return new SimpleEntry<>(key, value);
@@ -205,11 +247,8 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         }
 
         @Override
-        protected Entry<Integer, Coverage> createMapping(final String entry) {
-            Integer key = Integer.valueOf(StringUtils.substringBefore(entry, ':'));
-            Coverage value = Coverage.valueOf(StringUtils.substringAfter(entry, ':'));
-
-            return entry(key, value);
+        protected Entry<Integer, Coverage> createMapping(final String key, final String value) {
+            return entry(Integer.valueOf(key), Coverage.valueOf(value));
         }
     }
 
@@ -224,11 +263,24 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         }
 
         @Override
-        protected Entry<CoverageMetric, CoveragePercentage> createMapping(final String entry) {
-            CoverageMetric key = CoverageMetric.valueOf(StringUtils.substringBefore(entry, ':'));
-            CoveragePercentage value = CoveragePercentage.valueOf(StringUtils.substringAfter(entry, ':'));
+        protected Entry<CoverageMetric, CoveragePercentage> createMapping(final String key, final String value) {
+            return entry(CoverageMetric.valueOf(key), CoveragePercentage.valueOf(value));
+        }
+    }
 
-            return entry(key, value);
+    /**
+     * {@link Converter} for a {@link SortedMap} of coverage hits per line. Stores the mapping in the condensed
+     * format {@code line1: hits1, line2: hits2, ...}.
+     */
+    static final class HitsMapConverter extends TreeMapConverter<Integer, Integer> {
+        @Override
+        protected Function<Entry<Integer, Integer>, String> createMapEntry() {
+            return e -> String.format("%d: %d", e.getKey(), e.getValue());
+        }
+
+        @Override
+        protected Entry<Integer, Integer> createMapping(final String key, final String value) {
+            return entry(Integer.valueOf(key), Integer.valueOf(value));
         }
     }
 }
