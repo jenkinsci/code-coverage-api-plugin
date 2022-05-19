@@ -11,9 +11,8 @@ import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction.CoverageXmlStream;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction.LineMapConverter;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction.MetricPercentageMapConverter;
+import io.jenkins.plugins.coverage.model.CoverageXmlStream.LineMapConverter;
+import io.jenkins.plugins.coverage.model.CoverageXmlStream.MetricPercentageMapConverter;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
