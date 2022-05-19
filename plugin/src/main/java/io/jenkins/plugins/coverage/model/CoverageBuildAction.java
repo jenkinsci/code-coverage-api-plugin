@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -612,7 +613,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         @Override
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
                 final MarshallingContext context) {
-            writer.setValue(source instanceof TreeMap ? (marshal((TreeMap) source)) : null);
+            writer.setValue(source instanceof SortedMap ? (marshal((NavigableMap<Integer, Coverage>) source)) : null);
         }
 
         String marshal(final SortedMap<Integer, Coverage> source) {
@@ -623,12 +624,12 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         }
 
         @Override
-        public SortedMap<Integer, Coverage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+        public NavigableMap<Integer, Coverage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
             return unmarshal(reader.getValue());
         }
 
-        SortedMap<Integer, Coverage> unmarshal(final String value) {
-            TreeMap<Integer, Coverage> map = new TreeMap<>();
+        NavigableMap<Integer, Coverage> unmarshal(final String value) {
+            NavigableMap<Integer, Coverage> map = new TreeMap<>();
 
             String cleanInput = StringUtils.deleteWhitespace(value);
 
@@ -645,11 +646,71 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             return map;
         }
 
-        private void addMapping(final TreeMap<Integer, Coverage> map,
+        private void addMapping(final NavigableMap<Integer, Coverage> map,
                 final String entry) {
             try {
                 Integer key = Integer.valueOf(StringUtils.substringBefore(entry, ':'));
                 Coverage coverage = Coverage.valueOf(StringUtils.substringAfter(entry, ':'));
+                map.put(key, coverage);
+            }
+            catch (IllegalArgumentException exception) {
+                // ignore
+            }
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == TreeMap.class;
+        }
+    }
+
+    /**
+     * {@link Converter} for a {@link SortedMap} of coverage percentages per metric. Stores the mapping in the condensed format
+     * {@code metric1: numerator1/denominator1, metric2: numerator2/denominator2, ...}.
+     */
+    static final class MetricPercentageMapConverter implements Converter {
+        @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof SortedMap ? (marshal((NavigableMap<CoverageMetric, CoveragePercentage>) source)) : null);
+        }
+
+        String marshal(final NavigableMap<CoverageMetric, CoveragePercentage> source) {
+            return source.entrySet()
+                    .stream()
+                    .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue().serializeToString()))
+                    .collect(Collectors.joining(", "));
+        }
+
+        @Override
+        public NavigableMap<CoverageMetric, CoveragePercentage> unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return unmarshal(reader.getValue());
+        }
+
+        NavigableMap<CoverageMetric, CoveragePercentage> unmarshal(final String value) {
+            TreeMap<CoverageMetric, CoveragePercentage> map = new TreeMap<>();
+
+            String cleanInput = StringUtils.deleteWhitespace(value);
+
+            if (!StringUtils.containsAny(cleanInput, ',', ':')) {
+                return map;
+            }
+
+            String[] entries = StringUtils.split(cleanInput, ",");
+            for (String entry : entries) {
+                if (StringUtils.contains(entry, ":")) {
+                    addMapping(map, entry);
+                }
+            }
+            return map;
+        }
+
+        private void addMapping(final NavigableMap<CoverageMetric, CoveragePercentage> map,
+                final String entry) {
+            try {
+                CoverageMetric key = CoverageMetric.valueOf(StringUtils.substringBefore(entry, ':'));
+                CoveragePercentage coverage = CoveragePercentage.valueOf(StringUtils.substringAfter(entry, ':'));
                 map.put(key, coverage);
             }
             catch (IllegalArgumentException exception) {
@@ -690,6 +751,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             xStream.registerConverter(new CoverageConverter());
             xStream.registerConverter(new CoveragePercentageConverter());
             xStream.registerLocalConverter(FileCoverageNode.class, "coveragePerLine", new LineMapConverter());
+            xStream.registerLocalConverter(FileCoverageNode.class, "fileCoverageDelta", new MetricPercentageMapConverter());
         }
 
         @Override

@@ -13,6 +13,7 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction.CoverageXmlStream;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction.LineMapConverter;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction.MetricPercentageMapConverter;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
@@ -79,5 +80,32 @@ class CoverageXmlStreamTest extends SerializableTest<CoverageNode> {
                 .containsExactly(entry(10, first));
         assertThat(converter.unmarshal("10: 5/8, 20: 6/6"))
                 .containsExactly(entry(10, first), entry(20, BUILDER.setCovered(6).setTotal(6).build()));
+    }
+
+    @Test
+    void shouldConvertMetricMap2String() {
+        TreeMap<CoverageMetric, CoveragePercentage> map = new TreeMap<>();
+
+        MetricPercentageMapConverter converter = new MetricPercentageMapConverter();
+
+        assertThat(converter.marshal(map)).isEmpty();
+
+        map.put(CoverageMetric.BRANCH, CoveragePercentage.valueOf(50, 1));
+        assertThat(converter.marshal(map)).isEqualTo("Branch: 50/1");
+
+        map.put(CoverageMetric.LINE, CoveragePercentage.valueOf(3, 4));
+        assertThat(converter.marshal(map)).isEqualTo("Line: 3/4, Branch: 50/1");
+    }
+
+    @Test
+    void shouldConvertString2MetricMap() {
+        MetricPercentageMapConverter converter = new MetricPercentageMapConverter();
+
+        assertThat(converter.unmarshal("")).isEmpty();
+        CoveragePercentage first = CoveragePercentage.valueOf(50, 1);
+        assertThat(converter.unmarshal("Branch: 50/1"))
+                .containsExactly(entry(CoverageMetric.BRANCH, first));
+        assertThat(converter.unmarshal("Line: 3/4, Branch: 50/1"))
+                .containsExactly(entry(CoverageMetric.LINE, CoveragePercentage.valueOf(3, 4)), entry(CoverageMetric.BRANCH, first));
     }
 }

@@ -21,15 +21,14 @@ public class FileCoverageNode extends CoverageNode {
 
     private final String sourcePath;
 
-    // new since 3.0.0
     /**
      * The {@link Coverage} represents both line and branch coverage per line since it can be differentiated by the
      * total number of covered and missed cases and saves disk space.
      */
-    private SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>();
-    private SortedMap<CoverageMetric, CoveragePercentage> fileCoverageDelta = new TreeMap<>();
-    private SortedMap<Integer, Integer> indirectCoverageChanges = new TreeMap<>();
-    private SortedSet<Integer> changedCodeLines = new TreeSet<>();
+    private SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>(); // since 3.0.0
+    private SortedMap<CoverageMetric, CoveragePercentage> fileCoverageDelta = new TreeMap<>(); // since 3.0.0
+    private SortedMap<Integer, Integer> indirectCoverageChanges = new TreeMap<>(); // since 3.0.0
+    private SortedSet<Integer> changedCodeLines = new TreeSet<>(); // since 3.0.0
 
     /**
      * Creates a new {@link FileCoverageNode} with the given name.
