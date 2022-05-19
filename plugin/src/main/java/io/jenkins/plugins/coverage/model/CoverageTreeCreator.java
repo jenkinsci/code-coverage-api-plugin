@@ -208,7 +208,7 @@ public class CoverageTreeCreator {
                 }
             }
             else if (delta < 0) {
-                // the line is not covered any more
+                // the line is not covered anymore
                 if (currentCoverage.getCovered() == 0) {
                     lineCoverage = lineCoverage.add(new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build());
                 }
