@@ -4,6 +4,6 @@
 }
 
 .coverage-column-outer {
-    border: 1px solid var(--light-bg-color);
+    border: 1px solid var(--medium-grey);
     border-radius: 10px
 }
