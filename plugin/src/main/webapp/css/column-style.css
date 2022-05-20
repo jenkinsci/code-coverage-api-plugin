@@ -1,0 +1,9 @@
+.coverage-column-inner {
+    padding: 4px 7px;
+    border-radius: 10px
+}
+
+.coverage-column-outer {
+    border: 1px solid var(--light-bg-color);
+    border-radius: 10px
+}
