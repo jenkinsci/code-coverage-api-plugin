@@ -470,23 +470,23 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             // fileColumn.setWidth(2);
             columns.add(fileColumn);
 
-            TableColumn lineColumn = new TableColumn("Line", "lineCoverage", "number");
+            TableColumn lineColumn = new TableColumn("Line", "lineCoverage", "number").setHeaderClass(ColumnCss.NUMBER);
             // lineColumn.setWidth(2);
             columns.add(lineColumn);
 
-            TableColumn lineColumnDelta = new TableColumn("Line Δ", "lineCoverageDelta", "number");
+            TableColumn lineColumnDelta = new TableColumn("Line Δ", "lineCoverageDelta", "number").setHeaderClass(ColumnCss.NUMBER);
             // lineColumnDelta.setWidth(1);
             columns.add(lineColumnDelta);
 
-            TableColumn branchColumn = new TableColumn("Branch", "branchCoverage", "number");
+            TableColumn branchColumn = new TableColumn("Branch", "branchCoverage", "number").setHeaderClass(ColumnCss.NUMBER);
             // branchColumn.setWidth(2);
             columns.add(branchColumn);
 
-            TableColumn branchColumnDelta = new TableColumn("Branch Δ", "branchCoverageDelta", "number");
+            TableColumn branchColumnDelta = new TableColumn("Branch Δ", "branchCoverageDelta", "number").setHeaderClass(ColumnCss.NUMBER);
             // branchColumnDelta.setWidth(1);
             columns.add(branchColumnDelta);
 
-            TableColumn loc = new TableColumn("LOC", "loc", "number");
+            TableColumn loc = new TableColumn("LOC", "loc", "number").setHeaderClass(ColumnCss.NUMBER);
             // loc.setWidth(1);
             columns.add(loc);
 
@@ -699,7 +699,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         private final CoverageNode changeRoot;
 
         /**
-         * Creates a indirect coverage changes table model.
+         * Creates an indirect coverage changes table model.
          *
          * @param root
          *         The root of the origin coverage tree
