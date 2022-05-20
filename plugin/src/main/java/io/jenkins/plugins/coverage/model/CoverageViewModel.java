@@ -582,13 +582,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             double percentage = coverage.getDoubleValue();
             String sort = String.valueOf(percentage);
             DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
-            String tag = span()
-                    .withTitle(tooltip)
-                    .withStyle(String.format(
-                            "color:%s; background-image: linear-gradient(90deg, %s %f%%, transparent %f%%); display:block;",
+            String tag = div().withClasses("coverage-column-outer").with(
+                    div().withClasses("coverage-column-inner")
+                            .withStyle(String.format("color:%s; background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
                             colors.getLineColorAsHex(), colors.getFillColorAsHex(),
                             percentage, percentage))
-                    .withText(text)
+                            .withTitle(tooltip)
+                            .withText(text))
                     .render();
             return new DetailedColumnDefinition(tag, sort);
         }
@@ -610,12 +610,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             String sort = String.valueOf(coverageValue);
             DisplayColors colors = CoverageChangeTendency
                     .getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
-            String tag = span()
-                    .withClasses("badge", "badge-delta")
+            String tag = div().withClasses("coverage-column-outer").with(
+                    div().withClasses("coverage-column-inner")
                     .withStyle(String.format("color:%s;background-color:%s;",
                             colors.getLineColorAsHex(), colors.getFillColorAsHex()))
                     .withText(coverageText)
-                    .withTitle(tooltip)
+                    .withTitle(tooltip))
                     .render();
             return new DetailedColumnDefinition(tag, sort);
         }
