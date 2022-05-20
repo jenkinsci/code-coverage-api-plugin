@@ -189,7 +189,7 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         @SuppressWarnings({"PMD.NullAssignment", "unchecked"})
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
                 final MarshallingContext context) {
-            writer.setValue(source instanceof SortedMap ? marshal((NavigableMap<K, V>) source) : null);
+            writer.setValue(source instanceof NavigableMap ? marshal((NavigableMap<K, V>) source) : null);
         }
 
         String marshal(final SortedMap<K, V> source) {
@@ -242,6 +242,7 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
      * {@code key1: covered1/missed1, key2: covered2/missed2, ...}.
      */
     static final class LineMapConverter extends TreeMapConverter<Integer, Coverage> {
+        @Override
         protected Function<Entry<Integer, Coverage>, String> createMapEntry() {
             return e -> String.format("%d: %s", e.getKey(), e.getValue().serializeToString());
         }
