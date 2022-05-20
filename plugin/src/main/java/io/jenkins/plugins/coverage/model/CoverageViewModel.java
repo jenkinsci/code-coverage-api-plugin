@@ -510,6 +510,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * UI row model for the coverage details table.
      */
     private static class CoverageRow {
+        private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer";
+        private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
         private final CoverageNode root;
         private final Locale browserLocale;
 
@@ -532,14 +534,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         public DetailedColumnDefinition getLineCoverage() {
             Coverage coverage = root.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The total line coverage of the file");
+            return createColoredCoverageColumn(coverage, "The total line coverage of the file");
         }
 
         public DetailedColumnDefinition getBranchCoverage() {
             Coverage coverage = root.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The total branch coverage of the file");
+            return createColoredCoverageColumn(coverage, "The total branch coverage of the file");
         }
 
         public DetailedColumnDefinition getLineCoverageDelta() {
@@ -558,39 +558,32 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "0");
         }
 
-        protected String printCoverage(final Coverage coverage) {
-            if (coverage.isSet()) {
-                return coverage.formatCoveredPercentage(browserLocale);
-            }
-            return Messages.Coverage_Not_Available();
-        }
-
         /**
          * Creates a table cell which colorizes the shown coverage dependent on the coverage percentage.
          *
          * @param coverage
-         *         The coverage as percentage
-         * @param text
-         *         The text to be shown which represents the coverage
+         *         the coverage of the element
          * @param tooltip
-         *         The tooltip which describes the value
+         *         the tooltip which describes the value
          *
          * @return the create {@link DetailedColumnDefinition}
          */
-        protected DetailedColumnDefinition createColoredCoverageColumn(final CoveragePercentage coverage,
-                final String text, final String tooltip) {
-            double percentage = coverage.getDoubleValue();
-            String sort = String.valueOf(percentage);
-            DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
-            String tag = div().withClasses("coverage-column-outer").with(
-                    div().withClasses("coverage-column-inner")
-                            .withStyle(String.format("color:%s; background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
-                            colors.getLineColorAsHex(), colors.getFillColorAsHex(),
-                            percentage, percentage))
-                            .withTitle(tooltip)
-                            .withText(text))
-                    .render();
-            return new DetailedColumnDefinition(tag, sort);
+        protected DetailedColumnDefinition createColoredCoverageColumn(final Coverage coverage, final String tooltip) {
+            double percentage = coverage.getCoveredPercentage().getDoubleValue();
+            if (coverage.isSet()) {
+                DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
+                String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
+                                div().withClasses(COVERAGE_COLUMN_INNER)
+                                        .withStyle(String.format(
+                                                "color:%s; background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
+                                                colors.getLineColorAsHex(), colors.getFillColorAsHex(),
+                                                percentage, percentage))
+                                        .withTitle(tooltip)
+                                        .withText(coverage.formatCoveredPercentage(browserLocale)))
+                        .render();
+                return new DetailedColumnDefinition(cell, String.valueOf(percentage));
+            }
+            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-");
         }
 
         /**
@@ -608,16 +601,15 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             double coverageValue = coveragePercentage.getDoubleValue();
             String coverageText = coveragePercentage.formatDeltaPercentage(browserLocale);
             String sort = String.valueOf(coverageValue);
-            DisplayColors colors = CoverageChangeTendency
-                    .getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
-            String tag = div().withClasses("coverage-column-outer").with(
-                    div().withClasses("coverage-column-inner")
+            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
+            String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
+                    div().withClasses(COVERAGE_COLUMN_INNER)
                     .withStyle(String.format("color:%s;background-color:%s;",
                             colors.getLineColorAsHex(), colors.getFillColorAsHex()))
                     .withText(coverageText)
                     .withTitle(tooltip))
                     .render();
-            return new DetailedColumnDefinition(tag, sort);
+            return new DetailedColumnDefinition(cell, sort);
         }
 
         protected CoverageNode getRoot() {
@@ -654,7 +646,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @since 3.0.0
      */
     static class ChangeCoverageTable extends CoverageTableModel {
-
         private final CoverageNode changeRoot;
 
         /**
@@ -758,15 +749,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public DetailedColumnDefinition getLineCoverage() {
             Coverage coverage = changedFileNode.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The line change coverage");
+            return createColoredCoverageColumn(coverage, "The line change coverage");
         }
 
         @Override
         public DetailedColumnDefinition getBranchCoverage() {
             Coverage coverage = changedFileNode.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The branch change coverage");
+            return createColoredCoverageColumn(coverage, "The branch change coverage");
         }
 
         @Override
@@ -805,7 +794,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @since 3.0.0
      */
     private static class IndirectCoverageChangesRow extends CoverageRow {
-
         private final FileCoverageNode changedFileNode;
 
         /**
@@ -827,15 +815,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         @Override
         public DetailedColumnDefinition getLineCoverage() {
             Coverage coverage = changedFileNode.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The indirect line coverage changes");
+            return createColoredCoverageColumn(coverage, "The indirect line coverage changes");
         }
 
         @Override
         public DetailedColumnDefinition getBranchCoverage() {
             Coverage coverage = changedFileNode.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage.getCoveredPercentage(), printCoverage(coverage),
-                    "The indirect branch coverage changes");
+            return createColoredCoverageColumn(coverage, "The indirect branch coverage changes");
         }
 
         @Override
