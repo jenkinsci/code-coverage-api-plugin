@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -49,7 +51,7 @@ class PackageCoverageNodeTest {
      */
     private PackageCoverageNode createPackageCoverageNode() {
         CoverageNode parent = new CoverageNode(CoverageMetric.MODULE, "");
-        CoverageLeaf leaf = new CoverageLeaf(CoverageMetric.LINE, Coverage.NO_COVERAGE);
+        CoverageLeaf leaf = new CoverageLeaf(CoverageMetric.LINE, CoverageBuilder.NO_COVERAGE);
         PackageCoverageNode node = new PackageCoverageNode(PACKAGE);
         node.setParent(parent);
         parent.add(node);

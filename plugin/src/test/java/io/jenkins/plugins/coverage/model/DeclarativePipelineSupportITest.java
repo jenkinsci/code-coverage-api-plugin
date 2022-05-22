@@ -38,7 +38,7 @@ class DeclarativePipelineSupportITest extends IntegrationTestWithJenkinsPerSuite
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(job);
         assertThat(build.getAction(CoverageBuildAction.class).getLineCoverage())
-                .isEqualTo(new Coverage(6083, 6368 - 6083));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(6083).setMissed(6368 - 6083).build());
     }
 }
 

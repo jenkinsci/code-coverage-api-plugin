@@ -7,12 +7,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -24,7 +18,6 @@ import hudson.Functions;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Run;
-import hudson.util.XStream2;
 
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
@@ -527,55 +520,4 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         return DETAILS_URL;
     }
 
-    /**
-     * {@link Converter} for {@link CoverageMetric} instances so that only the string name will be serialized. After
-     * reading the values back from the stream, the string representation will be converted to an actual instance
-     * again.
-     */
-    private static final class MetricsConverter implements Converter {
-        @SuppressWarnings("PMD.NullAssignment")
-        @Override
-        public void marshal(final Object source, final HierarchicalStreamWriter writer,
-                final MarshallingContext context) {
-            writer.setValue(source instanceof CoverageMetric ? ((CoverageMetric) source).getName() : null);
-        }
-
-        @Override
-        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-            return CoverageMetric.valueOf(reader.getValue());
-        }
-
-        @Override
-        public boolean canConvert(final Class type) {
-            return type == CoverageMetric.class;
-        }
-    }
-
-    /**
-     * Configures the XML stream for the coverage tree, which consists of {@link CoverageNode}.
-     */
-    static class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
-
-        /**
-         * Creates a XML stream for {@link CoverageNode}.
-         */
-        CoverageXmlStream() {
-            super(CoverageNode.class);
-        }
-
-        @Override
-        protected void configureXStream(final XStream2 xStream) {
-            xStream.alias("node", CoverageNode.class);
-            xStream.alias("leaf", CoverageLeaf.class);
-            xStream.alias("coverage", Coverage.class);
-            xStream.alias("coveragePercentage", CoveragePercentage.class);
-            xStream.addImmutableType(CoverageMetric.class, false);
-            xStream.registerConverter(new MetricsConverter());
-        }
-
-        @Override
-        protected CoverageNode createDefaultValue() {
-            return new CoverageNode(CoverageMetric.MODULE, "Empty");
-        }
-    }
 }

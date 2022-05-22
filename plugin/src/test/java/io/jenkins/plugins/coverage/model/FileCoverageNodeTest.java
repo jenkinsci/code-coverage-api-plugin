@@ -20,7 +20,7 @@ class FileCoverageNodeTest {
     private static final String PATH = "path";
     private static final int LINE = 5;
     private static final int HIT_DELTA = 10;
-    private static final Coverage COVERAGE = new Coverage(2, 3);
+    private static final Coverage COVERAGE = new Coverage.CoverageBuilder().setCovered(2).setMissed(3).build();
     private static final CoveragePercentage COVERAGE_DELTA = CoveragePercentage.valueOf(0.5);
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.LINE;
 

@@ -28,6 +28,8 @@ import edu.hm.hafner.util.Ensure;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import one.util.streamex.StreamEx;
 
 /**
@@ -39,8 +41,8 @@ import one.util.streamex.StreamEx;
 public class CoverageNode implements Serializable {
     private static final long serialVersionUID = -6608885640271135273L;
 
-    private static final Coverage COVERED_NODE = new Coverage(1, 0);
-    private static final Coverage MISSED_NODE = new Coverage(0, 1);
+    private static final Coverage COVERED_NODE = new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build();
+    private static final Coverage MISSED_NODE = new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build();
 
     /** Transient non static {@link CoverageTreeCreator} in order to be able to mock it for tests. */
     private transient CoverageTreeCreator coverageTreeCreator;
@@ -332,7 +334,7 @@ public class CoverageNode implements Serializable {
         if (searchMetric.isLeaf()) {
             Coverage childrenCoverage = children.stream()
                     .map(node -> node.getCoverage(searchMetric))
-                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+                    .reduce(CoverageBuilder.NO_COVERAGE, Coverage::add);
             return leaves.stream()
                     .map(node -> node.getCoverage(searchMetric))
                     .reduce(childrenCoverage, Coverage::add);
@@ -340,7 +342,7 @@ public class CoverageNode implements Serializable {
         else {
             Coverage childrenCoverage = children.stream()
                     .map(node -> node.getCoverage(searchMetric))
-                    .reduce(Coverage.NO_COVERAGE, Coverage::add);
+                    .reduce(CoverageBuilder.NO_COVERAGE, Coverage::add);
 
             if (metric.equals(searchMetric)) {
                 if (getCoverage(CoverageMetric.LINE).getCovered() > 0) {

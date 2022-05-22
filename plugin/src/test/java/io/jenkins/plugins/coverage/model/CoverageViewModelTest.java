@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageViewModel.*;
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
@@ -101,10 +103,10 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         when(mock.filterPackageStructure()).thenReturn(mock);
 
         SortedMap<CoverageMetric, Coverage> changeMetricsDistribution = new TreeMap<>();
-        changeMetricsDistribution.put(LINE, Coverage.NO_COVERAGE);
-        changeMetricsDistribution.put(BRANCH, Coverage.NO_COVERAGE);
-        changeMetricsDistribution.put(FILE, Coverage.NO_COVERAGE);
-        changeMetricsDistribution.put(PACKAGE, Coverage.NO_COVERAGE);
+        changeMetricsDistribution.put(LINE, CoverageBuilder.NO_COVERAGE);
+        changeMetricsDistribution.put(BRANCH, CoverageBuilder.NO_COVERAGE);
+        changeMetricsDistribution.put(FILE, CoverageBuilder.NO_COVERAGE);
+        changeMetricsDistribution.put(PACKAGE, CoverageBuilder.NO_COVERAGE);
         when(mock.getMetricsDistribution()).thenReturn(changeMetricsDistribution);
 
         return new CoverageViewModel(mock(Run.class), mock);
