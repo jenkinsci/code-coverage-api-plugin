@@ -67,12 +67,13 @@
 .coverage-column-outer {
     border: 1px solid var(--medium-grey);
     border-radius: 10px;
+    width: 5em;
 }
 
 .coverage-column-inner {
-    padding: 1px 7px;
+    padding: 3px 7px;
     border-radius: 10px;
-    color:black
+    color:var(--text-color);
 }
 
 #coverage-table td {

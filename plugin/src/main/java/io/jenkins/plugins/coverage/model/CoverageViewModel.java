@@ -510,7 +510,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * UI row model for the coverage details table.
      */
     private static class CoverageRow {
-        private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer";
+        private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
         private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
         private final CoverageNode root;
         private final Locale browserLocale;
@@ -575,8 +575,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                                 div().withClasses(COVERAGE_COLUMN_INNER)
                                         .withStyle(String.format(
-                                                "color:%s; background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
-                                                colors.getLineColorAsHex(), colors.getFillColorAsHex(),
+                                                "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
+                                                colors.getFillColorAsHex(),
                                                 percentage, percentage))
                                         .withTitle(tooltip)
                                         .withText(coverage.formatCoveredPercentage(browserLocale)))
@@ -604,8 +604,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
             String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                     div().withClasses(COVERAGE_COLUMN_INNER)
-                    .withStyle(String.format("color:%s;background-color:%s;",
-                            colors.getLineColorAsHex(), colors.getFillColorAsHex()))
+                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsHex()))
                     .withText(coverageText)
                     .withTitle(tooltip))
                     .render();
