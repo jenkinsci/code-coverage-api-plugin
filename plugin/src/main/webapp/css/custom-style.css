@@ -71,7 +71,7 @@
 }
 
 .coverage-column-inner {
-    padding: 3px 7px;
+    padding: 1px 7px;
     border-radius: 10px;
     color:var(--text-color);
 }
