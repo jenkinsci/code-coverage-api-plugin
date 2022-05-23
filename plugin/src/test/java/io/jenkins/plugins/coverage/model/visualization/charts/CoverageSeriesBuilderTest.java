@@ -11,7 +11,7 @@ import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
 
-import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
@@ -38,13 +38,17 @@ class CoverageSeriesBuilderTest {
     void shouldCreateChart() {
         CoverageTrendChart trendChart = new CoverageTrendChart();
 
-        BuildResult<CoverageBuildAction> smallLineCoverage = createResult(1, new Coverage(1, 1), new Coverage(3, 1));
+        BuildResult<CoverageBuildAction> smallLineCoverage = createResult(1,
+                new CoverageBuilder().setCovered(1).setMissed(1).build(),
+                new CoverageBuilder().setCovered(3).setMissed(1).build());
 
         LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage),
                 createConfiguration());
         verifySeriesDetails(lineCoverage);
 
-        BuildResult<CoverageBuildAction> smallBranchCoverage = createResult(1, new Coverage(3, 1), new Coverage(1, 1));
+        BuildResult<CoverageBuildAction> smallBranchCoverage = createResult(1,
+                new CoverageBuilder().setCovered(3).setMissed(1).build(),
+                new CoverageBuilder().setCovered(1).setMissed(1).build());
 
         LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage),
                 createConfiguration());
@@ -62,7 +66,9 @@ class CoverageSeriesBuilderTest {
     void shouldHaveTwoValuesForSingleBuild() {
         CoverageSeriesBuilder builder = new CoverageSeriesBuilder();
 
-        BuildResult<CoverageBuildAction> singleResult = createResult(1, new Coverage(1, 1), new Coverage(3, 1));
+        BuildResult<CoverageBuildAction> singleResult = createResult(1,
+                new CoverageBuilder().setCovered(1).setMissed(1).build(),
+                new CoverageBuilder().setCovered(3).setMissed(1).build());
 
         LinesDataSet dataSet = builder.createDataSet(createConfiguration(), Collections.singletonList(singleResult));
 

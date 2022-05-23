@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
@@ -14,26 +15,9 @@ import org.apache.commons.lang3.math.Fraction;
  * @author Florian Orendi
  */
 public final class CoveragePercentage implements Serializable {
-
     private static final long serialVersionUID = 3324942976687883481L;
 
     static final String DENOMINATOR_ZERO_MESSAGE = "The denominator must not be zero";
-
-    private final int numerator;
-    private final int denominator;
-
-    /**
-     * Creates an instance of {@link CoveragePercentage}.
-     *
-     * @param numerator
-     *         The numerator of the fraction which represents the percentage
-     * @param denominator
-     *         The denominator of the fraction which represents the percentage
-     */
-    private CoveragePercentage(final int numerator, final int denominator) {
-        this.numerator = numerator;
-        this.denominator = denominator;
-    }
 
     /**
      * Creates an instance of {@link CoveragePercentage} from a {@link Fraction fraction} within the range [0,1].
@@ -75,10 +59,57 @@ public final class CoveragePercentage implements Serializable {
      *         if the denominator is zero
      */
     public static CoveragePercentage valueOf(final int numerator, final int denominator) {
-        if (denominator != 0) {
-            return new CoveragePercentage(numerator, denominator);
+        return new CoveragePercentage(numerator, denominator);
+    }
+
+    /**
+     * Creates a new {@link CoveragePercentage} instance from the provided string representation. The string
+     * representation is expected to contain the numerator and the denominator - separated by a slash, e.g. "500/345",
+     * or "100/1". Whitespace characters will be ignored.
+     *
+     * @param stringRepresentation
+     *         string representation to convert from
+     *
+     * @return the created {@link CoveragePercentage}
+     * @throws IllegalArgumentException
+     *         if the string is not a valid CoveragePercentage instance
+     */
+    public static CoveragePercentage valueOf(final String stringRepresentation) {
+        try {
+            String cleanedFormat = StringUtils.deleteWhitespace(stringRepresentation);
+            if (StringUtils.contains(cleanedFormat, "/")) {
+                String extractedNumerator = StringUtils.substringBefore(cleanedFormat, "/");
+                String extractedDenominator = StringUtils.substringAfter(cleanedFormat, "/");
+
+                int numerator = Integer.parseInt(extractedNumerator);
+                int denominator = Integer.parseInt(extractedDenominator);
+                return new CoveragePercentage(numerator, denominator);
+            }
         }
-        throw new IllegalArgumentException(DENOMINATOR_ZERO_MESSAGE);
+        catch (NumberFormatException exception) {
+            // ignore and throw a specific exception
+        }
+        throw new IllegalArgumentException(
+                String.format("Cannot convert %s to a valid CoveragePercentage instance.", stringRepresentation));
+    }
+
+    private final int numerator;
+    private final int denominator;
+
+    /**
+     * Creates an instance of {@link CoveragePercentage}.
+     *
+     * @param numerator
+     *         The numerator of the fraction which represents the percentage
+     * @param denominator
+     *         The denominator of the fraction which represents the percentage
+     */
+    private CoveragePercentage(final int numerator, final int denominator) {
+        if (denominator == 0) {
+            throw new IllegalArgumentException(DENOMINATOR_ZERO_MESSAGE);
+        }
+        this.numerator = numerator;
+        this.denominator = denominator;
     }
 
     /**
@@ -138,5 +169,21 @@ public final class CoveragePercentage implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(numerator, denominator);
+    }
+
+    /**
+     * Returns a string representation for this {@link CoveragePercentage} that can be used to serialize this instance
+     * in a simple but still readable way. The serialization contains the numerator and the denominator - separated by a
+     * slash, e.g. "100/345", or "0/1".
+     *
+     * @return a string representation for this {@link CoveragePercentage}
+     */
+    public String serializeToString() {
+        return String.format("%d/%d", getNumerator(), getDenominator());
+    }
+
+    @Override
+    public String toString() {
+        return formatPercentage(Locale.ENGLISH);
     }
 }

@@ -165,7 +165,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private CoverageViewModel verifyViewModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action.getLineCoverage())
-                .isEqualTo(new Coverage(8, 0));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(8).setMissed(0).build());
 
         Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, SOURCE_FILE_NAME);
         assertThat(fileNode).isNotEmpty()
@@ -196,7 +196,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage(6083, 6368 - 6083));
+                .isEqualTo(new Coverage.CoverageBuilder().setCovered(6083).setMissed(6368 - 6083).build());
         System.out.println(getConsoleLog(build));
     }
 }

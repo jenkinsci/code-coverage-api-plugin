@@ -3,7 +3,10 @@ package io.jenkins.plugins.coverage.model;
 import java.io.Serializable;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
+
+import edu.hm.hafner.util.VisibleForTesting;
 
 /**
  * Value of a code coverage item. The code coverage is measured using the number of covered and missed items. The type
@@ -17,6 +20,39 @@ public final class Coverage implements Serializable {
     /** Null object that indicates that the code coverage has not been measured. */
     public static final Coverage NO_COVERAGE = new Coverage(0, 0);
 
+    /**
+     * Creates a new {@link Coverage} instance from the provided string representation. The string representation is
+     * expected to contain the number of covered items and the total number of items - separated by a slash, e.g.
+     * "100/345", or "0/0". Whitespace characters will be ignored.
+     *
+     * @param stringRepresentation
+     *         string representation to convert from
+     *
+     * @return the created coverage
+     * @throws IllegalArgumentException
+     *         if the string is not a valid Coverage instance
+     */
+    public static Coverage valueOf(final String stringRepresentation) {
+        try {
+            String cleanedFormat = StringUtils.deleteWhitespace(stringRepresentation);
+            if (StringUtils.contains(cleanedFormat, "/")) {
+                String extractedCovered = StringUtils.substringBefore(cleanedFormat, "/");
+                String extractedTotal = StringUtils.substringAfter(cleanedFormat, "/");
+
+                int covered = Integer.parseInt(extractedCovered);
+                int total = Integer.parseInt(extractedTotal);
+                if (total >= covered) {
+                    return new CoverageBuilder().setCovered(covered).setMissed(total - covered).build();
+                }
+            }
+        }
+        catch (NumberFormatException exception) {
+            // ignore and throw a specific exception
+        }
+        throw new IllegalArgumentException(
+                String.format("Cannot convert %s to a valid Coverage instance.", stringRepresentation));
+    }
+
     private final int covered;
     private final int missed;
 
@@ -28,7 +64,7 @@ public final class Coverage implements Serializable {
      * @param missed
      *         the number of missed items
      */
-    public Coverage(final int covered, final int missed) {
+    private Coverage(final int covered, final int missed) {
         this.covered = covered;
         this.missed = missed;
     }
@@ -80,8 +116,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses {@code
-     * Locale.getDefault()} to format the percentage.
+     * Formats the covered percentage as String (with a precision of two digits after the comma). Uses
+     * {@code Locale.getDefault()} to format the percentage.
      *
      * @return the covered percentage
      * @see #formatCoveredPercentage(Locale)
@@ -136,8 +172,8 @@ public final class Coverage implements Serializable {
     }
 
     /**
-     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses {@code
-     * Locale.getDefault()} to format the percentage.
+     * Formats the missed percentage as formatted String (with a precision of two digits after the comma). Uses
+     * {@code Locale.getDefault()} to format the percentage.
      *
      * @return the missed percentage
      */
@@ -173,8 +209,9 @@ public final class Coverage implements Serializable {
      * @return the sum of this and the additional coverage
      */
     public Coverage add(final Coverage additional) {
-        return new Coverage(covered + additional.getCovered(),
-                missed + additional.getMissed());
+        return new CoverageBuilder().setCovered(covered + additional.getCovered())
+                .setMissed(missed + additional.getMissed())
+                .build();
     }
 
     @Override
@@ -216,5 +253,124 @@ public final class Coverage implements Serializable {
         int result = covered;
         result = 31 * result + missed;
         return result;
+    }
+
+    /**
+     * Returns a string representation for this {@link Coverage} that can be used to serialize this instance in a simple
+     * but still readable way. The serialization contains the number of covered items and the total number of items -
+     * separated by a slash, e.g. "100/345", or "0/0".
+     *
+     * @return a string representation for this {@link Coverage}
+     */
+    public String serializeToString() {
+        return String.format("%d/%d", getCovered(), getTotal());
+    }
+
+    /**
+     * Builder to create an cache new {@link Coverage} instances.
+     */
+    public static class CoverageBuilder {
+        @VisibleForTesting
+        static final int CACHE_SIZE = 16;
+        private static final Coverage[] CACHE = new Coverage[CACHE_SIZE * CACHE_SIZE];
+
+        static {
+            for (int covered = 0; covered < CACHE_SIZE; covered++) {
+                for (int missed = 0; missed < CACHE_SIZE; missed++) {
+                    CACHE[getCacheIndex(covered, missed)] = new Coverage(covered, missed);
+                }
+            }
+        }
+
+        private static int getCacheIndex(final int covered, final int missed) {
+            return covered * CACHE_SIZE + missed;
+        }
+
+        /** Null object that indicates that the code coverage has not been measured. */
+        public static final Coverage NO_COVERAGE = CACHE[0];
+
+        private int covered;
+        private boolean isCoveredSet;
+        private int missed;
+        private boolean isMissedSet;
+        private int total;
+        private boolean isTotalSet;
+
+        /**
+         * Sets the number of total items.
+         *
+         * @param total
+         *         the number of total items
+         *
+         * @return this
+         */
+        public CoverageBuilder setTotal(final int total) {
+            this.total = total;
+            isTotalSet = true;
+            return this;
+        }
+
+        /**
+         * Sets the number of covered items.
+         *
+         * @param covered
+         *         the number of covered items
+         *
+         * @return this
+         */
+        public CoverageBuilder setCovered(final int covered) {
+            this.covered = covered;
+            isCoveredSet = true;
+            return this;
+        }
+
+        /**
+         * Sets the number of missed items.
+         *
+         * @param missed
+         *         the number of missed items
+         *
+         * @return this
+         */
+        public CoverageBuilder setMissed(final int missed) {
+            this.missed = missed;
+            isMissedSet = true;
+            return this;
+        }
+
+        /**
+         * Creates the new {@link Coverage} instance.
+         *
+         * @return the new instance
+         */
+        @SuppressWarnings("PMD.CyclomaticComplexity")
+        public Coverage build() {
+            if (isCoveredSet && isMissedSet && isTotalSet) {
+                throw new IllegalArgumentException(
+                        "Setting all three values covered, missed, and total is not allowed, just select two of them.");
+            }
+            if (isTotalSet) {
+                if (isCoveredSet) {
+                    return createOrGetCoverage(covered, total - covered);
+                }
+                else if (isMissedSet) {
+                    return createOrGetCoverage(total - missed, missed);
+                }
+            }
+            else {
+                if (isCoveredSet && isMissedSet) {
+                    return createOrGetCoverage(covered, missed);
+                }
+            }
+            throw new IllegalArgumentException("You must set exactly two properties.");
+        }
+
+        @SuppressWarnings({"checkstyle:HiddenField", "ParameterHidesMemberVariable"})
+        private Coverage createOrGetCoverage(final int covered, final int missed) {
+            if (covered < CACHE_SIZE && missed < CACHE_SIZE) {
+                return CACHE[getCacheIndex(covered, missed)];
+            }
+            return new Coverage(covered, missed);
+        }
     }
 }

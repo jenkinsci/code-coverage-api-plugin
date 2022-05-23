@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.util.ResourceTest;
 
 import io.jenkins.plugins.coverage.model.Coverage;
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 import io.jenkins.plugins.coverage.model.FileCoverageNode;
 
 import static org.assertj.core.api.Assertions.*;
@@ -61,7 +62,7 @@ class SourceCodeFacadeTest extends ResourceTest {
         INDIRECT_COVERAGE_CHANGES.put(14, 1);
         INDIRECT_COVERAGE_CHANGES.put(15, 1);
         for (int i = 1; i <= 25; i++) {
-            COVERAGE_PER_LINE.put(i, Coverage.NO_COVERAGE);
+            COVERAGE_PER_LINE.put(i, CoverageBuilder.NO_COVERAGE);
         }
     }
 

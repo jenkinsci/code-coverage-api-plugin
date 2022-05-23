@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 /**
  * Creates coverage trees which represent different types of coverage.
  *
@@ -152,17 +154,21 @@ public class CoverageTreeCreator {
      *         The {@link Coverage} to be represented by the leaves
      */
     private void createChangeCoverageLeaves(final FileCoverageNode fileNode, final List<Coverage> changes) {
-        Coverage lineCoverage = Coverage.NO_COVERAGE;
-        Coverage branchCoverage = Coverage.NO_COVERAGE;
+        Coverage lineCoverage = CoverageBuilder.NO_COVERAGE;
+        Coverage branchCoverage = CoverageBuilder.NO_COVERAGE;
         for (Coverage change : changes) {
             int covered = change.getCovered() > 0 ? 1 : 0;
             if (change.getTotal() > 1) {
-                branchCoverage = branchCoverage.add(new Coverage(change.getCovered(), change.getMissed()));
-                lineCoverage = lineCoverage.add(new Coverage(covered, 1 - covered));
+                branchCoverage = branchCoverage.add(new Coverage.CoverageBuilder().setCovered(change.getCovered())
+                        .setMissed(change.getMissed())
+                        .build());
+                lineCoverage = lineCoverage.add(
+                        new Coverage.CoverageBuilder().setCovered(covered).setMissed(1 - covered).build());
             }
             else {
                 int missed = change.getMissed() > 0 ? 1 : 0;
-                lineCoverage = lineCoverage.add(new Coverage(covered, missed));
+                lineCoverage = lineCoverage.add(
+                        new Coverage.CoverageBuilder().setCovered(covered).setMissed(missed).build());
             }
         }
         if (lineCoverage.isSet()) {
@@ -185,29 +191,31 @@ public class CoverageTreeCreator {
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     // there is no useful possibility for outsourcing code
     private void createIndirectCoverageChangesLeaves(final FileCoverageNode fileNode) {
-        Coverage lineCoverage = Coverage.NO_COVERAGE;
-        Coverage branchCoverage = Coverage.NO_COVERAGE;
+        Coverage lineCoverage = CoverageBuilder.NO_COVERAGE;
+        Coverage branchCoverage = CoverageBuilder.NO_COVERAGE;
         for (Map.Entry<Integer, Integer> change : fileNode.getIndirectCoverageChanges().entrySet()) {
             int delta = change.getValue();
             Coverage currentCoverage = fileNode.getCoveragePerLine().get(change.getKey());
             if (delta > 0) {
                 // the line is fully covered - even in case of branch coverage
                 if (delta == currentCoverage.getCovered()) {
-                    lineCoverage = lineCoverage.add(new Coverage(1, 0));
+                    lineCoverage = lineCoverage.add(new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build());
                 }
                 // the branch coverage increased for 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
-                    branchCoverage = branchCoverage.add(new Coverage(delta, 0));
+                    branchCoverage = branchCoverage.add(
+                            new Coverage.CoverageBuilder().setCovered(delta).setMissed(0).build());
                 }
             }
             else if (delta < 0) {
-                // the line is not covered any more
+                // the line is not covered anymore
                 if (currentCoverage.getCovered() == 0) {
-                    lineCoverage = lineCoverage.add(new Coverage(0, 1));
+                    lineCoverage = lineCoverage.add(new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build());
                 }
                 // the branch coverage is decreased by 'delta' hits
                 if (currentCoverage.getTotal() > 1) {
-                    branchCoverage = branchCoverage.add(new Coverage(0, Math.abs(delta)));
+                    branchCoverage = branchCoverage.add(
+                            new Coverage.CoverageBuilder().setCovered(0).setMissed(Math.abs(delta)).build());
                 }
             }
         }
