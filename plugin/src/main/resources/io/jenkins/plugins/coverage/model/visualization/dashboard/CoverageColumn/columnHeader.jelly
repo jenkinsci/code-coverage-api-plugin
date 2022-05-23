@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core">
-    <th>${it.columnName}</th>
+    <th align="right">${it.columnName}</th>
 </j:jelly>
