@@ -25,17 +25,15 @@
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.3</saxon-he.version>
-
-    <plugin-util-api.version>2.17.0</plugin-util-api.version>
-    <forensics-api.version>1.13.0</forensics-api.version>
-    <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
-    <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
-    <streamex.version>0.8.1</streamex.version>
     <gson.version>2.9.0</gson.version>
     <jsoup.version>1.15.1</jsoup.version>
-    <prism-api.version>1.26.0-2</prism-api.version>
-    <docker-fixtures.version>1.11</docker-fixtures.version>
+
+    <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
     <testcontainers.version>1.17.2</testcontainers.version>
+
+    <prism-api.version>1.26.0-2</prism-api.version>
+    <forensics-api.version>1.13.0</forensics-api.version>
+    <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
   </properties>
 
   <developers>
@@ -59,11 +57,6 @@
   </licenses>
 
   <dependencies>
-    <dependency>
-      <groupId>one.util</groupId>
-      <artifactId>streamex</artifactId>
-      <version>${streamex.version}</version>
-    </dependency>
     <dependency>
       <groupId>net.sf.trove4j</groupId>
       <artifactId>trove4j</artifactId>
@@ -158,10 +151,10 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>${plugin-util-api.version}</version>
+      <classifier>tests</classifier>
       <scope>test</scope>
-      <type>test-jar</type>
     </dependency>
+
     <!-- Test Dependencies -->
     <dependency>
       <groupId>net.javacrumbs.json-unit</groupId>
