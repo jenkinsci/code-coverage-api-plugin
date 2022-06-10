@@ -27,7 +27,7 @@
     <saxon-he.version>11.3</saxon-he.version>
 
     <plugin-util-api.version>2.16.0</plugin-util-api.version>
-    <forensics-api.version>1.13.0</forensics-api.version>
+    <forensics-api.version>1.14.0</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
     <streamex.version>0.8.1</streamex.version>
