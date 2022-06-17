@@ -81,7 +81,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     @Test
     void shouldProvideRightTableModelById() {
         CoverageViewModel model = createModel();
-        assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTable.class);
+        assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTableModel.class);
         assertThat(model.getTableModel(COVERAGE_CHANGES_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
         assertThat(model.getTableModel("")).isInstanceOf(CoverageTableModel.class);
     }

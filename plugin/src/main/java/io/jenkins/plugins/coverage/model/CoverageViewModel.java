@@ -2,9 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -14,31 +12,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.Fraction;
 
+import edu.hm.hafner.echarts.JacksonFacade;
+import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
-import hudson.Functions;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
-import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
-import io.jenkins.plugins.datatables.TableColumn;
-import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
-import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableModel;
-import io.jenkins.plugins.datatables.TableModel.DetailedColumnDefinition;
-import io.jenkins.plugins.datatables.options.SelectStyle;
 import io.jenkins.plugins.util.BuildResultNavigator;
-
-import static j2html.TagCreator.*;
 
 /**
  * Server side model that provides the data for the details view of the coverage results. The layout of the associated
@@ -49,8 +41,7 @@ import static j2html.TagCreator.*;
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
-    private static final CoverageMetric LINE_COVERAGE = CoverageMetric.LINE;
-    private static final CoverageMetric BRANCH_COVERAGE = CoverageMetric.BRANCH;
+    private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
     private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter(COLOR_PROVIDER);
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
@@ -114,6 +105,32 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
+     * Returns the trend chart configuration.
+     *
+     * @param configuration
+     *         JSON object to configure optional properties for the trend chart
+     *
+     * @return the trend chart model (converted to a JSON string)
+     */
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public String getTrendChart(final String configuration) {
+        return JACKSON_FACADE.toJson(createTrendChart(configuration));
+    }
+
+    private LinesChartModel createTrendChart(final String configuration) {
+        Optional<CoverageBuildAction> latestAction = getLatestAction();
+        if (latestAction.isPresent()) {
+            return latestAction.get().createProjectAction().createChartModel(configuration);
+        }
+        return new LinesChartModel();
+    }
+
+    private Optional<CoverageBuildAction> getLatestAction() {
+        return Optional.ofNullable(getOwner().getAction(CoverageBuildAction.class));
+    }
+
+    /**
      * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart on the
      * client side. The tree is available for line and branch coverage.
      *
@@ -167,6 +184,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @param text
      *         The coverage metric as String
+     *
      * @return the coverage metric
      */
     private CoverageMetric getCoverageMetricFromText(final String text) {
@@ -188,13 +206,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @Override
     public TableModel getTableModel(final String tableId) {
         CoverageNode root = getNode();
-        if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
-            return new ChangeCoverageTable(root, changeCoverageTreeRoot, tableId);
+        File rootDir = getOwner().getRootDir();
+        if ("coverage-table-inline".equals(tableId)) {
+            return new CoverageTableModel(tableId, root, rootDir, getId(), true);
+        }
+        else if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
+            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId());
         }
         else if (COVERAGE_CHANGES_TABLE_ID.equals(tableId)) {
-            return new IndirectCoverageChangesTable(root, indirectCoverageChangesTreeRoot, tableId);
+            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId());
         }
-        return new CoverageTableModel(root, tableId);
+        return new CoverageTableModel(tableId, root, rootDir, getId());
     }
 
     /**
@@ -210,9 +232,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     public String getUrlForBuild(final String selectedBuildDisplayName, final String currentUrl) {
-        return NAVIGATOR.getSameUrlForOtherBuild(owner,
-                currentUrl, CoverageBuildAction.DETAILS_URL, selectedBuildDisplayName)
-                .orElse(StringUtils.EMPTY);
+        return NAVIGATOR.getSameUrlForOtherBuild(owner, currentUrl, CoverageBuildAction.DETAILS_URL,
+                        selectedBuildDisplayName).orElse(StringUtils.EMPTY);
     }
 
     /**
@@ -378,6 +399,36 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
+     * Returns a new sub-page for the selected link.
+     *
+     * @param link
+     *         the link to identify the sub-page to show
+     * @param request
+     *         Stapler request
+     * @param response
+     *         Stapler response
+     *
+     * @return the new sub-page
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    @CheckForNull
+    public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+        if (StringUtils.isNotEmpty(link)) {
+            try {
+                Optional<CoverageNode> targetResult
+                        = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
+                if (targetResult.isPresent()) {
+                    return new SourceViewModel(getOwner(), targetResult.get());
+                }
+            }
+            catch (NumberFormatException exception) {
+                // ignore
+            }
+        }
+        return null; // fallback on broken URLs
+    }
+
+    /**
      * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage metrics.
      */
     public static class CoverageOverview {
@@ -423,432 +474,4 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
     }
 
-    /**
-     * UI table model for the coverage details table.
-     */
-    static class CoverageTableModel extends TableModel {
-        private final CoverageNode root;
-        private final String id;
-
-        CoverageTableModel(final CoverageNode root, final String id) {
-            super();
-
-            this.root = root;
-            this.id = id;
-        }
-
-        @Override
-        public String getId() {
-            return id;
-        }
-
-        @Override
-        public TableConfiguration getTableConfiguration() {
-            TableConfiguration tableConfiguration = new TableConfiguration();
-            tableConfiguration.select(SelectStyle.SINGLE);
-            return tableConfiguration;
-        }
-
-        @Override
-        public List<TableColumn> getColumns() {
-            List<TableColumn> columns = new ArrayList<>();
-
-            // TODO: DataTables API sets options wrong in case of invisible columns (columnDef and <th> number not matching)
-            // TODO: DataTables API requires more granular width options
-
-            // this column is hidden, but used to access the file hash from the frontend
-            TableColumn fileHashColumn = new TableColumn("Hash", "fileHash");
-            fileHashColumn.setHeaderClass(ColumnCss.HIDDEN);
-            // fileHashColumn.setWidth(0);
-            columns.add(fileHashColumn);
-
-            TableColumn packageColumn = new TableColumn("Package", "packageName");
-            // packageColumn.setWidth(2);
-            columns.add(packageColumn);
-
-            TableColumn fileColumn = new TableColumn("File", "fileName");
-            // fileColumn.setWidth(2);
-            columns.add(fileColumn);
-
-            TableColumn lineColumn = new TableColumn("Line", "lineCoverage", "number").setHeaderClass(ColumnCss.NUMBER);
-            // lineColumn.setWidth(2);
-            columns.add(lineColumn);
-
-            TableColumn lineColumnDelta = new TableColumn("Line Δ", "lineCoverageDelta", "number").setHeaderClass(ColumnCss.NUMBER);
-            // lineColumnDelta.setWidth(1);
-            columns.add(lineColumnDelta);
-
-            TableColumn branchColumn = new TableColumn("Branch", "branchCoverage", "number").setHeaderClass(ColumnCss.NUMBER);
-            // branchColumn.setWidth(2);
-            columns.add(branchColumn);
-
-            TableColumn branchColumnDelta = new TableColumn("Branch Δ", "branchCoverageDelta", "number").setHeaderClass(ColumnCss.NUMBER);
-            // branchColumnDelta.setWidth(1);
-            columns.add(branchColumnDelta);
-
-            TableColumn loc = new TableColumn("LOC", "loc", "number").setHeaderClass(ColumnCss.NUMBER);
-            // loc.setWidth(1);
-            columns.add(loc);
-
-            return columns;
-        }
-
-        @Override
-        public List<Object> getRows() {
-            Locale browserLocale = Functions.getCurrentLocale();
-            return root.getAll(CoverageMetric.FILE).stream()
-                    .map(file -> new CoverageRow(file, browserLocale))
-                    .collect(Collectors.toList());
-        }
-
-        protected CoverageNode getRoot() {
-            return root;
-        }
-    }
-
-    /**
-     * UI row model for the coverage details table.
-     */
-    private static class CoverageRow {
-        private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
-        private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
-        private final CoverageNode root;
-        private final Locale browserLocale;
-
-        CoverageRow(final CoverageNode root, final Locale browserLocale) {
-            this.root = root;
-            this.browserLocale = browserLocale;
-        }
-
-        public String getFileHash() {
-            return String.valueOf(root.getName().hashCode());
-        }
-
-        public String getFileName() {
-            return root.getName();
-        }
-
-        public String getPackageName() {
-            return root.getParentName();
-        }
-
-        public DetailedColumnDefinition getLineCoverage() {
-            Coverage coverage = root.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The total line coverage of the file");
-        }
-
-        public DetailedColumnDefinition getBranchCoverage() {
-            Coverage coverage = root.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The total branch coverage of the file");
-        }
-
-        public DetailedColumnDefinition getLineCoverageDelta() {
-            return createColoredFileCoverageDeltaColumn(LINE_COVERAGE);
-        }
-
-        public DetailedColumnDefinition getBranchCoverageDelta() {
-            return createColoredFileCoverageDeltaColumn(BRANCH_COVERAGE);
-        }
-
-        public DetailedColumnDefinition getLoc() {
-            if (root instanceof FileCoverageNode) {
-                String value = String.valueOf(((FileCoverageNode) root).getCoveragePerLine().size());
-                return new DetailedColumnDefinition(value, value);
-            }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "0");
-        }
-
-        /**
-         * Creates a table cell which colorizes the shown coverage dependent on the coverage percentage.
-         *
-         * @param coverage
-         *         the coverage of the element
-         * @param tooltip
-         *         the tooltip which describes the value
-         *
-         * @return the create {@link DetailedColumnDefinition}
-         */
-        protected DetailedColumnDefinition createColoredCoverageColumn(final Coverage coverage, final String tooltip) {
-            double percentage = coverage.getCoveredPercentage().getDoubleValue();
-            if (coverage.isSet()) {
-                DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
-                String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
-                                div().withClasses(COVERAGE_COLUMN_INNER)
-                                        .withStyle(String.format(
-                                                "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
-                                                colors.getFillColorAsHex(),
-                                                percentage, percentage))
-                                        .withTitle(tooltip)
-                                        .withText(coverage.formatCoveredPercentage(browserLocale)))
-                        .render();
-                return new DetailedColumnDefinition(cell, String.valueOf(percentage));
-            }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-");
-        }
-
-        /**
-         * Creates a table cell which colorizes the tendency of the shown coverage delta.
-         *
-         * @param coveragePercentage
-         *         The coverage delta as percentage
-         * @param tooltip
-         *         The tooltip which describes the value
-         *
-         * @return the create {@link DetailedColumnDefinition}
-         */
-        protected DetailedColumnDefinition createColoredCoverageDeltaColumn(
-                final CoveragePercentage coveragePercentage, final String tooltip) {
-            double coverageValue = coveragePercentage.getDoubleValue();
-            String coverageText = coveragePercentage.formatDeltaPercentage(browserLocale);
-            String sort = String.valueOf(coverageValue);
-            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
-            String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
-                    div().withClasses(COVERAGE_COLUMN_INNER)
-                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsHex()))
-                    .withText(coverageText)
-                    .withTitle(tooltip))
-                    .render();
-            return new DetailedColumnDefinition(cell, sort);
-        }
-
-        protected CoverageNode getRoot() {
-            return root;
-        }
-
-        /**
-         * Creates a colored column for visualizing the file coverage delta against a reference for the passed {@link
-         * CoverageMetric}.
-         *
-         * @param coverageMetric
-         *         The coverage metric
-         *
-         * @return the {@link DetailedColumnDefinition}
-         * @since 3.0.0
-         */
-        private DetailedColumnDefinition createColoredFileCoverageDeltaColumn(final CoverageMetric coverageMetric) {
-            // this is only available for versions later then 3.0.0 which introduced FileCoverageNode
-            if (root instanceof FileCoverageNode) {
-                FileCoverageNode fileNode = (FileCoverageNode) root;
-                if (fileNode.hasFileCoverageDelta(coverageMetric)) {
-                    CoveragePercentage delta = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
-                    return createColoredCoverageDeltaColumn(delta,
-                            "The total file coverage delta against the reference build");
-                }
-            }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
-        }
-    }
-
-    /**
-     * {@link CoverageTableModel} implementation for visualizing the change coverage.
-     *
-     * @since 3.0.0
-     */
-    static class ChangeCoverageTable extends CoverageTableModel {
-        private final CoverageNode changeRoot;
-
-        /**
-         * Creates a change coverage table model.
-         *
-         * @param root
-         *         The root of the origin coverage tree
-         * @param changeRoot
-         *         The root of the change coverage tree
-         * @param id
-         *         The ID of the table
-         */
-        ChangeCoverageTable(final CoverageNode root, final CoverageNode changeRoot, final String id) {
-            super(root, id);
-            this.changeRoot = changeRoot;
-        }
-
-        @Override
-        public List<Object> getRows() {
-            Locale browserLocale = Functions.getCurrentLocale();
-            return changeRoot.getAllFileCoverageNodes().stream()
-                    .map(file -> new ChangeCoverageRow(getOriginalNode(file), file, browserLocale))
-                    .collect(Collectors.toList());
-        }
-
-        private FileCoverageNode getOriginalNode(final FileCoverageNode fileNode) {
-            Optional<FileCoverageNode> reference = getRoot().getAllFileCoverageNodes().stream()
-                    .filter(node -> node.getPath().equals(fileNode.getPath())
-                            && node.getName().equals(fileNode.getName()))
-                    .findFirst();
-            return reference.orElse(fileNode); // return this as fallback to prevent exceptions
-        }
-    }
-
-    /**
-     * {@link CoverageTableModel} implementation for visualizing the indirect coverage changes.
-     *
-     * @since 3.0.0
-     */
-    static class IndirectCoverageChangesTable extends CoverageTableModel {
-
-        private final CoverageNode changeRoot;
-
-        /**
-         * Creates an indirect coverage changes table model.
-         *
-         * @param root
-         *         The root of the origin coverage tree
-         * @param changeRoot
-         *         The root of the indirect coverage changes tree
-         * @param id
-         *         The ID of the table
-         */
-        IndirectCoverageChangesTable(final CoverageNode root, final CoverageNode changeRoot, final String id) {
-            super(root, id);
-            this.changeRoot = changeRoot;
-        }
-
-        @Override
-        public List<Object> getRows() {
-            Locale browserLocale = Functions.getCurrentLocale();
-            return changeRoot.getAllFileCoverageNodes().stream()
-                    .map(file -> new IndirectCoverageChangesRow(getOriginalNode(file), file, browserLocale))
-                    .collect(Collectors.toList());
-        }
-
-        private FileCoverageNode getOriginalNode(final FileCoverageNode fileNode) {
-            Optional<FileCoverageNode> reference = getRoot().getAllFileCoverageNodes().stream()
-                    .filter(node -> node.getPath().equals(fileNode.getPath())
-                            && node.getName().equals(fileNode.getName()))
-                    .findFirst();
-            return reference.orElse(fileNode); // return this as fallback to prevent exceptions
-        }
-    }
-
-    /**
-     * UI row model for the change coverage details table.
-     *
-     * @since 3.0.0
-     */
-    private static class ChangeCoverageRow extends CoverageRow {
-
-        private final FileCoverageNode changedFileNode;
-
-        /**
-         * Creates a table row for visualizing the change coverage of a file.
-         *
-         * @param root
-         *         The unfiltered node which represents the coverage of the whole file
-         * @param changedFileNode
-         *         The filtered node which represents the change coverage only
-         * @param browserLocale
-         *         The locale
-         */
-        ChangeCoverageRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
-                final Locale browserLocale) {
-            super(root, browserLocale);
-            this.changedFileNode = changedFileNode;
-        }
-
-        @Override
-        public DetailedColumnDefinition getLineCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The line change coverage");
-        }
-
-        @Override
-        public DetailedColumnDefinition getBranchCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The branch change coverage");
-        }
-
-        @Override
-        public DetailedColumnDefinition getLineCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(LINE_COVERAGE);
-        }
-
-        @Override
-        public DetailedColumnDefinition getBranchCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
-        }
-
-        @Override
-        public DetailedColumnDefinition getLoc() {
-            String value = String.valueOf(changedFileNode.getChangedCodeLines().stream()
-                    .filter(line -> changedFileNode.getCoveragePerLine().containsKey(line))
-                    .count());
-            return new DetailedColumnDefinition(value, value);
-        }
-
-        private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(final CoverageMetric coverageMetric) {
-            Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
-            if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredFraction()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
-                return createColoredCoverageDeltaColumn(CoveragePercentage.valueOf(delta),
-                        "The change coverage within the file against the total file coverage");
-            }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
-        }
-    }
-
-    /**
-     * UI row model for the indirect coverage changes details table.
-     *
-     * @since 3.0.0
-     */
-    private static class IndirectCoverageChangesRow extends CoverageRow {
-        private final FileCoverageNode changedFileNode;
-
-        /**
-         * Creates a table row for visualizing the indirect coverage changes of a file.
-         *
-         * @param root
-         *         The unfiltered node which represents the coverage of the whole file
-         * @param changedFileNode
-         *         The filtered node which represents the indirect coverage changes only
-         * @param browserLocale
-         *         The locale
-         */
-        IndirectCoverageChangesRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
-                final Locale browserLocale) {
-            super(root, browserLocale);
-            this.changedFileNode = changedFileNode;
-        }
-
-        @Override
-        public DetailedColumnDefinition getLineCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(LINE_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The indirect line coverage changes");
-        }
-
-        @Override
-        public DetailedColumnDefinition getBranchCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(BRANCH_COVERAGE);
-            return createColoredCoverageColumn(coverage, "The indirect branch coverage changes");
-        }
-
-        @Override
-        public DetailedColumnDefinition getLineCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(LINE_COVERAGE);
-        }
-
-        @Override
-        public DetailedColumnDefinition getBranchCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(BRANCH_COVERAGE);
-        }
-
-        @Override
-        public DetailedColumnDefinition getLoc() {
-            String value = String.valueOf(changedFileNode.getIndirectCoverageChanges().size());
-            return new DetailedColumnDefinition(value, value);
-        }
-
-        private DetailedColumnDefinition createColoredChangeCoverageDeltaColumn(
-                final CoverageMetric coverageMetric) {
-            Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
-            if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredFraction()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
-                return createColoredCoverageDeltaColumn(CoveragePercentage.valueOf(delta),
-                        "The indirect coverage changes within the file against the total file coverage");
-            }
-            return new DetailedColumnDefinition(Messages.Coverage_Not_Available(), "-101");
-        }
-    }
 }
