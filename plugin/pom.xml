@@ -123,7 +123,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>data-tables-api</artifactId>
-      <version>1.12.1-1-SNAPSHOT</version>
+      <version>1.12.1-1-rc700.c12cd9a7969a</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
