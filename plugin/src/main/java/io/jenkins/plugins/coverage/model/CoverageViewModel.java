@@ -47,8 +47,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
+    private static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
     static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
-    static final String COVERAGE_CHANGES_TABLE_ID = "coverage-changes-table";
+    static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -207,16 +208,26 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     public TableModel getTableModel(final String tableId) {
         CoverageNode root = getNode();
         File rootDir = getOwner().getRootDir();
-        if ("coverage-table-inline".equals(tableId)) {
+        if ((ABSOLUTE_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
             return new CoverageTableModel(tableId, root, rootDir, getId(), true);
         }
+        else if (ABSOLUTE_COVERAGE_TABLE_ID.equals(tableId)) {
+            return new CoverageTableModel(tableId, root, rootDir, getId(), false);
+        }
         else if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
-            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId());
+            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId(), false);
         }
-        else if (COVERAGE_CHANGES_TABLE_ID.equals(tableId)) {
-            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId());
+        else if ((CHANGE_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
+            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId(), true);
         }
-        return new CoverageTableModel(tableId, root, rootDir, getId());
+        else if (INDIRECT_COVERAGE_TABLE_ID.equals(tableId)) {
+            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId(), false);
+        }
+        else if ((INDIRECT_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
+            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId(), true);
+        }
+
+        throw new IllegalArgumentException("No such table with id " + id);
     }
 
     /**
@@ -268,7 +279,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Reads the sourcecode corresponding to the passed {@link CoverageNode node} and filters the code dependent on the
      * table ID.
      *
-     * @param fileNode
+     * @param node
      *         The node
      * @param tableId
      *         The table ID
@@ -279,24 +290,25 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @throws InterruptedException
      *         if reading failed
      */
-    private String readSourceCode(final CoverageNode fileNode, final String tableId)
+    private String readSourceCode(final CoverageNode node, final String tableId)
             throws IOException, InterruptedException {
         String content = "";
         File rootDir = getOwner().getRootDir();
-        if (isSourceFileInNewFormatAvailable(fileNode)) {
-            content = SOURCE_CODE_FACADE.read(rootDir, getId(), fileNode.getPath());
+        if (isSourceFileInNewFormatAvailable(node)) {
+            content = SOURCE_CODE_FACADE.read(rootDir, getId(), node.getPath());
         }
-        if (isSourceFileInOldFormatAvailable(fileNode)) {
+        if (isSourceFileInOldFormatAvailable(node)) {
             content = new TextFile(getFileForBuildsWithOldVersion(rootDir,
-                    fileNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
+                    node.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
         }
-        if (!content.isEmpty() && fileNode instanceof FileCoverageNode) {
-            if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
-                return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, (FileCoverageNode) fileNode);
+        if (!content.isEmpty() && node instanceof FileCoverageNode) {
+            String cleanTableId = StringUtils.removeEnd(tableId, "-inline");
+            FileCoverageNode fileNode = (FileCoverageNode) node;
+            if (CHANGE_COVERAGE_TABLE_ID.equals(cleanTableId)) {
+                return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, fileNode);
             }
-            else if (COVERAGE_CHANGES_TABLE_ID.equals(tableId)) {
-                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content,
-                        (FileCoverageNode) fileNode);
+            else if (INDIRECT_COVERAGE_TABLE_ID.equals(cleanTableId)) {
+                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, fileNode);
             }
             else {
                 return content;

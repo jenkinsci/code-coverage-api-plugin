@@ -49,10 +49,6 @@ class CoverageTableModel extends TableModel {
      * @param resultsId
      *         the ID of the results as prefix for the source code files in the build folder
      */
-    CoverageTableModel(final String id, final CoverageNode root, final File buildFolder, final String resultsId) {
-        this(id, root, buildFolder, resultsId, false);
-    }
-
     public CoverageTableModel(final String id, final CoverageNode root, final File buildFolder, final String resultsId, final boolean isInline) {
         super();
 

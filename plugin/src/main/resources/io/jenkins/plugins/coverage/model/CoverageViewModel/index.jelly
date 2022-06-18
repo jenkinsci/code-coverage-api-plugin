@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:cov="/coverage" xmlns:c="/charts">
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
@@ -75,46 +75,18 @@
       </div>
 
       <div role="tabpanel" id="fileCoverage" class="tab-pane fade">
-        <div class="row">
-          <div class="col-12 d-xxl-none">
-            <bs:card title="${%Coverage of all files - with links}" fontAwesomeIcon="magnifying-glass"
-                     class="" bodyClass="h-100">
-              <dt:table model="${it.getTableModel('coverage-table')}"/>
-            </bs:card>
-          </div>
-          <div class="col-xxl-6 d-none d-xxl-block ">
-            <bs:card title="${%Coverage of all files - no links}" fontAwesomeIcon="magnifying-glass"
-                     class="flex-fill h-100"
-                     bodyClass="d-flex flex-column h-100">
-              <dt:table model="${it.getTableModel('coverage-table-inline')}"/>
-            </bs:card>
-          </div>
-          <div class="col-xxl-6 d-none d-xxl-block ">
-            <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
-                     class="flex-fill h-100">
-              <div id="source-file-content">
-                <table id="source-file" class="source">
-                </table>
-              </div>
-            </bs:card>
-          </div>
-        </div>
+        <cov:coverage-table tableId="absolute-coverage" />
       </div>
 
       <j:if test="${hasChangeCoverage}">
         <div role="tabpanel" id="changeCoverage" class="tab-pane fade">
-          <bs:card title="${%Coverage map}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100"
-                   bodyClass="d-flex flex-column h-100">
-            <dt:table model="${it.getTableModel('change-coverage-table')}"/>
-          </bs:card>
+          <cov:coverage-table tableId="change-coverage" />
         </div>
       </j:if>
+
       <j:if test="${hasIndirectCoverageChanges}">
         <div role="tabpanel" id="indirectCoverage" class="tab-pane fade">
-          <bs:card title="${%Coverage map}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100"
-                   bodyClass="d-flex flex-column h-100">
-            <dt:table model="${it.getTableModel('coverage-changes-table')}"/>
-          </bs:card>
+          <cov:coverage-table tableId="indirect-coverage" />
         </div>
       </j:if>
 

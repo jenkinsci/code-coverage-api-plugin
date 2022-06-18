@@ -354,7 +354,9 @@ const CoverageChartGenerator = function ($) {
      */
     function initializeDataTables() {
         $(document).ready(function () {
-            initializeSourceCodeSelection($('#coverage-table-inline').DataTable(), 'coverage-table-inline');
+            initializeSourceCodeSelection($('#absolute-coverage-table-inline').DataTable(), 'absolute-coverage-table-inline');
+            initializeSourceCodeSelection($('#change-coverage-table-inline').DataTable(), 'change-coverage-table-inline');
+            initializeSourceCodeSelection($('#indirect-coverage-table-inline').DataTable(), 'indirect-coverage-table-inline');
         });
     }
 
@@ -365,33 +367,27 @@ const CoverageChartGenerator = function ($) {
      * @param {String} id The ID of the DataTable
      */
     function initializeSourceCodeSelection(datatable, id) {
-        /**
-         * Clears the source code view within #source-file.
-         */
-        function clearSourceCode() {
-            $('#source-file').html('No file selected');
-        }
-
+        const sourceView = $('#' + id + '-source-file');
         datatable.on('select', function (e, dt, type, indexes) {
             if (type === 'row') {
-                $('#source-file').html('Loading...');
+                sourceView.html('Loading...');
                 const rowData = datatable.rows(indexes).data().toArray();
                 viewProxy.getSourceCode(rowData[0].fileHash, id, function (t) {
                     const sourceCode = t.responseObject();
                     if (sourceCode === "n/a") {
-                        $('#source-file').html('No source code available');
+                        sourceView.html('No source code available');
                     }
                     else {
-                        $('#source-file').html(sourceCode);
+                        sourceView.html(sourceCode);
                     }
                 });
             }
             else {
-                clearSourceCode();
+                sourceView.html('No file selected');
             }
         })
         datatable.on('deselect', function () {
-            clearSourceCode();
+            sourceView.html('No file selected');
         });
     }
 
