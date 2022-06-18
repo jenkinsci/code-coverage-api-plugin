@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ import io.jenkins.plugins.util.BuildResultNavigator;
  * @author Ullrich Hafner
  * @author Florian Orendi
  */
-@SuppressWarnings("PMD.ExcessivePublicCount")
+@SuppressWarnings({"PMD.ExcessivePublicCount", "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
@@ -47,7 +48,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
-    private static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
+    static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
     static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
 
@@ -227,7 +228,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId(), true);
         }
 
-        throw new IllegalArgumentException("No such table with id " + id);
+        throw new NoSuchElementException("No such table with id " + id);
     }
 
     /**
@@ -279,7 +280,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Reads the sourcecode corresponding to the passed {@link CoverageNode node} and filters the code dependent on the
      * table ID.
      *
-     * @param node
+     * @param sourceNode
      *         The node
      * @param tableId
      *         The table ID
@@ -290,20 +291,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @throws InterruptedException
      *         if reading failed
      */
-    private String readSourceCode(final CoverageNode node, final String tableId)
+    private String readSourceCode(final CoverageNode sourceNode, final String tableId)
             throws IOException, InterruptedException {
         String content = "";
         File rootDir = getOwner().getRootDir();
-        if (isSourceFileInNewFormatAvailable(node)) {
-            content = SOURCE_CODE_FACADE.read(rootDir, getId(), node.getPath());
+        if (isSourceFileInNewFormatAvailable(sourceNode)) {
+            content = SOURCE_CODE_FACADE.read(rootDir, getId(), sourceNode.getPath());
         }
-        if (isSourceFileInOldFormatAvailable(node)) {
+        if (isSourceFileInOldFormatAvailable(sourceNode)) {
             content = new TextFile(getFileForBuildsWithOldVersion(rootDir,
-                    node.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
+                    sourceNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
         }
-        if (!content.isEmpty() && node instanceof FileCoverageNode) {
+        if (!content.isEmpty() && sourceNode instanceof FileCoverageNode) {
             String cleanTableId = StringUtils.removeEnd(tableId, "-inline");
-            FileCoverageNode fileNode = (FileCoverageNode) node;
+            FileCoverageNode fileNode = (FileCoverageNode) sourceNode;
             if (CHANGE_COVERAGE_TABLE_ID.equals(cleanTableId)) {
                 return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, fileNode);
             }

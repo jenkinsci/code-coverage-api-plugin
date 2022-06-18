@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -30,9 +31,9 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         CoverageViewModel model = createModel();
 
         String hash = String.valueOf("PathUtil.java".hashCode());
-        assertThat(model.getSourceCode(hash, "coverage-table")).isEqualTo("n/a");
-        assertThat(model.getSourceCode(hash, "change-coverage-table")).isEqualTo("n/a");
-        assertThat(model.getSourceCode(hash, "coverage-changes-table")).isEqualTo("n/a");
+        assertThat(model.getSourceCode(hash, ABSOLUTE_COVERAGE_TABLE_ID)).isEqualTo("n/a");
+        assertThat(model.getSourceCode(hash, CHANGE_COVERAGE_TABLE_ID)).isEqualTo("n/a");
+        assertThat(model.getSourceCode(hash, INDIRECT_COVERAGE_TABLE_ID)).isEqualTo("n/a");
     }
 
     @Test
@@ -83,12 +84,14 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         CoverageViewModel model = createModel();
         assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTableModel.class);
         assertThat(model.getTableModel(INDIRECT_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
-        assertThat(model.getTableModel("")).isInstanceOf(CoverageTableModel.class);
+        assertThat(model.getTableModel(ABSOLUTE_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
+
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> model.getTableModel("wrong-id"));
     }
 
     private CoverageViewModel createModel() {
-        return new CoverageViewModel(mock(Run.class),
-                readNode("jacoco-codingstyle.xml"));
+        return new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
     }
 
     /**
