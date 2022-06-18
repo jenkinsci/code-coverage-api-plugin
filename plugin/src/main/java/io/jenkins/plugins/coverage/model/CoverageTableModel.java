@@ -17,6 +17,7 @@ import io.jenkins.plugins.datatables.DetailedCell;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnBuilder;
 import io.jenkins.plugins.datatables.TableColumn.ColumnCss;
+import io.jenkins.plugins.datatables.TableColumn.ColumnType;
 import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableConfiguration.SelectStyle;
 import io.jenkins.plugins.datatables.TableModel;
@@ -104,39 +105,35 @@ class CoverageTableModel extends TableModel {
         TableColumn lineCoverage = new ColumnBuilder().withHeaderLabel(Messages.Column_LineCoverage())
                 .withDataPropertyKey("lineCoverage")
                 .withDetailedCell()
-                .withType("number")
-                .withHeaderClass(ColumnCss.NUMBER)
+                .withType(ColumnType.NUMBER)
                 .withResponsivePriority(1)
                 .build();
         columns.add(lineCoverage);
         TableColumn lineCoverageDelta = new ColumnBuilder().withHeaderLabel(Messages.Column_DeltaLineCoverage("Δ"))
                 .withDataPropertyKey("lineCoverageDelta")
                 .withDetailedCell()
-                .withType("number")
-                .withHeaderClass(ColumnCss.NUMBER)
+                .withType(ColumnType.NUMBER)
                 .withResponsivePriority(2)
                 .build();
         columns.add(lineCoverageDelta);
         TableColumn branchCoverage = new ColumnBuilder().withHeaderLabel(Messages.Column_BranchCoverage())
                 .withDataPropertyKey("branchCoverage")
                 .withDetailedCell()
-                .withType("number")
-                .withHeaderClass(ColumnCss.NUMBER)
+                .withType(ColumnType.NUMBER)
                 .withResponsivePriority(1)
                 .build();
         columns.add(branchCoverage);
         TableColumn branchCoverageDelta = new ColumnBuilder().withHeaderLabel(Messages.Column_DeltaLineCoverage("Δ"))
                 .withDataPropertyKey("branchCoverageDelta")
                 .withDetailedCell()
-                .withType("number")
-                .withHeaderClass(ColumnCss.NUMBER)
+                .withType(ColumnType.NUMBER)
                 .withResponsivePriority(2)
                 .build();
         columns.add(branchCoverageDelta);
         TableColumn loc = new ColumnBuilder().withHeaderLabel(Messages.Column_LinesOfCode())
                 .withDataPropertyKey("loc")
                 .withResponsivePriority(200)
-                .withHeaderClass(ColumnCss.NUMBER)
+                .withType(ColumnType.NUMBER)
                 .build();
         columns.add(loc);
 
