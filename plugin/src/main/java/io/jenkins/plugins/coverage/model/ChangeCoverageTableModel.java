@@ -37,8 +37,8 @@ class ChangeCoverageTableModel extends CoverageTableModel {
      *         the ID of the results as prefix for the source code files in the build folder
      */
     ChangeCoverageTableModel(final String id, final CoverageNode root, final CoverageNode changeRoot,
-            final File buildFolder, final String resultsId) {
-        super(id, root, buildFolder, resultsId);
+            final File buildFolder, final String resultsId, final boolean isInline) {
+        super(id, root, buildFolder, resultsId, isInline);
 
         this.changeRoot = changeRoot;
     }
