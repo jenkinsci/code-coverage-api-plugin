@@ -339,25 +339,25 @@ const CoverageChartGenerator = function ($) {
      */
     function initializeDataTables() {
         $(document).ready(function () {
-            initializeSourceCodeSelection($('#absolute-coverage-table-inline').DataTable(), 'absolute-coverage-table-inline');
-            initializeSourceCodeSelection($('#change-coverage-table-inline').DataTable(), 'change-coverage-table-inline');
-            initializeSourceCodeSelection($('#indirect-coverage-table-inline').DataTable(), 'indirect-coverage-table-inline');
+            initializeSourceCodeSelection('absolute-coverage-table-inline');
+            initializeSourceCodeSelection('change-coverage-table-inline');
+            initializeSourceCodeSelection('indirect-coverage-table-inline');
         });
     }
 
     /**
      * Initializes a selection listener for a datatable which loads the selected source code.
      *
-     * @param {DataTable} datatable The DataTable
-     * @param {String} id The ID of the DataTable
+     * @param {String} tableId The ID of the DataTable
      */
-    function initializeSourceCodeSelection(datatable, id) {
-        const sourceView = $('#' + id + '-source-file');
+    function initializeSourceCodeSelection(tableId) {
+        const datatable = $('#' + tableId).DataTable();
+        const sourceView = $('#' + tableId + '-source-file');
         datatable.on('select', function (e, dt, type, indexes) {
             if (type === 'row') {
                 sourceView.html('Loading...');
                 const rowData = datatable.rows(indexes).data().toArray();
-                viewProxy.getSourceCode(rowData[0].fileHash, id, function (t) {
+                viewProxy.getSourceCode(rowData[0].fileHash, tableId, function (t) {
                     const sourceCode = t.responseObject();
                     if (sourceCode === "n/a") {
                         sourceView.html('No source code available');
