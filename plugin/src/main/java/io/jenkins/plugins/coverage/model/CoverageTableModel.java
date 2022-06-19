@@ -33,10 +33,8 @@ class CoverageTableModel extends TableModel {
     static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
             NO_COVERAGE_SORT);
     private final CoverageNode root;
-    private final File buildFolder;
+    private final RowRenderer renderer;
     private final String id;
-    private final String resultsId;
-    private final boolean isInline;
 
     /**
      * Creates an indirect coverage changes table model.
@@ -44,28 +42,20 @@ class CoverageTableModel extends TableModel {
      * @param id
      *         The ID of the table
      * @param root
-     *         The root of the origin coverage tree
-     * @param buildFolder
-     *         the build folder to store the source code files
-     * @param resultsId
-     *         the ID of the results as prefix for the source code files in the build folder
+     *         The root of the coverage tree
+     * @param renderer
+     *         the renderer to use for the file names
      */
-    public CoverageTableModel(final String id, final CoverageNode root, final File buildFolder, final String resultsId, final boolean isInline) {
+    CoverageTableModel(final String id, final CoverageNode root, final RowRenderer renderer) {
         super();
 
-        this.root = root;
-        this.buildFolder = buildFolder;
         this.id = id;
-        this.resultsId = resultsId;
-        this.isInline = isInline;
+        this.root = root;
+        this.renderer = renderer;
     }
 
-    String getResultsId() {
-        return resultsId;
-    }
-
-    File getBuildFolder() {
-        return buildFolder;
+    RowRenderer getRenderer() {
+        return renderer;
     }
 
     @Override
@@ -77,9 +67,7 @@ class CoverageTableModel extends TableModel {
     public TableConfiguration getTableConfiguration() {
         TableConfiguration tableConfiguration = new TableConfiguration();
         tableConfiguration.responsive();
-        if (isInline) {
-            tableConfiguration.select(SelectStyle.SINGLE);
-        }
+        renderer.configureTable(tableConfiguration);
         return tableConfiguration;
     }
 
@@ -144,7 +132,7 @@ class CoverageTableModel extends TableModel {
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
         return root.getAll(CoverageMetric.FILE).stream()
-                .map(file -> new CoverageRow(file, buildFolder, getResultsId(), browserLocale, isInline))
+                .map(file -> new CoverageRow(file, browserLocale, renderer))
                 .collect(Collectors.toList());
     }
 
@@ -159,21 +147,13 @@ class CoverageTableModel extends TableModel {
         private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
         private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
         private final CoverageNode root;
-        private final File buildFolder;
-        private final String resultsId;
         private final Locale browserLocale;
-        private boolean isInline;
+        private final RowRenderer renderer;
 
-        CoverageRow(final CoverageNode root, final File buildFolder, final String resultsId, final Locale browserLocale) {
-            this(root, buildFolder, resultsId, browserLocale, false);
-        }
-
-        CoverageRow(final CoverageNode root, final File buildFolder, final String resultsId, final Locale browserLocale, final boolean isInline) {
+        CoverageRow(final CoverageNode root, final Locale browserLocale, final RowRenderer renderer) {
             this.root = root;
-            this.buildFolder = buildFolder;
-            this.resultsId = resultsId;
             this.browserLocale = browserLocale;
-            this.isInline = isInline;
+            this.renderer = renderer;
         }
 
         public String getFileHash() {
@@ -181,12 +161,7 @@ class CoverageTableModel extends TableModel {
         }
 
         public String getFileName() {
-            String fileName = root.getName();
-            if (!isInline && CoverageViewModel.isSourceFileInNewFormatAvailable(buildFolder, resultsId, root.getPath())
-                    || CoverageViewModel.isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
-                return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
-            }
-            return fileName;
+            return renderer.renderFileName(root.getName(), root.getPath());
         }
 
         public String getPackageName() {
@@ -295,5 +270,56 @@ class CoverageTableModel extends TableModel {
             }
             return NO_COVERAGE;
         }
+    }
+
+    /**
+     * Renders filenames with links. Selection will be handled by opening a new page using the provided link.
+     */
+    static class LinkedRowRenderer implements RowRenderer {
+        private File buildFolder;
+        private String resultsId;
+
+        LinkedRowRenderer(final File buildFolder, final String resultsId) {
+            this.buildFolder = buildFolder;
+            this.resultsId = resultsId;
+        }
+
+        @Override
+        public void configureTable(final TableConfiguration tableConfiguration) {
+            // nothing required
+        }
+
+        @Override
+        public String renderFileName(final String fileName, final String path) {
+            if (CoverageViewModel.isSourceFileInNewFormatAvailable(buildFolder, resultsId, path)
+                    || CoverageViewModel.isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
+                return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
+            }
+            return fileName;
+        }
+    }
+
+    /**
+     * Renders filenames without links. Selection will be handled using the table select events.
+     */
+    static class InlineRowRenderer implements RowRenderer {
+        @Override
+        public void configureTable(final TableConfiguration tableConfiguration) {
+            tableConfiguration.select(SelectStyle.SINGLE);
+        }
+
+        @Override
+        public String renderFileName(final String fileName, final String path) {
+            return fileName;
+        }
+    }
+
+    /**
+     * Renders filenames in table cells.
+     */
+    interface RowRenderer {
+        void configureTable(TableConfiguration tableConfiguration);
+
+        String renderFileName(String fileName, String path);
     }
 }

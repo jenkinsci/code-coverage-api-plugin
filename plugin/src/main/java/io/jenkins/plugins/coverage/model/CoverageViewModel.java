@@ -25,6 +25,8 @@ import hudson.model.ModelObject;
 import hudson.model.Run;
 import hudson.util.TextFile;
 
+import io.jenkins.plugins.coverage.model.CoverageTableModel.InlineRowRenderer;
+import io.jenkins.plugins.coverage.model.CoverageTableModel.LinkedRowRenderer;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
@@ -51,6 +53,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
     static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
+    private static final String INLINE_SUFFIX = "-inline";
 
     private final Run<?, ?> owner;
     private final CoverageNode node;
@@ -207,28 +210,27 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @Override
     public TableModel getTableModel(final String tableId) {
-        CoverageNode root = getNode();
-        File rootDir = getOwner().getRootDir();
-        if ((ABSOLUTE_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
-            return new CoverageTableModel(tableId, root, rootDir, getId(), true);
+        CoverageTableModel.RowRenderer renderer;
+        String actualId;
+        if (tableId.endsWith(INLINE_SUFFIX)) {
+            renderer = new InlineRowRenderer();
+            actualId = tableId.replace(INLINE_SUFFIX, StringUtils.EMPTY);
         }
-        else if (ABSOLUTE_COVERAGE_TABLE_ID.equals(tableId)) {
-            return new CoverageTableModel(tableId, root, rootDir, getId(), false);
-        }
-        else if (CHANGE_COVERAGE_TABLE_ID.equals(tableId)) {
-            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId(), false);
-        }
-        else if ((CHANGE_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
-            return new ChangeCoverageTableModel(tableId, root, changeCoverageTreeRoot, rootDir, getId(), true);
-        }
-        else if (INDIRECT_COVERAGE_TABLE_ID.equals(tableId)) {
-            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId(), false);
-        }
-        else if ((INDIRECT_COVERAGE_TABLE_ID + "-inline").equals(tableId)) {
-            return new IndirectCoverageChangesTable(tableId, root, indirectCoverageChangesTreeRoot, rootDir, getId(), true);
+        else {
+            renderer = new LinkedRowRenderer(getOwner().getRootDir(), getId());
+            actualId = tableId;
         }
 
-        throw new NoSuchElementException("No such table with id " + id);
+        switch (actualId) {
+            case ABSOLUTE_COVERAGE_TABLE_ID:
+                return new CoverageTableModel(tableId, getNode(), renderer);
+            case CHANGE_COVERAGE_TABLE_ID:
+                return new ChangeCoverageTableModel(tableId, getNode(), changeCoverageTreeRoot, renderer);
+            case INDIRECT_COVERAGE_TABLE_ID:
+                return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer);
+            default:
+                throw new NoSuchElementException("No such table with id " + id);
+        }
     }
 
     /**
@@ -245,7 +247,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     public String getUrlForBuild(final String selectedBuildDisplayName, final String currentUrl) {
         return NAVIGATOR.getSameUrlForOtherBuild(owner, currentUrl, CoverageBuildAction.DETAILS_URL,
-                        selectedBuildDisplayName).orElse(StringUtils.EMPTY);
+                selectedBuildDisplayName).orElse(StringUtils.EMPTY);
     }
 
     /**
@@ -303,7 +305,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                     sourceNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
         }
         if (!content.isEmpty() && sourceNode instanceof FileCoverageNode) {
-            String cleanTableId = StringUtils.removeEnd(tableId, "-inline");
+            String cleanTableId = StringUtils.removeEnd(tableId, INLINE_SUFFIX);
             FileCoverageNode fileNode = (FileCoverageNode) sourceNode;
             if (CHANGE_COVERAGE_TABLE_ID.equals(cleanTableId)) {
                 return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, fileNode);
@@ -486,5 +488,4 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return coverage.getMetricsDistribution();
         }
     }
-
 }

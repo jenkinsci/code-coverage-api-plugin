@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,14 +30,12 @@ class ChangeCoverageTableModel extends CoverageTableModel {
      *         The root of the origin coverage tree
      * @param changeRoot
      *         The root of the change coverage tree
-     * @param buildFolder
-     *         the build folder to store the source code files
-     * @param resultsId
-     *         the ID of the results as prefix for the source code files in the build folder
+     * @param renderer
+     *         the renderer to use for the file names
      */
     ChangeCoverageTableModel(final String id, final CoverageNode root, final CoverageNode changeRoot,
-            final File buildFolder, final String resultsId, final boolean isInline) {
-        super(id, root, buildFolder, resultsId, isInline);
+            final RowRenderer renderer) {
+        super(id, root, renderer);
 
         this.changeRoot = changeRoot;
     }
@@ -52,8 +49,8 @@ class ChangeCoverageTableModel extends CoverageTableModel {
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
         return changeRoot.getAllFileCoverageNodes().stream()
-                .map(file -> new ChangeCoverageRow(getOriginalNode(file), file, getBuildFolder(), getResultsId(),
-                        browserLocale))
+                .map(file -> new ChangeCoverageRow(
+                        getOriginalNode(file), file, browserLocale, getRenderer()))
                 .collect(Collectors.toList());
     }
 
@@ -73,23 +70,9 @@ class ChangeCoverageTableModel extends CoverageTableModel {
     private static class ChangeCoverageRow extends CoverageRow {
         private final FileCoverageNode changedFileNode;
 
-        /**
-         * Creates a table row for visualizing the change coverage of a file.
-         *
-         * @param root
-         *         The unfiltered node which represents the coverage of the whole file
-         * @param changedFileNode
-         *         The filtered node which represents the change coverage only
-         * @param buildFolder
-         *         the build folder to store the source code files
-         * @param resultsId
-         *         the ID of the results as prefix for the source code files in the build folder
-         * @param browserLocale
-         *         The locale
-         */
         ChangeCoverageRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
-                final File buildFolder, final String resultsId, final Locale browserLocale) {
-            super(root, buildFolder, resultsId, browserLocale);
+                final Locale browserLocale, final RowRenderer renderer) {
+            super(root, browserLocale, renderer);
 
             this.changedFileNode = changedFileNode;
         }

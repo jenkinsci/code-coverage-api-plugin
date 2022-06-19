@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -29,14 +28,12 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
      *         The root of the origin coverage tree
      * @param changeRoot
      *         The root of the indirect coverage changes tree
-     * @param buildFolder
-     *         the build folder to store the source code files
-     * @param resultsId
-     *         the ID of the results as prefix for the source code files in the build folder
+     * @param renderer
+     *         the renderer to use for the file names
      */
-    IndirectCoverageChangesTable(final String id, final CoverageNode root, final CoverageNode changeRoot, final File buildFolder,
-            final String resultsId, final boolean isInline) {
-        super(id, root, buildFolder, resultsId, isInline);
+    IndirectCoverageChangesTable(final String id, final CoverageNode root, final CoverageNode changeRoot,
+            final RowRenderer renderer) {
+        super(id, root, renderer);
 
         this.changeRoot = changeRoot;
     }
@@ -45,8 +42,8 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
         return changeRoot.getAllFileCoverageNodes().stream()
-                .map(file -> new IndirectCoverageChangesRow(getOriginalNode(file), file, getBuildFolder(), getResultsId(),
-                        browserLocale))
+                .map(file -> new IndirectCoverageChangesRow(
+                        getOriginalNode(file), file, browserLocale, getRenderer()))
                 .collect(Collectors.toList());
     }
 
@@ -66,23 +63,9 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
     private static class IndirectCoverageChangesRow extends CoverageRow {
         private final FileCoverageNode changedFileNode;
 
-        /**
-         * Creates a table row for visualizing the indirect coverage changes of a file.
-         *
-         * @param root
-         *         The unfiltered node which represents the coverage of the whole file
-         * @param changedFileNode
-         *         The filtered node which represents the indirect coverage changes only
-         * @param buildFolder
-         *         the build folder to store the source code files
-         * @param resultsId
-         *         the ID of the results as prefix for the source code files in the build folder
-         * @param browserLocale
-         *         The locale
-         */
         IndirectCoverageChangesRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
-                final File buildFolder, final String resultsId, final Locale browserLocale) {
-            super(root, buildFolder, resultsId, browserLocale);
+                final Locale browserLocale, final RowRenderer renderer) {
+            super(root, browserLocale, renderer);
 
             this.changedFileNode = changedFileNode;
         }
