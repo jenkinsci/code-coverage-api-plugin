@@ -29,7 +29,7 @@ import static j2html.TagCreator.*;
  */
 class CoverageTableModel extends TableModel {
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
-    private static final int NO_COVERAGE_SORT = -1000;
+    private static final int NO_COVERAGE_SORT = -1_000;
     static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
             NO_COVERAGE_SORT);
     private final CoverageNode root;
@@ -87,7 +87,7 @@ class CoverageTableModel extends TableModel {
         columns.add(fileName);
         TableColumn packageName = new ColumnBuilder().withHeaderLabel(Messages.Column_Package())
                 .withDataPropertyKey("packageName")
-                .withResponsivePriority(50000)
+                .withResponsivePriority(50_000)
                 .build();
         columns.add(packageName);
         TableColumn lineCoverage = new ColumnBuilder().withHeaderLabel(Messages.Column_LineCoverage())
