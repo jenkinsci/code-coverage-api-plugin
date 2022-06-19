@@ -335,21 +335,6 @@ const CoverageChartGenerator = function ($) {
     }
 
     /**
-     * Activates the specified tab.
-     *
-     * @param {String} selector - selector of the tab
-     */
-    function selectTab (selector) {
-        const detailsTabs = $('#tab-details');
-        const selectedTab = detailsTabs.find(selector);
-
-        if (selectedTab.length !== 0) {
-            const tab = new bootstrap5.Tab(selectedTab[0]);
-            tab.show();
-        }
-    }
-
-    /**
      * Initializes the datatables.
      */
     function initializeDataTables() {
@@ -396,21 +381,43 @@ const CoverageChartGenerator = function ($) {
          * Activate the tab that has been visited the last time. If there is no such tab, highlight the first one.
          * If the user selects the tab using an #anchor prefer this tab.
          */
-        function registerTabStatePersistence() {
-            const selectedTabID = 'jenkins-coverage-activeTab';
+        function registerTabEvents() {
+            /**
+             * Activates the specified tab.
+             *
+             * @param {String} selector - selector of the tab
+             * @return true if the tab has been selected
+             */
+            function selectTab (selector) {
+                const detailsTabs = $('#tab-details');
+                const selectedTab = detailsTabs.find(selector);
 
-            // TODO: check if a tab has been selected
-            selectTab('li:first-child a'); // fallback if all other options fail
+                if (selectedTab.length !== 0) {
+                    const tab = new bootstrap5.Tab(selectedTab[0]);
+                    tab.show();
+
+                    return true;
+                }
+                return false
+            }
+
+            const selectedTabID = 'jenkins-coverage-activeTab';
             const url = document.location.toString();
             if (url.match('#')) {
                 const tabName = url.split('#')[1];
-                selectTab('a[href="#' + tabName + '"]');
+                if (selectTab('a[href="#' + tabName + '"]')) {
+                    localStorage.setItem(selectedTabID, '#' + tabName);
+                }
+
             }
             else {
                 const activeTab = localStorage.getItem(selectedTabID);
                 if (activeTab) {
                     selectTab('a[href="' + activeTab + '"]');
                 }
+            }
+            if ($('#tab-details a.active').length === 0) {
+                selectTab('li:first-child a'); // fallback if all other options fail
             }
 
             $('a[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
@@ -429,7 +436,7 @@ const CoverageChartGenerator = function ($) {
         }
 
         registerTrendChartConfiguration();
-        registerTabStatePersistence();
+        registerTabEvents();
         redrawCharts();
 
         initializeDataTables();
