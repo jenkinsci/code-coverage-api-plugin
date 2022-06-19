@@ -276,8 +276,8 @@ class CoverageTableModel extends TableModel {
      * Renders filenames with links. Selection will be handled by opening a new page using the provided link.
      */
     static class LinkedRowRenderer implements RowRenderer {
-        private File buildFolder;
-        private String resultsId;
+        private final File buildFolder;
+        private final String resultsId;
 
         LinkedRowRenderer(final File buildFolder, final String resultsId) {
             this.buildFolder = buildFolder;
