@@ -148,11 +148,8 @@ const CoverageChartGenerator = function ($) {
             ]
         };
         summaryChart.setOption(summaryOption);
-
-        window.addEventListener('resize', function () {
-            summaryChart.resize();
-        });
-    }
+        summaryChart.resize();
+     }
 
     function createFilesTreeMap(coverageTree, id, coverageMetric) {
         function getLevelOption() {
@@ -302,78 +299,7 @@ const CoverageChartGenerator = function ($) {
             ]
         };
         treeChart.setOption(option);
-
-        // TODO: there will be two events right now?
-        window.addEventListener('resize', function () {
-            treeChart.resize();
-        });
-        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
-            treeChart.resize();
-        });
-
         treeChart.resize();
-    }
-
-    function redrawCharts() {
-        // TODO: render only the active ones
-        const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
-        viewProxy.getTrendChart(configuration, function (t) {
-            echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
-        });
-
-        viewProxy.getOverview(function (t) {
-            createOverview(t.responseObject(), 'coverage-overview');
-        });
-
-        viewProxy.getCoverageTree('Line', function (t) {
-            createFilesTreeMap(t.responseObject(), 'project-line-coverage', 'Line');
-        });
-
-        viewProxy.getCoverageTree('Branch', function (t) {
-            createFilesTreeMap(t.responseObject(), 'project-branch-coverage', 'Branch');
-        });
-    }
-
-    /**
-     * Initializes the datatables.
-     */
-    function initializeDataTables() {
-        $(document).ready(function () {
-            initializeSourceCodeSelection('absolute-coverage-table-inline');
-            initializeSourceCodeSelection('change-coverage-table-inline');
-            initializeSourceCodeSelection('indirect-coverage-table-inline');
-        });
-    }
-
-    /**
-     * Initializes a selection listener for a datatable which loads the selected source code.
-     *
-     * @param {String} tableId The ID of the DataTable
-     */
-    function initializeSourceCodeSelection(tableId) {
-        const datatable = $('#' + tableId).DataTable();
-        const sourceView = $('#' + tableId + '-source-file');
-        datatable.on('select', function (e, dt, type, indexes) {
-            if (type === 'row') {
-                sourceView.html('Loading...');
-                const rowData = datatable.rows(indexes).data().toArray();
-                viewProxy.getSourceCode(rowData[0].fileHash, tableId, function (t) {
-                    const sourceCode = t.responseObject();
-                    if (sourceCode === "n/a") {
-                        sourceView.html('No source code available');
-                    }
-                    else {
-                        sourceView.html(sourceCode);
-                    }
-                });
-            }
-            else {
-                sourceView.html('No file selected');
-            }
-        })
-        datatable.on('deselect', function () {
-            sourceView.html('No file selected');
-        });
     }
 
     this.populateDetailsCharts = function () {
@@ -420,12 +346,48 @@ const CoverageChartGenerator = function ($) {
                 selectTab('li:first-child a'); // fallback if all other options fail
             }
 
-            $('a[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 window.location.hash = e.target.hash;
                 const activeTab = $(e.target).attr('href');
                 localStorage.setItem(selectedTabID, activeTab);
                 redrawCharts();
             });
+        }
+
+        /**
+         * Loads all chart JSON models via AJAX calls from the server and renders the corresponding echarts.
+         */
+        function initializeCharts() {
+            viewProxy.getOverview(function (t) {
+                createOverview(t.responseObject(), 'coverage-overview');
+            });
+
+            viewProxy.getCoverageTree('Line', function (t) {
+                createFilesTreeMap(t.responseObject(), 'project-line-coverage', 'Line');
+            });
+
+            viewProxy.getCoverageTree('Branch', function (t) {
+                createFilesTreeMap(t.responseObject(), 'project-branch-coverage', 'Branch');
+            });
+        }
+
+        /**
+         * Event handler to resizes all charts.
+         */
+        function redrawCharts() {
+            function resizeChartOf(selector) {
+                $(selector)[0].echart.resize();
+            }
+
+            const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
+            viewProxy.getTrendChart(configuration, function (t) {
+                echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
+                resizeChartOf('#coverage-trend');
+            });
+
+            resizeChartOf('#coverage-overview');
+            resizeChartOf('#project-line-coverage');
+            resizeChartOf('#project-branch-coverage');
         }
 
         function registerTrendChartConfiguration() {
@@ -435,14 +397,50 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
+        /**
+         * Initializes a selection listener for a datatable which loads the selected source code.
+         *
+         * @param {String} tableId The ID of the DataTable
+         */
+        function initializeSourceCodeSelection(tableId) {
+            const datatable = $('#' + tableId).DataTable();
+            const sourceView = $('#' + tableId + '-source-file');
+            datatable.on('select', function (e, dt, type, indexes) {
+                if (type === 'row') {
+                    sourceView.html('Loading...');
+                    const rowData = datatable.rows(indexes).data().toArray();
+                    viewProxy.getSourceCode(rowData[0].fileHash, tableId, function (t) {
+                        const sourceCode = t.responseObject();
+                        if (sourceCode === "n/a") {
+                            sourceView.html('No source code available');
+                        }
+                        else {
+                            sourceView.html(sourceCode);
+                        }
+                    });
+                }
+                else {
+                    sourceView.html('No file selected');
+                }
+            })
+            datatable.on('deselect', function () {
+                sourceView.html('No file selected');
+            });
+        }
+
         registerTrendChartConfiguration();
         registerTabEvents();
-        redrawCharts();
 
-        initializeDataTables();
+        initializeCharts();
 
         window.addEventListener('resize', function () {
             redrawCharts();
+        });
+
+        $(document).ready(function () {
+            initializeSourceCodeSelection('absolute-coverage-table-inline');
+            initializeSourceCodeSelection('change-coverage-table-inline');
+            initializeSourceCodeSelection('indirect-coverage-table-inline');
         });
     }
 };
