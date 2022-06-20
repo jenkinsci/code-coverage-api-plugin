@@ -357,6 +357,7 @@ const CoverageChartGenerator = function ($) {
         /**
          * Loads all chart JSON models via AJAX calls from the server and renders the corresponding echarts.
          */
+        // TODO: maybe it would make sense to render only visible charts
         function initializeCharts() {
             viewProxy.getOverview(function (t) {
                 createOverview(t.responseObject(), 'coverage-overview');
@@ -428,7 +429,7 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
-        registerTrendChartConfiguration();
+        registerTrendCmvnnhartConfiguration();
         registerTabEvents();
 
         initializeCharts();

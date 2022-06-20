@@ -104,6 +104,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new CoverageOverview(getNode().filterPackageStructure());
     }
 
+    // FIXME: currently not in use anymore
     @JavaScriptMethod
     public CoverageOverview getChangeCoverageOverview() {
         return new CoverageOverview(changeCoverageTreeRoot.filterPackageStructure());
