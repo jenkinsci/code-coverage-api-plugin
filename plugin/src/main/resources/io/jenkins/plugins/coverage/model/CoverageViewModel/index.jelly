@@ -75,7 +75,7 @@
       </div>
 
       <div role="tabpanel" id="fileCoverage" class="tab-pane fade">
-        <cov:coverage-table tableId="absolute-coverage" />
+        <cov:coverage-table tableId="absolute-coverage"  />
       </div>
 
       <j:if test="${hasChangeCoverage}">

@@ -213,14 +213,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     public TableModel getTableModel(final String tableId) {
         CoverageTableModel.RowRenderer renderer;
         String actualId;
-        if (tableId.endsWith(INLINE_SUFFIX)) {
+        if (tableId.endsWith(INLINE_SUFFIX) && isSourceFileAvailable(getNode())) {
             renderer = new InlineRowRenderer();
-            actualId = tableId.replace(INLINE_SUFFIX, StringUtils.EMPTY);
         }
         else {
             renderer = new LinkedRowRenderer(getOwner().getRootDir(), getId());
-            actualId = tableId;
         }
+        actualId = tableId.replace(INLINE_SUFFIX, StringUtils.EMPTY);
 
         switch (actualId) {
             case ABSOLUTE_COVERAGE_TABLE_ID:
@@ -230,7 +229,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             case INDIRECT_COVERAGE_TABLE_ID:
                 return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer);
             default:
-                throw new NoSuchElementException("No such table with id " + id);
+                throw new NoSuchElementException("No such table with id " + actualId);
         }
     }
 
@@ -322,13 +321,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Checks whether there are stored source files.
+     * Checks whether source files are stored.
      *
-     * @return {@code true} whether there are stored source files, else {@code false}
+     * @return {@code true} when source files are stored, {@code false} otherwise
      * @since 3.0.0
      */
     @JavaScriptMethod
-    public boolean hasStoredSourceCode() {
+    public boolean hasSourceCode() {
         return SOURCE_CODE_FACADE.hasStoredSourceCode(getOwner().getRootDir(), id);
     }
 

@@ -2,35 +2,45 @@
 <j:jelly xmlns:j="jelly:core" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:st="jelly:stapler">
 
   <st:documentation>
-    Provides a table to render the file coverage nodes and the source code view.
+    Provides a table to render the file coverage nodes without the source code.
     <st:attribute name="tableId" type="String">
       The ID of the table.
     </st:attribute>
   </st:documentation>
 
   <div class="row">
-    <div class="col-12 d-xxl-none">
-      <bs:card title="${%Coverage of all files - with links}" fontAwesomeIcon="magnifying-glass"
-               class="" bodyClass="h-100">
-        <dt:table model="${it.getTableModel(tableId + '-table')}"/>
-      </bs:card>
-    </div>
-    <div class="col-xxl-6 d-none d-xxl-block ">
-      <bs:card title="${%Coverage of all files - no links}" fontAwesomeIcon="magnifying-glass"
-               class="flex-fill h-100"
-               bodyClass="d-flex flex-column h-100">
-        <dt:table model="${it.getTableModel(tableId + '-table-inline')}"/>
-      </bs:card>
-    </div>
-    <div class="col-xxl-6 d-none d-xxl-block ">
-      <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
-               class="flex-fill h-100">
-        <div id="${tableId}-source-file-content">
-          <table id="${tableId}-table-inline-source-file" class="source">
-          </table>
+    <j:choose>
+      <j:when test="${it.hasSourceCode()}">
+        <div class="col-12 d-xxl-none">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="" bodyClass="h-100">
+            <dt:table model="${it.getTableModel(tableId + '-table')}"/>
+          </bs:card>
         </div>
-      </bs:card>
-    </div>
+        <div class="col-xxl-6 d-none d-xxl-block">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass"
+                   class="flex-fill h-100">
+            <dt:table model="${it.getTableModel(tableId + '-table-inline')}"/>
+          </bs:card>
+        </div>
+        <div class="col-xxl-6 d-none d-xxl-block">
+          <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
+                   class="flex-fill h-100">
+            <div id="${tableId}-source-file-content">
+              <table id="${tableId}-table-inline-source-file" class="source">
+              </table>
+            </div>
+          </bs:card>
+        </div>
+      </j:when>
+      <j:otherwise>
+        <div class="col-12 d-xxl-none">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="" bodyClass="h-100">
+            <dt:table model="${it.getTableModel(tableId + '-table')}"/>
+          </bs:card>
+        </div>
+
+      </j:otherwise>
+    </j:choose>
   </div>
 
 </j:jelly>
