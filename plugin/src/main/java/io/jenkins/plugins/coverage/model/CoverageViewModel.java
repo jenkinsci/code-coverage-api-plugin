@@ -213,7 +213,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     public TableModel getTableModel(final String tableId) {
         CoverageTableModel.RowRenderer renderer;
         String actualId;
-        if (tableId.endsWith(INLINE_SUFFIX) && isSourceFileAvailable(getNode())) {
+        if (tableId.endsWith(INLINE_SUFFIX) && hasSourceCode()) {
             renderer = new InlineRowRenderer();
         }
         else {
