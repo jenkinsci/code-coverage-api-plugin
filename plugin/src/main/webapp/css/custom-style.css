@@ -1,3 +1,10 @@
+.no-selection-banner {
+    padding: 30px;
+    fill: var(--text-color);
+    height: 200px;
+    width: 200px;
+}
+
 .overview-chart {
     width: 100%;
     min-height: 40vh;

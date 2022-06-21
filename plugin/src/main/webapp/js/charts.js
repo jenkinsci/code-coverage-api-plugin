@@ -149,7 +149,7 @@ const CoverageChartGenerator = function ($) {
         };
         summaryChart.setOption(summaryOption);
         summaryChart.resize();
-     }
+    }
 
     function createFilesTreeMap(coverageTree, id, coverageMetric) {
         function getLevelOption() {
@@ -314,7 +314,7 @@ const CoverageChartGenerator = function ($) {
              * @param {String} selector - selector of the tab
              * @return true if the tab has been selected
              */
-            function selectTab (selector) {
+            function selectTab(selector) {
                 const detailsTabs = $('#tab-details');
                 const selectedTab = detailsTabs.find(selector);
 
@@ -404,16 +404,39 @@ const CoverageChartGenerator = function ($) {
          * @param {String} tableId The ID of the DataTable
          */
         function initializeSourceCodeSelection(tableId) {
-            const datatable = $('#' + tableId).DataTable();
+            const datatable = $('#' + tableId + '-table-inline').DataTable();
             const sourceView = $('#' + tableId + '-source-file');
+            const noFileSelectedBanner = $('#' + tableId + '-no-selection');
+            const noSourceAvailableBanner = $('#' + tableId + '-no-source');
+
+            function showNoSelection() {
+                sourceView.hide();
+                noSourceAvailableBanner.hide();
+                noFileSelectedBanner.show();
+            }
+
+            function showNoSourceCode() {
+                sourceView.hide();
+                noFileSelectedBanner.hide();
+                noSourceAvailableBanner.show();
+            }
+
+            function showSourceCode() {
+                noFileSelectedBanner.hide();
+                noSourceAvailableBanner.hide();
+                sourceView.show();
+            }
+
+            showNoSelection();
             datatable.on('select', function (e, dt, type, indexes) {
                 if (type === 'row') {
+                    showSourceCode();
                     sourceView.html('Loading...');
                     const rowData = datatable.rows(indexes).data().toArray();
-                    viewProxy.getSourceCode(rowData[0].fileHash, tableId, function (t) {
+                    viewProxy.getSourceCode(rowData[0].fileHash, tableId + '-table', function (t) {
                         const sourceCode = t.responseObject();
                         if (sourceCode === "n/a") {
-                            sourceView.html('No source code available');
+                            showNoSourceCode();
                         }
                         else {
                             sourceView.html(sourceCode);
@@ -421,11 +444,11 @@ const CoverageChartGenerator = function ($) {
                     });
                 }
                 else {
-                    sourceView.html('No file selected');
+                    showNoSelection();
                 }
             })
             datatable.on('deselect', function () {
-                sourceView.html('No file selected');
+                showNoSelection();
             });
         }
 
@@ -439,9 +462,9 @@ const CoverageChartGenerator = function ($) {
         });
 
         $(document).ready(function () {
-            initializeSourceCodeSelection('absolute-coverage-table-inline');
-            initializeSourceCodeSelection('change-coverage-table-inline');
-            initializeSourceCodeSelection('indirect-coverage-table-inline');
+            initializeSourceCodeSelection('absolute-coverage');
+            initializeSourceCodeSelection('change-coverage');
+            initializeSourceCodeSelection('indirect-coverage');
         });
     }
 };
