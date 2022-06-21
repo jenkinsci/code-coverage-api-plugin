@@ -429,7 +429,7 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
-        registerTrendCmvnnhartConfiguration();
+        registerTrendChartConfiguration();
         registerTabEvents();
 
         initializeCharts();
