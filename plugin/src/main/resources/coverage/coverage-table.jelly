@@ -50,7 +50,7 @@
       </j:when>
       <j:otherwise>
         <div class="col-12">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="" bodyClass="h-100">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass">
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>
         </div>

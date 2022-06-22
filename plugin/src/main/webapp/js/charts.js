@@ -359,6 +359,8 @@ const CoverageChartGenerator = function ($) {
          */
         // TODO: maybe it would make sense to render only visible charts
         function initializeCharts() {
+            renderTrendChart();
+
             viewProxy.getOverview(function (t) {
                 createOverview(t.responseObject(), 'coverage-overview');
             });
@@ -372,19 +374,23 @@ const CoverageChartGenerator = function ($) {
             });
         }
 
-        /**
-         * Event handler to resizes all charts.
-         */
-        function redrawCharts() {
-            function resizeChartOf(selector) {
-                $(selector)[0].echart.resize();
-            }
+        function resizeChartOf(selector) {
+            $(selector)[0].echart.resize();
+        }
 
+        function renderTrendChart() {
             const configuration = JSON.stringify(echartsJenkinsApi.readFromLocalStorage('jenkins-echarts-chart-configuration-coverage-history'));
             viewProxy.getTrendChart(configuration, function (t) {
                 echartsJenkinsApi.renderConfigurableZoomableTrendChart('coverage-trend', t.responseJSON, 'chart-configuration-coverage-history', openBuild);
                 resizeChartOf('#coverage-trend');
             });
+        }
+
+        /**
+         * Event handler to resizes all charts.
+         */
+        function redrawCharts() {
+            renderTrendChart(); // rerender since the configuration might have changed
 
             resizeChartOf('#coverage-overview');
             resizeChartOf('#project-line-coverage');

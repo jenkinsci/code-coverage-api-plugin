@@ -68,9 +68,9 @@
         </bs:card>
       </div>
 
-      <div role="tabpanel" id="branchCoverage" class="flex-grow h-100 tab-pane fade">
-        <bs:card title="${%Branch coverage}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100">
-          <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart h-100"/>
+      <div role="tabpanel" id="branchCoverage" class="tab-pane fade">
+        <bs:card title="${%Branch coverage}" fontAwesomeIcon="magnifying-glass" >
+          <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
@@ -90,18 +90,6 @@
         </div>
       </j:if>
 
-    </div>
-
-    <div class="row">
-      <div class="col-12">
-        <span class="badge bg-secondary d-xxxl-inline d-none">xxxl</span>
-        <span class="badge bg-secondary d-xxl-inline d-xxxl-none d-none">xxl</span>
-        <span class="badge bg-secondary d-xl-inline d-xxl-none d-none">xl</span>
-        <span class="badge bg-secondary d-lg-inline d-xl-none d-none">lg</span>
-        <span class="badge bg-secondary d-md-inline d-lg-none d-none">md</span>
-        <span class="badge bg-secondary d-sm-inline d-md-none d-none">sm</span>
-        <span class="badge bg-secondary d-inline d-sm-none">xs</span>
-      </div>
     </div>
 
   </bs:page>
