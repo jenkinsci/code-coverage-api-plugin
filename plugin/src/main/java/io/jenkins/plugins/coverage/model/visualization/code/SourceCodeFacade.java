@@ -367,8 +367,7 @@ public class SourceCodeFacade {
         }
 
         @Override
-        public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel)
-                throws IOException, InterruptedException {
+        public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel) {
             FilteredLog log = new FilteredLog("Errors during source code painting:");
             Set<String> sourceDirectories = filterSourceDirectories(workspaceFile, log);
             if (sourceDirectories.isEmpty()) {
