@@ -1,7 +1,21 @@
-.details-chart {
+.no-selection-banner {
+    padding: 30px;
+    fill: var(--text-color);
+    height: 200px;
+    width: 200px;
+}
+
+.overview-chart {
     width: 100%;
-    min-height: 512px;
-    min-width: 256px;
+    min-height: 40vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tree-chart {
+    width: 100%;
+    min-height: 40vh;
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -56,9 +70,26 @@
     border-color: #b4b4b4;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
 }
+
 .form-switch .form-check-input:focus {
     box-shadow: none;
     background-color: #b4b4b4;
     border-color: #b4b4b4;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+}
+
+.coverage-column-outer {
+    border: 1px solid var(--medium-grey);
+    border-radius: 10px;
+    width: 5em;
+}
+
+.coverage-column-inner {
+    padding: 1px 7px;
+    border-radius: 10px;
+    color:var(--text-color);
+}
+
+#coverage-table td {
+    vertical-align: middle;
 }

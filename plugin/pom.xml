@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>5.26.0</version>
+    <version>5.28.0</version>
     <relativePath />
   </parent>
 
@@ -26,14 +26,13 @@
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.3</saxon-he.version>
 
-    <plugin-util-api.version>2.16.0</plugin-util-api.version>
-    <forensics-api.version>1.13.0</forensics-api.version>
+    <forensics-api.version>1.15.1</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
     <streamex.version>0.8.1</streamex.version>
     <gson.version>2.9.0</gson.version>
     <jsoup.version>1.15.1</jsoup.version>
-    <prism-api.version>1.26.0-2</prism-api.version>
+    <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.2</testcontainers.version>
   </properties>
@@ -123,6 +122,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>data-tables-api</artifactId>
+      <version>1.12.1-1</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -158,9 +158,8 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>${plugin-util-api.version}</version>
+      <classifier>tests</classifier>
       <scope>test</scope>
-      <type>test-jar</type>
     </dependency>
     <!-- Test Dependencies -->
     <dependency>
@@ -239,7 +238,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>git-forensics</artifactId>
-      <version>1.8.0</version>
+      <version>1.9.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -291,6 +290,13 @@
           <excludes combine.children="append">
           </excludes>
           <entryPointClassPackage>io.jenkins.plugins.coverage.model</entryPointClassPackage>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.revapi</groupId>
+        <artifactId>revapi-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>

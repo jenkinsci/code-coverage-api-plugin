@@ -1,9 +1,9 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:c="/charts">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:bs="/bootstrap5" xmlns:cov="/coverage" xmlns:c="/charts">
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
-  <bs:page it="${it}" notitle="true" class="fluid-container d-flex flex-column h-100">
+  <bs:page it="${it}" class="fluid-container d-flex flex-column">
 
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.data-tables-select"/>
@@ -17,192 +17,76 @@
     <j:set var="hasChangeCoverage" value="${it.hasChangeCoverage()}"/>
     <j:set var="hasIndirectCoverageChanges" value="${it.hasIndirectCoverageChanges()}"/>
 
-    <div class="d-flex flex-row align-items-center">
-      <div class="align-items-center">
-        <h1 style="margin-bottom: 0;">${it.displayName}</h1>
-      </div>
-      <div class="btn-group ms-3">
-        <input type="radio" class="btn-check" name="options" id="overviewToggle" autocomplete="off" checked="true"/>
-        <label id="overviewToggleLabel" class="btn btn-outline-secondary" for="overviewToggle"
-               onclick="coverageChartGenerator.loadReportViewById('report-overview')"
-               title="Show coverage overview">
-          <i>
-            <svg class="fa-svg-icon" width="25px" height="25px">
-              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#chart-bar"/>
-            </svg>
-          </i>
-        </label>
-        <input type="radio" class="btn-check" name="options" id="detailToggle" autocomplete="off"/>
-        <label id="detailToggleLabel" class="btn btn-outline-secondary" for="detailToggle"
-               onclick="coverageChartGenerator.loadReportViewById('report-details')"
-               title="Show coverage details">
-          <i>
-            <svg class="fa-svg-icon" width="25px" height="25px">
-              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#magnifying-glass"/>
-            </svg>
-          </i>
-        </label>
-      </div>
-      <div id="menu-separator" class="vr ms-3"/>
-      <div id="hide-button" class="vertical-center ms-3">
-        <input type="checkbox" class="btn-check" id="showOverviewChartsToggle" autocomplete="off"/>
-        <label class="btn btn-outline-secondary" for="showOverviewChartsToggle"
-               title="Hide/Show coverage overview charts"
-               onclick="coverageChartGenerator.toggleOverviewColumn()">
-          <i>
-            <svg class="fa-svg-icon" width="25px" height="25px">
-              <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#table-columns"/>
-            </svg>
-          </i>
-        </label>
-      </div>
-    </div>
+    <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
+      <li class="nav-item">
+        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#overview">Overview</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#lineCoverage">Line Coverage</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#branchCoverage">Branch Coverage</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#fileCoverage">File Coverage</a>
+      </li>
+      <j:if test="${hasChangeCoverage}">
+        <li class="nav-item">
+          <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverage">Change Coverage</a>
+        </li>
+      </j:if>
+      <j:if test="${hasIndirectCoverageChanges}">
+        <li class="nav-item">
+          <a class="nav-link" role="tab" data-bs-toggle="tab" href="#indirectCoverage">Indirect Coverage Changes</a>
+        </li>
+      </j:if>
+    </ul>
 
-    <div id="report-overview" class="d-flex flex-grow-1 mt-3">
-      <div id="overview-column" class="col-4 flex-column flex-nowrap h-100" style="min-width: 500px;">
-        <div class="h-50 pb-1">
-          <bs:card title="${%Total coverage overview}" fontAwesomeIcon="chart-bar" class="flex-fill h-100 mb-2"
-                   bodyClass="d-flex flex-column h-100">
-            <div id="coverage-overview" class="graph-cursor-pointer card-chart flex-grow-1"/>
-          </bs:card>
-        </div>
-        <div class="h-50 pt-1">
-          <bs:card title="${%Change coverage overview}" fontAwesomeIcon="chart-bar" class="flex-fill h-100"
-                   bodyClass="d-flex flex-column h-100">
-            <j:choose>
-              <j:when test="${hasChangeCoverage}">
-                <div id="change-coverage-overview" class="graph-cursor-pointer card-chart flex-grow-1"/>
-              </j:when>
-              <j:otherwise>
-                <div class="d-flex flex-column flex-grow-1 justify-content-center align-items-center">
-                  <i>
-                    <svg class="fa-svg-icon" width="75px" height="75px">
-                      <use href="${resURL}/plugin/font-awesome-api/sprites/solid.svg#xmark"/>
-                    </svg>
-                  </i>
-                  <div class="justify-content-center">
-                    No code changes found.
-                  </div>
-                </div>
-              </j:otherwise>
-            </j:choose>
-          </bs:card>
+    <div class="tab-content">
+
+      <div role="tabpanel" id="overview" class="tab-pane fade">
+        <div class="row">
+
+          <div class="col-5">
+            <bs:card title="${%Total coverage overview}" fontAwesomeIcon="chart-bar">
+              <div id="coverage-overview" class="graph-cursor-pointer overview-chart h-100"/>
+            </bs:card>
+          </div>
+
+          <div class="col-7">
+            <bs:card title="${%Coverage trend}" fontAwesomeIcon="chart-line">
+              <div id="coverage-trend" class="graph-cursor-pointer overview-chart h-100"/>
+            </bs:card>
+          </div>
+
         </div>
       </div>
 
-      <div id="tree-column" class="col-8 flex-column flex-nowrap flex-fill ms-3" style="min-width: 500px;">
-        <bs:card title="${%Coverage map}" fontAwesomeIcon="magnifying-glass"
-                 class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" id="coverage-map-metrics"/>
-            <label id="coverage-map-metrics-label" class="form-check-label" for="coverage-map-metric"
-                   title="The shown coverage metric (line and branch coverage are available)"
-                   onclick="coverageChartGenerator.setCoverageMapMetric()">Line Coverage
-            </label>
-          </div>
-          <ul class="nav nav-tabs flex-wrap mt-0" role="tablist" id="tab-tree">
-            <li class="nav-item" id="coverageTreeNav">
-              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTree">Project Coverage</a>
-            </li>
-            <j:if test="${hasChangeCoverage}">
-              <li class="nav-item" id="changeCoverageTreeNav">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTree">Change Coverage</a>
-              </li>
-            </j:if>
-            <j:if test="${hasIndirectCoverageChanges}">
-              <li class="nav-item" id="coverageChangesTreeNav">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTree">Indirect Coverage
-                  Changes
-                </a>
-              </li>
-            </j:if>
-          </ul>
-          <div class="tab-content flex-grow-1">
-            <div role="tabpanel" id="coverageTree" class="tab-pane fade h-100">
-              <div id="project-coverage" class="graph-cursor-pointer details-chart h-100"/>
-            </div>
-            <j:if test="${hasChangeCoverage}">
-              <div role="tabpanel" id="changeCoverageTree" class="tab-pane fade h-100">
-                <div id="change-coverage" class="graph-cursor-pointer details-chart h-100"/>
-              </div>
-            </j:if>
-            <j:if test="${hasIndirectCoverageChanges}">
-              <div role="tabpanel" id="coverageChangesTree" class="tab-pane fade h-100">
-                <div id="coverage-changes" class="graph-cursor-pointer details-chart h-100"/>
-              </div>
-            </j:if>
-          </div>
+      <div role="tabpanel" id="lineCoverage" class="tab-pane fade">
+        <bs:card title="${%Line coverage}" fontAwesomeIcon="magnifying-glass">
+          <div id="project-line-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
-    </div>
 
-    <div id="report-details" class="d-none d-flex flex-grow-1 mt-3">
-      <div id="tree-column" class="col-6 flex-column flex-nowrap flex-fill" style="min-width: 500px;">
-        <bs:card title="${%Coverage details}" fontAwesomeIcon="magnifying-glass" class="flex-fill">
-          <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
-            <li class="nav-item">
-              <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageTable">File Coverage</a>
-            </li>
-            <j:if test="${hasChangeCoverage}">
-              <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverageTable">Change Coverage
-                </a>
-              </li>
-            </j:if>
-            <j:if test="${hasIndirectCoverageChanges}">
-              <li class="nav-item">
-                <a class="nav-link" role="tab" data-bs-toggle="tab" href="#coverageChangesTable">Indirect Coverage
-                  Changes
-                </a>
-              </li>
-            </j:if>
-          </ul>
-          <div class="tab-content flex-grow-1">
-            <div role="tabpanel" id="coverageTable" class="tab-pane fade">
-              <dt:table model="${it.getTableModel('coverage-table')}"/>
-            </div>
-            <j:if test="${hasChangeCoverage}">
-              <div role="tabpanel" id="changeCoverageTable" class="tab-pane fade">
-                <dt:table model="${it.getTableModel('change-coverage-table')}"/>
-              </div>
-            </j:if>
-            <j:if test="${hasIndirectCoverageChanges}">
-              <div role="tabpanel" id="coverageChangesTable" class="tab-pane fade">
-                <dt:table model="${it.getTableModel('coverage-changes-table')}"/>
-              </div>
-            </j:if>
-          </div>
+      <div role="tabpanel" id="branchCoverage" class="tab-pane fade">
+        <bs:card title="${%Branch coverage}" fontAwesomeIcon="magnifying-glass" >
+          <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
-      <j:if test="${it.hasStoredSourceCode()}">
-        <div class="col-6 flex-column flex-nowrap flex-fill ms-3" style="min-width: 700px;">
-          <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
-                   class="flex-fill">
-            <div id="source-file-content" class="d-none">
-              <div style="overflow-x:scroll;">
-                <table id="source-file" class="source">
-                </table>
-              </div>
-            </div>
-            <div id="source-file-unavailable" class="d-none">
-              <p>
-                <b>${%Source code is unavailable.}</b>
-                <p>
-                  ${%Some possible reasons are:}
-                  <ul>
-                    <li>${%reason.1}</li>
-                    <li>${%reason.2}</li>
-                    <li>${%reason.3}</li>
-                  </ul>
-                </p>
-              </p>
-            </div>
-            <div id="source-file-unselected">
-              <p>
-                <b>${%No source code is selected.}</b>
-              </p>
-            </div>
-          </bs:card>
+
+      <div role="tabpanel" id="fileCoverage" class="tab-pane fade">
+        <cov:coverage-table tableId="absolute-coverage"  />
+      </div>
+
+      <j:if test="${hasChangeCoverage}">
+        <div role="tabpanel" id="changeCoverage" class="tab-pane fade">
+          <cov:coverage-table tableId="change-coverage" />
+        </div>
+      </j:if>
+
+      <j:if test="${hasIndirectCoverageChanges}">
+        <div role="tabpanel" id="indirectCoverage" class="tab-pane fade">
+          <cov:coverage-table tableId="indirect-coverage" />
         </div>
       </j:if>
 

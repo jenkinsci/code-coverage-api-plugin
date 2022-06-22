@@ -1,0 +1,14 @@
+.coverage-column-outer {
+    border: 1px solid var(--medium-grey);
+    border-radius: 10px;
+}
+
+.coverage-column-inner {
+    padding: 4px 7px;
+    border-radius: 10px
+}
+
+.coverage-column-link:hover {
+    text-decoration: none;
+}
+

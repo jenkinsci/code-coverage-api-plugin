@@ -58,7 +58,7 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         xStream.addImmutableType(Coverage.class, false);
         xStream.addImmutableType(CoveragePercentageConverter.class, false);
         xStream.registerConverter(new CoverageMetricConverter());
-        xStream.registerConverter(new CoverageConverter());
+        xStream.registerConverter(new CoverageConverter(xStream));
         xStream.registerConverter(new CoveragePercentageConverter());
         xStream.registerLocalConverter(FileCoverageNode.class, "coveragePerLine", new LineMapConverter());
         xStream.registerLocalConverter(FileCoverageNode.class, "fileCoverageDelta", new MetricPercentageMapConverter());
@@ -99,7 +99,11 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
      * {@link Converter} for {@link Coverage} instances so that only the values will be serialized. After reading the
      * values back from the stream, the string representation will be converted to an actual instance again.
      */
-    private static final class CoverageConverter implements Converter {
+    private static final class CoverageConverter extends XStream2.PassthruConverter<Coverage> {
+        CoverageConverter(final XStream2 xStream) {
+            super(xStream);
+        }
+
         @SuppressWarnings("PMD.NullAssignment")
         @Override
         public void marshal(final Object source, final HierarchicalStreamWriter writer,
@@ -108,8 +112,17 @@ class CoverageXmlStream extends AbstractXmlStream<CoverageNode> {
         }
 
         @Override
-        public Coverage unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-            return Coverage.valueOf(reader.getValue());
+        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            String value = reader.getValue();
+            if (StringUtils.contains(value,  '/')) {
+                return Coverage.valueOf(value);
+            }
+            return super.unmarshal(reader, context); // old versions before 3.0.0
+        }
+
+        @Override
+        protected void callback(final Coverage obj, final UnmarshallingContext context) {
+            // nothing to do
         }
 
         @Override
