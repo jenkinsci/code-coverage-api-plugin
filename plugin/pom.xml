@@ -26,7 +26,6 @@
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.3</saxon-he.version>
 
-    <forensics-api.version>1.15.1</forensics-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <json-unit-assertj.version>2.35.0</json-unit-assertj.version>
     <streamex.version>0.8.1</streamex.version>
@@ -122,12 +121,10 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>data-tables-api</artifactId>
-      <version>1.12.1-1</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>forensics-api</artifactId>
-      <version>${forensics-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
