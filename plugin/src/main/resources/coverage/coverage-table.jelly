@@ -12,12 +12,12 @@
     <j:choose>
       <j:when test="${it.hasSourceCode()}">
         <div class="col-12 d-xxl-none">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100" >
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100" >
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>
         </div>
         <div class="col-xxl-6 d-none d-xxl-block">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
             <dt:table model="${it.getTableModel(tableId + '-table-inline')}"/>
           </bs:card>
         </div>
@@ -49,7 +49,7 @@
       </j:when>
       <j:otherwise>
         <div class="col-12">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="magnifying-glass" class="flex-fill h-100">
+          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>
         </div>
