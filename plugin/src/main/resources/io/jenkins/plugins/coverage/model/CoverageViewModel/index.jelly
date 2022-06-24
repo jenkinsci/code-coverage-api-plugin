@@ -63,13 +63,13 @@
       </div>
 
       <div role="tabpanel" id="lineCoverage" class="tab-pane fade">
-        <bs:card title="${%Line coverage}" fontAwesomeIcon="magnifying-glass">
+        <bs:card title="${%Line coverage}" fontAwesomeIcon="folder-tree">
           <div id="project-line-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
       <div role="tabpanel" id="branchCoverage" class="tab-pane fade">
-        <bs:card title="${%Branch coverage}" fontAwesomeIcon="magnifying-glass" >
+        <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree" >
           <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
