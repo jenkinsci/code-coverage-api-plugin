@@ -111,7 +111,7 @@ class CoverageTableModel extends TableModel {
                 .withResponsivePriority(1)
                 .build();
         columns.add(branchCoverage);
-        TableColumn branchCoverageDelta = new ColumnBuilder().withHeaderLabel(Messages.Column_DeltaLineCoverage("Δ"))
+        TableColumn branchCoverageDelta = new ColumnBuilder().withHeaderLabel(Messages.Column_DeltaBranchCoverage("Δ"))
                 .withDataPropertyKey("branchCoverageDelta")
                 .withDetailedCell()
                 .withType(ColumnType.NUMBER)
