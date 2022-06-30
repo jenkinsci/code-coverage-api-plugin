@@ -19,7 +19,7 @@
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
-    <revision>3.1.0</revision>
+    <revision>3.0.1</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
