@@ -22,6 +22,13 @@ class CoveragePercentageTest {
     private static final Locale LOCALE = Locale.GERMAN;
 
     @Test
+    void shouldHandleOverflow() {
+        Fraction fraction = Fraction.getFraction(Integer.MAX_VALUE - 1, Integer.MAX_VALUE - 1);
+        CoveragePercentage coveragePercentage = valueOf(fraction);
+        assertThat(coveragePercentage.getDoubleValue()).isEqualTo(100);
+    }
+
+    @Test
     void shouldCreateCoveragePercentageFromFraction() {
         Fraction fraction = Fraction.getFraction(COVERAGE_FRACTION);
         CoveragePercentage coveragePercentage = valueOf(fraction);
