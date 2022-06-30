@@ -18,6 +18,7 @@ public final class CoveragePercentage implements Serializable {
     private static final long serialVersionUID = 3324942976687883481L;
 
     static final String DENOMINATOR_ZERO_MESSAGE = "The denominator must not be zero";
+    private static final Fraction HUNDRED = Fraction.getFraction("100.0");
 
     private final int numerator;
     private final int denominator;
@@ -44,7 +45,7 @@ public final class CoveragePercentage implements Serializable {
      * @return the created instance
      */
     public static CoveragePercentage valueOf(final Fraction fraction) {
-        Fraction percentage = fraction.multiplyBy(Fraction.getFraction("100.0"));
+        Fraction percentage = new SafeFraction(fraction).multiplyBy(HUNDRED);
         return new CoveragePercentage(percentage.getNumerator(), percentage.getDenominator());
     }
 

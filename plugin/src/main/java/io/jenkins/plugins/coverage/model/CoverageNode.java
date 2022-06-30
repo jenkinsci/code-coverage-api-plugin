@@ -30,6 +30,8 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import one.util.streamex.StreamEx;
 
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+
 /**
  * A hierarchical decomposition of coverage results.
  *
@@ -368,7 +370,7 @@ public class CoverageNode implements Serializable {
         SortedMap<CoverageMetric, Fraction> referencePercentages = reference.getMetricFractions();
         metricPercentages.forEach((key, value) ->
                 deltaPercentages.put(key,
-                        saveSubtractFraction(value, referencePercentages.getOrDefault(key, Fraction.ZERO))));
+                        new SafeFraction(value).subtract(referencePercentages.getOrDefault(key, Fraction.ZERO))));
         return deltaPercentages;
     }
 
@@ -383,27 +385,6 @@ public class CoverageNode implements Serializable {
     public SortedMap<CoverageMetric, CoveragePercentage> computeDeltaAsPercentage(final CoverageNode reference) {
         return StreamEx.of(computeDelta(reference).entrySet())
                 .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
-    }
-
-    /**
-     * Calculates the difference between two fraction. Since there might be an arithmetic exception due to an overflow,
-     * the method handles it and calculates the difference based on the double values of the fractions.
-     *
-     * @param minuend
-     *         The minuend as a fraction
-     * @param subtrahend
-     *         The subtrahend as a fraction
-     *
-     * @return the difference as a fraction
-     */
-    private Fraction saveSubtractFraction(final Fraction minuend, final Fraction subtrahend) {
-        try {
-            return minuend.subtract(subtrahend);
-        }
-        catch (ArithmeticException e) {
-            double diff = minuend.doubleValue() - subtrahend.doubleValue();
-            return Fraction.getFraction(diff);
-        }
     }
 
     /**
