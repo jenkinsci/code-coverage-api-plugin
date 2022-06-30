@@ -6,6 +6,7 @@ jobs:
         }
         recurse(true)
         columns {
+          coverageColumn()
           status()
           weather()
           name()
@@ -13,7 +14,6 @@ jobs:
           lastFailure()
           lastDuration()
           testResult(1)
-          coverageColumn()
           buildButton()
         }
       }

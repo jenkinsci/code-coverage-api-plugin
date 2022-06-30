@@ -85,6 +85,7 @@ public abstract class CoverageColumnType {
      *
      * @return the display names
      */
+    // FIXME: these texts should not be used as IDs
     public static List<String> getAvailableCoverageTypeNames() {
         return Arrays.asList(
                 Messages.Project_Coverage_Type(),

@@ -10,7 +10,7 @@ import io.jenkins.plugins.casc.ConfiguratorException;
 import io.jenkins.plugins.coverage.model.visualization.dashboard.CoverageColumn;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
 
-import static org.assertj.core.api.Assertions.*;
+import static io.jenkins.plugins.coverage.model.Assertions.*;
 
 /**
  * Tests the Job DSL Plugin.
@@ -29,7 +29,16 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
 
         assertThat(view).isNotNull();
 
-        assertThat(view.getColumns()).extracting(ListViewColumn::getColumnCaption).contains(new CoverageColumn().getColumnCaption());
+        assertThat(view.getColumns())
+                .extracting(ListViewColumn::getColumnCaption)
+                .contains(new CoverageColumn().getColumnCaption());
+
+        assertThat(view.getColumns()).first()
+                .isInstanceOfSatisfying(CoverageColumn.class,
+                        c -> {
+                            assertThat(c).hasColumnCaption(Messages.Coverage_Column())
+                                    .hasCoverageMetric(CoverageMetric.LINE.getName());
+                        });
     }
 
     /**
