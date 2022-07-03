@@ -11,7 +11,7 @@
 
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>code-coverage-api</artifactId>
-  <version>3.0.2</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Code Coverage API Plugin</name>
@@ -19,7 +19,7 @@
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
-    <revision>3.0.2</revision>
+    <revision>3.1.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
@@ -315,7 +315,7 @@
     <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
-    <tag>v3.0.2</tag>
+    <tag>${scmTag}</tag>
   </scm>
 
   <repositories>
