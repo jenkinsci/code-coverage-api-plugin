@@ -33,7 +33,7 @@
     <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.3</testcontainers.version>
-    <job-dsl.version>1.79</job-dsl.version>
+    <job-dsl.version>1.80</job-dsl.version>
   </properties>
 
   <developers>
