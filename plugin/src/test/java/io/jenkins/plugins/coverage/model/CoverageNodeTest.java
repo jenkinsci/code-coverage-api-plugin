@@ -5,8 +5,8 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -22,13 +22,9 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  * @author Florian Orendi
  */
+@DefaultLocale("en")
 class CoverageNodeTest extends AbstractCoverageTest {
     private static final String PROJECT_NAME = "Java coding style: jacoco-codingstyle.xml";
-
-    @BeforeAll
-    static void beforeAll() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
 
     @Test
     void shouldProvideEmptyPathForDefaultPackage() {

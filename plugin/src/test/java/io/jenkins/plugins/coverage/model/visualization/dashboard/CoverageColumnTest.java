@@ -1,11 +1,10 @@
 package io.jenkins.plugins.coverage.model.visualization.dashboard;
 
-import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import hudson.Functions;
 import hudson.model.Job;
@@ -28,13 +27,8 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Florian Orendi
  */
+@DefaultLocale("en")
 class CoverageColumnTest {
-
-    @BeforeAll
-    static void beforeAll() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
-
     private static final String COLUMN_NAME = "Test Column";
     private static final ProjectCoverage PROJECT_COVERAGE = new ProjectCoverage();
     private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();

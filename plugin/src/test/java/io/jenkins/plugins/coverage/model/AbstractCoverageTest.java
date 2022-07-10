@@ -1,8 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.Locale;
-
-import org.junit.jupiter.api.BeforeAll;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.util.ResourceTest;
 
@@ -17,6 +15,7 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  *
  * @author Ullrich Hafner
  */
+@DefaultLocale("en")
 public abstract class AbstractCoverageTest extends ResourceTest {
     static final double PRECISION = 0.01;
     static final CoverageMetric MODULE = CoverageMetric.MODULE;
@@ -27,11 +26,6 @@ public abstract class AbstractCoverageTest extends ResourceTest {
     static final CoverageMetric LINE = CoverageMetric.LINE;
     static final CoverageMetric INSTRUCTION = CoverageMetric.INSTRUCTION;
     static final CoverageMetric BRANCH = CoverageMetric.BRANCH;
-
-    @BeforeAll
-    static void beforeAll() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
 
     /**
      * Reads the {@link CoverageResult} from a coverage report.
