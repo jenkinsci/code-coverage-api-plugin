@@ -366,7 +366,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private String formatCoverageForMetric(final CoverageMetric metric,
             final Map<CoverageMetric, CoveragePercentage> coverages) {
         String coverage = Messages.Coverage_Not_Available();
-        if (coverages != null && coverages.containsKey(metric)) {
+        if (coverages.containsKey(metric)) {
             coverage = coverages.get(metric).formatPercentage(Functions.getCurrentLocale());
         }
         return metric.getName() + ": " + coverage;
@@ -492,8 +492,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatCoverage(final CoverageMetric metric) {
-        String coverage = getResult().printCoverageFor(metric, Functions.getCurrentLocale());
-        return metric.getName() + ": " + coverage;
+        return metric.getName() + ": " + getCoverage(metric).formatCoveredPercentage(Functions.getCurrentLocale());
     }
 
     @Override
