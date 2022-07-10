@@ -33,7 +33,6 @@ import io.jenkins.plugins.util.JenkinsFacade;
  */
 @SuppressWarnings("PMD.GodClass")
 public class CoverageBuildAction extends BuildAction<CoverageNode> implements HealthReportingAction, StaplerProxy {
-
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
     /** The coverage report icon. */
@@ -51,9 +50,14 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     private final String referenceBuildId;
 
     // since 3.0.0
+    /** The delta of this build's coverages with respect to the reference build. */
     private SortedMap<CoverageMetric, CoveragePercentage> difference;
+    /** The coverages filtered by changed lines of the associated change request. */
+    // FIXME: actually we need the coverages?
     private SortedMap<CoverageMetric, CoveragePercentage> changeCoverage;
+    /** The delta of the coverages of the associated change request with respect to the reference build. */
     private SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDifference;
+    /** The indirect coverage changes of the associated change request with respect to the reference build. */
     private SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges;
 
     @SuppressWarnings("unused")
@@ -86,13 +90,13 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @param referenceBuildId
      *         the ID of the reference build
      * @param delta
-     *         the delta coverage with respect to the reference build
+     *         delta of this build's coverages with respect to the reference build
      * @param changeCoverage
-     *         the change coverage with respect to the reference build
+     *         the coverages filtered by changed lines of the associated change request
      * @param changeCoverageDifference
-     *         the change coverage delta with respect to the reference build
+     *         the delta of the coverages of the associated change request with respect to the reference build
      * @param indirectCoverageChanges
-     *         the indirect coverage changes with respect to the reference build
+     *         the indirect coverage changes of the associated change request with respect to the reference build
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner, final CoverageNode result,
@@ -112,7 +116,8 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
             final SortedMap<CoverageMetric, CoveragePercentage> delta,
             final SortedMap<CoverageMetric, CoveragePercentage> changeCoverage,
             final SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDifference,
-            final SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges, final boolean canSerialize) {
+            final SortedMap<CoverageMetric, CoveragePercentage> indirectCoverageChanges,
+            final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         lineCoverage = result.getCoverage(CoverageMetric.LINE);
@@ -130,8 +135,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     protected Object readResolve() {
         if (difference == null) {
             difference = StreamEx.of(delta.entrySet())
-                    .toSortedMap(Entry::getKey,
-                            e -> CoveragePercentage.valueOf(e.getValue()));
+                    .toSortedMap(Entry::getKey, e -> CoveragePercentage.valueOf(e.getValue()));
         }
         if (changeCoverage == null) {
             changeCoverage = new TreeMap<>();
@@ -154,26 +158,39 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     }
 
     /**
-     * Returns whether the {@link Coverage} for the passed metric exists.
+     * Returns whether a {@link Coverage} for the specified metric exists.
      *
      * @param coverageMetric
-     *         the metric to check
+     *         the coverage metric
      *
-     * @return {@code true} if a coverage is available for the specified metric
+     * @return {@code true} if a coverage is available for the specified metric, {@code false} otherwise
      */
     public boolean hasCoverage(final CoverageMetric coverageMetric) {
+        if (coverageMetric.equals(CoverageMetric.LINE)) {
+            return lineCoverage.isSet();
+        }
+        if (coverageMetric.equals(CoverageMetric.BRANCH)) {
+            return branchCoverage.isSet();
+        }
+
         return getResult().getCoverage(coverageMetric).isSet();
     }
 
     /**
-     * Gets the {@link Coverage} for the passed metric.
+     * Returns the {@link Coverage} for the specified metric.
      *
      * @param coverageMetric
-     *         The coverage metric
+     *         the coverage metric
      *
      * @return the coverage
      */
     public Coverage getCoverage(final CoverageMetric coverageMetric) {
+        if (coverageMetric.equals(CoverageMetric.LINE)) {
+            return lineCoverage;
+        }
+        if (coverageMetric.equals(CoverageMetric.BRANCH)) {
+            return branchCoverage;
+        }
         return getResult().getCoverage(coverageMetric);
     }
 
@@ -183,7 +200,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if the change coverage exist, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return getResult().hasChangeCoverage();
+        return hasChangeCoverage(CoverageMetric.LINE) || hasChangeCoverage(CoverageMetric.BRANCH);
     }
 
     /**
@@ -195,7 +212,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if the change coverage exist for the metric, else {@code false}
      */
     public boolean hasChangeCoverage(final CoverageMetric coverageMetric) {
-        return getResult().hasChangeCoverage(coverageMetric);
+        return changeCoverage.containsKey(coverageMetric);
     }
 
     /**
@@ -207,6 +224,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return the change coverage
      */
     public Coverage getChangeCoverage(final CoverageMetric coverageMetric) {
+        // FIXME: is percentage sufficient?
         return getResult().getChangeCoverageTree().getCoverage(coverageMetric);
     }
 
@@ -216,7 +234,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return getResult().hasIndirectCoverageChanges();
+        return hasIndirectCoverageChanges(CoverageMetric.LINE) || hasIndirectCoverageChanges(CoverageMetric.BRANCH);
     }
 
     /**
@@ -228,7 +246,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return {@code true} if indirect coverage changes exist for the metric, else {@code false}
      */
     public boolean hasIndirectCoverageChanges(final CoverageMetric coverageMetric) {
-        return getResult().hasIndirectCoverageChanges(coverageMetric);
+        return indirectCoverageChanges.containsKey(coverageMetric);
     }
 
     /**
@@ -240,6 +258,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
      * @return the indirect coverage changes
      */
     public Coverage getIndirectCoverageChanges(final CoverageMetric coverageMetric) {
+        // FIXME: is percentage sufficient?
         return getResult().getIndirectCoverageChangesTree().getCoverage(coverageMetric);
     }
 

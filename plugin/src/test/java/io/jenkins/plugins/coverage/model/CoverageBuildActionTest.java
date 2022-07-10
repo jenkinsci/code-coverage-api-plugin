@@ -8,8 +8,11 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
 import hudson.Functions;
+import hudson.model.FreeStyleBuild;
 import hudson.model.HealthReport;
 import hudson.model.Run;
+
+import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.model.testutil.JobStubs.*;
@@ -22,7 +25,6 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  */
 class CoverageBuildActionTest {
-
     private static final Locale LOCALE = Functions.getCurrentLocale();
 
     private static final Fraction COVERAGE_FRACTION = Fraction.ONE_HALF;
@@ -31,6 +33,93 @@ class CoverageBuildActionTest {
 
     private static final int COVERAGE_FILE_CHANGES = 5;
     private static final long COVERAGE_LINE_CHANGES = 10;
+
+    @Test
+    void shouldNotLoadResultIfCoverageValuesArePersistedInAction() {
+        CoverageNode module = new CoverageNode(CoverageMetric.MODULE, "module");
+
+        CoverageBuilder coverageBuilder = new CoverageBuilder();
+
+        Coverage percent50 = coverageBuilder.setCovered(1).setMissed(1).build();
+        module.add(new CoverageLeaf(CoverageMetric.BRANCH, percent50));
+
+        Coverage percent80 = coverageBuilder.setCovered(8).setMissed(2).build();
+        module.add(new CoverageLeaf(CoverageMetric.LINE, percent80));
+
+        CoverageBuildAction action = spy(createEmptyAction(module));
+        when(action.getResult()).thenThrow(new IllegalStateException("Result should not be accessed with getResult() when getting a coverage metric that is persisted in the build"));
+
+        assertThat(action.hasCoverage(CoverageMetric.LINE)).isTrue();
+        assertThat(action.getCoverage(CoverageMetric.LINE)).isEqualTo(percent80);
+        assertThat(action.hasCoverage(CoverageMetric.BRANCH)).isTrue();
+        assertThat(action.getCoverage(CoverageMetric.BRANCH)).isEqualTo(percent50);
+
+        assertThatIllegalStateException().isThrownBy(
+                () -> action.hasCoverage(CoverageMetric.INSTRUCTION));
+        assertThatIllegalStateException().isThrownBy(
+                () -> action.getCoverage(CoverageMetric.INSTRUCTION));
+
+        assertThat(action.formatChangeCoverage(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
+        assertThat(action.formatChangeCoverageOverview()).isEqualTo("n/a");
+
+        assertThat(action.formatIndirectCoverageChanges(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
+        assertThat(action.formatIndirectCoverageChangesOverview()).isEqualTo("n/a");
+
+        assertThat(action.formatChangeCoverageDifference(CoverageMetric.BRANCH)).isEqualTo("n/a");
+        assertThat(action.formatDelta(CoverageMetric.BRANCH)).isEqualTo("n/a");
+    }
+
+    private static CoverageBuildAction createEmptyAction(final CoverageNode module) {
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), module, mock(HealthReport.class), "-",
+                new TreeMap<>(), new TreeMap<>(),
+                new TreeMap<>(), new TreeMap<>(), false);
+    }
+
+    @Test
+    void shouldNotLoadResultIfDeltasArePersistedInAction() {
+        SortedMap<CoverageMetric, CoveragePercentage> deltas = new TreeMap<>();
+
+        CoverageBuilder coverageBuilder = new CoverageBuilder();
+
+        CoveragePercentage percent50 = CoveragePercentage.valueOf(coverageBuilder.setCovered(1).setMissed(1).build()
+                .getCoveredFraction());
+        CoveragePercentage percent80 = CoveragePercentage.valueOf(coverageBuilder.setCovered(8).setMissed(2).build()
+                .getCoveredFraction());
+
+        deltas.put(CoverageMetric.BRANCH, percent50);
+        deltas.put(CoverageMetric.LINE, percent80);
+
+        CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class),
+                new CoverageNode(CoverageMetric.MODULE, "module"),
+                mock(HealthReport.class), "-",
+                deltas, deltas,
+                deltas, deltas, false);
+
+        CoverageBuildAction spy = spy(action);
+        when(spy.getResult()).thenThrow(new IllegalArgumentException("Result should not be accessed with getResult() when getting a coverage metric that is persisted in the build"));
+
+        assertThat(spy.hasChangeCoverage()).isTrue();
+        assertThat(spy.hasChangeCoverage(CoverageMetric.LINE)).isTrue();
+        assertThat(spy.hasChangeCoverage(CoverageMetric.BRANCH)).isTrue();
+        // FIXME: those values are not persisted yet
+//        assertThat(spy.getChangeCoverage(CoverageMetric.LINE)).isEqualTo(percent80);
+
+        assertThat(spy.hasIndirectCoverageChanges()).isTrue();
+        assertThat(spy.hasIndirectCoverageChanges(CoverageMetric.LINE)).isTrue();
+        assertThat(spy.hasIndirectCoverageChanges(CoverageMetric.BRANCH)).isTrue();
+        // FIXME: those values are not persisted yet
+//        assertThat(spy.getIndirectCoverageChanges(CoverageMetric.LINE)).isEqualTo(percent80);
+
+        assertThat(spy.hasChangeCoverageDifference(CoverageMetric.LINE)).isTrue();
+        assertThat(spy.hasChangeCoverageDifference(CoverageMetric.BRANCH)).isTrue();
+        // FIXME: those values are not persisted yet
+//        assertThat(spy.getIndirectCoverageChanges(CoverageMetric.LINE)).isEqualTo(percent80);
+
+        assertThat(spy.hasDelta(CoverageMetric.LINE)).isTrue();
+        assertThat(spy.hasDelta(CoverageMetric.BRANCH)).isTrue();
+        assertThat(spy.getDifference()).contains(entry(CoverageMetric.LINE, percent80));
+        assertThat(spy.getDifference()).contains(entry(CoverageMetric.BRANCH, percent50));
+    }
 
     @Test
     void shouldCreateViewModel() {
@@ -118,24 +207,6 @@ class CoverageBuildActionTest {
         CoverageBuildAction action = createChangeCoverageBuildActionWithMocks();
         String expected = COVERAGE_PERCENTAGE.formatDeltaPercentage(LOCALE);
         assertThat(action.formatChangeCoverageDifference(COVERAGE_METRIC)).isEqualTo(expected);
-    }
-
-    @Test
-    void shouldFormatNotAvailableCoverageValues() {
-        CoverageNode root = createCoverageNode(COVERAGE_FRACTION, CoverageMetric.BRANCH);
-        when(root.hasChangeCoverage()).thenReturn(false);
-        when(root.hasIndirectCoverageChanges()).thenReturn(false);
-
-        CoverageBuildAction action = createCoverageBuildAction(root);
-
-        assertThat(action.formatChangeCoverage(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
-        assertThat(action.formatChangeCoverageOverview()).isEqualTo("n/a");
-
-        assertThat(action.formatIndirectCoverageChanges(CoverageMetric.BRANCH)).isEqualTo("Branch: n/a");
-        assertThat(action.formatIndirectCoverageChangesOverview()).isEqualTo("n/a");
-
-        assertThat(action.formatChangeCoverageDifference(CoverageMetric.BRANCH)).isEqualTo("n/a");
-        assertThat(action.formatDelta(CoverageMetric.BRANCH)).isEqualTo("n/a");
     }
 
     /**
