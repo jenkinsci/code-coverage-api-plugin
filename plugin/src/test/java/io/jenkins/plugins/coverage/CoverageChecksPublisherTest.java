@@ -1,12 +1,11 @@
 package io.jenkins.plugins.coverage;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import org.jvnet.localizer.Localizable;
 import hudson.model.HealthReport;
@@ -25,6 +24,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@DefaultLocale("en")
 public class CoverageChecksPublisherTest {
     private static final String JENKINS_BASE_URL = "http://127.0.0.1:8080";
     private static final String COVERAGE_URL_NAME = "coverage";
@@ -32,11 +32,6 @@ public class CoverageChecksPublisherTest {
     private static final String TARGET_BUILD_LINK = "job/pipeline-coding-style/job/master/3/";
     private static final String LAST_SUCCESSFUL_BUILD_LINK = "http://127.0.0.1:8080/job/pipeline-coding-style/view/change-requests/job/PR-3/110/";
     private static final String HEALTH_REPORT = "Coverage Healthy score is 100%";
-
-    @BeforeClass
-    public static void enforceEnglishLocale() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
 
     @Test
     public void shouldConstructChecksDetailsWithLineAndMethodCoverage() {

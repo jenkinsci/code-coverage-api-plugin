@@ -134,7 +134,8 @@ public class CoverageReporter {
             }
 
             action = new CoverageBuildAction(build, rootNode, healthReport,
-                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
+                    referenceAction.getOwner().getExternalizableId(),
+                    coverageDelta,
                     changeCoverageRoot.getMetricPercentages(),
                     changeCoverageDelta,
                     indirectCoverageChangesTree.getMetricPercentages());

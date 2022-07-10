@@ -1,13 +1,11 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.Locale;
-
 import org.apache.commons.lang3.math.Fraction;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
@@ -21,12 +19,8 @@ import static io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder.*;
  *
  * @author Ullrich Hafner
  */
+@DefaultLocale("en")
 class CoverageTest {
-    @BeforeAll
-    static void beforeAll() {
-        Locale.setDefault(Locale.ENGLISH);
-    }
-
     @Test
     void shouldProvideNullObject() {
         assertThat(NO_COVERAGE).isNotSet()
