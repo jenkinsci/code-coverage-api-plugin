@@ -828,7 +828,7 @@ public class CoverageResult implements Serializable, Chartable, ModelObject {
     }
 
     public Set<String> getAdditionalProperty(final String propertyName) {
-        return additionalProperties.get(propertyName);
+        return additionalProperties.getOrDefault(propertyName, Collections.emptySet());
     }
 
     /**

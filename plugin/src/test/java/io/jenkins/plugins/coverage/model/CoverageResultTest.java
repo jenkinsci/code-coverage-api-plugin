@@ -30,6 +30,13 @@ class CoverageResultTest extends AbstractCoverageTest {
     private static final CoverageElement CLASS_NAME = JavaCoverageReportAdapterDescriptor.CLASS;
 
     @Test
+    void shouldNeverReturnNullForSets() throws CoverageException {
+        CoverageResult project = readReport("jacoco-codingstyle.xml");
+
+        assertThat(project.getAdditionalProperty("not-found")).isEmpty();
+    }
+
+    @Test
     void shouldReadJaCoCoResult() throws CoverageException {
         CoverageResult project = readReport("jacoco-codingstyle.xml");
 
