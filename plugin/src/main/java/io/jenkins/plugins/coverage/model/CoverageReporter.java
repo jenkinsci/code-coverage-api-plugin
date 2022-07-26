@@ -1,19 +1,24 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+
+import one.util.streamex.StreamEx;
 
 import hudson.FilePath;
 import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import io.jenkins.plugins.coverage.model.exception.AmbiguousPathException;
 import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -71,6 +76,9 @@ public class CoverageReporter {
         CoverageNode rootNode = converter.convert(rootResult);
         rootNode.splitPackages();
 
+        log.logInfo("Verify uniqueness of file paths...");
+        verifyPathUniqueness(rootNode);
+
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
         logHandler.log(log);
@@ -89,6 +97,9 @@ public class CoverageReporter {
                 FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
 
                 try {
+                    log.logInfo("Verify uniqueness of reference file paths...");
+                    verifyPathUniqueness(referenceRoot);
+
                     log.logInfo("Preprocessing code changes...");
                     Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
                     Map<String, FileChanges> mappedChanges =
@@ -109,8 +120,9 @@ public class CoverageReporter {
                     log.logInfo("Obtaining coverage delta for files...");
                     fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
                 }
-                catch (CodeDeltaException e) {
-                    log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
+                catch (CodeDeltaException | AmbiguousPathException e) {
+                    log.logError("An error occurred while processing code and coverage changes:");
+                    log.logError("-> Message: " + e.getMessage());
                     log.logError("-> Skipping calculating change coverage and indirect coverage changes");
                 }
             }
@@ -173,6 +185,25 @@ public class CoverageReporter {
             return changeCoverageRoot.computeDeltaAsPercentage(rootNode);
         }
         return new TreeMap<>();
+    }
+
+    /**
+     * Verifies that the passed coverage tree only contains files with unique paths.
+     *
+     * @param root
+     *         The {@link CoverageNode root} of the coverage tree
+     */
+    private void verifyPathUniqueness(final CoverageNode root) {
+        List<String> duplicates = StreamEx.of(root.getAllFileCoverageNodes())
+                .map(FileCoverageNode::getPath)
+                .distinct(2)
+                .collect(Collectors.toList());
+        if (!duplicates.isEmpty()) {
+            String message = "There are ambiguous file paths which might lead to ambiguous coverage reports:"
+                    + System.lineSeparator()
+                    + String.join("," + System.lineSeparator(), duplicates);
+            throw new AmbiguousPathException(message);
+        }
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {
