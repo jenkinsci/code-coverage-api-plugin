@@ -14,7 +14,6 @@ import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.model.exception.AmbiguousPathException;
 import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
@@ -118,7 +117,7 @@ public class CoverageReporter {
                     log.logInfo("Obtaining coverage delta for files...");
                     fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
                 }
-                catch (CodeDeltaException | AmbiguousPathException e) {
+                catch (CodeDeltaException e) {
                     log.logError("An error occurred while processing code and coverage changes:");
                     log.logError("-> Message: " + e.getMessage());
                     log.logError("-> Skipping calculating change coverage and indirect coverage changes");
