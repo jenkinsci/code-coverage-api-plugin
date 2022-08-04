@@ -256,6 +256,28 @@ public class CoverageNode implements Serializable {
     }
 
     /**
+     * Removes this node from the coverage tree.
+     */
+    public void remove() {
+        if (hasParent()) {
+            CoverageNode parent = getParent();
+            parent.getChildren().remove(this);
+            clearEmptyPaths(parent);
+        }
+    }
+
+    /**
+     * Clears an empty tree path from the bottom of the tree to the top, beginning with the passed node.
+     *
+     * @param node The {@link CoverageNode node} to begin from
+     */
+    private void clearEmptyPaths(final CoverageNode node) {
+        if (node.getChildren().isEmpty()) {
+            node.remove();
+        }
+    }
+
+    /**
      * Returns whether this node is the root of the tree.
      *
      * @return {@code true} if this node is the root of the tree, {@code false} otherwise
