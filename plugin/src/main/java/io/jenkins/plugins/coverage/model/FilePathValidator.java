@@ -22,6 +22,13 @@ class FilePathValidator {
             "-> In order to avoid this make sure package names are unique within the whole project";
 
     /**
+     * Private default constructor.
+     */
+    private FilePathValidator() {
+        // hides the public constructor
+    }
+
+    /**
      * Verifies that the passed coverage tree only contains files with unique paths. Duplicate paths are logged and
      * removed from the coverage tree.
      *

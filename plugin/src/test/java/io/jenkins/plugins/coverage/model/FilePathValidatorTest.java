@@ -20,7 +20,8 @@ class FilePathValidatorTest extends AbstractCoverageTest {
         CoverageNode rootCopy = root.copyTree();
         FilteredLog log = createLog();
 
-        FilePathValidator.verifyPathUniqueness(root, log);
+        verifyPathUniqueness(root, log);
+
         assertThat(root).isEqualTo(rootCopy);
         assertThat(log.getErrorMessages()).isEmpty();
     }
@@ -30,7 +31,8 @@ class FilePathValidatorTest extends AbstractCoverageTest {
         CoverageNode root = createMultiModuleReportWithDuplicates();
         FilteredLog log = createLog();
 
-        FilePathValidator.verifyPathUniqueness(root, log);
+        verifyPathUniqueness(root, log);
+
         assertThat(root.getAll(CoverageMetric.PACKAGE))
                 .hasSize(1)
                 .satisfies(node -> assertThat(node.get(0).getName()).isEqualTo("package"));

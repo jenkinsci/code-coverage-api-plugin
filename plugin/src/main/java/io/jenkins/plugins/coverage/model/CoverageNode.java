@@ -258,9 +258,8 @@ public class CoverageNode implements Serializable {
     /**
      * Removes this node from the coverage tree.
      */
-    public void remove() {
+    void remove() {
         if (hasParent()) {
-            CoverageNode parent = getParent();
             parent.getChildren().remove(this);
             clearEmptyPaths(parent);
         }
@@ -272,7 +271,7 @@ public class CoverageNode implements Serializable {
      * @param node The {@link CoverageNode node} to begin from
      */
     private void clearEmptyPaths(final CoverageNode node) {
-        if (node.getChildren().isEmpty()) {
+        if (node != null && node.getChildren().isEmpty()) {
             node.remove();
         }
     }

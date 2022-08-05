@@ -67,18 +67,10 @@ public class CoverageReporter {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        rootResult.stripGroup();
-
         CoverageNodeConverter converter = new CoverageNodeConverter();
-        CoverageNode rootNode = converter.convert(rootResult);
-        rootNode.splitPackages();
-
-        log.logInfo("Verify uniqueness of file paths...");
-        verifyPathUniqueness(rootNode, log);
+        CoverageNode rootNode = convertCoverageTree(converter, rootResult, log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
-
-        logHandler.log(log);
 
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
@@ -124,7 +116,6 @@ public class CoverageReporter {
                 }
             }
 
-            logHandler.log(log);
             log.logInfo("Calculating coverage deltas...");
 
             // filtered coverage trees
@@ -163,6 +154,30 @@ public class CoverageReporter {
         logHandler.log(log);
 
         build.addOrReplaceAction(action);
+    }
+
+    /**
+     * Converts the passed coverage tree to the new model and verifies its path structure.
+     *
+     * @param converter
+     *         The {@link CoverageNodeConverter converter} to be used
+     * @param rootResult
+     *         The {@link CoverageResult root} of the coverage tree to be converted
+     * @param log
+     *         The log
+     *
+     * @return the converted coverage tree which uses the new model
+     */
+    private CoverageNode convertCoverageTree(final CoverageNodeConverter converter,
+            final CoverageResult rootResult, final FilteredLog log) {
+        rootResult.stripGroup();
+        CoverageNode rootNode = converter.convert(rootResult);
+        rootNode.splitPackages();
+
+        log.logInfo("Verify uniqueness of file paths...");
+        verifyPathUniqueness(rootNode, log);
+
+        return rootNode;
     }
 
     /**
