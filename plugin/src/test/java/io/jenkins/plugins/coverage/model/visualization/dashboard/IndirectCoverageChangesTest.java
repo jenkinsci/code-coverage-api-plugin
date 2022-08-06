@@ -46,4 +46,9 @@ class IndirectCoverageChangesTest extends CoverageColumnTypeTest {
         String formattedCoverage = INDIRECT_COVERAGE_CHANGES.formatCoverage(COVERAGE_PERCENTAGE, LOCALE);
         assertThat(formattedCoverage).isEqualTo("50,00%");
     }
+
+    @Test
+    void shouldProvideReportUrl() {
+        assertThat(INDIRECT_COVERAGE_CHANGES.getAnchor()).isEqualTo("#indirectCoverage");
+    }
 }

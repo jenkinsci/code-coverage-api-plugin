@@ -41,4 +41,9 @@ public class ChangeCoverageDelta extends CoverageColumnType {
     public String formatCoverage(final CoveragePercentage coverage, final Locale locale) {
         return coverage.formatDeltaPercentage(locale);
     }
+
+    @Override
+    public String getAnchor() {
+        return "#changeCoverage";
+    }
 }

@@ -46,4 +46,9 @@ class ChangeCoverageTest extends CoverageColumnTypeTest {
         String formattedCoverage = CHANGE_COVERAGE.formatCoverage(COVERAGE_PERCENTAGE, LOCALE);
         assertThat(formattedCoverage).isEqualTo("50,00%");
     }
+
+    @Test
+    void shouldProvideReportUrl() {
+        assertThat(CHANGE_COVERAGE.getAnchor()).isEqualTo("#changeCoverage");
+    }
 }

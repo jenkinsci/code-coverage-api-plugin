@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -452,6 +453,7 @@ public class SourceCodeFacade {
                     paint.setTotalLines(lines.size());
                 }
                 new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
+                FileUtils.deleteDirectory(paintedFilesFolder.toFile());
                 return 1;
             }
             catch (IOException | InterruptedException exception) {

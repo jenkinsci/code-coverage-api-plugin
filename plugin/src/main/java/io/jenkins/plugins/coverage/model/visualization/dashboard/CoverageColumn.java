@@ -167,7 +167,7 @@ public class CoverageColumn extends ListViewColumn {
     public String getRelativeCoverageUrl(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
             CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-            return action.getUrlName();
+            return action.getUrlName() + "/" + selectedCoverageColumnType.getAnchor();
         }
         return "";
     }
