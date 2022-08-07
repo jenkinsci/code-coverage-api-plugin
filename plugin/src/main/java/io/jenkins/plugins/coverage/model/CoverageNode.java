@@ -256,6 +256,29 @@ public class CoverageNode implements Serializable {
     }
 
     /**
+     * Removes this node from the coverage tree.
+     */
+    void remove() {
+        // TODO: remove this method when unique paths are handled correctly
+        if (hasParent()) {
+            getParent().getChildren().remove(this);
+            clearEmptyPaths(getParent());
+        }
+    }
+
+    /**
+     * Clears an empty tree path from the bottom of the tree to the top, beginning with the passed node.
+     *
+     * @param node The {@link CoverageNode node} to begin from
+     */
+    private void clearEmptyPaths(final CoverageNode node) {
+        // TODO: remove this method when unique paths are handled correctly
+        if (node != null && node.getChildren().isEmpty()) {
+            node.remove();
+        }
+    }
+
+    /**
      * Returns whether this node is the root of the tree.
      *
      * @return {@code true} if this node is the root of the tree, {@code false} otherwise
@@ -426,21 +449,21 @@ public class CoverageNode implements Serializable {
     }
 
     /**
-     * Finds the coverage metric with the given name starting from this node.
+     * Finds the coverage metric with the given path starting from this node.
      *
      * @param searchMetric
      *         the coverage metric to search for
-     * @param searchName
-     *         the name of the node
+     * @param searchPath
+     *         the path of the node
      *
      * @return the result if found
      */
-    public Optional<CoverageNode> find(final CoverageMetric searchMetric, final String searchName) {
-        if (matches(searchMetric, searchName)) {
+    public Optional<CoverageNode> find(final CoverageMetric searchMetric, final String searchPath) {
+        if (matches(searchMetric, searchPath)) {
             return Optional.of(this);
         }
         return children.stream()
-                .map(child -> child.find(searchMetric, searchName))
+                .map(child -> child.find(searchMetric, searchPath))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .findAny();
     }
@@ -451,7 +474,7 @@ public class CoverageNode implements Serializable {
      * @param searchMetric
      *         the coverage metric to search for
      * @param searchNameHashCode
-     *         the hash code of the node name
+     *         the hash code of the node path
      *
      * @return the result if found
      */
@@ -470,13 +493,13 @@ public class CoverageNode implements Serializable {
      *
      * @param searchMetric
      *         the coverage metric to search for
-     * @param searchName
+     * @param searchPath
      *         the name of the node
      *
      * @return the result if found
      */
-    public boolean matches(final CoverageMetric searchMetric, final String searchName) {
-        return metric.equals(searchMetric) && name.equals(searchName);
+    private boolean matches(final CoverageMetric searchMetric, final String searchPath) {
+        return metric.equals(searchMetric) && getPath().equals(searchPath);
     }
 
     /**
@@ -489,11 +512,11 @@ public class CoverageNode implements Serializable {
      *
      * @return the result if found
      */
-    public boolean matches(final CoverageMetric searchMetric, final int searchNameHashCode) {
+    private boolean matches(final CoverageMetric searchMetric, final int searchNameHashCode) {
         if (!metric.equals(searchMetric)) {
             return false;
         }
-        return name.hashCode() == searchNameHashCode || getPath().hashCode() == searchNameHashCode;
+        return getPath().hashCode() == searchNameHashCode;
     }
 
     /**

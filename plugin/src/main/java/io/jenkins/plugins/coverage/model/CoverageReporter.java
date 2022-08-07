@@ -23,6 +23,8 @@ import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
 
+import static io.jenkins.plugins.coverage.model.FilePathValidator.*;
+
 /**
  * Transforms the old model to the new model and invokes all steps that work on the new model. Currently, only the
  * source code painting and copying has been moved to this new reporter class.
@@ -65,15 +67,10 @@ public class CoverageReporter {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        rootResult.stripGroup();
-
         CoverageNodeConverter converter = new CoverageNodeConverter();
-        CoverageNode rootNode = converter.convert(rootResult);
-        rootNode.splitPackages();
+        CoverageNode rootNode = convertCoverageTree(converter, rootResult, log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
-
-        logHandler.log(log);
 
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
@@ -89,6 +86,9 @@ public class CoverageReporter {
                 FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
 
                 try {
+                    log.logInfo("Verify uniqueness of reference file paths...");
+                    verifyPathUniqueness(referenceRoot, log);
+
                     log.logInfo("Preprocessing code changes...");
                     Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
                     Map<String, FileChanges> mappedChanges =
@@ -110,12 +110,12 @@ public class CoverageReporter {
                     fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
                 }
                 catch (CodeDeltaException e) {
-                    log.logError("An error occurred while processing code and coverage changes: " + e.getMessage());
+                    log.logError("An error occurred while processing code and coverage changes:");
+                    log.logError("-> Message: " + e.getMessage());
                     log.logError("-> Skipping calculating change coverage and indirect coverage changes");
                 }
             }
 
-            logHandler.log(log);
             log.logInfo("Calculating coverage deltas...");
 
             // filtered coverage trees
@@ -154,6 +154,30 @@ public class CoverageReporter {
         logHandler.log(log);
 
         build.addOrReplaceAction(action);
+    }
+
+    /**
+     * Converts the passed coverage tree to the new model and verifies its path structure.
+     *
+     * @param converter
+     *         The {@link CoverageNodeConverter converter} to be used
+     * @param rootResult
+     *         The {@link CoverageResult root} of the coverage tree to be converted
+     * @param log
+     *         The log
+     *
+     * @return the converted coverage tree which uses the new model
+     */
+    private CoverageNode convertCoverageTree(final CoverageNodeConverter converter,
+            final CoverageResult rootResult, final FilteredLog log) {
+        rootResult.stripGroup();
+        CoverageNode rootNode = converter.convert(rootResult);
+        rootNode.splitPackages();
+
+        log.logInfo("Verify uniqueness of file paths...");
+        verifyPathUniqueness(rootNode, log);
+
+        return rootNode;
     }
 
     /**

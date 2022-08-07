@@ -222,11 +222,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode tree = readNode("jacoco-analysis-model.xml");
 
         String checkStyleParser = "CheckStyleParser.java";
-        Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageMetric.FILE, checkStyleParser);
+        String checkStyleParserPath = "edu/hm/hafner/analysis/parser/checkstyle/" + checkStyleParser;
+        Optional<CoverageNode> wrappedCheckStyle = tree.find(CoverageMetric.FILE, checkStyleParserPath);
         assertThat(wrappedCheckStyle).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node)
                         .hasName(checkStyleParser)
-                        .hasPath("edu/hm/hafner/analysis/parser/checkstyle/CheckStyleParser.java")
+                        .hasPath(checkStyleParserPath)
         );
 
         CoverageNode checkStyle = wrappedCheckStyle.get();
@@ -246,11 +247,12 @@ class CoverageNodeTest extends AbstractCoverageTest {
                 .containsEntry(BRANCH, Fraction.getFraction(11, 12));
 
         String pmdParser = "PmdParser.java";
-        Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParser);
+        String pmdParserPath = "edu/hm/hafner/analysis/parser/pmd/" + pmdParser;
+        Optional<CoverageNode> wrappedPmd = tree.find(CoverageMetric.FILE, pmdParserPath);
         assertThat(wrappedPmd).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node)
                         .hasName(pmdParser)
-                        .hasPath("edu/hm/hafner/analysis/parser/pmd/PmdParser.java")
+                        .hasPath(pmdParserPath)
         );
 
         CoverageNode pmd = wrappedPmd.get();
@@ -358,15 +360,20 @@ class CoverageNodeTest extends AbstractCoverageTest {
         tree.splitPackages();
 
         String fileName = "Ensure.java";
-        assertThat(tree.findByHashCode(FILE, fileName.hashCode())).isNotEmpty().hasValueSatisfying(
-                node -> assertThat(node).hasName(fileName).isNotRoot());
-        assertThat(tree.findByHashCode(PACKAGE, fileName.hashCode())).isEmpty();
+        String filePath = "edu/hm/hafner/util/" + fileName;
+        assertThat(tree.findByHashCode(FILE, filePath.hashCode())).isNotEmpty().hasValueSatisfying(
+                        node -> assertThat(node).hasPath(filePath).isNotRoot());
+        assertThat(tree.findByHashCode(FILE, fileName.hashCode())).isEmpty();
         assertThat(tree.findByHashCode(FILE, "not-found".hashCode())).isEmpty();
 
         String noBranchCoverage = "NoSuchElementException.java";
-        assertThat(tree.find(FILE, noBranchCoverage)).isNotEmpty().hasValueSatisfying(
+        String noBranchCoveragePath = "edu/hm/hafner/util/" + noBranchCoverage;
+        assertThat(tree.find(FILE, noBranchCoveragePath)).isNotEmpty().hasValueSatisfying(
                 node -> {
-                    assertThat(node).hasName(noBranchCoverage).isNotRoot();
+                    assertThat(node)
+                            .hasName(noBranchCoverage)
+                            .hasPath(noBranchCoveragePath)
+                            .isNotRoot();
                     assertThat(node.getCoverage(BRANCH)).isNotSet();
                     assertThat(node.printCoverageFor(BRANCH)).isEqualTo(Messages.Coverage_Not_Available());
                 }
@@ -378,7 +385,8 @@ class CoverageNodeTest extends AbstractCoverageTest {
         CoverageNode tree = readExampleReport();
 
         String fileName = "Ensure.java";
-        assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
+        String filePath = "edu/hm/hafner/util/" + fileName;
+        assertThat(tree.find(FILE, filePath)).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(fileName)
                         .hasParentName("edu.hm.hafner.util")
                         .hasParent()
@@ -386,7 +394,7 @@ class CoverageNodeTest extends AbstractCoverageTest {
         );
 
         tree.splitPackages();
-        assertThat(tree.find(FILE, fileName)).isNotEmpty().hasValueSatisfying(
+        assertThat(tree.find(FILE, filePath)).isNotEmpty().hasValueSatisfying(
                 node -> assertThat(node).hasName(fileName)
                         .hasParentName("edu.hm.hafner.util")
                         .hasParent()
