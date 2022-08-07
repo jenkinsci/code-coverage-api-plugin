@@ -41,4 +41,9 @@ public class IndirectCoverageChanges extends CoverageColumnType {
     public String formatCoverage(final CoveragePercentage coverage, final Locale locale) {
         return coverage.formatPercentage(locale);
     }
+
+    @Override
+    public String getAnchor() {
+        return "#indirectCoverage";
+    }
 }
