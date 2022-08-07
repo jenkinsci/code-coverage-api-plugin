@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -385,10 +386,12 @@ public class SourceCodeFacade {
             try {
                 FilePath outputFolder = workspace.child(directory);
                 outputFolder.mkdirs();
+                Path temporaryFolder = Files.createTempDirectory(directory);
 
                 Charset charset = getCharset();
                 int count = paintedFiles.parallelStream()
-                        .mapToInt(file -> paintSource(file, workspace, sourceDirectories, charset, log))
+                        .mapToInt(
+                                file -> paintSource(file, workspace, temporaryFolder, sourceDirectories, charset, log))
                         .sum();
 
                 if (count == paintedFiles.size()) {
@@ -402,6 +405,8 @@ public class SourceCodeFacade {
                 FilePath zipFile = workspace.child(COVERAGE_SOURCES_ZIP);
                 outputFolder.zip(zipFile);
                 log.logInfo("-> zipping sources from folder '%s' as '%s'", outputFolder, zipFile);
+
+                deleteFolder(temporaryFolder.toFile(), log);
             }
             catch (IOException exception) {
                 log.logException(exception,
@@ -425,23 +430,23 @@ public class SourceCodeFacade {
                     permittedSourceDirectories, requestedSourceDirectories, log);
         }
 
-        private int paintSource(final PaintedNode fileNode, final FilePath workspace,
+        private int paintSource(final PaintedNode fileNode, final FilePath workspace, final Path temporaryFolder,
                 final Set<String> sourceSearchDirectories, final Charset sourceEncoding, final FilteredLog log) {
             String relativePathIdentifier = fileNode.getNode().getPath();
             FilePath paintedFilesDirectory = workspace.child(directory);
             return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
                     .map(resolvedPath -> paint(fileNode.getPaint(), relativePathIdentifier, resolvedPath,
-                            paintedFilesDirectory,
-                            sourceEncoding, log))
+                            paintedFilesDirectory, temporaryFolder, sourceEncoding, log))
                     .orElse(0);
         }
 
         private int paint(final CoveragePaint paint, final String relativePathIdentifier, final FilePath resolvedPath,
-                final FilePath paintedFilesDirectory, final Charset charset, final FilteredLog log) {
+                final FilePath paintedFilesDirectory, final Path temporaryFolder,
+                final Charset charset, final FilteredLog log) {
             String sanitizedFileName = sanitizeFilename(relativePathIdentifier);
             FilePath zipOutputPath = paintedFilesDirectory.child(sanitizedFileName + ZIP_FILE_EXTENSION);
             try {
-                Path paintedFilesFolder = Files.createTempDirectory(directory);
+                Path paintedFilesFolder = Files.createTempDirectory(temporaryFolder, directory);
                 Path fullSourcePath = paintedFilesFolder.resolve(sanitizedFileName);
                 try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
                     List<String> lines = Files.readAllLines(Paths.get(resolvedPath.getRemote()), charset);
@@ -452,6 +457,7 @@ public class SourceCodeFacade {
                     paint.setTotalLines(lines.size());
                 }
                 new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
+                FileUtils.deleteDirectory(paintedFilesFolder.toFile());
                 return 1;
             }
             catch (IOException | InterruptedException exception) {
@@ -538,6 +544,24 @@ public class SourceCodeFacade {
             log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
                     absolutePath.getRemote());
             return Optional.empty();
+        }
+
+        /**
+         * Deletes a folder.
+         *
+         * @param folder The directory to be deleted
+         * @param log The log
+         */
+        private void deleteFolder(final File folder, final FilteredLog log) {
+            if (folder.isDirectory()) {
+                try {
+                    FileUtils.deleteDirectory(folder);
+                }
+                catch (IOException e) {
+                    log.logError("The folder '%s' could not be deleted",
+                            folder.getAbsolutePath());
+                }
+            }
         }
 
         private static class PaintedNode implements Serializable {
