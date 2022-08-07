@@ -1,8 +1,10 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Optional;
@@ -116,14 +118,16 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
+        File temporaryDirectory = Paths.get("target", "tmp").toFile();
+        assertThat(temporaryDirectory.exists()).isTrue();
+        assertThat(temporaryDirectory.isDirectory()).isTrue();
+        File[] temporaryFiles = temporaryDirectory.listFiles();
+
         String sourceCodeRetention = "STORE_ALL_BUILD";
         job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
-
         Run<?, ?> firstBuild = buildSuccessfully(job);
-
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting successfully");
-
         verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER);
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
@@ -142,6 +146,8 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
+
+        assertThat(temporaryDirectory.listFiles()).isEqualTo(temporaryFiles);
 
         return firstBuild;
     }
