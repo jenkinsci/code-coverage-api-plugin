@@ -47,25 +47,32 @@ class CoverageColumnTest {
     @Test
     void shouldProvideSelectedColumn() {
         CoverageColumn column = createColumn();
+        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
+
         column.setCoverageType(Messages.Project_Coverage_Type());
         assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Type());
         assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverage.class);
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#overview");
 
         column.setCoverageType(Messages.Project_Coverage_Delta_Type());
         assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Delta_Type());
         assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverageDelta.class);
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#overview");
 
         column.setCoverageType(Messages.Change_Coverage_Type());
         assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Type());
         assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverage.class);
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
         column.setCoverageType(Messages.Change_Coverage_Delta_Type());
         assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Delta_Type());
         assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverageDelta.class);
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
         column.setCoverageType(Messages.Indirect_Coverage_Changes_Type());
         assertThat(column.getCoverageType()).isEqualTo(Messages.Indirect_Coverage_Changes_Type());
         assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(IndirectCoverageChanges.class);
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#indirectCoverage");
     }
 
     @Test

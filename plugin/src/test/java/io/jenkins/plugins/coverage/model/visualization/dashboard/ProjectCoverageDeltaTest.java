@@ -46,4 +46,9 @@ class ProjectCoverageDeltaTest extends CoverageColumnTypeTest {
         String formattedCoverage = PROJECT_COVERAGE_DELTA.formatCoverage(COVERAGE_PERCENTAGE, LOCALE);
         assertThat(formattedCoverage).isEqualTo("+50,00%");
     }
+
+    @Test
+    void shouldProvideReportUrl() {
+        assertThat(PROJECT_COVERAGE_DELTA.getAnchor()).isEqualTo("#overview");
+    }
 }

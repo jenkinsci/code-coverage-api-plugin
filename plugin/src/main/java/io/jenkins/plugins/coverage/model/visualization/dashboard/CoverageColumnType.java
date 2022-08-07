@@ -81,6 +81,16 @@ public abstract class CoverageColumnType {
     public abstract String formatCoverage(CoveragePercentage coverage, Locale locale);
 
     /**
+     * Returns the anchor which stands for a specific part of the coverage report which belongs to this coverage
+     * column. The default value is '#overview'.
+     *
+     * @return the anchor
+     */
+    public String getAnchor() {
+        return "#overview";
+    }
+
+    /**
      * Gets the names of the available coverage types.
      *
      * @return the display names
