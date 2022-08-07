@@ -157,7 +157,7 @@ class CoverageTableModel extends TableModel {
         }
 
         public String getFileHash() {
-            return String.valueOf(root.getName().hashCode());
+            return String.valueOf(root.getPath().hashCode());
         }
 
         public String getFileName() {
@@ -293,7 +293,7 @@ class CoverageTableModel extends TableModel {
         public String renderFileName(final String fileName, final String path) {
             if (CoverageViewModel.isSourceFileInNewFormatAvailable(buildFolder, resultsId, path)
                     || CoverageViewModel.isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
-                return a().withHref(String.valueOf(fileName.hashCode())).withText(fileName).render();
+                return a().withHref(String.valueOf(path.hashCode())).withText(fileName).render();
             }
             return fileName;
         }
