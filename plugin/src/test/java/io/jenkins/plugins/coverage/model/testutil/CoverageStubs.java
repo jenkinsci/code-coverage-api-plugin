@@ -14,6 +14,7 @@ import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 
+import static io.jenkins.plugins.coverage.model.CoverageBuildAction.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -91,6 +92,8 @@ public final class CoverageStubs {
 
         when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
         when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(percentage);
+
+        when(action.getUrlName()).thenReturn(DETAILS_URL);
 
         return action;
     }
