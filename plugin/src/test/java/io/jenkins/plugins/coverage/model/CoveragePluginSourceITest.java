@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Optional;
@@ -117,7 +116,8 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
 
-        File temporaryDirectory = Paths.get("target", "tmp").toFile();
+        // get the temporary directory - used by unit tests - to verify its content
+        File temporaryDirectory = new File(System.getProperty("java.io.tmpdir"));
         assertThat(temporaryDirectory.exists()).isTrue();
         assertThat(temporaryDirectory.isDirectory()).isTrue();
         File[] temporaryFiles = temporaryDirectory.listFiles();
