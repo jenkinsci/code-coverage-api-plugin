@@ -39,6 +39,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
     private static final String SOURCE_FILE = SOURCE_FILE_NAME + ".txt";
     private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
+    private static final String SOURCE_FILE_PATH = PACKAGE_PATH + SOURCE_FILE_NAME;
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
     private static final PathUtil PATH_UTIL = new PathUtil();
     static final String FILE_NAME = "jacoco-analysis-model.xml";
@@ -164,7 +165,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
         CoverageViewModel model = verifyViewModel(build);
 
-        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_NAME.hashCode()), "coverage-table"))
+        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_PATH.hashCode()), "coverage-table"))
                 .contains(sourceCodeSnippet);
     }
 
@@ -173,10 +174,10 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(action.getLineCoverage())
                 .isEqualTo(new Coverage.CoverageBuilder().setCovered(8).setMissed(0).build());
 
-        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, SOURCE_FILE_NAME);
+        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, SOURCE_FILE_PATH);
         assertThat(fileNode).isNotEmpty()
                 .hasValueSatisfying(node ->
-                        assertThat(node.getPath()).isEqualTo(PACKAGE_PATH + SOURCE_FILE_NAME));
+                        assertThat(node.getPath()).isEqualTo(SOURCE_FILE_PATH));
 
         return action.getTarget();
     }

@@ -79,7 +79,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
         fileChangesProcessor.attachChangedCodeLines(tree, CODE_CHANGES);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1.hashCode()))
+        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
@@ -102,7 +102,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
         fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1.hashCode()))
+        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
@@ -139,7 +139,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
         fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES, OLD_PATH_MAPPING);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1.hashCode()))
+        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
