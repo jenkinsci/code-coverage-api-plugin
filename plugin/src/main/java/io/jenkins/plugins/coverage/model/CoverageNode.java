@@ -261,7 +261,7 @@ public class CoverageNode implements Serializable {
     void remove() {
         // TODO: remove this method when unique paths are handled correctly
         if (hasParent()) {
-            getParent().getChildren().remove(this);
+            getParent().children.remove(this);
             clearEmptyPaths(getParent());
         }
     }
