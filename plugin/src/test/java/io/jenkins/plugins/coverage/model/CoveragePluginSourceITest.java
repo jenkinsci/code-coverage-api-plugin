@@ -110,7 +110,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         Files.createDirectories(sourceCodeDirectory);
         Files.copy(getResourceAsFile(SOURCE_FILE), sourceCodeDirectory.resolve("AcuCobolParser.java"),
                 StandardCopyOption.REPLACE_EXISTING);
-        return tempDirectory.toString().replace('\\', '/');
+        return PATH_UTIL.getAbsolutePath(tempDirectory);
     }
 
     private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
