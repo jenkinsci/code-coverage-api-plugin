@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
-  <t:summary icon="/plugin/code-coverage-api/icons/coverage.svg">
+  <t:summary icon="symbol-footsteps-outline plugin-ionicons-api">
     <span id="coverage-summary">
       <j:set var="result" value="${it.result}"/>
       <j:choose>

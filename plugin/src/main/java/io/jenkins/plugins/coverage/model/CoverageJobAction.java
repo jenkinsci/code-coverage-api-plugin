@@ -26,7 +26,7 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
 
     @Override
     public String getIconFileName() {
-        return CoverageBuildAction.SMALL_ICON;
+        return CoverageBuildAction.ICON;
     }
 
     @Override
