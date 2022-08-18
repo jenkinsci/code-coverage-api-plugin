@@ -36,7 +36,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
     /** The coverage report icon. */
-    public static final String SMALL_ICON = "/plugin/code-coverage-api/icons/coverage.svg";
+    public static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
 
     private static final long serialVersionUID = -6023811049340671399L;
 
@@ -123,7 +123,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
         lineCoverage = result.getCoverage(CoverageMetric.LINE);
         branchCoverage = result.getCoverage(CoverageMetric.BRANCH);
 
-        this.difference = delta;
+        difference = delta;
         this.changeCoverage = changeCoverage;
         this.changeCoverageDifference = changeCoverageDifference;
         this.indirectCoverageChanges = indirectCoverageChanges;
@@ -523,7 +523,7 @@ public class CoverageBuildAction extends BuildAction<CoverageNode> implements He
     @CheckForNull
     @Override
     public String getIconFileName() {
-        return SMALL_ICON;
+        return ICON;
     }
 
     @NonNull
