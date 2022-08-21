@@ -168,63 +168,63 @@ const CoverageChartGenerator = function ($) {
                     itemStyle: {
                         borderColor: '#ddd',
                         borderWidth: 2,
-                        gapWidth: 2
+                        gapWidth: 3
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.6
+                        gapWidth: 5,
+                        borderColorSaturation: 0.2
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.7
+                        gapWidth: 3,
+                        borderColorSaturation: 0.8
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.6
+                        gapWidth: 3,
+                        borderColorSaturation: 0.2
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.7
+                        gapWidth: 3,
+                        borderColorSaturation: 0.8
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.6
+                        gapWidth: 3,
+                        borderColorSaturation: 0.2
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.7
+                        gapWidth: 3,
+                        borderColorSaturation: 0.8
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.6
+                        gapWidth: 3,
+                        borderColorSaturation: 0.2
                     }
                 },
                 {
                     itemStyle: {
                         borderWidth: 4,
-                        gapWidth: 2,
-                        borderColorSaturation: 0.7
+                        gapWidth: 3,
+                        borderColorSaturation: 0.8
                     }
                 },
             ];
