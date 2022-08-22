@@ -330,16 +330,16 @@ const CoverageChartGenerator = function ($) {
             const selectedTabID = 'jenkins-coverage-activeTab';
             const url = document.location.toString();
             if (url.match('#')) {
+                window.location.hash = '';
                 const tabName = url.split('#')[1];
-                if (selectTab('a[href="#' + tabName + '"]')) {
+                if (selectTab('a[data-bs-target="#' + tabName + '"]')) {
                     localStorage.setItem(selectedTabID, '#' + tabName);
                 }
-
             }
             else {
                 const activeTab = localStorage.getItem(selectedTabID);
                 if (activeTab) {
-                    selectTab('a[href="' + activeTab + '"]');
+                    selectTab('a[data-bs-target="' + activeTab + '"]');
                 }
             }
             if ($('#tab-details a.active').length === 0) {
@@ -348,7 +348,7 @@ const CoverageChartGenerator = function ($) {
 
             $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 window.location.hash = e.target.hash;
-                const activeTab = $(e.target).attr('href');
+                const activeTab = $(e.target).attr('data-bs-target');
                 localStorage.setItem(selectedTabID, activeTab);
                 redrawCharts();
             });
