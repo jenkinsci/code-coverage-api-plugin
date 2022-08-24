@@ -17,34 +17,36 @@
     <j:set var="hasChangeCoverage" value="${it.hasChangeCoverage()}"/>
     <j:set var="hasIndirectCoverageChanges" value="${it.hasIndirectCoverageChanges()}"/>
 
-    <ul class="nav nav-tabs flex-wrap" role="tablist" id="tab-details">
-      <li class="nav-item">
-        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#overview">Overview</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#lineCoverage">Line Coverage</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#branchCoverage">Branch Coverage</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" role="tab" data-bs-toggle="tab" href="#fileCoverage">File Coverage</a>
-      </li>
-      <j:if test="${hasChangeCoverage}">
-        <li class="nav-item">
-          <a class="nav-link" role="tab" data-bs-toggle="tab" href="#changeCoverage">Change Coverage</a>
+    <div class="tabBarFrame">
+      <ul class="flex-wrap tabBar" role="tablist" id="tab-details">
+        <li class="nav-item tab" role="presentation">
+          <a class="nav-link" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="false">Overview</a>
         </li>
-      </j:if>
-      <j:if test="${hasIndirectCoverageChanges}">
-        <li class="nav-item">
-          <a class="nav-link" role="tab" data-bs-toggle="tab" href="#indirectCoverage">Indirect Coverage Changes</a>
+        <li class="nav-item tab" role="presentation">
+          <a class="nav-link" id="lineCoverage-tab" data-bs-toggle="tab" data-bs-target="#lineCoverage" type="button" role="tab" aria-controls="lineCoverage" aria-selected="false">Line Coverage</a>
         </li>
-      </j:if>
-    </ul>
+        <li class="nav-item tab" role="presentation">
+          <a class="nav-link" id="branchCoverage-tab" data-bs-toggle="tab" data-bs-target="#branchCoverage" type="button" role="tab" aria-controls="branchCoverage" aria-selected="false">Branch Coverage</a>
+        </li>
+        <li class="nav-item tab" role="presentation">
+          <a class="nav-link" id="fileCoverage-tab" data-bs-toggle="tab" data-bs-target="#fileCoverage" type="button" role="tab" aria-controls="fileCoverage" aria-selected="false">File Coverage</a>
+        </li>
+        <j:if test="${hasChangeCoverage}">
+          <li class="nav-item tab" role="presentation">
+            <a class="nav-link" id="changeCoverage-tab" data-bs-toggle="tab" data-bs-target="#changeCoverage" type="button" role="tab" aria-controls="changeCoverage" aria-selected="false">Change Coverage</a>
+          </li>
+        </j:if>
+        <j:if test="${hasIndirectCoverageChanges}">
+          <li class="nav-item tab" role="presentation">
+            <a class="nav-link" id="indirectCoverage-tab" data-bs-toggle="tab" data-bs-target="#indirectCoverage" type="button" role="tab" aria-controls="indirectCoverage" aria-selected="false">Indirect Coverage Changes</a>
+          </li>
+        </j:if>
+      </ul>
+    </div>
 
     <div class="tab-content">
 
-      <div role="tabpanel" id="overview" class="tab-pane fade">
+      <div role="tabpanel" id="overview" class="tab-pane fade" aria-labelledby="overview-tab" >
         <div class="row">
 
           <div class="col-5">
@@ -62,31 +64,31 @@
         </div>
       </div>
 
-      <div role="tabpanel" id="lineCoverage" class="tab-pane fade">
+      <div role="tabpanel" id="lineCoverage" class="tab-pane fade" aria-labelledby="lineCoverage-tab">
         <bs:card title="${%Line coverage}" fontAwesomeIcon="folder-tree">
           <div id="project-line-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
-      <div role="tabpanel" id="branchCoverage" class="tab-pane fade">
-        <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree" >
+      <div role="tabpanel" id="branchCoverage" class="tab-pane fade" aria-labelledby="branchCoverage-tab">
+        <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree">
           <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
-      <div role="tabpanel" id="fileCoverage" class="tab-pane fade">
-        <cov:coverage-table tableId="absolute-coverage"  />
+      <div role="tabpanel" id="fileCoverage" class="tab-pane fade" aria-labelledby="fileCoverage-tab">
+        <cov:coverage-table tableId="absolute-coverage"/>
       </div>
 
       <j:if test="${hasChangeCoverage}">
-        <div role="tabpanel" id="changeCoverage" class="tab-pane fade">
-          <cov:coverage-table tableId="change-coverage" />
+        <div role="tabpanel" id="changeCoverage" class="tab-pane fade" aria-labelledby="changeCoverage-tab">
+          <cov:coverage-table tableId="change-coverage"/>
         </div>
       </j:if>
 
       <j:if test="${hasIndirectCoverageChanges}">
-        <div role="tabpanel" id="indirectCoverage" class="tab-pane fade">
-          <cov:coverage-table tableId="indirect-coverage" />
+        <div role="tabpanel" id="indirectCoverage" class="tab-pane fade" aria-labelledby="indirectCoverage-tab">
+          <cov:coverage-table tableId="indirect-coverage"/>
         </div>
       </j:if>
 
