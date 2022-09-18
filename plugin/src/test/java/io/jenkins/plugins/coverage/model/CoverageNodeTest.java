@@ -12,6 +12,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+import io.jenkins.plugins.coverage.targets.CoverageResult;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +31,31 @@ class CoverageNodeTest extends AbstractCoverageTest {
     void shouldProvideEmptyPathForDefaultPackage() {
         PackageCoverageNode node = new PackageCoverageNode("-");
         assertThat(node.getPath()).isEqualTo("");
+    }
+
+    @Test
+    void shouldReturnCoberturaNpeReportIssue473() {
+        CoverageResult result = readCoberturaResult("cobertura-npe.xml");
+        CoverageNode tree = new CoverageNodeConverter().convert(result);
+
+        assertThat(tree.getAll(MODULE)).hasSize(1).extracting(CoverageNode::getName).containsOnly("cobertura: cobertura-npe.xml");
+        assertThat(tree.getAll(PACKAGE)).hasSize(1).extracting(CoverageNode::getName).containsOnly("CoverageTest.Service");
+        assertThat(tree.getAll(FILE)).hasSize(2).extracting(CoverageNode::getName).containsOnly("Program.cs", "Startup.cs");
+        assertThat(tree.getAll(CLASS)).hasSize(2).extracting(CoverageNode::getName).containsOnly("Lisec.CoverageTest.Program", "Lisec.CoverageTest.Startup");
+
+        assertThat(tree).hasOnlyMetrics(MODULE, PACKAGE, FILE, CLASS, METHOD, LINE, BRANCH);
+        assertThat(tree.getMetricsDistribution()).containsExactly(
+                entry(MODULE, getCoverage(1, 0)),
+                entry(PACKAGE, getCoverage(1, 0)),
+                entry(FILE, getCoverage(2, 0)),
+                entry(CLASS, getCoverage(2, 0)),
+                entry(METHOD, getCoverage(4, 1)),
+                entry(LINE, getCoverage(44, 9)),
+                entry(BRANCH, getCoverage(3, 1)));
+    }
+
+    private static Coverage getCoverage(final int covered, final int missed) {
+        return new CoverageBuilder().setCovered(covered).setMissed(missed).build();
     }
 
     @Test

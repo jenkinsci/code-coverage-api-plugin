@@ -4,6 +4,7 @@ import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.util.ResourceTest;
 
+import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.exception.CoverageException;
@@ -39,6 +40,27 @@ public abstract class AbstractCoverageTest extends ResourceTest {
         try {
             JacocoReportAdapter parser = new JacocoReportAdapter("unused");
             CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
+            CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
+            result.stripGroup();
+            return result;
+        }
+        catch (CoverageException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
+    /**
+     * Reads the {@link CoverageResult} from a coverage report.
+     *
+     * @param fileName
+     *         The name of the coverage report file
+     *
+     * @return the parsed coverage results
+     */
+    public CoverageResult readCoberturaResult(final String fileName) {
+        try {
+            CoberturaReportAdapter parser = new CoberturaReportAdapter("unused");
+            CoverageElementRegister.addCoverageElements(new CoberturaReportAdapter.CoberturaReportAdapterDescriptor().getCoverageElements());
             CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
             result.stripGroup();
             return result;
