@@ -74,6 +74,30 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         verifyGitIntegration(build, referenceBuild);
     }
 
+    // See https://github.com/jenkinsci/code-coverage-api-plugin/issues/467
+    @Test
+    void tryToExpose467() {
+        assumeThat(isWindows()).as("Running on Windows").isFalse();
+
+        Node agent = createDockerAgent(AGENT_CONTAINER);
+        String node = "node('" + DOCKER_AGENT_NAME + "')";
+        WorkflowJob project = createPipeline();
+        String jacocoReferenceFile = "jacoco-duplicate-key-reference.xml";
+        copySingleFileToAgentWorkspace(agent, project, jacocoReferenceFile, jacocoReferenceFile);
+        String jacocoFile = "jacoco-duplicate-key.xml";
+        copySingleFileToAgentWorkspace(agent, project, jacocoFile, jacocoFile);
+
+        String commitReference = "723aac821a5e967dd3894d215b267a38de086b90";
+        project.setDefinition(createFlowDefinitionForCommit(node, commitReference, jacocoReferenceFile, "https://github.com/jenkinsci/design-library-plugin.git"));
+        Run<?, ?> referenceBuild = buildSuccessfully(project);
+        System.out.println(getConsoleLog(referenceBuild));
+
+        String commit = "2796bb89ac793bb1775a6dff1a48b52ca34c0f67";
+        project.setDefinition(createFlowDefinitionForCommit(node, commit, jacocoFile, "https://github.com/janfaracik/design-library-plugin.git"));
+        Run<?, ?> build = buildSuccessfully(project);
+        System.out.println(getConsoleLog(build));
+    }
+
     @Test
     void shouldIntegrateForensicsPluginInFreestyleJobOnAgent() throws IOException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
@@ -240,10 +264,29 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private FlowDefinition createFlowDefinitionForCommit(
             final String node, final String commit, final String jacocoXML) {
+        return createFlowDefinitionForCommit(node, commit, jacocoXML, REPOSITORY);
+    }
+
+    /**
+     * Creates a {@link FlowDefinition} for a Jenkins pipeline which processes a JaCoCo coverage report.
+     *
+     * @param node
+     *         The node
+     * @param commit
+     *         The processed commit
+     * @param jacocoXML
+     *         The content of the processed JaCoCo report
+     * @param repository
+     *         the remote Git repository
+     *
+     * @return the created definition
+     */
+    private FlowDefinition createFlowDefinitionForCommit(
+            final String node, final String commit, final String jacocoXML, final String repository) {
         return new CpsFlowDefinition(node + " {"
                 + "    checkout([$class: 'GitSCM', "
                 + "branches: [[name: '" + commit + "' ]],\n"
-                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
+                + "userRemoteConfigs: [[url: '" + repository + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
                 + "    publishCoverage adapters: [jacocoAdapter('" + jacocoXML

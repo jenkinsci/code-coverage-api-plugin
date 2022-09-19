@@ -1,0 +1,1866 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN"
+        "report.dtd">
+<report name="Jenkins Design Library">
+  <sessioninfo id="Ullis-MBP.fritz.box-9748d8fa" start="1663571606630" dump="1663571624365"/>
+  <sessioninfo id="Ullis-MBP.fritz.box-e9e1153b" start="1663571625156" dump="1663571625744"/>
+  <package name="io/jenkins/plugins/designlibrary">
+    <class name="io/jenkins/plugins/designlibrary/Table" sourcefilename="Table.java">
+      <method name="&lt;init&gt;" desc="()V" line="9">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="12">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Root" sourcefilename="Root.java">
+      <method name="&lt;init&gt;" desc="()V" line="14">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="16">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="20">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getUrlName" desc="()Ljava/lang/String;" line="24">
+        <counter type="INSTRUCTION" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getDynamic" desc="(Ljava/lang/String;)Lio/jenkins/plugins/designlibrary/UISample;" line="28">
+        <counter type="INSTRUCTION" missed="25" covered="0"/>
+        <counter type="BRANCH" missed="6" covered="0"/>
+        <counter type="LINE" missed="6" covered="0"/>
+        <counter type="COMPLEXITY" missed="4" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getAll" desc="()Ljava/util/List;" line="37">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="31" covered="5"/>
+      <counter type="BRANCH" missed="6" covered="0"/>
+      <counter type="LINE" missed="9" covered="2"/>
+      <counter type="COMPLEXITY" missed="7" covered="2"/>
+      <counter type="METHOD" missed="4" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$Fruit" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="78">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDescriptor" desc="()Lhudson/model/Descriptor;" line="81">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="11" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation$City$DescriptorImpl" sourcefilename="Validation.java">
+      <method name="&lt;init&gt;" desc="()V" line="102">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="doCheckName" desc="(Ljava/lang/String;Ljava/lang/String;)Lhudson/util/FormValidation;" line="115">
+        <counter type="INSTRUCTION" missed="14" covered="0"/>
+        <counter type="BRANCH" missed="6" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="4" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="14" covered="3"/>
+      <counter type="BRANCH" missed="6" covered="0"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="4" covered="1"/>
+      <counter type="METHOD" missed="1" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Buttons" sourcefilename="Buttons.java">
+      <method name="&lt;init&gt;" desc="()V" line="9">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="12">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Buttons$DescriptorImpl" sourcefilename="Buttons.java">
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$Config" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="(Ljava/util/List;)V" line="82">
+        <counter type="INSTRUCTION" missed="13" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntries" desc="()Ljava/util/List;" line="87">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="17" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/ToggleSwitch$DescriptorImpl" sourcefilename="ToggleSwitch.java">
+      <method name="&lt;init&gt;" desc="()V" line="18">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$Apple" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="(I)V" line="90">
+        <counter type="INSTRUCTION" missed="7" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getSeeds" desc="()I" line="95">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="10" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Radios$DescriptorImpl" sourcefilename="Radios.java">
+      <method name="&lt;init&gt;" desc="()V" line="21">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation$State$DescriptorImpl" sourcefilename="Validation.java">
+      <method name="&lt;init&gt;" desc="()V" line="69">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="doCheckName" desc="(Ljava/lang/String;Ljava/lang/String;)Lhudson/util/FormValidation;" line="80">
+        <counter type="INSTRUCTION" missed="9" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="3"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="1" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Checkboxes" sourcefilename="Checkboxes.java">
+      <method name="&lt;init&gt;" desc="()V" line="9">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="12">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$Entry" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="94">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="3" covered="0"/>
+      <counter type="LINE" missed="1" covered="0"/>
+      <counter type="COMPLEXITY" missed="1" covered="0"/>
+      <counter type="METHOD" missed="1" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$SimpleEntry" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="100">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getText" desc="()Ljava/lang/String;" line="105">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Conventions$DescriptorImpl" sourcefilename="Conventions.java">
+      <method name="&lt;init&gt;" desc="()V" line="13">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Spacing" sourcefilename="Spacing.java">
+      <method name="&lt;init&gt;" desc="()V" line="6">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="9">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Links" sourcefilename="Links.java">
+      <method name="&lt;init&gt;" desc="()V" line="13">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="16">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doContextMenu"
+              desc="(Lorg/kohsuke/stapler/StaplerRequest;Lorg/kohsuke/stapler/StaplerResponse;)Ljenkins/model/ModelObjectWithContextMenu$ContextMenu;"
+              line="30">
+        <counter type="INSTRUCTION" missed="20" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doChildrenContextMenu"
+              desc="(Lorg/kohsuke/stapler/StaplerRequest;Lorg/kohsuke/stapler/StaplerResponse;)Ljenkins/model/ModelObjectWithContextMenu$ContextMenu;"
+              line="39">
+        <counter type="INSTRUCTION" missed="13" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="38" covered="0"/>
+      <counter type="LINE" missed="10" covered="0"/>
+      <counter type="COMPLEXITY" missed="4" covered="0"/>
+      <counter type="METHOD" missed="4" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$FruitDescriptor" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="()V" line="85">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$Banana" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="(Z)V" line="105">
+        <counter type="INSTRUCTION" missed="7" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="isYellow" desc="()Z" line="110">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="10" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/UISample" sourcefilename="UISample.java">
+      <method name="&lt;init&gt;" desc="()V" line="17">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="19">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getUrlName" desc="()Ljava/lang/String;" line="23">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="30">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDescriptor" desc="()Lio/jenkins/plugins/designlibrary/UISampleDescriptor;" line="34">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getAll" desc="()Ljava/util/List;" line="38">
+        <counter type="INSTRUCTION" missed="7" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getPreviousPage" desc="()Lio/jenkins/plugins/designlibrary/UISample;" line="43">
+        <counter type="INSTRUCTION" missed="12" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getNextPage" desc="()Lio/jenkins/plugins/designlibrary/UISample;" line="51">
+        <counter type="INSTRUCTION" missed="12" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="50" covered="0"/>
+      <counter type="LINE" missed="12" covered="0"/>
+      <counter type="COMPLEXITY" missed="8" covered="0"/>
+      <counter type="METHOD" missed="8" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$ChoiceEntry$DescriptorImpl"
+           sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="128">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="131">
+        <counter type="INSTRUCTION" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="doFillChoiceItems" desc="()Lhudson/util/ListBoxModel;" line="135">
+        <counter type="INSTRUCTION" missed="10" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="10" covered="5"/>
+      <counter type="LINE" missed="1" covered="2"/>
+      <counter type="COMPLEXITY" missed="1" covered="2"/>
+      <counter type="METHOD" missed="1" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$SimpleEntry$DescriptorImpl"
+           sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="108">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="110">
+        <counter type="INSTRUCTION" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="5"/>
+      <counter type="LINE" missed="0" covered="2"/>
+      <counter type="COMPLEXITY" missed="0" covered="2"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation" sourcefilename="Validation.java">
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="24">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="27">
+        <counter type="INSTRUCTION" missed="67" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Ljava/util/List;)V" line="27">
+        <counter type="INSTRUCTION" missed="70" covered="0"/>
+        <counter type="LINE" missed="6" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getStates" desc="()Ljava/util/List;" line="41">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="142" covered="0"/>
+      <counter type="LINE" missed="10" covered="0"/>
+      <counter type="COMPLEXITY" missed="4" covered="0"/>
+      <counter type="METHOD" missed="4" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Symbols" sourcefilename="Symbols.java">
+      <method name="&lt;init&gt;" desc="()V" line="10">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="13">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getSymbols" desc="()Ljava/util/Stack;" line="17">
+        <counter type="INSTRUCTION" missed="94" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="99" covered="0"/>
+      <counter type="LINE" missed="6" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$ChoiceEntry" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="120">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getChoice" desc="()Ljava/lang/String;" line="125">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$Banana$DescriptorImpl" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="()V" line="114">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Colors" sourcefilename="Colors.java">
+      <method name="&lt;init&gt;" desc="()V" line="10">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="13">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getSemantics" desc="()Ljava/util/List;" line="17">
+        <counter type="INSTRUCTION" missed="51" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getColors" desc="()Ljava/util/List;" line="27">
+        <counter type="INSTRUCTION" missed="86" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="lambda$getColors$0" desc="(Ljava/util/List;Lio/jenkins/plugins/designlibrary/Colors$Color;)V"
+              line="40">
+        <counter type="INSTRUCTION" missed="35" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="177" covered="0"/>
+      <counter type="LINE" missed="11" covered="0"/>
+      <counter type="COMPLEXITY" missed="5" covered="0"/>
+      <counter type="METHOD" missed="5" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Progress" sourcefilename="Progress.java">
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="19">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="factor" desc="(Ljava/lang/String;)Ljenkins/util/ProgressiveRendering;" line="23">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="11" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Conventions" sourcefilename="Conventions.java">
+      <method name="&lt;init&gt;" desc="()V" line="6">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="9">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$Apple$DescriptorImpl" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="()V" line="99">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation$State" sourcefilename="Validation.java">
+      <method name="&lt;init&gt;"
+              desc="(Ljava/lang/String;Lio/jenkins/plugins/designlibrary/Validation$City;Ljava/util/List;)V" line="50">
+        <counter type="INSTRUCTION" missed="12" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getName" desc="()Ljava/lang/String;" line="57">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getCapital" desc="()Lio/jenkins/plugins/designlibrary/Validation$City;" line="61">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getCities" desc="()Ljava/util/List;" line="65">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="21" covered="0"/>
+      <counter type="LINE" missed="8" covered="0"/>
+      <counter type="COMPLEXITY" missed="4" covered="0"/>
+      <counter type="METHOD" missed="4" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList" sourcefilename="HeteroList.java">
+      <method name="getConfigFile" desc="()Lhudson/XmlFile;" line="51">
+        <counter type="INSTRUCTION" missed="10" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="56">
+        <counter type="INSTRUCTION" missed="13" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getConfig" desc="()Lio/jenkins/plugins/designlibrary/HeteroList$Config;" line="64">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setConfig" desc="(Lio/jenkins/plugins/designlibrary/HeteroList$Config;)V" line="68">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doConfigSubmit" desc="(Lorg/kohsuke/stapler/StaplerRequest;)Lorg/kohsuke/stapler/HttpResponse;"
+              line="72">
+        <counter type="INSTRUCTION" missed="15" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="45" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="13" covered="0"/>
+      <counter type="COMPLEXITY" missed="6" covered="0"/>
+      <counter type="METHOD" missed="5" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Radios" sourcefilename="Radios.java">
+      <method name="&lt;init&gt;" desc="()V" line="10">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="13">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getRadios" desc="()Ljava/util/List;" line="17">
+        <counter type="INSTRUCTION" missed="10" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="15" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/TextBox" sourcefilename="TextBox.java">
+      <method name="&lt;init&gt;" desc="()V" line="43">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="46">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getStatesNames" desc="()Ljava/util/Set;" line="95">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;clinit&gt;" desc="()V" line="98">
+        <counter type="INSTRUCTION" missed="0" covered="204"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="11" covered="204"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/UISampleDescriptor" sourcefilename="UISampleDescriptor.java">
+      <method name="&lt;init&gt;" desc="()V" line="8">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Notifications" sourcefilename="Notifications.java">
+      <method name="&lt;init&gt;" desc="()V" line="9">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="12">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Tooltips" sourcefilename="Tooltips.java">
+      <method name="&lt;init&gt;" desc="()V" line="30">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="33">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="5" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation$City" sourcefilename="Validation.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="93">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getName" desc="()Ljava/lang/String;" line="98">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/TextBox$DescriptorImpl" sourcefilename="TextBox.java">
+      <method name="&lt;init&gt;" desc="()V" line="50">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="doAutoCompleteState" desc="(Ljava/lang/String;)Lhudson/model/AutoCompletionCandidates;" line="59">
+        <counter type="INSTRUCTION" missed="32" covered="0"/>
+        <counter type="BRANCH" missed="4" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="3" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doFillStateItems" desc="()Lhudson/util/ComboBoxModel;" line="68">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doFillAlbumItems" desc="()Lhudson/util/ListBoxModel;" line="72">
+        <counter type="INSTRUCTION" missed="18" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doFillTitleItems" desc="(I)Lhudson/util/ComboBoxModel;" line="80">
+        <counter type="INSTRUCTION" missed="60" covered="0"/>
+        <counter type="BRANCH" missed="4" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="4" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="115" covered="3"/>
+      <counter type="BRANCH" missed="8" covered="0"/>
+      <counter type="LINE" missed="16" covered="1"/>
+      <counter type="COMPLEXITY" missed="9" covered="1"/>
+      <counter type="METHOD" missed="4" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$DescriptorImpl" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="48">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/JavaScriptProxy$DescriptorImpl" sourcefilename="JavaScriptProxy.java">
+      <method name="&lt;init&gt;" desc="()V" line="30">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Symbols$DescriptorImpl" sourcefilename="Symbols.java">
+      <method name="&lt;init&gt;" desc="()V" line="43">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/AppBar" sourcefilename="AppBar.java">
+      <method name="&lt;init&gt;" desc="()V" line="6">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="9">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="14">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="7" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Colors$Semantic" sourcefilename="Colors.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V" line="57">
+        <counter type="INSTRUCTION" missed="12" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"
+              line="64">
+        <counter type="INSTRUCTION" missed="9" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getName" desc="()Ljava/lang/String;" line="69">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setName" desc="(Ljava/lang/String;)V" line="73">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDescription" desc="()Ljava/lang/String;" line="77">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setDescription" desc="(Ljava/lang/String;)V" line="81">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getVariable" desc="()Ljava/lang/String;" line="85">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setVariable" desc="(Ljava/lang/String;)V" line="89">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getSymbol" desc="()Ljava/lang/String;" line="93">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setSymbol" desc="(Ljava/lang/String;)V" line="97">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="49" covered="0"/>
+      <counter type="LINE" missed="20" covered="0"/>
+      <counter type="COMPLEXITY" missed="10" covered="0"/>
+      <counter type="METHOD" missed="10" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Links$DescriptorImpl" sourcefilename="Links.java">
+      <method name="&lt;init&gt;" desc="()V" line="46">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Tooltips$DescriptorImpl" sourcefilename="Tooltips.java">
+      <method name="&lt;init&gt;" desc="()V" line="37">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Validation$DescriptorImpl" sourcefilename="Validation.java">
+      <method name="&lt;init&gt;" desc="()V" line="122">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Progress$DescriptorImpl" sourcefilename="Progress.java">
+      <method name="&lt;init&gt;" desc="()V" line="60">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select$DescriptorImpl" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="()V" line="50">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="doFillFruitItems" desc="()Lhudson/util/ListBoxModel;" line="53">
+        <counter type="INSTRUCTION" missed="20" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doFillStateItems" desc="(Ljava/lang/String;)Lhudson/util/ListBoxModel;" line="60">
+        <counter type="INSTRUCTION" missed="48" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doFillCityItems" desc="(Ljava/lang/String;Ljava/lang/String;)Lhudson/util/ListBoxModel;" line="68">
+        <counter type="INSTRUCTION" missed="52" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="120" covered="3"/>
+      <counter type="BRANCH" missed="4" covered="0"/>
+      <counter type="LINE" missed="9" covered="1"/>
+      <counter type="COMPLEXITY" missed="5" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Progress$1" sourcefilename="Progress.java">
+      <method name="&lt;init&gt;" desc="(Lio/jenkins/plugins/designlibrary/Progress;Ljava/lang/String;)V" line="23">
+        <counter type="INSTRUCTION" missed="14" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="compute" desc="()V" line="28">
+        <counter type="INSTRUCTION" missed="50" covered="0"/>
+        <counter type="BRANCH" missed="8" covered="0"/>
+        <counter type="LINE" missed="15" covered="0"/>
+        <counter type="COMPLEXITY" missed="5" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="data" desc="()Lnet/sf/json/JSON;" line="49">
+        <counter type="INSTRUCTION" missed="32" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="6" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="96" covered="0"/>
+      <counter type="BRANCH" missed="10" covered="0"/>
+      <counter type="LINE" missed="23" covered="0"/>
+      <counter type="COMPLEXITY" missed="8" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Colors$DescriptorImpl" sourcefilename="Colors.java">
+      <method name="&lt;init&gt;" desc="()V" line="48">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$HeteroRadioEntry$DescriptorImpl"
+           sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="150">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="152">
+        <counter type="INSTRUCTION" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getEntryDescriptors" desc="()Ljava/util/List;" line="155">
+        <counter type="INSTRUCTION" missed="10" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="10" covered="5"/>
+      <counter type="LINE" missed="2" covered="2"/>
+      <counter type="COMPLEXITY" missed="1" covered="2"/>
+      <counter type="METHOD" missed="1" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Checkboxes$DescriptorImpl" sourcefilename="Checkboxes.java">
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$HeteroRadioEntry" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="(Lio/jenkins/plugins/designlibrary/HeteroList$Entry;)V" line="144">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntry" desc="()Lio/jenkins/plugins/designlibrary/HeteroList$Entry;" line="147">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/HeteroList$Config$DescriptorImpl" sourcefilename="HeteroList.java">
+      <method name="&lt;init&gt;" desc="()V" line="90">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/AppBar$DescriptorImpl" sourcefilename="AppBar.java">
+      <method name="&lt;init&gt;" desc="()V" line="18">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Notifications$DescriptorImpl" sourcefilename="Notifications.java">
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Table$DescriptorImpl" sourcefilename="Table.java">
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/JavaScriptProxy" sourcefilename="JavaScriptProxy.java">
+      <method name="&lt;init&gt;" desc="()V" line="13">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="18">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="increment" desc="(I)I" line="26">
+        <counter type="INSTRUCTION" missed="8" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="13" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Spacing$DescriptorImpl" sourcefilename="Spacing.java">
+      <method name="&lt;init&gt;" desc="()V" line="13">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Colors$Color" sourcefilename="Colors.java">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;)V" line="106">
+        <counter type="INSTRUCTION" missed="13" covered="0"/>
+        <counter type="LINE" missed="5" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getName" desc="()Ljava/lang/String;" line="113">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setName" desc="(Ljava/lang/String;)V" line="117">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getClassName" desc="()Ljava/lang/String;" line="121">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setClassName" desc="(Ljava/lang/String;)V" line="125">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getVariable" desc="()Ljava/lang/String;" line="129">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setVariable" desc="(Ljava/lang/String;)V" line="133">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="34" covered="0"/>
+      <counter type="LINE" missed="14" covered="0"/>
+      <counter type="COMPLEXITY" missed="7" covered="0"/>
+      <counter type="METHOD" missed="7" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/ToggleSwitch" sourcefilename="ToggleSwitch.java">
+      <method name="&lt;init&gt;" desc="()V" line="6">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getDisplayName" desc="()Ljava/lang/String;" line="9">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="14">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="7" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="io/jenkins/plugins/designlibrary/Select" sourcefilename="Select.java">
+      <method name="&lt;init&gt;" desc="()V" line="25">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getIconFileName" desc="()Ljava/lang/String;" line="28">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getFruit" desc="()Lio/jenkins/plugins/designlibrary/Select$Fruit;" line="33">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getFruitDescriptors" desc="()Lhudson/DescriptorExtensionList;" line="37">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="doSubmit" desc="(Lorg/kohsuke/stapler/StaplerRequest;Lorg/kohsuke/stapler/StaplerResponse;)V"
+              line="44">
+        <counter type="INSTRUCTION" missed="20" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="31" covered="0"/>
+      <counter type="LINE" missed="8" covered="0"/>
+      <counter type="COMPLEXITY" missed="5" covered="0"/>
+      <counter type="METHOD" missed="5" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="Table.java">
+      <line nr="9" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="12" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Spacing.java">
+      <line nr="6" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="13" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Select.java">
+      <line nr="25" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="44" mi="9" ci="0" mb="0" cb="0"/>
+      <line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="46" mi="7" ci="0" mb="0" cb="0"/>
+      <line nr="47" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="50" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="53" mi="20" ci="0" mb="0" cb="0"/>
+      <line nr="60" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="61" mi="24" ci="0" mb="2" cb="0"/>
+      <line nr="62" mi="18" ci="0" mb="0" cb="0"/>
+      <line nr="64" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="68" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="69" mi="24" ci="0" mb="2" cb="0"/>
+      <line nr="70" mi="22" ci="0" mb="0" cb="0"/>
+      <line nr="72" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="78" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="81" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="85" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="90" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="91" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="92" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="95" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="99" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="105" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="106" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="107" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="110" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="114" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="182" covered="12"/>
+      <counter type="BRANCH" missed="4" covered="0"/>
+      <counter type="LINE" missed="27" covered="4"/>
+      <counter type="COMPLEXITY" missed="16" covered="4"/>
+      <counter type="METHOD" missed="14" covered="4"/>
+      <counter type="CLASS" missed="4" covered="4"/>
+    </sourcefile>
+    <sourcefile name="AppBar.java">
+      <line nr="6" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="7" covered="3"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="JavaScriptProxy.java">
+      <line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="26" mi="8" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="13" covered="3"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Symbols.java">
+      <line nr="10" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="13" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="17" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="86" ci="0" mb="0" cb="0"/>
+      <line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="43" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="99" covered="3"/>
+      <counter type="LINE" missed="6" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="ToggleSwitch.java">
+      <line nr="6" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="7" covered="3"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Colors.java">
+      <line nr="10" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="13" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="17" mi="51" ci="0" mb="0" cb="0"/>
+      <line nr="27" mi="76" ci="0" mb="0" cb="0"/>
+      <line nr="38" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="39" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="40" mi="12" ci="0" mb="0" cb="0"/>
+      <line nr="41" mi="10" ci="0" mb="0" cb="0"/>
+      <line nr="42" mi="12" ci="0" mb="0" cb="0"/>
+      <line nr="43" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="44" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="48" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="57" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="58" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="59" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="60" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="61" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="64" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="65" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="66" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="69" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="73" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="74" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="77" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="81" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="82" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="85" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="89" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="90" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="93" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="97" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="98" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="106" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="107" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="108" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="109" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="110" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="113" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="117" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="118" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="121" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="125" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="126" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="129" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="133" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="134" mi="1" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="260" covered="3"/>
+      <counter type="LINE" missed="45" covered="1"/>
+      <counter type="COMPLEXITY" missed="22" covered="1"/>
+      <counter type="METHOD" missed="22" covered="1"/>
+      <counter type="CLASS" missed="3" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Progress.java">
+      <line nr="16" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="19" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="23" mi="14" ci="0" mb="0" cb="0"/>
+      <line nr="24" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="28" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="29" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="31" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="7" ci="0" mb="2" cb="0"/>
+      <line nr="34" mi="3" ci="0" mb="2" cb="0"/>
+      <line nr="35" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="4" ci="0" mb="2" cb="0"/>
+      <line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="40" mi="4" ci="0" mb="2" cb="0"/>
+      <line nr="41" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="42" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="45" mi="7" ci="0" mb="0" cb="0"/>
+      <line nr="47" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="50" mi="12" ci="0" mb="2" cb="0"/>
+      <line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="52" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="53" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="54" mi="7" ci="0" mb="0" cb="0"/>
+      <line nr="60" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="107" covered="3"/>
+      <counter type="BRANCH" missed="10" covered="0"/>
+      <counter type="LINE" missed="25" covered="1"/>
+      <counter type="COMPLEXITY" missed="11" covered="1"/>
+      <counter type="METHOD" missed="6" covered="1"/>
+      <counter type="CLASS" missed="2" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Radios.java">
+      <line nr="10" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="13" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="17" mi="10" ci="0" mb="0" cb="0"/>
+      <line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="15" covered="3"/>
+      <counter type="LINE" missed="3" covered="1"/>
+      <counter type="COMPLEXITY" missed="3" covered="1"/>
+      <counter type="METHOD" missed="3" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="HeteroList.java">
+      <line nr="48" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="51" mi="10" ci="0" mb="0" cb="0"/>
+      <line nr="56" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="57" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="58" mi="3" ci="0" mb="2" cb="0"/>
+      <line nr="59" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="61" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="64" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="68" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="69" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="72" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="73" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="74" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="75" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="82" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="83" mi="10" ci="0" mb="2" cb="0"/>
+      <line nr="84" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="87" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="90" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="94" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="100" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="101" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="102" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="105" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="108" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="110" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="120" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="121" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="122" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="125" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="128" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="131" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="135" mi="10" ci="0" mb="0" cb="0"/>
+      <line nr="144" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="147" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="150" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="152" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="155" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="156" mi="8" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="112" covered="21"/>
+      <counter type="BRANCH" missed="4" covered="0"/>
+      <counter type="LINE" missed="31" covered="8"/>
+      <counter type="COMPLEXITY" missed="18" covered="8"/>
+      <counter type="METHOD" missed="16" covered="8"/>
+      <counter type="CLASS" missed="6" covered="5"/>
+    </sourcefile>
+    <sourcefile name="Buttons.java">
+      <line nr="9" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="12" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Validation.java">
+      <line nr="24" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="27" mi="66" ci="0" mb="0" cb="0"/>
+      <line nr="28" mi="56" ci="0" mb="0" cb="0"/>
+      <line nr="29" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="32" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="36" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="38" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="50" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="51" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="52" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="53" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="54" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="57" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="61" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="65" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="69" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="80" mi="2" ci="0" mb="2" cb="0"/>
+      <line nr="81" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="84" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="93" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="94" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="95" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="98" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="102" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="115" mi="10" ci="0" mb="6" cb="0"/>
+      <line nr="116" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="122" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="195" covered="9"/>
+      <counter type="BRANCH" missed="8" covered="0"/>
+      <counter type="LINE" missed="27" covered="3"/>
+      <counter type="COMPLEXITY" missed="16" covered="3"/>
+      <counter type="METHOD" missed="12" covered="3"/>
+      <counter type="CLASS" missed="3" covered="3"/>
+    </sourcefile>
+    <sourcefile name="Checkboxes.java">
+      <line nr="9" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="12" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Links.java">
+      <line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="16" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="8" ci="0" mb="0" cb="0"/>
+      <line nr="31" mi="8" ci="0" mb="0" cb="0"/>
+      <line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="39" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="42" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="46" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="38" covered="3"/>
+      <counter type="LINE" missed="10" covered="1"/>
+      <counter type="COMPLEXITY" missed="4" covered="1"/>
+      <counter type="METHOD" missed="4" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Tooltips.java">
+      <line nr="30" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="UISampleDescriptor.java">
+      <line nr="8" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Root.java">
+      <line nr="14" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="16" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="20" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="24" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="28" mi="11" ci="0" mb="2" cb="0"/>
+      <line nr="29" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="6" ci="0" mb="4" cb="0"/>
+      <line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="2" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="31" covered="5"/>
+      <counter type="BRANCH" missed="6" covered="0"/>
+      <counter type="LINE" missed="9" covered="2"/>
+      <counter type="COMPLEXITY" missed="7" covered="2"/>
+      <counter type="METHOD" missed="4" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Conventions.java">
+      <line nr="6" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="13" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="Notifications.java">
+      <line nr="9" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="12" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="5" covered="3"/>
+      <counter type="LINE" missed="2" covered="1"/>
+      <counter type="COMPLEXITY" missed="2" covered="1"/>
+      <counter type="METHOD" missed="2" covered="1"/>
+      <counter type="CLASS" missed="1" covered="1"/>
+    </sourcefile>
+    <sourcefile name="TextBox.java">
+      <line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="46" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="50" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="59" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="60" mi="16" ci="0" mb="2" cb="0"/>
+      <line nr="61" mi="6" ci="0" mb="2" cb="0"/>
+      <line nr="62" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="64" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="68" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="72" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="73" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="74" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="75" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="76" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="80" mi="2" ci="0" mb="4" cb="0"/>
+      <line nr="82" mi="18" ci="0" mb="0" cb="0"/>
+      <line nr="84" mi="18" ci="0" mb="0" cb="0"/>
+      <line nr="86" mi="18" ci="0" mb="0" cb="0"/>
+      <line nr="89" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="95" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="98" mi="0" ci="204" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="126" covered="207"/>
+      <counter type="BRANCH" missed="8" covered="0"/>
+      <counter type="LINE" missed="19" covered="2"/>
+      <counter type="COMPLEXITY" missed="12" covered="2"/>
+      <counter type="METHOD" missed="7" covered="2"/>
+      <counter type="CLASS" missed="0" covered="2"/>
+    </sourcefile>
+    <sourcefile name="UISample.java">
+      <line nr="17" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="19" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="23" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="34" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="38" mi="7" ci="0" mb="0" cb="0"/>
+      <line nr="43" mi="9" ci="0" mb="0" cb="0"/>
+      <line nr="44" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="45" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="51" mi="9" ci="0" mb="0" cb="0"/>
+      <line nr="52" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="53" mi="2" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="50" covered="0"/>
+      <counter type="LINE" missed="12" covered="0"/>
+      <counter type="COMPLEXITY" missed="8" covered="0"/>
+      <counter type="METHOD" missed="8" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="1277" covered="302"/>
+    <counter type="BRANCH" missed="40" covered="0"/>
+    <counter type="LINE" missed="237" covered="35"/>
+    <counter type="COMPLEXITY" missed="143" covered="35"/>
+    <counter type="METHOD" missed="122" covered="35"/>
+    <counter type="CLASS" missed="32" covered="31"/>
+  </package>
+  <counter type="INSTRUCTION" missed="1277" covered="302"/>
+  <counter type="BRANCH" missed="40" covered="0"/>
+  <counter type="LINE" missed="237" covered="35"/>
+  <counter type="COMPLEXITY" missed="143" covered="35"/>
+  <counter type="METHOD" missed="122" covered="35"/>
+  <counter type="CLASS" missed="32" covered="31"/>
+</report>
