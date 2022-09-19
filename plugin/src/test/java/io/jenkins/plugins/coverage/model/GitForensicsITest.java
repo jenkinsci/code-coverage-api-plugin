@@ -130,7 +130,7 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
     private void verifyGitRepositoryForCommit(final Run<?, ?> build, final String commit) {
         String consoleLog = getConsoleLog(build);
         assertThat(consoleLog)
-                .contains("remote.origin.url " + REPOSITORY)
+                .contains("git " + REPOSITORY)
                 .contains("Checking out Revision " + commit)
                 .contains("checkout -f " + commit);
     }

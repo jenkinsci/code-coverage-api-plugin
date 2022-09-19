@@ -23,8 +23,8 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
-      <jenkins.baseline>2.346</jenkins.baseline>
-      <jenkins.version>2.346.3</jenkins.version>
+    <jenkins.baseline>2.346</jenkins.baseline>
+    <jenkins.version>2.346.3</jenkins.version>
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>
@@ -37,6 +37,7 @@
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.3</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
+    <argLine>-Djava.awt.headless=true -Xmx1024m -Djenkins.test.timeout=1000 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED</argLine>
   </properties>
 
   <developers>
