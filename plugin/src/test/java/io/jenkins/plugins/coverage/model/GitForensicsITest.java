@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Node;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.plugins.git.BranchSpec;
 import hudson.plugins.git.GitSCM;
@@ -82,20 +83,30 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         Node agent = createDockerAgent(AGENT_CONTAINER);
         String node = "node('" + DOCKER_AGENT_NAME + "')";
         WorkflowJob project = createPipeline();
+        // jacoco file of commit 723aac8 -> the reference build
         String jacocoReferenceFile = "jacoco-duplicate-key-reference.xml";
         copySingleFileToAgentWorkspace(agent, project, jacocoReferenceFile, jacocoReferenceFile);
+        // jacoco file of commit 2796bb8 -> the current build
         String jacocoFile = "jacoco-duplicate-key.xml";
         copySingleFileToAgentWorkspace(agent, project, jacocoFile, jacocoFile);
 
+        // the commit id of the reference build - the master branch parent of the current commit
         String commitReference = "723aac821a5e967dd3894d215b267a38de086b90";
-        project.setDefinition(createFlowDefinitionForCommit(node, commitReference, jacocoReferenceFile, "https://github.com/jenkinsci/design-library-plugin.git"));
+        project.setDefinition(createFlowDefinitionForCommit(node, commitReference, jacocoReferenceFile, "https://github.com/janfaracik/design-library-plugin.git"));
         Run<?, ?> referenceBuild = buildSuccessfully(project);
         System.out.println(getConsoleLog(referenceBuild));
 
-        String commit = "2796bb89ac793bb1775a6dff1a48b52ca34c0f67";
+        // the commit id of the second parent commit within the PR
+        String commit = "3823eadf5aa0196f8f2d8d9a2abe29b6ced721bb";
         project.setDefinition(createFlowDefinitionForCommit(node, commit, jacocoFile, "https://github.com/janfaracik/design-library-plugin.git"));
-        Run<?, ?> build = buildSuccessfully(project);
-        System.out.println(getConsoleLog(build));
+        // the git delta in the issue is calculated between the parents, not between the merge commit and the master parent, what would be the expected behavior.
+        // (this behavior is a guess adapted from a similar situation: https://github.com/jenkinsci/design-library-plugin/commit/708f674be9170c7a732400fb26bb7dc882185676) -> also see the Jenkins log of the build of this commit
+        // -> the GitDeltaCalculator takes the latest commit for the current build to calculate the delta, not the merge commit itself which would be required here
+        // -> reason: GitDeltaCalculator uses the function getLatestCommit() and ignores the targetCommit, if set, which represents the merge commit
+        // -> TODO: possible solution in Git-Forensics-Plugin GitDeltaCalculator -> check for target commit, fallback with latest commit for current build
+        Run<?, ?> build = buildWithResult(project, Result.FAILURE);
+        assertThat(getConsoleLog(build))
+                .contains("java.lang.IllegalStateException: Duplicate key io/jenkins/plugins/designlibrary/Conventions.java (attempted merging values [File] Conventions.java and [File] Layouts.java)");
     }
 
     @Test
