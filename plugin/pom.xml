@@ -63,7 +63,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>ionicons-api</artifactId>
-      <version>25.vea_758a_74e28f</version>
+      <version>26.ved6a_92d2fd4c</version>
     </dependency>
     <dependency>
       <groupId>net.sf.trove4j</groupId>
