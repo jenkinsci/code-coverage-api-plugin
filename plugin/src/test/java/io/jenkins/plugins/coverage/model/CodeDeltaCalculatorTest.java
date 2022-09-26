@@ -10,12 +10,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 import edu.hm.hafner.util.FilteredLog;
-import edu.hm.hafner.util.PathUtil;
 
 import hudson.FilePath;
 import hudson.model.Run;
