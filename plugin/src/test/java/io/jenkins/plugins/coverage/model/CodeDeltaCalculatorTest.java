@@ -10,9 +10,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 import edu.hm.hafner.util.FilteredLog;
+import edu.hm.hafner.util.PathUtil;
 
 import hudson.FilePath;
 import hudson.model.Run;
@@ -160,8 +163,9 @@ class CodeDeltaCalculatorTest {
         assertThatThrownBy(() -> codeDeltaCalculator.createOldPathMapping(tree, referenceTree, changes, log))
                 .isInstanceOf(CodeDeltaException.class)
                 .hasMessageStartingWith(CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE)
-                .hasMessageContainingAll("new: 'example\\Test_Renamed.java' - former: 'example\\Test.java',",
-                        "new: 'example\\test\\Test.java' - former: 'example\\Test.java'");
+                .hasMessageContainingAll(
+                        String.format("new: '%s' - former: '%s',", REPORT_PATH_RENAME, OLD_REPORT_PATH_RENAME),
+                        String.format("new: '%s' - former: '%s'", REPORT_PATH_MODIFY, OLD_REPORT_PATH_RENAME));
     }
 
     /**
