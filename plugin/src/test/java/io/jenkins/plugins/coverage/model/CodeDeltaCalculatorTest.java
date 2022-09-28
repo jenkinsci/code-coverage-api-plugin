@@ -155,7 +155,6 @@ class CodeDeltaCalculatorTest {
         changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
 
         assertThat(codeDeltaCalculator.createOldPathMapping(tree, referenceTree, changes, log)).isEmpty();
-        System.out.println(log.getInfoMessages());
         assertThat(log.getInfoMessages()).contains(
                 EMPTY_OLD_PATHS_WARNING + System.lineSeparator() + REPORT_PATH_RENAME
         );
