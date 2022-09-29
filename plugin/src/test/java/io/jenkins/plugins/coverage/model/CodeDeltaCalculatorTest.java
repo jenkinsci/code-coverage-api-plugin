@@ -160,6 +160,27 @@ class CodeDeltaCalculatorTest {
         );
     }
 
+    // checks the functionality to prevent exceptions in case of false calculated code deltas
+    @Test
+    void shouldNotCreateOldPathMappingWithCodeDeltaMismatches() {
+        CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
+        FilteredLog log = createFilteredLog();
+        CoverageNode tree = createMockedCoverageTree();
+        CoverageNode referenceTree = createMockedReferenceCoverageTree();
+
+        // two changes with the same former path
+        Map<String, FileChanges> changes = new HashMap<>();
+        changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
+        changes.put(REPORT_PATH_MODIFY, createFileChanges(REPORT_PATH_MODIFY, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
+
+        assertThatThrownBy(() -> codeDeltaCalculator.createOldPathMapping(tree, referenceTree, changes, log))
+                .isInstanceOf(CodeDeltaException.class)
+                .hasMessageStartingWith(CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE)
+                .hasMessageContainingAll(
+                        String.format("new: '%s' - former: '%s',", REPORT_PATH_RENAME, OLD_REPORT_PATH_RENAME),
+                        String.format("new: '%s' - former: '%s'", REPORT_PATH_MODIFY, OLD_REPORT_PATH_RENAME));
+    }
+
     /**
      * Creates an instance of {@link CodeDeltaCalculator}.
      *
