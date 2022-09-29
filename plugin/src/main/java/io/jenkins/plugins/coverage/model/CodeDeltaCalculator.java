@@ -282,20 +282,18 @@ public class CodeDeltaCalculator {
         Set<String> duplicates = StreamEx.of(oldPathMapping.values())
                 .distinct(2)
                 .collect(Collectors.toSet());
-        Map<String, String> duplicateEntries = new HashMap<>();
-        for (Map.Entry<String, String> entry : oldPathMapping.entrySet()) {
-            for (String duplicate : duplicates) {
-                if (entry.getValue().equals(duplicate)) {
-                    duplicateEntries.put(entry.getKey(), duplicate);
-                }
-            }
-        }
+
+        Map<String, String> duplicateEntries = oldPathMapping.entrySet().stream()
+                .filter(entry -> duplicates.contains(entry.getValue()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
         if (!duplicates.isEmpty()) {
             String mismatches = duplicateEntries.entrySet().stream()
                     .limit(20) // prevent log overflows
                     .map(entry -> String.format("new: '%s' - former: '%s'", entry.getKey(), entry.getValue()))
                     .collect(Collectors.joining("," + System.lineSeparator()));
-            String errorMessage = CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE + System.lineSeparator() + mismatches;
+            String errorMessage =
+                    CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE + System.lineSeparator() + mismatches;
             throw new CodeDeltaException(errorMessage);
         }
         log.logInfo("Successfully verified that the coverage data matches with the code delta");
