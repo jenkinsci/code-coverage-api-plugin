@@ -1,0 +1,167 @@
+package io.jenkins.plugins.coverage.model;
+
+import java.io.Serializable;
+
+import org.apache.commons.lang3.StringUtils;
+
+import edu.hm.hafner.util.VisibleForTesting;
+
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.util.FormValidation;
+
+import io.jenkins.plugins.util.JenkinsFacade;
+
+/**
+ * A coverage tool that can produce a {@link CoverageNode coverage tree} by parsing a given report file.
+ *
+ * @author Ullrich Hafner
+ */
+public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implements Serializable {
+    private static final long serialVersionUID = -8612521458890553037L;
+
+    private JenkinsFacade jenkins = new JenkinsFacade();
+
+    private String id = StringUtils.EMPTY;
+    private String name = StringUtils.EMPTY;
+
+    @DataBoundConstructor
+    public CoverageTool() {
+        // empty for stapler
+    }
+
+    @VisibleForTesting
+    void setJenkinsFacade(final JenkinsFacade jenkinsFacade) {
+        jenkins = jenkinsFacade;
+    }
+
+    /**
+     * Called after de-serialization to retain backward compatibility.
+     *
+     * @return this
+     */
+    protected Object readResolve() {
+        jenkins = new JenkinsFacade();
+
+        return this;
+    }
+
+    /**
+     * Overrides the default ID of the results. The ID is used as URL of the results and as identifier in UI elements.
+     * If no ID is given, then the default ID is used.
+     *
+     * @param id
+     *         the ID of the results
+     */
+    @DataBoundSetter
+    public void setId(final String id) {
+        new ModelValidation().ensureValidId(id);
+
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the actual ID of the tool. If no user defined ID is given, then the default ID is returned.
+     *
+     * @return the ID
+     * @see #setId(String)
+     */
+    public String getActualId() {
+        return StringUtils.defaultIfBlank(getId(), getDescriptor().getId());
+    }
+
+    /**
+     * Overrides the name of the results. The name is used for all labels in the UI. If no name is given, then the
+     * default name is used.
+     *
+     * @param name
+     *         the name of the results
+     */
+    @DataBoundSetter
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
+     *
+     * @return the name
+     * @see #setName(String)
+     */
+    public String getActualName() {
+        return StringUtils.defaultIfBlank(getName(), getDescriptor().getDisplayName());
+    }
+
+    @Override
+    public CoverageToolDescriptor getDescriptor() {
+        return (CoverageToolDescriptor) jenkins.getDescriptorOrDie(getClass());
+    }
+
+    /** Descriptor for {@link CoverageTool}. **/
+    @Extension
+    public static class CoverageToolDescriptor extends Descriptor<CoverageTool> {
+        private final JenkinsFacade JENKINS = new JenkinsFacade();
+
+        /**
+         * Creates a new instance of {@link CoverageToolDescriptor}.
+         */
+        public CoverageToolDescriptor() {
+            super();
+        }
+
+        /**
+         * Performs on-the-fly validation of the ID.
+         *
+         * @param project
+         *         the project that is configured
+         * @param id
+         *         the ID of the tool
+         *
+         * @return the validation result
+         */
+        @POST
+        public FormValidation doCheckId(@AncestorInPath final AbstractProject<?, ?> project,
+                @QueryParameter final String id) {
+            if (!new JenkinsFacade().hasPermission(Item.CONFIGURE, project)) {
+                return FormValidation.ok();
+            }
+
+            return new ModelValidation().validateId(id);
+        }
+
+        /**
+         * Returns an optional help text that can provide useful hints on how to configure the coverage tool so that the
+         * report files could be parsed by Jenkins. This help can be a plain text message or an HTML snippet.
+         *
+         * @return the help
+         */
+        public String getHelp() {
+            return StringUtils.EMPTY;
+        }
+
+        /**
+         * Returns an optional URL to the homepage of the coverage tool.
+         *
+         * @return the help
+         */
+        public String getUrl() {
+            return StringUtils.EMPTY;
+        }
+    }
+}
