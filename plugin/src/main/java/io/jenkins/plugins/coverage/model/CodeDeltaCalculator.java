@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import edu.hm.hafner.util.FilteredLog;
 
+import one.util.streamex.StreamEx;
+
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -36,6 +38,13 @@ public class CodeDeltaCalculator {
     static final String AMBIGUOUS_OLD_PATHS_ERROR =
             "Failed to map SCM paths from the reference with coverage report paths from the reference "
                     + "due to ambiguous fully qualified names";
+
+    static final String CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE =
+            "Unexpected behavior detected when comparing coverage data with the code delta "
+                    + "- there are ambiguous paths when comparing new with former file paths: ";
+
+    static final String EMPTY_OLD_PATHS_WARNING = "File renamings have been detected for files which have not been "
+            + "part of the reference coverage report. These files are skipped when calculating the coverage deltas:";
 
     private final Run<?, ?> build;
     private final FilePath workspace;
@@ -131,7 +140,7 @@ public class CodeDeltaCalculator {
     /**
      * Creates a mapping between the currently used coverage report paths and the corresponding paths that has been used
      * for the same coverage nodes before the modifications. This affects only renamed and untouched / modified files
-     * without a rename, since added files did not exist before and deleted files do not exist anymore.
+     * without a renaming, since added files did not exist before and deleted files do not exist anymore.
      *
      * @param root
      *         The root of the coverage tree
@@ -154,32 +163,34 @@ public class CodeDeltaCalculator {
         Set<String> oldReportPaths = referenceRoot.getAllFileCoverageNodes().stream()
                 .map(FileCoverageNode::getPath)
                 .collect(Collectors.toSet());
-        // the affected, currently used report paths and the SCM paths from the reference
-        Map<String, String> newReportToOldScmPathMapping = changes.entrySet().stream()
+        // mapping between reference and current file paths which initially contains the SCM paths with renamings
+        Map<String, String> oldPathMapping = changes.entrySet().stream()
                 .filter(entry -> FileEditType.RENAME.equals(entry.getValue().getFileEditType()))
                 .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().getOldFileName()));
         // the SCM paths and the coverage report paths from the reference
         Map<String, String> oldScmToOldReportPathMapping =
-                getScmToReportPathMapping(newReportToOldScmPathMapping.values(), oldReportPaths);
-        verifyScmToReportPathMapping(newReportToOldScmPathMapping, log);
+                getScmToReportPathMapping(oldPathMapping.values(), oldReportPaths);
 
         // replacing the old SCM paths with the old report paths
-        Set<String> oldReportPathsWithRename = newReportToOldScmPathMapping.keySet();
-        newReportToOldScmPathMapping.forEach((reportPath, oldScmPath) -> {
+        Set<String> newReportPathsWithRename = oldPathMapping.keySet();
+        oldPathMapping.forEach((reportPath, oldScmPath) -> {
             String oldReportPath = oldScmToOldReportPathMapping.get(oldScmPath);
-            newReportToOldScmPathMapping.replace(reportPath, oldReportPath);
+            oldPathMapping.replace(reportPath, oldReportPath);
         });
-        if (!oldReportPathsWithRename.equals(newReportToOldScmPathMapping.keySet())) {
+        if (!newReportPathsWithRename.equals(oldPathMapping.keySet())) {
             throw new CodeDeltaException(AMBIGUOUS_OLD_PATHS_ERROR);
         }
 
         // adding the paths, which exist in both trees and contain no changes, to the mapping
         root.getAllFileCoverageNodes().stream()
-                .filter(node -> !newReportToOldScmPathMapping.containsKey(node.getPath()) && oldReportPaths.contains(
+                .filter(node -> !oldPathMapping.containsKey(node.getPath()) && oldReportPaths.contains(
                         node.getPath()))
-                .forEach(node -> newReportToOldScmPathMapping.put(node.getPath(), node.getPath()));
+                .forEach(node -> oldPathMapping.put(node.getPath(), node.getPath()));
 
-        return newReportToOldScmPathMapping;
+        removeMissingReferences(oldPathMapping, log);
+        verifyOldPathMapping(oldPathMapping, log);
+
+        return oldPathMapping;
     }
 
     /**
@@ -209,7 +220,7 @@ public class CodeDeltaCalculator {
     }
 
     /**
-     * Verifies the the passed mapping between SCM and coverage report paths.
+     * Verifies the passed mapping between SCM and coverage report paths.
      *
      * @param pathMapping
      *         The path mapping
@@ -228,5 +239,63 @@ public class CodeDeltaCalculator {
             throw new CodeDeltaException(AMBIGUOUS_PATHS_ERROR);
         }
         log.logInfo("Successfully mapped SCM paths to coverage report paths");
+    }
+
+    /**
+     * Verifies that all reference coverage report files of the passed path mapping exist. Found empty paths which
+     * represent missing reference nodes will be removed from the mapping since these entries are not usable.
+     *
+     * @param oldPathMapping
+     *         The file path mapping to be verified and adjusted
+     * @param log
+     *         The log
+     */
+    private void removeMissingReferences(final Map<String, String> oldPathMapping, final FilteredLog log) {
+        Set<String> pathsWithEmptyReferences = oldPathMapping.entrySet().stream()
+                .filter(entry -> entry.getValue().isEmpty())
+                .map(Entry::getKey)
+                .collect(Collectors.toSet());
+        if (!pathsWithEmptyReferences.isEmpty()) {
+            pathsWithEmptyReferences.forEach(oldPathMapping::remove); // remove entries which represent missing reference files
+            String skippedFiles = pathsWithEmptyReferences.stream()
+                    .limit(20) // prevent log overflows
+                    .collect(Collectors.joining("," + System.lineSeparator()));
+            log.logInfo(EMPTY_OLD_PATHS_WARNING + System.lineSeparator() + skippedFiles);
+        }
+    }
+
+    /**
+     * Verifies that the mapping between the file paths of the current build and the former file paths of the reference
+     * builds are clearly assigned to each other. This is done to prevent an unexpected behavior triggered by a third
+     * party library in case that the code delta does not match with the coverage data.
+     *
+     * @param oldPathMapping
+     *         The file path mapping
+     * @param log
+     *         The log
+     *
+     * @throws CodeDeltaException
+     *         when the mapping is ambiguous
+     */
+    static void verifyOldPathMapping(final Map<String, String> oldPathMapping, final FilteredLog log)
+            throws CodeDeltaException {
+        Set<String> duplicates = StreamEx.of(oldPathMapping.values())
+                .distinct(2)
+                .collect(Collectors.toSet());
+
+        Map<String, String> duplicateEntries = oldPathMapping.entrySet().stream()
+                .filter(entry -> duplicates.contains(entry.getValue()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        if (!duplicates.isEmpty()) {
+            String mismatches = duplicateEntries.entrySet().stream()
+                    .limit(20) // prevent log overflows
+                    .map(entry -> String.format("new: '%s' - former: '%s'", entry.getKey(), entry.getValue()))
+                    .collect(Collectors.joining("," + System.lineSeparator()));
+            String errorMessage =
+                    CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE + System.lineSeparator() + mismatches;
+            throw new CodeDeltaException(errorMessage);
+        }
+        log.logInfo("Successfully verified that the coverage data matches with the code delta");
     }
 }

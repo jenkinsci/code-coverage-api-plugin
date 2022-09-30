@@ -110,6 +110,28 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
                 });
     }
 
+    // test to prevent issue #487 https://github.com/jenkinsci/code-coverage-api-plugin/issues/487
+    @Test
+    void shouldNotAttachFileCoverageDeltasWithMissingReferences() {
+        FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
+        CoverageNode reference = readCoverageTree(TEST_REPORT_BEFORE);
+        CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
+
+        // simulating a file that has not been part of the reference coverage report, but is part of the code delta
+        assertThat(reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode())).isNotEmpty();
+        reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode()).ifPresent(CoverageNode::remove);
+        assertThat(reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode())).isEmpty();
+
+        // verifies that the method does not process the delta calculation for the missing reference node
+        fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
+        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
+                .isNotEmpty()
+                .satisfies(node -> {
+                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
+                    assertThat(((FileCoverageNode) node.get()).hasFileCoverageDelta(FILE)).isFalse();
+                });
+    }
+
     /**
      * Verifies the file coverage delta of {@link #TEST_FILE_1}.
      *

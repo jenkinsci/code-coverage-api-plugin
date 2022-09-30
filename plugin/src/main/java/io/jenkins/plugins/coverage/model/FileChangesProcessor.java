@@ -82,8 +82,9 @@ public class FileChangesProcessor {
             final Map<String, String> oldPathMapping) {
         Map<String, FileCoverageNode> fileNodes = getFileNodeMappingWithReferencePaths(root, oldPathMapping);
         Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
-        fileNodes.forEach(
-                (referencePath, node) -> attachFileCoverageDelta(node, referenceFileNodes.get(referencePath)));
+        fileNodes.entrySet().stream()
+                .filter(entry -> referenceFileNodes.containsKey(entry.getKey()))
+                .forEach(entry -> attachFileCoverageDelta(entry.getValue(), referenceFileNodes.get(entry.getKey())));
     }
 
     /**
