@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/controls">
+
+  <f:entry title="${%title.id}" description="${%description.id(descriptor.id)}" field="id">
+    <c:safe-textbox/>
+  </f:entry>
+
+  <f:entry title="${%title.name}" description="${%description.name(descriptor.name)}" field="name">
+    <f:textbox/>
+  </f:entry>
+
+</j:jelly>

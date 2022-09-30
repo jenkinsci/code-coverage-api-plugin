@@ -1,33 +1,39 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.util.VisibleForTesting;
 
-import org.jenkinsci.Symbol;
-import hudson.FilePath;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 import hudson.model.AbstractDescribableImpl;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.model.Run;
-import jenkins.security.MasterToSlaveCallable;
+import hudson.model.Item;
+import hudson.util.FormValidation;
 
 import io.jenkins.plugins.util.JenkinsFacade;
-import io.jenkins.plugins.util.LogHandler;
 
 /**
  * A coverage tool that can produce a {@link CoverageNode coverage tree} by parsing a given report file.
  *
  * @author Ullrich Hafner
  */
-public abstract class CoverageTool extends AbstractDescribableImpl<CoverageTool> implements Serializable {
+public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implements Serializable {
+    private static final long serialVersionUID = -8612521458890553037L;
+
     private JenkinsFacade jenkins = new JenkinsFacade();
 
+    private String id = StringUtils.EMPTY;
+    private String name = StringUtils.EMPTY;
+
     @VisibleForTesting
-    public void setJenkinsFacade(final JenkinsFacade jenkinsFacade) {
-        this.jenkins = jenkinsFacade;
+    void setJenkinsFacade(final JenkinsFacade jenkinsFacade) {
+        jenkins = jenkinsFacade;
     }
 
     /**
@@ -42,12 +48,57 @@ public abstract class CoverageTool extends AbstractDescribableImpl<CoverageTool>
     }
 
     /**
-     * Returns the {@link Symbol} name of this tool.
+     * Overrides the default ID of the results. The ID is used as URL of the results and as identifier in UI elements.
+     * If no ID is given, then the default ID is used.
      *
-     * @return the name of this tool, or "undefined" if no symbol has been defined
+     * @param id
+     *         the ID of the results
      */
-    public String getSymbolName() {
-        return getDescriptor().getSymbolName();
+    @DataBoundSetter
+    public void setId(final String id) {
+        new ModelValidation().ensureValidId(id);
+
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the actual ID of the tool. If no user defined ID is given, then the default ID is returned.
+     *
+     * @return the ID
+     * @see #setId(String)
+     */
+    public String getActualId() {
+        return StringUtils.defaultIfBlank(getId(), getDescriptor().getId());
+    }
+
+    /**
+     * Overrides the name of the results. The name is used for all labels in the UI. If no name is given, then the
+     * default name is used.
+     *
+     * @param name
+     *         the name of the results
+     */
+    @DataBoundSetter
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
+     *
+     * @return the name
+     * @see #setName(String)
+     */
+    public String getActualName() {
+        return StringUtils.defaultIfBlank(getName(), getDescriptor().getDisplayName());
     }
 
     @Override
@@ -55,57 +106,40 @@ public abstract class CoverageTool extends AbstractDescribableImpl<CoverageTool>
         return (CoverageToolDescriptor) jenkins.getDescriptorOrDie(getClass());
     }
 
-    /**
-     * Scans the results of a build for issues. This method is invoked on Jenkins master. I.e., if a tool wants to
-     * process some build results it is required to run a {@link MasterToSlaveCallable}.
-     *
-     * @param run
-     *         the build
-     * @param workspace
-     *         the workspace of the build
-     * @param sourceCodeEncoding
-     *         the encoding to use to read source files
-     * @param logger
-     *         the logger
-     *
-     * @return the created report
-     * @throws ParsingException
-     *         Signals that during parsing a non-recoverable error has been occurred
-     * @throws ParsingCanceledException
-     *         Signals that the parsing has been aborted by the user
-     */
-    public abstract CoverageNode parse(Run<?, ?> run, FilePath workspace, Charset sourceCodeEncoding, LogHandler logger)
-            throws ParsingException, ParsingCanceledException;
-
     /** Descriptor for {@link CoverageTool}. **/
-    public abstract static class CoverageToolDescriptor extends Descriptor<CoverageTool> {
+    public static class CoverageToolDescriptor extends Descriptor<CoverageTool> {
+        private final JenkinsFacade JENKINS = new JenkinsFacade();
+
         /**
          * Creates a new instance of {@link CoverageToolDescriptor}.
          */
-        protected CoverageToolDescriptor() {
+        public CoverageToolDescriptor() {
             super();
         }
 
         /**
-         * Returns the {@link Symbol} name of this tool.
+         * Performs on-the-fly validation of the ID.
          *
-         * @return the name of this tool, or "undefined" if no symbol has been defined
+         * @param project
+         *         the project that is configured
+         * @param id
+         *         the ID of the tool
+         *
+         * @return the validation result
          */
-        public String getSymbolName() {
-            Symbol annotation = getClass().getAnnotation(Symbol.class);
-
-            if (annotation != null) {
-                String[] symbols = annotation.value();
-                if (symbols.length > 0) {
-                    return symbols[0];
-                }
+        @POST
+        public FormValidation doCheckId(@AncestorInPath final AbstractProject<?, ?> project,
+                @QueryParameter final String id) {
+            if (!new JenkinsFacade().hasPermission(Item.CONFIGURE, project)) {
+                return FormValidation.ok();
             }
-            return "unknownSymbol";
+
+            return new ModelValidation().validateId(id);
         }
 
         /**
-         * Returns an optional help text that can provide useful hints on how to configure the coverage tool so
-         * that the report files could be parsed by Jenkins. This help can be a plain text message or an HTML snippet.
+         * Returns an optional help text that can provide useful hints on how to configure the coverage tool so that the
+         * report files could be parsed by Jenkins. This help can be a plain text message or an HTML snippet.
          *
          * @return the help
          */

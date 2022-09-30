@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +56,9 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
     private boolean skipPublishingChecks = false;
     private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.NEVER;
-    private List<CoverageTool> tools;
+    private List<CoverageTool> tools = new ArrayList<>();
+    private int healthy;
+    private int unhealthy;
 
     /**
      * Creates a new instance of {@link  CoverageRecorder}.
@@ -78,22 +79,6 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setTools(final List<CoverageTool> tools) {
         this.tools = new ArrayList<>(tools);
-    }
-
-    /**
-     * Sets the coverage tools that will scan files and create coverage reports.
-     *
-     * @param tool
-     *         the static analysis tool
-     * @param additionalTools
-     *         additional static analysis tools (might be empty)
-     *
-     * @see #setTools(List)
-     */
-    public void setTools(final CoverageTool tool, final CoverageTool... additionalTools) {
-        tools = new ArrayList<>();
-        tools.add(tool);
-        Collections.addAll(tools, additionalTools);
     }
 
     /**
@@ -164,7 +149,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
      */
     @DataBoundSetter
     public void setSourceDirectories(final List<SourceCodeDirectory> sourceCodeDirectories) {
-        this.sourceDirectories = new HashSet<>(sourceCodeDirectories);
+        sourceDirectories = new HashSet<>(sourceCodeDirectories);
     }
 
     private Set<String> getSourceDirectoriesPaths() {
@@ -230,7 +215,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         @NonNull
         @Override
         public String getDisplayName() {
-            return Messages.Coverage_Recorder();
+            return Messages.Recorder_Name();
         }
 
         @Override
