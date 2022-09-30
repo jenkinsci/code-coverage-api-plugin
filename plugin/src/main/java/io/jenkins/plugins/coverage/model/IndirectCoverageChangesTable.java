@@ -46,7 +46,7 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
         Locale browserLocale = Functions.getCurrentLocale();
         return changeRoot.getAllFileCoverageNodes().stream()
                 .map(file -> new IndirectCoverageChangesRow(
-                        getOriginalNode(file), file, browserLocale, getRenderer(), colorProvider))
+                        getOriginalNode(file), file, browserLocale, getRenderer(), getColorProvider()))
                 .collect(Collectors.toList());
     }
 

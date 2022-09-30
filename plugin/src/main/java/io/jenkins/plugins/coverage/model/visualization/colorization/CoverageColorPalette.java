@@ -26,7 +26,6 @@ public enum CoverageColorPalette {
     LIGHT_GREEN(ColorId.VERY_GOOD, new Color(75, 223, 124), new Color(0, 0, 0)),
     GREEN(ColorId.EXCELLENT, new Color(30, 166, 75), new Color(255, 255, 255));
 
-
     private final ColorId colorId;
     private final Color fillColor;
     private final Color lineColor;

@@ -2,8 +2,10 @@ package io.jenkins.plugins.coverage.model.visualization.colorization;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -44,7 +46,7 @@ public class ColorProviderFactory {
      * @return the created color provider
      */
     public static ColorProvider createColorProvider(final Map<String, String> colors) {
-        if (!colors.keySet().equals(getAll())) {
+        if (!colors.keySet().equals(getAll()) || !verifyHexCodes(colors.values())) {
             return createDefaultColorProvider();
         }
         Map<ColorId, DisplayColors> colorMap = new HashMap<>();
@@ -78,6 +80,24 @@ public class ColorProviderFactory {
     private static Map<ColorId, DisplayColors> getDefaultColors() {
         return Arrays.stream(CoverageColorPalette.values())
                 .collect(Collectors.toMap(CoverageColorPalette::getColorId, ColorProviderFactory::createDisplayColor));
+    }
+
+    /**
+     * Verifies that all passed strings are color hex codes.
+     *
+     * @param hexCodes
+     *         The strings to be investigated
+     *
+     * @return {@code true} if all strings are hex codes
+     */
+    private static boolean verifyHexCodes(final Collection<String> hexCodes) {
+        Pattern hexPattern = Pattern.compile("^#[A-Fa-f0-9]{6}$");
+        for (String hex : hexCodes) {
+            if (!hexPattern.matcher(hex).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

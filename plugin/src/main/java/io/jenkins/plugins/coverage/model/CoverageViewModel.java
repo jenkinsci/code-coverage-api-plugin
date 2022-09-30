@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -141,8 +142,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private ColorProvider createColorProvider(final String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> colorMapping = mapper.readValue(json, new TypeReference<Map<String, String>>() {
-            });
+            Map<String, String> colorMapping = mapper.readValue(json, new ColorMappingType());
             return ColorProviderFactory.createColorProvider(colorMapping);
         }
         catch (JsonProcessingException e) {
@@ -541,4 +541,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return coverage.getMetricsDistribution();
         }
     }
+
+    /**
+     * Used for parsing a Jenkins color mapping JSON string to a color map.
+     */
+    private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {}
 }

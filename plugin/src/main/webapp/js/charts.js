@@ -29,7 +29,10 @@ const CoverageChartGenerator = function ($) {
     function getJenkinsColorById(jenkinsColors, id, defaultValue, alpha) {
         const alphaHex = alpha.toString(16);
         if (jenkinsColors.has(id)) {
-            return jenkinsColors.get(id) + alphaHex;
+            const color = jenkinsColors.get(id);
+            if (color.match(/^#[a-fA-F0-9]{6}$/) !== null) {
+                return color + alphaHex;
+            }
         }
         return defaultValue + alphaHex;
     }

@@ -53,7 +53,7 @@ class ChangeCoverageTableModel extends CoverageTableModel {
         Locale browserLocale = Functions.getCurrentLocale();
         return changeRoot.getAllFileCoverageNodes().stream()
                 .map(file -> new ChangeCoverageRow(
-                        getOriginalNode(file), file, browserLocale, getRenderer(), colorProvider))
+                        getOriginalNode(file), file, browserLocale, getRenderer(), getColorProvider()))
                 .collect(Collectors.toList());
     }
 

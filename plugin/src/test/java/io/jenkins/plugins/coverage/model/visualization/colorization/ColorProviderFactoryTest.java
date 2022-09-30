@@ -52,6 +52,16 @@ class ColorProviderFactoryTest {
         }
     }
 
+    @Test
+    void shouldCreateDefaultColorProviderWithoutHexColors() {
+        Map<String, String> colorMapping = createColorMapping();
+        colorMapping.replace("--green", "hsl(135deg, 75%, 55%)");
+        ColorProvider colorProvider = ColorProviderFactory.createColorProvider(colorMapping);
+        for (CoverageColorPalette color : CoverageColorPalette.values()) {
+            assertThat(colorProvider.containsColorId(color.getColorId())).isTrue();
+        }
+    }
+
     /**
      * Creates a color mapping between the {@link CoverageColorJenkinsId jenkins color id} and the corresponding color
      * hex code.

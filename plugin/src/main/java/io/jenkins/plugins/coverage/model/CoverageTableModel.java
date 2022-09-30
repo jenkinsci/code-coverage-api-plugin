@@ -31,7 +31,7 @@ class CoverageTableModel extends TableModel {
     static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
             NO_COVERAGE_SORT);
 
-    protected final ColorProvider colorProvider;
+    private final ColorProvider colorProvider;
     private final CoverageNode root;
     private final RowRenderer renderer;
     private final String id;
@@ -141,6 +141,10 @@ class CoverageTableModel extends TableModel {
 
     protected CoverageNode getRoot() {
         return root;
+    }
+
+    protected ColorProvider getColorProvider() {
+        return colorProvider;
     }
 
     /**
