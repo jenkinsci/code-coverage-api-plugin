@@ -41,7 +41,7 @@ class CoverageColumnTypeTest {
     protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;
-    protected static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
+    protected static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
 
     @Test
     void shouldGetDisplayName() {

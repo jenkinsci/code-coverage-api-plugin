@@ -9,6 +9,7 @@ import org.apache.commons.lang3.math.Fraction;
 
 import hudson.Functions;
 
+import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.datatables.DetailedCell;
 
 /**
@@ -29,11 +30,13 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
      * @param changeRoot
      *         The root of the indirect coverage changes tree
      * @param renderer
-     *         the renderer to use for the file names
+     *         The renderer to use for the file names
+     * @param colorProvider
+     *         The {@link ColorProvider} which provides the used colors
      */
     IndirectCoverageChangesTable(final String id, final CoverageNode root, final CoverageNode changeRoot,
-            final RowRenderer renderer) {
-        super(id, root, renderer);
+            final RowRenderer renderer, final ColorProvider colorProvider) {
+        super(id, root, renderer, colorProvider);
 
         this.changeRoot = changeRoot;
     }
@@ -43,7 +46,7 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
         Locale browserLocale = Functions.getCurrentLocale();
         return changeRoot.getAllFileCoverageNodes().stream()
                 .map(file -> new IndirectCoverageChangesRow(
-                        getOriginalNode(file), file, browserLocale, getRenderer()))
+                        getOriginalNode(file), file, browserLocale, getRenderer(), colorProvider))
                 .collect(Collectors.toList());
     }
 
@@ -64,8 +67,8 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
         private final FileCoverageNode changedFileNode;
 
         IndirectCoverageChangesRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
-                final Locale browserLocale, final RowRenderer renderer) {
-            super(root, browserLocale, renderer);
+                final Locale browserLocale, final RowRenderer renderer, final ColorProvider colorProvider) {
+            super(root, browserLocale, renderer, colorProvider);
 
             this.changedFileNode = changedFileNode;
         }

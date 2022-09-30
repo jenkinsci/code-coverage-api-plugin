@@ -1,11 +1,9 @@
 package io.jenkins.plugins.coverage.model.visualization.colorization;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 
@@ -27,23 +25,17 @@ public class ColorProvider {
     /**
      * The available {@link DisplayColors display colors} are mapped by the {@link ColorId id} of the fill color.
      */
-    private final Map<ColorId, DisplayColors> availableColors = new HashMap<>();
+    private final Map<ColorId, DisplayColors> availableColors;
 
     /**
-     * Creates a color provider which uses the {@link CoverageColorPalette internal color palette}.
-     */
-    public ColorProvider() {
-        loadDefaultColors();
-    }
-
-    /**
-     * Creates a color provider for the passed {@link ColorScheme scheme}.
+     * Creates a color provider which uses the passed colors. Each color entry contains a background and a fitting text
+     * color.
      *
-     * @param colorScheme
-     *         The color scheme to be used
+     * @param colorMapping
+     *         The color mapping to be used
      */
-    public ColorProvider(final ColorScheme colorScheme) {
-        loadColors(colorScheme);
+    ColorProvider(final Map<ColorId, DisplayColors> colorMapping) {
+        availableColors = new HashMap<>(colorMapping);
     }
 
     /**
@@ -92,25 +84,25 @@ public class ColorProvider {
      *
      * @param color
      *         The {@link Color}
+     * @param alpha
+     *         The alpha value within the range [0;255]
      *
      * @return the color as a hex string
      */
-    public static String colorAsHex(final Color color) {
-        return String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    public static String colorAsRGBAHex(final Color color, final int alpha) {
+        return String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), alpha);
     }
 
     /**
-     * Loads a color palette matching with the passed scheme.
+     * Provides the RGB hex string of the passed color.
      *
-     * @param colorScheme
-     *         The color scheme
+     * @param color
+     *         The {@link Color}
+     *
+     * @return the color as a hex string
      */
-    @SuppressWarnings("PMD.UnusedFormalParameter")
-    private void loadColors(final ColorScheme colorScheme) {
-        // TODO: insert code here in order to load colors dependent on selected scheme
-
-        // Internal fallback if no other schemes exist
-        loadDefaultColors();
+    public static String colorAsRGBHex(final Color color) {
+        return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
     }
 
     /**
@@ -174,17 +166,6 @@ public class ColorProvider {
     }
 
     /**
-     * Loads the internally usable {@link CoverageColorPalette color palette}.
-     */
-    private void loadDefaultColors() {
-        availableColors.clear();
-        availableColors.putAll(
-                Arrays.stream(CoverageColorPalette.values())
-                        .collect(Collectors.toMap(CoverageColorPalette::getColorId,
-                                color -> new DisplayColors(color.getLineColor(), color.getFillColor()))));
-    }
-
-    /**
      * Wraps the fill color and the line color that should be used in order to visualize coverage values.
      *
      * @author Florian Orendi
@@ -215,12 +196,25 @@ public class ColorProvider {
             return fillColor;
         }
 
-        public String getLineColorAsHex() {
-            return colorAsHex(lineColor);
+        /**
+         * Gets the fill color with the passed alpha value. Using a low alpha value might require using another line
+         * color than the provided {@link #lineColor}.
+         *
+         * @param alpha
+         *         The color alpha
+         *
+         * @return the hex code which contains the alpha value
+         */
+        public String getFillColorAsRGBAHex(final int alpha) {
+            return colorAsRGBAHex(fillColor, alpha);
         }
 
-        public String getFillColorAsHex() {
-            return colorAsHex(fillColor);
+        public String getLineColorAsRGBHex() {
+            return colorAsRGBHex(lineColor);
+        }
+
+        public String getFillColorAsRGBHex() {
+            return colorAsRGBHex(fillColor);
         }
 
         @Override

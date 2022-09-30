@@ -3,8 +3,10 @@ package io.jenkins.plugins.coverage.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,6 +14,10 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.Fraction;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
@@ -30,6 +36,7 @@ import io.jenkins.plugins.coverage.model.CoverageTableModel.LinkedRowRenderer;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
+import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageColorJenkinsId;
 import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableModel;
@@ -45,8 +52,7 @@ import io.jenkins.plugins.util.BuildResultNavigator;
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
     private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
-    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
-    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter(COLOR_PROVIDER);
+    private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
@@ -61,6 +67,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final CoverageNode changeCoverageTreeRoot;
     private final CoverageNode indirectCoverageChangesTreeRoot;
+
+    private ColorProvider colorProvider = ColorProviderFactory.createDefaultColorProvider();
 
     /**
      * Creates a new view model instance.
@@ -97,6 +105,49 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @Override
     public String getDisplayName() {
         return Messages.Coverage_Title(node.getName());
+    }
+
+    /**
+     * Gets a set of color IDs which can be used to dynamically load the defined Jenkins colors.
+     *
+     * @return the available color IDs
+     */
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public Set<String> getJenkinsColorIDs() {
+        return CoverageColorJenkinsId.getAll();
+    }
+
+    /**
+     * Creates a new {@link ColorProvider} based on the passed color json string which contains the set Jenkins colors.
+     *
+     * @param colors
+     *         The dynamically loaded Jenkins colors to be used for highlighting the coverage tree as json string
+     */
+    @JavaScriptMethod
+    @SuppressWarnings("unused")
+    public void setJenkinsColors(final String colors) {
+        colorProvider = createColorProvider(colors);
+    }
+
+    /**
+     * Parses the passed color json string to a {@link ColorProvider}.
+     *
+     * @param json
+     *         The color json
+     *
+     * @return the created color provider
+     */
+    private ColorProvider createColorProvider(final String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> colorMapping = mapper.readValue(json, new TypeReference<Map<String, String>>() {
+            });
+            return ColorProviderFactory.createColorProvider(colorMapping);
+        }
+        catch (JsonProcessingException e) {
+            return ColorProviderFactory.createDefaultColorProvider();
+        }
     }
 
     @JavaScriptMethod
@@ -149,7 +200,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageTree(final String coverageMetric) {
         CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric, colorProvider);
     }
 
     /**
@@ -165,7 +216,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @SuppressWarnings("unused")
     public TreeMapNode getChangeCoverageTree(final String coverageMetric) {
         CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric, colorProvider);
     }
 
     /**
@@ -181,7 +232,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageChangesTree(final String coverageMetric) {
         CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric);
+        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric, colorProvider);
     }
 
     /**
@@ -223,11 +274,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         switch (actualId) {
             case ABSOLUTE_COVERAGE_TABLE_ID:
-                return new CoverageTableModel(tableId, getNode(), renderer);
+                return new CoverageTableModel(tableId, getNode(), renderer, colorProvider);
             case CHANGE_COVERAGE_TABLE_ID:
-                return new ChangeCoverageTableModel(tableId, getNode(), changeCoverageTreeRoot, renderer);
+                return new ChangeCoverageTableModel(tableId, getNode(), changeCoverageTreeRoot, renderer,
+                        colorProvider);
             case INDIRECT_COVERAGE_TABLE_ID:
-                return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer);
+                return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer,
+                        colorProvider);
             default:
                 throw new NoSuchElementException("No such table with id " + actualId);
         }

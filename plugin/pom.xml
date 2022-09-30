@@ -34,6 +34,7 @@
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.3</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
+    <echarts-api.version>5.3.3-2-rc729.068617b_48a_5c</echarts-api.version>
   </properties>
 
   <developers>
@@ -104,6 +105,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>echarts-api</artifactId>
+      <version>${echarts-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>

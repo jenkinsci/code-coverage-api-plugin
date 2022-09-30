@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="${resURL}/plugin/font-awesome-api/css/jenkins-style.css"/>
 
     <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/colors.js"/>
 
     <j:set var="hasChangeCoverage" value="${it.hasChangeCoverage()}"/>
     <j:set var="hasIndirectCoverageChanges" value="${it.hasIndirectCoverageChanges()}"/>
@@ -42,7 +43,7 @@
       </j:if>
     </ul>
 
-    <div class="tab-content h-100">
+    <div class="tab-content h-100 pt-2">
 
       <div role="tabpanel" id="overview" class="tab-pane fade h-100">
 
@@ -98,7 +99,12 @@
   <script>
     const viewProxy =<st:bind value="${it}"/>;
     const coverageChartGenerator = new CoverageChartGenerator(jQuery3);
-    coverageChartGenerator.populateDetailsCharts();
+    viewProxy.getJenkinsColorIDs(function (colors) {
+        const jenkinsColors = getJenkinsColors(colors.responseObject());
+        const colorJson = JSON.stringify(Object.fromEntries(jenkinsColors));
+        viewProxy.setJenkinsColors(colorJson, function(t) {});
+        coverageChartGenerator.populateDetailsCharts(jenkinsColors);
+    });
   </script>
 
 </j:jelly>

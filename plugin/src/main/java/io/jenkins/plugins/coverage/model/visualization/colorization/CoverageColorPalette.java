@@ -3,7 +3,9 @@ package io.jenkins.plugins.coverage.model.visualization.colorization;
 import java.awt.*;
 
 /**
- * Provides a color palette which can be used as an plugin internal fallback if no other color schemes have been defined.
+ * Provides a color palette which can be used as a plugin internal fallback if no other color schemes have been defined.
+ * The defined colors correspond to the <a href="https://weekly.ci.jenkins.io/design-library/Colors/">Jenkins Design
+ * Library</a>.
  *
  * @author Florian Orendi
  */
@@ -12,20 +14,18 @@ public enum CoverageColorPalette {
     WHITE(ColorId.WHITE, new Color(255, 255, 255), new Color(0, 0, 0)),
     BLACK(ColorId.BLACK, new Color(0, 0, 0), new Color(255, 255, 255)),
 
-    DARK_RED(ColorId.INSUFFICIENT, new Color(200, 0, 0, 80), new Color(0, 0, 0)),
-    LIGHT_RED(ColorId.VERY_BAD, new Color(255, 50, 50, 80), new Color(0, 0, 0)),
+    RED(ColorId.INSUFFICIENT, new Color(230, 0, 31), new Color(255, 255, 255)),
+    LIGHT_RED(ColorId.VERY_BAD, new Color(255, 77, 101), new Color(255, 255, 255)),
 
-    DARK_ORANGE(ColorId.BAD, new Color(255, 120, 50, 80), new Color(0, 0, 0)),
-    ORANGE(ColorId.INADEQUATE, new Color(255, 170, 50, 80), new Color(0, 0, 0)),
-    LIGHT_ORANGE(ColorId.BELOW_AVERAGE, new Color(255, 200, 50, 80), new Color(0, 0, 0)),
+    ORANGE(ColorId.BAD, new Color(254, 130, 10), new Color(0, 0, 0)),
+    LIGHT_ORANGE(ColorId.INADEQUATE, new Color(254, 182, 112), new Color(0, 0, 0)),
 
-    DARK_YELLOW(ColorId.AVERAGE, new Color(240, 240, 120, 80), new Color(0, 0, 0)),
-    YELLOW(ColorId.ABOVE_AVERAGE, new Color(220, 250, 110, 80), new Color(0, 0, 0)),
-    LIGHT_YELLOW(ColorId.GOOD, new Color(200, 255, 100, 80), new Color(0, 0, 0)),
+    YELLOW(ColorId.AVERAGE, new Color(255, 204, 0), new Color(0, 0, 0)),
+    LIGHT_YELLOW(ColorId.GOOD, new Color(255, 224, 102), new Color(0, 0, 0)),
 
-    LIGHT_GREEN(ColorId.VERY_GOOD, new Color(150, 255, 100, 80), new Color(0, 0, 0)),
-    GREEN(ColorId.EXCELLENT, new Color(0, 200, 0, 80), new Color(0, 0, 0)),
-    DARK_GREEN(ColorId.OUTSTANDING, new Color(0, 130, 0, 80), new Color(0, 0, 0));
+    LIGHT_GREEN(ColorId.VERY_GOOD, new Color(75, 223, 124), new Color(0, 0, 0)),
+    GREEN(ColorId.EXCELLENT, new Color(30, 166, 75), new Color(255, 255, 255));
+
 
     private final ColorId colorId;
     private final Color fillColor;

@@ -17,9 +17,26 @@ const CoverageChartGenerator = function ($) {
         return getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
     }
 
-    function createOverview(overview, id) {
-        const missedColor = '#EF9A9A';
-        const coveredColor = '#A5D6A7';
+    /**
+     * Searches for a Jenkins color by a color id.
+     *
+     * @param jenkinsColors The available Jenkins colors
+     * @param id The color id
+     * @param defaultValue The default value if the id does not exist
+     * @param alpha The alpha value between [0;255]
+     * @returns {string} the hex code of the Jenkins color or, if not existent, the default value
+     */
+    function getJenkinsColorById(jenkinsColors, id, defaultValue, alpha) {
+        const alphaHex = alpha.toString(16);
+        if (jenkinsColors.has(id)) {
+            return jenkinsColors.get(id) + alphaHex;
+        }
+        return defaultValue + alphaHex;
+    }
+
+    function createOverview(overview, id, jenkinsColors) {
+        const missedColor = getJenkinsColorById(jenkinsColors, "--light-red", "#ff4d65", 120);
+        const coveredColor = getJenkinsColorById(jenkinsColors, "--light-green", "#4bdf7c", 120);
 
         const summaryChartDiv = $('#' + id);
         summaryChartDiv.height(overview.metrics.length * 31 + 150 + 'px');
@@ -121,6 +138,7 @@ const CoverageChartGenerator = function ($) {
                     label: {
                         show: true,
                         position: 'insideLeft',
+                        color: 'black',
                         formatter: function (obj) {
                             return overview.covered[obj.dataIndex];
                         }
@@ -139,6 +157,7 @@ const CoverageChartGenerator = function ($) {
                     label: {
                         show: true,
                         position: 'insideRight',
+                        color: 'black',
                         formatter: function (obj) {
                             return overview.missed[obj.dataIndex];
                         }
@@ -156,9 +175,8 @@ const CoverageChartGenerator = function ($) {
             return [
                 {
                     itemStyle: {
-                        borderColor: 'black',
                         borderWidth: 0,
-                        gapWidth: 1
+                        gapWidth: 5,
                     },
                     upperLabel: {
                         show: false
@@ -166,65 +184,47 @@ const CoverageChartGenerator = function ($) {
                 },
                 {
                     itemStyle: {
-                        borderColor: '#ddd',
-                        borderWidth: 2,
-                        gapWidth: 3
-                    }
-                },
-                {
-                    itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 5,
-                        borderColorSaturation: 0.2
-                    }
-                },
-                {
-                    itemStyle: {
-                        borderWidth: 4,
                         gapWidth: 3,
-                        borderColorSaturation: 0.8
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.2
+                        gapWidth: 1,
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.8
+                        gapWidth: 1,
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.2
+                        gapWidth: 1,
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.8
+                        gapWidth: 1,
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.2
+                        gapWidth: 1,
                     }
                 },
                 {
                     itemStyle: {
-                        borderWidth: 4,
-                        gapWidth: 3,
-                        borderColorSaturation: 0.8
+                        gapWidth: 1,
+                    }
+                },
+                {
+                    itemStyle: {
+                        gapWidth: 1,
+                    }
+                },
+                {
+                    itemStyle: {
+                        gapWidth: 1,
                     }
                 },
             ];
@@ -234,7 +234,6 @@ const CoverageChartGenerator = function ($) {
         const treeChart = echarts.init(treeChartDiv[0]);
         treeChartDiv[0].echart = treeChart;
 
-        const textColor = getTextColor();
         const formatUtil = echarts.format;
 
         const option = {
@@ -281,17 +280,14 @@ const CoverageChartGenerator = function ($) {
                     label: {
                         show: true,
                         formatter: '{b}',
-                        color: textColor
                     },
                     upperLabel: {
                         show: true,
                         height: 30,
-                        color: 'black',
-                        borderColorSaturation: 0.6,
-                        colorSaturation: 0.6,
                     },
                     itemStyle: {
-                        borderColor: '#fff',
+                        shadowColor: '#000',
+                        shadowBlur: 3,
                     },
                     levels: getLevelOption(),
                     data: [coverageTree]
@@ -302,7 +298,7 @@ const CoverageChartGenerator = function ($) {
         treeChart.resize();
     }
 
-    this.populateDetailsCharts = function () {
+    this.populateDetailsCharts = function (jenkinsColors) {
         /**
          * Activate the tab that has been visited the last time. If there is no such tab, highlight the first one.
          * If the user selects the tab using an #anchor prefer this tab.
@@ -362,7 +358,7 @@ const CoverageChartGenerator = function ($) {
             renderTrendChart();
 
             viewProxy.getOverview(function (t) {
-                createOverview(t.responseObject(), 'coverage-overview');
+                createOverview(t.responseObject(), 'coverage-overview', jenkinsColors);
             });
 
             viewProxy.getCoverageTree('Line', function (t) {
