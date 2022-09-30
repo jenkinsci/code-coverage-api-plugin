@@ -545,5 +545,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Used for parsing a Jenkins color mapping JSON string to a color map.
      */
-    private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {}
+    private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {
+    }
 }
