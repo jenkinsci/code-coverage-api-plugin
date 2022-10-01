@@ -11,13 +11,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
+import org.jvnet.localizer.Localizable;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
+import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
@@ -32,10 +35,25 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
 
     private String id = StringUtils.EMPTY;
     private String name = StringUtils.EMPTY;
+    private CoverageParser parser = CoverageParser.JACOCO;
 
     @DataBoundConstructor
     public CoverageTool() {
         // empty for stapler
+    }
+
+    public CoverageParser getParser() {
+        return parser;
+    }
+
+    /**
+     * Sets the parser to be used to read the input files.
+     *
+     * @param parser the parser to use
+     */
+    @DataBoundSetter
+    public void setParser(final CoverageParser parser) {
+        this.parser = parser;
     }
 
     @VisibleForTesting
@@ -126,6 +144,29 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         }
 
         /**
+         * Returns a model with all {@link SourceCodeRetention} strategies.
+         *
+         * @param project
+         *         the project that is configured
+         * @return a model with all {@link SourceCodeRetention} strategies.
+         */
+        @POST
+        public ListBoxModel doFillParserItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                ListBoxModel options = new ListBoxModel();
+                add(options, CoverageParser.JACOCO);
+                add(options, CoverageParser.COBERTURA);
+                add(options, CoverageParser.PIT);
+                return options;
+            }
+            return new ListBoxModel();
+        }
+
+        private void add(final ListBoxModel options, final CoverageParser parser) {
+            options.add(parser.getDisplayName(), parser.name());
+        }
+
+        /**
          * Performs on-the-fly validation of the ID.
          *
          * @param project
@@ -162,6 +203,22 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
          */
         public String getUrl() {
             return StringUtils.EMPTY;
+        }
+    }
+
+    public enum CoverageParser {
+        COBERTURA(Messages._Parser_Cobertura()),
+        JACOCO(Messages._Parser_JaCoCo()),
+        PIT(Messages._Parser_PIT());
+
+        private final Localizable displayName;
+
+        CoverageParser(final Localizable displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName.toString();
         }
     }
 }
