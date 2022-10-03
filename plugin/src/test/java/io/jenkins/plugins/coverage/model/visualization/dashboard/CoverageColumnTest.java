@@ -34,7 +34,7 @@ class CoverageColumnTest {
     private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();
     private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
 
-    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
+    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
 
     @Test
     void shouldHaveWorkingDataGetters() {

@@ -10,13 +10,10 @@ public enum ColorId {
     VERY_BAD,
     BAD,
     INADEQUATE,
-    BELOW_AVERAGE,
     AVERAGE,
-    ABOVE_AVERAGE,
     GOOD,
     VERY_GOOD,
     EXCELLENT,
-    OUTSTANDING,
 
     BLACK,
     WHITE

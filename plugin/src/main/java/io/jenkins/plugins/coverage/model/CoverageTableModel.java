@@ -10,7 +10,6 @@ import hudson.Functions;
 
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
-import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChangeTendency;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 import io.jenkins.plugins.datatables.DetailedCell;
@@ -28,10 +27,17 @@ import static j2html.TagCreator.*;
  * UI table model for the coverage details table.
  */
 class CoverageTableModel extends TableModel {
-    private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createColorProvider();
     private static final int NO_COVERAGE_SORT = -1_000;
+
+    /**
+     * The alpha value for colors to be used to highlight the coverage within the table view.
+     */
+    private static final int TABLE_COVERAGE_COLOR_ALPHA = 80;
+
     static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
             NO_COVERAGE_SORT);
+
+    private final ColorProvider colorProvider;
     private final CoverageNode root;
     private final RowRenderer renderer;
     private final String id;
@@ -45,13 +51,16 @@ class CoverageTableModel extends TableModel {
      *         The root of the coverage tree
      * @param renderer
      *         the renderer to use for the file names
+     * @param colors
+     *         The {@link ColorProvider} which provides the used colors
      */
-    CoverageTableModel(final String id, final CoverageNode root, final RowRenderer renderer) {
+    CoverageTableModel(final String id, final CoverageNode root, final RowRenderer renderer, final ColorProvider colors) {
         super();
 
         this.id = id;
         this.root = root;
         this.renderer = renderer;
+        colorProvider = colors;
     }
 
     RowRenderer getRenderer() {
@@ -132,12 +141,16 @@ class CoverageTableModel extends TableModel {
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
         return root.getAll(CoverageMetric.FILE).stream()
-                .map(file -> new CoverageRow(file, browserLocale, renderer))
+                .map(file -> new CoverageRow(file, browserLocale, renderer, colorProvider))
                 .collect(Collectors.toList());
     }
 
     protected CoverageNode getRoot() {
         return root;
+    }
+
+    protected ColorProvider getColorProvider() {
+        return colorProvider;
     }
 
     /**
@@ -149,11 +162,13 @@ class CoverageTableModel extends TableModel {
         private final CoverageNode root;
         private final Locale browserLocale;
         private final RowRenderer renderer;
+        private final ColorProvider colorProvider;
 
-        CoverageRow(final CoverageNode root, final Locale browserLocale, final RowRenderer renderer) {
+        CoverageRow(final CoverageNode root, final Locale browserLocale, final RowRenderer renderer, final ColorProvider colors) {
             this.root = root;
             this.browserLocale = browserLocale;
             this.renderer = renderer;
+            this.colorProvider = colors;
         }
 
         public String getFileHash() {
@@ -206,12 +221,12 @@ class CoverageTableModel extends TableModel {
         protected DetailedCell<?> createColoredCoverageColumn(final Coverage coverage, final String tooltip) {
             if (coverage.isSet()) {
                 double percentage = coverage.getCoveredPercentage().getDoubleValue();
-                DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, COLOR_PROVIDER);
+                DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, colorProvider);
                 String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                                 div().withClasses(COVERAGE_COLUMN_INNER)
                                         .withStyle(String.format(
                                                 "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
-                                                colors.getFillColorAsHex(),
+                                                colors.getFillColorAsRGBAHex(TABLE_COVERAGE_COLOR_ALPHA),
                                                 percentage, percentage))
                                         .withTitle(tooltip)
                                         .withText(coverage.formatCoveredPercentage(browserLocale)))
@@ -234,10 +249,11 @@ class CoverageTableModel extends TableModel {
         protected DetailedCell<?> createColoredCoverageDeltaColumn(
                 final CoveragePercentage coveragePercentage, final String tooltip) {
             double coverageValue = coveragePercentage.getDoubleValue();
-            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, COLOR_PROVIDER);
+            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, colorProvider);
             String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                             div().withClasses(COVERAGE_COLUMN_INNER)
-                                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsHex()))
+                                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(
+                                            TABLE_COVERAGE_COLOR_ALPHA)))
                                     .withText(coveragePercentage.formatDeltaPercentage(browserLocale))
                                     .withTitle(tooltip))
                     .render();

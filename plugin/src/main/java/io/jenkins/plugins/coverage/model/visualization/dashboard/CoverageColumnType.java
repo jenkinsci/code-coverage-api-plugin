@@ -43,7 +43,7 @@ public abstract class CoverageColumnType {
      * @return the color provider
      */
     protected ColorProvider getColorProvider() {
-        return ColorProviderFactory.createColorProvider();
+        return ColorProviderFactory.createDefaultColorProvider();
     }
 
     /**

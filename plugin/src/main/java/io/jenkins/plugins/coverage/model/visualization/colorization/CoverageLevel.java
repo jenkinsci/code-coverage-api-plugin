@@ -11,13 +11,11 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  */
 public enum CoverageLevel {
 
-    LVL_95(95.0, ColorId.OUTSTANDING),
-    LVL_90(90.0, ColorId.EXCELLENT),
-    LVL_85(85.0, ColorId.VERY_GOOD),
-    LVL_80(80.0, ColorId.GOOD),
-    LVL_75(75.0, ColorId.ABOVE_AVERAGE),
-    LVL_70(70.0, ColorId.AVERAGE),
-    LVL_65(65.0, ColorId.BELOW_AVERAGE),
+    LVL_95(95.0, ColorId.EXCELLENT),
+    LVL_90(90.0, ColorId.VERY_GOOD),
+    LVL_80(85.0, ColorId.GOOD),
+    LVL_75(80.0, ColorId.AVERAGE),
+    LVL_70(70.0, ColorId.INADEQUATE),
     LVL_60(60.0, ColorId.BAD),
     LVL_50(50.0, ColorId.VERY_BAD),
     LVL_0(0.0, ColorId.INSUFFICIENT),

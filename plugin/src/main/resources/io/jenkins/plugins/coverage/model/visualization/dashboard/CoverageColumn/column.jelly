@@ -9,7 +9,7 @@
   <j:choose>
     <j:when test="${coverageValue.isPresent()}">
       <j:set var="displayColors" value="${it.getDisplayColors(job, coverageValue)}"/>
-      <j:set var="backgroundColor" value="${displayColors.getFillColorAsHex()}"/>
+      <j:set var="backgroundColor" value="${displayColors.getFillColorAsRGBAHex(80)}"/>
       <j:set var="url" value="${it.getRelativeCoverageUrl(job)}"/>
       <j:set var="fillPercentage" value="${it.getBackgroundColorFillPercentage(coverageText)}"/>
       <td align="right">

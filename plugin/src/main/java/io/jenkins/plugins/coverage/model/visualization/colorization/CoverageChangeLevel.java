@@ -11,8 +11,8 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  */
 public enum CoverageChangeLevel {
 
-    INCREASE_5(5.0, ColorId.OUTSTANDING),
-    INCREASE_2(2.0, ColorId.EXCELLENT),
+    INCREASE_5(5.0, ColorId.EXCELLENT),
+    INCREASE_2(2.0, ColorId.VERY_GOOD),
     EQUALS(0.0, ColorId.AVERAGE),
     DECREASE_2(-2.0, ColorId.INADEQUATE),
     DECREASE_5(-5.0, ColorId.BAD),

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="${resURL}/plugin/font-awesome-api/css/jenkins-style.css"/>
 
     <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/charts.js"/>
+    <script type="text/javascript" src="${resURL}/plugin/code-coverage-api/js/colors.js"/>
 
     <j:set var="hasChangeCoverage" value="${it.hasChangeCoverage()}"/>
     <j:set var="hasIndirectCoverageChanges" value="${it.hasIndirectCoverageChanges()}"/>
@@ -48,30 +49,29 @@
 
       <div role="tabpanel" id="overview" class="tab-pane fade" aria-labelledby="overview-tab" >
         <div class="row">
-
           <div class="col-5">
             <bs:card title="${%Total coverage overview}" fontAwesomeIcon="chart-bar">
               <div id="coverage-overview" class="graph-cursor-pointer overview-chart h-100"/>
             </bs:card>
           </div>
-
           <div class="col-7">
             <bs:card title="${%Coverage trend}" fontAwesomeIcon="chart-line">
               <div id="coverage-trend" class="graph-cursor-pointer overview-chart h-100"/>
             </bs:card>
           </div>
-
         </div>
       </div>
 
       <div role="tabpanel" id="lineCoverage" class="tab-pane fade" aria-labelledby="lineCoverage-tab">
-        <bs:card title="${%Line coverage}" fontAwesomeIcon="folder-tree">
+        <bs:card title="${%Line coverage}" fontAwesomeIcon="folder-tree"
+                 class="flex-fill" bodyClass="d-flex flex-column">
           <div id="project-line-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
       <div role="tabpanel" id="branchCoverage" class="tab-pane fade" aria-labelledby="branchCoverage-tab">
-        <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree">
+        <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree"
+                 class="flex-fill" bodyClass="d-flex flex-column">
           <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
@@ -101,7 +101,12 @@
   <script>
     const viewProxy =<st:bind value="${it}"/>;
     const coverageChartGenerator = new CoverageChartGenerator(jQuery3);
-    coverageChartGenerator.populateDetailsCharts();
+    viewProxy.getJenkinsColorIDs(function (colors) {
+        const jenkinsColors = getJenkinsColors(colors.responseObject());
+        const colorJson = JSON.stringify(Object.fromEntries(jenkinsColors));
+        viewProxy.setJenkinsColors(colorJson, function(t) {});
+        coverageChartGenerator.populateDetailsCharts(jenkinsColors);
+    });
   </script>
 
 </j:jelly>

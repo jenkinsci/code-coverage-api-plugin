@@ -17,13 +17,6 @@ import static org.assertj.core.api.Assertions.*;
 class ColorProviderTest {
 
     @Test
-    void shouldLoadColors() {
-        // TODO: this test case is trivial at the moment and needs to get expanded with further color schemes
-        ColorProvider colorProvider = new ColorProvider(ColorScheme.DEFAULT);
-        assertThat(colorProvider.containsColorId(ColorId.EXCELLENT)).isTrue();
-    }
-
-    @Test
     void shouldGetDisplayColorsOfId() {
         ColorProvider colorProvider = createDefaultColorProvider();
         DisplayColors displayColors = colorProvider.getDisplayColorsOf(ColorId.EXCELLENT);
@@ -80,14 +73,17 @@ class ColorProviderTest {
 
     @Test
     void shouldProvideColorAsHex() {
-        assertThat(colorAsHex(Color.black)).isEqualTo("#000000FF");
+        assertThat(colorAsRGBHex(Color.black)).isEqualTo("#000000");
+        assertThat(colorAsRGBAHex(Color.black, 255)).isEqualTo("#000000FF");
     }
 
     @Test
     void shouldProvideColorAsHexForDisplayColors() {
         DisplayColors displayColors = new DisplayColors(Color.black, Color.white);
-        assertThat(displayColors.getLineColorAsHex()).isEqualTo("#000000FF");
-        assertThat(displayColors.getFillColorAsHex()).isEqualTo("#FFFFFFFF");
+
+        assertThat(displayColors.getFillColorAsRGBAHex(255)).isEqualTo("#FFFFFFFF");
+        assertThat(displayColors.getLineColorAsRGBHex()).isEqualTo("#000000");
+        assertThat(displayColors.getFillColorAsRGBHex()).isEqualTo("#FFFFFF");
     }
 
     @Test
