@@ -28,6 +28,12 @@ import static j2html.TagCreator.*;
  */
 class CoverageTableModel extends TableModel {
     private static final int NO_COVERAGE_SORT = -1_000;
+
+    /**
+     * The alpha value for colors to be used to highlight the coverage within the table view.
+     */
+    private static final int TABLE_COVERAGE_COLOR_ALPHA = 80;
+
     static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
             NO_COVERAGE_SORT);
 
@@ -220,7 +226,7 @@ class CoverageTableModel extends TableModel {
                                 div().withClasses(COVERAGE_COLUMN_INNER)
                                         .withStyle(String.format(
                                                 "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
-                                                colors.getFillColorAsRGBAHex(80),
+                                                colors.getFillColorAsRGBAHex(TABLE_COVERAGE_COLOR_ALPHA),
                                                 percentage, percentage))
                                         .withTitle(tooltip)
                                         .withText(coverage.formatCoveredPercentage(browserLocale)))
@@ -246,7 +252,8 @@ class CoverageTableModel extends TableModel {
             DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, colorProvider);
             String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                             div().withClasses(COVERAGE_COLUMN_INNER)
-                                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(80)))
+                                    .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(
+                                            TABLE_COVERAGE_COLOR_ALPHA)))
                                     .withText(coveragePercentage.formatDeltaPercentage(browserLocale))
                                     .withTitle(tooltip))
                     .render();

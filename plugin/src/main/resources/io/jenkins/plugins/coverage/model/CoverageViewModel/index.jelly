@@ -3,7 +3,7 @@
 
   <st:header name="Content-Type" value="text/html;charset=UTF-8"/>
 
-  <bs:page it="${it}" class="fluid-container d-flex flex-column h-100">
+  <bs:page it="${it}" class="fluid-container d-flex flex-column">
 
     <st:adjunct includes="io.jenkins.plugins.echarts"/>
     <st:adjunct includes="io.jenkins.plugins.data-tables-select"/>
@@ -45,34 +45,34 @@
       </ul>
     </div>
 
-    <div class="tab-content pt-2">
+    <div class="tab-content">
 
-      <div role="tabpanel" id="overview" class="tab-pane fade h-100" aria-labelledby="overview-tab" >
+      <div role="tabpanel" id="overview" class="tab-pane fade" aria-labelledby="overview-tab" >
         <div class="row">
           <div class="col-5">
             <bs:card title="${%Total coverage overview}" fontAwesomeIcon="chart-bar">
-              <div id="coverage-overview" class="graph-cursor-pointer overview-chart"/>
+              <div id="coverage-overview" class="graph-cursor-pointer overview-chart h-100"/>
             </bs:card>
           </div>
           <div class="col-7">
             <bs:card title="${%Coverage trend}" fontAwesomeIcon="chart-line">
-              <div id="coverage-trend" class="graph-cursor-pointer overview-chart"/>
+              <div id="coverage-trend" class="graph-cursor-pointer overview-chart h-100"/>
             </bs:card>
           </div>
         </div>
       </div>
 
-      <div role="tabpanel" id="lineCoverage" class="tab-pane fade h-100" aria-labelledby="lineCoverage-tab">
+      <div role="tabpanel" id="lineCoverage" class="tab-pane fade" aria-labelledby="lineCoverage-tab">
         <bs:card title="${%Line coverage}" fontAwesomeIcon="folder-tree"
-                 class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
-          <div id="project-line-coverage" class="graph-cursor-pointer tree-chart flex-grow-1"/>
+                 class="flex-fill" bodyClass="d-flex flex-column">
+          <div id="project-line-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 
-      <div role="tabpanel" id="branchCoverage" class="tab-pane fade h-100" aria-labelledby="branchCoverage-tab">
+      <div role="tabpanel" id="branchCoverage" class="tab-pane fade" aria-labelledby="branchCoverage-tab">
         <bs:card title="${%Branch coverage}" fontAwesomeIcon="folder-tree"
-                 class="flex-fill h-100" bodyClass="d-flex flex-column h-100">
-          <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart flex-grow-1"/>
+                 class="flex-fill" bodyClass="d-flex flex-column">
+          <div id="project-branch-coverage" class="graph-cursor-pointer tree-chart"/>
         </bs:card>
       </div>
 

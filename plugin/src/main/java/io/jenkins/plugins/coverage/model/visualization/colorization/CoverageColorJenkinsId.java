@@ -23,12 +23,6 @@ public enum CoverageColorJenkinsId {
 
     private final String jenkinsColorId;
 
-    /**
-     * Constructor.
-     *
-     * @param colorId
-     *         The color id
-     */
     CoverageColorJenkinsId(final String colorId) {
         this.jenkinsColorId = colorId;
     }
