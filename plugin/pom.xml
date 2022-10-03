@@ -238,7 +238,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>git-forensics</artifactId>
-      <version>1.9.0</version>
+      <version>1.11.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
