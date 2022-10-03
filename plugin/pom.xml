@@ -23,9 +23,6 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
-      <jenkins.baseline>2.346</jenkins.baseline>
-      <jenkins.version>2.346.3</jenkins.version>
-
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>
 
@@ -37,7 +34,7 @@
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.4</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
-    <echarts-api.version>5.3.3-2-rc729.068617b_48a_5c</echarts-api.version>
+    <echarts-api.version>5.4.0-1</echarts-api.version>
   </properties>
 
   <developers>
@@ -64,7 +61,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>ionicons-api</artifactId>
-      <version>28.vccb_448cc14b_d</version>
+      <version>28.va_f3a_84439e5f</version>
     </dependency>
     <dependency>
       <groupId>net.sf.trove4j</groupId>
