@@ -32,7 +32,7 @@
     <jsoup.version>1.15.3</jsoup.version>
     <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
-    <testcontainers.version>1.17.4</testcontainers.version>
+    <testcontainers.version>1.17.5</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
   </properties>
