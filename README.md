@@ -8,18 +8,13 @@
 
 
 This Jenkins plugin integrates and publishes multiple coverage report types.
-It has been developed during [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
+It has been developed since [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-coverage-api-plugin/).
 
-## Features
-* Pipeline support
-* Modernized coverage chart
-* Coverage trend
-* Source code navigation
-* Parallel execution in pipeline support
-* Reports combining
-* REST API
-* Failed conditions and flexible threshold setting
-* Other small features
+* [Supported coverage formats](#Supported-Coverage-Formats)
+* [Release notes](#Release-Notes)
+* [Features](#Features)
+* [Usage](#Usage)
+
 
 ## Supported Coverage Formats
 #### Embedded
@@ -34,7 +29,45 @@ It has been developed during [GSoC 2018](https://jenkins.io/projects/gsoc/2018/c
 ## Release Notes
 See the [GitHub Releases](https://github.com/jenkinsci/code-coverage-api-plugin/releases).
 
-## How to Use it
+## Features
+### General Features
+* Pipeline support
+* Parallel execution in pipeline support
+* Reports combining
+* REST API
+* Failed conditions and flexible threshold setting
+
+### Coverage Analysis
+* **Coverage analysis of whole projects and pull requests:**
+  * complete code (Project Coverage)
+  * code changes (Change Coverage)
+  * coverage changes created by changed test cases (Indirect Coverage Changes)
+* **Modernized coverage report visualization:**
+  * Coverage overview and trend
+
+    ![alt text](./images/reportOverview_screen.PNG "Coverage overview and trend")
+  
+  * Colored project coverage tree map for line and branch coverage
+
+    ![alt text](./images/reportTree_screen.PNG "Colored project coverage tree map")
+  
+  * Source code navigation
+
+    ![alt text](./images/reportFile_screen.PNG "Source code navigation")
+  
+  * Specific source code view for specifically analyzing the coverage of code changes (Change Coverage):
+
+    ![alt text](./images/reportCC_screen.PNG "Specific source code view for Change Coverage")
+   
+  * Specific source code view for specifically analyzing the coverage after test changes (Indirect Coverage Changes):
+
+    ![alt text](./images/reportICC_screen.PNG "Specific source code view for Indirect Coverage Changes")
+
+* **Customizable coverage overview for the Jenkins dashboard view and for build results:**
+  ![alt text](./images/dashboard_screen.PNG "Analysis overview for Jenkins dashboard")
+  ![alt text](./images/buildview_screen.PNG "Analysis overview for Jenkins build result")
+
+## Usage
 
 ###  1. Configure your coverage tool to generate reports
 
