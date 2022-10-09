@@ -1,10 +1,16 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.metrics;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.parser.CoberturaParser;
+import edu.hm.hafner.metric.parser.JacocoParser;
+import edu.hm.hafner.metric.parser.PitestParser;
+import edu.hm.hafner.metric.parser.XmlParser;
 import edu.hm.hafner.util.VisibleForTesting;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -20,11 +26,13 @@ import hudson.model.Item;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
+import io.jenkins.plugins.coverage.model.FileCoverageNode;
+import io.jenkins.plugins.coverage.model.ModelValidation;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
- * A coverage tool that can produce a {@link CoverageNode coverage tree} by parsing a given report file.
+ * A coverage tool that can produce a {@link FileCoverageNode coverage tree} by parsing a given report file.
  *
  * @author Ullrich Hafner
  */
@@ -35,6 +43,7 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
 
     private String id = StringUtils.EMPTY;
     private String name = StringUtils.EMPTY;
+    private String pattern = StringUtils.EMPTY;
     private CoverageParser parser = CoverageParser.JACOCO;
 
     @DataBoundConstructor
@@ -123,8 +132,37 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
      * @see #setName(String)
      */
     public String getActualName() {
-        return StringUtils.defaultIfBlank(getName(), getDescriptor().getDisplayName());
+        return StringUtils.defaultIfBlank(getName(), getParser().getDisplayName());
     }
+
+    /**
+     * Sets the Ant file-set pattern of files to work with. If the pattern is undefined then the console log is
+     * scanned.
+     *
+     * @param pattern
+     *         the pattern to use
+     */
+    @DataBoundSetter
+    public void setPattern(final String pattern) {
+        this.pattern = pattern;
+    }
+
+    @CheckForNull
+    public String getPattern() {
+        return pattern;
+    }
+
+    /**
+     * Returns the actual pattern to work with. If no user defined pattern is given, then the default pattern is
+     * returned.
+     *
+     * @return the name
+     * @see #setPattern(String)
+     */
+    public String getActualPattern() {
+        return StringUtils.defaultIfBlank(pattern, parser.getDefaultPattern());
+    }
+
 
     @Override
     public CoverageToolDescriptor getDescriptor() {
@@ -206,19 +244,34 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         }
     }
 
+    /**
+     * Supported coverage parsers.
+     */
     public enum CoverageParser {
-        COBERTURA(Messages._Parser_Cobertura()),
-        JACOCO(Messages._Parser_JaCoCo()),
-        PIT(Messages._Parser_PIT());
+        COBERTURA(Messages._Parser_Cobertura(), "**/cobertura.xml", CoberturaParser::new),
+        JACOCO(Messages._Parser_JaCoCo(), "**/jacoco.xml", JacocoParser::new),
+        PIT(Messages._Parser_PIT(), "**/pit.xml", PitestParser::new);
 
         private final Localizable displayName;
+        private final String defaultPattern;
+        private final Supplier<XmlParser> parserSupplier;
 
-        CoverageParser(final Localizable displayName) {
+        CoverageParser(final Localizable displayName, final String defaultPattern, final Supplier<XmlParser> parserSupplier) {
             this.displayName = displayName;
+            this.defaultPattern = defaultPattern;
+            this.parserSupplier = parserSupplier;
         }
 
         public String getDisplayName() {
             return displayName.toString();
+        }
+
+        public String getDefaultPattern() {
+            return defaultPattern;
+        }
+
+        public XmlParser createParser() {
+            return parserSupplier.get();
         }
     }
 }

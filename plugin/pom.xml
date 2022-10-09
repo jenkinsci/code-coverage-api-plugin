@@ -23,6 +23,9 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
+    <jenkins.basline>2.361.1</jenkins.basline>
+    <jdk>11</jdk>
+
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>
 
@@ -58,6 +61,11 @@
   </licenses>
 
   <dependencies>
+    <dependency>
+      <groupId>edu.hm.hafner</groupId>
+      <artifactId>metric-model</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>ionicons-api</artifactId>
@@ -141,6 +149,10 @@
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>prism-api</artifactId>
       <version>${prism-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>
@@ -292,6 +304,12 @@
           <groupId>xmlunit</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>edu.hm.hafner</groupId>
+      <artifactId>metric-model</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 

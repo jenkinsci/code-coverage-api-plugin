@@ -1,5 +1,6 @@
-package io.jenkins.plugins.coverage.model;
+package io.jenkins.plugins.coverage.metrics;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -35,9 +37,13 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 
+import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
+import io.jenkins.plugins.util.EnvironmentResolver;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
 
@@ -55,9 +61,11 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private String sourceCodeEncoding = StringUtils.EMPTY;
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
     private boolean skipPublishingChecks = false;
-    private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.NEVER;
+    private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.LAST_BUILD;
     private List<CoverageTool> tools = new ArrayList<>();
 
+    private boolean failOnError;
+    private boolean enabledForFailure;
     private int healthy;
     private int unhealthy;
 
@@ -108,6 +116,40 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setSkipPublishingChecks(final boolean skipPublishingChecks) {
         this.skipPublishingChecks = skipPublishingChecks;
+    }
+
+    /**
+     * Determines whether to fail the build on errors during the step of recording issues.
+     *
+     * @param failOnError
+     *         if {@code true} then the build will be failed on errors, {@code false} then errors are only reported in
+     *         the UI
+     */
+    @DataBoundSetter
+    @SuppressWarnings("unused") // Used by Stapler
+    public void setFailOnError(final boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    @SuppressWarnings({"PMD.BooleanGetMethodName", "unused"})
+    public boolean getFailOnError() {
+        return failOnError;
+    }
+
+    /**
+     * Returns whether recording should be enabled for failed builds as well.
+     *
+     * @return {@code true}  if recording should be enabled for failed builds as well, {@code false} if recording is
+     *         enabled for successful or unstable builds only
+     */
+    @SuppressWarnings("PMD.BooleanGetMethodName")
+    public boolean getEnabledForFailure() {
+        return enabledForFailure;
+    }
+
+    @DataBoundSetter
+    public void setEnabledForFailure(final boolean enabledForFailure) {
+        this.enabledForFailure = enabledForFailure;
     }
 
     /**
@@ -189,14 +231,59 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     @Override
     public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final EnvVars env,
             @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException {
+        Result overallResult = run.getResult();
         LogHandler logHandler = new LogHandler(listener, "Coverage");
-        FilteredLog log = new FilteredLog("Errors while recording code coverage:");
-        log.logInfo("Recording coverage results");
+        if (enabledForFailure || overallResult == null || overallResult.isBetterOrEqualTo(Result.UNSTABLE)) {
+            FilteredLog log = new FilteredLog("Errors while recording code coverage:");
+            log.logInfo("Recording coverage results");
 
+            if (tools.isEmpty()) {
+                log.logError("No tools defined that will record the coverage files");
+                run.setResult(Result.FAILURE); // use StageResultHandler of warnings plugin
+                logHandler.log(log);
+            }
+            else {
+                for (CoverageTool tool : tools) {
+                    LogHandler toolHandler = new LogHandler(listener, tool.getActualName());
+                    CoverageParser parser = tool.getParser();
+                    if (StringUtils.isBlank(tool.getPattern())) {
+                        toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
+                                parser.getDefaultPattern());
+                    }
 
+                    String expandedPattern = expandPattern(run, tool.getActualPattern());
+                    if (!expandedPattern.equals(tool.getActualPattern())) {
+                        log.logInfo("Expanding pattern '%s' to '%s'", tool.getActualPattern(), expandedPattern);
+                    }
 
+                    try {
+                        AggregatedResult result = workspace.act(
+                                new FilesScanner(expandedPattern, "UTF-8", false, parser));
+                        log.merge(result.getLog());
+                    }
+                    catch (IOException exception) {
+                        log.logException(exception, "Exception during parsing");
+                    }
 
-        logHandler.log(log);
+                    toolHandler.log(log);
+                }
+            }
+        }
+        else {
+            logHandler.log("Skipping execution of coverage recorder since overall result is '%s'", overallResult);
+        }
+    }
+
+    private String expandPattern(final Run<?, ?> run, final String actualPattern) {
+        try {
+            EnvironmentResolver environmentResolver = new EnvironmentResolver();
+
+            return environmentResolver.expandEnvironmentVariables(
+                    run.getEnvironment(TaskListener.NULL), actualPattern);
+        }
+        catch (IOException | InterruptedException ignore) {
+            return actualPattern; // fallback, no expansion
+        }
     }
 
     @Override
