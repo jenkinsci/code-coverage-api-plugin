@@ -30,14 +30,6 @@ It has been developed since [GSoC 2018](https://jenkins.io/projects/gsoc/2018/co
 See the [GitHub Releases](https://github.com/jenkinsci/code-coverage-api-plugin/releases).
 
 ## Features
-### General Features
-* Pipeline support
-* Parallel execution in pipeline support
-* Reports combining
-* REST API
-* Failed conditions and flexible threshold setting
-
-### Coverage Analysis
 * **Coverage analysis of whole projects and pull requests:**
   * complete code (Project Coverage)
   * code changes (Change Coverage)
