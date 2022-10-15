@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import edu.hm.hafner.metric.Metric;
+
 import org.jvnet.localizer.Localizable;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
@@ -52,11 +53,11 @@ public abstract class CoverageColumnType {
      * @param action
      *         The {@link CoverageBuildAction action} which contains the coverage
      * @param metric
-     *         The {@link CoverageMetric coverage metric}
+     *         The {@link Metric coverage metric}
      *
      * @return the coverage as optional or an empty optional if no coverage has been found
      */
-    public abstract Optional<CoveragePercentage> getCoverage(CoverageBuildAction action, CoverageMetric metric);
+    public abstract Optional<CoveragePercentage> getCoverage(CoverageBuildAction action, Metric metric);
 
     /**
      * Gets the {@link DisplayColors display colors} which are used for visualizing the passed coverage.

@@ -6,11 +6,12 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.DefaultLocale;
 
+import edu.hm.hafner.metric.Metric;
+
 import hudson.Functions;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
@@ -32,7 +33,7 @@ class CoverageColumnTest {
     private static final String COLUMN_NAME = "Test Column";
     private static final ProjectCoverage PROJECT_COVERAGE = new ProjectCoverage();
     private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();
-    private static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
+    private static final Metric COVERAGE_METRIC = Metric.BRANCH;
 
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
 
@@ -41,7 +42,7 @@ class CoverageColumnTest {
         CoverageColumn column = createColumn();
         assertThat(column.getColumnName()).isEqualTo(COLUMN_NAME);
         assertThat(column.getCoverageType()).isEqualTo(PROJECT_COVERAGE.getDisplayName());
-        assertThat(column.getCoverageMetric()).isEqualTo(COVERAGE_METRIC.getName());
+        assertThat(column.getCoverageMetric()).isEqualTo(COVERAGE_METRIC.name());
     }
 
     @Test
@@ -115,9 +116,9 @@ class CoverageColumnTest {
     }
 
     @Test
-    void shouldShowNoResultForUnavailableCoverageMetric() {
+    void shouldShowNoResultForUnavailableMetric() {
         CoverageColumn column = createColumn();
-        column.setCoverageMetric(CoverageMetric.CLASS.getName());
+        column.setCoverageMetric(Metric.CLASS.name());
 
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
 
@@ -181,7 +182,7 @@ class CoverageColumnTest {
         CoverageColumn column = new CoverageColumn();
         column.setColumnName(COLUMN_NAME);
         column.setCoverageType(PROJECT_COVERAGE.getDisplayName());
-        column.setCoverageMetric(COVERAGE_METRIC.getName());
+        column.setCoverageMetric(COVERAGE_METRIC.name());
         return column;
     }
 

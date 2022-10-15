@@ -8,6 +8,12 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -20,8 +26,8 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
     @Test
     void shouldCreateEmptyChangeCoverageTreeWithoutChanges() {
         CoverageTreeCreator coverageTreeCreator = createCoverageTreeCreator();
-        CoverageNode tree = readCoverageTree();
-        CoverageNode changeCoverageTree = coverageTreeCreator.createChangeCoverageTree(tree);
+        Node tree = readCoverageTree();
+        Node changeCoverageTree = coverageTreeCreator.createChangeCoverageTree(tree);
         assertThat(changeCoverageTree)
                 .isNotNull()
                 .isNotSameAs(tree)
@@ -30,15 +36,15 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getChildren()).isEmpty();
-                    assertThat(root.getLeaves()).isEmpty();
+                    assertThat(root.getValues()).isEmpty();
                 });
     }
 
     @Test
     void shouldCreateEmptyIndirectCoverageChangesTreeWithoutChanges() {
         CoverageTreeCreator coverageTreeCreator = createCoverageTreeCreator();
-        CoverageNode tree = readCoverageTree();
-        CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(tree);
+        Node tree = readCoverageTree();
+        Node indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(tree);
         assertThat(indirectCoverageChangesTree)
                 .isNotNull()
                 .isNotSameAs(tree)
@@ -47,15 +53,15 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getChildren()).isEmpty();
-                    assertThat(root.getLeaves()).isEmpty();
+                    assertThat(root.getValues()).isEmpty();
                 });
     }
 
     @Test
     void shouldCreateChangeCoverageTree() {
         CoverageTreeCreator coverageTreeCreator = createCoverageTreeCreator();
-        CoverageNode tree = createTreeWithChangeCoverage();
-        CoverageNode changeCoverageTree = coverageTreeCreator.createChangeCoverageTree(tree);
+        Node tree = createTreeWithChangeCoverage();
+        Node changeCoverageTree = coverageTreeCreator.createChangeCoverageTree(tree);
         assertThat(changeCoverageTree)
                 .isNotNull()
                 .isNotSameAs(tree)
@@ -64,9 +70,9 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
-                    assertThat(root.getCoverage(LINE)).isEqualTo(
+                    assertThat(root.getValue(LINE)).isNotEmpty().contains(
                             new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
-                    assertThat(root.getCoverage(BRANCH)).isEqualTo(
+                    assertThat(root.getValue(BRANCH)).isNotEmpty().contains(
                             new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
                 });
     }
@@ -74,8 +80,8 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
     @Test
     void shouldCreateIndirectCoverageChangesTree() {
         CoverageTreeCreator coverageTreeCreator = createCoverageTreeCreator();
-        CoverageNode tree = createTreeWithIndirectCoverageChanges();
-        CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(tree);
+        Node tree = createTreeWithIndirectCoverageChanges();
+        Node indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(tree);
         assertThat(indirectCoverageChangesTree)
                 .isNotNull()
                 .isNotSameAs(tree)
@@ -84,9 +90,9 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
-                    assertThat(root.getCoverage(LINE)).isEqualTo(
+                    assertThat(root.getValue(LINE)).isNotEmpty().contains(
                             new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
-                    assertThat(root.getCoverage(BRANCH)).isEqualTo(
+                    assertThat(root.getValue(BRANCH)).isNotEmpty().contains(
                             new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
                 });
     }
@@ -103,40 +109,38 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
     /**
      * Reads the coverage tree from the report 'jacoco-codingstyle.xml'.
      *
-     * @return the {@link CoverageNode} root of the tree
+     * @return the {@link Node} root of the tree
      */
-    private CoverageNode readCoverageTree() {
-        CoverageNode root = readNode("jacoco-codingstyle.xml");
-        root.splitPackages();
-        return root;
+    private Node readCoverageTree() {
+        return readJacocoResult("jacoco-codingstyle.xml");
     }
 
     /**
-     * Creates a coverage tree which contains a {@link FileCoverageNode} with changed code lines and change coverage.
+     * Creates a coverage tree which contains a {@link FileNode} with changed code lines and change coverage.
      *
      * @return the root of the tree
      */
-    private CoverageNode createTreeWithChangeCoverage() {
-        CoverageNode root = readCoverageTree();
-        FileCoverageNode file = attachFileCoverageNodeToTree(root);
+    private Node createTreeWithChangeCoverage() {
+        Node root = readCoverageTree();
+        FileNode file = attachFileCoverageNodeToTree(root);
         attachCodeChanges(file);
         return root;
     }
 
     /**
-     * Creates a coverage tree which contains a {@link FileCoverageNode} with indirect coverage changes.
+     * Creates a coverage tree which contains a {@link FileNode} with indirect coverage changes.
      *
      * @return the root of the tree
      */
-    private CoverageNode createTreeWithIndirectCoverageChanges() {
-        CoverageNode root = readCoverageTree();
-        FileCoverageNode file = attachFileCoverageNodeToTree(root);
+    private Node createTreeWithIndirectCoverageChanges() {
+        Node root = readCoverageTree();
+        FileNode file = attachFileCoverageNodeToTree(root);
         attachIndirectCoverageChanges(file);
         return root;
     }
 
     /**
-     * Attaches a custom {@link FileCoverageNode file node} to an existing coverage tree and returns the inserted
+     * Attaches a custom {@link FileNode file node} to an existing coverage tree and returns the inserted
      * instance.
      *
      * @param root
@@ -144,58 +148,56 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
      *
      * @return the inserted instance
      */
-    private FileCoverageNode attachFileCoverageNodeToTree(final CoverageNode root) {
-        FileCoverageNode file = new FileCoverageNode("CoverageTreeTest.java", "");
-        Optional<CoverageNode> packageNode = root.getAll(PACKAGE).stream().findFirst();
+    private FileNode attachFileCoverageNodeToTree(final Node root) {
+        FileNode file = new FileNode("CoverageTreeTest.java");
+        Optional<Node> packageNode = root.getAll(PACKAGE).stream().findFirst();
         assertThat(packageNode).isNotEmpty();
-        packageNode.get().add(file);
-        file.setParent(packageNode.get());
+        packageNode.get().addChild(file);
         attachCoveragePerLine(file);
         return file;
     }
 
     /**
-     * Attaches the coverage-per-line to the passed {@link FileCoverageNode node}.
+     * Attaches the coverage-per-line to the passed {@link FileNode node}.
      *
      * @param file
      *         The node to which coverage information should be added
      */
-    private void attachCoveragePerLine(final FileCoverageNode file) {
-        SortedMap<Integer, Coverage> coveragePerLine = new TreeMap<>();
-        coveragePerLine.put(10, new Coverage.CoverageBuilder().setCovered(1).setMissed(0).build());
-        coveragePerLine.put(11, new Coverage.CoverageBuilder().setCovered(0).setMissed(4).build());
-        coveragePerLine.put(12, new Coverage.CoverageBuilder().setCovered(4).setMissed(0).build());
-        coveragePerLine.put(13, new Coverage.CoverageBuilder().setCovered(0).setMissed(1).build());
-        file.setCoveragePerLine(coveragePerLine);
+    private void attachCoveragePerLine(final FileNode file) {
+        var builder = new CoverageBuilder().setMetric(Metric.LINE);
+        file.addLineCoverage(10, builder.setCovered(1).setMissed(0).build());
+        file.addLineCoverage(11, builder.setCovered(0).setMissed(4).build());
+        file.addLineCoverage(12, builder.setCovered(4).setMissed(0).build());
+        file.addLineCoverage(13, builder.setCovered(0).setMissed(1).build());
     }
 
     /**
-     * Attaches indirect coverage changes to the passed {@link FileCoverageNode node}.
+     * Attaches indirect coverage changes to the passed {@link FileNode node}.
      *
      * @param file
      *         The node to which information about indirect coverage changes should be added
      */
-    private void attachIndirectCoverageChanges(final FileCoverageNode file) {
+    private void attachIndirectCoverageChanges(final FileNode file) {
         SortedMap<Integer, Integer> indirectChanges = new TreeMap<>();
         indirectChanges.put(10, 1);
         indirectChanges.put(11, -4);
         indirectChanges.put(12, 4);
         indirectChanges.put(13, -1);
-        file.setIndirectCoverageChanges(indirectChanges);
+        file.getIndirectCoverageChanges().putAll(indirectChanges);
     }
 
     /**
-     * Attaches changed code lines to the passed {@link FileCoverageNode node}.
+     * Attaches changed code lines to the passed {@link FileNode node}.
      *
      * @param file
      *         The node to which information about changed code lines should be added
      */
-    private void attachCodeChanges(final FileCoverageNode file) {
+    private void attachCodeChanges(final FileNode file) {
         SortedSet<Integer> changes = new TreeSet<>();
         changes.add(10);
         changes.add(11);
         changes.add(12);
         changes.add(13);
-        file.setChangedCodeLines(changes);
+        file.getChangedLines().addAll(changes);
     }
 }

@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.ModuleNode;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
@@ -66,11 +70,11 @@ class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSui
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(6083).setMissed(6368 - 6083).build());
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(6083).setMissed(6368 - 6083).build());
     }
 
     private void verifySourceCode(final Run<?, ?> build) {
-        CoverageNode root = new CoverageNode(CoverageMetric.MODULE, "top-level");
+        ModuleNode root = new ModuleNode("top-level");
 
         CoverageBuildAction action = new CoverageBuildAction(build, root, new HealthReport(), "-",
                 new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), false);

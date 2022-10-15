@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import one.util.streamex.StreamEx;
@@ -13,7 +14,6 @@ import one.util.streamex.StreamEx;
  * @author Florian Orendi
  */
 class FilePathValidator {
-
     static final String AMBIGUOUS_FILES_MESSAGE =
             "There are ambiguous file paths which might lead to faulty coverage reports:";
     static final String REMOVED_MESSAGE =
@@ -37,16 +37,11 @@ class FilePathValidator {
      * @param log
      *         The log
      */
-    static void verifyPathUniqueness(final CoverageNode root, final FilteredLog log) {
-        List<String> duplicates = StreamEx.of(root.getAllFileCoverageNodes())
-                .map(FileCoverageNode::getPath)
+    static void verifyPathUniqueness(final Node root, final FilteredLog log) {
+        List<String> duplicates = StreamEx.of(root.getFiles())
                 .distinct(2)
                 .collect(Collectors.toList());
         if (!duplicates.isEmpty()) {
-            root.getAllFileCoverageNodes().stream()
-                    .filter(node -> duplicates.contains(node.getPath()))
-                    .forEach(CoverageNode::remove);
-
             String message = AMBIGUOUS_FILES_MESSAGE + System.lineSeparator()
                     + String.join("," + System.lineSeparator(), duplicates);
             log.logError(message);

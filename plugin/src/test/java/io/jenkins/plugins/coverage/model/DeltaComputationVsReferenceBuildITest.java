@@ -3,7 +3,11 @@ package io.jenkins.plugins.coverage.model;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
+
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Node;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -14,8 +18,8 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.model.Assertions.*;
-import static io.jenkins.plugins.coverage.model.CoverageMetric.*;
 
 /**
  * Integration test for delta computation of reference builds.
@@ -89,11 +93,11 @@ class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPe
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
-        assertThat(coverageBuildAction.getDifference()).contains(
-                new SimpleEntry<>(LINE, CoveragePercentage.valueOf(-2_315_425, 514_216)),
-                new SimpleEntry<>(BRANCH, CoveragePercentage.valueOf(11_699, 2175)),
-                new SimpleEntry<>(INSTRUCTION, CoveragePercentage.valueOf(-235_580, 81_957)),
-                new SimpleEntry<>(METHOD, CoveragePercentage.valueOf(-217_450, 94_299))
+        assertThat(coverageBuildAction.getDelta()).contains(
+                new SimpleEntry<>(LINE, Fraction.getFraction(-2_315_425, 514_216)),
+                new SimpleEntry<>(BRANCH, Fraction.getFraction(11_699, 2175)),
+                new SimpleEntry<>(INSTRUCTION, Fraction.getFraction(-235_580, 81_957)),
+                new SimpleEntry<>(METHOD, Fraction.getFraction(-217_450, 94_299))
         );
 
         verifyChangeCoverage(coverageBuildAction);
@@ -120,12 +124,8 @@ class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPe
      *         The created Jenkins action
      */
     private void verifyCodeDelta(final CoverageBuildAction action) {
-        CoverageNode root = action.getResult();
+        Node root = action.getResult();
         assertThat(root).isNotNull();
-
-        assertThat(root.getAllFileCoverageNodes()).flatExtracting(FileCoverageNode::getChangedCodeLines).isEmpty();
-
-        assertThat(root).hasFileAmountWithChangedCoverage(0);
-        assertThat(root).hasLineAmountWithChangedCoverage(0);
+        assertThat(root.getAllFileNodes()).flatExtracting(FileNode::getChangedLines).isEmpty();
     }
 }

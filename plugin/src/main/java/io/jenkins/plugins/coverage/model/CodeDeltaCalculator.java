@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import one.util.streamex.StreamEx;
@@ -32,7 +33,6 @@ import io.jenkins.plugins.forensics.delta.model.FileEditType;
  * @author Florian Orendi
  */
 public class CodeDeltaCalculator {
-
     static final String AMBIGUOUS_PATHS_ERROR =
             "Failed to map SCM paths with coverage report paths due to ambiguous fully qualified names";
     static final String AMBIGUOUS_OLD_PATHS_ERROR =
@@ -108,24 +108,20 @@ public class CodeDeltaCalculator {
      * the coverage reporting tools - usually the fully qualified name of the file.
      *
      * @param changes
-     *         The code changes
+     *         the code changes
      * @param root
-     *         The root of the coverage tree
+     *         the root of the coverage tree
      * @param log
-     *         The log
+     *         logger
      *
-     * @return the create code changes mapping
+     * @return the created mapping of code changes
      * @throws CodeDeltaException
      *         when creating the mapping failed due to ambiguous paths
      */
     public Map<String, FileChanges> mapScmChangesToReportPaths(
-            final Set<FileChanges> changes, final CoverageNode root, final FilteredLog log) throws CodeDeltaException {
-        Set<String> reportPaths = root.getAllFileCoverageNodes().stream()
-                .map(FileCoverageNode::getPath)
-                .collect(Collectors.toSet());
-        Set<String> scmPaths = changes.stream()
-                .map(FileChanges::getFileName)
-                .collect(Collectors.toSet());
+            final Set<FileChanges> changes, final Node root, final FilteredLog log) throws CodeDeltaException {
+        Set<String> reportPaths = new HashSet<>(root.getFiles());
+        Set<String> scmPaths = changes.stream().map(FileChanges::getFileName).collect(Collectors.toSet());
 
         Map<String, String> pathMapping = getScmToReportPathMapping(scmPaths, reportPaths);
         verifyScmToReportPathMapping(pathMapping, log);
@@ -157,19 +153,17 @@ public class CodeDeltaCalculator {
      * @throws CodeDeltaException
      *         if the SCM path mapping is ambiguous
      */
-    public Map<String, String> createOldPathMapping(final CoverageNode root, final CoverageNode referenceRoot,
+    public Map<String, String> createOldPathMapping(final Node root, final Node referenceRoot,
             final Map<String, FileChanges> changes, final FilteredLog log)
             throws CodeDeltaException {
-        Set<String> oldReportPaths = referenceRoot.getAllFileCoverageNodes().stream()
-                .map(FileCoverageNode::getPath)
-                .collect(Collectors.toSet());
+        Set<String> oldReportPaths = new HashSet<>(referenceRoot.getFiles());
         // mapping between reference and current file paths which initially contains the SCM paths with renamings
         Map<String, String> oldPathMapping = changes.entrySet().stream()
                 .filter(entry -> FileEditType.RENAME.equals(entry.getValue().getFileEditType()))
                 .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().getOldFileName()));
         // the SCM paths and the coverage report paths from the reference
-        Map<String, String> oldScmToOldReportPathMapping =
-                getScmToReportPathMapping(oldPathMapping.values(), oldReportPaths);
+        Map<String, String> oldScmToOldReportPathMapping
+                = getScmToReportPathMapping(oldPathMapping.values(), oldReportPaths);
 
         // replacing the old SCM paths with the old report paths
         Set<String> newReportPathsWithRename = oldPathMapping.keySet();
@@ -182,10 +176,9 @@ public class CodeDeltaCalculator {
         }
 
         // adding the paths, which exist in both trees and contain no changes, to the mapping
-        root.getAllFileCoverageNodes().stream()
-                .filter(node -> !oldPathMapping.containsKey(node.getPath()) && oldReportPaths.contains(
-                        node.getPath()))
-                .forEach(node -> oldPathMapping.put(node.getPath(), node.getPath()));
+        root.getFiles().stream()
+                .filter(file -> !oldPathMapping.containsKey(file) && oldReportPaths.contains(file))
+                .forEach(file -> oldPathMapping.put(file, file));
 
         removeMissingReferences(oldPathMapping, log);
         verifyOldPathMapping(oldPathMapping, log);

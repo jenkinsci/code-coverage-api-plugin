@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import edu.hm.hafner.metric.Node;
+
 import hudson.model.Run;
 import hudson.util.TextFile;
 
@@ -25,7 +27,7 @@ public class SourceViewModel extends CoverageViewModel {
      * @param fileNode
      *         the selected file node of the coverage tree
      */
-    public SourceViewModel(final Run<?, ?> owner, final CoverageNode fileNode) {
+    public SourceViewModel(final Run<?, ?> owner, final Node fileNode) {
         super(owner, fileNode);
     }
 

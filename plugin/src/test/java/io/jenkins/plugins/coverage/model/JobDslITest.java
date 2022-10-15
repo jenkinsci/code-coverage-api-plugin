@@ -2,6 +2,8 @@ package io.jenkins.plugins.coverage.model;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Metric;
+
 import hudson.model.View;
 import hudson.views.ListViewColumn;
 
@@ -37,7 +39,7 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
                 .isInstanceOfSatisfying(CoverageColumn.class,
                         c -> {
                             assertThat(c).hasColumnCaption(Messages.Coverage_Column())
-                                    .hasCoverageMetric(CoverageMetric.LINE.getName());
+                                    .hasCoverageMetric(Metric.LINE.name());
                         });
     }
 

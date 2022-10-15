@@ -5,6 +5,9 @@ import java.util.Locale;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Metric;
+
 import nl.jqno.equalsverifier.EqualsVerifier;
 
 import static io.jenkins.plugins.coverage.model.Assertions.assertThat;
@@ -93,6 +96,6 @@ class CoveragePercentageTest {
                 .hasToString("49.00%");
 
         assertThatIllegalArgumentException().isThrownBy(
-                () -> Coverage.valueOf("1/0"));
+                () -> Coverage.valueOf(Metric.LINE, "1/0"));
     }
 }

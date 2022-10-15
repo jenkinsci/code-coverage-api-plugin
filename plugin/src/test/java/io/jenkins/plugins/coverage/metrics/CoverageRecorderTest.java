@@ -69,7 +69,7 @@ class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
                         "[JaCoCo] INSTRUCTION: 93.33% (1260/1350)",
                         "[JaCoCo] LINE: 91.02% (294/323)",
                         "[JaCoCo] BRANCH: 93.97% (109/116)",
-                        "[JaCoCo] COMPLEXITY: [COMPLEXITY]: 160")
+                        "[JaCoCo] COMPLEXITY: 160")
                 .containsPattern("Searching for all files in '.*' that match the pattern '\\*\\*/jacoco.xml'")
                 .containsPattern("Successfully parsed file '.*/jacoco.xml'")
                 .doesNotContain("Expanding pattern");

@@ -10,8 +10,9 @@ import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
 
-import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
 
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
@@ -39,16 +40,16 @@ class CoverageSeriesBuilderTest {
         CoverageTrendChart trendChart = new CoverageTrendChart();
 
         BuildResult<CoverageBuildAction> smallLineCoverage = createResult(1,
-                new CoverageBuilder().setCovered(1).setMissed(1).build(),
-                new CoverageBuilder().setCovered(3).setMissed(1).build());
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(1).setMissed(1).build(),
+                new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(3).setMissed(1).build());
 
         LinesChartModel lineCoverage = trendChart.create(Collections.singletonList(smallLineCoverage),
                 createConfiguration());
         verifySeriesDetails(lineCoverage);
 
         BuildResult<CoverageBuildAction> smallBranchCoverage = createResult(1,
-                new CoverageBuilder().setCovered(3).setMissed(1).build(),
-                new CoverageBuilder().setCovered(1).setMissed(1).build());
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(3).setMissed(1).build(),
+                new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(1).setMissed(1).build());
 
         LinesChartModel branchCoverage = trendChart.create(Collections.singletonList(smallBranchCoverage),
                 createConfiguration());
@@ -67,8 +68,8 @@ class CoverageSeriesBuilderTest {
         CoverageSeriesBuilder builder = new CoverageSeriesBuilder();
 
         BuildResult<CoverageBuildAction> singleResult = createResult(1,
-                new CoverageBuilder().setCovered(1).setMissed(1).build(),
-                new CoverageBuilder().setCovered(3).setMissed(1).build());
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(1).setMissed(1).build(),
+                new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(3).setMissed(1).build());
 
         LinesDataSet dataSet = builder.createDataSet(createConfiguration(), Collections.singletonList(singleResult));
 

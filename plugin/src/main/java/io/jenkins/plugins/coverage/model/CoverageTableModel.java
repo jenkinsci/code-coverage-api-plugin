@@ -6,6 +6,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.math.Fraction;
+
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.LinesOfCode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+
 import hudson.Functions;
 
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
@@ -34,11 +42,11 @@ class CoverageTableModel extends TableModel {
      */
     private static final int TABLE_COVERAGE_COLOR_ALPHA = 80;
 
-    static final DetailedCell<Integer> NO_COVERAGE = new DetailedCell<>(Messages.Coverage_Not_Available(),
-            NO_COVERAGE_SORT);
+    static final DetailedCell<Integer> NO_COVERAGE
+            = new DetailedCell<>(Messages.Coverage_Not_Available(), NO_COVERAGE_SORT);
 
     private final ColorProvider colorProvider;
-    private final CoverageNode root;
+    private final Node root;
     private final RowRenderer renderer;
     private final String id;
 
@@ -54,7 +62,7 @@ class CoverageTableModel extends TableModel {
      * @param colors
      *         The {@link ColorProvider} which provides the used colors
      */
-    CoverageTableModel(final String id, final CoverageNode root, final RowRenderer renderer, final ColorProvider colors) {
+    CoverageTableModel(final String id, final Node root, final RowRenderer renderer, final ColorProvider colors) {
         super();
 
         this.id = id;
@@ -140,12 +148,12 @@ class CoverageTableModel extends TableModel {
     @Override
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
-        return root.getAll(CoverageMetric.FILE).stream()
+        return root.getAllFileNodes().stream()
                 .map(file -> new CoverageRow(file, browserLocale, renderer, colorProvider))
                 .collect(Collectors.toList());
     }
 
-    protected CoverageNode getRoot() {
+    protected Node getRoot() {
         return root;
     }
 
@@ -159,53 +167,54 @@ class CoverageTableModel extends TableModel {
     static class CoverageRow {
         private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
         private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
-        private final CoverageNode root;
+        private static final CoverageFormatter FORMATTER = new CoverageFormatter();
+
+        private final FileNode file;
         private final Locale browserLocale;
         private final RowRenderer renderer;
         private final ColorProvider colorProvider;
 
-        CoverageRow(final CoverageNode root, final Locale browserLocale, final RowRenderer renderer, final ColorProvider colors) {
-            this.root = root;
+        CoverageRow(final FileNode file, final Locale browserLocale, final RowRenderer renderer, final ColorProvider colors) {
+            this.file = file;
             this.browserLocale = browserLocale;
             this.renderer = renderer;
             this.colorProvider = colors;
         }
 
         public String getFileHash() {
-            return String.valueOf(root.getPath().hashCode());
+            return String.valueOf(file.getPath().hashCode());
         }
 
         public String getFileName() {
-            return renderer.renderFileName(root.getName(), root.getPath());
+            return renderer.renderFileName(file.getName(), file.getPath());
         }
 
         public String getPackageName() {
-            return root.getParentName();
+            return file.getParentName();
         }
 
         public DetailedCell<?> getLineCoverage() {
-            Coverage coverage = root.getCoverage(CoverageMetric.LINE);
-            return createColoredCoverageColumn(coverage, "The total line coverage of the file");
+            return createColoredCoverageColumn(getCoverageOfNode(Metric.LINE));
         }
 
         public DetailedCell<?> getBranchCoverage() {
-            Coverage coverage = root.getCoverage(CoverageMetric.BRANCH);
-            return createColoredCoverageColumn(coverage, "The total branch coverage of the file");
+            return createColoredCoverageColumn(getCoverageOfNode(Metric.BRANCH));
+        }
+
+        Coverage getCoverageOfNode(final Metric metric) {
+            return file.getTypedValue(metric, Coverage.nullObject(metric));
         }
 
         public DetailedCell<?> getLineCoverageDelta() {
-            return createColoredFileCoverageDeltaColumn(CoverageMetric.LINE);
+            return createColoredFileCoverageDeltaColumn(Metric.LINE);
         }
 
         public DetailedCell<?> getBranchCoverageDelta() {
-            return createColoredFileCoverageDeltaColumn(CoverageMetric.BRANCH);
+            return createColoredFileCoverageDeltaColumn(Metric.BRANCH);
         }
 
         public int getLoc() {
-            if (root instanceof FileCoverageNode) { // FIXME: Move LOC up in the hierarchy
-                return ((FileCoverageNode) root).getCoveragePerLine().size();
-            }
-            return 0;
+            return file.getTypedValue(Metric.LOC, new LinesOfCode(0)).getValue();
         }
 
         /**
@@ -213,14 +222,11 @@ class CoverageTableModel extends TableModel {
          *
          * @param coverage
          *         the coverage of the element
-         * @param tooltip
-         *         the tooltip which describes the value
-         *
          * @return the new {@link DetailedCell}
          */
-        protected DetailedCell<?> createColoredCoverageColumn(final Coverage coverage, final String tooltip) {
+        protected DetailedCell<?> createColoredCoverageColumn(final Coverage coverage) {
             if (coverage.isSet()) {
-                double percentage = coverage.getCoveredPercentage().getDoubleValue();
+                double percentage = coverage.getCoveredPercentage().doubleValue() * 100.0;
                 DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, colorProvider);
                 String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                                 div().withClasses(COVERAGE_COLUMN_INNER)
@@ -228,8 +234,7 @@ class CoverageTableModel extends TableModel {
                                                 "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
                                                 colors.getFillColorAsRGBAHex(TABLE_COVERAGE_COLOR_ALPHA),
                                                 percentage, percentage))
-                                        .withTitle(tooltip)
-                                        .withText(coverage.formatCoveredPercentage(browserLocale)))
+                                        .withText(FORMATTER.formatPercentage(coverage, browserLocale)))
                         .render();
                 return new DetailedCell<>(cell, percentage);
             }
@@ -239,50 +244,40 @@ class CoverageTableModel extends TableModel {
         /**
          * Creates a table cell which colorizes the tendency of the shown coverage delta.
          *
-         * @param coveragePercentage
+         * @param delta
          *         The coverage delta as percentage
-         * @param tooltip
-         *         The tooltip which describes the value
          *
          * @return the created {@link DetailedCell}
          */
-        protected DetailedCell<?> createColoredCoverageDeltaColumn(
-                final CoveragePercentage coveragePercentage, final String tooltip) {
-            double coverageValue = coveragePercentage.getDoubleValue();
-            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(coverageValue, colorProvider);
+        protected DetailedCell<?> createColoredCoverageDeltaColumn(final Fraction delta) {
+            double percentage = delta.doubleValue() * 100.0;
+            DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(percentage, colorProvider);
             String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                             div().withClasses(COVERAGE_COLUMN_INNER)
                                     .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(
                                             TABLE_COVERAGE_COLOR_ALPHA)))
-                                    .withText(coveragePercentage.formatDeltaPercentage(browserLocale))
-                                    .withTitle(tooltip))
+                                    .withText(FORMATTER.formatDelta(delta, browserLocale)))
                     .render();
-            return new DetailedCell<>(cell, coverageValue);
+            return new DetailedCell<>(cell, percentage);
         }
 
-        protected CoverageNode getRoot() {
-            return root;
+        protected FileNode getFile() {
+            return file;
         }
 
         /**
          * Creates a colored column for visualizing the file coverage delta against a reference for the passed
-         * {@link CoverageMetric}.
+         * {@link Metric}.
          *
-         * @param coverageMetric
+         * @param metric
          *         The coverage metric
          *
          * @return the created {@link DetailedCell}
          * @since 3.0.0
          */
-        private DetailedCell<?> createColoredFileCoverageDeltaColumn(final CoverageMetric coverageMetric) {
-            // this is only available for versions later than 3.0.0 which introduced FileCoverageNode
-            if (root instanceof FileCoverageNode) {
-                FileCoverageNode fileNode = (FileCoverageNode) root;
-                if (fileNode.hasFileCoverageDelta(coverageMetric)) {
-                    CoveragePercentage delta = fileNode.getFileCoverageDeltaForMetric(coverageMetric);
-                    return createColoredCoverageDeltaColumn(delta,
-                            "The total file coverage delta against the reference build");
-                }
+        private DetailedCell<?> createColoredFileCoverageDeltaColumn(final Metric metric) {
+            if (file.hasChangeCoverage(metric)) {
+                return createColoredCoverageDeltaColumn(file.getChangeCoverage(metric));
             }
             return NO_COVERAGE;
         }

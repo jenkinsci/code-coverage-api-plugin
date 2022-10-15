@@ -1,15 +1,18 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.NavigableMap;
 import java.util.NoSuchElementException;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import hudson.model.Run;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.metric.Value;
 
-import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
+import hudson.model.Run;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageViewModel.*;
@@ -55,26 +58,8 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     }
 
     @Test
-    void shouldProvideChangeCoverage() {
-        CoverageNode node = createChangeCoverageNode(Fraction.ZERO, LINE, 1, 1);
-        CoverageViewModel model = createModelFromMock(node);
-        assertThat(model.hasChangeCoverage()).isTrue();
-
-        CoverageOverview overview = model.getChangeCoverageOverview();
-        assertThatJson(overview).node("metrics").isArray().containsExactly(
-                "File", "Line", "Branch"
-        );
-        assertThatJson(overview).node("covered").isArray().containsExactly(
-                0, 0, 0
-        );
-        assertThatJson(overview).node("missed").isArray().containsExactly(
-                0, 0, 0
-        );
-    }
-
-    @Test
     void shouldProvideIndirectCoverageChanges() {
-        CoverageNode node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
+        Node node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
         CoverageViewModel model = createModelFromMock(node);
         assertThat(model.hasIndirectCoverageChanges()).isTrue();
     }
@@ -91,25 +76,23 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     }
 
     private CoverageViewModel createModel() {
-        return new CoverageViewModel(mock(Run.class), readNode("jacoco-codingstyle.xml"));
+        return new CoverageViewModel(mock(Run.class), readJacocoResult("jacoco-codingstyle.xml"));
     }
 
     /**
-     * Creates a {@link CoverageViewModel} which represents a mocked {@link CoverageNode}.
+     * Creates a {@link CoverageViewModel} which represents a mocked {@link Node}.
      *
      * @param mock
      *         The mocked node
      *
      * @return the created model
      */
-    private CoverageViewModel createModelFromMock(final CoverageNode mock) {
-        when(mock.filterPackageStructure()).thenReturn(mock);
-
-        SortedMap<CoverageMetric, Coverage> changeMetricsDistribution = new TreeMap<>();
-        changeMetricsDistribution.put(LINE, CoverageBuilder.NO_COVERAGE);
-        changeMetricsDistribution.put(BRANCH, CoverageBuilder.NO_COVERAGE);
-        changeMetricsDistribution.put(FILE, CoverageBuilder.NO_COVERAGE);
-        changeMetricsDistribution.put(PACKAGE, CoverageBuilder.NO_COVERAGE);
+    private CoverageViewModel createModelFromMock(final Node mock) {
+        NavigableMap<Metric, Value> changeMetricsDistribution = new TreeMap<>();
+        changeMetricsDistribution.put(LINE, Coverage.nullObject(Metric.LINE));
+        changeMetricsDistribution.put(BRANCH, Coverage.nullObject(Metric.BRANCH));
+        changeMetricsDistribution.put(FILE, Coverage.nullObject(Metric.FILE));
+        changeMetricsDistribution.put(PACKAGE, Coverage.nullObject(Metric.PACKAGE));
         when(mock.getMetricsDistribution()).thenReturn(changeMetricsDistribution);
 
         return new CoverageViewModel(mock(Run.class), mock);

@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.LinesChartModel;
+import edu.hm.hafner.metric.Node;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Job;
@@ -13,7 +14,7 @@ import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
 /**
  * Project level action for the coverage results. A job action displays a link on the side panel of a job that refers to
- * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link CoverageNode}
+ * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link Node}
  * instance). This action also is responsible to render the historical trend via its associated 'floatingBox.jelly'
  * view.
  *

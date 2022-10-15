@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -39,7 +40,7 @@ import jenkins.tasks.SimpleBuildStep;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageNode;
+import io.jenkins.plugins.coverage.model.CoverageReporter;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
@@ -51,7 +52,7 @@ import io.jenkins.plugins.util.LogHandler;
  * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and
  * adds the results to the persisted build results.
  * <p>
- * Stores the created issues in a {@link CoverageNode}. This result is then attached to the {@link Run build} by
+ * Stores the created issues in a {@link Node}. This result is then attached to the {@link Run build} by
  * registering a {@link CoverageBuildAction}.
  * </p>
  *
@@ -68,6 +69,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private boolean enabledForFailure;
     private int healthy;
     private int unhealthy;
+    private String scm;
 
     /**
      * Creates a new instance of {@link  CoverageRecorder}.
@@ -223,6 +225,24 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         this.sourceCodeRetention = sourceCodeRetention;
     }
 
+    /**
+     * Sets the SCM that should be used to find the reference build for. The reference recorder will select the SCM
+     * based on a substring comparison, there is no need to specify the full name.
+     *
+     * @param scm
+     *         the ID of the SCM to use (a substring of the full ID)
+     */
+    @DataBoundSetter
+    public void setScm(final String scm) {
+        this.scm = scm;
+    }
+
+    public String getScm() {
+        return scm;
+    }
+
+
+
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -260,6 +280,10 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                         AggregatedResult result = workspace.act(
                                 new FilesScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
+
+                        CoverageReporter reporter = new CoverageReporter();
+                        reporter.run(result.getRoot(), run, workspace, listener, getScm(), getSourceDirectoriesPaths(),
+                                getSourceCodeEncoding(), getSourceCodeRetention());
                     }
                     catch (IOException exception) {
                         log.logException(exception, "Exception during parsing");

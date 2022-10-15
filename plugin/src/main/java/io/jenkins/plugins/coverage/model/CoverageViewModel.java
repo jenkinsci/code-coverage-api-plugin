@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.metric.Value;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -63,11 +69,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final String INLINE_SUFFIX = "-inline";
 
     private final Run<?, ?> owner;
-    private final CoverageNode node;
+    private final Node node;
     private final String id;
 
-    private final CoverageNode changeCoverageTreeRoot;
-    private final CoverageNode indirectCoverageChangesTreeRoot;
+    private final Node changeCoverageTreeRoot;
+    private final Node indirectCoverageChangesTreeRoot;
 
     private ColorProvider colorProvider = ColorProviderFactory.createDefaultColorProvider();
 
@@ -79,7 +85,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @param node
      *         the coverage node to be shown
      */
-    public CoverageViewModel(final Run<?, ?> owner, final CoverageNode node) {
+    public CoverageViewModel(final Run<?, ?> owner, final Node node) {
         super();
 
         this.owner = owner;
@@ -87,8 +93,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         this.id = "coverage"; // TODO: this needs to be a parameter
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
-        this.changeCoverageTreeRoot = node.getChangeCoverageTree();
-        this.indirectCoverageChangesTreeRoot = node.getIndirectCoverageChangesTree();
+        CoverageTreeCreator treeCreator = new CoverageTreeCreator();
+        this.changeCoverageTreeRoot = treeCreator.createChangeCoverageTree(node);
+        this.indirectCoverageChangesTreeRoot = treeCreator.createIndirectCoverageChangesTree(node);
     }
 
     public String getId() {
@@ -99,7 +106,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return owner;
     }
 
-    public CoverageNode getNode() {
+    public Node getNode() {
         return node;
     }
 
@@ -150,15 +157,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
     }
 
+    // FIXME: check why this model works on a filtered view
     @JavaScriptMethod
     public CoverageOverview getOverview() {
-        return new CoverageOverview(getNode().filterPackageStructure());
-    }
-
-    // FIXME: currently not in use anymore
-    @JavaScriptMethod
-    public CoverageOverview getChangeCoverageOverview() {
-        return new CoverageOverview(changeCoverageTreeRoot.filterPackageStructure());
+        return new CoverageOverview(node);
     }
 
     /**
@@ -199,7 +201,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageTree(final String coverageMetric) {
-        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        Metric metric = getCoverageMetricFromText(coverageMetric);
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric, colorProvider);
     }
 
@@ -215,7 +217,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeMapNode getChangeCoverageTree(final String coverageMetric) {
-        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        Metric metric = getCoverageMetricFromText(coverageMetric);
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric, colorProvider);
     }
 
@@ -231,12 +233,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageChangesTree(final String coverageMetric) {
-        CoverageMetric metric = getCoverageMetricFromText(coverageMetric);
+        Metric metric = getCoverageMetricFromText(coverageMetric);
         return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric, colorProvider);
     }
 
     /**
-     * Gets the {@link CoverageMetric} from a String representation used in the frontend. Only 'Line' and 'Branch' is
+     * Gets the {@link Metric} from a String representation used in the frontend. Only 'Line' and 'Branch' is
      * possible. 'Line' is used as a default.
      *
      * @param text
@@ -244,11 +246,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return the coverage metric
      */
-    private CoverageMetric getCoverageMetricFromText(final String text) {
+    private Metric getCoverageMetricFromText(final String text) {
         if ("Branch".equals(text)) {
-            return CoverageMetric.BRANCH;
+            return Metric.BRANCH;
         }
-        return CoverageMetric.LINE;
+        return Metric.LINE;
     }
 
     /**
@@ -317,11 +319,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     public String getSourceCode(final String fileHash, final String tableId) {
-        Optional<CoverageNode> targetResult
-                = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(fileHash));
+        Optional<Node> targetResult
+                = getNode().findByHashCode(Metric.FILE, Integer.parseInt(fileHash));
         if (targetResult.isPresent()) {
             try {
-                CoverageNode fileNode = targetResult.get();
+                Node fileNode = targetResult.get();
                 return readSourceCode(fileNode, tableId);
             }
             catch (IOException | InterruptedException exception) {
@@ -332,7 +334,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Reads the sourcecode corresponding to the passed {@link CoverageNode node} and filters the code dependent on the
+     * Reads the sourcecode corresponding to the passed {@link Node node} and filters the code dependent on the
      * table ID.
      *
      * @param sourceNode
@@ -346,7 +348,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @throws InterruptedException
      *         if reading failed
      */
-    private String readSourceCode(final CoverageNode sourceNode, final String tableId)
+    private String readSourceCode(final Node sourceNode, final String tableId)
             throws IOException, InterruptedException {
         String content = "";
         File rootDir = getOwner().getRootDir();
@@ -357,9 +359,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             content = new TextFile(getFileForBuildsWithOldVersion(rootDir,
                     sourceNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
         }
-        if (!content.isEmpty() && sourceNode instanceof FileCoverageNode) {
+        if (!content.isEmpty() && sourceNode instanceof FileNode) {
+            FileNode fileNode = (FileNode) sourceNode;
             String cleanTableId = StringUtils.removeEnd(tableId, INLINE_SUFFIX);
-            FileCoverageNode fileNode = (FileCoverageNode) sourceNode;
             if (CHANGE_COVERAGE_TABLE_ID.equals(cleanTableId)) {
                 return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, fileNode);
             }
@@ -390,7 +392,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether change coverage exists, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return getNode().hasChangeCoverage();
+        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasCodeChanges);
     }
 
     /**
@@ -399,18 +401,18 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return getNode().hasIndirectCoverageChanges();
+        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasIndirectCoverageChanges);
     }
 
     /**
      * Returns whether the source file is available in Jenkins build folder.
      *
      * @param coverageNode
-     *         The {@link CoverageNode} which is checked if there is a source file available
+     *         The {@link Node} which is checked if there is a source file available
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileAvailable(final CoverageNode coverageNode) {
+    public boolean isSourceFileAvailable(final Node coverageNode) {
         return isSourceFileInNewFormatAvailable(coverageNode) || isSourceFileInOldFormatAvailable(coverageNode);
     }
 
@@ -419,11 +421,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * less than 2.1.0.
      *
      * @param coverageNode
-     *         The {@link CoverageNode} which is checked if there is a source file available
+     *         The {@link Node} which is checked if there is a source file available
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileInOldFormatAvailable(final CoverageNode coverageNode) {
+    public boolean isSourceFileInOldFormatAvailable(final Node coverageNode) {
         return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), coverageNode.getName());
     }
 
@@ -454,11 +456,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * greater or equal than 2.1.0.
      *
      * @param coverageNode
-     *         The {@link CoverageNode} which is checked if there is a source file available
+     *         The {@link Node} which is checked if there is a source file available
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileInNewFormatAvailable(final CoverageNode coverageNode) {
+    public boolean isSourceFileInNewFormatAvailable(final Node coverageNode) {
         return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, coverageNode.getPath());
     }
 
@@ -483,8 +485,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (StringUtils.isNotEmpty(link)) {
             try {
-                Optional<CoverageNode> targetResult
-                        = getNode().findByHashCode(CoverageMetric.FILE, Integer.parseInt(link));
+                Optional<Node> targetResult
+                        = getNode().findByHashCode(Metric.FILE, Integer.parseInt(link));
                 if (targetResult.isPresent()) {
                     return new SourceViewModel(getOwner(), targetResult.get());
                 }
@@ -499,17 +501,18 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage metrics.
      */
+    // FIXME: In the new model we do not only have coverages
     public static class CoverageOverview {
-        private final CoverageNode coverage;
+        private final Node coverage;
 
-        CoverageOverview(final CoverageNode coverage) {
+        CoverageOverview(final Node coverage) {
             this.coverage = coverage;
         }
 
         public List<String> getMetrics() {
             return getMetricsDistribution().keySet().stream()
                     .skip(1) // ignore the root of the tree as the coverage is always 1 of 1
-                    .map(CoverageMetric::getName)
+                    .map(Metric::name) // FIXME: we need to create localized names
                     .collect(Collectors.toList());
         }
 
@@ -518,9 +521,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getCoveredPercentages() {
-            return streamCoverages().map(Coverage::getCoveredFraction)
-                    .map(Fraction::doubleValue)
-                    .collect(Collectors.toList());
+            return getPercentages(Coverage::getCoveredPercentage);
         }
 
         public List<Integer> getMissed() {
@@ -528,16 +529,25 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return streamCoverages().map(Coverage::getMissedFraction)
+            return getPercentages(Coverage::getMissedPercentage);
+        }
+
+        private List<Double> getPercentages(final Function<Coverage, Fraction> displayType) {
+            return streamCoverages().map(displayType)
                     .map(Fraction::doubleValue)
+                    .map(p -> p * 100.0)
                     .collect(Collectors.toList());
         }
 
         private Stream<Coverage> streamCoverages() {
-            return getMetricsDistribution().values().stream().skip(1);
+            return getMetricsDistribution().values()
+                    .stream()
+                    .skip(1)
+                    .filter(v -> v instanceof Coverage)
+                    .map(Coverage.class::cast);
         }
 
-        private SortedMap<CoverageMetric, Coverage> getMetricsDistribution() {
+        private NavigableMap<Metric, Value> getMetricsDistribution() {
             return coverage.getMetricsDistribution();
         }
     }

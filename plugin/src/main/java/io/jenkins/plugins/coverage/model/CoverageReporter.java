@@ -1,11 +1,18 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.math.Fraction;
+
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -16,7 +23,7 @@ import hudson.model.TaskListener;
 
 import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
+import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
@@ -44,8 +51,6 @@ public class CoverageReporter {
      *         the workspace on the agent that provides access to the source code files
      * @param listener
      *         logger
-     * @param healthReport
-     *         health report
      * @param scm
      *         the SCM which is used for calculating the code delta to a reference build
      * @param sourceDirectories
@@ -59,23 +64,35 @@ public class CoverageReporter {
      *         if the build has been aborted
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public void run(final CoverageResult rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final HealthReport healthReport, final String scm,
+    public void run(final Node rootResult, final Run<?, ?> build, final FilePath workspace,
+            final TaskListener listener, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        CoverageNodeConverter converter = new CoverageNodeConverter();
-        CoverageNode rootNode = convertCoverageTree(converter, rootResult, log);
+        verifyPathUniqueness(rootResult, log);
 
+        runWithModel(build, workspace, listener, scm, sourceDirectories, sourceCodeEncoding,
+                sourceCodeRetention,
+                logHandler, log, rootResult, new HashSet<>());
+    }
+
+    private void runWithModel(final Run<?, ?> build, final FilePath workspace, final TaskListener listener,
+            final String scm, final Set<String> sourceDirectories,
+            final String sourceCodeEncoding, final SourceCodeRetention sourceCodeRetention, final LogHandler logHandler,
+            final FilteredLog log, final Node rootNode,
+            final Set<Entry<Node, CoveragePaint>> paintedFiles)
+            throws InterruptedException {
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
+
+        HealthReport healthReport = new HealthReport(); // FIXME: currently empty
 
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
-            CoverageNode referenceRoot = referenceAction.getResult();
+            Node referenceRoot = referenceAction.getResult();
 
             // calculate code delta
             log.logInfo("Calculating the code delta...");
@@ -120,25 +137,29 @@ public class CoverageReporter {
 
             // filtered coverage trees
             CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
-            CoverageNode changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
-            CoverageNode indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
+            Node changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
+            Node indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
 
             // coverage delta
-            SortedMap<CoverageMetric, CoveragePercentage> coverageDelta =
-                    rootNode.computeDeltaAsPercentage(referenceRoot);
-            SortedMap<CoverageMetric, CoveragePercentage> changeCoverageDelta =
-                    computeChangeCoverageDelta(rootNode, changeCoverageRoot);
+            NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
 
-            if (rootNode.hasCodeChanges() && !rootNode.hasChangeCoverage()) {
-                log.logInfo("No detected code changes affect the code coverage");
+            NavigableMap<Metric, Fraction> changeCoverageDelta;
+            if (hasChangeCoverage(changeCoverageRoot)) {
+                changeCoverageDelta = changeCoverageRoot.computeDelta(rootNode);
+            }
+            else {
+                changeCoverageDelta = new TreeMap<>();
+                if (rootNode.hasCodeChanges()) {
+                    log.logInfo("No detected code changes affect the code coverage");
+                }
             }
 
             action = new CoverageBuildAction(build, rootNode, healthReport,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
-                    changeCoverageRoot.getMetricPercentages(),
+                    changeCoverageRoot.getMetricsDistribution(),
                     changeCoverageDelta,
-                    indirectCoverageChangesTree.getMetricPercentages());
+                    indirectCoverageChangesTree.getMetricsDistribution());
         }
         else {
             action = new CoverageBuildAction(build, rootNode, healthReport);
@@ -146,7 +167,7 @@ public class CoverageReporter {
 
         log.logInfo("Executing source code painting...");
         SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
-        sourceCodePainter.processSourceCodePainting(converter.getPaintedFiles(), sourceDirectories,
+        sourceCodePainter.processSourceCodePainting(paintedFiles, sourceDirectories,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
         log.logInfo("Finished coverage processing - adding the action to the build...");
@@ -156,47 +177,15 @@ public class CoverageReporter {
         build.addOrReplaceAction(action);
     }
 
-    /**
-     * Converts the passed coverage tree to the new model and verifies its path structure.
-     *
-     * @param converter
-     *         The {@link CoverageNodeConverter converter} to be used
-     * @param rootResult
-     *         The {@link CoverageResult root} of the coverage tree to be converted
-     * @param log
-     *         The log
-     *
-     * @return the converted coverage tree which uses the new model
-     */
-    private CoverageNode convertCoverageTree(final CoverageNodeConverter converter,
-            final CoverageResult rootResult, final FilteredLog log) {
-        rootResult.stripGroup();
-        CoverageNode rootNode = converter.convert(rootResult);
-        rootNode.splitPackages();
-
-        log.logInfo("Verify uniqueness of file paths...");
-        verifyPathUniqueness(rootNode, log);
-
-        return rootNode;
-    }
-
-    /**
-     * Computes the change coverage delta which represents the difference between the change coverage and the overall
-     * coverage per coverage metric.
-     *
-     * @param rootNode
-     *         The root of the overall coverage tree
-     * @param changeCoverageRoot
-     *         The root of the change coverage tree
-     *
-     * @return the delta per metric
-     */
-    private SortedMap<CoverageMetric, CoveragePercentage> computeChangeCoverageDelta(
-            final CoverageNode rootNode, final CoverageNode changeCoverageRoot) {
-        if (rootNode.hasChangeCoverage()) {
-            return changeCoverageRoot.computeDeltaAsPercentage(rootNode);
+    private boolean hasChangeCoverage(final Node changeCoverageRoot) {
+        Optional<Value> lineCoverage = changeCoverageRoot.getValue(Metric.LINE);
+        if (lineCoverage.isPresent()) {
+            if (((edu.hm.hafner.metric.Coverage) lineCoverage.get()).isSet()) {
+                return true;
+            }
         }
-        return new TreeMap<>();
+        Optional<Value> branchCoverage = changeCoverageRoot.getValue(Metric.BRANCH);
+        return branchCoverage.filter(value -> ((edu.hm.hafner.metric.Coverage) value).isSet()).isPresent();
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

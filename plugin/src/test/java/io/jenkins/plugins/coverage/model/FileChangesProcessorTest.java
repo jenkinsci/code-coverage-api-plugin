@@ -8,6 +8,9 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Node;
+
 import io.jenkins.plugins.forensics.delta.model.Change;
 import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
@@ -21,7 +24,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class FileChangesProcessorTest extends AbstractCoverageTest {
-
     private static final String TEST_FILE_1 = "Test1.java";
     private static final String TEST_FILE_2 = "Main.java";
     private static final String TEST_FILE_1_PATH = "test/example/" + TEST_FILE_1;
@@ -76,59 +78,34 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
     @Test
     void shouldAttachChangesCodeLines() {
         FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
-        CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
+        Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachChangedCodeLines(tree, CODE_CHANGES);
 
         assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
-                .satisfies(node -> {
-                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    assertThat(((FileCoverageNode) node.get()).getChangedCodeLines()).containsExactly(
-                            5, 6, 7, 8, 9, 14, 15, 16, 17, 18, 20, 21, 22, 33, 34, 35, 36
-                    );
-                });
+                .satisfies(node -> assertThat(node.get())
+                        .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
+                                        .containsExactly(
+                            5, 6, 7, 8, 9, 14, 15, 16, 17, 18, 20, 21, 22, 33, 34, 35, 36)));
         assertThat(tree.findByHashCode(FILE, TEST_FILE_2.hashCode()))
                 .isNotEmpty()
-                .satisfies(node -> {
-                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    assertThat(((FileCoverageNode) node.get()).getChangedCodeLines()).isEmpty();
-                });
+                .satisfies(node -> assertThat(node.get())
+                            .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
+                            .isEmpty()));
     }
 
     @Test
     void shouldAttachFileCoverageDelta() {
         FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
-        CoverageNode reference = readCoverageTree(TEST_REPORT_BEFORE);
-        CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
+        Node reference = readJacocoResult(TEST_REPORT_BEFORE);
+        Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
 
         assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
-                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    verifyFileCoverageDeltaOfTestFile1((FileCoverageNode) node.get());
-                });
-    }
-
-    // test to prevent issue #487 https://github.com/jenkinsci/code-coverage-api-plugin/issues/487
-    @Test
-    void shouldNotAttachFileCoverageDeltasWithMissingReferences() {
-        FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
-        CoverageNode reference = readCoverageTree(TEST_REPORT_BEFORE);
-        CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
-
-        // simulating a file that has not been part of the reference coverage report, but is part of the code delta
-        assertThat(reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode())).isNotEmpty();
-        reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode()).ifPresent(CoverageNode::remove);
-        assertThat(reference.findByHashCode(FILE, TEST_FILE_1_PATH_OLD.hashCode())).isEmpty();
-
-        // verifies that the method does not process the delta calculation for the missing reference node
-        fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
-                .isNotEmpty()
-                .satisfies(node -> {
-                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    assertThat(((FileCoverageNode) node.get()).hasFileCoverageDelta(FILE)).isFalse();
+                    assertThat(node.get()).isInstanceOf(FileNode.class);
+                    verifyFileCoverageDeltaOfTestFile1((FileNode) node.get());
                 });
     }
 
@@ -136,56 +113,36 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
      * Verifies the file coverage delta of {@link #TEST_FILE_1}.
      *
      * @param file
-     *         The referencing coverage tree {@link FileCoverageNode node}
+     *         The referencing coverage tree {@link FileNode node}
      */
-    private void verifyFileCoverageDeltaOfTestFile1(final FileCoverageNode file) {
+    private void verifyFileCoverageDeltaOfTestFile1(final FileNode file) {
         assertThat(file.getName()).isEqualTo(TEST_FILE_1);
-        assertThat(file.getFileCoverageDeltaForMetric(LINE)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.getFraction(3, 117)));
-        assertThat(file.getFileCoverageDeltaForMetric(BRANCH)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.getFraction(3, 24)));
-        assertThat(file.getFileCoverageDeltaForMetric(INSTRUCTION)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.getFraction(90, 999)));
-        assertThat(file.getFileCoverageDeltaForMetric(METHOD)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.getFraction(-4, 30)));
-        assertThat(file.getFileCoverageDeltaForMetric(CLASS)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.ZERO));
-        assertThat(file.getFileCoverageDeltaForMetric(FILE)).isEqualTo(
-                CoveragePercentage.valueOf(Fraction.ZERO));
+        assertThat(file.getChangeCoverage(LINE)).isEqualTo(Fraction.getFraction(3, 117));
+        assertThat(file.getChangeCoverage(BRANCH)).isEqualTo(Fraction.getFraction(3, 24));
+        assertThat(file.getChangeCoverage(INSTRUCTION)).isEqualTo(Fraction.getFraction(90, 999));
+        assertThat(file.getChangeCoverage(METHOD)).isEqualTo(Fraction.getFraction(-4, 30));
+        assertThat(file.getChangeCoverage(CLASS)).isEqualTo(Fraction.ZERO);
+        assertThat(file.getChangeCoverage(FILE)).isEqualTo(Fraction.ZERO);
     }
 
     @Test
     void shouldAttachIndirectCoverageChanges() {
         FileChangesProcessor fileChangesProcessor = createFileChangesProcessor();
-        CoverageNode reference = readCoverageTree(TEST_REPORT_BEFORE);
-        CoverageNode tree = readCoverageTree(TEST_REPORT_AFTER);
+        Node reference = readJacocoResult(TEST_REPORT_BEFORE);
+        Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES, OLD_PATH_MAPPING);
 
         assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
-                    assertThat(node.get()).isInstanceOf(FileCoverageNode.class);
-                    FileCoverageNode file = (FileCoverageNode) node.get();
+                    assertThat(node.get()).isInstanceOf(FileNode.class);
+                    FileNode file = (FileNode) node.get();
                     assertThat(file.getIndirectCoverageChanges()).containsExactly(
                             new SimpleEntry<>(11, -1),
                             new SimpleEntry<>(29, -1),
                             new SimpleEntry<>(31, 1)
                     );
                 });
-    }
-
-    /**
-     * Reads the coverage tree from a report.
-     *
-     * @param file
-     *         The name of the report
-     *
-     * @return the {@link CoverageNode} root of the tree
-     */
-    private CoverageNode readCoverageTree(final String file) {
-        CoverageNode root = readNode(file);
-        root.splitPackages();
-        return root;
     }
 
     /**

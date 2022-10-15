@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.parser.CoberturaParser;
 import edu.hm.hafner.metric.parser.JacocoParser;
 import edu.hm.hafner.metric.parser.PitestParser;
@@ -26,13 +27,12 @@ import hudson.model.Item;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
-import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.model.ModelValidation;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
- * A coverage tool that can produce a {@link FileCoverageNode coverage tree} by parsing a given report file.
+ * A coverage tool that can produce a {@link Node coverage tree} by parsing a given report file.
  *
  * @author Ullrich Hafner
  */

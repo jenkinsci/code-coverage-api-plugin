@@ -2,6 +2,9 @@ package io.jenkins.plugins.coverage.model;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Run;
@@ -38,7 +41,7 @@ class DeclarativePipelineSupportITest extends IntegrationTestWithJenkinsPerSuite
                 + "}", true));
         Run<?, ?> build = buildSuccessfully(job);
         assertThat(build.getAction(CoverageBuildAction.class).getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(6083).setMissed(6368 - 6083).build());
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(6083).setMissed(6368 - 6083).build());
     }
 }
 

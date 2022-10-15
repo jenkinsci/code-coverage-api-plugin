@@ -29,6 +29,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;
@@ -37,8 +39,6 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
@@ -165,14 +165,12 @@ public class SourceCodeFacade {
      * @param content
      *         The original HTML content
      * @param fileNode
-     *         The {@link FileCoverageNode node} which represents the coverage of the file
+     *         The {@link FileNode node} which represents the coverage of the file
      *
      * @return the filtered HTML sourcecode view
      */
-    public String calculateChangeCoverageSourceCode(final String content, final FileCoverageNode fileNode) {
-        Set<Integer> lines = fileNode.getChangedCodeLines().stream()
-                .filter(line -> fileNode.getCoveragePerLine().containsKey(line))
-                .collect(Collectors.toSet());
+    public String calculateChangeCoverageSourceCode(final String content, final FileNode fileNode) {
+        Set<Integer> lines = fileNode.getCoveredLines();
         Set<String> linesAsText = lines.stream().map(String::valueOf).collect(Collectors.toSet());
         Document doc = Jsoup.parse(content, Parser.xmlParser());
         int maxLine = Integer.parseInt(Objects.requireNonNull(
@@ -204,11 +202,11 @@ public class SourceCodeFacade {
      * @param content
      *         The original HTML content
      * @param fileNode
-     *         The {@link FileCoverageNode node} which represents the coverage of the file
+     *         The {@link FileNode node} which represents the coverage of the file
      *
      * @return the filtered HTML sourcecode view
      */
-    public String calculateIndirectCoverageChangesSourceCode(final String content, final FileCoverageNode fileNode) {
+    public String calculateIndirectCoverageChangesSourceCode(final String content, final FileNode fileNode) {
         Map<Integer, Integer> lines = fileNode.getIndirectCoverageChanges();
         Map<String, String> indirectCoverageChangesAsText = lines.entrySet().stream()
                 .collect(Collectors
@@ -353,7 +351,7 @@ public class SourceCodeFacade {
          * @param directory
          *         the subdirectory where the source files will be stored in
          */
-        AgentCoveragePainter(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+        AgentCoveragePainter(final Set<Entry<Node, CoveragePaint>> paintedFiles,
                 final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
                 final String sourceCodeEncoding, final String directory) {
             super();
@@ -567,15 +565,15 @@ public class SourceCodeFacade {
         private static class PaintedNode implements Serializable {
             private static final long serialVersionUID = -6044649044983631852L;
 
-            private final CoverageNode node;
+            private final Node node;
             private final CoveragePaint paint;
 
-            PaintedNode(final CoverageNode node, final CoveragePaint paint) {
+            PaintedNode(final Node node, final CoveragePaint paint) {
                 this.node = node;
                 this.paint = paint;
             }
 
-            public CoverageNode getNode() {
+            public Node getNode() {
                 return node;
             }
 

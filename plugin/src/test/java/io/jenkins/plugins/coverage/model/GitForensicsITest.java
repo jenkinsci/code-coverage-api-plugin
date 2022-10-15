@@ -6,9 +6,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
@@ -24,8 +28,8 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
+import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.model.Assertions.*;
-import static io.jenkins.plugins.coverage.model.CoverageMetric.*;
 import static org.assertj.core.api.Assumptions.*;
 
 /**
@@ -151,16 +155,16 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
         assertThat(action.getLineCoverage()).satisfies(coverage -> {
-            assertThat(coverage).hasCovered(546);
-            assertThat(coverage).hasMissed(461);
+            assertThat(coverage.getCovered()).isEqualTo(546);
+            assertThat(coverage.getMissed()).isEqualTo(461);
         });
         assertThat(action.getBranchCoverage()).satisfies(coverage -> {
-            assertThat(coverage).hasCovered(136);
-            assertThat(coverage).hasMissed(94);
+            assertThat(coverage.getCovered()).isEqualTo(136);
+            assertThat(coverage.getMissed()).isEqualTo(94);
         });
-        assertThat(action.getDifference()).contains(
-                new SimpleEntry<>(LINE, CoveragePercentage.valueOf(65_160, 103_721)),
-                new SimpleEntry<>(BRANCH, CoveragePercentage.valueOf(0, 1))
+        assertThat(action.getDelta()).contains(
+                new SimpleEntry<>(LINE, Fraction.getFraction(65_160, 103_721)),
+                new SimpleEntry<>(BRANCH, Fraction.getFraction(0, 1))
         );
     }
 
@@ -171,17 +175,17 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The created Jenkins action
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
-        assertThat(action.getChangeCoverage(LINE)).satisfies(coverage -> {
-            assertThat(coverage).hasCovered(1);
-            assertThat(coverage).hasMissed(1);
+        assertThat(action.getChangeCoverage(LINE)).isInstanceOfSatisfying(Coverage.class, coverage -> {
+            assertThat(coverage.getCovered()).isEqualTo(1);
+            assertThat(coverage.getMissed()).isEqualTo(1);
         });
-        assertThat(action.getChangeCoverage(BRANCH)).satisfies(coverage -> {
-            assertThat(coverage).hasCovered(0);
-            assertThat(coverage).hasMissed(0);
+        assertThat(action.getChangeCoverage(BRANCH)).isInstanceOfSatisfying(Coverage.class, coverage -> {
+                assertThat(coverage.getCovered()).isEqualTo(0);
+            assertThat(coverage.getMissed()).isEqualTo(0);
         });
         assertThat(action.getChangeCoverageDifference(LINE)).satisfies(coverage -> {
-            assertThat(coverage).hasNumerator(-4250);
-            assertThat(coverage).hasDenominator(1007);
+            assertThat(coverage.getNumerator()).isEqualTo(-4250);
+            assertThat(coverage.getDenominator()).isEqualTo(1007);
         });
         assertThat(action.hasChangeCoverageDifference(BRANCH)).isFalse();
     }
@@ -193,9 +197,9 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The created Jenkins action
      */
     private void verifyIndirectCoverageChanges(final CoverageBuildAction action) {
-        assertThat(action.getIndirectCoverageChanges(LINE)).satisfies(coverage -> {
-            assertThat(coverage).hasCovered(4);
-            assertThat(coverage).hasMissed(0);
+        assertThat(action.getIndirectCoverageChanges(LINE)).isInstanceOfSatisfying(Coverage.class, coverage -> {
+            assertThat(coverage.getCovered()).isEqualTo(4);
+            assertThat(coverage.getMissed()).isEqualTo(0);
         });
         assertThat(action.hasIndirectCoverageChanges(BRANCH)).isFalse();
     }
@@ -207,23 +211,18 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The created Jenkins action
      */
     private void verifyCodeDelta(final CoverageBuildAction action) {
-        CoverageNode root = action.getResult();
+        edu.hm.hafner.metric.Node root = action.getResult();
         assertThat(root).isNotNull();
 
-        List<FileCoverageNode> changedFiles = root.getAllFileCoverageNodes().stream()
-                .filter(fileNode -> !fileNode.getChangedCodeLines().isEmpty())
+        List<FileNode> changedFiles = root.getAllFileNodes().stream()
+                .filter(FileNode::hasCodeChanges)
                 .collect(Collectors.toList());
         assertThat(changedFiles).hasSize(4);
-        assertThat(changedFiles).extracting(FileCoverageNode::getName)
+        assertThat(changedFiles).extracting(FileNode::getName)
                 .containsExactly("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
-        assertThat(changedFiles).flatExtracting(FileCoverageNode::getChangedCodeLines)
+        assertThat(changedFiles).flatExtracting(FileNode::getChangedLines)
                 .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
-
-        assertThat(root).hasFileAmountWithChangedCoverage(2);
-        assertThat(root).hasFileAmountWithIndirectCoverageChanges(1);
-        assertThat(root).hasLineAmountWithChangedCoverage(2);
-        assertThat(root).hasLineAmountWithIndirectCoverageChanges(4);
     }
 
     /**

@@ -3,25 +3,24 @@ package io.jenkins.plugins.coverage.model.visualization.tree;
 import edu.hm.hafner.echarts.ItemStyle;
 import edu.hm.hafner.echarts.Label;
 import edu.hm.hafner.echarts.TreeMapNode;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.coverage.model.Coverage;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
-import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
 
 /**
- * Converts a tree of {@link CoverageNode coverage nodes} to a corresponding tree of
+ * Converts a tree of {@link Node coverage nodes} to a corresponding tree of
  * {@link TreeMapNode ECharts tree map nodes}.
  *
  * @author Ullrich Hafner
  */
 public class TreeMapNodeConverter {
-
     /**
-     * Converts a coverage tree of {@link CoverageNode} to a ECharts tree map of {@link TreeMapNode}.
+     * Converts a coverage tree of {@link Node nodes} to an ECharts tree map of {@link TreeMapNode}.
      *
      * @param node
      *         The root node of the tree to be converted
@@ -32,8 +31,7 @@ public class TreeMapNodeConverter {
      *
      * @return the converted tree map representation
      */
-    public TreeMapNode toTeeChartModel(final CoverageNode node, final CoverageMetric metric,
-            final ColorProvider colorProvider) {
+    public TreeMapNode toTeeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
         TreeMapNode root = toTreeMapNode(node, metric, colorProvider);
         for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
@@ -42,11 +40,11 @@ public class TreeMapNodeConverter {
         return root;
     }
 
-    private TreeMapNode toTreeMapNode(final CoverageNode node, final CoverageMetric metric,
+    private TreeMapNode toTreeMapNode(final Node node, final Metric metric,
             final ColorProvider colorProvider) {
-        Coverage coverage = node.getCoverage(metric);
+        Coverage coverage = (Coverage)node.getValue(metric).orElse(Coverage.nullObject(metric));
 
-        double coveragePercentage = coverage.getCoveredPercentage().getDoubleValue();
+        double coveragePercentage = coverage.getCoveredPercentage().doubleValue() * 100.0;
 
         DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider);
         String lineColor = colors.getLineColorAsRGBHex();
@@ -55,10 +53,9 @@ public class TreeMapNodeConverter {
         Label label = new Label(true, lineColor);
         Label upperLabel = new Label(true, lineColor);
 
-        if (node instanceof FileCoverageNode) {
+        if (node instanceof FileNode) {
             ItemStyle style = new ItemStyle(fillColor);
-            return new TreeMapNode(node.getName(), style, label, upperLabel, coverage.getTotal(),
-                    coverage.getCovered());
+            return new TreeMapNode(node.getName(), style, label, upperLabel, coverage.getTotal(), coverage.getCovered());
         }
 
         ItemStyle packageStyle = new ItemStyle(fillColor, fillColor, 4);

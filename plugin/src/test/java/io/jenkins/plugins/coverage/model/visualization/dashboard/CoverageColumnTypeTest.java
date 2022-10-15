@@ -6,8 +6,9 @@ import java.util.Locale;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Metric;
+
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.testutil.CoverageStubs;
@@ -22,7 +23,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class CoverageColumnTypeTest {
-
     protected static final String PROJECT_COVERAGE_NAME = Messages.Project_Coverage_Type();
     protected static final String PROJECT_COVERAGE_DELTA_NAME = Messages.Project_Coverage_Delta_Type();
     protected static final String CHANGE_COVERAGE_NAME = Messages.Change_Coverage_Type();
@@ -38,7 +38,7 @@ class CoverageColumnTypeTest {
     protected static final Fraction COVERAGE_FRACTION = Fraction.getFraction(0.5);
     protected static final CoveragePercentage COVERAGE_PERCENTAGE =
             CoveragePercentage.valueOf(COVERAGE_FRACTION);
-    protected static final CoverageMetric COVERAGE_METRIC = CoverageMetric.BRANCH;
+    protected static final Metric COVERAGE_METRIC = Metric.BRANCH;
 
     protected static final Locale LOCALE = Locale.GERMAN;
     protected static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();

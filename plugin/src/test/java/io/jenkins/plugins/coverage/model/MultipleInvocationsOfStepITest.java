@@ -5,6 +5,10 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Result;
@@ -39,7 +43,7 @@ class MultipleInvocationsOfStepITest extends IntegrationTestWithJenkinsPerSuite 
 
         List<CoverageBuildAction> buildAction = getCoverageBuildActions(job, 1);
         assertThat(buildAction.get(0).getBranchCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE)
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(JACOCO_LOWER_BRANCH_COVERAGE_COVERED_VALUE)
                         .setMissed(JACOCO_LOWER_BRANCH_COVERAGE_MISSED_VALUE)
                         .build());
 

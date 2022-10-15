@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +93,9 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
                 nodes.add(aggregateIssuesOfFile(file, log));
             }
         }
-        return nodes.stream().reduce(Node::combineWith).orElse(new ModuleNode("Empty results for " + fileNames));
+        return nodes.stream()
+                .reduce(Node::combineWith)
+                .orElse(new ModuleNode("Empty results for " + Arrays.toString(fileNames)));
     }
 
     private boolean isEmpty(final Path file) {
@@ -110,7 +113,7 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
             XmlParser xmlParser = parser.createParser();
             ModuleNode node = xmlParser.parse(Files.newBufferedReader(file));
             log.logInfo("Successfully parsed file '%s'", file);
-            node.getMetricsDistribution().forEach((m, v) -> log.logInfo("%s: %s", m, v));
+            node.getMetricsDistribution().values().forEach(v -> log.logInfo("%s", v));
             return node;
         }
         catch (IOException exception) {

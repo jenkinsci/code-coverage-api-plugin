@@ -3,8 +3,9 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 import java.util.Locale;
 import java.util.Optional;
 
+import edu.hm.hafner.metric.Metric;
+
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -25,9 +26,9 @@ public class ProjectCoverageDelta extends CoverageColumnType {
     }
 
     @Override
-    public Optional<CoveragePercentage> getCoverage(final CoverageBuildAction action, final CoverageMetric metric) {
+    public Optional<CoveragePercentage> getCoverage(final CoverageBuildAction action, final Metric metric) {
         if (action.hasDelta(metric)) {
-            return Optional.of(action.getDifference().get(metric));
+            return Optional.of(CoveragePercentage.valueOf(action.getDelta().get(metric)));
         }
         return Optional.empty();
     }

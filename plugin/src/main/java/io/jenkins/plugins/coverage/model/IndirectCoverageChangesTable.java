@@ -2,10 +2,12 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.math.Fraction;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
 
 import hudson.Functions;
 
@@ -17,8 +19,9 @@ import io.jenkins.plugins.datatables.DetailedCell;
  *
  * @since 3.0.0
  */
+// FIXME: create a base class for changes table, there is too much duplication
 class IndirectCoverageChangesTable extends CoverageTableModel {
-    private final CoverageNode changeRoot;
+    private final Node changeRoot;
 
     /**
      * Creates an indirect coverage changes table model.
@@ -34,7 +37,7 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
      * @param colorProvider
      *         The {@link ColorProvider} which provides the used colors
      */
-    IndirectCoverageChangesTable(final String id, final CoverageNode root, final CoverageNode changeRoot,
+    IndirectCoverageChangesTable(final String id, final Node root, final Node changeRoot,
             final RowRenderer renderer, final ColorProvider colorProvider) {
         super(id, root, renderer, colorProvider);
 
@@ -44,18 +47,18 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
     @Override
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
-        return changeRoot.getAllFileCoverageNodes().stream()
+        return changeRoot.getAllFileNodes().stream()
                 .map(file -> new IndirectCoverageChangesRow(
                         getOriginalNode(file), file, browserLocale, getRenderer(), getColorProvider()))
                 .collect(Collectors.toList());
     }
 
-    private FileCoverageNode getOriginalNode(final FileCoverageNode fileNode) {
-        Optional<FileCoverageNode> reference = getRoot().getAllFileCoverageNodes().stream()
+    private FileNode getOriginalNode(final FileNode fileNode) {
+        return getRoot().getAllFileNodes().stream()
                 .filter(node -> node.getPath().equals(fileNode.getPath())
                         && node.getName().equals(fileNode.getName()))
-                .findFirst();
-        return reference.orElse(fileNode); // return this as fallback to prevent exceptions
+                .findFirst()
+                .orElse(fileNode); // return this as fallback to prevent exceptions
     }
 
     /**
@@ -64,50 +67,36 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
      * @since 3.0.0
      */
     private static class IndirectCoverageChangesRow extends CoverageRow {
-        private final FileCoverageNode changedFileNode;
+        private final FileNode originalFile;
 
-        IndirectCoverageChangesRow(final FileCoverageNode root, final FileCoverageNode changedFileNode,
+        IndirectCoverageChangesRow(final FileNode originalFile, final FileNode changedFileNode,
                 final Locale browserLocale, final RowRenderer renderer, final ColorProvider colorProvider) {
-            super(root, browserLocale, renderer, colorProvider);
+            super(changedFileNode, browserLocale, renderer, colorProvider);
 
-            this.changedFileNode = changedFileNode;
-        }
-
-        @Override
-        public DetailedCell<?> getLineCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(CoverageMetric.LINE);
-            return createColoredCoverageColumn(coverage, "The indirect line coverage changes");
-        }
-
-        @Override
-        public DetailedCell<?> getBranchCoverage() {
-            Coverage coverage = changedFileNode.getCoverage(CoverageMetric.BRANCH);
-            return createColoredCoverageColumn(coverage, "The indirect branch coverage changes");
+            this.originalFile = originalFile;
         }
 
         @Override
         public DetailedCell<?> getLineCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(CoverageMetric.LINE);
+            return createColoredChangeCoverageDeltaColumn(Metric.LINE);
         }
 
         @Override
         public DetailedCell<?> getBranchCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(CoverageMetric.BRANCH);
+            return createColoredChangeCoverageDeltaColumn(Metric.BRANCH);
         }
 
         @Override
         public int getLoc() {
-            return changedFileNode.getIndirectCoverageChanges().size();
+            return originalFile.getIndirectCoverageChanges().size();
         }
 
         private DetailedCell<?> createColoredChangeCoverageDeltaColumn(
-                final CoverageMetric coverageMetric) {
-            Coverage changeCoverage = changedFileNode.getCoverage(coverageMetric);
+                final Metric metric) {
+            Coverage changeCoverage = getFile().getTypedValue(metric, Coverage.nullObject(metric));
             if (changeCoverage.isSet()) {
-                Fraction delta = changeCoverage.getCoveredFraction()
-                        .subtract(getRoot().getCoverage(coverageMetric).getCoveredFraction());
-                return createColoredCoverageDeltaColumn(CoveragePercentage.valueOf(delta),
-                        "The indirect coverage changes within the file against the total file coverage");
+                return createColoredCoverageDeltaColumn(
+                        changeCoverage.delta(originalFile.getTypedValue(metric, Coverage.nullObject(metric))));
             }
             return NO_COVERAGE;
         }

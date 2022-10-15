@@ -44,7 +44,6 @@ import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.detector.Detectable;
 import io.jenkins.plugins.coverage.detector.ReportDetector;
 import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.model.CoverageReporter;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver.SourceFileResolverLevel;
 import io.jenkins.plugins.coverage.targets.CoverageElement;
@@ -128,7 +127,8 @@ public class CoverageProcessor {
         HealthReport healthReport = processThresholds(results, globalThresholds, action);
         action.setHealthReport(healthReport);
 
-        // Transform the old model to the new model
+        // FIXME: Transform the old model to the new model
+        /*
         CoverageReporter coverageReporter = new CoverageReporter();
         coverageReporter.run(coverageReport.getRoot(), run, workspace, listener, healthReport, scm,
                 sourceDirectories, sourceCodeEncoding, mapSourceCodeRetention());
@@ -136,6 +136,7 @@ public class CoverageProcessor {
         if (failBuildIfCoverageDecreasedInChangeRequest) {
             failBuildIfChangeRequestDecreasedCoverage(coverageReport, action);
         }
+        */
     }
 
     private SourceCodeRetention mapSourceCodeRetention() {

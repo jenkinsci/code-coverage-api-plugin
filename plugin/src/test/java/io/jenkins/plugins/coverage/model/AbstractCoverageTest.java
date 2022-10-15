@@ -1,15 +1,15 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 import org.junitpioneer.jupiter.DefaultLocale;
 
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.metric.parser.JacocoParser;
 import edu.hm.hafner.util.ResourceTest;
-
-import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter.JacocoReportAdapterDescriptor;
-import io.jenkins.plugins.coverage.exception.CoverageException;
-import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
-import io.jenkins.plugins.coverage.targets.CoverageResult;
+import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
 /**
  * Base class for coverage tests that work on real coverage reports.
@@ -18,74 +18,29 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
  */
 @DefaultLocale("en")
 public abstract class AbstractCoverageTest extends ResourceTest {
-    static final CoverageMetric MODULE = CoverageMetric.MODULE;
-    static final CoverageMetric PACKAGE = CoverageMetric.PACKAGE;
-    static final CoverageMetric FILE = CoverageMetric.FILE;
-    static final CoverageMetric CLASS = CoverageMetric.CLASS;
-    static final CoverageMetric METHOD = CoverageMetric.METHOD;
-    static final CoverageMetric LINE = CoverageMetric.LINE;
-    static final CoverageMetric INSTRUCTION = CoverageMetric.INSTRUCTION;
-    static final CoverageMetric BRANCH = CoverageMetric.BRANCH;
+    static final Metric MODULE = Metric.MODULE;
+    static final Metric PACKAGE = Metric.PACKAGE;
+    static final Metric FILE = Metric.FILE;
+    static final Metric CLASS = Metric.CLASS;
+    static final Metric METHOD = Metric.METHOD;
+    static final Metric LINE = Metric.LINE;
+    static final Metric INSTRUCTION = Metric.INSTRUCTION;
+    static final Metric BRANCH = Metric.BRANCH;
 
     /**
-     * Reads the {@link CoverageResult} from a coverage report.
+     * Reads and parses a JaCoCo coverage report.
      *
      * @param fileName
-     *         The name of the coverage report file
-     *
-     * @return the parsed coverage results
-     */
-    public CoverageResult readResult(final String fileName) {
-        try {
-            JacocoReportAdapter parser = new JacocoReportAdapter("unused");
-            CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
-            CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
-            result.stripGroup();
-            return result;
-        }
-        catch (CoverageException exception) {
-            throw new AssertionError(exception);
-        }
-    }
-
-    /**
-     * Reads the {@link CoverageResult} from a coverage report.
-     *
-     * @param fileName
-     *         The name of the coverage report file
-     *
-     * @return the parsed coverage results
-     */
-    public CoverageResult readCoberturaResult(final String fileName) {
-        try {
-            CoberturaReportAdapter parser = new CoberturaReportAdapter("unused");
-            CoverageElementRegister.addCoverageElements(new CoberturaReportAdapter.CoberturaReportAdapterDescriptor().getCoverageElements());
-            CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
-            result.stripGroup();
-            return result;
-        }
-        catch (CoverageException exception) {
-            throw new AssertionError(exception);
-        }
-    }
-
-    /**
-     * Reads the {@link CoverageNode} from a coverage report.
-     *
-     * @param fileName
-     *         The name of the coverage report file
+     *         the name of the coverage report file
      *
      * @return the parsed coverage tree
      */
-    public CoverageNode readNode(final String fileName) {
-        return new CoverageNodeConverter().convert(readResult(fileName));
-    }
-
-    protected CoverageResult readReport(final String fileName) throws CoverageException {
-        JacocoReportAdapter parser = new JacocoReportAdapter("Hello");
-        CoverageElementRegister.addCoverageElements(new JacocoReportAdapterDescriptor().getCoverageElements());
-        CoverageResult result = parser.getResult(getResourceAsFile(fileName).toFile());
-        result.stripGroup();
-        return result;
+    public Node readJacocoResult(final String fileName) {
+        try {
+            return new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)));
+        }
+        catch (ParsingException | IOException exception) {
+            throw new AssertionError(exception);
+        }
     }
 }

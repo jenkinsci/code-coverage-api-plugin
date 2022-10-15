@@ -7,6 +7,10 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
@@ -18,6 +22,9 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
+import io.jenkins.plugins.coverage.metrics.CoverageRecorder;
+import io.jenkins.plugins.coverage.metrics.CoverageTool;
+import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
@@ -162,11 +169,12 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     void freestyleForOneJacoco() {
         FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
+        copyFileToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, "jacoco.xml");
+        CoverageRecorder recorder = new CoverageRecorder();
+        var tool = new CoverageTool();
+        tool.setParser(CoverageParser.JACOCO);
+        recorder.setTools(List.of(tool));
+        project.getPublishersList().add(recorder);
 
         verifyForOneJacoco(project);
     }
@@ -342,7 +350,9 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_COVERED_LINES)
+                .isEqualTo(new Coverage.CoverageBuilder()
+                        .setMetric(Metric.LINE)
+                        .setCovered(JACOCO_COVERED_LINES)
                         .setMissed(JACOCO_ALL_LINES - JACOCO_COVERED_LINES)
                         .build());
     }
@@ -396,7 +406,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(COBERTURA_COVERED_LINES)
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
                         .setMissed(COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES)
                         .build());
 

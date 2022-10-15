@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import edu.hm.hafner.metric.Metric;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -18,7 +19,6 @@ import hudson.views.ListViewColumnDescriptor;
 import jenkins.model.Jenkins;
 
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
@@ -34,7 +34,7 @@ public class CoverageColumn extends ListViewColumn {
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
     private String columnName = Messages.Coverage_Column();
-    private String coverageMetric = CoverageMetric.LINE.getName();
+    private String coverageMetric = Metric.LINE.name();
     private String coverageType = selectedCoverageColumnType.getDisplayName();
 
     /**
@@ -133,7 +133,7 @@ public class CoverageColumn extends ListViewColumn {
     public Optional<CoveragePercentage> getCoverageValue(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
             CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-            return selectedCoverageColumnType.getCoverage(action, CoverageMetric.valueOf(coverageMetric));
+            return selectedCoverageColumnType.getCoverage(action, Metric.valueOf(coverageMetric));
         }
         return Optional.empty();
     }
@@ -243,8 +243,8 @@ public class CoverageColumn extends ListViewColumn {
         public ListBoxModel doFillCoverageMetricItems() {
             ListBoxModel model = new ListBoxModel();
             if (new JenkinsFacade().hasPermission(Jenkins.READ)) {
-                for (CoverageMetric coverageMetric : CoverageMetric.getAvailableCoverageMetrics()) {
-                    model.add(coverageMetric.getName());
+                for (Metric coverageMetric : Metric.values()) {
+                    model.add(coverageMetric.name());
                 }
             }
             return model;

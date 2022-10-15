@@ -10,6 +10,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.PathUtil;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -172,12 +176,11 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private CoverageViewModel verifyViewModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(8).setMissed(0).build());
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(8).setMissed(0).build());
 
-        Optional<CoverageNode> fileNode = action.getResult().find(CoverageMetric.FILE, SOURCE_FILE_PATH);
+        Optional<Node> fileNode = action.getResult().find(Metric.FILE, SOURCE_FILE_PATH);
         assertThat(fileNode).isNotEmpty()
-                .hasValueSatisfying(node ->
-                        assertThat(node.getPath()).isEqualTo(SOURCE_FILE_PATH));
+                .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(SOURCE_FILE_PATH));
 
         return action.getTarget();
     }

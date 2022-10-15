@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -14,20 +15,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.math.Fraction;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Node;
 
 import io.jenkins.plugins.forensics.delta.model.Change;
 import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
 
 /**
- * Calculates and attaches values to the {@link FileCoverageNode nodes} of the coverage tree which represent the changes
+ * Calculates and attaches values to the {@link FileNode nodes} of the coverage tree which represent the changes
  * concerning code and coverage.
  *
  * @author Florian Orendi
  */
 public class FileChangesProcessor {
-
     /**
      * Attaches the changed code lines to the file nodes of the coverage tree.
      *
@@ -36,30 +38,28 @@ public class FileChangesProcessor {
      * @param codeChanges
      *         The code changes to be attached
      */
-    public void attachChangedCodeLines(final CoverageNode coverageNode, final Map<String, FileChanges> codeChanges) {
-        Map<String, CoverageNode> nodePathMapping = coverageNode.getAllFileCoverageNodes().stream()
-                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+    public void attachChangedCodeLines(final Node coverageNode, final Map<String, FileChanges> codeChanges) {
+        Map<String, FileNode> nodePathMapping = coverageNode.getAllFileNodes().stream()
+                .collect(Collectors.toMap(Node::getPath, Function.identity()));
 
         codeChanges.forEach((path, fileChange) -> {
             if (nodePathMapping.containsKey(path)) {
-                CoverageNode changedNode = nodePathMapping.get(path);
-                if (changedNode instanceof FileCoverageNode) {
-                    attachChanges((FileCoverageNode) changedNode, fileChange.getChangesByType(ChangeEditType.INSERT));
-                    attachChanges((FileCoverageNode) changedNode, fileChange.getChangesByType(ChangeEditType.REPLACE));
-                }
+                FileNode changedNode = nodePathMapping.get(path);
+                attachChanges(changedNode, fileChange.getChangesByType(ChangeEditType.INSERT));
+                attachChanges(changedNode, fileChange.getChangesByType(ChangeEditType.REPLACE));
             }
         });
     }
 
     /**
-     * Attaches a set of changes to a specific {@link FileCoverageNode node}.
+     * Attaches a set of changes to a specific {@link FileNode node}.
      *
      * @param changedNode
      *         The node which contains code changes
      * @param relevantChanges
      *         The relevant changes
      */
-    private void attachChanges(final FileCoverageNode changedNode, final Set<Change> relevantChanges) {
+    private void attachChanges(final FileNode changedNode, final Set<Change> relevantChanges) {
         for (Change change : relevantChanges) {
             for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
                 changedNode.addChangedCodeLine(i);
@@ -78,10 +78,10 @@ public class FileChangesProcessor {
      * @param oldPathMapping
      *         A mapping between the report paths of the current and the reference coverage tree
      */
-    public void attachFileCoverageDeltas(final CoverageNode root, final CoverageNode referenceNode,
+    public void attachFileCoverageDeltas(final Node root, final Node referenceNode,
             final Map<String, String> oldPathMapping) {
-        Map<String, FileCoverageNode> fileNodes = getFileNodeMappingWithReferencePaths(root, oldPathMapping);
-        Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
+        Map<String, FileNode> fileNodes = getFileNodeMappingWithReferencePaths(root, oldPathMapping);
+        Map<String, FileNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
         fileNodes.entrySet().stream()
                 .filter(entry -> referenceFileNodes.containsKey(entry.getKey()))
                 .forEach(entry -> attachFileCoverageDelta(entry.getValue(), referenceFileNodes.get(entry.getKey())));
@@ -91,18 +91,12 @@ public class FileChangesProcessor {
      * Attaches the delta between the total coverage of a file against the same file from the reference build.
      *
      * @param fileNode
-     *         The {@link FileCoverageNode node} which represents the total coverage of a file
+     *         The {@link FileNode node} which represents the total coverage of a file
      * @param referenceNode
-     *         The {@link FileCoverageNode reference node} which represents the coverage of the reference file
+     *         The {@link FileNode reference node} which represents the coverage of the reference file
      */
-    private void attachFileCoverageDelta(final FileCoverageNode fileNode, final FileCoverageNode referenceNode) {
-        SortedMap<CoverageMetric, Fraction> referenceCoverage = referenceNode.getMetricFractions();
-        fileNode.getMetricFractions().forEach((metric, value) -> {
-            if (referenceCoverage.containsKey(metric)) {
-                Fraction delta = value.subtract(referenceCoverage.get(metric));
-                fileNode.putFileCoverageDelta(metric, CoveragePercentage.valueOf(delta));
-            }
-        });
+    private void attachFileCoverageDelta(final FileNode fileNode, final FileNode referenceNode) {
+        fileNode.computeDelta(referenceNode);
     }
 
     /**
@@ -117,14 +111,14 @@ public class FileChangesProcessor {
      * @param oldPathMapping
      *         A mapping between the report paths of the current and the reference coverage tree
      */
-    public void attachIndirectCoveragesChanges(final CoverageNode root, final CoverageNode referenceNode,
+    public void attachIndirectCoveragesChanges(final Node root, final Node referenceNode,
             final Map<String, FileChanges> codeChanges, final Map<String, String> oldPathMapping) {
-        Map<String, FileCoverageNode> fileNodes = getFileNodeMappingWithReferencePaths(root, oldPathMapping);
-        Map<String, FileCoverageNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
+        Map<String, FileNode> fileNodes = getFileNodeMappingWithReferencePaths(root, oldPathMapping);
+        Map<String, FileNode> referenceFileNodes = getReferenceFileNodeMapping(fileNodes, referenceNode);
 
-        for (Map.Entry<String, FileCoverageNode> entry : fileNodes.entrySet()) {
+        for (Map.Entry<String, FileNode> entry : fileNodes.entrySet()) {
             String referencePath = entry.getKey();
-            FileCoverageNode fileNode = entry.getValue();
+            FileNode fileNode = entry.getValue();
             Optional<SortedMap<Integer, Coverage>> referenceCoveragePerLine =
                     getReferenceCoveragePerLine(referenceFileNodes, referencePath);
             if (referenceCoveragePerLine.isPresent()) {
@@ -147,15 +141,15 @@ public class FileChangesProcessor {
      * @param referenceCoverageMapping
      *         A mapping which contains the coverage per line of the reference file
      */
-    private void attachIndirectCoverageChangeForFile(final FileCoverageNode fileNode,
+    private void attachIndirectCoverageChangeForFile(final FileNode fileNode,
             final SortedMap<Integer, Coverage> referenceCoverageMapping) {
-        fileNode.getCoveragePerLine().forEach((line, coverage) -> {
-            if (!fileNode.getChangedCodeLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
+        fileNode.getLineNumberToLineCoverage().forEach((line, coverage) -> {
+            if (!fileNode.getChangedLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
                 Coverage referenceCoverage = referenceCoverageMapping.get(line);
                 int covered = coverage.getCovered();
                 int referenceCovered = referenceCoverage.getCovered();
                 if (covered != referenceCovered) {
-                    fileNode.putIndirectCoverageChange(line, covered - referenceCovered);
+                    fileNode.addIndirectCoverageChange(line, covered - referenceCovered);
                 }
             }
         });
@@ -173,9 +167,9 @@ public class FileChangesProcessor {
      * @return an Optional of the coverage mapping if existent, else an empty Optional
      */
     private Optional<SortedMap<Integer, Coverage>> getReferenceCoveragePerLine(
-            final Map<String, FileCoverageNode> references, final String fullyQualifiedName) {
+            final Map<String, FileNode> references, final String fullyQualifiedName) {
         if (references.containsKey(fullyQualifiedName)) {
-            SortedMap<Integer, Coverage> coveragePerLine = references.get(fullyQualifiedName).getCoveragePerLine();
+            NavigableMap<Integer, Coverage> coveragePerLine = references.get(fullyQualifiedName).getLineNumberToLineCoverage();
             if (coveragePerLine != null && !coveragePerLine.isEmpty()) {
                 return Optional.of(coveragePerLine);
             }
@@ -273,20 +267,20 @@ public class FileChangesProcessor {
     }
 
     /**
-     * Gets all {@link FileCoverageNode file nodes} from the actual build which also exist within the reference build
-     * and maps them by their fully qualified name from the reference.
+     * Gets all {@link FileNode file nodes} from the currently running build which also exist within the
+     * reference build and maps them by their fully qualified name from the reference.
      *
      * @param root
-     *         The root node of the currently build coverage tree
+     *         the root node of the coverage tree of the currently running build
      * @param oldPathMapping
-     *         A mapping between the report fully qualified names of the current and the reference coverage tree
+     *         a mapping between the report fully qualified names of the current and the reference coverage tree
      *
      * @return the created node mapping whose keys are fully qualified names from the reference and which values are the
      *         corresponding nodes from the actual build
      */
-    private Map<String, FileCoverageNode> getFileNodeMappingWithReferencePaths(
-            final CoverageNode root, final Map<String, String> oldPathMapping) {
-        return root.getAllFileCoverageNodes().stream()
+    private Map<String, FileNode> getFileNodeMappingWithReferencePaths(
+            final Node root, final Map<String, String> oldPathMapping) {
+        return root.getAllFileNodes().stream()
                 .filter(node -> oldPathMapping.containsKey(node.getPath()))
                 .collect(Collectors.toMap(node -> oldPathMapping.get(node.getPath()), Function.identity()));
     }
@@ -302,11 +296,11 @@ public class FileChangesProcessor {
      *
      * @return the created node mapping
      */
-    private Map<String, FileCoverageNode> getReferenceFileNodeMapping(
-            final Map<String, FileCoverageNode> nodeMapping, final CoverageNode referenceNode) {
-        return referenceNode.getAllFileCoverageNodes().stream()
+    private Map<String, FileNode> getReferenceFileNodeMapping(
+            final Map<String, FileNode> nodeMapping, final Node referenceNode) {
+        return referenceNode.getAllFileNodes().stream()
                 .filter(reference -> nodeMapping.containsKey(reference.getPath()))
-                .collect(Collectors.toMap(FileCoverageNode::getPath, Function.identity()));
+                .collect(Collectors.toMap(FileNode::getPath, Function.identity()));
     }
 
     /**

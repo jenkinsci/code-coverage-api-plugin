@@ -1,17 +1,21 @@
 package io.jenkins.plugins.coverage.model.testutil;
 
-import java.util.SortedMap;
+import java.util.NavigableMap;
+import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.ModuleNode;
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.VisibleForTesting;
 
-import io.jenkins.plugins.coverage.model.Coverage;
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
-import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 
 import static io.jenkins.plugins.coverage.model.CoverageBuildAction.*;
@@ -65,19 +69,19 @@ public final class CoverageStubs {
      */
     @VisibleForTesting
     public static CoverageBuildAction createCoverageBuildAction(
-            final CoverageMetric coverageMetric, final Fraction coverageValue) {
+            final Metric coverageMetric, final Fraction coverageValue) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         Coverage coverage = createCoverage(coverageValue);
         CoveragePercentage percentage = CoveragePercentage.valueOf(coverageValue);
 
-        SortedMap<CoverageMetric, CoveragePercentage> deltas = mock(SortedMap.class);
+        NavigableMap<Metric, Fraction> deltas = mock(NavigableMap.class);
         when(deltas.size()).thenReturn(1);
         when(deltas.containsKey(coverageMetric)).thenReturn(true);
-        when(deltas.containsValue(percentage)).thenReturn(true);
-        when(deltas.get(coverageMetric)).thenReturn(percentage);
+        when(deltas.containsValue(coverageValue)).thenReturn(true);
+        when(deltas.get(coverageMetric)).thenReturn(coverageValue);
 
         when(action.hasDelta(coverageMetric)).thenReturn(true);
-        when(action.getDifference()).thenReturn(deltas);
+        when(action.getDelta()).thenReturn(deltas);
 
         when(action.hasCoverage(coverageMetric)).thenReturn(true);
         when(action.getCoverage(coverageMetric)).thenReturn(coverage);
@@ -91,7 +95,7 @@ public final class CoverageStubs {
         when(action.getIndirectCoverageChanges(coverageMetric)).thenReturn(coverage);
 
         when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
-        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(percentage);
+        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(coverageValue);
 
         when(action.getUrlName()).thenReturn(DETAILS_URL);
 
@@ -109,14 +113,13 @@ public final class CoverageStubs {
     @VisibleForTesting
     public static Coverage createCoverage(final Fraction coverageFraction) {
         Coverage coverage = mock(Coverage.class);
-        when(coverage.getCoveredFraction()).thenReturn(coverageFraction);
-        when(coverage.getCoveredPercentage()).thenReturn(CoveragePercentage.valueOf(coverageFraction));
+        when(coverage.getCoveredPercentage()).thenReturn(coverageFraction);
         when(coverage.isSet()).thenReturn(true);
         return coverage;
     }
 
     /**
-     * Creates a stub of {@link CoverageNode}, which provides the passed coverage percentage for the passed metric.
+     * Creates a stub of {@link Node}, which provides the passed coverage percentage for the passed metric.
      *
      * @param coverageFraction
      *         The coverage fraction
@@ -126,16 +129,15 @@ public final class CoverageStubs {
      * @return the created stub
      */
     @VisibleForTesting
-    public static CoverageNode createCoverageNode(final Fraction coverageFraction,
-            final CoverageMetric coverageMetric) {
-        CoverageNode coverageNode = mock(CoverageNode.class);
+    public static FileNode createCoverageNode(final Fraction coverageFraction, final Metric coverageMetric) {
+        FileNode coverageNode = mock(FileNode.class);
         Coverage coverage = createCoverage(coverageFraction);
-        when(coverageNode.getCoverage(coverageMetric)).thenReturn(coverage);
+        when(coverageNode.getValue(coverageMetric)).thenReturn(Optional.of(coverage));
         return coverageNode;
     }
 
     /**
-     * Creates a stub of {@link CoverageNode}, which represents the change coverage and provides information about it.
+     * Creates a stub of {@link Node}, which represents the change coverage and provides information about it.
      *
      * @param changeCoverage
      *         The change coverage
@@ -149,21 +151,25 @@ public final class CoverageStubs {
      * @return the created stub
      */
     @VisibleForTesting
-    public static CoverageNode createChangeCoverageNode(final Fraction changeCoverage, final CoverageMetric metric,
+    public static Node createChangeCoverageNode(final Fraction changeCoverage, final Metric metric,
             final int coverageFileChange, final long coverageLineChanges) {
-        CoverageNode coverageNode = createCoverageNode(changeCoverage, metric);
-        when(coverageNode.hasChangeCoverage()).thenReturn(true);
-        when(coverageNode.hasChangeCoverage(metric)).thenReturn(true);
-        when(coverageNode.getChangeCoverageTree()).thenReturn(coverageNode);
-        when(coverageNode.hasCodeChanges()).thenReturn(true);
-        when(coverageNode.getFileAmountWithChangedCoverage()).thenReturn(coverageFileChange);
-        when(coverageNode.getLineAmountWithChangedCoverage()).thenReturn(coverageLineChanges);
-        return coverageNode;
+        var root = new ModuleNode("root");
+        var builder = new CoverageBuilder().setMetric(Metric.LINE);
+        for (int file = 0; file < 5; file++) {
+            var fileNode = new FileNode("File-" + file);
+
+            for (int line = 0; line < 2; line++) {
+                fileNode.addLineCoverage(10 + line, builder.setCovered(1).setMissed(1).build());
+                fileNode.addChangedCodeLine(10 + line);
+            }
+            root.addChild(fileNode);
+        }
+
+        return root;
     }
 
     /**
-     * Creates a stub of {@link CoverageNode}, which represents indirect coverage changes and provides information about
-     * it.
+     * Creates a stub of {@link Node}, which represents indirect coverage changes and provides information about it.
      *
      * @param coverageChanges
      *         The indirect coverage change
@@ -177,14 +183,19 @@ public final class CoverageStubs {
      * @return the created stub
      */
     @VisibleForTesting
-    public static CoverageNode createIndirectCoverageChangesNode(final Fraction coverageChanges,
-            final CoverageMetric metric, final int coverageFileChange, final long coverageLineChanges) {
-        CoverageNode coverageNode = createCoverageNode(coverageChanges, metric);
-        when(coverageNode.hasIndirectCoverageChanges()).thenReturn(true);
-        when(coverageNode.hasIndirectCoverageChanges(metric)).thenReturn(true);
-        when(coverageNode.getIndirectCoverageChangesTree()).thenReturn(coverageNode);
-        when(coverageNode.getFileAmountWithIndirectCoverageChanges()).thenReturn(coverageFileChange);
-        when(coverageNode.getLineAmountWithIndirectCoverageChanges()).thenReturn(coverageLineChanges);
-        return coverageNode;
+    public static Node createIndirectCoverageChangesNode(final Fraction coverageChanges,
+            final Metric metric, final int coverageFileChange, final long coverageLineChanges) {
+        var root = new ModuleNode("root");
+        var builder = new CoverageBuilder().setMetric(Metric.LINE);
+        for (int file = 0; file < 5; file++) {
+            var fileNode = new FileNode("File-" + file);
+
+            for (int line = 0; line < 2; line++) {
+                fileNode.addLineCoverage(10 + line, builder.setCovered(1).setMissed(1).build());
+                fileNode.addIndirectCoverageChange(10 + line, 2);
+            }
+            root.addChild(fileNode);
+        }
+        return root;
     }
 }

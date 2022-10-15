@@ -5,13 +5,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.FilePath;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade.AgentCoveragePainter;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
@@ -56,7 +56,7 @@ public class SourceCodePainter {
      * @throws InterruptedException
      *         if the painting process has been interrupted
      */
-    public void processSourceCodePainting(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+    public void processSourceCodePainting(final Set<Entry<Node, CoveragePaint>> paintedFiles,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
             throws InterruptedException {
@@ -72,7 +72,7 @@ public class SourceCodePainter {
         sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
     }
 
-    private void paintFilesOnAgent(final Set<Entry<CoverageNode, CoveragePaint>> paintedFiles,
+    private void paintFilesOnAgent(final Set<Entry<Node, CoveragePaint>> paintedFiles,
             final Set<String> requestedSourceDirectories,
             final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
         try {

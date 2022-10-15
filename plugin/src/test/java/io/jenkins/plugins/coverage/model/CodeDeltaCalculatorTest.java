@@ -2,9 +2,9 @@ package io.jenkins.plugins.coverage.model;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;
@@ -33,7 +35,6 @@ import static org.mockito.Mockito.*;
  * @author Florian Orendi
  */
 class CodeDeltaCalculatorTest {
-
     private static final String LOG_NAME = "Errors while calculating changes mapping:";
 
     private static final String EMPTY_PATH = "";
@@ -85,7 +86,7 @@ class CodeDeltaCalculatorTest {
         Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
         Map<String, FileChanges> changesMap = changes.stream()
                 .collect(Collectors.toMap(FileChanges::getFileName, Function.identity()));
-        CoverageNode tree = createMockedCoverageTree();
+        Node tree = createMockedCoverageTree();
         FilteredLog log = createFilteredLog();
 
         Map<String, FileChanges> should = new HashMap<>();
@@ -101,7 +102,7 @@ class CodeDeltaCalculatorTest {
     @Test
     void shouldCreateEmptyMappingWithoutChanges() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
-        CoverageNode tree = createMockedCoverageTree();
+        Node tree = createMockedCoverageTree();
         FilteredLog log = createFilteredLog();
         Set<FileChanges> noChanges = new HashSet<>();
 
@@ -109,17 +110,18 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldNotMapScmChangesWithAmbiguousPaths() {
+    void shouldNotMapScmChangesWithAmbiguousPaths() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
 
         String path = "example";
         Set<FileChanges> changes = createAmbiguousFileChanges(path);
 
-        CoverageNode tree = mock(CoverageNode.class);
-        FileCoverageNode file1 = mock(FileCoverageNode.class);
+        Node tree = mock(Node.class);
+        FileNode file1 = mock(FileNode.class);
         when(file1.getPath()).thenReturn(path);
-        when(tree.getAllFileCoverageNodes()).thenReturn(Collections.singletonList(file1));
+        when(tree.getAllFileNodes()).thenReturn(List.of(file1));
+        when(tree.getFiles()).thenReturn(List.of(path));
 
         assertThatThrownBy(() -> codeDeltaCalculator.mapScmChangesToReportPaths(changes, tree, log))
                 .isInstanceOf(CodeDeltaException.class)
@@ -130,8 +132,8 @@ class CodeDeltaCalculatorTest {
     void shouldCreateOldPathMapping() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
-        CoverageNode tree = createMockedCoverageTree();
-        CoverageNode referenceTree = createMockedReferenceCoverageTree();
+        Node tree = createMockedCoverageTree();
+        Node referenceTree = createMockedReferenceCoverageTree();
         Map<String, FileChanges> changes = new HashMap<>();
         changes.put(REPORT_PATH_MODIFY, createFileChanges(SCM_PATH_MODIFY, SCM_PATH_MODIFY, FileEditType.MODIFY));
         changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
@@ -149,8 +151,8 @@ class CodeDeltaCalculatorTest {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
 
-        CoverageNode tree = new CoverageNode(CoverageMetric.FILE, REPORT_PATH_RENAME);
-        CoverageNode referenceTree = new CoverageNode(CoverageMetric.FILE, REPORT_PATH_MODIFY);
+        Node tree = new FileNode(REPORT_PATH_RENAME);
+        Node referenceTree = new FileNode(REPORT_PATH_MODIFY);
         Map<String, FileChanges> changes = new HashMap<>();
         changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
 
@@ -165,8 +167,8 @@ class CodeDeltaCalculatorTest {
     void shouldNotCreateOldPathMappingWithCodeDeltaMismatches() {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
-        CoverageNode tree = createMockedCoverageTree();
-        CoverageNode referenceTree = createMockedReferenceCoverageTree();
+        Node tree = createMockedCoverageTree();
+        Node referenceTree = createMockedReferenceCoverageTree();
 
         // two changes with the same former path
         Map<String, FileChanges> changes = new HashMap<>();
@@ -257,19 +259,22 @@ class CodeDeltaCalculatorTest {
      * Mocks a coverage tree which contains file nodes which represent {@link #REPORT_PATH_ADD_1}, {@link
      * #REPORT_PATH_ADD_2} and {@link #REPORT_PATH_MODIFY}.
      *
-     * @return the {@link CoverageNode root} of the tree
+     * @return the {@link Node root} of the tree
      */
-    private CoverageNode createMockedCoverageTree() {
-        FileCoverageNode addFile1 = mock(FileCoverageNode.class);
+    private Node createMockedCoverageTree() {
+        FileNode addFile1 = mock(FileNode.class);
         when(addFile1.getPath()).thenReturn(REPORT_PATH_ADD_1);
-        FileCoverageNode addFile2 = mock(FileCoverageNode.class);
+        FileNode addFile2 = mock(FileNode.class);
         when(addFile2.getPath()).thenReturn(REPORT_PATH_ADD_2);
-        FileCoverageNode modifyFile = mock(FileCoverageNode.class);
+        FileNode modifyFile = mock(FileNode.class);
         when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
-        FileCoverageNode renameFile = mock(FileCoverageNode.class);
+        FileNode renameFile = mock(FileNode.class);
         when(renameFile.getPath()).thenReturn(REPORT_PATH_RENAME);
-        CoverageNode root = mock(CoverageNode.class);
-        when(root.getAllFileCoverageNodes()).thenReturn(Arrays.asList(addFile1, addFile2, modifyFile, renameFile));
+        Node root = mock(Node.class);
+        when(root.getAllFileNodes()).thenReturn(Arrays.asList(addFile1, addFile2, modifyFile, renameFile));
+        var files = root.getAllFileNodes().stream().map(FileNode::getPath).collect(Collectors.toList());
+        when(root.getFiles()).thenReturn(files);
+
         return root;
     }
 
@@ -277,15 +282,18 @@ class CodeDeltaCalculatorTest {
      * Mocks a reference coverage tree which contains file nodes which represent {@link #OLD_REPORT_PATH_RENAME} and
      * {@link #REPORT_PATH_MODIFY}.
      *
-     * @return the {@link CoverageNode root} of the tree
+     * @return the {@link Node root} of the tree
      */
-    private CoverageNode createMockedReferenceCoverageTree() {
-        FileCoverageNode modifyFile = mock(FileCoverageNode.class);
+    private Node createMockedReferenceCoverageTree() {
+        FileNode modifyFile = mock(FileNode.class);
         when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
-        FileCoverageNode renameFile = mock(FileCoverageNode.class);
+        FileNode renameFile = mock(FileNode.class);
         when(renameFile.getPath()).thenReturn(OLD_REPORT_PATH_RENAME);
-        CoverageNode root = mock(CoverageNode.class);
-        when(root.getAllFileCoverageNodes()).thenReturn(Arrays.asList(renameFile, modifyFile));
+        Node root = mock(Node.class);
+        when(root.getAllFileNodes()).thenReturn(Arrays.asList(renameFile, modifyFile));
+        var files = root.getAllFileNodes().stream().map(FileNode::getPath).collect(Collectors.toList());
+        when(root.getFiles()).thenReturn(files);
+
         return root;
     }
 

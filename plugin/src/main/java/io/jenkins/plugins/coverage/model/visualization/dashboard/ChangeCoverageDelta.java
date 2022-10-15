@@ -3,8 +3,9 @@ package io.jenkins.plugins.coverage.model.visualization.dashboard;
 import java.util.Locale;
 import java.util.Optional;
 
+import edu.hm.hafner.metric.Metric;
+
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -16,7 +17,6 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageChan
  * @author Florian Orendi
  */
 public class ChangeCoverageDelta extends CoverageColumnType {
-
     /**
      * Creates a column type to be used for representing the change coverage delta.
      */
@@ -25,9 +25,9 @@ public class ChangeCoverageDelta extends CoverageColumnType {
     }
 
     @Override
-    public Optional<CoveragePercentage> getCoverage(final CoverageBuildAction action, final CoverageMetric metric) {
+    public Optional<CoveragePercentage> getCoverage(final CoverageBuildAction action, final Metric metric) {
         if (action.hasChangeCoverageDifference(metric)) {
-            return Optional.of(action.getChangeCoverageDifference(metric));
+            return Optional.of(CoveragePercentage.valueOf(action.getChangeCoverageDifference(metric)));
         }
         return Optional.empty();
     }

@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.LinesChartModel;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.Metric;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -43,7 +45,7 @@ class CoverageJobActionTest {
     void shouldNavigateToLastAction() throws IOException {
         FreeStyleBuild build = mock(FreeStyleBuild.class);
 
-        CoverageBuildAction action = creataBuildAction(build);
+        CoverageBuildAction action = createBuildAction(build);
 
         when(build.getAction(CoverageBuildAction.class)).thenReturn(action);
         when(build.getNumber()).thenReturn(15);
@@ -63,7 +65,7 @@ class CoverageJobActionTest {
     void shouldCreateTrendChartForLineAndBranchCoverage() throws IOException {
         FreeStyleBuild build = mock(FreeStyleBuild.class);
 
-        CoverageBuildAction action = creataBuildAction(build);
+        CoverageBuildAction action = createBuildAction(build);
 
         when(build.getAction(CoverageBuildAction.class)).thenReturn(action);
         int buildNumber = 15;
@@ -93,12 +95,12 @@ class CoverageJobActionTest {
         });
     }
 
-    private CoverageBuildAction creataBuildAction(final FreeStyleBuild build) {
+    private CoverageBuildAction createBuildAction(final FreeStyleBuild build) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         when(action.getOwner()).thenAnswer(i -> build);
         when(action.getUrlName()).thenReturn("coverage");
-        when(action.getBranchCoverage()).thenReturn(new Coverage.CoverageBuilder().setCovered(9).setMissed(1).build());
-        when(action.getLineCoverage()).thenReturn(new Coverage.CoverageBuilder().setCovered(10).setMissed(10).build());
+        when(action.getBranchCoverage()).thenReturn(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build());
+        when(action.getLineCoverage()).thenReturn(new CoverageBuilder().setMetric(Metric.LINE).setCovered(10).setMissed(10).build());
         return action;
     }
 }

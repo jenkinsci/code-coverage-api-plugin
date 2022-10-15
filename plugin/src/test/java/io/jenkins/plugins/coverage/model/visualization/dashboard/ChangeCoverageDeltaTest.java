@@ -4,8 +4,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Metric;
+
 import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageMetric;
 import io.jenkins.plugins.coverage.model.CoveragePercentage;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorId;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider.DisplayColors;
@@ -30,7 +31,7 @@ class ChangeCoverageDeltaTest extends CoverageColumnTypeTest {
     @Test
     void shouldNotReturnNonExistentCoverage() {
         CoverageBuildAction action = createCoverageBuildAction();
-        Optional<CoveragePercentage> coverage = CHANGE_COVERAGE_DELTA.getCoverage(action, CoverageMetric.FILE);
+        Optional<CoveragePercentage> coverage = CHANGE_COVERAGE_DELTA.getCoverage(action, Metric.FILE);
 
         assertThat(coverage).isEmpty();
     }
