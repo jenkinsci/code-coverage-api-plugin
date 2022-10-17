@@ -17,18 +17,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
-    @Test
-    void shouldFailWithoutAdapter() {
-        WorkflowJob job = createPipeline();
-        job.setDefinition(new CpsFlowDefinition(
-                "node {\n"
-                        + "    recordCoverage()\n"
-                        + " }\n", true));
-
-        Run<?, ?> run = buildWithResult(job, Result.FAILURE);
-
-        assertThat(getConsoleLog(run)).contains("[-ERROR-] No tools defined that will record the coverage files");
-    }
 
     @Test
     void shouldIgnoreEmptyListOfFiles() {
