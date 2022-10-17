@@ -1,11 +1,13 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
@@ -112,20 +114,24 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(getConsoleLog(run)).contains("[-ERROR-] No tools defined that will record the coverage files");
     }
 
-    @Test
-    void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob() {
+    @EnumSource
+    @ParameterizedTest(name = "{index} => Freestyle job with parser {0}")
+    @DisplayName("Report error but do not fail build in freestyle job when no input files are found")
+    void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
         FreeStyleProject project = createFreeStyleProject();
 
-        createRecorder(project, CoverageParser.JACOCO);
+        createRecorder(project, parser);
 
         verifyNoFilesFound(project);
     }
 
-    @Test
-    void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline() {
+    @EnumSource
+    @ParameterizedTest(name = "{index} => Pipeline with parser {0}")
+    @DisplayName("Report error but do not fail build in pipeline when no input files are found")
+    void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
         WorkflowJob job = createPipeline();
 
-        createPipelineFor(job, CoverageParser.JACOCO);
+        createPipelineFor(job, parser);
 
         verifyNoFilesFound(job);
     }
@@ -274,18 +280,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     // ---------------------------------------------------------------------------------------
 
     /**
-     * Pipeline integration test with no cobertura file.
-     */
-    @Test
-    void pipelineForNoCobertura() {
-        WorkflowJob job = createPipeline();
-
-        createPipelineFor(job, CoverageParser.COBERTURA);
-
-        verifyForNoFile(job);
-    }
-
-    /**
      * Pipeline integration test with one cobertura file.
      */
     @Test
@@ -308,21 +302,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         createPipelineFor(job, CoverageParser.COBERTURA);
 
         verifyForTwoCobertura(job);
-    }
-
-    /**
-     * Freestyle integration test with no cobertura file.
-     */
-    @Test
-    void freestyleForNoCobertura() {
-        FreeStyleProject project = createFreeStyleProject();
-
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter("");
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        verifyForNoFile(project);
     }
 
     /**
@@ -383,28 +362,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
 
         verifyForOneCoberturaAndOneJacoco(project);
-    }
-
-    /**
-     * Verifies project with no adapter.
-     *
-     * @param project
-     *         the project with no adapter
-     */
-    private void verifyForNoAdapter(final ParameterizedJob<?, ?> project) {
-        buildWithResult(project, Result.FAILURE);
-    }
-
-    /**
-     * Verifies project with no files.
-     *
-     * @param project
-     *         the project with no files
-     */
-    private void verifyForNoFile(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
-        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
-        assertThat(action).isEqualTo(null);
     }
 
     /**
