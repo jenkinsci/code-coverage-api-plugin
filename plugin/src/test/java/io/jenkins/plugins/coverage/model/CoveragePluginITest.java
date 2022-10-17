@@ -118,9 +118,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @ParameterizedTest(name = "{index} => Freestyle job with parser {0}")
     @DisplayName("Report error but do not fail build in freestyle job when no input files are found")
     void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
-        FreeStyleProject project = createFreeStyleProject();
-
-        createRecorder(project, parser);
+        FreeStyleProject project = createFreestyleJob(parser);
 
         verifyNoFilesFound(project);
     }
@@ -129,9 +127,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     @ParameterizedTest(name = "{index} => Pipeline with parser {0}")
     @DisplayName("Report error but do not fail build in pipeline when no input files are found")
     void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
-        WorkflowJob job = createPipeline();
-
-        createPipelineFor(job, parser);
+        WorkflowJob job = createPipeline(parser);
 
         verifyNoFilesFound(job);
     }
@@ -144,9 +140,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     void shouldRecordOneJacocoResultInFreestyleJob() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
-
-        createRecorder(project, CoverageParser.JACOCO);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         // FIXME: which parser is correct?
         /*
@@ -158,9 +152,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     void shouldRecordOneJacocoResultInPipeline() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
-
-        createPipelineFor(job, CoverageParser.JACOCO);
+        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         verifyOneJacocoResult(job);
     }
@@ -178,9 +170,8 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     void shouldRecordTwoJacocoResultsInFreestyleJob() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-
-        createRecorder(project, CoverageParser.JACOCO);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
 
         // FIXME: which parser is correct?
         /*
@@ -192,9 +183,8 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     void shouldRecordTwoJacocoResultsInPipeline() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-
-        createPipelineFor(job, CoverageParser.JACOCO);
+        WorkflowJob job = createPipeline(CoverageParser.JACOCO,
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
 
         verifyTwoJacocoResults(job);
     }
@@ -210,6 +200,28 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         .build());
     }
 
+    private FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
+
+        CoverageRecorder recorder = new CoverageRecorder();
+        var tool = new CoverageTool();
+        tool.setParser(parser);
+        tool.setPattern("**/*xml");
+        recorder.setTools(List.of(tool));
+        project.getPublishersList().add(recorder);
+
+        return project;
+    }
+
+    private WorkflowJob createPipeline(final CoverageParser parser, final String... fileNames) {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(fileNames);
+
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: '" + parser.name() + "', pattern: '**/*xml']]");
+
+        return job;
+    }
+
     private void setPipelineScript(final WorkflowJob job, final String recorderSnippet) {
         job.setDefinition(new CpsFlowDefinition(
                 "node {\n"
@@ -217,27 +229,19 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         + " }\n", true));
     }
 
-    private void createPipelineFor(final WorkflowJob job, final CoverageParser parser) {
-        setPipelineScript(job, "recordCoverage tools: [[parser: '" + parser.name() + "', pattern: '**/*xml']]");
-    }
-
-    private void createRecorder(final FreeStyleProject project, final CoverageParser parser) {
-        CoverageRecorder recorder = new CoverageRecorder();
-        var tool = new CoverageTool();
-        tool.setParser(parser);
-        tool.setPattern("**/*xml");
-        recorder.setTools(List.of(tool));
-        project.getPublishersList().add(recorder);
-    }
-
     @Test
     void shouldRecordOneCoberturaResultInFreestyleJob() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
-
-        createRecorder(project, CoverageParser.COBERTURA);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
         // FIXME: all parsers should only fail for mandatory properties (complexity is only optional)
         verifyOneCoberturaResult(project);
+    }
+
+    @Test
+    void shouldRecordOneCoberturaResultInPipeline() {
+        WorkflowJob job = createPipeline(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        verifyOneCoberturaResult(job);
     }
 
     private void verifyOneCoberturaResult(final ParameterizedJob<?, ?> project) {
@@ -252,9 +256,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
 
     @Test
     void shouldRecordOnePitResultInFreestyleJob() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles("mutations.xml");
-
-        createRecorder(project, CoverageParser.PIT);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.PIT, "mutations.xml");
 
         verifyOnePitResult(project);
     }
@@ -280,26 +282,12 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     // ---------------------------------------------------------------------------------------
 
     /**
-     * Pipeline integration test with one cobertura file.
-     */
-    @Test
-    void pipelineForOneCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
-
-        createPipelineFor(job, CoverageParser.COBERTURA);
-
-        verifyOneCoberturaResult(job);
-    }
-
-    /**
      * Pipeline integration test with two cobertura files.
      */
     @Test
     void pipelineForTwoCobertura() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE,
-                COBERTURA_WITH_LOTS_OF_DATA_FILE);
-
-        createPipelineFor(job, CoverageParser.COBERTURA);
+        WorkflowJob job = createPipeline(CoverageParser.COBERTURA,
+                COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
 
         verifyForTwoCobertura(job);
     }
