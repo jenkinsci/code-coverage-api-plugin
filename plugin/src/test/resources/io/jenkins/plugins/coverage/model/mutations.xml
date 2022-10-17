@@ -1,0 +1,3497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>add</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)V</methodDescription>
+    <lineNumber>175</lineNumber>
+    <mutator>NotExisting</mutator>
+    <index>12</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::setParent</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>addAll</mutatedMethod>
+    <methodDescription>(Ljava/util/List;)V</methodDescription>
+    <lineNumber>164</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>6</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>removed call to java/util/List::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>aggregateChildren</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>284</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>19</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::aggregateChildren
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>computeDelta</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ljava/util/SortedMap;</methodDescription>
+    <lineNumber>301</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>24</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldComputeDeltaWithOverflow()]
+    </killingTest>
+    <description>removed call to java/util/SortedMap::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>computeDelta</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ljava/util/SortedMap;</methodDescription>
+    <lineNumber>304</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>28</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldComputeDeltaWithOverflow()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::computeDelta</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyEmpty</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>483</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>10</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::copyEmpty</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>452</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::copyTree</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>465</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>9</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyLeaf()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>466</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>14</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyWithChild()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::setParent</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>471</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>33</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyWithChild()]
+    </killingTest>
+    <description>removed call to java/util/stream/Stream::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>472</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>43</index>
+    <block>10</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyLeaf()]
+    </killingTest>
+    <description>removed call to java/util/List::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>copyTree</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>474</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>47</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::copyTree</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>createChild</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>499</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>22</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>createChild</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>505</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>43</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>createChild</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>500</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>26</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::createChild</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>createChild</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>506</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>47</index>
+    <block>12</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::createChild</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>find</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Ljava/util/Optional;
+    </methodDescription>
+    <lineNumber>362</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>find</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Ljava/util/Optional;
+    </methodDescription>
+    <lineNumber>363</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>12</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for edu/hm/hafner/coverage/CoverageNode::find</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>find</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Ljava/util/Optional;
+    </methodDescription>
+    <lineNumber>365</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>34</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for edu/hm/hafner/coverage/CoverageNode::find</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>findByHashCode</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Ljava/util/Optional;</methodDescription>
+    <lineNumber>382</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>findByHashCode</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Ljava/util/Optional;</methodDescription>
+    <lineNumber>383</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>12</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for edu/hm/hafner/coverage/CoverageNode::findByHashCode
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>findByHashCode</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Ljava/util/Optional;</methodDescription>
+    <lineNumber>385</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>34</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for edu/hm/hafner/coverage/CoverageNode::findByHashCode
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getAll</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ljava/util/List;</methodDescription>
+    <lineNumber>345</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>40</index>
+    <block>9</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getAll</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ljava/util/List;</methodDescription>
+    <lineNumber>340</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>15</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldThrowExceptionWithLeafMetric()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/util/Ensure$BooleanCondition::isFalse</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getAll</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ljava/util/List;</methodDescription>
+    <lineNumber>348</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>51</index>
+    <block>12</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyList for edu/hm/hafner/coverage/CoverageNode::getAll
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getChildren</mutatedMethod>
+    <methodDescription>()Ljava/util/List;</methodDescription>
+    <lineNumber>156</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildAndLeaf()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyList for edu/hm/hafner/coverage/CoverageNode::getChildren
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='4'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>272</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>45</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetModuleCoverage()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>265</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>11</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>271</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>38</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>272</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>45</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>266</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>30</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>273</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>51</index>
+    <block>13</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>276</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>58</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetModuleCoverage()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>279</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>63</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetModuleCoverage()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getLeaves</mutatedMethod>
+    <methodDescription>()Ljava/util/List;</methodDescription>
+    <lineNumber>160</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildAndLeaf()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyList for edu/hm/hafner/coverage/CoverageNode::getLeaves
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getMetric</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>113</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldTextuallyRepresent()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getMetric</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getMetrics</mutatedMethod>
+    <methodDescription>()Ljava/util/NavigableSet;</methodDescription>
+    <lineNumber>128</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>40</index>
+    <block>10</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>removed call to java/util/stream/Stream::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getMetrics</mutatedMethod>
+    <methodDescription>()Ljava/util/NavigableSet;</methodDescription>
+    <lineNumber>130</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>44</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getMetrics</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getMetricsDistribution</mutatedMethod>
+    <methodDescription>()Ljava/util/NavigableMap;</methodDescription>
+    <lineNumber>139</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>18</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getMetricsDistribution
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getMetricsPercentages</mutatedMethod>
+    <methodDescription>()Ljava/util/NavigableMap;</methodDescription>
+    <lineNumber>144</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>18</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getMetricsPercentages
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>152</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldTextuallyRepresent()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::getName</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParent</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>71</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldThrowExceptionWithoutParent()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParent</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>74</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>18</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::getParent</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>216</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>222</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>31</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>222</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>36</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>223</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>43</index>
+    <block>10</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>removed call to java/util/List::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>217</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>9</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::getParentName
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>getParentName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>225</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>56</index>
+    <block>13</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::getParentName
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>hasParent</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>203</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>hasParent</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>203</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>13</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::hasParent</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>insertPackage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/Deque;)V</methodDescription>
+    <lineNumber>489</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>17</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>insertPackage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/Deque;)V</methodDescription>
+    <lineNumber>490</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>23</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::addAll</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>insertPackage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/Deque;)V</methodDescription>
+    <lineNumber>493</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>31</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::insertPackage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>isRoot</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>194</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>isRoot</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>194</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>13</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldAddChildren()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::isRoot</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$aggregateChildren$4</mutatedMethod>
+    <methodDescription>
+      (Ledu/hm/hafner/coverage/CoverageMetric;Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/Coverage;
+    </methodDescription>
+    <lineNumber>285</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetModuleCoverage()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::lambda$aggregateChildren$4
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$copyTree$12</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>470</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldCopyWithChild()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::lambda$copyTree$12
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$find$7</mutatedMethod>
+    <methodDescription>
+      (Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;Ledu/hm/hafner/coverage/CoverageNode;)Ljava/util/Optional;
+    </methodDescription>
+    <lineNumber>366</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for edu/hm/hafner/coverage/CoverageNode::lambda$find$7
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$find$8</mutatedMethod>
+    <methodDescription>(Ljava/util/Optional;)Ljava/util/stream/Stream;</methodDescription>
+    <lineNumber>367</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>9</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Stream.empty for edu/hm/hafner/coverage/CoverageNode::lambda$find$8
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$findByHashCode$10</mutatedMethod>
+    <methodDescription>(Ljava/util/Optional;)Ljava/util/stream/Stream;</methodDescription>
+    <lineNumber>387</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>9</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Stream.empty for
+      edu/hm/hafner/coverage/CoverageNode::lambda$findByHashCode$10
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$findByHashCode$9</mutatedMethod>
+    <methodDescription>
+      (Ledu/hm/hafner/coverage/CoverageMetric;ILedu/hm/hafner/coverage/CoverageNode;)Ljava/util/Optional;
+    </methodDescription>
+    <lineNumber>386</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced return value with Optional.empty for
+      edu/hm/hafner/coverage/CoverageNode::lambda$findByHashCode$9
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getAll$6</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ledu/hm/hafner/coverage/CoverageNode;)Ljava/util/List;
+    </methodDescription>
+    <lineNumber>343</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyList for
+      edu/hm/hafner/coverage/CoverageNode::lambda$getAll$6
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getCoverage$3</mutatedMethod>
+    <methodDescription>
+      (Ledu/hm/hafner/coverage/CoverageMetric;Ledu/hm/hafner/coverage/CoverageLeaf;)Ledu/hm/hafner/coverage/Coverage;
+    </methodDescription>
+    <lineNumber>267</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::lambda$getCoverage$3
+    </description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getMetricsDistribution$0</mutatedMethod>
+    <methodDescription>
+      (Ledu/hm/hafner/coverage/Coverage;Ledu/hm/hafner/coverage/Coverage;)Ledu/hm/hafner/coverage/Coverage;
+    </methodDescription>
+    <lineNumber>140</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>4</index>
+    <block>0</block>
+    <killingTest/>
+    <description>replaced return value with null for
+      edu/hm/hafner/coverage/CoverageNode::lambda$getMetricsDistribution$0
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getMetricsPercentages$1</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Lorg/apache/commons/lang3/math/Fraction;
+    </methodDescription>
+    <lineNumber>146</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>replaced return value with null for
+      edu/hm/hafner/coverage/CoverageNode::lambda$getMetricsPercentages$1
+    </description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getMetricsPercentages$2</mutatedMethod>
+    <methodDescription>
+      (Lorg/apache/commons/lang3/math/Fraction;Lorg/apache/commons/lang3/math/Fraction;)Lorg/apache/commons/lang3/math/Fraction;
+    </methodDescription>
+    <lineNumber>147</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>4</index>
+    <block>0</block>
+    <killingTest/>
+    <description>replaced return value with null for
+      edu/hm/hafner/coverage/CoverageNode::lambda$getMetricsPercentages$2
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$splitPackages$11</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Z</methodDescription>
+    <lineNumber>428</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>replaced boolean return with false for edu/hm/hafner/coverage/CoverageNode::lambda$splitPackages$11
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='4'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>lambda$splitPackages$11</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageNode;)Z</methodDescription>
+    <lineNumber>428</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithoutPackageNodes()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::lambda$splitPackages$11
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Z</methodDescription>
+    <lineNumber>416</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Z</methodDescription>
+    <lineNumber>419</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>19</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Z</methodDescription>
+    <lineNumber>419</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>24</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMatchPath()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Z</methodDescription>
+    <lineNumber>417</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>11</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::matches</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='3'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;I)Z</methodDescription>
+    <lineNumber>419</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>34</index>
+    <block>10</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMatchPath()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::matches</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>402</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>402</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>12</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>matches</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>402</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>20</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldFindMetric()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageNode::matches</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>88</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>92</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>16</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>95</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>27</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>98</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>37</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>96</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>31</index>
+    <block>9</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::mergePath</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>99</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>41</index>
+    <block>12</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::mergePath</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>101</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>55</index>
+    <block>18</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::mergePath</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>mergePath</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>104</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>60</index>
+    <block>19</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldMergePath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::mergePath</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>printCoverageFor</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ljava/lang/String;</methodDescription>
+    <lineNumber>238</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetAndPrintLineCoverage()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::printCoverageFor
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>printCoverageFor</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;Ljava/util/Locale;)Ljava/lang/String;</methodDescription>
+    <lineNumber>252</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>8</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetAndPrintLineCoverage()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageNode::printCoverageFor
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>saveSubtractFraction</mutatedMethod>
+    <methodDescription>
+      (Lorg/apache/commons/lang3/math/Fraction;Lorg/apache/commons/lang3/math/Fraction;)Lorg/apache/commons/lang3/math/Fraction;
+    </methodDescription>
+    <lineNumber>323</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>18</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldComputeDeltaWithOverflow()]
+    </killingTest>
+    <description>Replaced double subtraction with addition</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>saveSubtractFraction</mutatedMethod>
+    <methodDescription>
+      (Lorg/apache/commons/lang3/math/Fraction;Lorg/apache/commons/lang3/math/Fraction;)Lorg/apache/commons/lang3/math/Fraction;
+    </methodDescription>
+    <lineNumber>320</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldComputeDeltaWithOverflow()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::saveSubtractFraction
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>saveSubtractFraction</mutatedMethod>
+    <methodDescription>
+      (Lorg/apache/commons/lang3/math/Fraction;Lorg/apache/commons/lang3/math/Fraction;)Lorg/apache/commons/lang3/math/Fraction;
+    </methodDescription>
+    <lineNumber>324</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>24</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldComputeDeltaWithOverflow()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageNode::saveSubtractFraction
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>434</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>59</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldKeepChildAfterSplit()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>426</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>430</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>27</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>434</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>59</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>431</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>32</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>removed call to java/util/List::clear</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>436</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>73</index>
+    <block>19</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithMultipleDots()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::insertPackage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageNode</mutatedClass>
+    <mutatedMethod>splitPackages</mutatedMethod>
+    <methodDescription>()V</methodDescription>
+    <lineNumber>439</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>82</index>
+    <block>21</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldSplitPackagesWithSingleDot()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>&#60;init&#62;</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>54</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>29</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/XmlParser::parseFile</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>endElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/EndElement;)V</methodDescription>
+    <lineNumber>251</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>75</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='4'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>endElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/EndElement;)V</methodDescription>
+    <lineNumber>251</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>74</index>
+    <block>16</block>
+    <killingTest/>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>endElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/EndElement;)V</methodDescription>
+    <lineNumber>251</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>75</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>endElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/EndElement;)V</methodDescription>
+    <lineNumber>249</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>67</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>endElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/EndElement;)V</methodDescription>
+    <lineNumber>254</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>99</index>
+    <block>19</block>
+    <killingTest/>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>131</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>32</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>Replaced integer subtraction with addition</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='4'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>137</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>52</index>
+    <block>9</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>148</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>67</index>
+    <block>12</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>138</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>61</index>
+    <block>10</block>
+    <killingTest/>
+    <description>removed call to java/util/List::forEach</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>150</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>79</index>
+    <block>14</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/FileCoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>151</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>85</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/PackageCoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>181</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>53</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:testAmountOfLinenumberTolines()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>195</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>112</index>
+    <block>28</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>209</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>163</index>
+    <block>40</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>221</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>210</index>
+    <block>48</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>210</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>170</index>
+    <block>41</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>213</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>180</index>
+    <block>42</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>222</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>217</index>
+    <block>49</block>
+    <killingTest/>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>225</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>228</index>
+    <block>50</block>
+    <killingTest/>
+    <description>Replaced integer subtraction with addition</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>225</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>229</index>
+    <block>50</block>
+    <killingTest/>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='4'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>171</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>30</index>
+    <block>7</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>176</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>45</index>
+    <block>13</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>180</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>49</index>
+    <block>14</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>181</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>53</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:testAmountOfLinenumberTolines()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>195</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>112</index>
+    <block>28</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>208</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>159</index>
+    <block>39</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>209</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>163</index>
+    <block>40</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>221</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>210</index>
+    <block>48</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>lambda$handleClassElement$0</mutatedMethod>
+    <methodDescription>
+      (Ljava/lang/String;Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/concurrent/atomic/AtomicBoolean;Ledu/hm/hafner/coverage/CoverageNode;)V
+    </methodDescription>
+    <lineNumber>139</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>lambda$handleClassElement$0</mutatedMethod>
+    <methodDescription>
+      (Ljava/lang/String;Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/concurrent/atomic/AtomicBoolean;Ledu/hm/hafner/coverage/CoverageNode;)V
+    </methodDescription>
+    <lineNumber>140</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>12</index>
+    <block>3</block>
+    <killingTest/>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>lambda$handleClassElement$0</mutatedMethod>
+    <methodDescription>
+      (Ljava/lang/String;Ledu/hm/hafner/coverage/CoverageNode;Ljava/util/concurrent/atomic/AtomicBoolean;Ledu/hm/hafner/coverage/CoverageNode;)V
+    </methodDescription>
+    <lineNumber>141</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>17</index>
+    <block>4</block>
+    <killingTest/>
+    <description>removed call to java/util/concurrent/atomic/AtomicBoolean::set</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>parseConditionCoverage</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)[Ljava/lang/String;</methodDescription>
+    <lineNumber>272</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>23</index>
+    <block>4</block>
+    <killingTest/>
+    <description>replaced return value with null for edu/hm/hafner/parser/CoberturaParser::parseConditionCoverage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startDocument</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/XMLEvent;)V</methodDescription>
+    <lineNumber>67</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>20</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>Replaced integer subtraction with addition</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startDocument</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/XMLEvent;)V</methodDescription>
+    <lineNumber>69</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>31</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/CoberturaParser::setRootNode</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>87</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>75</index>
+    <block>21</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>94</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>94</index>
+    <block>23</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/CoberturaParser::handleClassElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>105</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>137</index>
+    <block>33</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>107</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>143</index>
+    <block>34</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoberturaParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.CoberturaParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>112</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>157</index>
+    <block>36</block>
+    <killingTest>
+      edu.hm.hafner.parser.CoberturaParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.CoberturaParserTest]/[method:shouldConvertCoberturaBigToTree()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/CoberturaParser::handleLineElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>&#60;init&#62;</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;ILedu/hm/hafner/coverage/CoverageMetric$MetricType;)V</methodDescription>
+    <lineNumber>152</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>20</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>compareTo</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)I</methodDescription>
+    <lineNumber>170</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>7</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldSortMetrics()]
+    </killingTest>
+    <description>Replaced integer subtraction with addition</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>compareTo</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)I</methodDescription>
+    <lineNumber>170</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>8</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldSortMetrics()]
+    </killingTest>
+    <description>replaced int return with 0 for edu/hm/hafner/coverage/CoverageMetric::compareTo</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>equalsIgnoreCase</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>108</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced boolean return with false for edu/hm/hafner/coverage/CoverageMetric::equalsIgnoreCase
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>equalsIgnoreCase</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>108</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageMetric::equalsIgnoreCase
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>equalsIgnoreCase</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>134</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator</mutator>
+    <index>8</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced boolean return with false for edu/hm/hafner/coverage/CoverageMetric::equalsIgnoreCase
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>equalsIgnoreCase</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;Ljava/lang/String;)Z</methodDescription>
+    <lineNumber>134</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>8</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageMetric::equalsIgnoreCase
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>getAvailableCoverageMetrics</mutatedMethod>
+    <methodDescription>()Ljava/util/List;</methodDescription>
+    <lineNumber>96</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>42</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldGetAvailableMetrics()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyList for
+      edu/hm/hafner/coverage/CoverageMetric::getAvailableCoverageMetrics
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>getName</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>156</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageMetric::getName</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>isLeaf</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>160</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanFalseReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced boolean return with false for edu/hm/hafner/coverage/CoverageMetric::isLeaf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>isLeaf</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>160</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/CoverageMetric::isLeaf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>normalize</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ljava/lang/String;</methodDescription>
+    <lineNumber>138</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/CoverageMetric::normalize
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>60</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>6</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>60</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>10</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>63</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>22</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>66</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>33</index>
+    <block>9</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>69</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>44</index>
+    <block>12</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>72</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>55</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>75</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>66</index>
+    <block>18</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>78</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>77</index>
+    <block>21</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>81</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>88</index>
+    <block>24</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>81</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>92</index>
+    <block>26</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>84</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>104</index>
+    <block>29</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>61</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>15</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>64</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>26</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>67</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>37</index>
+    <block>10</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>70</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>48</index>
+    <block>13</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>73</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>59</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>76</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>70</index>
+    <block>19</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>79</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>81</index>
+    <block>22</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>82</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>97</index>
+    <block>27</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>85</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>108</index>
+    <block>30</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreatePredefinedMetrics()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageMetric.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Metric</mutatedClass>
+    <mutatedMethod>valueOf</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>87</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>117</index>
+    <block>32</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageMetricTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageMetricTest]/[method:shouldCreateNewMetric()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageMetric::valueOf</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>add</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/Coverage;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>148</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>9</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='3'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>add</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/Coverage;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>149</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>16</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageNodeTest]/[method:shouldGetMetricsDistributionAndPercentages()]
+    </killingTest>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>add</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/Coverage;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>148</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>20</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/Coverage::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>formatCoveredPercentage</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>74</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::formatCoveredPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>formatCoveredPercentage</mutatedMethod>
+    <methodDescription>(Ljava/util/Locale;)Ljava/lang/String;</methodDescription>
+    <lineNumber>86</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>8</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::formatCoveredPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>formatMissedPercentage</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>117</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::formatMissedPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>formatMissedPercentage</mutatedMethod>
+    <methodDescription>(Ljava/util/Locale;)Ljava/lang/String;</methodDescription>
+    <lineNumber>129</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>8</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::formatMissedPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getCovered</mutatedMethod>
+    <methodDescription>()I</methodDescription>
+    <lineNumber>51</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced int return with 0 for edu/hm/hafner/coverage/Coverage::getCovered</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getCoveredPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>60</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getCoveredPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>61</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>9</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/Coverage::getCoveredPercentage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getCoveredPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>63</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>18</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/Coverage::getCoveredPercentage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getMissed</mutatedMethod>
+    <methodDescription>()I</methodDescription>
+    <lineNumber>95</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced int return with 0 for edu/hm/hafner/coverage/Coverage::getMissed</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getMissedPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>104</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getMissedPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>105</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>9</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/Coverage::getMissedPercentage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getMissedPercentage</mutatedMethod>
+    <methodDescription>()Lorg/apache/commons/lang3/math/Fraction;</methodDescription>
+    <lineNumber>107</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>17</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/Coverage::getMissedPercentage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getTotal</mutatedMethod>
+    <methodDescription>()I</methodDescription>
+    <lineNumber>162</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>7</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>Replaced integer addition with subtraction</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='2'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>getTotal</mutatedMethod>
+    <methodDescription>()I</methodDescription>
+    <lineNumber>162</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>8</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced int return with 0 for edu/hm/hafner/coverage/Coverage::getTotal</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>isSet</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>166</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>isSet</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>166</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>isSet</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>166</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>13</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/Coverage::isSet</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>printPercentage</mutatedMethod>
+    <methodDescription>(Ljava/util/Locale;Lorg/apache/commons/lang3/math/Fraction;)Ljava/lang/String;
+    </methodDescription>
+    <lineNumber>133</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>printPercentage</mutatedMethod>
+    <methodDescription>(Ljava/util/Locale;Lorg/apache/commons/lang3/math/Fraction;)Ljava/lang/String;
+    </methodDescription>
+    <lineNumber>134</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>21</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldCreatePercentages()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::printPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>Coverage.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.Coverage</mutatedClass>
+    <mutatedMethod>printPercentage</mutatedMethod>
+    <methodDescription>(Ljava/util/Locale;Lorg/apache/commons/lang3/math/Fraction;)Ljava/lang/String;
+    </methodDescription>
+    <lineNumber>136</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>26</index>
+    <block>7</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageTest]/[method:shouldProvideNullObject()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/Coverage::printPercentage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='4'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>&#60;init&#62;</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>47</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>16</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldCreatePackageName()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/JacocoParser::parseFile</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleClassElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>137</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>25</index>
+    <block>6</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleCounterElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>158</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>15</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleCounterElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>184</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>134</index>
+    <block>34</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='7'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>199</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>44</index>
+    <block>15</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='7'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>199</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>46</index>
+    <block>16</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='7'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>205</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>75</index>
+    <block>23</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='7'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>205</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>77</index>
+    <block>24</block>
+    <killingTest/>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>199</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>44</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>199</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>46</index>
+    <block>16</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>205</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>75</index>
+    <block>23</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='false' status='SURVIVED' numberOfTestsRun='7'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>handleLineElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>205</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>77</index>
+    <block>24</block>
+    <killingTest/>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startDocument</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/XMLEvent;)V</methodDescription>
+    <lineNumber>54</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>
+    <index>21</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>Replaced integer subtraction with addition</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='3'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>72</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>108</index>
+    <block>34</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldNotSplitPackagesIfOnWrongHierarchyNode()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/JacocoParser::setRootNode</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='3'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>79</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>141</index>
+    <block>42</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldNotSplitPackagesIfOnWrongHierarchyNode()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>86</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>160</index>
+    <block>44</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/JacocoParser::handleClassElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>93</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>183</index>
+    <block>49</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>98</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>197</index>
+    <block>51</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/JacocoParser::handleCounterElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>108</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>242</index>
+    <block>62</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='4'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>111</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>252</index>
+    <block>64</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldCreatePackageName()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/coverage/CoverageNode::add</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>JacocoParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.JacocoParser</mutatedClass>
+    <mutatedMethod>startElement</mutatedMethod>
+    <methodDescription>(Ljavax/xml/stream/events/StartElement;)V</methodDescription>
+    <lineNumber>116</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>266</index>
+    <block>66</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/JacocoParser::handleLineElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>copyEmpty</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>86</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>8</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.metric.FileNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.metric.FileNodeTest]/[method:shouldCopyEmpty()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/FileCoverageNode::copyEmpty</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getCoveredBranchesCount</mutatedMethod>
+    <methodDescription>()J</methodDescription>
+    <lineNumber>74</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>17</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced long return with 0 for edu/hm/hafner/coverage/FileCoverageNode::getCoveredBranchesCount
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getCoveredInstructionsCount</mutatedMethod>
+    <methodDescription>()J</methodDescription>
+    <lineNumber>52</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>17</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced long return with 0 for edu/hm/hafner/coverage/FileCoverageNode::getCoveredInstructionsCount
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getLineNumberToBranchCoverage</mutatedMethod>
+    <methodDescription>()Ljava/util/Map;</methodDescription>
+    <lineNumber>28</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyMap for
+      edu/hm/hafner/coverage/FileCoverageNode::getLineNumberToBranchCoverage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getLineNumberToInstructionCoverage</mutatedMethod>
+    <methodDescription>()Ljava/util/Map;</methodDescription>
+    <lineNumber>32</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>replaced return value with Collections.emptyMap for
+      edu/hm/hafner/coverage/FileCoverageNode::getLineNumberToInstructionCoverage
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getMissedBranchesCount</mutatedMethod>
+    <methodDescription>()J</methodDescription>
+    <lineNumber>63</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>17</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced long return with 0 for edu/hm/hafner/coverage/FileCoverageNode::getMissedBranchesCount
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getMissedInstructionsCount</mutatedMethod>
+    <methodDescription>()J</methodDescription>
+    <lineNumber>41</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>17</index>
+    <block>4</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced long return with 0 for edu/hm/hafner/coverage/FileCoverageNode::getMissedInstructionsCount
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>getPath</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>81</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>7</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.metric.FileNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.metric.FileNodeTest]/[method:shouldGetPath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/FileCoverageNode::getPath
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getCoveredBranchesCount$3</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageLeaf;)I</methodDescription>
+    <lineNumber>75</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced int return with 0 for
+      edu/hm/hafner/coverage/FileCoverageNode::lambda$getCoveredBranchesCount$3
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getCoveredInstructionsCount$1</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageLeaf;)I</methodDescription>
+    <lineNumber>53</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced int return with 0 for
+      edu/hm/hafner/coverage/FileCoverageNode::lambda$getCoveredInstructionsCount$1
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getMissedBranchesCount$2</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageLeaf;)I</methodDescription>
+    <lineNumber>64</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced int return with 0 for
+      edu/hm/hafner/coverage/FileCoverageNode::lambda$getMissedBranchesCount$2
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>FileCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.FileCoverageNode</mutatedClass>
+    <mutatedMethod>lambda$getMissedInstructionsCount$0</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageLeaf;)I</methodDescription>
+    <lineNumber>42</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>6</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>replaced int return with 0 for
+      edu/hm/hafner/coverage/FileCoverageNode::lambda$getMissedInstructionsCount$0
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>getRootNode</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>24</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>4</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/parser/XmlParser::getRootNode</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='3'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>42</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>20</index>
+    <block>5</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldNotSplitPackagesIfOnWrongHierarchyNode()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>45</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>30</index>
+    <block>8</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>49</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>41</index>
+    <block>11</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>53</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>53</index>
+    <block>15</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>46</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>35</index>
+    <block>9</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/XmlParser::startDocument</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>50</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>47</index>
+    <block>13</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldThrowExceptionWhenObtainingAllBasicBlocks()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/XmlParser::startElement</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='5'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>54</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>59</index>
+    <block>17</block>
+    <killingTest>
+      edu.hm.hafner.parser.JacocoParserTest.[engine:junit-jupiter]/[class:edu.hm.hafner.parser.JacocoParserTest]/[method:shouldSplitPackages()]
+    </killingTest>
+    <description>removed call to edu/hm/hafner/parser/XmlParser::endElement</description>
+  </mutation>
+  <mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>
+    <sourceFile>XmlParser.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.metric.parser.XmlParser</mutatedClass>
+    <mutatedMethod>parseFile</mutatedMethod>
+    <methodDescription>(Ljava/lang/String;)V</methodDescription>
+    <lineNumber>59</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>
+    <index>75</index>
+    <block>20</block>
+    <killingTest/>
+    <description>removed call to java/lang/Exception::printStackTrace</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageLeaf.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageLeaf</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>38</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageLeafTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageLeafTest]/[method:shouldCreateLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageLeaf::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageLeaf.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageLeaf</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>50</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>7</index>
+    <block>1</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageLeafTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageLeafTest]/[method:shouldCreateLeaf()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageLeaf.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageLeaf</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>51</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>12</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageLeafTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageLeafTest]/[method:shouldCreateLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageLeaf::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageLeaf.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageLeaf</mutatedClass>
+    <mutatedMethod>getCoverage</mutatedMethod>
+    <methodDescription>(Ledu/hm/hafner/coverage/CoverageMetric;)Ledu/hm/hafner/coverage/Coverage;</methodDescription>
+    <lineNumber>53</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>17</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageLeafTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageLeafTest]/[method:shouldCreateLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageLeaf::getCoverage</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>CoverageLeaf.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.CoverageLeaf</mutatedClass>
+    <mutatedMethod>getMetric</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageMetric;</methodDescription>
+    <lineNumber>34</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.CoverageLeafTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.CoverageLeafTest]/[method:shouldCreateLeaf()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/CoverageLeaf::getMetric</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>MethodCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.MethodCoverageNode</mutatedClass>
+    <mutatedMethod>getLineNumber</mutatedMethod>
+    <methodDescription>()I</methodDescription>
+    <lineNumber>44</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.PrimitiveReturnsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.MethodCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.MethodCoverageNodeTest]/[method:shouldGetValidLineNumber()]
+    </killingTest>
+    <description>replaced int return with 0 for edu/hm/hafner/coverage/MethodCoverageNode::getLineNumber</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>MethodCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.MethodCoverageNode</mutatedClass>
+    <mutatedMethod>hasValidLineNumber</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>40</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.MethodCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.MethodCoverageNodeTest]/[method:shouldCheckInvalidLineNumber()]
+    </killingTest>
+    <description>changed conditional boundary</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>MethodCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.MethodCoverageNode</mutatedClass>
+    <mutatedMethod>hasValidLineNumber</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>40</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator</mutator>
+    <index>5</index>
+    <block>0</block>
+    <killingTest>
+      edu.hm.hafner.coverage.MethodCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.MethodCoverageNodeTest]/[method:shouldCheckInvalidLineNumber()]
+    </killingTest>
+    <description>negated conditional</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>MethodCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.MethodCoverageNode</mutatedClass>
+    <mutatedMethod>hasValidLineNumber</mutatedMethod>
+    <methodDescription>()Z</methodDescription>
+    <lineNumber>40</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.BooleanTrueReturnValsMutator</mutator>
+    <index>13</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.MethodCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.MethodCoverageNodeTest]/[method:shouldCheckInvalidLineNumber()]
+    </killingTest>
+    <description>replaced boolean return with true for edu/hm/hafner/coverage/MethodCoverageNode::hasValidLineNumber
+    </description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>PackageCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.PackageCoverageNode</mutatedClass>
+    <mutatedMethod>copyEmpty</mutatedMethod>
+    <methodDescription>()Ledu/hm/hafner/coverage/CoverageNode;</methodDescription>
+    <lineNumber>28</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>
+    <index>8</index>
+    <block>2</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldCopyEmpty()]
+    </killingTest>
+    <description>replaced return value with null for edu/hm/hafner/coverage/PackageCoverageNode::copyEmpty</description>
+  </mutation>
+  <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+    <sourceFile>PackageCoverageNode.java</sourceFile>
+    <mutatedClass>edu.hm.hafner.coverage.PackageCoverageNode</mutatedClass>
+    <mutatedMethod>getPath</mutatedMethod>
+    <methodDescription>()Ljava/lang/String;</methodDescription>
+    <lineNumber>23</lineNumber>
+    <mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.EmptyObjectReturnValsMutator</mutator>
+    <index>10</index>
+    <block>3</block>
+    <killingTest>
+      edu.hm.hafner.coverage.PackageCoverageNodeTest.[engine:junit-jupiter]/[class:edu.hm.hafner.coverage.PackageCoverageNodeTest]/[method:shouldMatchPath()]
+    </killingTest>
+    <description>replaced return value with &#34;&#34; for edu/hm/hafner/coverage/PackageCoverageNode::getPath
+    </description>
+  </mutation>
+</mutations>

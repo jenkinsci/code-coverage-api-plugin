@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.MutationValue;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -91,6 +92,170 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
      */
     private static final String JACOCO_ADAPTER = "jacocoAdapter";
 
+    // ---------------------------------------------------------------------------------------
+    // vv Converted tests vv
+    // ---------------------------------------------------------------------------------------
+
+    @Test
+    void shouldRecordOneJacocoResultInFreestyleJob() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFileToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE);
+
+        CoverageRecorder recorder = new CoverageRecorder();
+        registerJaCoCo(recorder);
+        project.getPublishersList().add(recorder);
+
+        // FIXME: which parser is correct?
+        /*
+            Expected :LINE: 95.52% (6083/6368)
+            Actual   :LINE: 95.41% (5588/5857)
+         */
+        verifyOneJacocoResult(project);
+    }
+
+    @Test
+    void shouldRecordTwoJacocoResultsInFreestyleJob() {
+        FreeStyleProject project = createFreeStyleProject();
+        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+
+        CoverageRecorder recorder = new CoverageRecorder();
+        registerJaCoCo(recorder);
+        project.getPublishersList().add(recorder);
+
+        // FIXME: which parser is correct?
+        /*
+            Expected :LINE: 95.31% (6377/6691)
+            Actual   :LINE: 95.18% (5882/6180)
+         */
+        verifyTwoJacocoResults(project);
+    }
+
+    private void registerJaCoCo(final CoverageRecorder recorder) {
+        var tool = new CoverageTool();
+        tool.setParser(CoverageParser.JACOCO);
+        tool.setPattern("**/jacoco*xml");
+        recorder.setTools(List.of(tool));
+    }
+
+    /**
+     * Verifies project with one jacoco file.
+     *
+     * @param project
+     *         the project with added files
+     */
+    private void verifyOneJacocoResult(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(createLineCoverageBuilder()
+                        .setCovered(JACOCO_COVERED_LINES)
+                        .setMissed(JACOCO_ALL_LINES - JACOCO_COVERED_LINES)
+                        .build());
+    }
+
+    /**
+     * Verifies project with two jacoco files.
+     *
+     * @param project
+     *         the project with added files
+     */
+    private void verifyTwoJacocoResults(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(createLineCoverageBuilder()
+                        .setCovered(BOTH_JACOCO_COVERED_LINES)
+                        .setMissed(BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES)
+                        .build());
+    }
+
+    /**
+     * Freestyle integration test with one cobertura file.
+     */
+    @Test
+    void shouldRecordOneCoberturaResultInFreestyleJob() {
+        FreeStyleProject project = createFreeStyleProject();
+
+        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        CoverageRecorder recorder = new CoverageRecorder();
+        registerCobertura(recorder);
+        project.getPublishersList().add(recorder);
+
+        // FIXME: all parsers should only fail for mandatory properties (complexity is only optional)
+        verifyOneCoberturaResult(project);
+    }
+
+    private void registerCobertura(final CoverageRecorder recorder) {
+        var tool = new CoverageTool();
+        tool.setParser(CoverageParser.COBERTURA);
+        tool.setPattern("**/cobertura*xml");
+        recorder.setTools(List.of(tool));
+    }
+
+    /**
+     * Verifies project with one cobertura file.
+     *
+     * @param project
+     *         the project with added files
+     */
+    private void verifyOneCoberturaResult(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
+                        .setMissed(COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES)
+                        .build());
+
+    }
+
+    /**
+     * Freestyle integration test with one cobertura file.
+     */
+    @Test
+    void shouldRecordOnePitResultInFreestyleJob() {
+        FreeStyleProject project = createFreeStyleProject();
+
+        copyFilesToWorkspace(project, "mutations.xml");
+
+        CoverageRecorder recorder = new CoverageRecorder();
+        registerPit(recorder);
+        project.getPublishersList().add(recorder);
+
+        verifyOnePitResult(project);
+    }
+
+    private void registerPit(final CoverageRecorder recorder) {
+        var tool = new CoverageTool();
+        tool.setParser(CoverageParser.PIT);
+        tool.setPattern("**/mutations*xml");
+        recorder.setTools(List.of(tool));
+    }
+
+    private void verifyOnePitResult(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getCoverage(Metric.MUTATION))
+                .isInstanceOfSatisfying(MutationValue.class, m -> {
+                    assertThat(m.getKilled()).isEqualTo(222);
+                    assertThat(m.getTotal()).isEqualTo(246);
+                });
+
+    }
+
+    private static CoverageBuilder createLineCoverageBuilder() {
+        return new CoverageBuilder().setMetric(Metric.LINE);
+    }
+
+
+    // ---------------------------------------------------------------------------------------
+    // ^^ Converted tests ^^
+    // ---------------------------------------------------------------------------------------
+
     /**
      * Pipeline integration test with no adapter.
      */
@@ -134,7 +299,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
 
-        verifyForOneJacoco(job);
+        verifyOneJacocoResult(job);
     }
 
     /**
@@ -145,7 +310,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(JACOCO_ADAPTER));
 
-        verifyForTwoJacoco(job);
+        verifyTwoJacocoResults(job);
     }
 
     /**
@@ -161,43 +326,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
 
         verifyForNoFile(project);
-    }
-
-    /**
-     * Freestyle integration test with one jacoco file.
-     */
-    @Test
-    void freestyleForOneJacoco() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFileToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, "jacoco.xml");
-        CoverageRecorder recorder = new CoverageRecorder();
-        var tool = new CoverageTool();
-        tool.setParser(CoverageParser.JACOCO);
-        recorder.setTools(List.of(tool));
-        project.getPublishersList().add(recorder);
-
-        verifyForOneJacoco(project);
-    }
-
-    /**
-     * Freestyle integration test with two jacoco files.
-     */
-    @Test
-    void freestyleForTwoJacoco() {
-
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
-        JacocoReportAdapter jacocoReportAdapter2 = new JacocoReportAdapter(JACOCO_CODINGSTYLE_FILE);
-        List<CoverageAdapter> reportAdapters = new ArrayList<>();
-        reportAdapters.add(jacocoReportAdapter);
-        reportAdapters.add(jacocoReportAdapter2);
-        coveragePublisher.setAdapters(reportAdapters);
-        project.getPublishersList().add(coveragePublisher);
-
-        verifyForTwoJacoco(project);
     }
 
     /**
@@ -219,7 +347,7 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(COBERTURA_HIGHER_COVERAGE_FILE);
         job.setDefinition(getCpsFlowDefinitionWithAdapter(COBERTURA_ADAPTER));
 
-        verifyForOneCobertura(job);
+        verifyOneCoberturaResult(job);
     }
 
     /**
@@ -248,21 +376,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         project.getPublishersList().add(coveragePublisher);
 
         verifyForNoFile(project);
-    }
-
-    /**
-     * Freestyle integration test with one cobertura file.
-     */
-    @Test
-    void freestyleForOneCobertura() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
-        coveragePublisher.setAdapters(Collections.singletonList(coberturaReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        verifyForOneCobertura(project);
     }
 
     /**
@@ -340,40 +453,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
     }
 
     /**
-     * Verifies project with one jacoco file.
-     *
-     * @param project
-     *         the project with added files
-     */
-    private void verifyForOneJacoco(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder()
-                        .setMetric(Metric.LINE)
-                        .setCovered(JACOCO_COVERED_LINES)
-                        .setMissed(JACOCO_ALL_LINES - JACOCO_COVERED_LINES)
-                        .build());
-    }
-
-    /**
-     * Verifies project with two jacoco files.
-     *
-     * @param project
-     *         the project with added files
-     */
-    private void verifyForTwoJacoco(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(BOTH_JACOCO_COVERED_LINES)
-                        .setMissed(BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES)
-                        .build());
-    }
-
-    /**
      * Verifies project with no adapter.
      *
      * @param project
@@ -393,23 +472,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
         assertThat(action).isEqualTo(null);
-    }
-
-    /**
-     * Verifies project with one cobertura file.
-     *
-     * @param project
-     *         the project with added files
-     */
-    private void verifyForOneCobertura(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
-                        .setMissed(COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES)
-                        .build());
-
     }
 
     /**

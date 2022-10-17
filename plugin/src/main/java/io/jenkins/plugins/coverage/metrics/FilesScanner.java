@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -93,9 +92,7 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
                 nodes.add(aggregateIssuesOfFile(file, log));
             }
         }
-        return nodes.stream()
-                .reduce(Node::combineWith)
-                .orElse(new ModuleNode("Empty results for " + Arrays.toString(fileNames)));
+        return Node.merge(nodes);
     }
 
     private boolean isEmpty(final Path file) {
