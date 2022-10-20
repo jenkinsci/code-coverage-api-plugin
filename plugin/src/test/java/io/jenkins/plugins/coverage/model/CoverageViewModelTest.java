@@ -1,18 +1,15 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.NavigableMap;
 import java.util.NoSuchElementException;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Value;
 
 import hudson.model.Run;
+
+import io.vavr.collection.List;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageViewModel.*;
@@ -28,7 +25,6 @@ import static org.mockito.Mockito.*;
  */
 @SuppressWarnings("PMD.TooManyStaticImports")
 class CoverageViewModelTest extends AbstractCoverageTest {
-
     @Test
     void shouldReturnEmptySourceViewForExistingLinkButMissingSourceFile() {
         CoverageViewModel model = createModel();
@@ -43,24 +39,32 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     void shouldReportOverview() {
         CoverageViewModel model = createModel();
 
-        assertThat(model.getDisplayName()).contains("Java coding style: jacoco-codingstyle.xml");
+        assertThat(model.getDisplayName()).contains("'Java coding style'");
 
         CoverageOverview overview = model.getOverview();
-        assertThatJson(overview).node("metrics").isArray().containsExactly(
-                "Package", "File", "Class", "Method", "Line", "Instruction", "Branch"
-        );
-        assertThatJson(overview).node("covered").isArray().containsExactly(
-                1, 7, 15, 97, 294, 1260, 109
-        );
-        assertThatJson(overview).node("missed").isArray().containsExactly(
-                0, 3, 3, 5, 29, 90, 7
-        );
+
+        var expectedMetrics = new String[] {"File", "Class", "Method", "Line", "Instruction", "Branch"};
+        assertThat(overview.getMetrics()).containsExactly(expectedMetrics);
+
+        var expectedCovered = List.ofAll(7, 15, 97, 294, 1260, 109);
+        assertThat(overview.getCovered()).containsExactlyElementsOf(expectedCovered);
+        assertThat(overview.getCoveredPercentages()).allSatisfy(d -> assertThat(d).isStrictlyBetween(0.0, 1.0));
+
+        var expectedMissed = List.ofAll(3, 3, 5, 29, 90, 7);
+        assertThat(overview.getMissed()).containsExactlyElementsOf(expectedMissed);
+        assertThat(overview.getMissedPercentages()).allSatisfy(d -> assertThat(d).isStrictlyBetween(0.0, 1.0));
+
+        assertThatJson(overview).node("metrics").isArray().containsExactly(expectedMetrics);
+        assertThatJson(overview).node("covered").isArray().containsExactlyElementsOf(expectedCovered);
+        assertThatJson(overview).node("missed").isArray().containsExactlyElementsOf(expectedMissed);
     }
 
     @Test
     void shouldProvideIndirectCoverageChanges() {
         Node node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
-        CoverageViewModel model = createModelFromMock(node);
+
+        CoverageViewModel model = new CoverageViewModel(mock(Run.class), node);
+
         assertThat(model.hasIndirectCoverageChanges()).isTrue();
     }
 
@@ -68,7 +72,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     void shouldProvideRightTableModelById() {
         CoverageViewModel model = createModel();
         assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTableModel.class);
-        assertThat(model.getTableModel(INDIRECT_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
+        assertThat(model.getTableModel(INDIRECT_COVERAGE_TABLE_ID)).isInstanceOf(IndirectCoverageChangesTable.class);
         assertThat(model.getTableModel(ABSOLUTE_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
 
         assertThatExceptionOfType(NoSuchElementException.class)
@@ -79,22 +83,4 @@ class CoverageViewModelTest extends AbstractCoverageTest {
         return new CoverageViewModel(mock(Run.class), readJacocoResult("jacoco-codingstyle.xml"));
     }
 
-    /**
-     * Creates a {@link CoverageViewModel} which represents a mocked {@link Node}.
-     *
-     * @param mock
-     *         The mocked node
-     *
-     * @return the created model
-     */
-    private CoverageViewModel createModelFromMock(final Node mock) {
-        NavigableMap<Metric, Value> changeMetricsDistribution = new TreeMap<>();
-        changeMetricsDistribution.put(LINE, Coverage.nullObject(Metric.LINE));
-        changeMetricsDistribution.put(BRANCH, Coverage.nullObject(Metric.BRANCH));
-        changeMetricsDistribution.put(FILE, Coverage.nullObject(Metric.FILE));
-        changeMetricsDistribution.put(PACKAGE, Coverage.nullObject(Metric.PACKAGE));
-        when(mock.getMetricsDistribution()).thenReturn(changeMetricsDistribution);
-
-        return new CoverageViewModel(mock(Run.class), mock);
-    }
 }

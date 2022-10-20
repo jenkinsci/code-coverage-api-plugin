@@ -2,10 +2,10 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +28,6 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Value;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -40,6 +39,7 @@ import hudson.util.TextFile;
 
 import io.jenkins.plugins.coverage.model.CoverageTableModel.InlineRowRenderer;
 import io.jenkins.plugins.coverage.model.CoverageTableModel.LinkedRowRenderer;
+import io.jenkins.plugins.coverage.model.CoverageTableModel.RowRenderer;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
@@ -90,12 +90,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         this.owner = owner;
         this.node = node;
-        this.id = "coverage"; // TODO: this needs to be a parameter
+        id = "coverage"; // TODO: this needs to be a parameter
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         CoverageTreeCreator treeCreator = new CoverageTreeCreator();
-        this.changeCoverageTreeRoot = treeCreator.createChangeCoverageTree(node);
-        this.indirectCoverageChangesTreeRoot = treeCreator.createIndirectCoverageChangesTree(node);
+        changeCoverageTreeRoot = treeCreator.createChangeCoverageTree(node);
+        indirectCoverageChangesTreeRoot = treeCreator.createIndirectCoverageChangesTree(node);
     }
 
     public String getId() {
@@ -238,8 +238,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Gets the {@link Metric} from a String representation used in the frontend. Only 'Line' and 'Branch' is
-     * possible. 'Line' is used as a default.
+     * Gets the {@link Metric} from a String representation used in the frontend. Only 'Line' and 'Branch' is possible.
+     * 'Line' is used as a default.
      *
      * @param text
      *         The coverage metric as String
@@ -264,16 +264,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @Override
     public TableModel getTableModel(final String tableId) {
-        CoverageTableModel.RowRenderer renderer;
-        String actualId;
-        if (tableId.endsWith(INLINE_SUFFIX) && hasSourceCode()) {
-            renderer = new InlineRowRenderer();
-        }
-        else {
-            renderer = new LinkedRowRenderer(getOwner().getRootDir(), getId());
-        }
-        actualId = tableId.replace(INLINE_SUFFIX, StringUtils.EMPTY);
+        RowRenderer renderer = createRenderer(tableId);
 
+        String actualId = tableId.replace(INLINE_SUFFIX, StringUtils.EMPTY);
         switch (actualId) {
             case ABSOLUTE_COVERAGE_TABLE_ID:
                 return new CoverageTableModel(tableId, getNode(), renderer, colorProvider);
@@ -286,6 +279,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             default:
                 throw new NoSuchElementException("No such table with id " + actualId);
         }
+    }
+
+    private RowRenderer createRenderer(final String tableId) {
+        RowRenderer renderer;
+        if (tableId.endsWith(INLINE_SUFFIX) && hasSourceCode()) {
+            renderer = new InlineRowRenderer();
+        }
+        else {
+            renderer = new LinkedRowRenderer(getOwner().getRootDir(), getId());
+        }
+        return renderer;
     }
 
     /**
@@ -334,8 +338,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Reads the sourcecode corresponding to the passed {@link Node node} and filters the code dependent on the
-     * table ID.
+     * Reads the sourcecode corresponding to the passed {@link Node node} and filters the code dependent on the table
+     * ID.
      *
      * @param sourceNode
      *         The node
@@ -501,31 +505,46 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * UI model for the coverage overview bar chart. Shows the coverage results for the different coverage metrics.
      */
-    // FIXME: In the new model we do not only have coverages
     public static class CoverageOverview {
         private final Node coverage;
+        private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
 
         CoverageOverview(final Node coverage) {
             this.coverage = coverage;
         }
 
         public List<String> getMetrics() {
-            return getMetricsDistribution().keySet().stream()
-                    .skip(1) // ignore the root of the tree as the coverage is always 1 of 1
-                    .map(Metric::name) // FIXME: we need to create localized names
+            return sortCoverages()
+                    .map(Coverage::getMetric)
+                    .map(LABEL_PROVIDER::getDisplayName)
                     .collect(Collectors.toList());
         }
 
+        private Stream<Coverage> sortCoverages() {
+            return coverage.getMetrics()
+                    .stream()
+                    .map(m -> m.getValueFor(coverage))
+                    .flatMap(Optional::stream)
+                    .filter(value -> value instanceof Coverage)
+                    .map(Coverage.class::cast)
+                    .filter(c -> c.getTotal() > 1) // ignore elements that have a total of 1
+                    .sorted(Comparator.comparing(Coverage::getMetric));
+        }
+
         public List<Integer> getCovered() {
-            return streamCoverages().map(Coverage::getCovered).collect(Collectors.toList());
+            return getCoverageCounter(Coverage::getCovered);
+        }
+
+        public List<Integer> getMissed() {
+            return getCoverageCounter(Coverage::getMissed);
+        }
+
+        private List<Integer> getCoverageCounter(final Function<Coverage, Integer> property) {
+            return sortCoverages().map(property).collect(Collectors.toList());
         }
 
         public List<Double> getCoveredPercentages() {
             return getPercentages(Coverage::getCoveredPercentage);
-        }
-
-        public List<Integer> getMissed() {
-            return streamCoverages().map(Coverage::getMissed).collect(Collectors.toList());
         }
 
         public List<Double> getMissedPercentages() {
@@ -533,22 +552,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         private List<Double> getPercentages(final Function<Coverage, Fraction> displayType) {
-            return streamCoverages().map(displayType)
+            return sortCoverages().map(displayType)
                     .map(Fraction::doubleValue)
-                    .map(p -> p * 100.0)
                     .collect(Collectors.toList());
-        }
-
-        private Stream<Coverage> streamCoverages() {
-            return getMetricsDistribution().values()
-                    .stream()
-                    .skip(1)
-                    .filter(v -> v instanceof Coverage)
-                    .map(Coverage.class::cast);
-        }
-
-        private NavigableMap<Metric, Value> getMetricsDistribution() {
-            return coverage.getMetricsDistribution();
         }
     }
 
@@ -556,5 +562,38 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Used for parsing a Jenkins color mapping JSON string to a color map.
      */
     private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {
+    }
+
+    public static final class ValueLabelProvider {
+        public String getDisplayName(final Metric metric) {
+            switch (metric) {
+                case CONTAINER:
+                    return Messages.Metric_CONTAINER();
+                case MODULE:
+                    return Messages.Metric_MODULE();
+                case PACKAGE:
+                    return Messages.Metric_PACKAGE();
+                case FILE:
+                    return Messages.Metric_FILE();
+                case CLASS:
+                    return Messages.Metric_CLASS();
+                case METHOD:
+                    return Messages.Metric_METHOD();
+                case LINE:
+                    return Messages.Metric_LINE();
+                case BRANCH:
+                    return Messages.Metric_BRANCH();
+                case INSTRUCTION:
+                    return Messages.Metric_INSTRUCTION();
+                case MUTATION:
+                    return Messages.Metric_MUTATION();
+                case COMPLEXITY:
+                    return Messages.Metric_COMPLEXITY();
+                case LOC:
+                    return Messages.Metric_LOC();
+                default:
+                    throw new NoSuchElementException("No display name found for metric " + metric);
+            }
+        }
     }
 }
