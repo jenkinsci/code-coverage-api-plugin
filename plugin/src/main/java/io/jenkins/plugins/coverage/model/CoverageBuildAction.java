@@ -25,10 +25,13 @@ import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.CoverageXmlStream.FractionConverter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
 import io.jenkins.plugins.util.JenkinsFacade;
+
+import static hudson.model.Run.*;
 
 /**
  * Controls the life cycle of the coverage results in a job. This action persists the results of a build and displays a
@@ -68,6 +71,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
 
     /** The indirect coverage changes of the associated change request with respect to the reference build. */
     private final NavigableMap<Metric, Value> indirectCoverageChanges;
+
+    static {
+        XSTREAM.registerConverter(new FractionConverter());
+    }
 
     /**
      * Creates a new instance of {@link CoverageBuildAction}.

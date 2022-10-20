@@ -14,7 +14,6 @@ import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
 
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -26,16 +25,14 @@ import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.CoverageRecorder;
-import io.jenkins.plugins.coverage.metrics.CoverageTool;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test for different jacoco and cobertura files.
  */
-class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
+class CoveragePluginITest extends AbstractCoverageITest {
 
     /**
      * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
@@ -198,35 +195,6 @@ class CoveragePluginITest extends IntegrationTestWithJenkinsPerSuite {
                         .setCovered(BOTH_JACOCO_COVERED_LINES)
                         .setMissed(BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES)
                         .build());
-    }
-
-    private FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
-
-        CoverageRecorder recorder = new CoverageRecorder();
-        var tool = new CoverageTool();
-        tool.setParser(parser);
-        tool.setPattern("**/*xml");
-        recorder.setTools(List.of(tool));
-        project.getPublishersList().add(recorder);
-
-        return project;
-    }
-
-    private WorkflowJob createPipeline(final CoverageParser parser, final String... fileNames) {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(fileNames);
-
-        setPipelineScript(job,
-                "recordCoverage tools: [[parser: '" + parser.name() + "', pattern: '**/*xml']]");
-
-        return job;
-    }
-
-    private void setPipelineScript(final WorkflowJob job, final String recorderSnippet) {
-        job.setDefinition(new CpsFlowDefinition(
-                "node {\n"
-                        + recorderSnippet + "\n"
-                        + " }\n", true));
     }
 
     @Test

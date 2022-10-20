@@ -1,5 +1,13 @@
 package io.jenkins.plugins.coverage.model;
 
+import org.apache.commons.lang3.math.Fraction;
+
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 import edu.hm.hafner.metric.ClassNode;
 import edu.hm.hafner.metric.ContainerNode;
 import edu.hm.hafner.metric.Coverage;
@@ -45,6 +53,8 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
         xStream.addImmutableType(Coverage.class, false);
         xStream.addImmutableType(LinesOfCode.class, false);
         xStream.addImmutableType(CyclomaticComplexity.class, false);
+        xStream.registerConverter(new FractionConverter());
+
         /* FIXME: restore converters
         xStream.addImmutableType(CoveragePercentageConverter.class, false);
         xStream.registerConverter(new CoverageMetricConverter());
@@ -60,5 +70,27 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
     @Override
     protected Node createDefaultValue() {
         return new ModuleNode("Empty");
+    }
+    /**
+     * {@link Converter} for {@link Fraction} instances so that only the values will be serialized. After reading the
+     * values back from the stream, the string representation will be converted to an actual instance again.
+     */
+    static final class FractionConverter implements Converter {
+        @SuppressWarnings("PMD.NullAssignment")
+        @Override
+        public void marshal(final Object source, final HierarchicalStreamWriter writer,
+                final MarshallingContext context) {
+            writer.setValue(source instanceof Fraction ? ((Fraction) source).toProperString() : null);
+        }
+
+        @Override
+        public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
+            return Fraction.getFraction(reader.getValue());
+        }
+
+        @Override
+        public boolean canConvert(final Class type) {
+            return type == Fraction.class;
+        }
     }
 }

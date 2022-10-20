@@ -69,7 +69,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private boolean enabledForFailure;
     private int healthy;
     private int unhealthy;
-    private String scm;
+    private String scm = StringUtils.EMPTY;
 
     /**
      * Creates a new instance of {@link  CoverageRecorder}.

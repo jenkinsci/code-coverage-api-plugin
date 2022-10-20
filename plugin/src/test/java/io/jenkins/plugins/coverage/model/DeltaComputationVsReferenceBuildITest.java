@@ -1,30 +1,26 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
-
-import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Node;
 
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import io.jenkins.plugins.coverage.metrics.CoverageRecorder;
+import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.assertj.core.data.Percentage.*;
 
 /**
  * Integration test for delta computation of reference builds.
  */
-class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPerSuite {
+class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
 
@@ -33,21 +29,17 @@ class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPe
      */
     @Test
     void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE,
-                JACOCO_CODINGSTYLE_FILE);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
 
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        coveragePublisher.setAdapters(Collections.singletonList(new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE)));
-        project.getPublishersList().add(coveragePublisher);
-
-        //run first build
         Run<?, ?> firstBuild = buildSuccessfully(project);
+        verifyFirstBuild(firstBuild);
 
-        // update adapter
-        coveragePublisher.setAdapters(Collections.singletonList(new JacocoReportAdapter(JACOCO_CODINGSTYLE_FILE)));
+        // update parser pattern to pick only the coding style results
+        project.getPublishersList().get(CoverageRecorder.class).getTools().get(0).setPattern(JACOCO_CODINGSTYLE_FILE);
 
-        //run second build
         Run<?, ?> secondBuild = buildSuccessfully(project);
+        verifySecondBuild(secondBuild);
 
         verifyDeltaComputation(firstBuild, secondBuild);
     }
@@ -57,22 +49,31 @@ class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPe
      */
     @Test
     void pipelineCreatingReferenceBuildWithDeltaComputation() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "   publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
-                + "')]"
-                + "}", true));
+        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
+        verifyFirstBuild(firstBuild);
 
-        job.setDefinition(new CpsFlowDefinition("node {"
-                + "publishCoverage adapters: [jacocoAdapter('" + JACOCO_CODINGSTYLE_FILE + "')]\n"
-                + "discoverReferenceBuild(referenceJob: '" + job.getName() + "')"
-                + "}", true));
+        // update parser pattern to pick only the codingstyle results
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODINGSTYLE_FILE + "']]");
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
+        verifySecondBuild(secondBuild);
 
         verifyDeltaComputation(firstBuild, secondBuild);
+    }
+
+    private static void verifySecondBuild(final Run<?, ?> secondBuild) {
+        var secondBuildCoverage = secondBuild.getAction(CoverageBuildAction.class).getLineCoverage();
+        assertThat(secondBuildCoverage).extracting(Coverage::getCovered).isEqualTo(294);
+        assertThat(secondBuildCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0)); // 294 + 5531 ?
+    }
+
+    private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
+        var firstBuildLineCoverage = firstBuild.getAction(CoverageBuildAction.class).getLineCoverage();
+        assertThat(firstBuildLineCoverage.getCovered()).isEqualTo(5882); // 294 + 5531 ?
+        assertThat(firstBuildLineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0)); // 294 + 5531 ?
     }
 
     /**
@@ -93,12 +94,8 @@ class DeltaComputationVsReferenceBuildITest extends IntegrationTestWithJenkinsPe
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
-        assertThat(coverageBuildAction.getDelta()).contains(
-                new SimpleEntry<>(LINE, Fraction.getFraction(-2_315_425, 514_216)),
-                new SimpleEntry<>(BRANCH, Fraction.getFraction(11_699, 2175)),
-                new SimpleEntry<>(INSTRUCTION, Fraction.getFraction(-235_580, 81_957)),
-                new SimpleEntry<>(METHOD, Fraction.getFraction(-217_450, 94_299))
-        );
+        assertThat(coverageBuildAction.getDelta().get(LINE).doubleValue()).isCloseTo(-0.0415, withPercentage(1.0));
+        // TODO: compute delta for other metrics
 
         verifyChangeCoverage(coverageBuildAction);
     }
