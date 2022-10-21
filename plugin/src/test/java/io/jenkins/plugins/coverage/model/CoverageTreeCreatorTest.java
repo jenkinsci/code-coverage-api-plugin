@@ -8,7 +8,6 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
@@ -70,10 +69,11 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
+                    var builder = new CoverageBuilder();
                     assertThat(root.getValue(LINE)).isNotEmpty().contains(
-                            new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
+                            builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
                     assertThat(root.getValue(BRANCH)).isNotEmpty().contains(
-                            new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
+                            builder.setMetric((Metric.BRANCH)).setCovered(4).setMissed(4).build());
                 });
     }
 
@@ -90,10 +90,11 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getPath()).isEqualTo(tree.getPath());
                     assertThat(root.getMetric()).isEqualTo(tree.getMetric());
                     assertThat(root.getAll(FILE)).hasSize(1);
+                    var builder = new CoverageBuilder();
                     assertThat(root.getValue(LINE)).isNotEmpty().contains(
-                            new Coverage.CoverageBuilder().setCovered(2).setMissed(2).build());
+                            builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
                     assertThat(root.getValue(BRANCH)).isNotEmpty().contains(
-                            new Coverage.CoverageBuilder().setCovered(4).setMissed(4).build());
+                            builder.setMetric(Metric.BRANCH).setCovered(4).setMissed(4).build());
                 });
     }
 

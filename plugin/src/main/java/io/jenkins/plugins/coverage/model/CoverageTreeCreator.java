@@ -75,16 +75,19 @@ public class CoverageTreeCreator {
             // this is required since there might be changes which do not affect the code coverage -> ignore these files
             return fileNode.hasCoveredLinesInChangeSet();
         }
-        Iterator<Node> nodeIterator = root.getChildren().iterator();
+        var children = root.getChildren();
+        Iterator<Node> nodeIterator = children.iterator();
         boolean hasChanged = false;
         while (nodeIterator.hasNext()) {
             Node child = nodeIterator.next();
-            boolean childHasChanged = calculateChangeCoverageTree(child);
-            if (!childHasChanged) {
+            boolean hasChildChanges = calculateChangeCoverageTree(child);
+            if (!hasChildChanges) {
                 nodeIterator.remove();
             }
-            hasChanged |= childHasChanged;
+            hasChanged |= hasChildChanges;
         }
+        root.clearChildren();
+        root.addAllChildren(children);
         return hasChanged;
     }
 
@@ -101,7 +104,8 @@ public class CoverageTreeCreator {
             clearChildrenAndLeaves(root);
             return ((FileNode) root).hasIndirectCoverageChanges();
         }
-        Iterator<Node> nodeIterator = root.getChildren().iterator();
+        var children = root.getChildren();
+        Iterator<Node> nodeIterator = children.iterator();
         boolean hasChangedCoverage = false;
         while (nodeIterator.hasNext()) {
             Node child = nodeIterator.next();
@@ -111,6 +115,8 @@ public class CoverageTreeCreator {
             }
             hasChangedCoverage |= childHasChangedCoverage;
         }
+        root.clearChildren();
+        root.addAllChildren(children);
         return hasChangedCoverage;
     }
 
