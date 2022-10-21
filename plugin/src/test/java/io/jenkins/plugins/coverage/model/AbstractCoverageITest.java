@@ -17,6 +17,9 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
  * @author Ullrich Hafner
  */
 public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPerSuite {
+    static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
+
     protected FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
 

@@ -21,22 +21,16 @@ import static org.assertj.core.data.Percentage.*;
  * Integration test for delta computation of reference builds.
  */
 class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
-    private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
-    private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
-
-    /**
-     * Checks if the delta coverage can be computed regarding a reference build within a freestyle project.
-     */
     @Test
-    void freestyleProjectTryCreatingReferenceBuildWithDeltaComputation() {
+    void shouldComputeDeltaInFreestyleJob() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
-                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> firstBuild = buildSuccessfully(project);
         verifyFirstBuild(firstBuild);
 
         // update parser pattern to pick only the coding style results
-        project.getPublishersList().get(CoverageRecorder.class).getTools().get(0).setPattern(JACOCO_CODINGSTYLE_FILE);
+        project.getPublishersList().get(CoverageRecorder.class).getTools().get(0).setPattern(JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> secondBuild = buildSuccessfully(project);
         verifySecondBuild(secondBuild);
@@ -44,19 +38,16 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
         verifyDeltaComputation(firstBuild, secondBuild);
     }
 
-    /**
-     * Checks if the delta coverage can be computed regarding a reference build within a pipeline project.
-     */
     @Test
-    void pipelineCreatingReferenceBuildWithDeltaComputation() {
-        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+    void shouldComputeDeltaInPipeline() {
+        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
         verifyFirstBuild(firstBuild);
 
         // update parser pattern to pick only the codingstyle results
         setPipelineScript(job,
-                "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODINGSTYLE_FILE + "']]");
+                "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
         verifySecondBuild(secondBuild);
@@ -64,16 +55,28 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
         verifyDeltaComputation(firstBuild, secondBuild);
     }
 
-    private static void verifySecondBuild(final Run<?, ?> secondBuild) {
-        var secondBuildCoverage = secondBuild.getAction(CoverageBuildAction.class).getLineCoverage();
-        assertThat(secondBuildCoverage).extracting(Coverage::getCovered).isEqualTo(294);
-        assertThat(secondBuildCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0)); // 294 + 5531 ?
+    private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
+        var action = firstBuild.getAction(CoverageBuildAction.class);
+
+        var lineCoverage = action.getLineCoverage();
+        assertThat(lineCoverage.getCovered()).isEqualTo(5882); // 294 + 5531 ?
+        assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0));
+
+        var branchCoverage = action.getBranchCoverage();
+        assertThat(branchCoverage.getCovered()).isEqualTo(1544 + 109);
+        assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.88, withPercentage(1.0));
     }
 
-    private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
-        var firstBuildLineCoverage = firstBuild.getAction(CoverageBuildAction.class).getLineCoverage();
-        assertThat(firstBuildLineCoverage.getCovered()).isEqualTo(5882); // 294 + 5531 ?
-        assertThat(firstBuildLineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0)); // 294 + 5531 ?
+    private static void verifySecondBuild(final Run<?, ?> secondBuild) {
+        var action = secondBuild.getAction(CoverageBuildAction.class);
+
+        var lineCoverage = action.getLineCoverage();
+        assertThat(lineCoverage).extracting(Coverage::getCovered).isEqualTo(294);
+        assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0));
+
+        var branchCoverage = action.getBranchCoverage();
+        assertThat(branchCoverage.getCovered()).isEqualTo(109);
+        assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.94, withPercentage(1.0));
     }
 
     /**
@@ -94,7 +97,9 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
-        assertThat(coverageBuildAction.getDelta().get(LINE).doubleValue()).isCloseTo(-0.0415, withPercentage(1.0));
+        var delta = coverageBuildAction.getDelta();
+        assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0415, withPercentage(1.0));
+        assertThat(delta.get(BRANCH).doubleValue()).isCloseTo(0.0533, withPercentage(1.0));
         // TODO: compute delta for other metrics
 
         verifyChangeCoverage(coverageBuildAction);
