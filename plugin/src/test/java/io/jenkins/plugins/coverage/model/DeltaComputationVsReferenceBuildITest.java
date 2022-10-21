@@ -3,7 +3,9 @@ package io.jenkins.plugins.coverage.model;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.CyclomaticComplexity;
 import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.LinesOfCode;
 import edu.hm.hafner.metric.Node;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -65,6 +67,9 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
         var branchCoverage = action.getBranchCoverage();
         assertThat(branchCoverage.getCovered()).isEqualTo(1544 + 109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.88, withPercentage(1.0));
+
+        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(lineCoverage.getTotal()));
+        assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(2718));
     }
 
     private static void verifySecondBuild(final Run<?, ?> secondBuild) {
@@ -77,6 +82,9 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
         var branchCoverage = action.getBranchCoverage();
         assertThat(branchCoverage.getCovered()).isEqualTo(109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.94, withPercentage(1.0));
+
+        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(lineCoverage.getTotal()));
+        assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(160));
     }
 
     /**
@@ -98,9 +106,12 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
         var delta = coverageBuildAction.getDelta();
+        assertThat(delta.get(MODULE).doubleValue()).isCloseTo(0, withPercentage(1.0));
+        assertThat(delta.get(PACKAGE).doubleValue()).isCloseTo(0, withPercentage(1.0));
         assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0415, withPercentage(1.0));
         assertThat(delta.get(BRANCH).doubleValue()).isCloseTo(0.0533, withPercentage(1.0));
-        // TODO: compute delta for other metrics
+        assertThat(delta.get(LOC).intValue()).isEqualTo(-5857);
+        assertThat(delta.get(COMPLEXITY).intValue()).isEqualTo(160 - 2718);
 
         verifyChangeCoverage(coverageBuildAction);
     }
