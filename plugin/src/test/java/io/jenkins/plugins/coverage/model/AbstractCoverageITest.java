@@ -48,4 +48,21 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
                         + recorderSnippet + "\n"
                         + " }\n", true));
     }
+
+    protected WorkflowJob createDeclarativePipeline(final CoverageParser parser, final String... fileNames) {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(fileNames);
+
+        job.setDefinition(new CpsFlowDefinition("pipeline {\n"
+                + "    agent any\n"
+                + "    stages {\n"
+                + "        stage('Test') {\n"
+                + "            steps {\n"
+                + "                    recordCoverage(\n"
+                + "                        tools: [[parser: '" + parser.name() + "', pattern: '**/*xml']]"
+                + "            )}\n"
+                + "        }\n"
+                + "    }\n"
+                + "}", true));
+        return job;
+    }
 }

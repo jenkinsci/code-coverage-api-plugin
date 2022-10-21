@@ -67,14 +67,6 @@ class CoveragePluginITest extends AbstractCoverageITest {
      */
     private static final int JACOCO_COBERTURA_ALL_LINES = 6370;
     /**
-     * Jacoco file for testing.
-     */
-    private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
-    /**
-     * Another jacoco file for testing.
-     */
-    private static final String JACOCO_CODINGSTYLE_FILE = "jacoco-codingstyle.xml";
-    /**
      * Cobertura file for testing.
      */
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
@@ -137,7 +129,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordOneJacocoResultInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+                JACOCO_ANALYSIS_MODEL_FILE);
 
         // FIXME: which parser is correct?
         /*
@@ -150,6 +143,13 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @Test
     void shouldRecordOneJacocoResultInPipeline() {
         WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+
+        verifyOneJacocoResult(job);
+    }
+
+    @Test
+    void shouldRecordOneJacocoResultInDeclarativePipeline() {
+        WorkflowJob job = createDeclarativePipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         verifyOneJacocoResult(job);
     }
@@ -168,7 +168,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @Test
     void shouldRecordTwoJacocoResultsInFreestyleJob() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
-                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         // FIXME: which parser is correct?
         /*
@@ -181,7 +181,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @Test
     void shouldRecordTwoJacocoResultsInPipeline() {
         WorkflowJob job = createPipeline(CoverageParser.JACOCO,
-                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODINGSTYLE_FILE);
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         verifyTwoJacocoResults(job);
     }
@@ -208,6 +208,13 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @Test
     void shouldRecordOneCoberturaResultInPipeline() {
         WorkflowJob job = createPipeline(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        verifyOneCoberturaResult(job);
+    }
+
+    @Test
+    void shouldRecordOneCoberturaResultInDeclarativePipeline() {
+        WorkflowJob job = createDeclarativePipeline(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
         verifyOneCoberturaResult(job);
     }
@@ -308,7 +315,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
         List<CoverageAdapter> coverageAdapters = new ArrayList<>();
 
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
+        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(
+                JACOCO_ANALYSIS_MODEL_FILE);
         coverageAdapters.add(jacocoReportAdapter);
 
         CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
