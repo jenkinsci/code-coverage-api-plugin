@@ -91,11 +91,10 @@ class IndirectCoverageChangesTable extends CoverageTableModel {
             return originalFile.getIndirectCoverageChanges().size();
         }
 
-        private DetailedCell<?> createColoredChangeCoverageDeltaColumn(
-                final Metric metric) {
+        private DetailedCell<?> createColoredChangeCoverageDeltaColumn(final Metric metric) {
             Coverage changeCoverage = getFile().getTypedValue(metric, Coverage.nullObject(metric));
             if (changeCoverage.isSet()) {
-                return createColoredCoverageDeltaColumn(
+                return createColoredCoverageDeltaColumn(metric,
                         changeCoverage.delta(originalFile.getTypedValue(metric, Coverage.nullObject(metric))));
             }
             return NO_COVERAGE;

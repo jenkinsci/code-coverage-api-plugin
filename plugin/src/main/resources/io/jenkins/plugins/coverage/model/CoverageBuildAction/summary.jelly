@@ -3,10 +3,8 @@
   <t:summary icon="symbol-footsteps-outline plugin-ionicons-api">
     <span id="coverage-summary">
       <j:set var="result" value="${it.result}"/>
-      <j:choose>
-        <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
-        <j:set var="metrics" value="${result.importantMetrics}"/>
-      </j:choose>
+      <j:set var="metrics" value="${it.metricsForSummary}"/>
+      <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
       <ul>
         <li>
           <b>
@@ -100,7 +98,7 @@
         <j:if test="${it.referenceBuild.present}">
           <span id="coverage-reference">
             <li>
-              <b>Reference build: </b>
+              Reference build:
               <j:out value="${it.referenceBuildLink}"/>
             </li>
           </span>

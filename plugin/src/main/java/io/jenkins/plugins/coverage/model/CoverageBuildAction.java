@@ -3,9 +3,11 @@ package io.jenkins.plugins.coverage.model;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -25,6 +27,7 @@ import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.model.CoverageViewModel.ValueLabelProvider;
 import io.jenkins.plugins.coverage.model.CoverageXmlStream.FractionConverter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
@@ -44,7 +47,7 @@ import static hudson.model.Run.*;
 public class CoverageBuildAction extends BuildAction<Node> implements HealthReportingAction, StaplerProxy {
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
-    /** The coverage report icon. */
+    /** The coverage report symbol from the Ionicons plugin. */
     public static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
 
     private static final long serialVersionUID = -6023811049340671399L;
@@ -52,6 +55,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     private static final String NO_REFERENCE_BUILD = "-";
 
     private static final CoverageFormatter FORMATTER = new CoverageFormatter();
+    private static final ValueLabelProvider VALUE_LABEL_PROVIDER = new ValueLabelProvider();
 
     private final HealthReport healthReport;
 
@@ -142,12 +146,27 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
         this.healthReport = healthReport;
     }
 
+    public NavigableSet<Metric> getMetricsForSummary() {
+        var metrics = new TreeSet<Metric>();
+        if (hasCoverage(Metric.LINE)) {
+            metrics.add(Metric.LINE);
+            metrics.add(Metric.LOC);
+        }
+        if (hasCoverage(Metric.BRANCH)) {
+            metrics.add(Metric.BRANCH);
+        }
+        if (hasCoverage(Metric.COMPLEXITY)) {
+            metrics.add(Metric.COMPLEXITY);
+        }
+        return metrics;
+    }
+
     public Coverage getLineCoverage() {
-        return ((Coverage)getCoverage(Metric.LINE));
+        return (Coverage) getCoverage(Metric.LINE);
     }
 
     public Coverage getBranchCoverage() {
-        return ((Coverage)getCoverage(Metric.BRANCH));
+        return (Coverage) getCoverage(Metric.BRANCH);
     }
 
     /**
@@ -298,7 +317,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     @SuppressWarnings("unused") // Called by jelly view
     public String formatDelta(final Metric metric) {
         if (hasDelta(metric)) {
-            return FORMATTER.formatDelta(difference.get(metric), Functions.getCurrentLocale());
+            return FORMATTER.formatDelta(metric, difference.get(metric), Functions.getCurrentLocale());
         }
         return Messages.Coverage_Not_Available();
     }
@@ -396,7 +415,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     @SuppressWarnings("unused") // Called by jelly view
     public String formatChangeCoverageDifference(final Metric metric) {
         if (hasChangeCoverage(metric)) {
-            return FORMATTER.formatDelta(changeCoverageDifference.get(metric), Functions.getCurrentLocale());
+            return FORMATTER.formatDelta(metric, changeCoverageDifference.get(metric), Functions.getCurrentLocale());
         }
         return Messages.Coverage_Not_Available();
     }
@@ -504,7 +523,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatCoverage(final Metric metric) {
-        return metric + ": " + FORMATTER.format(getCoverage(metric), Functions.getCurrentLocale());
+        return VALUE_LABEL_PROVIDER.getDisplayName(metric) + ": "
+                + FORMATTER.format(getCoverage(metric), Functions.getCurrentLocale());
     }
 
     @Override

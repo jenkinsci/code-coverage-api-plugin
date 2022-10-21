@@ -90,7 +90,6 @@ class CoverageBuildActionTest {
 
         CoverageBuilder coverageBuilder = new CoverageBuilder();
 
-
         Coverage percent50 = coverageBuilder.setMetric(Metric.BRANCH).setCovered(1).setMissed(1).build();
         coverages.put(Metric.BRANCH, percent50);
         deltas.put(Metric.BRANCH, percent50.getCoveredPercentage());
@@ -151,9 +150,8 @@ class CoverageBuildActionTest {
         CoverageBuildAction action = createCoverageBuildAction();
 
         assertThat(action.hasCoverage(COVERAGE_METRIC)).isTrue();
-        assertThat(action.getCoverage(COVERAGE_METRIC))
-                .isEqualTo(VALUE);
-        assertThat(action.formatCoverage(COVERAGE_METRIC)).isEqualTo("LINE: 50.00%");
+        assertThat(action.getCoverage(COVERAGE_METRIC)).isEqualTo(VALUE);
+        assertThat(action.formatCoverage(COVERAGE_METRIC)).isEqualTo("Line: 50.00%");
     }
 
     @Test

@@ -178,7 +178,7 @@ class CoverageTableModel extends TableModel {
             this.file = file;
             this.browserLocale = browserLocale;
             this.renderer = renderer;
-            this.colorProvider = colors;
+            colorProvider = colors;
         }
 
         public String getFileHash() {
@@ -249,14 +249,14 @@ class CoverageTableModel extends TableModel {
          *
          * @return the created {@link DetailedCell}
          */
-        protected DetailedCell<?> createColoredCoverageDeltaColumn(final Fraction delta) {
+        protected DetailedCell<?> createColoredCoverageDeltaColumn(final Metric metric, final Fraction delta) {
             double percentage = delta.doubleValue() * 100.0;
             DisplayColors colors = CoverageChangeTendency.getDisplayColorsForTendency(percentage, colorProvider);
             String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
                             div().withClasses(COVERAGE_COLUMN_INNER)
                                     .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(
                                             TABLE_COVERAGE_COLOR_ALPHA)))
-                                    .withText(FORMATTER.formatDelta(delta, browserLocale)))
+                                    .withText(FORMATTER.formatDelta(metric, delta, browserLocale)))
                     .render();
             return new DetailedCell<>(cell, percentage);
         }
@@ -277,7 +277,7 @@ class CoverageTableModel extends TableModel {
          */
         private DetailedCell<?> createColoredFileCoverageDeltaColumn(final Metric metric) {
             if (file.hasChangeCoverage(metric)) {
-                return createColoredCoverageDeltaColumn(file.getChangeCoverage(metric));
+                return createColoredCoverageDeltaColumn(metric, file.getChangeCoverage(metric));
             }
             return NO_COVERAGE;
         }

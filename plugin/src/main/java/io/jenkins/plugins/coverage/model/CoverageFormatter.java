@@ -6,6 +6,7 @@ import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.IntegerValue;
+import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Value;
 
@@ -54,7 +55,10 @@ public final class CoverageFormatter {
      *
      * @return the formatted delta percentage as plain text with a leading sign
      */
-    public String formatDelta(final Fraction fraction, final Locale locale) {
+    public String formatDelta(final Metric metric, final Fraction fraction, final Locale locale) {
+        if (metric.equals(Metric.COMPLEXITY) || metric.equals(Metric.LOC)) { // TODO: move to metric?
+            return String.format(locale, "%+d", fraction.intValue());
+        }
         return String.format(locale, "%+.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
     }
 

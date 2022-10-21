@@ -158,6 +158,9 @@ class CoveragePluginITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getMetricsForSummary())
+                .containsExactly(Metric.LINE, Metric.BRANCH, Metric.COMPLEXITY, Metric.LOC);
+
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_COVERED_LINES)

@@ -98,22 +98,27 @@ class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
     private void verifyDeltaComputation(final Run<?, ?> firstBuild, final Run<?, ?> secondBuild) {
         assertThat(secondBuild.getAction(CoverageBuildAction.class)).isNotNull();
 
-        CoverageBuildAction coverageBuildAction = secondBuild.getAction(CoverageBuildAction.class);
+        CoverageBuildAction action = secondBuild.getAction(CoverageBuildAction.class);
 
-        assertThat(coverageBuildAction).isNotNull();
-        assertThat(coverageBuildAction.getReferenceBuild())
+        assertThat(action).isNotNull();
+        assertThat(action.getReferenceBuild())
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
-        var delta = coverageBuildAction.getDelta();
+        var delta = action.getDelta();
         assertThat(delta.get(MODULE).doubleValue()).isCloseTo(0, withPercentage(1.0));
         assertThat(delta.get(PACKAGE).doubleValue()).isCloseTo(0, withPercentage(1.0));
-        assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0415, withPercentage(1.0));
+        assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0416, withPercentage(1.0));
         assertThat(delta.get(BRANCH).doubleValue()).isCloseTo(0.0533, withPercentage(1.0));
         assertThat(delta.get(LOC).intValue()).isEqualTo(-5857);
         assertThat(delta.get(COMPLEXITY).intValue()).isEqualTo(160 - 2718);
 
-        verifyChangeCoverage(coverageBuildAction);
+        assertThat(action.formatDelta(LINE)).isEqualTo("-4.16%");
+        assertThat(action.formatDelta(BRANCH)).isEqualTo("+5.33%");
+        assertThat(action.formatDelta(LOC)).isEqualTo("-5857");
+        assertThat(action.formatDelta(COMPLEXITY)).isEqualTo("-2558");
+
+        verifyChangeCoverage(action);
     }
 
     /**
