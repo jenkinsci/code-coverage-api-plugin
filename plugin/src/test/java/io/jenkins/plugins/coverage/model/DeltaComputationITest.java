@@ -22,7 +22,7 @@ import static org.assertj.core.data.Percentage.*;
 /**
  * Integration test for delta computation of reference builds.
  */
-class DeltaComputationVsReferenceBuildITest extends AbstractCoverageITest {
+class DeltaComputationITest extends AbstractCoverageITest {
     @Test
     void shouldComputeDeltaInFreestyleJob() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,

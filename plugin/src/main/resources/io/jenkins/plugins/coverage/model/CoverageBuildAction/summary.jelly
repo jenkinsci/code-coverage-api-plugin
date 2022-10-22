@@ -7,16 +7,14 @@
       <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
       <ul>
         <li>
-          <b>
-            <a href="coverage/#lineCoverage">Project Coverage:</a>
-          </b>
+          <a href="coverage/#lineCoverage">${%Project Coverage:}</a>
           <ul>
             <j:forEach var="metric" items="${metrics}">
-              <span id="project-coverage" title="The overall code coverage">
+              <div id="project-coverage" tooltip="The overall code coverage of the project">
                 <li>${it.formatCoverage(metric)}
                   <j:if test="${it.hasDelta(metric)}">
                     <span id="project-coverage-delta"
-                          title="The overall code coverage delta against the reference build">
+                          tooltip="The delta of the code coverage with respect to the reference build">
                       <j:choose>
                         <j:when test="${it.formatDelta(metric).startsWith('-')}">
                           <j:set var="color" value="#9d1212"/>
@@ -29,7 +27,7 @@
                     </span>
                   </j:if>
                 </li>
-              </span>
+              </div>
             </j:forEach>
           </ul>
         </li>
@@ -41,11 +39,11 @@
               </b>
               <ul>
                 <j:forEach var="metric" items="${metrics}">
-                  <span id="change-coverage" title="The code coverage of only modified lines of code">
+                  <span id="change-coverage" tooltip="The code coverage of only modified lines of code">
                     <li>${it.formatChangeCoverage(metric)}
                       <j:if test="${it.hasChangeCoverageDifference(metric)}">
                         <span id="change-coverage-delta"
-                              title="The delta of the change coverage against the overall coverage">
+                              tooltip="The delta of the change coverage against the overall coverage">
                           <j:choose>
                             <j:when test="${it.formatChangeCoverageDifference(metric).startsWith('-')}">
                               <j:set var="color" value="#9d1212"/>
@@ -60,7 +58,7 @@
                     </li>
                   </span>
                 </j:forEach>
-                <span id="change-coverage-overview" title="The amount of modified lines which affect the change coverage">
+                <span id="change-coverage-overview" tooltip="The amount of modified lines which affect the change coverage">
                   <li>${it.formatChangeCoverageOverview()}</li>
                 </span>
               </ul>
@@ -84,12 +82,12 @@
             <ul>
               <j:forEach var="metric" items="${metrics}">
                 <span id="indirect-coverage-changes"
-                      title="The indirect coverage changes of only modified lines of code (the value represents newly covered vs. uncovered lines)">
+                      tooltip="The indirect coverage changes of only modified lines of code (the value represents newly covered vs. uncovered lines)">
                   <li>${it.formatIndirectCoverageChanges(metric)}</li>
                 </span>
               </j:forEach>
               <span id="indirect-coverage-changes-overview"
-                    title="The amount of unmodified lines which contain indirect coverage changes">
+                    tooltip="The amount of unmodified lines which contain indirect coverage changes">
                 <li>${it.formatIndirectCoverageChangesOverview()}</li>
               </span>
             </ul>

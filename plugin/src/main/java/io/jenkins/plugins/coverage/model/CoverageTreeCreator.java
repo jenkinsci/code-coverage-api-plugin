@@ -1,8 +1,8 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
@@ -128,12 +128,11 @@ public class CoverageTreeCreator {
      */
     private void attachChangeCoverageLeaves(final Node node) {
         node.getAllFileNodes()
-                .forEach(fileNode -> createChangeCoverageLeaves(fileNode, fileNode.getCoverageOfChangeSet()));
+                .forEach(fileNode -> createChangeCoverageLeaves(fileNode, fileNode.getChangedLines()));
     }
 
     /**
-     * Attaches leaves to the passed {@link Node node} which represent its underlying indirect coverage
-     * changes.
+     * Attaches leaves to the passed {@link Node node} which represent its underlying indirect coverage changes.
      *
      * @param node
      *         The node which contains indirect coverage changes
@@ -149,39 +148,23 @@ public class CoverageTreeCreator {
      *
      * @param fileNode
      *         The node the leaves are attached to
-     * @param changes
+     * @param changedLines
      *         The {@link Coverage} to be represented by the leaves
      */
-    private void createChangeCoverageLeaves(final FileNode fileNode, final List<Coverage> changes) {
-        Coverage lineCoverage = Coverage.nullObject(Metric.LINE);
-        Coverage branchCoverage = Coverage.nullObject(Metric.BRANCH);
-
-        CoverageBuilder builder = new CoverageBuilder();
-        for (Coverage change : changes) {
-            int covered = change.getCovered() > 0 ? 1 : 0;
-            if (change.getTotal() > 1) {
-                builder.setMetric(Metric.BRANCH).setCovered(change.getCovered()).setMissed(change.getMissed());
-                branchCoverage = branchCoverage.add(builder.build());
-                builder.setMetric(Metric.LINE).setCovered(covered).setMissed(1 - covered);
-                lineCoverage = lineCoverage.add(builder.build());
-            }
-            else {
-                int missed = change.getMissed() > 0 ? 1 : 0;
-                builder.setMetric(Metric.LINE).setCovered(covered).setMissed(missed);
-                lineCoverage = lineCoverage.add(builder.build());
-            }
-        }
-        if (lineCoverage.isSet()) {
-            fileNode.addValue(lineCoverage);
-        }
-        if (branchCoverage.isSet()) {
-            fileNode.addValue(branchCoverage);
-        }
+    private void createChangeCoverageLeaves(final FileNode fileNode, final SortedSet<Integer> changedLines) {
+        fileNode.addValue(changedLines.stream()
+                .map(fileNode::getLineCoverage)
+                .reduce(Coverage::add)
+                .orElse(Coverage.nullObject(Metric.LINE)));
+        fileNode.addValue(changedLines.stream()
+                .map(fileNode::getBranchCoverage)
+                .reduce(Coverage::add)
+                .orElse(Coverage.nullObject(Metric.BRANCH)));
     }
 
     /**
-     * Creates both a line and a branch indirect coverage changes leaf for the passed {@link FileNode node}. The
-     * leaves represent the delta for a file regarding the amount of lines / branches that got hit by tests.
+     * Creates both a line and a branch indirect coverage changes leaf for the passed {@link FileNode node}. The leaves
+     * represent the delta for a file regarding the amount of lines / branches that got hit by tests.
      *
      * @param fileNode
      *         The node the leaves are attached to
@@ -193,30 +176,33 @@ public class CoverageTreeCreator {
         Coverage branchCoverage = Coverage.nullObject(Metric.BRANCH);
         for (Map.Entry<Integer, Integer> change : fileNode.getIndirectCoverageChanges().entrySet()) {
             int delta = change.getValue();
-            Coverage currentLineCoverage = fileNode.getLineCoverage(change.getKey());
-            Coverage currentBranchCoverage = fileNode.getBranchCoverage(change.getKey());
+            Coverage currentCoverage = fileNode.getBranchCoverage(change.getKey());
+            if (!currentCoverage.isSet()) {
+                currentCoverage = fileNode.getLineCoverage(change.getKey());
+            }
             CoverageBuilder builder = new CoverageBuilder();
             if (delta > 0) {
                 // the line is fully covered - even in case of branch coverage
-                if (delta == currentLineCoverage.getCovered()) {
+                if (delta == currentCoverage.getCovered()) {
                     builder.setMetric(Metric.LINE).setCovered(1).setMissed(0);
                     lineCoverage = lineCoverage.add(builder.build());
                 }
                 // the branch coverage increased for 'delta' hits
-                if (currentBranchCoverage.getTotal() > 1) {
+                if (currentCoverage.getTotal() > 1) {
                     builder.setMetric(Metric.BRANCH).setCovered(delta).setMissed(0);
                     branchCoverage = branchCoverage.add(builder.build());
                 }
             }
             else if (delta < 0) {
                 // the line is not covered anymore
-                if (currentLineCoverage.getCovered() == 0) {
+                if (currentCoverage.getCovered() == 0) {
                     builder.setMetric(Metric.LINE).setCovered(0).setMissed(1);
                     lineCoverage = lineCoverage.add(builder.build());
                 }
                 // the branch coverage is decreased by 'delta' hits
-                if (currentBranchCoverage.getTotal() > 1) {
+                if (currentCoverage.getTotal() > 1) {
                     builder.setMetric(Metric.BRANCH).setCovered(0).setMissed(Math.abs(delta));
+                    branchCoverage = branchCoverage.add(builder.build());
                 }
             }
         }

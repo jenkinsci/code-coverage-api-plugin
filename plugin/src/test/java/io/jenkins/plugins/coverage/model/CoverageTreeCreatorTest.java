@@ -73,7 +73,7 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
                     assertThat(root.getValue(LINE)).isNotEmpty().contains(
                             builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
                     assertThat(root.getValue(BRANCH)).isNotEmpty().contains(
-                            builder.setMetric((Metric.BRANCH)).setCovered(4).setMissed(4).build());
+                            builder.setMetric(Metric.BRANCH).setCovered(4).setMissed(4).build());
                 });
     }
 
@@ -167,9 +167,12 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
     private void attachCoveragePerLine(final FileNode file) {
         var builder = new CoverageBuilder().setMetric(Metric.LINE);
         file.addLineCoverage(10, builder.setCovered(1).setMissed(0).build());
-        file.addLineCoverage(11, builder.setCovered(0).setMissed(4).build());
-        file.addLineCoverage(12, builder.setCovered(4).setMissed(0).build());
+        file.addLineCoverage(11, builder.setCovered(0).setMissed(1).build());
+        file.addLineCoverage(12, builder.setCovered(1).setMissed(0).build());
         file.addLineCoverage(13, builder.setCovered(0).setMissed(1).build());
+        builder.setMetric(Metric.BRANCH);
+        file.addBranchCoverage(11, builder.setCovered(0).setMissed(4).build());
+        file.addBranchCoverage(12, builder.setCovered(4).setMissed(0).build());
     }
 
     /**
