@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
@@ -18,17 +17,14 @@ import edu.hm.hafner.util.PathUtil;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import hudson.model.FreeStyleProject;
 import hudson.model.Run;
 import hudson.model.TopLevelItem;
-import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import io.jenkins.plugins.prism.SourceCodeRetention;
 
+import static io.jenkins.plugins.prism.SourceCodeRetention.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -37,7 +33,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 @SuppressWarnings({"checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
-class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
+class CoveragePluginSourceITest extends AbstractCoverageITest {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
     private static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
@@ -46,7 +42,6 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
     private static final String SOURCE_FILE_PATH = PACKAGE_PATH + SOURCE_FILE_NAME;
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
     private static final PathUtil PATH_UTIL = new PathUtil();
-    static final String FILE_NAME = "jacoco-analysis-model.xml";
 
     /** Verifies that the plugin reads source code from the workspace root. */
     @Test
@@ -94,8 +89,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
         copyFileToWorkspace(job, SOURCE_FILE, "ignore/" + PACKAGE_PATH + "AcuCobolParser.java");
 
-        String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
@@ -127,8 +121,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(temporaryDirectory.isDirectory()).isTrue();
         File[] temporaryFiles = temporaryDirectory.listFiles();
 
-        String sourceCodeRetention = "STORE_ALL_BUILD";
-        job.setDefinition(createPipelineWithSourceCode(sourceCodeRetention, sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
         Run<?, ?> firstBuild = buildSuccessfully(job);
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting successfully");
@@ -138,13 +131,13 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("STORE_LAST_BUILD", sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(LAST_BUILD, sourceDirectory));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
         verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode("NEVER_STORE", sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(NEVER, sourceDirectory));
         Run<?, ?> lastBuild = buildSuccessfully(job);
         verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
@@ -156,11 +149,11 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         return firstBuild;
     }
 
-    private CpsFlowDefinition createPipelineWithSourceCode(final String sourceCodeRetention,
+    private CpsFlowDefinition createPipelineWithSourceCode(final SourceCodeRetention sourceCodeRetention,
             final String sourceDirectory) {
         return new CpsFlowDefinition("node {"
-                + "    publishCoverage adapters: [jacocoAdapter('" + ACU_COBOL_PARSER_COVERAGE_REPORT + "')], \n"
-                + "         sourceFileResolver: sourceFiles('" + sourceCodeRetention + "'), \n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '**/*xml']], \n"
+                + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
                 + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"
                 + "}", true);
@@ -183,30 +176,5 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
                 .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(SOURCE_FILE_PATH));
 
         return action.getTarget();
-    }
-
-    /** Freestyle job integration test for a simple build with code coverage. */
-    @Test
-    void coveragePluginFreestyleHelloWorld() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, FILE_NAME);
-
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(FILE_NAME);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
-
-        verifySimpleCoverageNode(project);
-    }
-
-    @SuppressWarnings("PMD.SystemPrintln")
-    void verifySimpleCoverageNode(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-        assertThat(build.getNumber()).isEqualTo(1);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(6083).setMissed(6368 - 6083).build());
-        System.out.println(getConsoleLog(build));
     }
 }

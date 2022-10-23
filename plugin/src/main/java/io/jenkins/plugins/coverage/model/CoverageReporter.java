@@ -167,7 +167,7 @@ public class CoverageReporter {
 
         log.logInfo("Executing source code painting...");
         SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
-        sourceCodePainter.processSourceCodePainting(paintedFiles, sourceDirectories,
+        sourceCodePainter.processSourceCodePainting(rootNode, sourceDirectories,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
         log.logInfo("Finished coverage processing - adding the action to the build...");

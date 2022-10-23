@@ -241,8 +241,6 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         return scm;
     }
 
-
-
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;

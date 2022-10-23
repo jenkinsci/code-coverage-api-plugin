@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage.model.visualization.code;
 
 import java.io.IOException;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,7 +13,6 @@ import hudson.FilePath;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodeFacade.AgentCoveragePainter;
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
@@ -42,7 +41,7 @@ public class SourceCodePainter {
     /**
      * Processes the source code painting.
      *
-     * @param paintedFiles
+     * @param node
      *         The files to be painted together with the information which lines has to be highlighted
      * @param sourceDirectories
      *         the source directories that have been configured in the associated job
@@ -56,15 +55,16 @@ public class SourceCodePainter {
      * @throws InterruptedException
      *         if the painting process has been interrupted
      */
-    public void processSourceCodePainting(final Set<Entry<Node, CoveragePaint>> paintedFiles,
+    public void processSourceCodePainting(final Node node,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
             throws InterruptedException {
         SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
         if (sourceCodeRetention != SourceCodeRetention.NEVER) {
-            log.logInfo("Painting %d source files on agent", paintedFiles.size());
+            var files = node.getAllFileNodes().stream().map(PaintedNode::new).collect(Collectors.toList());
+            log.logInfo("Painting %d source files on agent", files.size());
 
-            paintFilesOnAgent(paintedFiles, sourceDirectories, sourceCodeEncoding, log);
+            paintFilesOnAgent(files, sourceDirectories, sourceCodeEncoding, log);
             log.logInfo("Copying painted sources from agent to build folder");
 
             sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
@@ -72,7 +72,7 @@ public class SourceCodePainter {
         sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
     }
 
-    private void paintFilesOnAgent(final Set<Entry<Node, CoveragePaint>> paintedFiles,
+    private void paintFilesOnAgent(final List<PaintedNode> paintedFiles,
             final Set<String> requestedSourceDirectories,
             final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
         try {

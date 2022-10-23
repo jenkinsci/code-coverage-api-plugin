@@ -3,15 +3,14 @@ package io.jenkins.plugins.coverage.model.visualization.code;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -30,7 +29,6 @@ import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;
@@ -39,7 +37,7 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
+import io.jenkins.plugins.coverage.model.CoverageFormatter;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
@@ -351,14 +349,12 @@ public class SourceCodeFacade {
          * @param directory
          *         the subdirectory where the source files will be stored in
          */
-        AgentCoveragePainter(final Set<Entry<Node, CoveragePaint>> paintedFiles,
+        AgentCoveragePainter(final List<PaintedNode> paintedFiles,
                 final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
                 final String sourceCodeEncoding, final String directory) {
             super();
 
-            this.paintedFiles = paintedFiles.stream()
-                    .map(e -> new PaintedNode(e.getKey(), e.getValue()))
-                    .collect(Collectors.toList());
+            this.paintedFiles = paintedFiles;
             this.permittedSourceDirectories = permittedSourceDirectories;
             this.requestedSourceDirectories = requestedSourceDirectories;
             this.sourceCodeEncoding = sourceCodeEncoding;
@@ -430,15 +426,15 @@ public class SourceCodeFacade {
 
         private int paintSource(final PaintedNode fileNode, final FilePath workspace, final Path temporaryFolder,
                 final Set<String> sourceSearchDirectories, final Charset sourceEncoding, final FilteredLog log) {
-            String relativePathIdentifier = fileNode.getNode().getPath();
+            String relativePathIdentifier = fileNode.getPath();
             FilePath paintedFilesDirectory = workspace.child(directory);
             return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
-                    .map(resolvedPath -> paint(fileNode.getPaint(), relativePathIdentifier, resolvedPath,
+                    .map(resolvedPath -> paint(fileNode, relativePathIdentifier, resolvedPath,
                             paintedFilesDirectory, temporaryFolder, sourceEncoding, log))
                     .orElse(0);
         }
 
-        private int paint(final CoveragePaint paint, final String relativePathIdentifier, final FilePath resolvedPath,
+        private int paint(final PaintedNode paint, final String relativePathIdentifier, final FilePath resolvedPath,
                 final FilePath paintedFilesDirectory, final Path temporaryFolder,
                 final Charset charset, final FilteredLog log) {
             String sanitizedFileName = sanitizeFilename(relativePathIdentifier);
@@ -452,7 +448,6 @@ public class SourceCodeFacade {
                         String content = lines.get(line);
                         paintLine(line + 1, content, paint, output);
                     }
-                    paint.setTotalLines(lines.size());
                 }
                 new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
                 FileUtils.deleteDirectory(paintedFilesFolder.toFile());
@@ -465,28 +460,29 @@ public class SourceCodeFacade {
             }
         }
 
-        private void paintLine(final int line, final String content, final CoveragePaint paint,
+        private void paintLine(final int line, final String content, final PaintedNode paint,
                 final BufferedWriter output) throws IOException {
             if (paint.isPainted(line)) {
-                final int hits = paint.getHits(line);
-                final int branchCoverage = paint.getBranchCoverage(line);
-                final int branchTotal = paint.getBranchTotal(line);
-                final int coveragePercent = (hits == 0) ? 0 : (int) (branchCoverage * 100.0 / branchTotal);
-                if (hits > 0) {
-                    if (branchTotal == branchCoverage) {
+                int covered = paint.getCovered(line);
+                int missed = paint.getMissed(line);
+                int total = missed + covered;
+
+                if (covered == 0) {
+                    output.write("<tr class=\"coverNone\">\n");
+                }
+                else {
+                    if (missed == 0) {
                         output.write("<tr class=\"coverFull\">\n");
                     }
                     else {
-                        output.write("<tr class=\"coverPart\" title=\"Line " + line + ": Conditional coverage "
-                                + coveragePercent + "% ("
-                                + branchCoverage + "/" + branchTotal + ")\">\n");
+                        var formatter = new CoverageFormatter();
+                        output.write("<tr class=\"coverPart\" tooltip=\"Line " + line + ": branch coverage "
+                                + formatter.formatPercentage(covered, total, Locale.ENGLISH) + "\">\n");
                     }
-                }
-                else {
-                    output.write("<tr class=\"coverNone\">\n");
+
                 }
                 output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
-                output.write("<td class=\"hits\">" + hits + "</td>\n");
+                output.write("<td class=\"hits\">" + covered + "</td>\n");
             }
             else {
                 output.write("<tr class=\"noCover\">\n");
@@ -562,24 +558,6 @@ public class SourceCodeFacade {
             }
         }
 
-        private static class PaintedNode implements Serializable {
-            private static final long serialVersionUID = -6044649044983631852L;
-
-            private final Node node;
-            private final CoveragePaint paint;
-
-            PaintedNode(final Node node, final CoveragePaint paint) {
-                this.node = node;
-                this.paint = paint;
-            }
-
-            public Node getNode() {
-                return node;
-            }
-
-            public CoveragePaint getPaint() {
-                return paint;
-            }
-        }
     }
+
 }

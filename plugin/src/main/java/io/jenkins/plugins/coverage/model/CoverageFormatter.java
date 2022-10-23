@@ -47,6 +47,18 @@ public final class CoverageFormatter {
     }
 
     /**
+     * Formats a percentage to plain text and rounds the value to two decimals.
+     *
+     * @param locale
+     *         The used locale
+     *
+     * @return the formatted percentage as plain text
+     */
+    public String formatPercentage(final int covered, final int total, final Locale locale) {
+        return formatPercentage(Fraction.getFraction(covered, total), locale);
+    }
+
+    /**
      * Formats a delta percentage to its plain text representation with a leading sign and rounds the value to two
      * decimals.
      *
