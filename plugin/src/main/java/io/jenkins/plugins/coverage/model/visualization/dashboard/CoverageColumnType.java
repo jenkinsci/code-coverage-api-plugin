@@ -22,10 +22,6 @@ import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvide
  * @author Florian Orendi
  */
 public abstract class CoverageColumnType {
-
-    /**
-     * The localized display name.
-     */
     private final Localizable displayName;
 
     /**

@@ -211,7 +211,6 @@ public class CoverageColumn extends ListViewColumn {
      */
     @Extension(optional = true)
     public static class CoverageDescriptor extends ListViewColumnDescriptor {
-
         @NonNull
         @Override
         public String getDisplayName() {

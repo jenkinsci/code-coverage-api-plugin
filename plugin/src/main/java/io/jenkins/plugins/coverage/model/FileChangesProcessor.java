@@ -134,12 +134,12 @@ public class FileChangesProcessor {
     }
 
     /**
-     * Attaches the indirect coverage changes for a specific file, represented by the passed {@link FileCoverageNode}.
+     * Attaches the indirect coverage changes for a specific file, represented by the specified {@link FileNode}.
      *
      * @param fileNode
-     *         The file coverage node which represents the processed file
+     *         the file coverage node which represents the processed file
      * @param referenceCoverageMapping
-     *         A mapping which contains the coverage per line of the reference file
+     *         a mapping which contains the coverage per line of the reference file
      */
     private void attachIndirectCoverageChangeForFile(final FileNode fileNode,
             final SortedMap<Integer, Coverage> referenceCoverageMapping) {
@@ -170,7 +170,7 @@ public class FileChangesProcessor {
             final Map<String, FileNode> references, final String fullyQualifiedName) {
         if (references.containsKey(fullyQualifiedName)) {
             NavigableMap<Integer, Coverage> coveragePerLine = references.get(fullyQualifiedName).getLineNumberToLineCoverage();
-            if (coveragePerLine != null && !coveragePerLine.isEmpty()) {
+            if (!coveragePerLine.isEmpty()) {
                 return Optional.of(coveragePerLine);
             }
         }
