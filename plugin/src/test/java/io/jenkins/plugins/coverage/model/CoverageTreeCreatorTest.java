@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.MethodNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 
@@ -165,14 +166,20 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
      *         The node to which coverage information should be added
      */
     private void attachCoveragePerLine(final FileNode file) {
+        var method = new MethodNode("aMethod", "{}");
         var builder = new CoverageBuilder().setMetric(Metric.LINE);
         file.addLineCoverage(10, builder.setCovered(1).setMissed(0).build());
         file.addLineCoverage(11, builder.setCovered(0).setMissed(1).build());
         file.addLineCoverage(12, builder.setCovered(1).setMissed(0).build());
         file.addLineCoverage(13, builder.setCovered(0).setMissed(1).build());
+        method.addValue(builder.setCovered(2).setMissed(2).build());
+
         builder.setMetric(Metric.BRANCH);
         file.addBranchCoverage(11, builder.setCovered(0).setMissed(4).build());
         file.addBranchCoverage(12, builder.setCovered(4).setMissed(0).build());
+        method.addValue(builder.setCovered(4).setMissed(4).build());
+
+        file.addChild(method);
     }
 
     /**
@@ -203,5 +210,6 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
         changes.add(12);
         changes.add(13);
         file.getChangedLines().addAll(changes);
+
     }
 }

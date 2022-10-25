@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 
 import edu.hm.hafner.metric.Coverage;
@@ -25,17 +26,9 @@ public class CoverageTreeCreator {
      * @return the filtered tree
      */
     public Node createChangeCoverageTree(final Node coverageNode) {
-        Node copy = coverageNode.copyTree();
-
-        boolean treeExists = calculateChangeCoverageTree(copy);
-        if (treeExists) {
-            attachChangeCoverageLeaves(copy);
-        }
-        else {
-            clearChildrenAndLeaves(copy);
-        }
-
-        return copy;
+        Optional<Node> copy = coverageNode.prune(
+                n -> n instanceof FileNode && ((FileNode)n).hasCoveredLinesInChangeSet());
+        return copy.orElse(coverageNode.copy());
     }
 
     /**
