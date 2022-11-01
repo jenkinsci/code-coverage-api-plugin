@@ -121,7 +121,7 @@ class SourceCodeFacadeTest extends ResourceTest {
         file.addIndirectCoverageChange(14, 1);
         file.addIndirectCoverageChange(15, 1);
         for (int i = 1; i <= 25; i++) {
-            file.addLineCoverage(i, COVERAGE);
+            file.addCounters(i, 1, 0);
         }
         return file;
     }

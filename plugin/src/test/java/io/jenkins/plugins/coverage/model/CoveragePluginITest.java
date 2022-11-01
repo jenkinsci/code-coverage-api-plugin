@@ -13,6 +13,7 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
+import edu.hm.hafner.metric.Node;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
@@ -160,7 +161,9 @@ class CoveragePluginITest extends AbstractCoverageITest {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getMetricsForSummary())
                 .containsExactly(Metric.LINE, Metric.BRANCH, Metric.COMPLEXITY, Metric.LOC);
-
+        for (Node node : coverageResult.getResult().find(Metric.CLASS, "edu/hm/hafner/analysis/parser/pvsstudio/AnalyzerType").get().getAll(Metric.METHOD)) {
+            System.out.format("%s: %s%n", node, node.getValue(Metric.LINE));
+        }
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_COVERED_LINES)

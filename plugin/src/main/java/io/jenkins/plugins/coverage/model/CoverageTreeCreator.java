@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
@@ -26,9 +27,30 @@ public class CoverageTreeCreator {
      * @return the filtered tree
      */
     public Node createChangeCoverageTree(final Node coverageNode) {
-        Optional<Node> copy = coverageNode.prune(
-                n -> n instanceof FileNode && ((FileNode)n).hasCoveredLinesInChangeSet());
-        return copy.orElse(coverageNode.copy());
+        return prune(coverageNode).orElse(coverageNode.copyNode());
+    }
+
+    private Optional<Node> prune(final Node original) {
+        if (original instanceof FileNode) {
+            var file = (FileNode) original;
+            if (file.hasCoveredLinesInChangeSet()) {
+                return Optional.of(file.filter());
+            }
+            return Optional.empty();
+        }
+        else {
+            var copy = original.copy();
+            var children = original.getChildren()
+                    .stream()
+                    .map(this::prune)
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toList());
+            if (children.isEmpty()) {
+                return Optional.empty();
+            }
+            copy.addAllChildren(children);
+            return Optional.of(copy);
+        }
     }
 
     /**
@@ -145,6 +167,15 @@ public class CoverageTreeCreator {
      *         The {@link Coverage} to be represented by the leaves
      */
     private void createChangeCoverageLeaves(final FileNode fileNode, final SortedSet<Integer> changedLines) {
+        var lineCoverage = Coverage.nullObject(Metric.LINE);
+        var branchCoverage = Coverage.nullObject(Metric.BRANCH);
+        for (int changedLine : changedLines) {
+            if (fileNode.hasCoverageForLine(changedLine)) {
+                var covered = fileNode.getCoveredOfLine(changedLine);
+                var missed = fileNode.getMissedOfLine(changedLine);
+
+            }
+        }
         fileNode.addValue(changedLines.stream()
                 .map(fileNode::getLineCoverage)
                 .reduce(Coverage::add)

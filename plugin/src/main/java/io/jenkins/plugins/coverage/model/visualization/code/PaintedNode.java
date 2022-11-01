@@ -1,9 +1,7 @@
 package io.jenkins.plugins.coverage.model.visualization.code;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
+import java.util.Arrays;
 
 import edu.hm.hafner.metric.FileNode;
 
@@ -15,23 +13,15 @@ import edu.hm.hafner.metric.FileNode;
 class PaintedNode implements Serializable {
     private static final long serialVersionUID = -6044649044983631852L;
     private final String path;
-    private final SortedSet<Integer> coveredLines;
-    private final Map<Integer, Integer> coveredPerLine;
-    private final Map<Integer, Integer> missedPerLine;
+    private final int[] linesToPaint;
+    private final int[] coveredPerLine;
+    private final int[] missedPerLine;
 
     public PaintedNode(final FileNode file) {
         path = file.getPath();
-        coveredLines = file.getCoveredLines();
-        coveredPerLine = new HashMap<>();
-        missedPerLine = new HashMap<>();
-        for (Integer line : coveredLines) {
-            var coverage = file.getBranchCoverage(line);
-            if (!coverage.isSet()) {
-                coverage = file.getLineCoverage(line);
-            }
-            coveredPerLine.put(line, coverage.getCovered());
-            missedPerLine.put(line, coverage.getMissed());
-        }
+        linesToPaint = file.getCoveredLines().stream().mapToInt(i -> i).toArray();
+        coveredPerLine = file.getCoveredCounters();
+        missedPerLine = file.getMissedCounters();
     }
 
     public String getPath() {
@@ -39,14 +29,30 @@ class PaintedNode implements Serializable {
     }
 
     public boolean isPainted(final int line) {
-        return coveredLines.contains(line);
+        var index = findLine(line);
+        if (index >= 0) {
+            return coveredPerLine[index] > 0;
+        }
+        return false;
+    }
+
+    private int findLine(final int line) {
+        return Arrays.binarySearch(linesToPaint, line);
     }
 
     public int getCovered(final int line) {
-        return coveredPerLine.getOrDefault(line, 0);
+        return getCounter(line, coveredPerLine);
     }
 
     public int getMissed(final int line) {
-        return missedPerLine.getOrDefault(line, 0);
+        return getCounter(line, missedPerLine);
+    }
+
+    private int getCounter(final int line, final int[] counters) {
+        var index = findLine(line);
+        if (index >= 0) {
+            return counters[index];
+        }
+        return 0;
     }
 }

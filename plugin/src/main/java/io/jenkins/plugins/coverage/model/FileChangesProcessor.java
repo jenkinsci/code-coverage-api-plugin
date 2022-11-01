@@ -15,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Node;
 
@@ -119,14 +118,13 @@ public class FileChangesProcessor {
         for (Map.Entry<String, FileNode> entry : fileNodes.entrySet()) {
             String referencePath = entry.getKey();
             FileNode fileNode = entry.getValue();
-            Optional<SortedMap<Integer, Coverage>> referenceCoveragePerLine =
+            Optional<SortedMap<Integer, Integer>> referenceCoveragePerLine =
                     getReferenceCoveragePerLine(referenceFileNodes, referencePath);
             if (referenceCoveragePerLine.isPresent()) {
-                SortedMap<Integer, Coverage> referenceCoverageMapping = new TreeMap<>(referenceCoveragePerLine.get());
+                SortedMap<Integer, Integer> referenceCoverageMapping = new TreeMap<>(referenceCoveragePerLine.get());
                 String currentPath = fileNode.getPath();
                 if (codeChanges.containsKey(currentPath)) {
-                    adjustedCoveragePerLine(referenceCoverageMapping,
-                            codeChanges.get(currentPath));
+                    adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(currentPath));
                 }
                 attachIndirectCoverageChangeForFile(fileNode, referenceCoverageMapping);
             }
@@ -142,12 +140,11 @@ public class FileChangesProcessor {
      *         a mapping which contains the coverage per line of the reference file
      */
     private void attachIndirectCoverageChangeForFile(final FileNode fileNode,
-            final SortedMap<Integer, Coverage> referenceCoverageMapping) {
-        fileNode.getLineNumberToLineCoverage().forEach((line, coverage) -> {
-            if (!fileNode.getChangedLines().contains(line) && referenceCoverageMapping.containsKey(line)) {
-                Coverage referenceCoverage = referenceCoverageMapping.get(line);
-                int covered = coverage.getCovered();
-                int referenceCovered = referenceCoverage.getCovered();
+            final SortedMap<Integer, Integer> referenceCoverageMapping) {
+        fileNode.getCoveredLines().forEach(line -> {
+            if (!fileNode.hasChangedLine(line) && referenceCoverageMapping.containsKey(line)) {
+                int referenceCovered = referenceCoverageMapping.get(line);
+                int covered = fileNode.getCoveredOfLine(line);
                 if (covered != referenceCovered) {
                     fileNode.addIndirectCoverageChange(line, covered - referenceCovered);
                 }
@@ -166,10 +163,10 @@ public class FileChangesProcessor {
      *
      * @return an Optional of the coverage mapping if existent, else an empty Optional
      */
-    private Optional<SortedMap<Integer, Coverage>> getReferenceCoveragePerLine(
+    private Optional<SortedMap<Integer, Integer>> getReferenceCoveragePerLine(
             final Map<String, FileNode> references, final String fullyQualifiedName) {
         if (references.containsKey(fullyQualifiedName)) {
-            NavigableMap<Integer, Coverage> coveragePerLine = references.get(fullyQualifiedName).getLineNumberToLineCoverage();
+            NavigableMap<Integer, Integer> coveragePerLine = references.get(fullyQualifiedName).getCounters();
             if (!coveragePerLine.isEmpty()) {
                 return Optional.of(coveragePerLine);
             }
@@ -186,9 +183,9 @@ public class FileChangesProcessor {
      * @param fileChanges
      *         The applied code changes of the file
      */
-    private void adjustedCoveragePerLine(final SortedMap<Integer, Coverage> coveragePerLine,
+    private void adjustedCoveragePerLine(final SortedMap<Integer, Integer> coveragePerLine,
             final FileChanges fileChanges) {
-        List<List<Coverage>> coverages = transformCoveragePerLine(coveragePerLine, fileChanges);
+        List<List<Integer>> coverages = transformCoveragePerLine(coveragePerLine, fileChanges);
 
         fileChanges.getChangesByType(ChangeEditType.DELETE).forEach(change -> {
             for (int i = change.getChangedFromLine(); i <= change.getChangedToLine(); i++) {
@@ -197,13 +194,13 @@ public class FileChangesProcessor {
         });
 
         fileChanges.getChangesByType(ChangeEditType.INSERT).forEach(change -> {
-            List<Coverage> inserted = coverages.get(change.getChangedFromLine());
+            List<Integer> inserted = coverages.get(change.getChangedFromLine());
             int changedLinesNumber = change.getToLine() - change.getFromLine() + 1;
             fillCoverageListWithNull(inserted, changedLinesNumber);
         });
 
         fileChanges.getChangesByType(ChangeEditType.REPLACE).forEach(change -> {
-            List<Coverage> replaced = coverages.get(change.getChangedFromLine());
+            List<Integer> replaced = coverages.get(change.getChangedFromLine());
             replaced.clear(); // coverage of replaced code is irrelevant
             int changedLinesNumber = change.getToLine() - change.getFromLine() + 1;
             fillCoverageListWithNull(replaced, changedLinesNumber);
@@ -212,13 +209,13 @@ public class FileChangesProcessor {
             }
         });
 
-        List<Coverage> adjustedCoveragesList = coverages.stream()
+        List<Integer> adjustedCoveragesList = coverages.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
         coveragePerLine.clear();
         for (int line = 1; line < adjustedCoveragesList.size(); line++) {
-            Coverage coverage = adjustedCoveragesList.get(line);
+            Integer coverage = adjustedCoveragesList.get(line);
             if (coverage != null) {
                 coveragePerLine.put(line, coverage);
             }
@@ -236,9 +233,9 @@ public class FileChangesProcessor {
      *
      * @return the list expandable list representation of the coverage-per-line mapping
      */
-    private List<List<Coverage>> transformCoveragePerLine(
-            final SortedMap<Integer, Coverage> coveragePerLine, final FileChanges fileChanges) {
-        List<List<Coverage>> coverages = coveragePerLine.values().stream()
+    private List<List<Integer>> transformCoveragePerLine(
+            final SortedMap<Integer, Integer> coveragePerLine, final FileChanges fileChanges) {
+        List<List<Integer>> coverages = coveragePerLine.values().stream()
                 .map(coverage -> new ArrayList<>(Collections.singletonList(coverage)))
                 .collect(Collectors.toList());
 
@@ -286,7 +283,7 @@ public class FileChangesProcessor {
     }
 
     /**
-     * Gets all {@link FileCoverageNode file nodes} from a reference coverage tree which also exist in the current
+     * Gets all {@link FileNode file nodes} from a reference coverage tree which also exist in the current
      * coverage tree. The found nodes are mapped by their path.
      *
      * @param nodeMapping
@@ -311,7 +308,7 @@ public class FileChangesProcessor {
      * @param number
      *         The number of values to be inserted
      */
-    private void fillCoverageListWithNull(final List<Coverage> coverageList, final int number) {
+    private void fillCoverageListWithNull(final List<Integer> coverageList, final int number) {
         for (int i = 0; i < number; i++) {
             coverageList.add(null);
         }

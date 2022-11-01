@@ -159,7 +159,7 @@ public final class CoverageStubs {
             var fileNode = new FileNode("File-" + file);
 
             for (int line = 0; line < 2; line++) {
-                fileNode.addLineCoverage(10 + line, builder.setCovered(1).setMissed(1).build());
+                fileNode.addCounters(10 + line, 1, 1);
                 fileNode.addChangedCodeLine(10 + line);
             }
             root.addChild(fileNode);
@@ -191,7 +191,7 @@ public final class CoverageStubs {
             var fileNode = new FileNode("File-" + file);
 
             for (int line = 0; line < 2; line++) {
-                fileNode.addLineCoverage(10 + line, builder.setCovered(1).setMissed(1).build());
+                fileNode.addCounters(10 + line, 1, 1);
                 fileNode.addIndirectCoverageChange(10 + line, 2);
             }
             root.addChild(fileNode);

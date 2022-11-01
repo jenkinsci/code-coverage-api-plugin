@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class CoverageTreeCreatorTest extends AbstractCoverageTest {
-
     @Test
     void shouldCreateEmptyChangeCoverageTreeWithoutChanges() {
         CoverageTreeCreator coverageTreeCreator = createCoverageTreeCreator();
@@ -168,15 +167,15 @@ class CoverageTreeCreatorTest extends AbstractCoverageTest {
     private void attachCoveragePerLine(final FileNode file) {
         var method = new MethodNode("aMethod", "{}");
         var builder = new CoverageBuilder().setMetric(Metric.LINE);
-        file.addLineCoverage(10, builder.setCovered(1).setMissed(0).build());
-        file.addLineCoverage(11, builder.setCovered(0).setMissed(1).build());
-        file.addLineCoverage(12, builder.setCovered(1).setMissed(0).build());
-        file.addLineCoverage(13, builder.setCovered(0).setMissed(1).build());
+        file.addCounters(10, 1, 0);
+        file.addCounters(11, 0, 1);
+        file.addCounters(12, 1, 0);
+        file.addCounters(13, 0, 1);
         method.addValue(builder.setCovered(2).setMissed(2).build());
 
         builder.setMetric(Metric.BRANCH);
-        file.addBranchCoverage(11, builder.setCovered(0).setMissed(4).build());
-        file.addBranchCoverage(12, builder.setCovered(4).setMissed(0).build());
+        file.addCounters(11, 0, 4);
+        file.addCounters(12, 4, 0);
         method.addValue(builder.setCovered(4).setMissed(4).build());
 
         file.addChild(method);
