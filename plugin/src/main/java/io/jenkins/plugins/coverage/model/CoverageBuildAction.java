@@ -465,7 +465,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
 
     private Set<FileNode> extractFileNodesWithChangeCoverage() {
         CoverageTreeCreator treeCreator = new CoverageTreeCreator();
-        return treeCreator.createChangeCoverageTree(getResult()).getAllFileNodes().stream()
+        var allFileNodes = treeCreator.createChangeCoverageTree(getResult()).getAllFileNodes();
+        return allFileNodes.stream()
                 .filter(FileNode::hasCoveredLinesInChangeSet)
                 .collect(Collectors.toSet());
     }

@@ -10,6 +10,7 @@ import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
@@ -234,6 +235,37 @@ class CoverageBuildActionTest {
         Node root = createChangeCoverageNode(COVERAGE_FRACTION, COVERAGE_METRIC,
                 COVERAGE_FILE_CHANGES, COVERAGE_LINE_CHANGES);
         return createCoverageBuildAction(root);
+    }
+
+    /**
+     * Creates a stub of {@link Node}, which represents the change coverage and provides information about it.
+     *
+     * @param changeCoverage
+     *         The change coverage
+     * @param metric
+     *         The coverage metric
+     * @param coverageFileChange
+     *         The amount of files which contain indirect coverage changes
+     * @param coverageLineChanges
+     *         The amount of lines which contain indirect coverage changes
+     *
+     * @return the created stub
+     */
+    private Node createChangeCoverageNode(final Fraction changeCoverage, final Metric metric,
+            final int coverageFileChange, final long coverageLineChanges) {
+        var root = new ModuleNode("root");
+        var builder = new CoverageBuilder().setMetric(Metric.LINE);
+        for (int file = 0; file < 5; file++) {
+            var fileNode = new FileNode("File-" + file);
+
+            for (int line = 0; line < 2; line++) {
+                fileNode.addCounters(10 + line, 1, 1);
+                fileNode.addChangedCodeLine(10 + line);
+            }
+            root.addChild(fileNode);
+        }
+
+        return root;
     }
 
     /**

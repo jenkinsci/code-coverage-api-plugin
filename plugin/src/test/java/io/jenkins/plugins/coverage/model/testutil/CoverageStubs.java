@@ -136,37 +136,6 @@ public final class CoverageStubs {
         return coverageNode;
     }
 
-    /**
-     * Creates a stub of {@link Node}, which represents the change coverage and provides information about it.
-     *
-     * @param changeCoverage
-     *         The change coverage
-     * @param metric
-     *         The coverage metric
-     * @param coverageFileChange
-     *         The amount of files which contain indirect coverage changes
-     * @param coverageLineChanges
-     *         The amount of lines which contain indirect coverage changes
-     *
-     * @return the created stub
-     */
-    @VisibleForTesting
-    public static Node createChangeCoverageNode(final Fraction changeCoverage, final Metric metric,
-            final int coverageFileChange, final long coverageLineChanges) {
-        var root = new ModuleNode("root");
-        var builder = new CoverageBuilder().setMetric(Metric.LINE);
-        for (int file = 0; file < 5; file++) {
-            var fileNode = new FileNode("File-" + file);
-
-            for (int line = 0; line < 2; line++) {
-                fileNode.addCounters(10 + line, 1, 1);
-                fileNode.addChangedCodeLine(10 + line);
-            }
-            root.addChild(fileNode);
-        }
-
-        return root;
-    }
 
     /**
      * Creates a stub of {@link Node}, which represents indirect coverage changes and provides information about it.
