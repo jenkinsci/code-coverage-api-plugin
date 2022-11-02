@@ -18,7 +18,16 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
  */
 public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPerSuite {
     static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    static final int JACOCO_ANALYSIS_MODEL_COVERED = 5531;
+    static final int JACOCO_ANALYSIS_MODEL_MISSED = 267;
+    static final int JACOCO_ANALYSIS_MODEL_TOTAL
+            = JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_ANALYSIS_MODEL_MISSED;
+
     static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
+    static final int JACOCO_CODING_STYLE_COVERED = 294;
+    static final int JACOCO_CODING_STYLE_MISSED = 29;
+    static final int JACOCO_CODING_STYLE_TOTAL
+            = JACOCO_CODING_STYLE_COVERED + JACOCO_CODING_STYLE_MISSED;
 
     protected FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);

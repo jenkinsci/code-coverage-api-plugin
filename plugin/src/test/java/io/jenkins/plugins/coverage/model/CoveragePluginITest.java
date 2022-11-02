@@ -13,7 +13,6 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
-import edu.hm.hafner.metric.Node;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
@@ -34,23 +33,6 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test for different jacoco and cobertura files.
  */
 class CoveragePluginITest extends AbstractCoverageITest {
-
-    /**
-     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
-     */
-    private static final int JACOCO_COVERED_LINES = 6083;
-    /**
-     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE}.
-     */
-    private static final int JACOCO_ALL_LINES = 6368;
-    /**
-     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value JACOCO_CODINGSTYLE_FILE}.
-     */
-    private static final int BOTH_JACOCO_COVERED_LINES = 6377;
-    /**
-     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value JACOCO_CODINGSTYLE_FILE}.
-     */
-    private static final int BOTH_JACOCO_ALL_LINES = 6691;
     /**
      * Covered lines in {@value COBERTURA_HIGHER_COVERAGE_FILE}.
      */
@@ -130,14 +112,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordOneJacocoResultInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
-                JACOCO_ANALYSIS_MODEL_FILE);
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
-        // FIXME: which parser is correct?
-        /*
-            Expected :LINE: 95.52% (6083/6368)
-            Actual   :LINE: 95.41% (5588/5857)
-         */
         verifyOneJacocoResult(project);
     }
 
@@ -161,13 +137,10 @@ class CoveragePluginITest extends AbstractCoverageITest {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getMetricsForSummary())
                 .containsExactly(Metric.LINE, Metric.BRANCH, Metric.COMPLEXITY, Metric.LOC);
-        for (Node node : coverageResult.getResult().find(Metric.CLASS, "edu/hm/hafner/analysis/parser/pvsstudio/AnalyzerType").get().getAll(Metric.METHOD)) {
-            System.out.format("%s: %s%n", node, node.getValue(Metric.LINE));
-        }
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(createLineCoverageBuilder()
-                        .setCovered(JACOCO_COVERED_LINES)
-                        .setMissed(JACOCO_ALL_LINES - JACOCO_COVERED_LINES)
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_TOTAL - JACOCO_ANALYSIS_MODEL_COVERED)
                         .build());
     }
 
@@ -175,12 +148,6 @@ class CoveragePluginITest extends AbstractCoverageITest {
     void shouldRecordTwoJacocoResultsInFreestyleJob() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
-
-        // FIXME: which parser is correct?
-        /*
-            Expected :LINE: 95.31% (6377/6691)
-            Actual   :LINE: 95.18% (5882/6180)
-         */
         verifyTwoJacocoResults(project);
     }
 
@@ -192,14 +159,22 @@ class CoveragePluginITest extends AbstractCoverageITest {
         verifyTwoJacocoResults(job);
     }
 
+    @Test
+    void shouldRecordTwoJacocoResultsInDeclarativePipeline() {
+        WorkflowJob job = createDeclarativePipeline(CoverageParser.JACOCO,
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
+
+        verifyTwoJacocoResults(job);
+    }
+
     private void verifyTwoJacocoResults(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(createLineCoverageBuilder()
-                        .setCovered(BOTH_JACOCO_COVERED_LINES)
-                        .setMissed(BOTH_JACOCO_ALL_LINES - BOTH_JACOCO_COVERED_LINES)
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_MISSED + JACOCO_CODING_STYLE_MISSED)
                         .build());
     }
 
