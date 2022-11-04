@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
@@ -19,9 +18,7 @@ import hudson.model.HealthReport;
 import hudson.model.Node;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
@@ -31,7 +28,7 @@ import static org.assertj.core.api.Assumptions.*;
  */
 @Testcontainers(disabledWithoutDocker = true)
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
-class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSuite {
+class DockerAndSourceCodeRenderingITest extends AbstractCoverageITest {
     private static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
     private static final String COMMIT = "6bd346bbcc9779467ce657b2618ab11e38e28c2c";
     private static final String REPOSITORY = "https://github.com/jenkinsci/analysis-model.git";
@@ -57,20 +54,19 @@ class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSui
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
         project.setAssignedNode(agent);
         copySingleFileToAgentWorkspace(agent, project, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_ANALYSIS_MODEL_FILE);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(JACOCO_ANALYSIS_MODEL_FILE);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().add(coveragePublisher);
+
         Run<?, ?> build = buildSuccessfully(project);
 
         assertThat(build.getNumber()).isEqualTo(1);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(6083).setMissed(6368 - 6083).build());
+                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE)
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_MISSED).build());
     }
 
     private void verifySourceCode(final Run<?, ?> build) {
@@ -103,8 +99,7 @@ class DockerAndSourceCodeRenderingITest extends IntegrationTestWithJenkinsPerSui
                 + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '**/*xml']], sourceCodeRetention: 'LAST_BUILD' \n"
                 + "}", true));
 
         return job;

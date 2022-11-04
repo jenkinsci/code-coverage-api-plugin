@@ -64,7 +64,9 @@ class DockerCoveragePluginSourceITest extends CoveragePluginSourceITest {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setMetric(Metric.LINE).setCovered(6083).setMissed(6368 - 6083).build());
+                .isEqualTo(new Coverage.CoverageBuilder().setMetric(Metric.LINE)
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_MISSED).build());
         System.out.println(getConsoleLog(build));
     }
 
