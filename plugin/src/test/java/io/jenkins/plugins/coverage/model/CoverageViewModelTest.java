@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -8,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.metric.Node;
 
 import hudson.model.Run;
-
-import io.vavr.collection.List;
 
 import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageViewModel.*;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.*;
 class CoverageViewModelTest extends AbstractCoverageTest {
     @Test
     void shouldReturnEmptySourceViewForExistingLinkButMissingSourceFile() {
-        CoverageViewModel model = createModel();
+        CoverageViewModel model = createModelFromCodingStyleReport();
 
         String hash = String.valueOf("PathUtil.java".hashCode());
         assertThat(model.getSourceCode(hash, ABSOLUTE_COVERAGE_TABLE_ID)).isEqualTo("n/a");
@@ -37,26 +36,29 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
     void shouldReportOverview() {
-        CoverageViewModel model = createModel();
-
-        assertThat(model.getDisplayName()).contains("'Java coding style'");
+        CoverageViewModel model = createModelFromCodingStyleReport();
 
         CoverageOverview overview = model.getOverview();
 
-        var expectedMetrics = new String[] {"File", "Class", "Method", "Line", "Instruction", "Branch"};
+        var expectedMetrics = new String[] {"Package", "File", "Class", "Method", "Line", "Instruction", "Branch"};
         assertThat(overview.getMetrics()).containsExactly(expectedMetrics);
 
-        var expectedCovered = List.ofAll(7, 15, 97, 294, 1260, 109);
+        var expectedCovered = List.of(4, 7, 15, 97, 294, 1260, 109);
         assertThat(overview.getCovered()).containsExactlyElementsOf(expectedCovered);
-        assertThat(overview.getCoveredPercentages()).allSatisfy(d -> assertThat(d).isStrictlyBetween(0.0, 1.0));
+        ensureValidPercentages(overview.getCoveredPercentages());
 
-        var expectedMissed = List.ofAll(3, 3, 5, 29, 90, 7);
+        var expectedMissed = List.of(0, 3, 3, 5, 29, 90, 7);
         assertThat(overview.getMissed()).containsExactlyElementsOf(expectedMissed);
-        assertThat(overview.getMissedPercentages()).allSatisfy(d -> assertThat(d).isStrictlyBetween(0.0, 1.0));
+        ensureValidPercentages(overview.getMissedPercentages());
 
         assertThatJson(overview).node("metrics").isArray().containsExactly(expectedMetrics);
         assertThatJson(overview).node("covered").isArray().containsExactlyElementsOf(expectedCovered);
         assertThatJson(overview).node("missed").isArray().containsExactlyElementsOf(expectedMissed);
+    }
+
+    private static void ensureValidPercentages(final List<Double> percentages) {
+        assertThat(percentages).allSatisfy(d ->
+                assertThat(d).isLessThanOrEqualTo(1.0).isGreaterThanOrEqualTo(0.0));
     }
 
     @Test
@@ -70,7 +72,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
     void shouldProvideRightTableModelById() {
-        CoverageViewModel model = createModel();
+        CoverageViewModel model = createModelFromCodingStyleReport();
         assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTableModel.class);
         assertThat(model.getTableModel(INDIRECT_COVERAGE_TABLE_ID)).isInstanceOf(IndirectCoverageChangesTable.class);
         assertThat(model.getTableModel(ABSOLUTE_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
@@ -79,8 +81,10 @@ class CoverageViewModelTest extends AbstractCoverageTest {
                 .isThrownBy(() -> model.getTableModel("wrong-id"));
     }
 
-    private CoverageViewModel createModel() {
-        return new CoverageViewModel(mock(Run.class), readJacocoResult("jacoco-codingstyle.xml"));
+    private CoverageViewModel createModelFromCodingStyleReport() {
+        var model = new CoverageViewModel(mock(Run.class), readJacocoResult("jacoco-codingstyle.xml"));
+        assertThat(model.getDisplayName()).contains("'Java coding style'");
+        return model;
     }
 
 }

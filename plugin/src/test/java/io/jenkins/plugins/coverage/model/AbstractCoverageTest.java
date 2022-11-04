@@ -37,7 +37,9 @@ public abstract class AbstractCoverageTest extends ResourceTest {
      */
     public Node readJacocoResult(final String fileName) {
         try {
-            return new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)));
+            var node = new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)));
+            node.splitPackages();
+            return node;
         }
         catch (ParsingException | IOException exception) {
             throw new AssertionError(exception);

@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.model.visualization.tree;
+package io.jenkins.plugins.coverage.model;
 
 import java.nio.file.Paths;
 
@@ -8,11 +8,12 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.coverage.model.AbstractCoverageTest;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.model.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.model.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.model.visualization.tree.TreeMapNodeConverter;
 
+import static io.jenkins.plugins.coverage.model.AbstractCoverageITest.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -26,10 +27,10 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
     @Test
     void shouldConvertCodingStyleToTree() {
-        Node tree = readJacocoResult(Paths.get("..", "..", "jacoco-codingstyle.xml").toString());
+        Node tree = readJacocoResult(Paths.get(JACOCO_CODING_STYLE_FILE).toString());
 
-        final double totalLines = 323.0;
-        final double coveredLines = 294.0;
+        final double totalLines = JACOCO_CODING_STYLE_TOTAL;
+        final double coveredLines = JACOCO_CODING_STYLE_COVERED;
         final double coveredPercentage = coveredLines / totalLines * 100.0;
 
         TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
@@ -48,13 +49,13 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
     @Test
     void shouldConvertAnalysisModelToTree() {
-        Node tree = readJacocoResult(Paths.get("..", "..", "jacoco-analysis-model.xml").toString());
+        Node tree = readJacocoResult(Paths.get(JACOCO_ANALYSIS_MODEL_FILE).toString());
 
         TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
 
-        final double totalLines = 6368.0;
-        final double coveredLines = 6083.0;
-        final double coveredPercentage = coveredLines / totalLines * 100.0;
+        double totalLines = JACOCO_ANALYSIS_MODEL_TOTAL;
+        double coveredLines = JACOCO_ANALYSIS_MODEL_COVERED;
+        double coveredPercentage = coveredLines / totalLines * 100.0;
 
         assertThat(root.getName()).isEqualTo("Static Analysis Model and Parsers");
         assertThat(root.getValue()).containsExactly(totalLines, coveredLines);

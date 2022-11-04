@@ -27,7 +27,7 @@ public class CoverageTreeCreator {
      * @return the filtered tree
      */
     public Node createChangeCoverageTree(final Node coverageNode) {
-        return prune(coverageNode).orElse(coverageNode.copyNode());
+        return prune(coverageNode).orElse(coverageNode.copy());
     }
 
     private Optional<Node> prune(final Node original) {

@@ -46,17 +46,15 @@
       <counter type="METHOD" missed="0" covered="3"/>
       <counter type="CLASS" missed="0" covered="1"/>
     </sourcefile>
-    <counter type="INSTRUCTION" missed="7" covered="448"/>
-    <counter type="BRANCH" missed="0" covered="18"/>
-    <counter type="LINE" missed="3" covered="108"/>
-    <counter type="COMPLEXITY" missed="1" covered="59"/>
-    <counter type="METHOD" missed="1" covered="50"/>
-    <counter type="CLASS" missed="0" covered="17"/>
+    <counter type="INSTRUCTION" missed="0" covered="28"/>
+    <counter type="LINE" missed="0" covered="8"/>
+    <counter type="COMPLEXITY" missed="0" covered="3"/>
+    <counter type="METHOD" missed="0" covered="3"/>
+    <counter type="CLASS" missed="0" covered="1"/>
   </package>
-  <counter type="INSTRUCTION" missed="974" covered="24057"/>
-  <counter type="BRANCH" missed="205" covered="1544"/>
-  <counter type="LINE" missed="267" covered="5531"/>
-  <counter type="COMPLEXITY" missed="239" covered="2319"/>
-  <counter type="METHOD" missed="45" covered="1615"/>
-  <counter type="CLASS" missed="1" covered="333"/>
+  <counter type="INSTRUCTION" missed="0" covered="28"/>
+  <counter type="LINE" missed="0" covered="8"/>
+  <counter type="COMPLEXITY" missed="0" covered="3"/>
+  <counter type="METHOD" missed="0" covered="3"/>
+  <counter type="CLASS" missed="0" covered="1"/>
 </report>

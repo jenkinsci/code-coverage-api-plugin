@@ -61,14 +61,14 @@ class DeltaComputationITest extends AbstractCoverageITest {
         var action = firstBuild.getAction(CoverageBuildAction.class);
 
         var lineCoverage = action.getLineCoverage();
-        assertThat(lineCoverage.getCovered()).isEqualTo(5882); // 294 + 5531 ?
+        assertThat(lineCoverage.getCovered()).isEqualTo(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED);
         assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0));
 
         var branchCoverage = action.getBranchCoverage();
         assertThat(branchCoverage.getCovered()).isEqualTo(1544 + 109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.88, withPercentage(1.0));
 
-        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(lineCoverage.getTotal()));
+        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(JACOCO_ANALYSIS_MODEL_TOTAL + JACOCO_CODING_STYLE_TOTAL));
         assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(2718));
     }
 
@@ -76,14 +76,14 @@ class DeltaComputationITest extends AbstractCoverageITest {
         var action = secondBuild.getAction(CoverageBuildAction.class);
 
         var lineCoverage = action.getLineCoverage();
-        assertThat(lineCoverage).extracting(Coverage::getCovered).isEqualTo(294);
+        assertThat(lineCoverage).extracting(Coverage::getCovered).isEqualTo(JACOCO_CODING_STYLE_COVERED);
         assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0));
 
         var branchCoverage = action.getBranchCoverage();
         assertThat(branchCoverage.getCovered()).isEqualTo(109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.94, withPercentage(1.0));
 
-        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(lineCoverage.getTotal()));
+        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(JACOCO_CODING_STYLE_TOTAL));
         assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(160));
     }
 
@@ -110,13 +110,13 @@ class DeltaComputationITest extends AbstractCoverageITest {
         assertThat(delta.get(PACKAGE).doubleValue()).isCloseTo(0, withPercentage(1.0));
         assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0416, withPercentage(1.0));
         assertThat(delta.get(BRANCH).doubleValue()).isCloseTo(0.0533, withPercentage(1.0));
-        assertThat(delta.get(LOC).intValue()).isEqualTo(-5857);
         assertThat(delta.get(COMPLEXITY).intValue()).isEqualTo(160 - 2718);
+        assertThat(delta.get(LOC).intValue()).isEqualTo(-JACOCO_ANALYSIS_MODEL_TOTAL);
 
-        assertThat(action.formatDelta(LINE)).isEqualTo("-4.16%");
+        assertThat(action.formatDelta(LINE)).isEqualTo("-4.14%");
         assertThat(action.formatDelta(BRANCH)).isEqualTo("+5.33%");
-        assertThat(action.formatDelta(LOC)).isEqualTo("-5857");
-        assertThat(action.formatDelta(COMPLEXITY)).isEqualTo("-2558");
+        assertThat(action.formatDelta(LOC)).isEqualTo(String.valueOf(-JACOCO_ANALYSIS_MODEL_TOTAL));
+        assertThat(action.formatDelta(COMPLEXITY)).isEqualTo(String.valueOf(160 - 2718));
 
         verifyChangeCoverage(action);
     }
