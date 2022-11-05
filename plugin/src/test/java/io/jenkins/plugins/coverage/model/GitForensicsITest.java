@@ -1,17 +1,16 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.io.IOException;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.FileNode;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -26,7 +25,7 @@ import hudson.plugins.git.extensions.impl.RelativeTargetDirectory;
 
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
-import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
+import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.model.Assertions.*;
@@ -38,8 +37,7 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Florian Orendi
  */
 @Testcontainers(disabledWithoutDocker = true)
-class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
-
+class GitForensicsITest extends AbstractCoverageITest {
     /**
      * The JaCoCo coverage report, generated for the commit {@link #COMMIT}.
      */
@@ -67,11 +65,11 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         copySingleFileToAgentWorkspace(agent, project, JACOCO_REFERENCE_FILE, JACOCO_REFERENCE_FILE);
         copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
 
-        project.setDefinition(createFlowDefinitionForCommit(node, COMMIT_REFERENCE, JACOCO_REFERENCE_FILE));
+        project.setDefinition(createPipelineForCommit(node, COMMIT_REFERENCE, JACOCO_REFERENCE_FILE));
         Run<?, ?> referenceBuild = buildSuccessfully(project);
         verifyGitRepositoryForCommit(referenceBuild, COMMIT_REFERENCE);
 
-        project.setDefinition(createFlowDefinitionForCommit(node, COMMIT, JACOCO_FILE));
+        project.setDefinition(createPipelineForCommit(node, COMMIT, JACOCO_FILE));
         Run<?, ?> build = buildSuccessfully(project);
         verifyGitRepositoryForCommit(build, COMMIT);
 
@@ -83,17 +81,20 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO);
         project.setAssignedNode(agent);
+
+        configureGit(project, COMMIT_REFERENCE);
+        addCoverageRecorder(project, CoverageParser.JACOCO, JACOCO_REFERENCE_FILE);
+
         copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
         copySingleFileToAgentWorkspace(agent, project, JACOCO_REFERENCE_FILE, JACOCO_REFERENCE_FILE);
 
-        setGitScmWithCommitSpecForFreeStyleProject(project, COMMIT_REFERENCE);
-        setCoveragePublisherForFreeStyleProject(project, JACOCO_REFERENCE_FILE);
         Run<?, ?> referenceBuild = buildSuccessfully(project);
 
-        setGitScmWithCommitSpecForFreeStyleProject(project, COMMIT);
-        setCoveragePublisherForFreeStyleProject(project, JACOCO_FILE);
+        configureGit(project, COMMIT);
+        addCoverageRecorder(project, CoverageParser.JACOCO, JACOCO_FILE);
+
         Run<?, ?> build = buildSuccessfully(project);
 
         verifyGitIntegration(build, referenceBuild);
@@ -154,18 +155,13 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The created Jenkins action
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
-        assertThat(action.getLineCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(546);
-            assertThat(coverage.getMissed()).isEqualTo(461);
-        });
-        assertThat(action.getBranchCoverage()).satisfies(coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(136);
-            assertThat(coverage.getMissed()).isEqualTo(94);
-        });
-        assertThat(action.getDelta()).contains(
-                new SimpleEntry<>(LINE, Fraction.getFraction(65_160, 103_721)),
-                new SimpleEntry<>(BRANCH, Fraction.getFraction(0, 1))
-        );
+        var builder = new CoverageBuilder();
+        assertThat(action.getLineCoverage())
+                .isEqualTo(builder.setMetric(LINE).setCovered(529).setMissed(408).build());
+        assertThat(action.getBranchCoverage())
+                .isEqualTo(builder.setMetric(BRANCH).setCovered(136).setMissed(94).build());
+        assertThat(action.formatDelta(LINE)).isEqualTo("+0.72%");
+        assertThat(action.formatDelta(BRANCH)).isEqualTo("+0.00%");
     }
 
     /**
@@ -175,19 +171,16 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The created Jenkins action
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
-        assertThat(action.getChangeCoverage(LINE)).isInstanceOfSatisfying(Coverage.class, coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(1);
-            assertThat(coverage.getMissed()).isEqualTo(1);
-        });
-        assertThat(action.getChangeCoverage(BRANCH)).isInstanceOfSatisfying(Coverage.class, coverage -> {
-                assertThat(coverage.getCovered()).isEqualTo(0);
-            assertThat(coverage.getMissed()).isEqualTo(0);
-        });
-        assertThat(action.getChangeCoverageDifference(LINE)).satisfies(coverage -> {
-            assertThat(coverage.getNumerator()).isEqualTo(-4250);
-            assertThat(coverage.getDenominator()).isEqualTo(1007);
-        });
-        assertThat(action.hasChangeCoverageDifference(BRANCH)).isFalse();
+        var builder = new CoverageBuilder();
+        assertThat(action.getChangeCoverage(LINE))
+                .isEqualTo(builder.setMetric(LINE).setCovered(1).setMissed(1).build());
+        assertThat(action.getChangeCoverage(BRANCH))
+                .isEqualTo(builder.setMetric(BRANCH).setCovered(0).setMissed(0).build());
+
+        assertThat(action.formatChangeCoverageOverview()).isEqualTo("2 lines (2 files) are affected");
+
+        assertThat(action.formatChangeCoverageDifference(LINE)).isEqualTo("-6.46%");
+        assertThat(action.formatChangeCoverageDifference(BRANCH)).isEqualTo("-59.13%");
     }
 
     /**
@@ -204,12 +197,6 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(action.hasIndirectCoverageChanges(BRANCH)).isFalse();
     }
 
-    /**
-     * Verifies the calculated code delta.
-     *
-     * @param action
-     *         The created Jenkins action
-     */
     private void verifyCodeDelta(final CoverageBuildAction action) {
         edu.hm.hafner.metric.Node root = action.getResult();
         assertThat(root).isNotNull();
@@ -219,7 +206,7 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
                 .collect(Collectors.toList());
         assertThat(changedFiles).hasSize(4);
         assertThat(changedFiles).extracting(FileNode::getName)
-                .containsExactly("MinerFactory.java", "RepositoryMinerStep.java",
+                .containsExactlyInAnyOrder("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
         assertThat(changedFiles).flatExtracting(FileNode::getChangedLines)
                 .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
@@ -232,21 +219,19 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      *         The node
      * @param commit
      *         The processed commit
-     * @param jacocoXML
+     * @param fileName
      *         The content of the processed JaCoCo report
      *
      * @return the created definition
      */
-    private FlowDefinition createFlowDefinitionForCommit(
-            final String node, final String commit, final String jacocoXML) {
+    private FlowDefinition createPipelineForCommit(final String node, final String commit, final String fileName) {
         return new CpsFlowDefinition(node + " {"
                 + "    checkout([$class: 'GitSCM', "
-                + "branches: [[name: '" + commit + "' ]],\n"
-                + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
-                + "extensions: [[$class: 'RelativeTargetDirectory', \n"
-                + "            relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + jacocoXML
-                + "')], sourceFileResolver: sourceFiles('NEVER_STORE')\n"
+                + "         branches: [[name: '" + commit + "' ]],\n"
+                + "         userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
+                + "         extensions: [[$class: 'RelativeTargetDirectory', \n"
+                + "             relativeTargetDir: 'checkout']]])\n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '" + fileName + "']]\n"
                 + "}", true);
     }
 
@@ -279,7 +264,7 @@ class GitForensicsITest extends IntegrationTestWithJenkinsPerSuite {
      * @param commit
      *         The ID of the commit to be represented
      */
-    private void setGitScmWithCommitSpecForFreeStyleProject(final FreeStyleProject project, final String commit)
+    private void configureGit(final FreeStyleProject project, final String commit)
             throws IOException {
         GitSCM scm = new GitSCM(GitSCM.createRepoList(REPOSITORY, null),
                 Collections.singletonList(new BranchSpec(commit)), null, null,

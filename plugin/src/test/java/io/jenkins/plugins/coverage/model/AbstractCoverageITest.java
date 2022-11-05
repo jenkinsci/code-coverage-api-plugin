@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.model;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -38,18 +39,33 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
             final Consumer<CoverageRecorder> configuration, final String... fileNames) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
 
+        addCoverageRecorder(project, parser, "**/*xml", configuration);
+
+        return project;
+    }
+
+    void addCoverageRecorder(final FreeStyleProject project, final CoverageParser parser, final String pattern) {
+        addCoverageRecorder(project, parser, pattern, i -> { });
+    }
+
+    void addCoverageRecorder(final FreeStyleProject project,
+            final CoverageParser parser, final String pattern, final Consumer<CoverageRecorder> configuration) {
         CoverageRecorder recorder = new CoverageRecorder();
 
         var tool = new CoverageTool();
         tool.setParser(parser);
-        tool.setPattern("**/*xml");
+        tool.setPattern(pattern);
         recorder.setTools(List.of(tool));
 
         configuration.accept(recorder);
 
+        try {
+            project.getPublishersList().remove(CoverageRecorder.class);
+        }
+        catch (IOException exception) {
+            // ignore and continue
+        }
         project.getPublishersList().add(recorder);
-
-        return project;
     }
 
     protected WorkflowJob createPipeline(final CoverageParser parser, final String... fileNames) {
