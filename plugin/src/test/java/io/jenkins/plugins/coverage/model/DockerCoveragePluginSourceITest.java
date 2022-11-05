@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Ullrich Hafner
  */
 @Testcontainers(disabledWithoutDocker = true)
-class DockerCoveragePluginSourceITest extends CoveragePluginSourceITest {
+class DockerCoveragePluginSourceITest extends AbstractCoverageITest {
     @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer();
 
@@ -79,8 +79,8 @@ class DockerCoveragePluginSourceITest extends CoveragePluginSourceITest {
                 + "        userRemoteConfigs: [[url: '" + "https://github.com/jenkinsci/analysis-model.git" + "']],\n"
                 + "        extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "                    relativeTargetDir: 'checkout']]])\n"
-                + "    publishCoverage adapters: [jacocoAdapter('" + JACOCO_ANALYSIS_MODEL_FILE
-                + "')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')\n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_ANALYSIS_MODEL_FILE + "']], \n"
+                + "        sourceCodeRetention: 'LAST_BUILD' \n"
                 + "}"
                 + "}", true));
 

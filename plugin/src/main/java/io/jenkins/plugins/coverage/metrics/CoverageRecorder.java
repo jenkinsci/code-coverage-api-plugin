@@ -261,6 +261,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                 logHandler.log(log);
             }
             else {
+                List<Node> results = new ArrayList<>();
                 for (CoverageTool tool : tools) {
                     LogHandler toolHandler = new LogHandler(listener, tool.getActualName());
                     CoverageParser parser = tool.getParser();
@@ -278,17 +279,19 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                         AggregatedResult result = workspace.act(
                                 new FilesScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
+                        results.add(result.getRoot());
 
-                        CoverageReporter reporter = new CoverageReporter();
-                        reporter.run(result.getRoot(), run, workspace, listener, getScm(), getSourceDirectoriesPaths(),
-                                getSourceCodeEncoding(), getSourceCodeRetention());
                     }
                     catch (IOException exception) {
-                        log.logException(exception, "Exception during parsing");
+                        log.logException(exception, "Exception while parsing with tool " + tool);
                     }
 
                     toolHandler.log(log);
                 }
+
+                CoverageReporter reporter = new CoverageReporter();
+                reporter.run(Node.merge(results), run, workspace, listener, getScm(), getSourceDirectoriesPaths(),
+                        getSourceCodeEncoding(), getSourceCodeRetention());
             }
         }
         else {

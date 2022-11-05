@@ -46,6 +46,9 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
     private String pattern = StringUtils.EMPTY;
     private CoverageParser parser = CoverageParser.JACOCO;
 
+    /**
+     * Creates a new {@link CoverageTool}.
+     */
     @DataBoundConstructor
     public CoverageTool() {
         // empty for stapler
@@ -163,6 +166,10 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         return StringUtils.defaultIfBlank(pattern, parser.getDefaultPattern());
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s (pattern: %s)", getActualName(), getActualPattern());
+    }
 
     @Override
     public CoverageToolDescriptor getDescriptor() {

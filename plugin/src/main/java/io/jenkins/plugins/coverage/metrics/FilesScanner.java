@@ -78,7 +78,7 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
     }
 
     private Node scanFiles(final File workspace, final String[] fileNames, final FilteredLog log) {
-        List<Node> nodes = new ArrayList<>();
+        List<Node> results = new ArrayList<>();
         for (String fileName : fileNames) {
             Path file = workspace.toPath().resolve(fileName);
 
@@ -89,10 +89,10 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
                 log.logError("Skipping file '%s' because it's empty", fileName);
             }
             else {
-                nodes.add(aggregateIssuesOfFile(file, log));
+                results.add(aggregateIssuesOfFile(file, log));
             }
         }
-        return Node.merge(nodes);
+        return Node.merge(results);
     }
 
     private boolean isEmpty(final Path file) {

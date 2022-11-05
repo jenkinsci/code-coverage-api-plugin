@@ -1,30 +1,25 @@
 package io.jenkins.plugins.coverage.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
 
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.CoberturaReportAdapter;
-import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.CoverageRecorder;
+import io.jenkins.plugins.coverage.metrics.CoverageTool;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static org.assertj.core.api.Assertions.*;
@@ -33,34 +28,9 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test for different jacoco and cobertura files.
  */
 class CoveragePluginITest extends AbstractCoverageITest {
-    /**
-     * Covered lines in {@value COBERTURA_HIGHER_COVERAGE_FILE}.
-     */
-    private static final int COBERTURA_COVERED_LINES = 2;
-    /**
-     * All lines in {@value COBERTURA_HIGHER_COVERAGE_FILE}.
-     */
-    private static final int COBERTURA_ALL_LINES = 2;
-    /**
-     * Covered lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value COBERTURA_HIGHER_COVERAGE_FILE}.
-     */
-    private static final int JACOCO_COBERTURA_COVERED_LINES = 6085;
-    /**
-     * All lines in {@value JACOCO_ANALYSIS_MODEL_FILE} and {@value COBERTURA_HIGHER_COVERAGE_FILE}.
-     */
-    private static final int JACOCO_COBERTURA_ALL_LINES = 6370;
-    /**
-     * Cobertura file for testing.
-     */
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
-    /**
-     * Another cobertura file for testing.
-     */
-    private static final String COBERTURA_WITH_LOTS_OF_DATA_FILE = "cobertura-lots-of-data.xml";
-
-    // ---------------------------------------------------------------------------------------
-    // vv Converted tests vv
-    // ---------------------------------------------------------------------------------------
+    private static final int COBERTURA_COVERED_LINES = 2;
+    private static final int COBERTURA_MISSED_LINES = 0;
 
     @Test
     void shouldFailWithoutParserInFreestyleJob() {
@@ -182,7 +152,6 @@ class CoveragePluginITest extends AbstractCoverageITest {
     void shouldRecordOneCoberturaResultInFreestyleJob() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
-        // FIXME: all parsers should only fail for mandatory properties (complexity is only optional)
         verifyOneCoberturaResult(project);
     }
 
@@ -206,7 +175,72 @@ class CoveragePluginITest extends AbstractCoverageITest {
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
-                        .setMissed(COBERTURA_ALL_LINES - COBERTURA_COVERED_LINES)
+                        .setMissed(COBERTURA_MISSED_LINES)
+                        .build());
+    }
+
+    @Test
+    void shouldRecordCoberturaAndJacocoResultsInFreestyleJob() {
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        CoverageRecorder recorder = new CoverageRecorder();
+
+        var cobertura = new CoverageTool();
+        cobertura.setParser(CoverageParser.COBERTURA);
+        cobertura.setPattern(COBERTURA_HIGHER_COVERAGE_FILE);
+
+        var jacoco = new CoverageTool();
+        jacoco.setParser(CoverageParser.JACOCO);
+        jacoco.setPattern(JACOCO_ANALYSIS_MODEL_FILE);
+
+        recorder.setTools(List.of(jacoco, cobertura));
+        project.getPublishersList().add(recorder);
+
+        verifyForOneCoberturaAndOneJacoco(project);
+    }
+
+    @Test
+    void shouldRecordCoberturaAndJacocoResultsInPipeline() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        setPipelineScript(job,
+                "recordCoverage tools: ["
+                        + "[parser: 'COBERTURA', pattern: '" + COBERTURA_HIGHER_COVERAGE_FILE + "'],"
+                        + "[parser: 'JACOCO', pattern: '" + JACOCO_ANALYSIS_MODEL_FILE + "']"
+                        + "]");
+
+        verifyForOneCoberturaAndOneJacoco(job);
+    }
+
+    @Test
+    void shouldRecordCoberturaAndJacocoResultsInDeclarativePipeline() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        job.setDefinition(new CpsFlowDefinition("pipeline {\n"
+                + "    agent any\n"
+                + "    stages {\n"
+                + "        stage('Test') {\n"
+                + "            steps {\n"
+                + "                 recordCoverage(tools: [\n"
+                + "                     [parser: 'COBERTURA', pattern: '" + COBERTURA_HIGHER_COVERAGE_FILE + "'],\n"
+                + "                     [parser: 'JACOCO', pattern: '" + JACOCO_ANALYSIS_MODEL_FILE + "']\n"
+                + "                 ])\n"
+                + "            }\n"
+                + "        }\n"
+                + "    }\n"
+                + "}", true));
+
+        verifyForOneCoberturaAndOneJacoco(job);
+    }
+
+    private void verifyForOneCoberturaAndOneJacoco(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> build = buildSuccessfully(project);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getLineCoverage())
+                .isEqualTo(createLineCoverageBuilder()
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED + COBERTURA_COVERED_LINES)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_MISSED)
                         .build());
     }
 
@@ -232,111 +266,4 @@ class CoveragePluginITest extends AbstractCoverageITest {
     private static CoverageBuilder createLineCoverageBuilder() {
         return new CoverageBuilder().setMetric(Metric.LINE);
     }
-
-    // ---------------------------------------------------------------------------------------
-    // ^^ Converted tests ^^
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * Pipeline integration test with two cobertura files.
-     */
-    @Test
-    void pipelineForTwoCobertura() {
-        WorkflowJob job = createPipeline(CoverageParser.COBERTURA,
-                COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
-
-        verifyForTwoCobertura(job);
-    }
-
-    /**
-     * Freestyle integration test with two cobertura files.
-     */
-    @Disabled("Bug")
-    @Test
-    void freestyleForTwoCobertura() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, COBERTURA_HIGHER_COVERAGE_FILE, COBERTURA_WITH_LOTS_OF_DATA_FILE);
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-
-        List<CoverageAdapter> coverageAdapters = new ArrayList<>();
-
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
-        CoberturaReportAdapter coberturaReportAdapter2 = new CoberturaReportAdapter(COBERTURA_WITH_LOTS_OF_DATA_FILE);
-
-        coverageAdapters.add(coberturaReportAdapter);
-        coverageAdapters.add(coberturaReportAdapter2);
-        coveragePublisher.setAdapters(coverageAdapters);
-        project.getPublishersList().add(coveragePublisher);
-
-        verifyForTwoCobertura(project);
-    }
-
-    /**
-     * Pipeline integration test with one cobertura and one jacoco file.
-     */
-    @Test
-    void pipelineForOneCoberturaAndOneJacoco() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
-        setPipelineScript(job, "node {"
-                + "   publishCoverage adapters: [jacocoAdapter('**/*.xml'), istanbulCoberturaAdapter('**/*.xml')]"
-                + "}");
-
-        verifyForOneCoberturaAndOneJacoco(job);
-    }
-
-    /**
-     * Freestyle integration test with one cobertura and one jacoco file.
-     */
-    @Test
-    void freestyleForOneCoberturaAndOneJacoco() {
-        FreeStyleProject project = createFreeStyleProject();
-        copyFilesToWorkspace(project, JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
-
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-
-        List<CoverageAdapter> coverageAdapters = new ArrayList<>();
-
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(
-                JACOCO_ANALYSIS_MODEL_FILE);
-        coverageAdapters.add(jacocoReportAdapter);
-
-        CoberturaReportAdapter coberturaReportAdapter = new CoberturaReportAdapter(COBERTURA_HIGHER_COVERAGE_FILE);
-        coverageAdapters.add(coberturaReportAdapter);
-
-        coveragePublisher.setAdapters(coverageAdapters);
-        project.getPublishersList().add(coveragePublisher);
-
-        verifyForOneCoberturaAndOneJacoco(project);
-    }
-
-    /**
-     * Verifies project with two cobertura files.
-     *
-     * @param project
-     *         the project with added files
-     */
-    private void verifyForTwoCobertura(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        //FIXME
-        assertThat(coverageResult.getLineCoverage()).isEqualTo(
-                new Coverage.CoverageBuilder().setCovered(472).setMissed(722 - 472).build());
-    }
-
-    /**
-     * Verifies project with one cobertura and one jacoco file.
-     *
-     * @param project
-     *         the project with added files
-     */
-    private void verifyForOneCoberturaAndOneJacoco(final ParameterizedJob<?, ?> project) {
-        Run<?, ?> build = buildSuccessfully(project);
-
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
-                .isEqualTo(new Coverage.CoverageBuilder().setCovered(JACOCO_COBERTURA_COVERED_LINES)
-                        .setMissed(JACOCO_COBERTURA_ALL_LINES - JACOCO_COBERTURA_COVERED_LINES)
-                        .build());
-    }
-
 }

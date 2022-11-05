@@ -99,7 +99,9 @@ class DockerAndSourceCodeRenderingITest extends AbstractCoverageITest {
                 + "userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "            relativeTargetDir: 'checkout']]])\n"
-                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '**/*xml']], sourceCodeRetention: 'LAST_BUILD' \n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '"
+                + JACOCO_ANALYSIS_MODEL_FILE
+                + "']], sourceCodeRetention: 'LAST_BUILD' \n"
                 + "}", true));
 
         return job;
