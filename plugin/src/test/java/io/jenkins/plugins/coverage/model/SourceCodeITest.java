@@ -2,10 +2,7 @@ package io.jenkins.plugins.coverage.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -13,12 +10,10 @@ import org.junit.jupiter.api.Test;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.util.PathUtil;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Run;
-import hudson.model.TopLevelItem;
 
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
@@ -28,66 +23,52 @@ import static io.jenkins.plugins.prism.SourceCodeRetention.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for the coverage API plugin.
+ * Verifies if source code copying and rendering works on agents.
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings({"checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
-class CoveragePluginSourceITest extends AbstractCoverageITest {
+abstract class SourceCodeITest extends AbstractCoverageITest {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
-    private static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
-    private static final String SOURCE_FILE = SOURCE_FILE_NAME + ".txt";
-    private static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
+    static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
+    static final String SOURCE_FILE = SOURCE_FILE_NAME + ".txt";
+    static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String SOURCE_FILE_PATH = PACKAGE_PATH + SOURCE_FILE_NAME;
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
-    private static final PathUtil PATH_UTIL = new PathUtil();
+    static final String AGENT_LABEL = "coverage-agent";
 
     /** Verifies that the plugin reads source code from the workspace root. */
     @Test
-    void coveragePluginPipelineWithSourceCode() {
-        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
-
-        assertThat(getConsoleLog(workspace)).contains(createSingleMessage(workspace));
-    }
-
-    private String createSingleMessage(final Run<?, ?> workspace) {
-        return String.format("Searching for source code files in '%s'", createSingleDirectory(workspace));
+    void coveragePluginPipelineWithSourceCode() throws IOException {
+        runCoverageWithSourceCode("");
     }
 
     /** Verifies that the plugin reads source code in subdirectories of the workspace. */
     @Test
-    void coveragePluginPipelineWithSourceCodeInSubdirectory() {
-        Run<?, ?> workspace = runCoverageWithSourceCode("", "");
-        assertThat(getConsoleLog(workspace)).contains(createSingleMessage(workspace));
-    }
-
-    private String createSingleDirectory(final Run<?, ?> workspace) {
-        return PATH_UTIL.getAbsolutePath(String.format("%s/src/main/java",
-                getWorkspace((TopLevelItem) workspace.getParent()).getRemote()));
+    void coveragePluginPipelineWithSourceCodeInSubdirectory() throws IOException {
+        runCoverageWithSourceCode("sub-dir");
     }
 
     /** Verifies that the plugin reads source code in external but approved directories. */
     @Test
     void coveragePluginPipelineWithSourceCodeInPermittedDirectory() throws IOException {
-        String directory = createExternalSourceFolder();
-        PrismConfiguration.getInstance().setSourceDirectories(Collections.singletonList(
-                new PermittedSourceCodeDirectory(directory)));
+        String directory = createExternalFolder();
+        PrismConfiguration.getInstance().setSourceDirectories(List.of(new PermittedSourceCodeDirectory(directory)));
 
-        Run<?, ?> externalDirectory = runCoverageWithSourceCode("ignore", directory);
+        Run<?, ?> externalDirectory = runCoverageWithSourceCode(directory);
         assertThat(getConsoleLog(externalDirectory))
-                .contains("Searching for source code files in:",
-                        "-> " + createSingleDirectory(externalDirectory),
-                        "-> " + directory);
+                .contains("Searching for source code files in:", "-> " + directory);
     }
 
     /** Verifies that the plugin refuses source code in directories that are not approved in Jenkins' configuration. */
     @Test
     void coveragePluginPipelineNotRegisteredSourceCodeDirectory() throws IOException {
-        String sourceDirectory = createExternalSourceFolder();
+        var localAgent = crateCoverageAgent();
+        String sourceDirectory = createExternalFolder();
 
-        WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
-        copyFileToWorkspace(job, SOURCE_FILE, "ignore/" + PACKAGE_PATH + "AcuCobolParser.java");
+        WorkflowJob job = createPipeline();
+        copySourceFileToAgent("ignore/", localAgent, job);
+        copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
 
         job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
 
@@ -100,20 +81,16 @@ class CoveragePluginSourceITest extends AbstractCoverageITest {
                         sourceDirectory));
 
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+        localAgent.setLabelString("<null>");
     }
 
-    private String createExternalSourceFolder() throws IOException {
-        Path tempDirectory = Files.createTempDirectory("coverage");
-        Path sourceCodeDirectory = tempDirectory.resolve(PACKAGE_PATH);
-        Files.createDirectories(sourceCodeDirectory);
-        Files.copy(getResourceAsFile(SOURCE_FILE), sourceCodeDirectory.resolve("AcuCobolParser.java"),
-                StandardCopyOption.REPLACE_EXISTING);
-        return PATH_UTIL.getAbsolutePath(tempDirectory);
-    }
+    private Run<?, ?> runCoverageWithSourceCode(final String sourceDirectory)
+            throws IOException {
+        var localAgent = crateCoverageAgent();
 
-    private Run<?, ?> runCoverageWithSourceCode(final String checkoutDirectory, final String sourceDirectory) {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(ACU_COBOL_PARSER_COVERAGE_REPORT);
-        copyFileToWorkspace(job, SOURCE_FILE, checkoutDirectory + PACKAGE_PATH + "AcuCobolParser.java");
+        WorkflowJob job = createPipeline();
+        copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
+        copySourceFileToAgent(sourceDirectory, localAgent, job);
 
         // get the temporary directory - used by unit tests - to verify its content
         File temporaryDirectory = new File(System.getProperty("java.io.tmpdir"));
@@ -146,12 +123,13 @@ class CoveragePluginSourceITest extends AbstractCoverageITest {
 
         assertThat(temporaryDirectory.listFiles()).isEqualTo(temporaryFiles);
 
+        localAgent.setLabelString("<null>");
         return firstBuild;
     }
 
     private CpsFlowDefinition createPipelineWithSourceCode(final SourceCodeRetention sourceCodeRetention,
             final String sourceDirectory) {
-        return new CpsFlowDefinition("node {"
+        return new CpsFlowDefinition("node ('coverage-agent') {"
                 + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '**/*xml']], \n"
                 + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
@@ -168,6 +146,9 @@ class CoveragePluginSourceITest extends AbstractCoverageITest {
 
     private CoverageViewModel verifyViewModel(final Run<?, ?> build) {
         CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
+
+        System.out.println(getConsoleLog(build));
+
         assertThat(action.getLineCoverage())
                 .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(8).setMissed(0).build());
 
@@ -177,4 +158,19 @@ class CoveragePluginSourceITest extends AbstractCoverageITest {
 
         return action.getTarget();
     }
+
+    String createDestinationPath(final String sourceDirectory) {
+        if (sourceDirectory.isEmpty()) {
+            return PACKAGE_PATH + "AcuCobolParser.java";
+        }
+        else {
+            return sourceDirectory + "/" + PACKAGE_PATH + "AcuCobolParser.java";
+        }
+    }
+
+    abstract hudson.model.Node crateCoverageAgent();
+
+    abstract String createExternalFolder() throws IOException;
+
+    abstract void copySourceFileToAgent(String sourceDirectory, hudson.model.Node localAgent, WorkflowJob job);
 }

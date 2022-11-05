@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.model;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -30,13 +31,22 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
             = JACOCO_CODING_STYLE_COVERED + JACOCO_CODING_STYLE_MISSED;
 
     protected FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
+        return createFreestyleJob(parser, i -> { }, fileNames);
+    }
+
+    protected FreeStyleProject createFreestyleJob(final CoverageParser parser,
+            final Consumer<CoverageRecorder> configuration, final String... fileNames) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
 
         CoverageRecorder recorder = new CoverageRecorder();
+
         var tool = new CoverageTool();
         tool.setParser(parser);
         tool.setPattern("**/*xml");
         recorder.setTools(List.of(tool));
+
+        configuration.accept(recorder);
+
         project.getPublishersList().add(recorder);
 
         return project;

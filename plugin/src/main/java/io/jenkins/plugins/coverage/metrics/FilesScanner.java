@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.ContainerNode;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.parser.XmlParser;
@@ -67,7 +68,7 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
         if (fileNames.length == 0) {
             log.logError("No files found for pattern '%s'. Configuration error?", filePattern);
 
-            return new AggregatedResult(log, new ModuleNode(filePattern));
+            return new AggregatedResult(log, ContainerNode.EMPTY_TREE);
         }
         else {
             log.logInfo("-> found %s", plural(fileNames.length, "file"));

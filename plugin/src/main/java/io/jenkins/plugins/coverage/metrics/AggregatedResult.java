@@ -29,4 +29,8 @@ class AggregatedResult implements Serializable {
     public Node getRoot() {
         return root;
     }
+
+    public boolean hasErrors() {
+        return !getLog().getErrorMessages().isEmpty();
+    }
 }

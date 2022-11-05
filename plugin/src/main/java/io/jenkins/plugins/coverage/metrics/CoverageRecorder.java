@@ -52,8 +52,8 @@ import io.jenkins.plugins.util.LogHandler;
  * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and
  * adds the results to the persisted build results.
  * <p>
- * Stores the created issues in a {@link Node}. This result is then attached to the {@link Run build} by
- * registering a {@link CoverageBuildAction}.
+ * Stores the created issues in a {@link Node}. This result is then attached to the {@link Run build} by registering a
+ * {@link CoverageBuildAction}.
  * </p>
  *
  * @author Ullrich Hafner
@@ -66,7 +66,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     private List<CoverageTool> tools = new ArrayList<>();
 
     private boolean failOnError;
-    private boolean enabledForFailure;
+    private boolean enabledForFailure = true;
     private int healthy;
     private int unhealthy;
     private String scm = StringUtils.EMPTY;
@@ -113,7 +113,8 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     /**
      * Sets whether publishing checks should be skipped or not.
      *
-     * @param skipPublishingChecks  {@code true} if publishing checks should be skipped, {@code false} otherwise
+     * @param skipPublishingChecks
+     *         {@code true} if publishing checks should be skipped, {@code false} otherwise
      */
     @DataBoundSetter
     public void setSkipPublishingChecks(final boolean skipPublishingChecks) {
@@ -280,7 +281,17 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                                 new FilesScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
                         results.add(result.getRoot());
-
+                        if (result.getRoot().isEmpty() && result.hasErrors()) {
+                            if (failOnError) {
+                                var errorMessage = "Failing build due to some errors during recording of the coverage";
+                                log.logInfo(errorMessage);
+                                var resultHandler = new RunResultHandler(run);
+                                resultHandler.setResult(Result.FAILURE, errorMessage);
+                            }
+                            else {
+                                log.logInfo("Ignore errors and continue processing");
+                            }
+                        }
                     }
                     catch (IOException exception) {
                         log.logException(exception, "Exception while parsing with tool " + tool);
@@ -341,6 +352,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
          *
          * @param project
          *         the project that is configured
+         *
          * @return a model with all {@link SourceCodeRetention} strategies.
          */
         @POST
@@ -364,6 +376,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
          *
          * @param project
          *         the project that is configured
+         *
          * @return a model with all available charsets
          */
         @POST

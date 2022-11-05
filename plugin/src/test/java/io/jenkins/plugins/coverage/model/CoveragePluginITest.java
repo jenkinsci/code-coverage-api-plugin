@@ -31,6 +31,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
     private static final int COBERTURA_COVERED_LINES = 2;
     private static final int COBERTURA_MISSED_LINES = 0;
+    private static final String NO_FILES_FOUND_ERROR_MESSAGE = "[-ERROR-] No files found for pattern '**/*xml'. Configuration error?";
 
     @Test
     void shouldFailWithoutParserInFreestyleJob() {
@@ -62,7 +63,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
         FreeStyleProject project = createFreestyleJob(parser);
 
-        verifyNoFilesFound(project);
+        verifyLogMessageThatNoFilesFound(project);
     }
 
     @EnumSource
@@ -71,13 +72,43 @@ class CoveragePluginITest extends AbstractCoverageITest {
     void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
         WorkflowJob job = createPipeline(parser);
 
-        verifyNoFilesFound(job);
+        verifyLogMessageThatNoFilesFound(job);
     }
 
-    private void verifyNoFilesFound(final ParameterizedJob<?, ?> project) {
+    private void verifyLogMessageThatNoFilesFound(final ParameterizedJob<?, ?> project) {
         Run<?, ?> run = buildWithResult(project, Result.SUCCESS);
 
-        assertThat(getConsoleLog(run)).contains("[-ERROR-] No files found for pattern '**/*xml'. Configuration error?");
+        assertThat(getConsoleLog(run)).contains(NO_FILES_FOUND_ERROR_MESSAGE,
+                "Ignore errors and continue processing");
+    }
+
+    @EnumSource
+    @ParameterizedTest(name = "{index} => Freestyle job with parser {0}")
+    @DisplayName("Report error and fail build in freestyle job when no input files are found")
+    void shouldFailBuildWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
+        FreeStyleProject project = createFreestyleJob(parser, r -> r.setFailOnError(true));
+
+        verifyFailureWhenNoFilesFound(project);
+    }
+
+    @EnumSource
+    @ParameterizedTest(name = "{index} => Pipeline with parser {0}")
+    @DisplayName("Report error and fail build in pipeline when no input files are found")
+    void shouldFailBuildWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
+        WorkflowJob job = createPipeline();
+
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: '" + parser.name() + "', pattern: '**/*xml']], "
+                        + "failOnError: 'true'");
+
+        verifyFailureWhenNoFilesFound(job);
+    }
+
+    private void verifyFailureWhenNoFilesFound(final ParameterizedJob<?, ?> project) {
+        Run<?, ?> run = buildWithResult(project, Result.FAILURE);
+
+        assertThat(getConsoleLog(run)).contains(NO_FILES_FOUND_ERROR_MESSAGE,
+                "Failing build due to some errors during recording of the coverage");
     }
 
     @Test
