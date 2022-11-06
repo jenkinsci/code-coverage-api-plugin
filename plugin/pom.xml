@@ -68,8 +68,8 @@
   <dependencies>
     <dependency>
       <groupId>edu.hm.hafner</groupId>
-      <artifactId>metric-model</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <artifactId>coverage-model</artifactId>
+      <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
