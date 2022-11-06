@@ -19,9 +19,17 @@
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
-    <revision>3.3.0</revision>
+    <revision>4.0.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
+
+    <jenkins.baseline>2.361</jenkins.baseline>
+    <jenkins.version>2.361.2</jenkins.version>
+    <jdk>11</jdk>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.testRelease>11</maven.compiler.testRelease>
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>
@@ -58,6 +66,11 @@
   </licenses>
 
   <dependencies>
+    <dependency>
+      <groupId>edu.hm.hafner</groupId>
+      <artifactId>coverage-model</artifactId>
+      <version>0.1.0</version>
+    </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>ionicons-api</artifactId>
@@ -143,6 +156,10 @@
       <version>${prism-api.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
@@ -197,11 +214,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-durable-task-step</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins.workflow</groupId>
-      <artifactId>workflow-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -302,6 +314,7 @@
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
         <configuration>
           <packages combine.children="append">
+            <package>io.jenkins.plugins.coverage.metrics</package>
             <package>io.jenkins.plugins.coverage.model</package>
           </packages>
           <excludes combine.children="append">
@@ -314,6 +327,14 @@
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
           <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
     </plugins>
