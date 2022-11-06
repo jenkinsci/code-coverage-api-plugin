@@ -39,8 +39,6 @@ import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
-import io.jenkins.plugins.coverage.model.CoverageReporter;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;

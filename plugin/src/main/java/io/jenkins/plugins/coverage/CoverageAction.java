@@ -5,9 +5,10 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerProxy;
 import hudson.model.Action;
 import hudson.model.HealthReport;
@@ -16,7 +17,7 @@ import hudson.model.Run;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
 
-import io.jenkins.plugins.coverage.model.CoverageBuildAction;
+import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
 public class CoverageAction implements StaplerProxy, SimpleBuildStep.LastBuildAction, RunAction2, HealthReportingAction {

@@ -314,6 +314,7 @@
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
         <configuration>
           <packages combine.children="append">
+            <package>io.jenkins.plugins.coverage.metrics</package>
             <package>io.jenkins.plugins.coverage.model</package>
           </packages>
           <excludes combine.children="append">
