@@ -9,6 +9,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
+import org.jenkinsci.Symbol;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.model.Job;
@@ -210,6 +211,7 @@ public class CoverageColumn extends ListViewColumn {
      * Descriptor of the column.
      */
     @Extension(optional = true)
+    @Symbol("coverageTotalsColumn")
     public static class CoverageDescriptor extends ListViewColumnDescriptor {
         @NonNull
         @Override
