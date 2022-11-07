@@ -15,6 +15,7 @@ import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.parser.XmlParser;
 import edu.hm.hafner.util.FilteredLog;
+import edu.hm.hafner.util.PathUtil;
 
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
@@ -31,6 +32,7 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
     private static final long serialVersionUID = -4242755766101768715L;
 
+    private static final PathUtil PATH_UTIL = new PathUtil();
     private final String filePattern;
     private final CoverageParser parser;
     private final String encoding;
@@ -110,7 +112,7 @@ public class FilesScanner extends MasterToSlaveFileCallable<AggregatedResult> {
             // FIXME: encoding?
             XmlParser xmlParser = parser.createParser();
             ModuleNode node = xmlParser.parse(Files.newBufferedReader(file));
-            log.logInfo("Successfully parsed file '%s'", file);
+            log.logInfo("Successfully parsed file '%s'", PATH_UTIL.getAbsolutePath(file));
             node.getMetricsDistribution().values().forEach(v -> log.logInfo("%s", v));
             return node;
         }

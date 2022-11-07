@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
-
     @Test
     void shouldIgnoreEmptyListOfFiles() {
         WorkflowJob job = createPipeline();
@@ -59,7 +58,7 @@ class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
                         "[JaCoCo] BRANCH: 93.97% (109/116)",
                         "[JaCoCo] COMPLEXITY: 160")
                 .containsPattern("Searching for all files in '.*' that match the pattern '\\*\\*/jacoco.xml'")
-                .containsPattern("Successfully parsed file '.*/jacoco.xml'")
+                .containsPattern("Successfully parsed file .*/jacoco.xml")
                 .doesNotContain("Expanding pattern");
     }
 }
