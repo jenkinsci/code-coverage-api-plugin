@@ -4,19 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.util.ResourceTest;
 
 import static org.assertj.core.api.Assertions.*;
@@ -27,52 +20,17 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 class SourceCodeFacadeTest extends ResourceTest {
-
-    /**
-     * The original sourcecode view which shows the whole file.
-     */
-    private static final String SOURCECODE = "SourcecodeTest.html";
-    /**
-     * The sourcecode view for the change coverage.
-     */
-    private static final String SOURCECODE_CC = "SourcecodeTestCC.html";
-    /**
-     * The sourcecode view for the indirect coverage changes.
-     */
-    private static final String SOURCECODE_ICC = "SourcecodeTestICC.html";
-
-    /**
-     * The lines which contain code changes.
-     */
-    private static final SortedSet<Integer> CODE_CHANGES = new TreeSet<>();
-    /**
-     * The used indirect coverage changes.
-     */
-    private static final SortedMap<Integer, Integer> INDIRECT_COVERAGE_CHANGES = new TreeMap<>();
-    /**
-     * A dummy coverage per line mapping.
-     */
-    private static final SortedMap<Integer, Coverage> COVERAGE_PER_LINE = new TreeMap<>();
-
-    @BeforeAll
-    static void init() {
-        CODE_CHANGES.addAll(Arrays.asList(10, 11, 12, 16, 17, 18, 19));
-        INDIRECT_COVERAGE_CHANGES.put(6, -1);
-        INDIRECT_COVERAGE_CHANGES.put(7, -1);
-        INDIRECT_COVERAGE_CHANGES.put(14, 1);
-        INDIRECT_COVERAGE_CHANGES.put(15, 1);
-        for (int i = 1; i <= 25; i++) {
-            COVERAGE_PER_LINE.put(i, Coverage.nullObject(Metric.LINE));
-        }
-    }
+    private static final String WHOLE_SOURCE_CODE = "SourcecodeTest.html";
+    private static final String CHANGE_COVERAGE_SOURCE_CODE = "SourcecodeTestCC.html";
+    private static final String INDIRECT_COVERAGE_SOURCE_CODE = "SourcecodeTestICC.html";
 
     @Test
     void shouldCalculateSourcecodeForChangeCoverage() throws IOException {
         SourceCodeFacade sourceCodeFacade = createSourceCodeFacade();
-        String originalHtml = readHtml(SOURCECODE);
+        String originalHtml = readHtml(WHOLE_SOURCE_CODE);
         FileNode node = createFileCoverageNode();
 
-        String requiredHtml = Jsoup.parse(readHtml(SOURCECODE_CC), Parser.xmlParser()).html();
+        String requiredHtml = Jsoup.parse(readHtml(CHANGE_COVERAGE_SOURCE_CODE), Parser.xmlParser()).html();
 
         String changeCoverageHtml = sourceCodeFacade.calculateChangeCoverageSourceCode(originalHtml, node);
         assertThat(changeCoverageHtml).isEqualTo(requiredHtml);
@@ -81,10 +39,10 @@ class SourceCodeFacadeTest extends ResourceTest {
     @Test
     void shouldCalculateSourcecodeForIndirectCoverageChanges() throws IOException {
         SourceCodeFacade sourceCodeFacade = createSourceCodeFacade();
-        String originalHtml = readHtml(SOURCECODE);
+        String originalHtml = readHtml(WHOLE_SOURCE_CODE);
         FileNode node = createFileCoverageNode();
 
-        String requiredHtml = Jsoup.parse(readHtml(SOURCECODE_ICC), Parser.xmlParser()).html();
+        String requiredHtml = Jsoup.parse(readHtml(INDIRECT_COVERAGE_SOURCE_CODE), Parser.xmlParser()).html();
 
         String changeCoverageHtml = sourceCodeFacade.calculateIndirectCoverageChangesSourceCode(originalHtml, node);
         assertThat(changeCoverageHtml).isEqualTo(requiredHtml);
