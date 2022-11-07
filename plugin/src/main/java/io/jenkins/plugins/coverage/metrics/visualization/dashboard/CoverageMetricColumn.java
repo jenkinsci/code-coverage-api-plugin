@@ -31,7 +31,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
  *
  * @author Florian Orendi
  */
-public class CoverageColumn extends ListViewColumn {
+public class CoverageMetricColumn extends ListViewColumn {
     private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
 
     private String columnName = Messages.Coverage_Column();
@@ -42,7 +42,7 @@ public class CoverageColumn extends ListViewColumn {
      * Empty constructor.
      */
     @DataBoundConstructor
-    public CoverageColumn() {
+    public CoverageMetricColumn() {
         super();
     }
 

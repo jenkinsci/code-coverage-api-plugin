@@ -24,12 +24,12 @@ import static io.jenkins.plugins.coverage.metrics.testutil.JobStubs.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test class for {@link CoverageColumn}.
+ * Test class for {@link CoverageMetricColumn}.
  *
  * @author Florian Orendi
  */
 @DefaultLocale("en")
-class CoverageColumnTest {
+class CoverageMetricColumnTest {
     private static final String COLUMN_NAME = "Test Column";
     private static final ProjectCoverage PROJECT_COVERAGE = new ProjectCoverage();
     private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();
@@ -39,7 +39,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldHaveWorkingDataGetters() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         assertThat(column.getColumnName()).isEqualTo(COLUMN_NAME);
         assertThat(column.getCoverageType()).isEqualTo(PROJECT_COVERAGE.getDisplayName());
         assertThat(column.getCoverageMetric()).isEqualTo(COVERAGE_METRIC.name());
@@ -47,7 +47,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldProvideSelectedColumn() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
 
         column.setCoverageType(Messages.Project_Coverage_Type());
@@ -78,13 +78,13 @@ class CoverageColumnTest {
 
     @Test
     void shouldProvideEmptyCoverageUrlWithoutAction() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
     }
 
     @Test
     void shouldProvideBackgroundColorFillPercentage() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         assertThat(column.getBackgroundColorFillPercentage("+5,0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("+5.0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("5,00%")).isEqualTo("5.00%");
@@ -93,7 +93,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldShowNoResultIfBuild() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
 
         Job<?, ?> job = createJob();
 
@@ -106,7 +106,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldShowNoResultIfNoAction() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
 
         Job<?, ?> job = createJobWithActions();
 
@@ -117,7 +117,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldShowNoResultForUnavailableMetric() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         column.setCoverageMetric(Metric.CLASS.name());
 
         Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
@@ -133,7 +133,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldCalculateProjectCoverage() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
 
         Fraction coverageFraction = Fraction.getFraction(1, 2);
         CoveragePercentage coveragePercentage = CoveragePercentage.valueOf(coverageFraction);
@@ -153,7 +153,7 @@ class CoverageColumnTest {
 
     @Test
     void shouldCalculateProjectCoverageDelta() {
-        CoverageColumn column = createColumn();
+        CoverageMetricColumn column = createColumn();
         column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
@@ -174,12 +174,12 @@ class CoverageColumnTest {
     }
 
     /**
-     * Creates a {@link CoverageColumn} for displaying the project coverage.
+     * Creates a {@link CoverageMetricColumn} for displaying the project coverage.
      *
      * @return the created column.
      */
-    private CoverageColumn createColumn() {
-        CoverageColumn column = new CoverageColumn();
+    private CoverageMetricColumn createColumn() {
+        CoverageMetricColumn column = new CoverageMetricColumn();
         column.setColumnName(COLUMN_NAME);
         column.setCoverageType(PROJECT_COVERAGE.getDisplayName());
         column.setCoverageMetric(COVERAGE_METRIC.name());

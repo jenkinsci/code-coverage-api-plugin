@@ -6,7 +6,7 @@ jobs:
         }
         recurse(true)
         columns {
-          coverageColumn()
+          coverageMetricColumn()
           status()
           weather()
           name()

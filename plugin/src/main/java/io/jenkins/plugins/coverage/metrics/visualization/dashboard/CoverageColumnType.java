@@ -17,7 +17,7 @@ import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvi
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
 
 /**
- * Provides functions for different types of coverage that can be represented within a {@link CoverageColumn}.
+ * Provides functions for different types of coverage that can be represented within a {@link CoverageMetricColumn}.
  *
  * @author Florian Orendi
  */
