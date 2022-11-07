@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.util.ResourceTest;
@@ -54,10 +53,6 @@ class SourceCodeFacadeTest extends ResourceTest {
      * A dummy coverage per line mapping.
      */
     private static final SortedMap<Integer, Coverage> COVERAGE_PER_LINE = new TreeMap<>();
-    private static final Coverage COVERAGE = new CoverageBuilder().setMetric(Metric.LINE)
-            .setCovered(1)
-            .setMissed(0)
-            .build();
 
     @BeforeAll
     static void init() {
