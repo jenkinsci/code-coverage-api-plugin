@@ -4,3 +4,23 @@ gnu.trove.impl.hash.TPrimitiveHash
 gnu.trove.map.hash.TIntObjectHashMap
 
 org.apache.commons.lang3.math.Fraction
+
+edu.hm.hafner.metric.ClassNode
+edu.hm.hafner.metric.ContainerNode
+edu.hm.hafner.metric.Coverage
+edu.hm.hafner.metric.CyclomaticComplexity
+edu.hm.hafner.metric.FileNode
+edu.hm.hafner.metric.IntegerValue
+edu.hm.hafner.metric.LinesOfCode
+edu.hm.hafner.metric.MethodNode
+edu.hm.hafner.metric.Metric
+edu.hm.hafner.metric.ModuleNode
+edu.hm.hafner.metric.Mutation
+edu.hm.hafner.metric.MutationStatus
+edu.hm.hafner.metric.MutationValue
+edu.hm.hafner.metric.Mutator
+edu.hm.hafner.metric.Node
+edu.hm.hafner.metric.PackageNode
+edu.hm.hafner.metric.Percentage
+edu.hm.hafner.metric.SafeFraction
+edu.hm.hafner.metric.Value

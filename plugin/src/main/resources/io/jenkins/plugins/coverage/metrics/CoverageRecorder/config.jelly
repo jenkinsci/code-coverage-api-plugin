@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:p="/prism" xmlns:f="/lib/form" xmlns:l="/lib/layout">
 
   <f:entry title="${%parser.title}" >
