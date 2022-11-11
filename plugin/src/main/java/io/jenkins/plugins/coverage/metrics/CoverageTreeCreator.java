@@ -3,7 +3,6 @@ package io.jenkins.plugins.coverage.metrics;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 import edu.hm.hafner.metric.Coverage;
@@ -34,7 +33,7 @@ public class CoverageTreeCreator {
         if (original instanceof FileNode) {
             var file = (FileNode) original;
             if (file.hasCoveredLinesInChangeSet()) {
-                return Optional.of(file.filter());
+                return Optional.of(file.filterChangedLines());
             }
             return Optional.empty();
         }
@@ -76,37 +75,6 @@ public class CoverageTreeCreator {
     }
 
     /**
-     * Recursively calculates a coverage tree which represents the change coverage.
-     *
-     * @param root
-     *         The {@link Node root} of the tree
-     *
-     * @return {@code true} whether the tree has been calculated successfully, else {@link false}
-     */
-    private boolean calculateChangeCoverageTree(final Node root) {
-        if (root instanceof FileNode) {
-            FileNode fileNode = (FileNode) root;
-            clearChildrenAndLeaves(fileNode);
-            // this is required since there might be changes which do not affect the code coverage -> ignore these files
-            return fileNode.hasCoveredLinesInChangeSet();
-        }
-        var children = root.getChildren();
-        Iterator<Node> nodeIterator = children.iterator();
-        boolean hasChanged = false;
-        while (nodeIterator.hasNext()) {
-            Node child = nodeIterator.next();
-            boolean hasChildChanges = calculateChangeCoverageTree(child);
-            if (!hasChildChanges) {
-                nodeIterator.remove();
-            }
-            hasChanged |= hasChildChanges;
-        }
-        root.clearChildren();
-        root.addAllChildren(children);
-        return hasChanged;
-    }
-
-    /**
      * Recursively calculates a coverage tree which represents the indirect coverage changes.
      *
      * @param root
@@ -136,17 +104,6 @@ public class CoverageTreeCreator {
     }
 
     /**
-     * Attaches leaves to the given {@link Node node} which represent its underlying change coverage.
-     *
-     * @param node
-     *         The node which contains the change coverage
-     */
-    private void attachChangeCoverageLeaves(final Node node) {
-        node.getAllFileNodes()
-                .forEach(fileNode -> createChangeCoverageLeaves(fileNode, fileNode.getChangedLines()));
-    }
-
-    /**
      * Attaches leaves to the passed {@link Node node} which represent its underlying indirect coverage changes.
      *
      * @param node
@@ -156,34 +113,6 @@ public class CoverageTreeCreator {
         node.getAllFileNodes().stream()
                 .filter(FileNode::hasIndirectCoverageChanges)
                 .forEach(this::createIndirectCoverageChangesLeaves);
-    }
-
-    /**
-     * Creates both a line and a branch change coverage leaf for the given {@link FileNode node}.
-     *
-     * @param fileNode
-     *         The node the leaves are attached to
-     * @param changedLines
-     *         The {@link Coverage} to be represented by the leaves
-     */
-    private void createChangeCoverageLeaves(final FileNode fileNode, final SortedSet<Integer> changedLines) {
-        var lineCoverage = Coverage.nullObject(Metric.LINE);
-        var branchCoverage = Coverage.nullObject(Metric.BRANCH);
-        for (int changedLine : changedLines) {
-            if (fileNode.hasCoverageForLine(changedLine)) {
-                var covered = fileNode.getCoveredOfLine(changedLine);
-                var missed = fileNode.getMissedOfLine(changedLine);
-
-            }
-        }
-        fileNode.addValue(changedLines.stream()
-                .map(fileNode::getLineCoverage)
-                .reduce(Coverage::add)
-                .orElse(Coverage.nullObject(Metric.LINE)));
-        fileNode.addValue(changedLines.stream()
-                .map(fileNode::getBranchCoverage)
-                .reduce(Coverage::add)
-                .orElse(Coverage.nullObject(Metric.BRANCH)));
     }
 
     /**
