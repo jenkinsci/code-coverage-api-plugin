@@ -30,6 +30,7 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     private final Control globalThreshold = control("repeatable-add");
     private final Control sourceCodeEncoding = control("sourceCodeEncoding");
     private final Control sourceDirectories = findRepeatableAddButtonFor("sourceDirectories");
+    private final Control checksName = control("checksName");
 
     /**
      * Constructor for CoveragePublisher.
@@ -146,6 +147,17 @@ public class CoveragePublisher extends AbstractStep implements PostBuildStep {
     public void setSkipPublishingChecks(final boolean skipPublishing) {
         ensureAdvancedOptionsIsActivated();
         skipPublishingChecks.check(skipPublishing);
+    }
+
+    /**
+     * Setter for setting the SCM checks name.
+     *
+     * @param checksName
+     *         the SCM check name
+     */
+    public void setChecksName(final String checksName) {
+        ensureAdvancedOptionsIsActivated();
+        this.checksName.set(checksName);
     }
 
     /**

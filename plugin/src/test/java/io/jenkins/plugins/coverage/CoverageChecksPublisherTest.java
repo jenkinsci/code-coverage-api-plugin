@@ -32,6 +32,7 @@ public class CoverageChecksPublisherTest {
     private static final String TARGET_BUILD_LINK = "job/pipeline-coding-style/job/master/3/";
     private static final String LAST_SUCCESSFUL_BUILD_LINK = "http://127.0.0.1:8080/job/pipeline-coding-style/view/change-requests/job/PR-3/110/";
     private static final String HEALTH_REPORT = "Coverage Healthy score is 100%";
+    private static final String CHECKS_NAME = "Code Coverage";
 
     @BeforeClass
     public static void enforceEnglishLocale() {
@@ -41,7 +42,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldConstructChecksDetailsWithLineAndMethodCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
@@ -64,7 +65,7 @@ public class CoverageChecksPublisherTest {
         when(build.getUrl()).thenReturn(BUILD_LINK);
         when(build.getPreviousSuccessfulBuild()).thenReturn(null);
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -73,7 +74,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldConstructChecksDetailsWithIncreasedLineCoverageAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
@@ -100,7 +101,7 @@ public class CoverageChecksPublisherTest {
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -109,7 +110,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldConstructChecksDetailsWithDecreasedLineCoverageAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
@@ -136,7 +137,7 @@ public class CoverageChecksPublisherTest {
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -145,7 +146,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldConstructChecksDetailsWithUnchangedLineAndConditionalCoverage() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
@@ -170,7 +171,7 @@ public class CoverageChecksPublisherTest {
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -179,7 +180,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldUseLastSuccessfulBuildForLineCoverageIfNoTargetBranchIsComparedWith() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.SUCCESS)
                 .withDetailsURL(JENKINS_BASE_URL + "/job/pipeline-coding-style/job/PR-3/49/coverage")
@@ -204,7 +205,7 @@ public class CoverageChecksPublisherTest {
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -213,7 +214,7 @@ public class CoverageChecksPublisherTest {
     @Test
     public void shouldPublishFailedCheck() {
         ChecksDetails expectedDetails = new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(CHECKS_NAME)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(ChecksConclusion.FAILURE)
                 .withDetailsURL(JENKINS_BASE_URL + "/" + BUILD_LINK + COVERAGE_URL_NAME)
@@ -244,7 +245,7 @@ public class CoverageChecksPublisherTest {
         action.setHealthReport(new HealthReport(100, localizable));
         action.setFailMessage("Failed because coverage is unhealthy.");
 
-        assertThat(new CoverageChecksPublisher(action, createJenkins())
+        assertThat(new CoverageChecksPublisher(action, createJenkins(), CHECKS_NAME)
                 .extractChecksDetails())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedDetails);
@@ -275,7 +276,7 @@ public class CoverageChecksPublisherTest {
         when(localizable.toString()).thenReturn(HEALTH_REPORT);
         action.setHealthReport(new HealthReport(100, localizable));
 
-        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins())
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), CHECKS_NAME)
                 .extractChecksDetails().getOutput())
                 .isPresent()
                 .get()
