@@ -251,6 +251,21 @@ public class CoverageChecksPublisherTest {
                 .isEqualTo(expectedDetails);
     }
 
+    @Test
+    public void shouldPublishCheckName() {
+        Run build = mock(Run.class);
+        CoverageResult result = mock(CoverageResult.class);
+        when(result.getOwner()).thenReturn(build);
+        when(build.getUrl()).thenReturn(BUILD_LINK);
+
+        String checksName = "Custom Checks Name";
+        assertThat(new CoverageChecksPublisher(createActionWithDefaultHealthReport(result), createJenkins(), checksName)
+                .extractChecksDetails().getName())
+                .isPresent()
+                .get()
+                .isEqualTo(checksName);
+    }
+
     private CoverageAction getCoverageAction(final CoverageResult result) {
         CoverageAction action = new CoverageAction(result);
         action.onAttached(mock(Run.class));
