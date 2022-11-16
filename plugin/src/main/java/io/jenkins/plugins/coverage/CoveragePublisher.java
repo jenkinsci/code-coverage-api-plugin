@@ -75,6 +75,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private boolean skipPublishingChecks = false;
 
+    private String checksName = "Code Coverage";
+
     @DataBoundConstructor
     public CoveragePublisher() {
     }
@@ -123,7 +125,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         if (!skipPublishingChecks) {
             CoverageAction coverageAction = run.getAction(CoverageAction.class);
             if (coverageAction != null) {
-                CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
+                CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction, checksName);
                 checksPublisher.publishChecks(listener);
             }
         }
@@ -245,6 +247,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     public boolean isSkipPublishingChecks() {
         return skipPublishingChecks;
+    }
+
+    public String getChecksName() {
+        return checksName;
+    }
+
+    @DataBoundSetter
+    public void setChecksName(final String checksName) {
+        this.checksName = checksName;
     }
 
     @DataBoundSetter
