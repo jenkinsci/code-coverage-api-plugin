@@ -93,9 +93,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         id = "coverage"; // TODO: this needs to be a parameter
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
-        CoverageTreeCreator treeCreator = new CoverageTreeCreator();
-        changeCoverageTreeRoot = treeCreator.createChangeCoverageTree(node);
-        indirectCoverageChangesTreeRoot = treeCreator.createIndirectCoverageChangesTree(node);
+        changeCoverageTreeRoot = node.filterChanges();
+        indirectCoverageChangesTreeRoot = node.filterByIndirectlyChangedCoverage();
     }
 
     public String getId() {

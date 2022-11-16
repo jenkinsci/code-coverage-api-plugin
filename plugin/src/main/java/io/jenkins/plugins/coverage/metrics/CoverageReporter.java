@@ -135,12 +135,7 @@ public class CoverageReporter {
             log.logInfo("Calculating coverage deltas...");
 
             // filtered coverage trees
-            CoverageTreeCreator coverageTreeCreator = new CoverageTreeCreator();
-            Node changeCoverageRoot = coverageTreeCreator.createChangeCoverageTree(rootNode);
-            Node indirectCoverageChangesTree = coverageTreeCreator.createIndirectCoverageChangesTree(rootNode);
-
-            // coverage delta
-            NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
+            Node changeCoverageRoot = rootNode.filterChanges();
 
             NavigableMap<Metric, Fraction> changeCoverageDelta;
             if (hasChangeCoverage(changeCoverageRoot)) {
@@ -153,6 +148,8 @@ public class CoverageReporter {
                 }
             }
 
+            NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
+            Node indirectCoverageChangesTree = rootNode.filterByIndirectlyChangedCoverage();
             action = new CoverageBuildAction(build, rootNode, healthReport,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
