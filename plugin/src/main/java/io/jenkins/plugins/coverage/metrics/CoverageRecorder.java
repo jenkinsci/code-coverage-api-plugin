@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -43,6 +44,7 @@ import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.EnvironmentResolver;
+import io.jenkins.plugins.util.FilesScanner.ScannerResult;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
 
@@ -275,11 +277,12 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                     }
 
                     try {
-                        AggregatedResult result = workspace.act(
-                                new FilesScanner(expandedPattern, "UTF-8", false, parser));
+                        ScannerResult<ModuleNode> result = workspace.act(
+                                new CoverageReportScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
-                        results.add(result.getRoot());
-                        if (result.getRoot().isEmpty() && result.hasErrors()) {
+                        var rootNode = Node.merge(result.getResults());
+                        results.add(rootNode);
+                        if (rootNode.isEmpty() && result.hasErrors()) {
                             if (failOnError) {
                                 var errorMessage = "Failing build due to some errors during recording of the coverage";
                                 log.logInfo(errorMessage);
