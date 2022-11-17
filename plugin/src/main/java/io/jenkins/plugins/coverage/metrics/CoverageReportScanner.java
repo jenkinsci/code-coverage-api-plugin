@@ -12,7 +12,7 @@ import edu.hm.hafner.util.PathUtil;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.util.FilesVisitor;
+import io.jenkins.plugins.util.AgentFileVisitor;
 
 /**
  * Scans the workspace for coverage reports that match a specified Ant file pattern and parse these files with the
@@ -21,7 +21,7 @@ import io.jenkins.plugins.util.FilesVisitor;
  *
  * @author Ullrich Hafner
  */
-public class CoverageReportScanner extends FilesVisitor<ModuleNode> {
+public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     private static final long serialVersionUID = 6940864958150044554L;
 
     private static final PathUtil PATH_UTIL = new PathUtil();
