@@ -6,21 +6,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.parser.XmlParser;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.PathUtil;
+import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.util.FilesScanner;
+import io.jenkins.plugins.util.FilesVisitor;
 
 /**
- * Scans files that match a specified Ant files pattern for issues and aggregates the coverage files into a single {@link
- * Node node} instance.
+ * Scans the workspace for coverage reports that match a specified Ant file pattern and parse these files with the
+ * specified parser. Creates a new {@link ModuleNode} for each parsed file. For files that cannot be read, an empty
+ * module node will be returned.
  *
  * @author Ullrich Hafner
  */
-public class CoverageReportScanner extends FilesScanner<ModuleNode> {
+public class CoverageReportScanner extends FilesVisitor<ModuleNode> {
     private static final long serialVersionUID = 6940864958150044554L;
 
     private static final PathUtil PATH_UTIL = new PathUtil();
@@ -54,7 +55,7 @@ public class CoverageReportScanner extends FilesScanner<ModuleNode> {
             node.getMetricsDistribution().values().forEach(v -> log.logInfo("%s", v));
             return node;
         }
-        catch (IOException exception) {
+        catch (IOException | ParsingException exception) {
             log.logException(exception, "Parsing of file '%s' failed due to an exception:", file);
             return new ModuleNode(file.toString());
         }
