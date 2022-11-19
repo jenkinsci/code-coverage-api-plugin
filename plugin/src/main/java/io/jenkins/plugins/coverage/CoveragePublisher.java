@@ -30,7 +30,6 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.scm.SCM;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -52,6 +51,7 @@ import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
+    private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
     private List<CoverageAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
 
@@ -75,7 +75,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
 
     private boolean skipPublishingChecks = false;
 
-    private String checksName = "Code Coverage";
+    private String checksName = CHECKS_DEFAULT_NAME;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -326,6 +326,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
         if (scm == null) {
             scm = StringUtils.EMPTY;
+        }
+        if (checksName == null) {
+            checksName = CHECKS_DEFAULT_NAME;
         }
         return this;
     }
