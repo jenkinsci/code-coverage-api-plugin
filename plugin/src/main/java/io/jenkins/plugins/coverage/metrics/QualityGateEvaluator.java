@@ -1,10 +1,14 @@
-package io.jenkins.plugins.coverage.model;
-
-import com.google.errorprone.annotations.FormatMethod;
+package io.jenkins.plugins.coverage.metrics;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.google.errorprone.annotations.FormatMethod;
+
+import edu.hm.hafner.metric.Metric;
+
+import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateResult;
 
 /**
  * Evaluates a set of quality gates for a static analysis report.
@@ -34,20 +38,34 @@ public class QualityGateEvaluator {
         QualityGateStatus status = QualityGateStatus.PASSED;
 
         for (QualityGate qualityGate : qualityGates) {
-            double actualSize = qualityGate.getActualCoverageReference().apply(report);
-            if (actualSize < qualityGate.getThreshold()) {
-                logger.print("-> %s - %s: %f - Quality QualityGate: %f",
-                        qualityGate.getStatus(), qualityGate.getName(), actualSize, qualityGate.getThreshold());
-                if (qualityGate.getStatus().isWorseThan(status)) {
-                    status = qualityGate.getStatus();
+            var baseline = qualityGate.getBaseline();
+            var possibleValue = report.getValue(baseline, qualityGate.getMetric());
+            if (possibleValue.isPresent()) {
+                var actualValue = possibleValue.get();
+                if (actualValue.isBelowThreshold(qualityGate.getThreshold())) {
+                    logger.print("-> <%s> %s - %s (Quality Gate: %.2f)",
+                            qualityGate.getName(), qualityGate.getStatus(), actualValue, qualityGate.getThreshold());
+                    status = changeQualityStatusIfNotWorse(status, qualityGate);
+                }
+                else {
+                    logger.print("-> <%s> PASSED - %s (Quality Gate: %.2f)",
+                            qualityGate.getName(), actualValue, qualityGate.getThreshold());
                 }
             }
             else {
-                logger.print("-> PASSED - %s: %f - Quality QualityGate: %f",
-                        qualityGate.getName(), actualSize, qualityGate.getThreshold());
+                status = changeQualityStatusIfNotWorse(status, qualityGate);
+                logger.print("-> <%s> %s - n/a (Quality Gate: %.2f)",
+                        qualityGate.getName(), qualityGate.getStatus(), qualityGate.getThreshold());
             }
         }
 
+        return status;
+    }
+
+    private QualityGateStatus changeQualityStatusIfNotWorse(QualityGateStatus status, final QualityGate qualityGate) {
+        if (qualityGate.getStatus().isWorseThan(status)) {
+            status = qualityGate.getStatus();
+        }
         return status;
     }
 
@@ -56,17 +74,19 @@ public class QualityGateEvaluator {
      *
      * @param size
      *         the minimum coverage that is needed for the quality gate
-     * @param type
-     *         the type of the quality gate
+     * @param metric
+     *         the metric to compare
+     * @param baseline
+     *         the baseline to use the bto compare
      * @param result
      *         determines whether the quality gate is a warning or failure
      */
-    public void add(final double size, final QualityGate.QualityGateType type, final QualityGate.QualityGateResult result) {
-        qualityGates.add(new QualityGate(size, type, result));
+    public void add(final double size, final Metric metric, final Baseline baseline, final QualityGateResult result) {
+        qualityGates.add(new QualityGate(size, metric, baseline, result));
     }
 
     /**
-     * Appends all of the quality gates in the specified collection to the end of the list of quality gates.
+     * Appends all the quality gates in the specified collection to the end of the list of quality gates.
      *
      * @param additionalQualityGates
      *         the quality gates to add

@@ -1,8 +1,6 @@
-package io.jenkins.plugins.coverage.model;
-
+package io.jenkins.plugins.coverage.metrics;
 
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import hudson.model.BallColor;
 import hudson.model.Result;
 
 /**
@@ -29,24 +27,7 @@ public enum QualityGateStatus {
         this.result = result;
     }
 
-    /**
-     * Returns the associated {@link Result} color.
-     *
-     * @return Jenkins' {@link Result} color
-     */
-    public BallColor getColor() {
-        return result.color;
-    }
-
-    /**
-     * Returns the associated {@link Result} icon class to be used in the UI.
-     *
-     * @return Jenkins' {@link Result} icon class
-     */
-    public String getIconClass() {
-        return getColor().getIconClassName();
-    }
-
+    // TODO: Update with new elements in warnings plugin
     /**
      * Returns whether the quality gate has been passed (or has not been activated at all).
      *

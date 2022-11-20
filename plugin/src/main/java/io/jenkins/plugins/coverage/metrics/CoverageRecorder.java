@@ -43,8 +43,8 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
+import io.jenkins.plugins.util.AgentFileVisitor.ScannerResult;
 import io.jenkins.plugins.util.EnvironmentResolver;
-import io.jenkins.plugins.util.FilesScanner.ScannerResult;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
 
