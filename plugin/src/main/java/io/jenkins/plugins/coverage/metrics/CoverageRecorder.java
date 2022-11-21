@@ -43,7 +43,7 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
-import io.jenkins.plugins.util.AgentFileVisitor.ScannerResult;
+import io.jenkins.plugins.util.AgentFileVisitor.FileVisitorResult;
 import io.jenkins.plugins.util.EnvironmentResolver;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
@@ -277,7 +277,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                     }
 
                     try {
-                        ScannerResult<ModuleNode> result = workspace.act(
+                        FileVisitorResult<ModuleNode> result = workspace.act(
                                 new CoverageReportScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
                         var rootNode = Node.merge(result.getResults());
