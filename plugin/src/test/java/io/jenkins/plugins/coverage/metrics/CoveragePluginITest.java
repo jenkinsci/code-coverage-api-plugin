@@ -23,7 +23,7 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration test for different jacoco and cobertura files.
+ * Integration test for different JaCoCo, Cobertura, and PIT files.
  */
 class CoveragePluginITest extends AbstractCoverageITest {
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";

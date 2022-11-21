@@ -40,10 +40,10 @@ import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.AgentFileVisitor.FileVisitorResult;
+import io.jenkins.plugins.util.CharsetValidation;
 import io.jenkins.plugins.util.EnvironmentResolver;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
@@ -67,8 +67,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
 
     private boolean failOnError;
     private boolean enabledForFailure = true;
-    private int healthy;
-    private int unhealthy;
+    private List<QualityGate> qualityGates = new ArrayList<>();
     private String scm = StringUtils.EMPTY;
 
     /**
@@ -89,25 +88,28 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
      */
     @DataBoundSetter
     public void setTools(final List<CoverageTool> tools) {
-        this.tools = new ArrayList<>(tools);
+        this.tools = List.copyOf(tools);
     }
 
-    /**
-     * Returns the static analysis tools that will scan files and create issues.
-     *
-     * @return the static analysis tools
-     */
     public List<CoverageTool> getTools() {
-        return new ArrayList<>(tools);
+        return tools;
     }
 
     /**
-     * Returns whether publishing checks should be skipped.
+     * Defines the optional list of quality gates.
      *
-     * @return {@code true} if publishing checks should be skipped, {@code false} otherwise
+     * @param qualityGates
+     *         the quality gates
      */
-    public boolean isSkipPublishingChecks() {
-        return skipPublishingChecks;
+    @SuppressWarnings("unused") // used by Stapler view data binding
+    @DataBoundSetter
+    public void setQualityGates(final List<QualityGate> qualityGates) {
+        this.qualityGates = List.copyOf(qualityGates);
+    }
+
+    @SuppressWarnings("unused") // used by Stapler view data binding
+    public List<QualityGate> getQualityGates() {
+        return qualityGates;
     }
 
     /**
@@ -121,8 +123,12 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         this.skipPublishingChecks = skipPublishingChecks;
     }
 
+    public boolean isSkipPublishingChecks() {
+        return skipPublishingChecks;
+    }
+
     /**
-     * Determines whether to fail the build on errors during the step of recording issues.
+     * Determines whether to fail the build on errors during the step of recording coverage reports.
      *
      * @param failOnError
      *         if {@code true} then the build will be failed on errors, {@code false} then errors are only reported in
@@ -134,35 +140,24 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         this.failOnError = failOnError;
     }
 
-    @SuppressWarnings({"PMD.BooleanGetMethodName", "unused"})
-    public boolean getFailOnError() {
+    public boolean isFailOnError() {
         return failOnError;
     }
 
     /**
      * Returns whether recording should be enabled for failed builds as well.
      *
-     * @return {@code true}  if recording should be enabled for failed builds as well, {@code false} if recording is
+     * @param enabledForFailure
+     *         {@code true} if recording should be enabled for failed builds as well, {@code false} if recording is
      *         enabled for successful or unstable builds only
      */
-    @SuppressWarnings("PMD.BooleanGetMethodName")
-    public boolean getEnabledForFailure() {
-        return enabledForFailure;
-    }
-
     @DataBoundSetter
     public void setEnabledForFailure(final boolean enabledForFailure) {
         this.enabledForFailure = enabledForFailure;
     }
 
-    /**
-     * Returns the  encoding to use to read source files.
-     *
-     * @return the source code encoding
-     */
-    @CheckForNull
-    public String getSourceCodeEncoding() {
-        return sourceCodeEncoding;
+    public boolean isEnabledForFailure() {
+        return enabledForFailure;
     }
 
     /**
@@ -176,13 +171,9 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
         this.sourceCodeEncoding = sourceCodeEncoding;
     }
 
-    /**
-     * Gets the paths to the directories that contain the source code.
-     *
-     * @return directories containing the source code
-     */
-    public List<SourceCodeDirectory> getSourceDirectories() {
-        return new ArrayList<>(sourceDirectories);
+    @CheckForNull
+    public String getSourceCodeEncoding() {
+        return sourceCodeEncoding;
     }
 
     /**
@@ -195,7 +186,11 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
      */
     @DataBoundSetter
     public void setSourceDirectories(final List<SourceCodeDirectory> sourceCodeDirectories) {
-        sourceDirectories = new HashSet<>(sourceCodeDirectories);
+        sourceDirectories = Set.copyOf(sourceCodeDirectories);
+    }
+
+    public Set<SourceCodeDirectory> getSourceDirectories() {
+        return sourceDirectories;
     }
 
     private Set<String> getSourceDirectoriesPaths() {
@@ -207,15 +202,6 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     }
 
     /**
-     * Returns the retention strategy for source code files.
-     *
-     * @return the retention strategy for source code files
-     */
-    public SourceCodeRetention getSourceCodeRetention() {
-        return sourceCodeRetention;
-    }
-
-    /**
      * Defines the retention strategy for source code files.
      *
      * @param sourceCodeRetention
@@ -224,6 +210,10 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     @DataBoundSetter
     public void setSourceCodeRetention(final SourceCodeRetention sourceCodeRetention) {
         this.sourceCodeRetention = sourceCodeRetention;
+    }
+
+    public SourceCodeRetention getSourceCodeRetention() {
+        return sourceCodeRetention;
     }
 
     /**
@@ -302,7 +292,9 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                 }
 
                 CoverageReporter reporter = new CoverageReporter();
-                reporter.run(Node.merge(results), run, workspace, listener, getScm(), getSourceDirectoriesPaths(),
+                reporter.run(Node.merge(results), run, workspace, listener,
+                        getQualityGates(),
+                        getScm(), getSourceDirectoriesPaths(),
                         getSourceCodeEncoding(), getSourceCodeRetention());
             }
         }
@@ -357,6 +349,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
          * @return a model with all {@link SourceCodeRetention} strategies.
          */
         @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillSourceCodeRetentionItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
                 ListBoxModel options = new ListBoxModel();
@@ -381,6 +374,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
          * @return a model with all available charsets
          */
         @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
         public ComboBoxModel doFillSourceCodeEncodingItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
                 return CHARSET_VALIDATION.getAllCharsets();
@@ -399,6 +393,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
          * @return the validation result
          */
         @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
         public FormValidation doCheckSourceCodeEncoding(@AncestorInPath final AbstractProject<?, ?> project,
                 @QueryParameter final String sourceCodeEncoding) {
             if (!JENKINS.hasPermission(Item.CONFIGURE, project)) {

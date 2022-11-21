@@ -563,6 +563,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {
     }
 
+    // TODO: move to coverage formatter?
     public static final class ValueLabelProvider {
         public String getDisplayName(final Metric metric) {
             switch (metric) {
@@ -592,6 +593,25 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                     return Messages.Metric_LOC();
                 default:
                     throw new NoSuchElementException("No display name found for metric " + metric);
+            }
+        }
+
+        public String getDisplayName(final Baseline baseline) {
+            switch (baseline) {
+                case PROJECT:
+                    return Messages.Baseline_PROJECT();
+                case CHANGE:
+                    return Messages.Baseline_CHANGE();
+                case FILE:
+                    return Messages.Baseline_FILE();
+                case PROJECT_DELTA:
+                    return Messages.Baseline_PROJECT_DELTA();
+                case CHANGE_DELTA:
+                    return Messages.Baseline_CHANGE_DELTA();
+                case FILE_DELTA:
+                    return Messages.Baseline_FILE_DELTA();
+                default:
+                    throw new NoSuchElementException("No display name found for baseline " + baseline);
             }
         }
     }

@@ -80,7 +80,8 @@ class CoverageBuildActionTest {
     }
 
     private static CoverageBuildAction createEmptyAction(final Node module) {
-        return new CoverageBuildAction(mock(FreeStyleBuild.class), module, new HealthReport(), "-",
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), module, new HealthReport(),
+                QualityGateStatus.INACTIVE, "-",
                 new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>(), false);
     }
@@ -101,7 +102,7 @@ class CoverageBuildActionTest {
 
         CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class),
                 new ModuleNode("module"),
-                mock(HealthReport.class), "-",
+                mock(HealthReport.class), QualityGateStatus.INACTIVE, "-",
                 deltas, coverages,
                 deltas, coverages, false);
 
@@ -301,7 +302,7 @@ class CoverageBuildActionTest {
         NavigableMap<Metric, Value> indirectCoverageChanges = new TreeMap<>();
         indirectCoverageChanges.put(COVERAGE_METRIC, VALUE);
 
-        return new CoverageBuildAction(build, root, new HealthReport(), "-", deltas,
+        return new CoverageBuildAction(build, root, new HealthReport(), QualityGateStatus.INACTIVE, "-", deltas,
                 changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);
     }
 

@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:p="/prism" xmlns:f="/lib/form" xmlns:l="/lib/layout">
+<j:jelly xmlns:j="jelly:core" xmlns:p="/prism" xmlns:f="/lib/form">
 
   <f:entry title="${%parser.title}" >
     <div id="tools">
@@ -23,13 +23,16 @@
     <f:checkbox title="${%failOnError.title}"/>
   </f:entry>
 
-  <f:block><l:icon alt="Healthy" class="icon-health-80plus icon-md"/></f:block>
-  <f:entry title="${%Healthy Threshold}" description="${%description.healthy}" field="healthy">
-    <f:number/>
-  </f:entry>
-  <f:block><l:icon alt="Healthy" class="icon-health-00to19 icon-md"/></f:block>
-  <f:entry title="${%Unhealthy Threshold}" description="${%description.unhealthy}" field="unhealthy">
-    <f:number/>
+  <f:entry title="${%Quality gates}" description="${%qualityGates.description}">
+    <div id="qualityGates">
+      <f:repeatableProperty field="qualityGates" add="${%Add Quality Gate}">
+        <f:entry title="">
+          <div align="right">
+            <f:repeatableDeleteButton/>
+          </div>
+        </f:entry>
+      </f:repeatableProperty>
+    </div>
   </f:entry>
 
   <p:sourceConfig/>

@@ -62,6 +62,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
 
     private final String referenceBuildId;
 
+    private int successfulSinceBuild;
+    private final QualityGateStatus qualityGateStatus;
+
     /** The coverages of the result. */
     private final NavigableMap<Metric, Value> coverage;
 
@@ -91,8 +94,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      * @param healthReport
      *         health report
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final Node result, final HealthReport healthReport) {
-        this(owner, result, healthReport, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
+    public CoverageBuildAction(final Run<?, ?> owner, final Node result, final HealthReport healthReport,
+            final QualityGateStatus qualityGateStatus) {
+        this(owner, result, healthReport, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>());
     }
 
@@ -118,19 +122,23 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner, final Node result,
-            final HealthReport healthReport, final String referenceBuildId,
+            final HealthReport healthReport,
+            final QualityGateStatus qualityGateStatus,
+            final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final NavigableMap<Metric, Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final NavigableMap<Metric, Value> indirectCoverageChanges) {
-        this(owner, result, healthReport, referenceBuildId, delta, changeCoverage,
+        this(owner, result, healthReport, qualityGateStatus, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner, final Node result,
-            final HealthReport healthReport, final String referenceBuildId,
+            final HealthReport healthReport,
+            final QualityGateStatus qualityGateStatus,
+            final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final NavigableMap<Metric, Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
@@ -139,6 +147,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
         super(owner, result, canSerialize);
 
         coverage = result.getMetricsDistribution();
+        this.qualityGateStatus = qualityGateStatus;
         difference = delta;
         this.changeCoverage = changeCoverage;
         this.changeCoverageDifference = changeCoverageDifference;
@@ -147,6 +156,19 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
         this.healthReport = healthReport;
     }
 
+    public int getSuccessfulSinceBuild() {
+        return successfulSinceBuild; // FIXME: required?
+    }
+
+    public QualityGateStatus getQualityGateStatus() {
+        return qualityGateStatus;
+    }
+
+    /**
+     * Returns the visible metrics for the project summary.
+     *
+     * @return the metrics to be shown in the project summary
+     */
     public NavigableSet<Metric> getMetricsForSummary() {
         var metrics = new TreeSet<Metric>();
         if (hasCoverage(Metric.LINE)) {

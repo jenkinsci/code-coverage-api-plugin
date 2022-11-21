@@ -1,8 +1,7 @@
 package io.jenkins.plugins.coverage.metrics;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +21,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodePainter;
-import io.jenkins.plugins.coverage.targets.CoveragePaint;
 import io.jenkins.plugins.forensics.delta.model.Delta;
 import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
@@ -42,7 +40,7 @@ public class CoverageReporter {
      * Transforms the old model to the new model and invokes all steps that work on the new model. In the final step, a
      * new {@link CoverageBuildAction} will be attached to the build.
      *
-     * @param rootResult
+     * @param rootNode
      *         the root result obtained from the old coverage API
      * @param build
      *         the build that owns these results
@@ -63,27 +61,16 @@ public class CoverageReporter {
      *         if the build has been aborted
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public void run(final Node rootResult, final Run<?, ?> build, final FilePath workspace,
-            final TaskListener listener, final String scm,
+    public void run(final Node rootNode, final Run<?, ?> build, final FilePath workspace,
+            final TaskListener listener, final List<QualityGate> qualityGates, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        verifyPathUniqueness(rootResult, log);
+        verifyPathUniqueness(rootNode, log);
 
-        runWithModel(build, workspace, listener, scm, sourceDirectories, sourceCodeEncoding,
-                sourceCodeRetention,
-                logHandler, log, rootResult, new HashSet<>());
-    }
-
-    private void runWithModel(final Run<?, ?> build, final FilePath workspace, final TaskListener listener,
-            final String scm, final Set<String> sourceDirectories,
-            final String sourceCodeEncoding, final SourceCodeRetention sourceCodeRetention, final LogHandler logHandler,
-            final FilteredLog log, final Node rootNode,
-            final Set<Entry<Node, CoveragePaint>> paintedFiles)
-            throws InterruptedException {
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
         HealthReport healthReport = new HealthReport(); // FIXME: currently empty
@@ -150,7 +137,15 @@ public class CoverageReporter {
 
             NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
             Node indirectCoverageChangesTree = rootNode.filterByIndirectlyChangedCoverage();
+
+            var resultHandler = new RunResultHandler(build);
+            QualityGateStatus qualityGateStatus;
+            qualityGateStatus = evaluateQualityGates(rootNode, log,
+                    changeCoverageRoot.getMetricsDistribution(), changeCoverageDelta, coverageDelta,
+                    resultHandler, qualityGates);
+
             action = new CoverageBuildAction(build, rootNode, healthReport,
+                    qualityGateStatus,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.getMetricsDistribution(),
@@ -158,7 +153,14 @@ public class CoverageReporter {
                     indirectCoverageChangesTree.getMetricsDistribution());
         }
         else {
-            action = new CoverageBuildAction(build, rootNode, healthReport);
+            var resultHandler = new RunResultHandler(build);
+            QualityGateStatus qualityGateStatus;
+            final TreeMap<Object, Object> objectObjectTreeMap = new TreeMap<>();
+            qualityGateStatus = evaluateQualityGates(rootNode, log,
+                    new TreeMap<>(), new TreeMap<>(), new TreeMap<>(),
+                    resultHandler, qualityGates);
+
+            action = new CoverageBuildAction(build, rootNode, healthReport, qualityGateStatus);
         }
 
         log.logInfo("Executing source code painting...");
@@ -171,6 +173,37 @@ public class CoverageReporter {
         logHandler.log(log);
 
         build.addOrReplaceAction(action);
+    }
+
+    private QualityGateStatus evaluateQualityGates(final Node rootNode, final FilteredLog log,
+            final NavigableMap<Metric, Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
+            final NavigableMap<Metric, Fraction> coverageDelta, final RunResultHandler resultHandler,
+            final List<QualityGate> qualityGates) {
+        QualityGateEvaluator evaluator = new QualityGateEvaluator();
+        evaluator.addAll(qualityGates);
+        QualityGateStatus qualityGateStatus;
+        if (evaluator.isEnabled()) {
+            log.logInfo("Evaluating quality gates");
+            var statistics = new CoverageStatistics(rootNode.getMetricsDistribution(), coverageDelta,
+                    changeCoverageDistribution, changeCoverageDelta,
+                    new TreeMap<>(), new TreeMap<>());
+            qualityGateStatus = evaluator.evaluate(statistics, log::logInfo);
+            if (qualityGateStatus.isSuccessful()) {
+                log.logInfo("-> All quality gates have been passed");
+            }
+            else {
+                log.logInfo("-> Some quality gates have been missed: overall result is %s", qualityGateStatus);
+            }
+            if (!qualityGateStatus.isSuccessful()) {
+                resultHandler.setResult(qualityGateStatus.getResult(),
+                        "Some quality gates have been missed: overall result is " + qualityGateStatus.getResult());
+            }
+        }
+        else {
+            log.logInfo("No quality gates have been set - skipping");
+            qualityGateStatus = QualityGateStatus.INACTIVE;
+        }
+        return qualityGateStatus;
     }
 
     private boolean hasChangeCoverage(final Node changeCoverageRoot) {

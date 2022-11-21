@@ -66,7 +66,7 @@ class CodeDeltaCalculatorTest {
     @Test
     void shouldGetCoverageRelevantChanges() {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
-        Delta delta = createDeltaWithMockedFileChanges();
+        Delta delta = createDeltaWithStubbedFileChanges();
         Map<String, FileChanges> allChanges = delta.getFileChangesMap();
 
         assertThat(codeDeltaCalculator.getCoverageRelevantChanges(delta))
@@ -81,11 +81,11 @@ class CodeDeltaCalculatorTest {
     @Test
     void shouldMapScmChangesToReportPaths() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
-        Delta delta = createDeltaWithMockedFileChanges();
+        Delta delta = createDeltaWithStubbedFileChanges();
         Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
         Map<String, FileChanges> changesMap = changes.stream()
                 .collect(Collectors.toMap(FileChanges::getFileName, Function.identity()));
-        Node tree = createMockedCoverageTree();
+        Node tree = createStubbedCoverageTree();
         FilteredLog log = createFilteredLog();
 
         Map<String, FileChanges> should = new HashMap<>();
@@ -101,7 +101,7 @@ class CodeDeltaCalculatorTest {
     @Test
     void shouldCreateEmptyMappingWithoutChanges() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
-        Node tree = createMockedCoverageTree();
+        Node tree = createStubbedCoverageTree();
         FilteredLog log = createFilteredLog();
         Set<FileChanges> noChanges = new HashSet<>();
 
@@ -131,8 +131,8 @@ class CodeDeltaCalculatorTest {
     void shouldCreateOldPathMapping() throws CodeDeltaException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
-        Node tree = createMockedCoverageTree();
-        Node referenceTree = createMockedReferenceCoverageTree();
+        Node tree = createStubbedCoverageTree();
+        Node referenceTree = createStubbedReferenceCoverageTree();
         Map<String, FileChanges> changes = new HashMap<>();
         changes.put(REPORT_PATH_MODIFY, createFileChanges(SCM_PATH_MODIFY, SCM_PATH_MODIFY, FileEditType.MODIFY));
         changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
@@ -166,8 +166,8 @@ class CodeDeltaCalculatorTest {
     void shouldNotCreateOldPathMappingWithCodeDeltaMismatches() {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
-        Node tree = createMockedCoverageTree();
-        Node referenceTree = createMockedReferenceCoverageTree();
+        Node tree = createStubbedCoverageTree();
+        Node referenceTree = createStubbedReferenceCoverageTree();
 
         // two changes with the same former path
         Map<String, FileChanges> changes = new HashMap<>();
@@ -192,12 +192,7 @@ class CodeDeltaCalculatorTest {
                 mock(TaskListener.class), "");
     }
 
-    /**
-     * Creates a mock of {@link Delta}.
-     *
-     * @return the created mock
-     */
-    private Delta createDeltaWithMockedFileChanges() {
+    private Delta createDeltaWithStubbedFileChanges() {
         Delta delta = mock(Delta.class);
         Map<String, FileChanges> fileChanges = new HashMap<>();
         FileChanges fileChangesAdd1 = createFileChanges(SCM_PATH_ADD_1, EMPTY_PATH, FileEditType.ADD);
@@ -234,7 +229,7 @@ class CodeDeltaCalculatorTest {
     }
 
     /**
-     * Creates a mock of {@link FileChanges}.
+     * Creates a stub of {@link FileChanges}.
      *
      * @param filePath
      *         The file path
@@ -260,7 +255,7 @@ class CodeDeltaCalculatorTest {
      *
      * @return the {@link Node root} of the tree
      */
-    private Node createMockedCoverageTree() {
+    private Node createStubbedCoverageTree() {
         FileNode addFile1 = mock(FileNode.class);
         when(addFile1.getPath()).thenReturn(REPORT_PATH_ADD_1);
         FileNode addFile2 = mock(FileNode.class);
@@ -283,7 +278,7 @@ class CodeDeltaCalculatorTest {
      *
      * @return the {@link Node root} of the tree
      */
-    private Node createMockedReferenceCoverageTree() {
+    private Node createStubbedReferenceCoverageTree() {
         FileNode modifyFile = mock(FileNode.class);
         when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
         FileNode renameFile = mock(FileNode.class);
