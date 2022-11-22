@@ -16,6 +16,7 @@ import edu.hm.hafner.metric.Node;
 
 import hudson.Functions;
 
+import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodeFacade;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
@@ -37,6 +38,7 @@ import static j2html.TagCreator.*;
  */
 class CoverageTableModel extends TableModel {
     private static final int NO_COVERAGE_SORT = -1_000;
+    private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
     /**
      * The alpha value for colors to be used to highlight the coverage within the table view.
@@ -304,8 +306,7 @@ class CoverageTableModel extends TableModel {
 
         @Override
         public String renderFileName(final String fileName, final String path) {
-            if (CoverageViewModel.isSourceFileInNewFormatAvailable(buildFolder, resultsId, path)
-                    || CoverageViewModel.isSourceFileInOldFormatAvailable(buildFolder, fileName)) {
+            if (SOURCE_CODE_FACADE.createFileInBuildFolder(buildFolder, resultsId, path).canRead()) {
                 return a().withHref(String.valueOf(path.hashCode())).withText(fileName).render();
             }
             return fileName;

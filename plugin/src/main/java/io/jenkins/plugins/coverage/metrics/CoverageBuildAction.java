@@ -17,6 +17,7 @@ import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -65,6 +66,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     private int successfulSinceBuild;
     private final QualityGateStatus qualityGateStatus;
 
+    // FIXME: Rething if we need a separate result object that stores all data?
+    private final FilteredLog log;
+
     /** The coverages of the result. */
     private final NavigableMap<Metric, Value> coverage;
 
@@ -94,9 +98,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      * @param healthReport
      *         health report
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final Node result, final HealthReport healthReport,
+    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log,  final Node result, final HealthReport healthReport,
             final QualityGateStatus qualityGateStatus) {
-        this(owner, result, healthReport, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
+        this(owner, log, result, healthReport, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>());
     }
 
@@ -121,7 +125,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      *         the indirect coverage changes of the associated change request with respect to the reference build
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public CoverageBuildAction(final Run<?, ?> owner, final Node result,
+    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
             final HealthReport healthReport,
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
@@ -129,13 +133,13 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
             final NavigableMap<Metric, Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final NavigableMap<Metric, Value> indirectCoverageChanges) {
-        this(owner, result, healthReport, qualityGateStatus, referenceBuildId, delta, changeCoverage,
+        this(owner, log, result, healthReport, qualityGateStatus, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CoverageBuildAction(final Run<?, ?> owner, final Node result,
+    CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
             final HealthReport healthReport,
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
@@ -146,6 +150,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
+        this.log = log;
         coverage = result.getMetricsDistribution();
         this.qualityGateStatus = qualityGateStatus;
         difference = delta;
@@ -571,7 +576,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
 
     @Override
     public CoverageViewModel getTarget() {
-        return new CoverageViewModel(getOwner(), getResult());
+        return new CoverageViewModel(getOwner(), log, getResult());
     }
 
     @CheckForNull

@@ -1,13 +1,14 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
+<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:l="/lib/layout" xmlns:fa="/font-awesome">
   <t:summary icon="symbol-footsteps-outline plugin-ionicons-api">
-    <span id="coverage-summary">
+    <div id="coverage-summary">
       <j:set var="result" value="${it.result}"/>
       <j:set var="metrics" value="${it.metricsForSummary}"/>
       <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
+      <fa:image-button label="${%Open log messages}" name="circle-info" tooltip="${%icon.info.tooltip}" url="${it.urlName}/info"/>
       <ul>
         <li>
-          <a href="coverage/#lineCoverage">${%Project Coverage:}</a>
+          <a href="coverage/#lineCoverage">${%Project Coverage}:</a>
           <ul>
             <j:forEach var="metric" items="${metrics}">
               <div id="project-coverage" tooltip="The overall code coverage of the project">
@@ -101,11 +102,14 @@
             </li>
           </span>
         </j:if>
+        <j:set var="q" value="${it.qualityGateStatus}"/>
+        <j:if test="${q.name() != 'INACTIVE'}">
+          <li>
+            ${%Quality gate}: ${q.description}
+            <l:icon alt="${q.description}" class="${q.iconClass} icon-sm"/>
+          </li>
+        </j:if>
       </ul>
-      <j:set var="failMessage" value="${it.failMessage}"/>
-      <j:if test="${failMessage != null}">
-        ${failMessage}
-      </j:if>
-    </span>
+    </div>
   </t:summary>
 </j:jelly>

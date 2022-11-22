@@ -144,8 +144,8 @@ public class CoverageReporter {
                     changeCoverageRoot.getMetricsDistribution(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, rootNode, healthReport,
-                    qualityGateStatus,
+            action = new CoverageBuildAction(build, log, rootNode,
+                    healthReport, qualityGateStatus,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.getMetricsDistribution(),
@@ -154,13 +154,10 @@ public class CoverageReporter {
         }
         else {
             var resultHandler = new RunResultHandler(build);
-            QualityGateStatus qualityGateStatus;
-            final TreeMap<Object, Object> objectObjectTreeMap = new TreeMap<>();
-            qualityGateStatus = evaluateQualityGates(rootNode, log,
-                    new TreeMap<>(), new TreeMap<>(), new TreeMap<>(),
-                    resultHandler, qualityGates);
+            QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
+                    new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, rootNode, healthReport, qualityGateStatus);
+            action = new CoverageBuildAction(build, log, rootNode, healthReport, qualityGateStatus);
         }
 
         log.logInfo("Executing source code painting...");

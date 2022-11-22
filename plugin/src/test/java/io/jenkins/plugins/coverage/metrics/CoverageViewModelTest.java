@@ -7,6 +7,7 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.Run;
 
@@ -65,7 +66,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     void shouldProvideIndirectCoverageChanges() {
         Node node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
 
-        CoverageViewModel model = new CoverageViewModel(mock(Run.class), node);
+        CoverageViewModel model = new CoverageViewModel(mock(Run.class), new FilteredLog("Errors"), node);
 
         assertThat(model.hasIndirectCoverageChanges()).isTrue();
     }
@@ -82,7 +83,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     }
 
     private CoverageViewModel createModelFromCodingStyleReport() {
-        var model = new CoverageViewModel(mock(Run.class), readJacocoResult("jacoco-codingstyle.xml"));
+        var model = new CoverageViewModel(mock(Run.class), new FilteredLog("Errors"), readJacocoResult("jacoco-codingstyle.xml"));
         assertThat(model.getDisplayName()).contains("'Java coding style'");
         return model;
     }

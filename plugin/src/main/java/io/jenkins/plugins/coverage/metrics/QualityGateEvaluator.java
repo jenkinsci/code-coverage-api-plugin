@@ -43,23 +43,26 @@ public class QualityGateEvaluator {
             if (possibleValue.isPresent()) {
                 var actualValue = possibleValue.get();
                 if (actualValue.isBelowThreshold(qualityGate.getThreshold())) {
-                    logger.print("-> <%s> %s - %s (Quality Gate: %.2f)",
-                            qualityGate.getName(), qualityGate.getStatus(), actualValue, qualityGate.getThreshold());
+                    printResult(logger, qualityGate, qualityGate.getStatus(), actualValue);
                     status = changeQualityStatusIfNotWorse(status, qualityGate);
                 }
                 else {
-                    logger.print("-> <%s> PASSED - %s (Quality Gate: %.2f)",
-                            qualityGate.getName(), actualValue, qualityGate.getThreshold());
+                    printResult(logger, qualityGate, QualityGateStatus.PASSED, actualValue);
                 }
             }
             else {
                 status = changeQualityStatusIfNotWorse(status, qualityGate);
-                logger.print("-> <%s> %s - n/a (Quality Gate: %.2f)",
-                        qualityGate.getName(), qualityGate.getStatus(), qualityGate.getThreshold());
+                printResult(logger, qualityGate, qualityGate.getStatus(), "n/a");
             }
         }
 
         return status;
+    }
+
+    private static void printResult(final FormattedLogger logger, final QualityGate qualityGate,
+            final QualityGateStatus actualResult, final Object actualValue) {
+        logger.print("-> [%s]: ≪%s≫ - (Actual Value: %s, Quality Gate: %.2f)",
+                qualityGate.getName(), actualResult, actualValue, qualityGate.getThreshold());
     }
 
     private QualityGateStatus changeQualityStatusIfNotWorse(QualityGateStatus status, final QualityGate qualityGate) {

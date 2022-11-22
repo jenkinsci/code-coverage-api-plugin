@@ -16,6 +16,7 @@ import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.HealthReport;
@@ -80,7 +81,7 @@ class CoverageBuildActionTest {
     }
 
     private static CoverageBuildAction createEmptyAction(final Node module) {
-        return new CoverageBuildAction(mock(FreeStyleBuild.class), module, new HealthReport(),
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(), module, new HealthReport(),
                 QualityGateStatus.INACTIVE, "-",
                 new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>(), false);
@@ -100,7 +101,7 @@ class CoverageBuildActionTest {
         Coverage percent80 = coverageBuilder.setMetric(Metric.LINE).setCovered(8).setMissed(2).build();
         coverages.put(Metric.LINE, percent80);
 
-        CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class),
+        CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(),
                 new ModuleNode("module"),
                 mock(HealthReport.class), QualityGateStatus.INACTIVE, "-",
                 deltas, coverages,
@@ -137,6 +138,10 @@ class CoverageBuildActionTest {
         assertThat(spy.hasIndirectCoverageChanges(Metric.LINE)).isTrue();
         assertThat(spy.getIndirectCoverageChanges(Metric.LINE)).isEqualTo(percent80);
         assertThat(spy.hasIndirectCoverageChanges(Metric.BRANCH)).isTrue();
+    }
+
+    private static FilteredLog createLog() {
+        return new FilteredLog("Errors");
     }
 
     @Test
@@ -302,7 +307,7 @@ class CoverageBuildActionTest {
         NavigableMap<Metric, Value> indirectCoverageChanges = new TreeMap<>();
         indirectCoverageChanges.put(COVERAGE_METRIC, VALUE);
 
-        return new CoverageBuildAction(build, root, new HealthReport(), QualityGateStatus.INACTIVE, "-", deltas,
+        return new CoverageBuildAction(build, createLog(), root, new HealthReport(), QualityGateStatus.INACTIVE, "-", deltas,
                 changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);
     }
 

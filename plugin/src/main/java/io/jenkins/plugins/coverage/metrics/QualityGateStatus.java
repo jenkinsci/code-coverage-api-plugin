@@ -27,7 +27,24 @@ public enum QualityGateStatus {
         this.result = result;
     }
 
-    // TODO: Update with new elements in warnings plugin
+    /**
+     * Returns the associated {@link Result} icon class to be used in the UI.
+     *
+     * @return Jenkins' {@link Result} icon class
+     */
+    public String getIconClass() {
+        return result.color.getIconClassName();
+    }
+
+    /**
+     * Returns the localized description to be used in the UI.
+     *
+     * @return the localized description
+     */
+    public String getDescription() {
+        return result.color.getDescription();
+    }
+
     /**
      * Returns whether the quality gate has been passed (or has not been activated at all).
      *

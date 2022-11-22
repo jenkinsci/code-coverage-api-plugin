@@ -28,6 +28,7 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -35,8 +36,8 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import hudson.model.ModelObject;
 import hudson.model.Run;
-import hudson.util.TextFile;
 
+import io.jenkins.plugins.bootstrap5.MessagesViewModel;
 import io.jenkins.plugins.coverage.metrics.CoverageTableModel.InlineRowRenderer;
 import io.jenkins.plugins.coverage.metrics.CoverageTableModel.LinkedRowRenderer;
 import io.jenkins.plugins.coverage.metrics.CoverageTableModel.RowRenderer;
@@ -67,8 +68,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
+    private static final String INFO_MESSAGES_VIEW_URL = "info";
 
     private final Run<?, ?> owner;
+    private final FilteredLog log;
     private final Node node;
     private final String id;
 
@@ -85,10 +88,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @param node
      *         the coverage node to be shown
      */
-    public CoverageViewModel(final Run<?, ?> owner, final Node node) {
+    public CoverageViewModel(final Run<?, ?> owner, final FilteredLog log, final Node node) {
         super();
 
         this.owner = owner;
+        this.log = log;
         this.node = node;
         id = "coverage"; // TODO: this needs to be a parameter
 
@@ -355,12 +359,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             throws IOException, InterruptedException {
         String content = "";
         File rootDir = getOwner().getRootDir();
-        if (isSourceFileInNewFormatAvailable(sourceNode)) {
+        if (isSourceFileAvailable(sourceNode)) {
             content = SOURCE_CODE_FACADE.read(rootDir, getId(), sourceNode.getPath());
-        }
-        if (isSourceFileInOldFormatAvailable(sourceNode)) {
-            content = new TextFile(getFileForBuildsWithOldVersion(rootDir,
-                    sourceNode.getName())).read(); // fallback with sources persisted using the < 2.1.0 serialization
         }
         if (!content.isEmpty() && sourceNode instanceof FileNode) {
             FileNode fileNode = (FileNode) sourceNode;
@@ -416,59 +416,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable(final Node coverageNode) {
-        return isSourceFileInNewFormatAvailable(coverageNode) || isSourceFileInOldFormatAvailable(coverageNode);
-    }
-
-    /**
-     * Returns whether the source file is available in Jenkins build folder in the old format of the plugin versions
-     * less than 2.1.0.
-     *
-     * @param coverageNode
-     *         The {@link Node} which is checked if there is a source file available
-     *
-     * @return {@code true} if the source file is available, {@code false} otherwise
-     */
-    public boolean isSourceFileInOldFormatAvailable(final Node coverageNode) {
-        return isSourceFileInOldFormatAvailable(getOwner().getRootDir(), coverageNode.getName());
-    }
-
-    static boolean isSourceFileInOldFormatAvailable(final File rootDir, final String nodeName) {
-        return getFileForBuildsWithOldVersion(rootDir, nodeName).canRead();
-    }
-
-    /**
-     * Returns a file to the sources in release in the old format of the plugin versions less than 2.1.0.
-     *
-     * @param buildFolder
-     *         top-level folder of the build results
-     * @param fileName
-     *         base filename of the coverage node
-     *
-     * @return the file
-     */
-    public static File getFileForBuildsWithOldVersion(final File buildFolder, final String fileName) {
-        return new File(new File(buildFolder, "coverage-sources"), sanitizeFilename(fileName));
-    }
-
-    private static String sanitizeFilename(final String inputName) {
-        return inputName.replaceAll("[^a-zA-Z0-9-_.]", "_");
-    }
-
-    /**
-     * Returns whether the source file is available in Jenkins build folder in the new format of the plugin versions
-     * greater or equal than 2.1.0.
-     *
-     * @param coverageNode
-     *         The {@link Node} which is checked if there is a source file available
-     *
-     * @return {@code true} if the source file is available, {@code false} otherwise
-     */
-    public boolean isSourceFileInNewFormatAvailable(final Node coverageNode) {
-        return isSourceFileInNewFormatAvailable(getOwner().getRootDir(), id, coverageNode.getPath());
-    }
-
-    static boolean isSourceFileInNewFormatAvailable(final File rootDir, final String id, final String nodePath) {
-        return SOURCE_CODE_FACADE.createFileInBuildFolder(rootDir, id, nodePath).canRead();
+        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath()).canRead();
     }
 
     /**
@@ -485,13 +433,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @SuppressWarnings("unused") // Called by jelly view
     @CheckForNull
-    public SourceViewModel getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+    public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+        if (INFO_MESSAGES_VIEW_URL.equals(link)) {
+            return new MessagesViewModel(getOwner(), Messages.MessagesViewModel_Title(),
+                    log.getInfoMessages(), log.getErrorMessages());
+        }
         if (StringUtils.isNotEmpty(link)) {
             try {
                 Optional<Node> targetResult
                         = getNode().findByHashCode(Metric.FILE, Integer.parseInt(link));
-                if (targetResult.isPresent()) {
-                    return new SourceViewModel(getOwner(), targetResult.get());
+                if (targetResult.isPresent() && targetResult.get() instanceof FileNode) {
+                    return new SourceViewModel(getOwner(), getId(), (FileNode) targetResult.get());
                 }
             }
             catch (NumberFormatException exception) {

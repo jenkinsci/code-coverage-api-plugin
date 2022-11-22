@@ -27,6 +27,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class QualityGate extends AbstractDescribableImpl<QualityGate> implements Serializable {
     private static final long serialVersionUID = -397278599489426668L;
 
+    private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
     private final double threshold;
     private final Metric metric;
     private final Baseline baseline;
@@ -68,9 +69,9 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      *
      * @return the human-readable name
      */
-    // TODO: l10n?
     public String getName() {
-        return String.format("%s:%s", getBaseline(), getMetric());
+        return String.format("%s - %s", LABEL_PROVIDER.getDisplayName(getBaseline()),
+                LABEL_PROVIDER.getDisplayName(getMetric()));
     }
 
     public Metric getMetric() {
@@ -124,7 +125,6 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
     public static class QualityGateDescriptor extends Descriptor<QualityGate> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
         private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
-        private final ModelValidation modelValidation = new ModelValidation();
         private final JenkinsFacade jenkins;
 
         @VisibleForTesting
