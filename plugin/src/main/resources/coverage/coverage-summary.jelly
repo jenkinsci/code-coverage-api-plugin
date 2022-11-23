@@ -1,0 +1,35 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+
+  <st:documentation>
+    Provides a the summary for a given coverage baseline.
+    <st:attribute name="baseline" type="String">
+      Relevant metrics for a baseline.
+    </st:attribute>
+    <st:attribute name="values" type="List">
+      Relevant metrics for a baseline.
+    </st:attribute>
+  </st:documentation>
+
+  <div class="${baseline}-summary">
+    <ul>
+      <j:forEach var="value" items="${values}">
+        <li>${it.formatValue(value)}
+          <j:if test="${it.hasDelta(baseline, value)}">
+            <j:choose>
+              <j:when test="${it.formatDelta(baseline, value).startsWith('-')}">
+                <j:set var="color" value="var(--red)"/>
+              </j:when>
+              <j:otherwise>
+                <j:set var="color" value="var(--green)"/>
+              </j:otherwise>
+            </j:choose>
+            <span style="color: ${color}">(${it.formatDelta(baseline, value)})</span>
+          </j:if>
+        </li>
+      </j:forEach>
+    </ul>
+  </div>
+
+</j:jelly>
+

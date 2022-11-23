@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -64,7 +63,25 @@ class QualityGateITest extends AbstractCoverageITest {
         assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.FAILED);
     }
 
-    private static CoverageBuilder createLineCoverageBuilder() {
-        return new CoverageBuilder().setMetric(Metric.LINE);
+    @Test
+    void shouldUseQualityGateInPipeline() {
+        WorkflowJob project = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE);
+
+        setPipelineScript(project,
+                "recordCoverage("
+                        + "tools: [[parser: '" + CoverageParser.JACOCO.name() + "', pattern: '**/*xml']],\n"
+                        + "qualityGates: ["
+                        + "     [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', unstable: true], "
+                        + "     [threshold: 90.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])\n");
+
+        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+
+        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
+
+        assertThat(coverageResult.getLog().getInfoMessages()).contains("Evaluating quality gates",
+                "-> [Overall Project - Line]: ≪PASSED≫ - (Actual Value: LINE: 95.39% (5531/5798), Quality Gate: 90.00)",
+                "-> [Overall Project - Branch]: ≪WARNING≫ - (Actual Value: BRANCH: 88.28% (1544/1749), Quality Gate: 90.00)",
+                "-> Some quality gates have been missed: overall result is WARNING");
     }
 }

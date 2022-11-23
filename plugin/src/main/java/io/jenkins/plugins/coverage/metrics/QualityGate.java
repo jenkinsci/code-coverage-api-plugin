@@ -6,6 +6,7 @@ import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.verb.POST;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -32,46 +33,52 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
     private final Metric metric;
     private final Baseline baseline;
     private final QualityGateStatus status;
+    private final QualityGateResult result;
 
     /**
      * Creates a new instance of {@link QualityGate}.
      *
      * @param threshold
-     *         the minimum or maximum that is needed for the quality gate
+     *         minimum or maximum value that triggers this quality gate
      * @param metric
      *         the metric to compare
      * @param baseline
      *         the baseline to use the bto compare
-     * @param result
-     *         determines whether the quality gate is a warning or failure
+     * @param unstable
+     *         determines whether the build result will be set to unstable or failed if the quality gate is failed
      */
+    @DataBoundConstructor
     public QualityGate(final double threshold, final Metric metric, final Baseline baseline,
-            final QualityGateResult result) {
-        super();
+            final boolean unstable) {
+        this(threshold, metric, baseline,
+                unstable ? QualityGateResult.UNSTABLE : QualityGateResult.FAILURE);
+    }
 
+    QualityGate(final double threshold, final Metric metric, final Baseline baseline,
+            final QualityGateResult result) {
         this.threshold = threshold;
         this.metric = metric;
         this.baseline = baseline;
-        status = result.status;
+        this.status = result == QualityGateResult.UNSTABLE ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
+        this.result = result;
+    }
+
+    public boolean getUnstable() {
+        return result == QualityGateResult.UNSTABLE;
     }
 
     /**
-     * Returns the minimum number of issues that will fail the quality gate.
+     * Returns a human-readable name of the quality gate.
      *
-     * @return minimum number of issues
-     */
-    public double getThreshold() {
-        return threshold;
-    }
-
-    /**
-     * Returns the human-readable name of the quality gate.
-     *
-     * @return the human-readable name
+     * @return a human-readable name
      */
     public String getName() {
         return String.format("%s - %s", LABEL_PROVIDER.getDisplayName(getBaseline()),
                 LABEL_PROVIDER.getDisplayName(getMetric()));
+    }
+
+    public double getThreshold() {
+        return threshold;
     }
 
     public Metric getMetric() {

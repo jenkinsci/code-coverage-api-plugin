@@ -6,5 +6,6 @@ public enum Baseline {
     CHANGE,
     CHANGE_DELTA,
     FILE,
-    FILE_DELTA
+    FILE_DELTA,
+    INDIRECT
 }

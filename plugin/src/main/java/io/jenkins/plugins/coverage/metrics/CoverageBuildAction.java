@@ -1,9 +1,11 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -66,7 +68,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     private int successfulSinceBuild;
     private final QualityGateStatus qualityGateStatus;
 
-    // FIXME: Rething if we need a separate result object that stores all data?
+    // FIXME: Rethink if we need a separate result object that stores all data?
     private final FilteredLog log;
 
     /** The coverages of the result. */
@@ -161,12 +163,100 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
         this.healthReport = healthReport;
     }
 
+    public FilteredLog getLog() {
+        return log;
+    }
+
     public int getSuccessfulSinceBuild() {
         return successfulSinceBuild; // FIXME: required?
     }
 
     public QualityGateStatus getQualityGateStatus() {
         return qualityGateStatus;
+    }
+
+    public List<Value> getValues(final String baseline) {
+        var selectedBaseline = Baseline.valueOf(baseline);
+        if (selectedBaseline == Baseline.PROJECT) {
+            return coverage.values().stream()
+                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
+                    .collect(Collectors.toList());
+        }
+        if (selectedBaseline == Baseline.CHANGE) {
+            return changeCoverage.values().stream()
+                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
+                    .collect(Collectors.toList());
+        }
+        if (selectedBaseline == Baseline.INDIRECT) {
+            return indirectCoverageChanges.values().stream()
+                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
+                    .collect(Collectors.toList());
+        }
+        throw new NoSuchElementException("No such baseline: " + baseline);
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
+     * respect to the reference build).
+     *
+     * @param metric
+     *         the metric to get the coverage percentage for
+     *
+     * @return the delta metric
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValue(final Value value) {
+        return VALUE_LABEL_PROVIDER.getDisplayName(value.getMetric()) + ": "
+                + FORMATTER.format(value, Functions.getCurrentLocale());
+    }
+
+    /**
+     * Returns whether a delta metric for the specified metric exist.
+     *
+     * @param metric
+     *         the metric to check
+     *
+     * @return {@code true} if a delta is available for the specified metric
+     */
+    public boolean hasDelta(final String baseline, final Value value) {
+        var selectedBaseline = Baseline.valueOf(baseline);
+        if (selectedBaseline == Baseline.PROJECT) {
+            return difference.containsKey(value.getMetric());
+        }
+        if (selectedBaseline == Baseline.CHANGE) {
+            return changeCoverageDifference.containsKey(value.getMetric())
+                    && Set.of(Metric.BRANCH, Metric.LINE).contains(value.getMetric());
+        }
+        if (selectedBaseline == Baseline.INDIRECT) {
+            return false;
+        }
+        throw new NoSuchElementException("No such baseline: " + baseline);
+
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the delta for the specified metric (with respect to
+     * the reference build).
+     *
+     * @param metric
+     *         the metric to get the delta for
+     *
+     * @return the delta metric
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatDelta(final String baseline, final Value value) {
+        var selectedBaseline = Baseline.valueOf(baseline);
+        if (selectedBaseline == Baseline.PROJECT) {
+            if (hasDelta(baseline, value)) {
+                return FORMATTER.formatDelta(value.getMetric(), difference.get(value.getMetric()), Functions.getCurrentLocale());
+            }
+        }
+        if (selectedBaseline == Baseline.CHANGE) {
+            if (hasDelta(baseline, value)) {
+                return FORMATTER.formatDelta(value.getMetric(), changeCoverageDifference.get(value.getMetric()), Functions.getCurrentLocale());
+            }
+        }
+        return Messages.Coverage_Not_Available();
     }
 
     /**
