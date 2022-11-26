@@ -3,26 +3,12 @@
   <t:summary icon="symbol-footsteps-outline plugin-ionicons-api">
     <div id="coverage-summary">
       <j:set var="result" value="${it.result}"/>
-      <j:set var="metrics" value="${it.metricsForSummary}"/>
       <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
       <fa:image-button label="${%Open log messages}" name="circle-info" tooltip="${%icon.info.tooltip}" url="${it.urlName}/info"/>
       <ul>
-        <li>
-          <a href="coverage/#lineCoverage">${%project.title}</a>
-          <cov:coverage-summary baseline="PROJECT" values="${it.getValues('PROJECT')}"/>
-        </li>
-        <j:if test="${it.hasChangeCoverage()}">
-          <li>
-            <a href="coverage/#changeCoverage">${%change.title}</a>
-            <cov:coverage-summary baseline="CHANGE" values="${it.getValues('CHANGE')}"/>
-          </li>
-        </j:if>
-        <j:if test="${it.hasIndirectCoverageChanges()}">
-          <li>
-            <a href="coverage/#indirectCoverage">${%indirect.title}</a>
-            <cov:coverage-summary baseline="INDIRECT" values="${it.getValues('INDIRECT')}"/>
-          </li>
-        </j:if>
+        <j:forEach var="baseline" items="${it.baselines}">
+          <cov:coverage-summary baseline="${baseline}" />
+        </j:forEach>
         <j:if test="${it.referenceBuild.present}">
           <span id="coverage-reference">
             <li>
@@ -35,7 +21,7 @@
         <j:if test="${q.name() != 'INACTIVE'}">
           <li>
             ${%Quality gate}: ${q.description}
-            <l:icon alt="${q.description}" class="${q.iconClass} icon-sm"/>
+            <l:icon style="width: 16px; height: 16px; margin-left: 0; position: relative; top: -0.1rem;" alt="${q.description}" class="${q.iconClass} icon-sm"/>
           </li>
         </j:if>
       </ul>

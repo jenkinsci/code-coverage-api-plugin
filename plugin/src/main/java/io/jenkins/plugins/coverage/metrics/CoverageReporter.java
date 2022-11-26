@@ -16,7 +16,6 @@ import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
-import hudson.model.HealthReport;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -72,8 +71,6 @@ public class CoverageReporter {
         verifyPathUniqueness(rootNode, log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
-
-        HealthReport healthReport = new HealthReport(); // FIXME: currently empty
 
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
@@ -144,8 +141,7 @@ public class CoverageReporter {
                     changeCoverageRoot.getMetricsDistribution(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, log, rootNode,
-                    healthReport, qualityGateStatus,
+            action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.getMetricsDistribution(),
@@ -157,7 +153,7 @@ public class CoverageReporter {
             QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
                     new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, log, rootNode, healthReport, qualityGateStatus);
+            action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus);
         }
 
         log.logInfo("Executing source code painting...");

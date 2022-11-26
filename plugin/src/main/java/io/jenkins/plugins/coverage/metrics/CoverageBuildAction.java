@@ -26,8 +26,6 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.StaplerProxy;
 import hudson.Functions;
-import hudson.model.HealthReport;
-import hudson.model.HealthReportingAction;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageViewModel.ValueLabelProvider;
@@ -48,7 +46,7 @@ import static hudson.model.Run.*;
  * @author Ullrich Hafner
  */
 @SuppressWarnings("PMD.GodClass")
-public class CoverageBuildAction extends BuildAction<Node> implements HealthReportingAction, StaplerProxy {
+public class CoverageBuildAction extends BuildAction<Node> implements StaplerProxy {
     /** Relative URL to the details of the code coverage results. */
     public static final String DETAILS_URL = "coverage";
     /** The coverage report symbol from the Ionicons plugin. */
@@ -60,8 +58,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
 
     private static final CoverageFormatter FORMATTER = new CoverageFormatter();
     private static final ValueLabelProvider VALUE_LABEL_PROVIDER = new ValueLabelProvider();
-
-    private final HealthReport healthReport;
 
     private final String referenceBuildId;
 
@@ -95,14 +91,16 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      *
      * @param owner
      *         the associated build that created the statistics
+     * @param log
+     *         the logging statements of the recording step
      * @param result
-     *         the coverage results to persist with this action
-     * @param healthReport
-     *         health report
+     *         the coverage tree as result to persist with this action
+     * @param qualityGateStatus
+     *         status of the quality gates
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log,  final Node result, final HealthReport healthReport,
+    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
             final QualityGateStatus qualityGateStatus) {
-        this(owner, log, result, healthReport, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
+        this(owner, log, result, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>());
     }
 
@@ -111,10 +109,12 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      *
      * @param owner
      *         the associated build that created the statistics
+     * @param log
+     *         the logging statements of the recording step
      * @param result
-     *         the coverage results to persist with this action
-     * @param healthReport
-     *         health report
+     *         the coverage tree as result to persist with this action
+     * @param qualityGateStatus
+     *         status of the quality gates
      * @param referenceBuildId
      *         the ID of the reference build
      * @param delta
@@ -128,21 +128,19 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
-            final HealthReport healthReport,
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final NavigableMap<Metric, Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final NavigableMap<Metric, Value> indirectCoverageChanges) {
-        this(owner, log, result, healthReport, qualityGateStatus, referenceBuildId, delta, changeCoverage,
+        this(owner, log, result, qualityGateStatus, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
-            final HealthReport healthReport,
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
@@ -160,49 +158,105 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
         this.changeCoverageDifference = changeCoverageDifference;
         this.indirectCoverageChanges = indirectCoverageChanges;
         this.referenceBuildId = referenceBuildId;
-        this.healthReport = healthReport;
     }
 
     public FilteredLog getLog() {
         return log;
     }
 
-    public int getSuccessfulSinceBuild() {
-        return successfulSinceBuild; // FIXME: required?
-    }
-
     public QualityGateStatus getQualityGateStatus() {
         return qualityGateStatus;
     }
 
-    public List<Value> getValues(final String baseline) {
-        var selectedBaseline = Baseline.valueOf(baseline);
-        if (selectedBaseline == Baseline.PROJECT) {
-            return coverage.values().stream()
-                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
-                    .collect(Collectors.toList());
+    /**
+     * Returns the supported baselines.
+     *
+     * @return all supported baselines
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public List<Baseline> getBaselines() {
+        return List.of(Baseline.PROJECT, Baseline.CHANGE, Baseline.INDIRECT);
+    }
+
+    /**
+     * Returns whether a delta metric for the specified metric exists.
+     *
+     * @param baseline
+     *         the baseline to use
+     *
+     * @return {@code true} if a delta is available for the specified metric, {@code false} otherwise
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public boolean hasBaselineResult(final Baseline baseline) {
+        if (baseline == Baseline.CHANGE) {
+            return hasChangeCoverage();
         }
-        if (selectedBaseline == Baseline.CHANGE) {
-            return changeCoverage.values().stream()
-                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
-                    .collect(Collectors.toList());
+        if (baseline == Baseline.INDIRECT) {
+            return hasIndirectCoverageChanges();
         }
-        if (selectedBaseline == Baseline.INDIRECT) {
-            return indirectCoverageChanges.values().stream()
-                    .filter(v -> getMetricsForSummary().contains(v.getMetric()))
-                    .collect(Collectors.toList());
+        return true;
+    }
+
+    /**
+     * Returns the associate delta baseline for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the delta baseline for
+     *
+     * @return the delta baseline
+     * @throws NoSuchElementException
+     *         if this baseline does not provide a delta baseline
+     */
+    public Baseline getDeltaBaseline(final Baseline baseline) {
+        if (baseline == Baseline.PROJECT) {
+            return Baseline.PROJECT_DELTA;
+        }
+        if (baseline == Baseline.CHANGE) {
+            return Baseline.CHANGE_DELTA;
+        }
+        if (baseline == Baseline.FILE) {
+            return Baseline.FILE_DELTA;
+        }
+        throw new NoSuchElementException("No delta baseline for this baseline: " + baseline);
+    }
+
+    /**
+     * Returns the available values for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the values for
+     *
+     * @return the available values
+     * @throws NoSuchElementException
+     *         if this baseline does not provide values
+     */
+    // Called by jelly view
+    public List<Value> getValues(final Baseline baseline) {
+        if (baseline == Baseline.PROJECT) {
+            return extractValuesFromMapping(coverage);
+        }
+        if (baseline == Baseline.CHANGE) {
+            return extractValuesFromMapping(changeCoverage);
+        }
+        if (baseline == Baseline.INDIRECT) {
+            return extractValuesFromMapping(indirectCoverageChanges);
         }
         throw new NoSuchElementException("No such baseline: " + baseline);
     }
 
+    private List<Value> extractValuesFromMapping(final NavigableMap<Metric, Value> valueMapping) {
+        return valueMapping.values().stream()
+                .filter(v -> getMetricsForSummary().contains(v.getMetric()))
+                .collect(Collectors.toList());
+    }
+
     /**
-     * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
-     * respect to the reference build).
+     * Returns a formatted and localized String representation of the specified value.
      *
-     * @param metric
-     *         the metric to get the coverage percentage for
+     * @param value
+     *         the value to format
      *
-     * @return the delta metric
+     * @return the value formatted as a string
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatValue(final Value value) {
@@ -211,49 +265,64 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     }
 
     /**
-     * Returns whether a delta metric for the specified metric exist.
+     * Returns whether a delta metric for the specified baseline exists.
      *
+     * @param baseline
+     *         the baseline to use
+     *
+     * @return {@code true} if a delta is available for the specified baseline, {@code false} otherwise
+     */
+    public boolean hasDelta(final Baseline baseline) {
+        return baseline == Baseline.PROJECT || baseline == Baseline.CHANGE;
+    }
+
+    /**
+     * Returns whether a delta metric for the specified metric exists.
+     *
+     * @param baseline
+     *         the baseline to use
      * @param metric
      *         the metric to check
      *
-     * @return {@code true} if a delta is available for the specified metric
+     * @return {@code true} if a delta is available for the specified metric, {@code false} otherwise
      */
-    public boolean hasDelta(final String baseline, final Value value) {
-        var selectedBaseline = Baseline.valueOf(baseline);
-        if (selectedBaseline == Baseline.PROJECT) {
-            return difference.containsKey(value.getMetric());
+    public boolean hasDelta(final Baseline baseline, final Metric metric) {
+        if (baseline == Baseline.PROJECT) {
+            return difference.containsKey(metric);
         }
-        if (selectedBaseline == Baseline.CHANGE) {
-            return changeCoverageDifference.containsKey(value.getMetric())
-                    && Set.of(Metric.BRANCH, Metric.LINE).contains(value.getMetric());
+        if (baseline == Baseline.CHANGE) {
+            return changeCoverageDifference.containsKey(metric)
+                    && Set.of(Metric.BRANCH, Metric.LINE).contains(metric);
         }
-        if (selectedBaseline == Baseline.INDIRECT) {
+        if (baseline == Baseline.INDIRECT) {
             return false;
         }
         throw new NoSuchElementException("No such baseline: " + baseline);
-
     }
 
     /**
      * Returns a formatted and localized String representation of the delta for the specified metric (with respect to
-     * the reference build).
+     * the given baseline).
      *
+     * @param baseline
+     *         the baseline to use
      * @param metric
      *         the metric to get the delta for
      *
      * @return the delta metric
      */
     @SuppressWarnings("unused") // Called by jelly view
-    public String formatDelta(final String baseline, final Value value) {
-        var selectedBaseline = Baseline.valueOf(baseline);
-        if (selectedBaseline == Baseline.PROJECT) {
-            if (hasDelta(baseline, value)) {
-                return FORMATTER.formatDelta(value.getMetric(), difference.get(value.getMetric()), Functions.getCurrentLocale());
+    public String formatDelta(final Baseline baseline, final Metric metric) {
+        if (baseline == Baseline.PROJECT) {
+            if (hasDelta(baseline, metric)) {
+                return FORMATTER.formatDelta(metric, difference.get(metric),
+                        Functions.getCurrentLocale());
             }
         }
-        if (selectedBaseline == Baseline.CHANGE) {
-            if (hasDelta(baseline, value)) {
-                return FORMATTER.formatDelta(value.getMetric(), changeCoverageDifference.get(value.getMetric()), Functions.getCurrentLocale());
+        if (baseline == Baseline.CHANGE) {
+            if (hasDelta(baseline, metric)) {
+                return FORMATTER.formatDelta(metric, changeCoverageDifference.get(metric),
+                        Functions.getCurrentLocale());
             }
         }
         return Messages.Coverage_Not_Available();
@@ -264,7 +333,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
      *
      * @return the metrics to be shown in the project summary
      */
-    public NavigableSet<Metric> getMetricsForSummary() {
+    @VisibleForTesting
+    NavigableSet<Metric> getMetricsForSummary() {
         var metrics = new TreeSet<Metric>();
         if (hasCoverage(Metric.LINE)) {
             metrics.add(Metric.LINE);
@@ -657,11 +727,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements HealthRepo
     @Override
     protected String getBuildResultBaseName() {
         return "coverage.xml";
-    }
-
-    @Override
-    public HealthReport getBuildHealth() {
-        return healthReport;
     }
 
     @Override

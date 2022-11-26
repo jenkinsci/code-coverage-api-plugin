@@ -3,33 +3,44 @@
 
   <st:documentation>
     Provides a the summary for a given coverage baseline.
-    <st:attribute name="baseline" type="String">
-      Relevant metrics for a baseline.
-    </st:attribute>
-    <st:attribute name="values" type="List">
-      Relevant metrics for a baseline.
+    <st:attribute name="baseline" type="io.jenkins.plugins.coverage.metrics.Baseline">
+      The baseline to show.
     </st:attribute>
   </st:documentation>
 
-  <div class="${baseline}-summary">
-    <ul>
-      <j:forEach var="value" items="${values}">
-        <li>${it.formatValue(value)}
-          <j:if test="${it.hasDelta(baseline, value)}">
-            <j:choose>
-              <j:when test="${it.formatDelta(baseline, value).startsWith('-')}">
-                <j:set var="color" value="var(--red)"/>
-              </j:when>
-              <j:otherwise>
-                <j:set var="color" value="var(--green)"/>
-              </j:otherwise>
-            </j:choose>
-            <span style="color: ${color}">(${it.formatDelta(baseline, value)})</span>
-          </j:if>
-        </li>
-      </j:forEach>
-    </ul>
-  </div>
+  <j:if test="${it.hasBaselineResult(baseline)}">
+    <li>
+      <j:choose>
+        <j:when test="${it.hasDelta(baseline)}">
+          <a href="coverage/#${baseline.url}">${it.getDeltaBaseline(baseline).title}</a>
+        </j:when>
+        <j:otherwise>
+          <a href="coverage/#${baseline.url}">${baseline.title}</a>
+        </j:otherwise>
+      </j:choose>
+      <div class="${baseline}-summary">
+        <ul>
+          <j:forEach var="value" items="${it.getValues(baseline)}">
+            <li>${it.formatValue(value)}
+              <j:if test="${it.hasDelta(baseline, value.metric)}">
+                <j:set var="delta" value="${it.formatDelta(baseline, value.metric)}"/>
+                <j:choose>
+                  <j:when test="${delta.startsWith('-')}">
+                    <j:set var="color" value="var(--red)"/>
+                  </j:when>
+                  <j:otherwise>
+                    <j:set var="color" value="var(--green)"/>
+                  </j:otherwise>
+                </j:choose>
+                <span style="color: ${color}">(${delta})</span>
+              </j:if>
+            </li>
+          </j:forEach>
+        </ul>
+      </div>
+
+    </li>
+  </j:if>
 
 </j:jelly>
 

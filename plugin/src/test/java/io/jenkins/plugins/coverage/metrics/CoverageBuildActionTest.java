@@ -19,7 +19,6 @@ import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.FreeStyleBuild;
-import hudson.model.HealthReport;
 import hudson.model.Run;
 
 import static io.jenkins.plugins.coverage.metrics.testutil.CoverageStubs.*;
@@ -81,7 +80,7 @@ class CoverageBuildActionTest {
     }
 
     private static CoverageBuildAction createEmptyAction(final Node module) {
-        return new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(), module, new HealthReport(),
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(), module,
                 QualityGateStatus.INACTIVE, "-",
                 new TreeMap<>(), new TreeMap<>(),
                 new TreeMap<>(), new TreeMap<>(), false);
@@ -102,9 +101,9 @@ class CoverageBuildActionTest {
         coverages.put(Metric.LINE, percent80);
 
         CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(),
-                new ModuleNode("module"),
-                mock(HealthReport.class), QualityGateStatus.INACTIVE, "-",
-                deltas, coverages,
+                new ModuleNode("module"), QualityGateStatus.INACTIVE, "-",
+                deltas, coverages
+                ,
                 deltas, coverages, false);
 
         CoverageBuildAction spy = spy(action);
@@ -307,7 +306,7 @@ class CoverageBuildActionTest {
         NavigableMap<Metric, Value> indirectCoverageChanges = new TreeMap<>();
         indirectCoverageChanges.put(COVERAGE_METRIC, VALUE);
 
-        return new CoverageBuildAction(build, createLog(), root, new HealthReport(), QualityGateStatus.INACTIVE, "-", deltas,
+        return new CoverageBuildAction(build, createLog(), root, QualityGateStatus.INACTIVE, "-", deltas,
                 changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);
     }
 
