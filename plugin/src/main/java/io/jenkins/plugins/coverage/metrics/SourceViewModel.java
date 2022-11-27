@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.metrics;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -50,6 +49,7 @@ public class SourceViewModel implements ModelObject {
         return fileNode;
     }
 
+
     /**
      * Returns the source file rendered in HTML.
      *
@@ -58,12 +58,24 @@ public class SourceViewModel implements ModelObject {
     @SuppressWarnings("unused") // Called by jelly view
     public String getSourceFileContent() {
         try {
-            File rootDir = getOwner().getRootDir();
-            return SOURCE_CODE_FACADE.read(rootDir, id, getNode().getPath());
+            return SOURCE_CODE_FACADE.read(getOwner().getRootDir(), id, getNode().getPath());
         }
         catch (IOException | InterruptedException exception) {
             return ExceptionUtils.getStackTrace(exception);
         }
+    }
+
+    /**
+     * Returns whether the source file is available in Jenkins build folder.
+     *
+     * @param coverageNode
+     *         The {@link Node} which is checked if there is a source file available
+     *
+     * @return {@code true} if the source file is available, {@code false} otherwise
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public boolean isSourceFileAvailable(final Node coverageNode) {
+        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath()).canRead();
     }
 
     @Override

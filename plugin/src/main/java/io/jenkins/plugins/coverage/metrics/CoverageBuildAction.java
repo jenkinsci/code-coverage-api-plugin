@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -28,7 +27,6 @@ import org.kohsuke.stapler.StaplerProxy;
 import hudson.Functions;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.metrics.CoverageViewModel.ValueLabelProvider;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.FractionConverter;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
@@ -56,8 +54,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     private static final String NO_REFERENCE_BUILD = "-";
 
-    private static final CoverageFormatter FORMATTER = new CoverageFormatter();
-    private static final ValueLabelProvider VALUE_LABEL_PROVIDER = new ValueLabelProvider();
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
 
     private final String referenceBuildId;
 
@@ -221,7 +218,22 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     /**
-     * Returns the available values for the specified baseline.
+     * Returns all available values for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the values for
+     *
+     * @return the available values
+     * @throws NoSuchElementException
+     *         if this baseline does not provide values
+     */
+    // Called by jelly view
+    public List<Value> getAllValues(final Baseline baseline) {
+        return getValueStream(baseline).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns all important values for the specified baseline.
      *
      * @param baseline
      *         the baseline to get the values for
@@ -232,6 +244,15 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     // Called by jelly view
     public List<Value> getValues(final Baseline baseline) {
+        return filterImportantMetrics(getValueStream(baseline));
+    }
+
+    private List<Value> filterImportantMetrics(final Stream<Value> values) {
+        return values.filter(v -> getMetricsForSummary().contains(v.getMetric()))
+                .collect(Collectors.toList());
+    }
+
+    private Stream<Value> getValueStream(final Baseline baseline) {
         if (baseline == Baseline.PROJECT) {
             return extractValuesFromMapping(coverage);
         }
@@ -244,10 +265,16 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         throw new NoSuchElementException("No such baseline: " + baseline);
     }
 
-    private List<Value> extractValuesFromMapping(final NavigableMap<Metric, Value> valueMapping) {
-        return valueMapping.values().stream()
-                .filter(v -> getMetricsForSummary().contains(v.getMetric()))
-                .collect(Collectors.toList());
+    private Stream<Value> extractValuesFromMapping(final NavigableMap<Metric, Value> valueMapping) {
+        return valueMapping.values().stream();
+    }
+
+    // Called by jelly view
+    public String getTooltip(final Baseline baseline) {
+        var values = getValueStream(baseline).map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
+                .collect(Collectors.joining("\n", "- ", ""));
+
+        return "All <b>Available Values</b>:\n" + values;
     }
 
     /**
@@ -260,7 +287,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatValue(final Value value) {
-        return VALUE_LABEL_PROVIDER.getDisplayName(value.getMetric()) + ": "
+        return FORMATTER.getDisplayName(value.getMetric()) + ": "
                 + FORMATTER.format(value, Functions.getCurrentLocale());
     }
 
@@ -334,19 +361,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return the metrics to be shown in the project summary
      */
     @VisibleForTesting
-    NavigableSet<Metric> getMetricsForSummary() {
-        var metrics = new TreeSet<Metric>();
-        if (hasCoverage(Metric.LINE)) {
-            metrics.add(Metric.LINE);
-            metrics.add(Metric.LOC);
-        }
-        if (hasCoverage(Metric.BRANCH)) {
-            metrics.add(Metric.BRANCH);
-        }
-        if (hasCoverage(Metric.COMPLEXITY)) {
-            metrics.add(Metric.COMPLEXITY);
-        }
-        return metrics;
+    Set<Metric> getMetricsForSummary() {
+        return Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY);
     }
 
     public Coverage getLineCoverage() {
@@ -710,7 +726,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatCoverage(final Metric metric) {
-        return VALUE_LABEL_PROVIDER.getDisplayName(metric) + ": "
+        return FORMATTER.getDisplayName(metric) + ": "
                 + FORMATTER.format(getCoverage(metric), Functions.getCurrentLocale());
     }
 

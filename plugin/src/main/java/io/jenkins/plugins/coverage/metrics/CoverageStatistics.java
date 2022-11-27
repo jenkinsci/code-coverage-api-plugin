@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.Delta;
+import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Value;
 
@@ -42,7 +42,7 @@ class CoverageStatistics {
 
     private static TreeMap<Metric, Value> asValueMap(final NavigableMap<Metric, Fraction> projectDelta) {
         return projectDelta.entrySet().stream().collect(
-                Collectors.toMap(Entry::getKey, e -> new Delta(e.getKey(), e.getValue()), (o1, o2) -> o1,
+                Collectors.toMap(Entry::getKey, e -> new FractionValue(e.getKey(), e.getValue()), (o1, o2) -> o1,
                         TreeMap::new));
     }
 

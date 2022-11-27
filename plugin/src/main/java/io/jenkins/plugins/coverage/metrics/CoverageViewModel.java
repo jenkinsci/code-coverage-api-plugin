@@ -458,7 +458,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     public static class CoverageOverview {
         private final Node coverage;
-        private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
+        private static final ElementFormatter ELEMENT_FORMATTER = new ElementFormatter();
 
         CoverageOverview(final Node coverage) {
             this.coverage = coverage;
@@ -467,7 +467,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<String> getMetrics() {
             return sortCoverages()
                     .map(Coverage::getMetric)
-                    .map(LABEL_PROVIDER::getDisplayName)
+                    .map(ELEMENT_FORMATTER::getDisplayName)
                     .collect(Collectors.toList());
         }
 
@@ -513,58 +513,5 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Used for parsing a Jenkins color mapping JSON string to a color map.
      */
     private static final class ColorMappingType extends TypeReference<HashMap<String, String>> {
-    }
-
-    // TODO: move to coverage formatter?
-    public static final class ValueLabelProvider {
-        public String getDisplayName(final Metric metric) {
-            switch (metric) {
-                case CONTAINER:
-                    return Messages.Metric_CONTAINER();
-                case MODULE:
-                    return Messages.Metric_MODULE();
-                case PACKAGE:
-                    return Messages.Metric_PACKAGE();
-                case FILE:
-                    return Messages.Metric_FILE();
-                case CLASS:
-                    return Messages.Metric_CLASS();
-                case METHOD:
-                    return Messages.Metric_METHOD();
-                case LINE:
-                    return Messages.Metric_LINE();
-                case BRANCH:
-                    return Messages.Metric_BRANCH();
-                case INSTRUCTION:
-                    return Messages.Metric_INSTRUCTION();
-                case MUTATION:
-                    return Messages.Metric_MUTATION();
-                case COMPLEXITY:
-                    return Messages.Metric_COMPLEXITY();
-                case LOC:
-                    return Messages.Metric_LOC();
-                default:
-                    throw new NoSuchElementException("No display name found for metric " + metric);
-            }
-        }
-
-        public String getDisplayName(final Baseline baseline) {
-            switch (baseline) {
-                case PROJECT:
-                    return Messages.Baseline_PROJECT();
-                case CHANGE:
-                    return Messages.Baseline_CHANGE();
-                case FILE:
-                    return Messages.Baseline_FILE();
-                case PROJECT_DELTA:
-                    return Messages.Baseline_PROJECT_DELTA();
-                case CHANGE_DELTA:
-                    return Messages.Baseline_CHANGE_DELTA();
-                case FILE_DELTA:
-                    return Messages.Baseline_FILE_DELTA();
-                default:
-                    throw new NoSuchElementException("No display name found for baseline " + baseline);
-            }
-        }
     }
 }

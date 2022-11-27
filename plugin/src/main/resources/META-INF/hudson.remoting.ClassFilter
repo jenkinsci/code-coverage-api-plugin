@@ -10,6 +10,7 @@ edu.hm.hafner.metric.ContainerNode
 edu.hm.hafner.metric.Coverage
 edu.hm.hafner.metric.CyclomaticComplexity
 edu.hm.hafner.metric.FileNode
+edu.hm.hafner.metric.FractionValue
 edu.hm.hafner.metric.IntegerValue
 edu.hm.hafner.metric.LinesOfCode
 edu.hm.hafner.metric.MethodNode

@@ -171,7 +171,7 @@ class CoverageTableModel extends TableModel {
     static class CoverageRow {
         private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
         private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
-        private static final CoverageFormatter FORMATTER = new CoverageFormatter();
+        private static final ElementFormatter FORMATTER = new ElementFormatter();
 
         private final FileNode file;
         private final Locale browserLocale;

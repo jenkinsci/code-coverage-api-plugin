@@ -15,7 +15,6 @@ import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.util.ListBoxModel;
 
-import io.jenkins.plugins.coverage.metrics.CoverageViewModel.ValueLabelProvider;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
@@ -28,7 +27,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class QualityGate extends AbstractDescribableImpl<QualityGate> implements Serializable {
     private static final long serialVersionUID = -397278599489426668L;
 
-    private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
+    private static final ElementFormatter ELEMENT_FORMATTER = new ElementFormatter();
     private final double threshold;
     private final Metric metric;
     private final Baseline baseline;
@@ -73,8 +72,8 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      * @return a human-readable name
      */
     public String getName() {
-        return String.format("%s - %s", LABEL_PROVIDER.getDisplayName(getBaseline()),
-                LABEL_PROVIDER.getDisplayName(getMetric()));
+        return String.format("%s - %s", ELEMENT_FORMATTER.getDisplayName(getBaseline()),
+                ELEMENT_FORMATTER.getDisplayName(getMetric()));
     }
 
     public double getThreshold() {
@@ -130,8 +129,6 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      */
     @Extension
     public static class QualityGateDescriptor extends Descriptor<QualityGate> {
-        private static final JenkinsFacade JENKINS = new JenkinsFacade();
-        private static final ValueLabelProvider LABEL_PROVIDER = new ValueLabelProvider();
         private final JenkinsFacade jenkins;
 
         @VisibleForTesting
@@ -144,6 +141,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         /**
          * Creates a new descriptor.
          */
+        @SuppressWarnings("unused") // Required for Jenkins Extensions
         public QualityGateDescriptor() {
             this(new JenkinsFacade());
         }
@@ -159,7 +157,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         @POST
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillMetricItems(@AncestorInPath final AbstractProject<?, ?> project) {
-            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
                 ListBoxModel options = new ListBoxModel();
                 add(options, Metric.MODULE);
                 add(options, Metric.PACKAGE);
@@ -178,7 +176,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         }
 
         private void add(final ListBoxModel options, final Metric metric) {
-            options.add(LABEL_PROVIDER.getDisplayName(metric), metric.name());
+            options.add(ELEMENT_FORMATTER.getDisplayName(metric), metric.name());
         }
 
         /**
@@ -192,7 +190,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         @POST
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillBaselineItems(@AncestorInPath final AbstractProject<?, ?> project) {
-            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
                 ListBoxModel options = new ListBoxModel();
                 add(options, Baseline.PROJECT);
                 add(options, Baseline.CHANGE);
@@ -206,7 +204,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         }
 
         private void add(final ListBoxModel options, final Baseline baseline) {
-            options.add(LABEL_PROVIDER.getDisplayName(baseline), baseline.name());
+            options.add(ELEMENT_FORMATTER.getDisplayName(baseline), baseline.name());
         }
     }
 }

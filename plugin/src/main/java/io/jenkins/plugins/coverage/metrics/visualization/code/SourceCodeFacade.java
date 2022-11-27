@@ -37,7 +37,7 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.TextFile;
 import jenkins.MasterToSlaveFileCallable;
 
-import io.jenkins.plugins.coverage.metrics.CoverageFormatter;
+import io.jenkins.plugins.coverage.metrics.ElementFormatter;
 import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
@@ -476,7 +476,7 @@ public class SourceCodeFacade {
                         output.write("<tr class=\"coverFull\">\n");
                     }
                     else {
-                        var formatter = new CoverageFormatter();
+                        var formatter = new ElementFormatter();
                         output.write("<tr class=\"coverPart\" tooltip=\"Line " + line + ": branch coverage "
                                 + formatter.formatPercentage(covered, total, Locale.ENGLISH) + "\">\n");
                     }
