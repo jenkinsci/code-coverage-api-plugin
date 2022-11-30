@@ -41,7 +41,7 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
      */
     public CoverageReportScanner(final String filePattern, final String encoding,
             final boolean followSymbolicLinks, final CoverageParser parser) {
-        super(filePattern, encoding, followSymbolicLinks);
+        super(filePattern, encoding, followSymbolicLinks, true);
 
         this.parser = parser;
     }
