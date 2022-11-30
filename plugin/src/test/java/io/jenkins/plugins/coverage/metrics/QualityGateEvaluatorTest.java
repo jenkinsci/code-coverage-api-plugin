@@ -58,18 +58,18 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(result).isEqualTo(QualityGateStatus.PASSED);
         assertThat(logger.getMessages()).containsExactly(
-                "-> [Overall Project - File]: ≪PASSED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 0.00)",
-                "-> [Overall Project - Line]: ≪PASSED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 0.00)",
-                "-> [Changed Code Lines - File]: ≪PASSED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 0.00)",
-                "-> [Changed Code Lines - Line]: ≪PASSED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 0.00)",
-                "-> [Changed Files - File]: ≪PASSED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 0.00)",
-                "-> [Changed Files - Line]: ≪PASSED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 0.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - File]: ≪PASSED≫ - (Actual Value: FILE: -10/1, Quality Gate: -10.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - Line]: ≪PASSED≫ - (Actual Value: LINE: 5/1, Quality Gate: -10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - File]: ≪PASSED≫ - (Actual Value: FILE: -10/1, Quality Gate: -10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - Line]: ≪PASSED≫ - (Actual Value: LINE: 5/1, Quality Gate: -10.00)",
-                "-> [Changed Files (Difference to Overall Project) - File]: ≪PASSED≫ - (Actual Value: FILE: -10/1, Quality Gate: -10.00)",
-                "-> [Changed Files (Difference to Overall Project) - Line]: ≪PASSED≫ - (Actual Value: LINE: 5/1, Quality Gate: -10.00)");
+                "-> [Overall project - File]: ≪PASSED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 0.00)",
+                "-> [Overall project - Line]: ≪PASSED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 0.00)",
+                "-> [Changed code lines - File]: ≪PASSED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 0.00)",
+                "-> [Changed code lines - Line]: ≪PASSED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 0.00)",
+                "-> [Changed files - File]: ≪PASSED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 0.00)",
+                "-> [Changed files - Line]: ≪PASSED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 0.00)",
+                "-> [Overall project (difference to reference job) - File]: ≪PASSED≫ - (Actual value: FILE: -10/1, Quality gate: -10.00)",
+                "-> [Overall project (difference to reference job) - Line]: ≪PASSED≫ - (Actual value: LINE: 5/1, Quality gate: -10.00)",
+                "-> [Changed code lines (difference to overall project) - File]: ≪PASSED≫ - (Actual value: FILE: -10/1, Quality gate: -10.00)",
+                "-> [Changed code lines (difference to overall project) - Line]: ≪PASSED≫ - (Actual value: LINE: 5/1, Quality gate: -10.00)",
+                "-> [Changed files (difference to overall project) - File]: ≪PASSED≫ - (Actual value: FILE: -10/1, Quality gate: -10.00)",
+                "-> [Changed files (difference to overall project) - Line]: ≪PASSED≫ - (Actual value: LINE: 5/1, Quality gate: -10.00)");
     }
 
     @Test
@@ -97,18 +97,18 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(result).isEqualTo(QualityGateStatus.WARNING);
         assertThat(logger.getMessages()).containsExactly(
-                "-> [Overall Project - File]: ≪WARNING≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Overall Project - Line]: ≪WARNING≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Changed Code Lines - File]: ≪WARNING≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Changed Code Lines - Line]: ≪WARNING≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Changed Files - File]: ≪WARNING≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Changed Files - Line]: ≪WARNING≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - File]: ≪WARNING≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - Line]: ≪WARNING≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - File]: ≪WARNING≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - Line]: ≪WARNING≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)",
-                "-> [Changed Files (Difference to Overall Project) - File]: ≪WARNING≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Changed Files (Difference to Overall Project) - Line]: ≪WARNING≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)");
+                "-> [Overall project - File]: ≪WARNING≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Overall project - Line]: ≪WARNING≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Changed code lines - File]: ≪WARNING≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Changed code lines - Line]: ≪WARNING≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Changed files - File]: ≪WARNING≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Changed files - Line]: ≪WARNING≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Overall project (difference to reference job) - File]: ≪WARNING≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Overall project (difference to reference job) - Line]: ≪WARNING≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)",
+                "-> [Changed code lines (difference to overall project) - File]: ≪WARNING≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Changed code lines (difference to overall project) - Line]: ≪WARNING≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)",
+                "-> [Changed files (difference to overall project) - File]: ≪WARNING≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Changed files (difference to overall project) - Line]: ≪WARNING≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)");
     }
 
     @Test
@@ -136,18 +136,18 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
 
         assertThat(result).isEqualTo(QualityGateStatus.FAILED);
         assertThat(logger.getMessages()).containsExactly(
-                "-> [Overall Project - File]: ≪FAILED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Overall Project - Line]: ≪FAILED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Changed Code Lines - File]: ≪FAILED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Changed Code Lines - Line]: ≪FAILED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Changed Files - File]: ≪FAILED≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Changed Files - Line]: ≪FAILED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - File]: ≪FAILED≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Overall Project (Difference to Overall Project of Reference) - Line]: ≪FAILED≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - File]: ≪FAILED≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Changed Code Lines (Difference to Overall Project) - Line]: ≪FAILED≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)",
-                "-> [Changed Files (Difference to Overall Project) - File]: ≪FAILED≫ - (Actual Value: FILE: -10/1, Quality Gate: 10.00)",
-                "-> [Changed Files (Difference to Overall Project) - Line]: ≪FAILED≫ - (Actual Value: LINE: 5/1, Quality Gate: 10.00)");
+                "-> [Overall project - File]: ≪FAILED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Overall project - Line]: ≪FAILED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Changed code lines - File]: ≪FAILED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Changed code lines - Line]: ≪FAILED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Changed files - File]: ≪FAILED≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Changed files - Line]: ≪FAILED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)",
+                "-> [Overall project (difference to reference job) - File]: ≪FAILED≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Overall project (difference to reference job) - Line]: ≪FAILED≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)",
+                "-> [Changed code lines (difference to overall project) - File]: ≪FAILED≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Changed code lines (difference to overall project) - Line]: ≪FAILED≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)",
+                "-> [Changed files (difference to overall project) - File]: ≪FAILED≫ - (Actual value: FILE: -10/1, Quality gate: 10.00)",
+                "-> [Changed files (difference to overall project) - Line]: ≪FAILED≫ - (Actual value: LINE: 5/1, Quality gate: 10.00)");
     }
 
     @Test
@@ -167,8 +167,8 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus result = evaluator.evaluate(statistics, logger);
         assertThat(result).isEqualTo(QualityGateStatus.FAILED);
         assertThat(logger.getMessages()).containsExactly(
-                "-> [Overall Project - File]: ≪WARNING≫ - (Actual Value: FILE: 75.00% (3/4), Quality Gate: 76.00)",
-                "-> [Overall Project - Line]: ≪FAILED≫ - (Actual Value: LINE: 50.00% (2/4), Quality Gate: 51.00)");
+                "-> [Overall project - File]: ≪WARNING≫ - (Actual value: FILE: 75.00% (3/4), Quality gate: 76.00)",
+                "-> [Overall project - Line]: ≪FAILED≫ - (Actual value: LINE: 50.00% (2/4), Quality gate: 51.00)");
     }
 
     @Test
@@ -182,7 +182,7 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         QualityGateStatus result = evaluator.evaluate(statistics, logger);
         assertThat(result).isEqualTo(QualityGateStatus.FAILED);
         assertThat(logger.getMessages()).containsExactly(
-                "-> [Overall Project - Package or Namespace]: ≪FAILED≫ - (Actual Value: n/a, Quality Gate: 50.00)");
+                "-> [Overall project - Package]: ≪FAILED≫ - (Actual value: n/a, Quality gate: 50.00)");
     }
 
     @Test

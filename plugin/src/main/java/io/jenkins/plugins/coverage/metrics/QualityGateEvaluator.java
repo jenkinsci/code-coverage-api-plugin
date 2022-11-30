@@ -61,7 +61,7 @@ public class QualityGateEvaluator {
 
     private static void printResult(final FormattedLogger logger, final QualityGate qualityGate,
             final QualityGateStatus actualResult, final Object actualValue) {
-        logger.print("-> [%s]: ≪%s≫ - (Actual Value: %s, Quality Gate: %.2f)",
+        logger.print("-> [%s]: ≪%s≫ - (Actual value: %s, Quality gate: %.2f)",
                 qualityGate.getName(), actualResult, actualValue, qualityGate.getThreshold());
     }
 
