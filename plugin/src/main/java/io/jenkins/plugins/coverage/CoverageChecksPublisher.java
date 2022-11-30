@@ -38,15 +38,17 @@ class CoverageChecksPublisher {
     private final JenkinsFacade jenkinsFacade;
     private static final List<String> COVERAGE_TYPES =
             Arrays.asList("Report", "Group", "Package", "File", "Class", "Method", "Conditional", "Line", "Instruction");
+    private final String checksName;
 
-    CoverageChecksPublisher(final CoverageAction action) {
-        this(action, new JenkinsFacade());
+    CoverageChecksPublisher(final CoverageAction action, final String checksName) {
+        this(action, new JenkinsFacade(), checksName);
     }
 
     @VisibleForTesting
-    CoverageChecksPublisher(final CoverageAction action, final JenkinsFacade jenkinsFacade) {
+    CoverageChecksPublisher(final CoverageAction action, final JenkinsFacade jenkinsFacade, final String checksName) {
         this.jenkinsFacade = jenkinsFacade;
         this.action = action;
+        this.checksName = checksName;
     }
 
     void publishChecks(final TaskListener listener) {
@@ -64,7 +66,7 @@ class CoverageChecksPublisher {
                 .build();
 
         return new ChecksDetailsBuilder()
-                .withName("Code Coverage")
+                .withName(checksName)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(StringUtils.isBlank(action.getFailMessage()) ? ChecksConclusion.SUCCESS : ChecksConclusion.FAILURE)
                 .withDetailsURL(jenkinsFacade.getAbsoluteUrl(result.getOwner().getUrl(), action.getUrlName()))

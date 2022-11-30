@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>5.35.0</version>
+    <version>5.37.0</version>
     <relativePath />
   </parent>
 
@@ -36,11 +36,11 @@
 
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <json-unit-assertj.version>2.36.0</json-unit-assertj.version>
-    <gson.version>2.9.1</gson.version>
+    <gson.version>2.10</gson.version>
     <jsoup.version>1.15.3</jsoup.version>
     <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
-    <testcontainers.version>1.17.5</testcontainers.version>
+    <testcontainers.version>1.17.6</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
   </properties>
@@ -343,7 +343,7 @@
   </build>
 
   <scm>
-    <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
     <tag>${scmTag}</tag>

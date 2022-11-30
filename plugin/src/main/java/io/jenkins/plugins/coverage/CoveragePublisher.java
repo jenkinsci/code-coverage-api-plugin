@@ -30,7 +30,6 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.scm.SCM;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -52,6 +51,7 @@ import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
+    private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
     private List<CoverageAdapter> adapters = new LinkedList<>();
     private List<Threshold> globalThresholds = new LinkedList<>();
 
@@ -74,6 +74,8 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private boolean failBuildIfCoverageDecreasedInChangeRequest = false;
 
     private boolean skipPublishingChecks = false;
+
+    private String checksName = CHECKS_DEFAULT_NAME;
 
     @DataBoundConstructor
     public CoveragePublisher() {
@@ -123,7 +125,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         if (!skipPublishingChecks) {
             CoverageAction coverageAction = run.getAction(CoverageAction.class);
             if (coverageAction != null) {
-                CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction);
+                CoverageChecksPublisher checksPublisher = new CoverageChecksPublisher(coverageAction, checksName);
                 checksPublisher.publishChecks(listener);
             }
         }
@@ -247,6 +249,15 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         return skipPublishingChecks;
     }
 
+    public String getChecksName() {
+        return checksName;
+    }
+
+    @DataBoundSetter
+    public void setChecksName(final String checksName) {
+        this.checksName = checksName;
+    }
+
     @DataBoundSetter
     public void setFailBuildIfCoverageDecreasedInChangeRequest(
             final boolean failBuildIfCoverageDecreasedInChangeRequest) {
@@ -315,6 +326,9 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
         }
         if (scm == null) {
             scm = StringUtils.EMPTY;
+        }
+        if (checksName == null) {
+            checksName = CHECKS_DEFAULT_NAME;
         }
         return this;
     }

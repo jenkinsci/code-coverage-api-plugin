@@ -25,6 +25,9 @@
     <f:entry title="Disable Publish Checks" field="skipPublishingChecks">
       <f:checkbox/>
     </f:entry>
+    <f:entry title="SCM Check Name" field="checksName">
+        <f:textbox />
+    </f:entry>
     <f:entry title="${%Global Thresholds}">
       <f:repeatableProperty field="globalThresholds">
       </f:repeatableProperty>
