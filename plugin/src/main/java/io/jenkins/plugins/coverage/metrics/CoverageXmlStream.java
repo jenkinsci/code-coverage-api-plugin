@@ -18,6 +18,7 @@ import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.LinesOfCode;
 import edu.hm.hafner.metric.MethodNode;
+import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Node;
@@ -48,6 +49,8 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
         xStream.alias("class", ClassNode.class);
         xStream.alias("method", MethodNode.class);
 
+        xStream.alias("metric", Metric.class);
+
         xStream.alias("coverage", Coverage.class);
         xStream.addImmutableType(Coverage.class, false);
         xStream.alias("mutation", MutationValue.class);
@@ -61,10 +64,10 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
 
         xStream.registerConverter(new FractionConverter());
         xStream.registerConverter(new SimpleConverter<>(Value.class, Value::serialize, Value::valueOf));
+        xStream.registerConverter(new SimpleConverter<>(Metric.class, Metric::name, Metric::valueOf));
 
         /* FIXME: restore converters
         xStream.addImmutableType(CoveragePercentageConverter.class, false);
-        xStream.registerConverter(new CoverageMetricConverter());
         xStream.registerConverter(new CoverageConverter(xStream));
         xStream.registerConverter(new CoveragePercentageConverter());
         xStream.registerLocalConverter(FileNode.class, "coveragePerLine", new LineMapConverter());

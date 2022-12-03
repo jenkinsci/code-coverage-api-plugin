@@ -40,7 +40,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
     }
 
     @Test
-    void shouldSaveAndRestoreTree() {
+    void shouldSaveAndRestoreTree() throws IOException {
         CoverageXmlStream xmlStream = new CoverageXmlStream();
 
         Path saved = createTempFile();
@@ -48,7 +48,17 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
         xmlStream.write(saved, convertedNode);
         Node restored = xmlStream.read(saved);
+
         Assertions.assertThat(restored).usingRecursiveComparison().isEqualTo(convertedNode);
+
+        System.out.println(new String(Files.readAllBytes(saved)));
+
+        assertThat(Input.from(saved)).nodesByXPath("//module/values/*")
+                .hasSize(4).extractingText()
+                .containsExactly("INSTRUCTION: 1260/1350",
+                        "BRANCH: 109/116",
+                        "LINE: 294/323",
+                        "COMPLEXITY: 160");
     }
 
     @Test
