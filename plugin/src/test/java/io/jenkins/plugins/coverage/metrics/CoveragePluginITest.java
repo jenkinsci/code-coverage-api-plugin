@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
+import edu.hm.hafner.metric.Value;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -20,6 +21,7 @@ import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
+import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -134,8 +136,20 @@ class CoveragePluginITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        assertThat(coverageResult.getAllValues(Baseline.PROJECT)).extracting(Value::getMetric)
+                .containsExactly(MODULE,
+                        PACKAGE,
+                        Metric.FILE,
+                        Metric.CLASS,
+                        METHOD,
+                        LINE,
+                        INSTRUCTION,
+                        BRANCH,
+                        COMPLEXITY,
+                        COMPLEXITY_DENSITY,
+                        LOC);
         assertThat(coverageResult.getMetricsForSummary())
-                .containsExactly(Metric.LINE, Metric.BRANCH, Metric.COMPLEXITY, Metric.LOC);
+                .containsExactly(Metric.LINE, Metric.BRANCH, COMPLEXITY_DENSITY, Metric.LOC);
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)

@@ -138,20 +138,20 @@ public class CoverageReporter {
             var resultHandler = new RunResultHandler(build);
             QualityGateStatus qualityGateStatus;
             qualityGateStatus = evaluateQualityGates(rootNode, log,
-                    changeCoverageRoot.getMetricsDistribution(), changeCoverageDelta, coverageDelta,
+                    changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
-                    changeCoverageRoot.getMetricsDistribution(),
+                    changeCoverageRoot.aggregateValues(),
                     changeCoverageDelta,
-                    indirectCoverageChangesTree.getMetricsDistribution());
+                    indirectCoverageChangesTree.aggregateValues());
         }
         else {
             var resultHandler = new RunResultHandler(build);
             QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
-                    new TreeMap<>(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
+                    List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus);
         }
@@ -169,7 +169,7 @@ public class CoverageReporter {
     }
 
     private QualityGateStatus evaluateQualityGates(final Node rootNode, final FilteredLog log,
-            final NavigableMap<Metric, Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
+            final List<Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
             final NavigableMap<Metric, Fraction> coverageDelta, final RunResultHandler resultHandler,
             final List<QualityGate> qualityGates) {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
@@ -177,9 +177,9 @@ public class CoverageReporter {
         QualityGateStatus qualityGateStatus;
         if (evaluator.isEnabled()) {
             log.logInfo("Evaluating quality gates");
-            var statistics = new CoverageStatistics(rootNode.getMetricsDistribution(), coverageDelta,
+            var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
                     changeCoverageDistribution, changeCoverageDelta,
-                    new TreeMap<>(), new TreeMap<>());
+                    List.of(), new TreeMap<>());
             qualityGateStatus = evaluator.evaluate(statistics, log::logInfo);
             if (qualityGateStatus.isSuccessful()) {
                 log.logInfo("-> All quality gates have been passed");

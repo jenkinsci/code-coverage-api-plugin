@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.parser.XmlParser;
@@ -47,17 +48,17 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     }
 
     @Override
-    protected ModuleNode processFile(final Path file, final Charset charset, final FilteredLog log) {
+    protected Optional<ModuleNode> processFile(final Path file, final Charset charset, final FilteredLog log) {
         try {
             XmlParser xmlParser = parser.createParser();
             ModuleNode node = xmlParser.parse(Files.newBufferedReader(file, charset));
             log.logInfo("Successfully parsed file '%s'", PATH_UTIL.getAbsolutePath(file));
-            node.getMetricsDistribution().values().forEach(v -> log.logInfo("%s", v));
-            return node;
+            node.aggregateValues().forEach(v -> log.logInfo("%s", v));
+            return Optional.of(node);
         }
         catch (IOException | ParsingException exception) {
             log.logException(exception, "Parsing of file '%s' failed due to an exception:", file);
-            return new ModuleNode(file.toString());
+            return Optional.empty();
         }
     }
 }

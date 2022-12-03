@@ -2,12 +2,13 @@ package io.jenkins.plugins.coverage.metrics;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,26 +59,25 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     private final String referenceBuildId;
 
-    private int successfulSinceBuild;
     private final QualityGateStatus qualityGateStatus;
 
     // FIXME: Rethink if we need a separate result object that stores all data?
     private final FilteredLog log;
 
-    /** The coverages of the result. */
-    private final NavigableMap<Metric, Value> coverage;
+    /** The aggregated values of the result for the root of the tree. */
+    private final List<? extends Value> projectValues;
 
     /** The delta of this build's coverages with respect to the reference build. */
     private final NavigableMap<Metric, Fraction> difference;
 
     /** The coverages filtered by changed lines of the associated change request. */
-    private final NavigableMap<Metric, Value> changeCoverage;
+    private final List<? extends Value> changeCoverage;
 
     /** The delta of the coverages of the associated change request with respect to the reference build. */
     private final NavigableMap<Metric, Fraction> changeCoverageDifference;
 
     /** The indirect coverage changes of the associated change request with respect to the reference build. */
-    private final NavigableMap<Metric, Value> indirectCoverageChanges;
+    private final List<? extends Value> indirectCoverageChanges;
 
     static {
         XSTREAM.registerConverter(new FractionConverter());
@@ -97,8 +97,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
             final QualityGateStatus qualityGateStatus) {
-        this(owner, log, result, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), new TreeMap<>(),
-                new TreeMap<>(), new TreeMap<>());
+        this(owner, log, result, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), List.of(),
+                new TreeMap<>(), List.of());
     }
 
     /**
@@ -128,9 +128,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
-            final NavigableMap<Metric, Value> changeCoverage,
+            final List<? extends Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
-            final NavigableMap<Metric, Value> indirectCoverageChanges) {
+            final List<? extends Value> indirectCoverageChanges) {
         this(owner, log, result, qualityGateStatus, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
@@ -141,14 +141,14 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
             final QualityGateStatus qualityGateStatus,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
-            final NavigableMap<Metric, Value> changeCoverage,
+            final List<? extends Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
-            final NavigableMap<Metric, Value> indirectCoverageChanges,
+            final List<? extends Value> indirectCoverageChanges,
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
         this.log = log;
-        coverage = result.getMetricsDistribution();
+        projectValues = result.aggregateValues();
         this.qualityGateStatus = qualityGateStatus;
         difference = delta;
         this.changeCoverage = changeCoverage;
@@ -247,29 +247,25 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         return filterImportantMetrics(getValueStream(baseline));
     }
 
-    private List<Value> filterImportantMetrics(final Stream<Value> values) {
+    private List<Value> filterImportantMetrics(final Stream<? extends Value> values) {
         return values.filter(v -> getMetricsForSummary().contains(v.getMetric()))
                 .collect(Collectors.toList());
     }
 
-    private Stream<Value> getValueStream(final Baseline baseline) {
+    private Stream<? extends Value> getValueStream(final Baseline baseline) {
         if (baseline == Baseline.PROJECT) {
-            return extractValuesFromMapping(coverage);
+            return projectValues.stream();
         }
         if (baseline == Baseline.CHANGE) {
-            return extractValuesFromMapping(changeCoverage);
+            return changeCoverage.stream();
         }
         if (baseline == Baseline.INDIRECT) {
-            return extractValuesFromMapping(indirectCoverageChanges);
+            return indirectCoverageChanges.stream();
         }
         throw new NoSuchElementException("No such baseline: " + baseline);
     }
 
-    private Stream<Value> extractValuesFromMapping(final NavigableMap<Metric, Value> valueMapping) {
-        return valueMapping.values().stream();
-    }
-
-    // Called by jelly view
+    @SuppressWarnings("unused") // Called by jelly view
     public String getTooltip(final Baseline baseline) {
         var values = getValueStream(baseline).map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
                 .collect(Collectors.joining("\n", "- ", ""));
@@ -361,8 +357,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return the metrics to be shown in the project summary
      */
     @VisibleForTesting
-    Set<Metric> getMetricsForSummary() {
-        return Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY);
+    NavigableSet<Metric> getMetricsForSummary() {
+        return new TreeSet<>(Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY));
     }
 
     public Coverage getLineCoverage() {
@@ -382,7 +378,13 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return {@code true} if a coverage is available for the specified metric, {@code false} otherwise
      */
     public boolean hasCoverage(final Metric metric) {
-        return coverage.containsKey(metric);
+        return containsMetric(metric, projectValues);
+    }
+
+    private boolean containsMetric(final Metric metric, final List<? extends Value> values) {
+        return values.stream()
+                .map(Value::getMetric)
+                .anyMatch(metric::equals);
     }
 
     /**
@@ -394,7 +396,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return the coverage
      */
     public Value getCoverage(final Metric metric) {
-        return coverage.get(metric);
+        return Value.getValue(metric, projectValues);
     }
 
     /**
@@ -415,7 +417,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return {@code true} if the change coverage exist for the metric, else {@code false}
      */
     public boolean hasChangeCoverage(final Metric metric) {
-        return changeCoverage.containsKey(metric);
+        return containsMetric(metric, changeCoverage);
     }
 
     /**
@@ -427,7 +429,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return the change coverage
      */
     public Value getChangeCoverage(final Metric metric) {
-        return changeCoverage.get(metric);
+        return Value.getValue(metric, changeCoverage);
     }
 
     /**
@@ -448,7 +450,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return {@code true} if indirect coverage changes exist for the metric, else {@code false}
      */
     public boolean hasIndirectCoverageChanges(final Metric metric) {
-        return indirectCoverageChanges.containsKey(metric);
+        return containsMetric(metric, indirectCoverageChanges);
     }
 
     /**
@@ -460,7 +462,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @return the indirect coverage changes
      */
     public Value getIndirectCoverageChanges(final Metric metric) {
-        return indirectCoverageChanges.get(metric);
+        return Value.getValue(metric, indirectCoverageChanges);
     }
 
     /**
@@ -559,17 +561,18 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *
      * @param metric
      *         the metric to get the coverage for
-     * @param coverages
+     * @param values
      *         the coverage values of a specific type, mapped by their metrics
      *
      * @return the formatted text representation of the coverage value corresponding to the passed metric
      */
-    private String formatCoverageForMetric(final Metric metric, final Map<Metric, Value> coverages) {
-        String coverage = Messages.Coverage_Not_Available();
-        if (coverages.containsKey(metric)) {
-            coverage = FORMATTER.format(coverages.get(metric), Functions.getCurrentLocale());
-        }
-        return metric + ": " + coverage;
+    private String formatCoverageForMetric(final Metric metric, final List<? extends Value> values) {
+        var possibleValue = values.stream()
+                .filter(v -> metric.equals(v.getMetric()))
+                .findAny();
+        return metric + ": "
+                + possibleValue.map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
+                .orElse(Messages.Coverage_Not_Available());
     }
 
     /**

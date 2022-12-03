@@ -80,8 +80,8 @@ class QualityGateITest extends AbstractCoverageITest {
         assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
 
         assertThat(coverageResult.getLog().getInfoMessages()).contains("Evaluating quality gates",
-                "-> [Overall Project - Line]: ≪PASSED≫ - (Actual Value: LINE: 95.39% (5531/5798), Quality Gate: 90.00)",
-                "-> [Overall Project - Branch]: ≪WARNING≫ - (Actual Value: BRANCH: 88.28% (1544/1749), Quality Gate: 90.00)",
+                "-> [Overall project - Line]: ≪PASSED≫ - (Actual value: LINE: 95.39% (5531/5798), Quality gate: 90.00)",
+                "-> [Overall project - Branch]: ≪WARNING≫ - (Actual value: BRANCH: 88.28% (1544/1749), Quality gate: 90.00)",
                 "-> Some quality gates have been missed: overall result is WARNING");
     }
 }

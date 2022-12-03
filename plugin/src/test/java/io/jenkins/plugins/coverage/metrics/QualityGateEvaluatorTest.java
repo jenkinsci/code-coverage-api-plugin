@@ -206,12 +206,10 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
                 fillValues(), fillDeltas());
     }
 
-    private NavigableMap<Metric, Value> fillValues() {
-        final NavigableMap<Metric, Value> valueMapping = new TreeMap<>();
+    private List<Value> fillValues() {
         var builder = new CoverageBuilder();
-        valueMapping.put(Metric.FILE, builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build());
-        valueMapping.put(Metric.LINE, builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
-        return valueMapping;
+        return List.of(builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
+                builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
     }
 
     private NavigableMap<Metric, Fraction> fillDeltas() {

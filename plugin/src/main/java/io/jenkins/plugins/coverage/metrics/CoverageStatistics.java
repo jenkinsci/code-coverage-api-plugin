@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NoSuchElementException;
@@ -17,23 +18,23 @@ import edu.hm.hafner.metric.Value;
  * Represents the different mappings of coverage metric and baseline to actual values.
  */
 class CoverageStatistics {
-    private final NavigableMap<Metric, Value> projectValueMapping;
+    private final List<Value> projectValueMapping;
     private final NavigableMap<Metric, Value> projectDelta;
-    private final NavigableMap<Metric, Value> changeValueMapping;
+    private final List<Value> changeValueMapping;
     private final NavigableMap<Metric, Value> changeDelta;
-    private final NavigableMap<Metric, Value> fileValueMapping;
+    private final List<Value> fileValueMapping;
     private final NavigableMap<Metric, Value> fileDelta;
 
     CoverageStatistics(
-            final NavigableMap<Metric, Value> projectValueMapping,
+            final List<Value> projectValueMapping,
             final NavigableMap<Metric, Fraction> projectDelta,
-            final NavigableMap<Metric, Value> changeValueMapping,
+            final List<Value> changeValueMapping,
             final NavigableMap<Metric, Fraction> changeDelta,
-            final NavigableMap<Metric, Value> fileValueMapping,
+            final List<Value> fileValueMapping,
             final NavigableMap<Metric, Fraction> fileDelta)  {
-        this.projectValueMapping = copy(projectValueMapping);
-        this.changeValueMapping = copy(changeValueMapping);
-        this.fileValueMapping = copy(fileValueMapping);
+        this.projectValueMapping = List.copyOf(projectValueMapping);
+        this.changeValueMapping = List.copyOf(changeValueMapping);
+        this.fileValueMapping = List.copyOf(fileValueMapping);
 
         this.projectDelta = asValueMap(projectDelta);
         this.changeDelta = asValueMap(changeDelta);
@@ -50,15 +51,15 @@ class CoverageStatistics {
         return new TreeMap<>(original);
     }
 
-    public Optional<Value> getValue(final Baseline baseline, final Metric metric) {
+    public Optional<? extends Value> getValue(final Baseline baseline, final Metric metric) {
         if (baseline == Baseline.PROJECT) {
-            return getValue(metric, projectValueMapping);
+            return Value.findValue(metric, projectValueMapping);
         }
         if (baseline == Baseline.FILE) {
-            return getValue(metric, fileValueMapping);
+            return Value.findValue(metric, fileValueMapping);
         }
         if (baseline == Baseline.CHANGE) {
-            return getValue(metric, changeValueMapping);
+            return Value.findValue(metric, changeValueMapping);
         }
         if (baseline == Baseline.PROJECT_DELTA) {
             return getValue(metric, projectDelta);

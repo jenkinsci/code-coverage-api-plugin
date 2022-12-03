@@ -270,9 +270,9 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                         FileVisitorResult<ModuleNode> result = workspace.act(
                                 new CoverageReportScanner(expandedPattern, "UTF-8", false, parser));
                         log.merge(result.getLog());
-                        var rootNode = Node.merge(result.getResults());
-                        results.add(rootNode);
-                        if (rootNode.isEmpty() && result.hasErrors()) {
+
+                        var coverageResults = result.getResults();
+                        if (result.hasErrors()) {
                             if (failOnError) {
                                 var errorMessage = "Failing build due to some errors during recording of the coverage";
                                 log.logInfo(errorMessage);
@@ -283,6 +283,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                                 log.logInfo("Ignore errors and continue processing");
                             }
                         }
+                        results.addAll(coverageResults);
                     }
                     catch (IOException exception) {
                         log.logException(exception, "Exception while parsing with tool " + tool);
@@ -291,11 +292,13 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                     toolHandler.log(log);
                 }
 
-                CoverageReporter reporter = new CoverageReporter();
-                reporter.run(Node.merge(results), run, workspace, listener,
-                        getQualityGates(),
-                        getScm(), getSourceDirectoriesPaths(),
-                        getSourceCodeEncoding(), getSourceCodeRetention());
+                if (!results.isEmpty()) {
+                    CoverageReporter reporter = new CoverageReporter();
+                    reporter.run(Node.merge(results), run, workspace, listener,
+                            getQualityGates(),
+                            getScm(), getSourceDirectoriesPaths(),
+                            getSourceCodeEncoding(), getSourceCodeRetention());
+                }
             }
         }
         else {

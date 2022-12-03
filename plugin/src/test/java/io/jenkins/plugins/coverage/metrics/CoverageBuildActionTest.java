@@ -1,7 +1,10 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.NavigableMap;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -67,7 +70,8 @@ class CoverageBuildActionTest {
         assertThat(action.getBranchCoverage()).isEqualTo(percent50);
 
         assertThat(action.hasCoverage(Metric.INSTRUCTION)).isFalse();
-        assertThat(action.getCoverage(Metric.INSTRUCTION)).isNull();
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> action.getCoverage(Metric.INSTRUCTION));
 
         assertThat(action.formatChangeCoverage(Metric.BRANCH)).isEqualTo("BRANCH: n/a");
         assertThat(action.formatChangeCoverageOverview()).isEqualTo("n/a");
@@ -82,28 +86,27 @@ class CoverageBuildActionTest {
     private static CoverageBuildAction createEmptyAction(final Node module) {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(), module,
                 QualityGateStatus.INACTIVE, "-",
-                new TreeMap<>(), new TreeMap<>(),
-                new TreeMap<>(), new TreeMap<>(), false);
+                new TreeMap<>(), List.of(),
+                new TreeMap<>(), List.of(), false);
     }
 
     @Test
     void shouldNotLoadResultIfDeltasArePersistedInAction() {
-        NavigableMap<Metric, Value> coverages = new TreeMap<>();
+        List<Value> coverages = new ArrayList<>();
         NavigableMap<Metric, Fraction> deltas = new TreeMap<>();
 
         CoverageBuilder coverageBuilder = new CoverageBuilder();
 
         Coverage percent50 = coverageBuilder.setMetric(Metric.BRANCH).setCovered(1).setMissed(1).build();
-        coverages.put(Metric.BRANCH, percent50);
+        coverages.add(percent50);
         deltas.put(Metric.BRANCH, percent50.getCoveredPercentage());
 
         Coverage percent80 = coverageBuilder.setMetric(Metric.LINE).setCovered(8).setMissed(2).build();
-        coverages.put(Metric.LINE, percent80);
+        coverages.add(percent80);
 
         CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(),
                 new ModuleNode("module"), QualityGateStatus.INACTIVE, "-",
-                deltas, coverages
-                ,
+                deltas, coverages,
                 deltas, coverages, false);
 
         CoverageBuildAction spy = spy(action);
@@ -299,12 +302,10 @@ class CoverageBuildActionTest {
 
         NavigableMap<Metric, Fraction> deltas = new TreeMap<>();
         deltas.put(COVERAGE_METRIC, COVERAGE_FRACTION);
-        NavigableMap<Metric, Value> changeCoverage = new TreeMap<>();
-        changeCoverage.put(COVERAGE_METRIC, VALUE);
+        var changeCoverage = List.of(VALUE);
         NavigableMap<Metric, Fraction> changeCoverageDifference = new TreeMap<>();
         changeCoverageDifference.put(COVERAGE_METRIC, COVERAGE_FRACTION);
-        NavigableMap<Metric, Value> indirectCoverageChanges = new TreeMap<>();
-        indirectCoverageChanges.put(COVERAGE_METRIC, VALUE);
+        var indirectCoverageChanges = List.of(VALUE);
 
         return new CoverageBuildAction(build, createLog(), root, QualityGateStatus.INACTIVE, "-", deltas,
                 changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);

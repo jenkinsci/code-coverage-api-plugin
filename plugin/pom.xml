@@ -43,6 +43,7 @@
     <testcontainers.version>1.17.6</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
+    <xmlunit.version>2.9.0</xmlunit.version>
   </properties>
 
   <developers>
@@ -69,7 +70,7 @@
     <dependency>
       <groupId>edu.hm.hafner</groupId>
       <artifactId>coverage-model</artifactId>
-      <version>0.4.0</version>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -145,7 +146,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>2.19.0-rc648.7fb_1d38eec33</version>
+      <version>2.20.0</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -179,7 +180,38 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
-    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.xmlunit</groupId>
+      <artifactId>xmlunit-core</artifactId>
+      <version>${xmlunit.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.bytebuddy</groupId>
+          <artifactId>byte-buddy</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.xmlunit</groupId>
+      <artifactId>xmlunit-assertj</artifactId>
+      <version>${xmlunit.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.bytebuddy</groupId>
+          <artifactId>byte-buddy</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>net.javacrumbs.json-unit</groupId>
       <artifactId>json-unit-assertj</artifactId>
