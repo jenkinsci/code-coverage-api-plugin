@@ -53,12 +53,28 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
         System.out.println(new String(Files.readAllBytes(saved)));
 
-        assertThat(Input.from(saved)).nodesByXPath("//module/values/*")
+        var xml = Input.from(saved);
+        assertThat(xml).nodesByXPath("//module/values/*")
                 .hasSize(4).extractingText()
                 .containsExactly("INSTRUCTION: 1260/1350",
                         "BRANCH: 109/116",
                         "LINE: 294/323",
                         "COMPLEXITY: 160");
+        assertThat(xml).nodesByXPath("//module/values/*")
+                .hasSize(4).extractingText()
+                .containsExactly("INSTRUCTION: 1260/1350",
+                        "BRANCH: 109/116",
+                        "LINE: 294/323",
+                        "COMPLEXITY: 160");
+        assertThat(xml).nodesByXPath("//file[./name = 'TreeStringBuilder.java']/values/*")
+                .hasSize(4).extractingText()
+                .containsExactly("INSTRUCTION: 229/233", "BRANCH: 17/18", "LINE: 51/53", "COMPLEXITY: 23");
+        assertThat(xml).nodesByXPath("//file[./name = 'TreeStringBuilder.java']/coveredPerLine")
+                .hasSize(1).extractingText()
+                .containsExactly("[19: 1, 20: 1, 31: 1, 43: 1, 50: 1, 51: 1, 54: 1, 57: 1, 61: 0, 62: 0, 70: 1, 72: 1, 73: 1, 74: 1, 85: 2, 86: 1, 89: 1, 90: 2, 91: 1, 92: 2, 93: 2, 95: 1, 96: 1, 97: 1, 100: 1, 101: 1, 103: 1, 106: 1, 109: 1, 112: 1, 113: 1, 114: 1, 115: 1, 117: 1, 125: 2, 126: 1, 128: 1, 140: 1, 142: 1, 143: 1, 144: 1, 146: 1, 160: 1, 162: 2, 163: 2, 164: 1, 167: 1, 177: 1, 178: 2, 179: 1, 180: 1, 181: 1, 184: 1]");
+        assertThat(xml).nodesByXPath("//file[./name = 'TreeStringBuilder.java']/missedPerLine")
+                .hasSize(1).extractingText()
+                .containsExactly("[19: 0, 20: 0, 31: 0, 43: 0, 50: 0, 51: 0, 54: 0, 57: 0, 61: 1, 62: 1, 70: 0, 72: 0, 73: 0, 74: 0, 85: 0, 86: 0, 89: 0, 90: 0, 91: 0, 92: 0, 93: 0, 95: 0, 96: 0, 97: 0, 100: 0, 101: 0, 103: 0, 106: 0, 109: 0, 112: 0, 113: 1, 114: 0, 115: 0, 117: 0, 125: 0, 126: 0, 128: 0, 140: 0, 142: 0, 143: 0, 144: 0, 146: 0, 160: 0, 162: 0, 163: 0, 164: 0, 167: 0, 177: 0, 178: 0, 179: 0, 180: 0, 181: 0, 184: 0]");
     }
 
     @Test
