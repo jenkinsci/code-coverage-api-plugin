@@ -5,12 +5,17 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.builder.Input;
 
+import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.metric.parser.JacocoParser;
@@ -21,10 +26,15 @@ import hudson.XmlFile;
 import hudson.model.FreeStyleBuild;
 import hudson.util.XStream2;
 
+import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerLineMapConverter;
+import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerSetConverter;
+import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
 import io.jenkins.plugins.coverage.model.Assertions;
 
+import static edu.hm.hafner.metric.Metric.*;
+import static org.assertj.core.api.BDDAssertions.*;
 import static org.mockito.Mockito.*;
-import static org.xmlunit.assertj.XmlAssert.*;
+import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 /**
  * Tests the class {@link CoverageXmlStream}.
@@ -33,6 +43,7 @@ import static org.xmlunit.assertj.XmlAssert.*;
  */
 class CoverageXmlStreamTest extends SerializableTest<Node> {
     private static final String ACTION_QUALIFIED_NAME = "io.jenkins.plugins.coverage.metrics.CoverageBuildAction";
+    private static final String EMPTY = "[]";
 
     @Override
     protected Node createSerializable() {
@@ -41,17 +52,14 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
     @Test
     void shouldSaveAndRestoreTree() throws IOException {
-        CoverageXmlStream xmlStream = new CoverageXmlStream();
-
         Path saved = createTempFile();
         Node convertedNode = createSerializable();
 
+        var xmlStream = new CoverageXmlStream();
         xmlStream.write(saved, convertedNode);
         Node restored = xmlStream.read(saved);
 
         Assertions.assertThat(restored).usingRecursiveComparison().isEqualTo(convertedNode);
-
-        System.out.println(new String(Files.readAllBytes(saved)));
 
         var xml = Input.from(saved);
         assertThat(xml).nodesByXPath("//module/values/*")
@@ -79,8 +87,8 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
     @Test
     void shouldStoreActionCompactly() throws IOException {
-        TestXmlStream xmlStream = new TestXmlStream();
         Path saved = createTempFile();
+        var xmlStream = new TestXmlStream();
         xmlStream.read(saved);
 
         var file = new XmlFile(xmlStream.getStream(), saved.toFile());
@@ -131,9 +139,85 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                             "LOC: 323"
                     );
         });
-
     }
 
+    @Test
+    void shouldConvertMetricMap2String() {
+        NavigableMap<Metric, Fraction> map = new TreeMap<>();
+
+        MetricFractionMapConverter converter = new MetricFractionMapConverter();
+
+        assertThat(converter.marshal(map)).isEqualTo(EMPTY);
+
+        map.put(BRANCH, Fraction.getFraction(50, 100));
+        assertThat(converter.marshal(map)).isEqualTo("[BRANCH: 50/100]");
+
+        map.put(LINE, Fraction.getFraction(3, 4));
+        assertThat(converter.marshal(map)).isEqualTo("[LINE: 3/4, BRANCH: 50/100]");
+    }
+
+    @Test
+    void shouldConvertString2MetricMap() {
+        MetricFractionMapConverter converter = new MetricFractionMapConverter();
+
+        Assertions.assertThat(converter.unmarshal(EMPTY)).isEmpty();
+        Fraction first = Fraction.getFraction(50, 100);
+        Assertions.assertThat(converter.unmarshal("[BRANCH: 50/100]"))
+                .containsExactly(entry(BRANCH, first));
+        Assertions.assertThat(converter.unmarshal("[LINE: 3/4, BRANCH: 50/100]"))
+                .containsExactly(entry(LINE, Fraction.getFraction(3, 4)),
+                        entry(BRANCH, first));
+    }
+
+    @Test
+    void shouldConvertIntegerMap2String() {
+        NavigableMap<Integer, Integer> map = new TreeMap<>();
+
+        IntegerLineMapConverter converter = new IntegerLineMapConverter();
+
+        assertThat(converter.marshal(map)).isEqualTo(EMPTY);
+
+        map.put(10, 20);
+        assertThat(converter.marshal(map)).isEqualTo("[10: 20]");
+
+        map.put(15, 25);
+        assertThat(converter.marshal(map)).isEqualTo("[10: 20, 15: 25]");
+    }
+
+    @Test
+    void shouldConvertString2IntegerMap() {
+        IntegerLineMapConverter converter = new IntegerLineMapConverter();
+
+        Assertions.assertThat(converter.unmarshal(EMPTY)).isEmpty();
+        Assertions.assertThat(converter.unmarshal("[15: 25]")).containsExactly(entry(15, 25));
+        Assertions.assertThat(converter.unmarshal("[15:25, 10: 20]")).containsExactly(entry(10, 20), entry(15, 25));
+    }
+
+    @Test
+    void shouldConvertIntegerSet2String() {
+        NavigableSet<Integer> set = new TreeSet<>();
+
+        IntegerSetConverter converter = new IntegerSetConverter();
+
+        assertThat(converter.marshal(set)).isEqualTo(EMPTY);
+
+        set.add(10);
+        assertThat(converter.marshal(set)).isEqualTo("[10]");
+
+        set.add(15);
+        assertThat(converter.marshal(set)).isEqualTo("[10, 15]");
+    }
+
+    @Test
+    void shouldConvertString2IntegerSet() {
+        IntegerSetConverter converter = new IntegerSetConverter();
+
+        Assertions.assertThat(converter.unmarshal(EMPTY)).isEmpty();
+        Assertions.assertThat(converter.unmarshal("[15]")).containsExactly(15);
+        Assertions.assertThat(converter.unmarshal("[15, 20]")).containsExactly(15, 20);
+    }
+
+    // TODO: Add content for the other baselines as well
     CoverageBuildAction createAction() {
         var tree = createSerializable();
 
