@@ -269,7 +269,7 @@ class CoverageBuildActionTest {
 
             for (int line = 0; line < 2; line++) {
                 fileNode.addCounters(10 + line, 1, 1);
-                fileNode.addChangedCodeLine(10 + line);
+                fileNode.addChangedLine(10 + line);
             }
             root.addChild(fileNode);
         }

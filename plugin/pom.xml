@@ -352,6 +352,7 @@
           </packages>
           <excludes combine.children="append">
             <exclude>.*ITest.*</exclude>
+            <exclude>.*CoverageXmlStream.*</exclude>
           </excludes>
           <entryPointClassPackage>io.jenkins.plugins.coverage.model</entryPointClassPackage>
         </configuration>

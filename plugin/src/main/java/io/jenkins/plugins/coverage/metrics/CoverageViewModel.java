@@ -395,7 +395,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether change coverage exists, else {@code false}
      */
     public boolean hasChangeCoverage() {
-        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasCodeChanges);
+        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasChangedLines);
     }
 
     /**

@@ -25,3 +25,5 @@ edu.hm.hafner.metric.PackageNode
 edu.hm.hafner.metric.Percentage
 edu.hm.hafner.metric.SafeFraction
 edu.hm.hafner.metric.Value
+
+java.util.ImmutableCollections$ListN

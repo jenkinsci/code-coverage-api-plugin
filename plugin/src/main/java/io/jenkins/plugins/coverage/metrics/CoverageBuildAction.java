@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NavigableMap;
@@ -28,7 +29,7 @@ import org.kohsuke.stapler.StaplerProxy;
 import hudson.Functions;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.FractionConverter;
+import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
 import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
@@ -80,7 +81,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     private final List<? extends Value> indirectCoverageChanges;
 
     static {
-        XSTREAM.registerConverter(new FractionConverter());
+        CoverageXmlStream.registerConverters(XSTREAM2);
+        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "difference", new MetricFractionMapConverter());
+        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "changeCoverageDifference", new MetricFractionMapConverter());
     }
 
     /**
@@ -151,9 +154,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         projectValues = result.aggregateValues();
         this.qualityGateStatus = qualityGateStatus;
         difference = delta;
-        this.changeCoverage = changeCoverage;
+        this.changeCoverage = new ArrayList<>(changeCoverage);
         this.changeCoverageDifference = changeCoverageDifference;
-        this.indirectCoverageChanges = indirectCoverageChanges;
+        this.indirectCoverageChanges = new ArrayList<>(indirectCoverageChanges);
         this.referenceBuildId = referenceBuildId;
     }
 
@@ -607,7 +610,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public boolean hasCodeChanges() {
-        return getResult().hasCodeChanges();
+        return getResult().hasChangedLines();
     }
 
     /**

@@ -61,7 +61,7 @@ public class FileChangesProcessor {
     private void attachChanges(final FileNode changedNode, final Set<Change> relevantChanges) {
         for (Change change : relevantChanges) {
             for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
-                changedNode.addChangedCodeLine(i);
+                changedNode.addChangedLine(i);
             }
         }
     }

@@ -127,7 +127,7 @@ public class CoverageReporter {
             }
             else {
                 changeCoverageDelta = new TreeMap<>();
-                if (rootNode.hasCodeChanges()) {
+                if (rootNode.hasChangedLines()) {
                     log.logInfo("No detected code changes affect the code coverage");
                 }
             }

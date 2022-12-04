@@ -63,6 +63,8 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
 
     @Override
     protected void configureXStream(final XStream2 xStream) {
+        registerConverters(xStream);
+
         xStream.alias("container", ContainerNode.class);
         xStream.alias("module", ModuleNode.class);
         xStream.alias("package", PackageNode.class);
@@ -70,6 +72,15 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
         xStream.alias("class", ClassNode.class);
         xStream.alias("method", MethodNode.class);
 
+        xStream.registerLocalConverter(FileNode.class, "coveredPerLine", new IntegerLineMapConverter());
+        xStream.registerLocalConverter(FileNode.class, "missedPerLine", new IntegerLineMapConverter());
+        xStream.registerLocalConverter(FileNode.class, "indirectCoverageChanges", new IntegerLineMapConverter());
+
+        xStream.registerLocalConverter(FileNode.class, "changedLines", new IntegerSetConverter());
+        xStream.registerLocalConverter(FileNode.class, "coverageDelta", new MetricFractionMapConverter());
+    }
+
+    static void registerConverters(final XStream2 xStream) {
         xStream.alias("metric", Metric.class);
 
         xStream.alias("coverage", Coverage.class);
@@ -86,18 +97,6 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
         xStream.registerConverter(new FractionConverter());
         xStream.registerConverter(new SimpleConverter<>(Value.class, Value::serialize, Value::valueOf));
         xStream.registerConverter(new SimpleConverter<>(Metric.class, Metric::name, Metric::valueOf));
-
-        xStream.registerLocalConverter(FileNode.class, "coveredPerLine", new IntegerLineMapConverter());
-        xStream.registerLocalConverter(FileNode.class, "missedPerLine", new IntegerLineMapConverter());
-        xStream.registerLocalConverter(FileNode.class, "indirectCoverageChanges", new IntegerLineMapConverter());
-
-        xStream.registerLocalConverter(FileNode.class, "changedCodeLines", new IntegerSetConverter());
-
-        /* FIXME: restore converters
-            xStream.registerLocalConverter(FileNode.class, "fileCoverageDelta", new MetricPercentageMapConverter());
-            xStream.registerLocalConverter(FileNode.class, "indirectCoverageChanges", new HitsMapConverter());
-            xStream.registerLocalConverter(FileNode.class, "changedCodeLines", new IntegerSetConverter());
-         */
     }
 
     @Override
@@ -125,6 +124,22 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
         @Override
         public boolean canConvert(final Class type) {
             return type == Fraction.class;
+        }
+    }
+
+    /**
+     * {@link Converter} for a {@link TreeMap} of coverage percentages per metric. Stores the mapping in the condensed
+     * format {@code metric1: numerator1/denominator1, metric2: numerator2/denominator2, ...}.
+     */
+    static final class MetricFractionMapConverter extends TreeMapConverter<Metric, Fraction> {
+        @Override
+        protected Function<Entry<Metric, Fraction>, String> createMapEntry() {
+            return e -> String.format("%s: %s", e.getKey().name(), e.getValue().toProperString());
+        }
+
+        @Override
+        protected Entry<Metric, Fraction> createMapping(final String key, final String value) {
+            return entry(Metric.valueOf(key), Fraction.getFraction(value));
         }
     }
 
