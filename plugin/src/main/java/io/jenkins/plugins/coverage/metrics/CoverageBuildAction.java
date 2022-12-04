@@ -291,6 +291,20 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     /**
+     * Returns a formatted and localized String representation of the specified value.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValueWithDetails(final Value value) {
+        return FORMATTER.getDisplayName(value.getMetric()) + ": "
+                + FORMATTER.formatDetails(value, Functions.getCurrentLocale());
+    }
+
+    /**
      * Returns whether a delta metric for the specified baseline exists.
      *
      * @param baseline

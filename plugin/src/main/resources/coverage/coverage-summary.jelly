@@ -23,11 +23,11 @@
           All recorded values:
           <ul>
             <j:forEach var="value" items="${it.getAllValues(baseline)}">
-              <li>${it.formatValue(value)}</li>
+              <li>${it.formatValueWithDetails(value)}</li>
             </j:forEach>
           </ul>
         </j:set>
-        <ul tooltip="${tooltip}">
+        <ul tooltip="${tooltip}" data-html-tooltip="${tooltip}">
           <j:forEach var="value" items="${it.getValues(baseline)}">
             <li>${it.formatValue(value)}
               <j:if test="${it.hasDelta(baseline, value.metric)}">

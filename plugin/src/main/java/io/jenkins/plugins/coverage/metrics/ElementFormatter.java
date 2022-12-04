@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.metrics;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.metric.Coverage;
@@ -47,6 +48,45 @@ public final class ElementFormatter {
             return String.format(locale, "%.2f%%", ((FractionValue) value).getFraction().doubleValue());
         }
         return value.toString();
+    }
+
+    /**
+     * Formats a generic value using a specific rendering method. The type of the given {@link Value} instance is used
+     * to select the best matching rendering method. This non-object-oriented approach is required since the
+     * {@link Value} instances are provided by a library that is not capable of localizing these values for the user.
+     *
+     * @param value
+     *         the value to format
+     * @param locale
+     *         The used locale
+     *
+     * @return the formatted value as plain text
+     */
+    public String formatDetails(final Value value, final Locale locale) {
+        if (value instanceof Coverage) {
+            var coverage = (Coverage) value;
+            return formatPercentage(coverage, locale)
+                    + formatRatio(coverage.getCovered(), coverage.getTotal());
+        }
+        if (value instanceof MutationValue) {
+            var mutations = (MutationValue) value;
+            return formatPercentage(mutations.getCoveredPercentage(), locale)
+                    + formatRatio(mutations.getKilled(), mutations.getTotal());
+        }
+        if (value instanceof IntegerValue) {
+            return String.valueOf(((IntegerValue) value).getValue());
+        }
+        if (value instanceof FractionValue) {
+            return String.format(locale, "%.2f%%", ((FractionValue) value).getFraction().doubleValue());
+        }
+        return value.toString();
+    }
+
+    private String formatRatio(final int covered, final int total) {
+        if (total > 0) {
+            return String.format(" (%d/%d)", covered, total);
+        }
+        return StringUtils.EMPTY;
     }
 
     /**
