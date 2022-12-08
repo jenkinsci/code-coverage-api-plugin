@@ -21,11 +21,12 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 import org.jenkinsci.Symbol;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -37,7 +38,6 @@ import hudson.tasks.Recorder;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.tasks.SimpleBuildStep;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
@@ -58,7 +58,7 @@ import io.jenkins.plugins.util.LogHandler;
  *
  * @author Ullrich Hafner
  */
-public class CoverageRecorder extends Recorder implements SimpleBuildStep {
+public class CoverageRecorder extends Recorder {
     private String sourceCodeEncoding = StringUtils.EMPTY;
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
     private boolean skipPublishingChecks = false;
@@ -238,10 +238,22 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace, @NonNull final EnvVars env,
-            @NonNull final Launcher launcher, @NonNull final TaskListener listener) throws InterruptedException {
+    public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)
+            throws InterruptedException, IOException {
+        FilePath workspace = build.getWorkspace();
+        if (workspace == null) {
+            throw new IOException("No workspace found for " + build);
+        }
+
+        perform(build, workspace, listener, new RunResultHandler(build));
+
+        return true;
+    }
+
+    public void perform(final Run<?,?> run, final FilePath workspace, final TaskListener taskListener,
+            final StageResultHandler resultHandler) throws InterruptedException {
         Result overallResult = run.getResult();
-        LogHandler logHandler = new LogHandler(listener, "Coverage");
+        LogHandler logHandler = new LogHandler(taskListener, "Coverage");
         if (enabledForFailure || overallResult == null || overallResult.isBetterOrEqualTo(Result.UNSTABLE)) {
             FilteredLog log = new FilteredLog("Errors while recording code coverage:");
             log.logInfo("Recording coverage results");
@@ -254,7 +266,7 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
             else {
                 List<Node> results = new ArrayList<>();
                 for (CoverageTool tool : tools) {
-                    LogHandler toolHandler = new LogHandler(listener, tool.getActualName());
+                    LogHandler toolHandler = new LogHandler(taskListener, tool.getActualName());
                     CoverageParser parser = tool.getParser();
                     if (StringUtils.isBlank(tool.getPattern())) {
                         toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
@@ -276,7 +288,6 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
                             if (failOnError) {
                                 var errorMessage = "Failing build due to some errors during recording of the coverage";
                                 log.logInfo(errorMessage);
-                                var resultHandler = new RunResultHandler(run);
                                 resultHandler.setResult(Result.FAILURE, errorMessage);
                             }
                             else {
@@ -294,10 +305,10 @@ public class CoverageRecorder extends Recorder implements SimpleBuildStep {
 
                 if (!results.isEmpty()) {
                     CoverageReporter reporter = new CoverageReporter();
-                    reporter.run(Node.merge(results), run, workspace, listener,
+                    reporter.run(Node.merge(results), run, workspace, taskListener,
                             getQualityGates(),
                             getScm(), getSourceDirectoriesPaths(),
-                            getSourceCodeEncoding(), getSourceCodeRetention());
+                            getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
                 }
             }
         }

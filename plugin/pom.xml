@@ -112,6 +112,14 @@
       <artifactId>workflow-multibranch</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
     </dependency>
@@ -158,10 +166,6 @@
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>prism-api</artifactId>
       <version>${prism-api.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins.workflow</groupId>
-      <artifactId>workflow-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>
@@ -225,11 +229,6 @@
           <artifactId>asm</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins.workflow</groupId>
-      <artifactId>workflow-step-api</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>

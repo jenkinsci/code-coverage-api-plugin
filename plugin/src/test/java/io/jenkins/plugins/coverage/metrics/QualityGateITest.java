@@ -1,12 +1,17 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Metric;
 
+import org.jenkinsci.plugins.workflow.actions.WarningAction;
+import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -50,6 +55,8 @@ class QualityGateITest extends AbstractCoverageITest {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
+
+
     }
 
     @Test
@@ -74,7 +81,7 @@ class QualityGateITest extends AbstractCoverageITest {
                         + "     [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', unstable: true], "
                         + "     [threshold: 90.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])\n");
 
-        Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
+        WorkflowRun build = (WorkflowRun)buildWithResult(project, Result.UNSTABLE);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
@@ -83,5 +90,15 @@ class QualityGateITest extends AbstractCoverageITest {
                 "-> [Overall project - Line]: ≪PASSED≫ - (Actual value: LINE: 95.39% (5531/5798), Quality gate: 90.00)",
                 "-> [Overall project - Branch]: ≪WARNING≫ - (Actual value: BRANCH: 88.28% (1544/1749), Quality gate: 90.00)",
                 "-> Some quality gates have been missed: overall result is WARNING");
+
+
+        FlowNode flowNode = new DepthFirstScanner().findFirstMatch(build.getExecution(),
+                node -> "recordCoverage".equals(Objects.requireNonNull(node).getDisplayFunctionName()));
+        assertThat(flowNode).isNotNull();
+
+        WarningAction warningAction = flowNode.getPersistentAction(WarningAction.class);
+        assertThat(warningAction).isNotNull();
+        assertThat(warningAction.getMessage()).isEqualTo(
+                "Some quality gates have been missed: overall result is UNSTABLE");
     }
 }

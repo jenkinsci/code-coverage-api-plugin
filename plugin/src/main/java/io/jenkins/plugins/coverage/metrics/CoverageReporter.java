@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class CoverageReporter {
     public void run(final Node rootNode, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final List<QualityGate> qualityGates, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
-            final SourceCodeRetention sourceCodeRetention)
+            final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
         LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -77,48 +76,13 @@ public class CoverageReporter {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
             Node referenceRoot = referenceAction.getResult();
 
-            // calculate code delta
             log.logInfo("Calculating the code delta...");
             CodeDeltaCalculator codeDeltaCalculator = new CodeDeltaCalculator(build, workspace, listener, scm);
             Optional<Delta> delta = codeDeltaCalculator.calculateCodeDeltaToReference(referenceAction.getOwner(), log);
-
-            if (delta.isPresent()) {
-                FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
-
-                try {
-                    log.logInfo("Verify uniqueness of reference file paths...");
-                    verifyPathUniqueness(referenceRoot, log);
-
-                    log.logInfo("Preprocessing code changes...");
-                    Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta.get());
-                    Map<String, FileChanges> mappedChanges =
-                            codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
-                    Map<String, String> oldPathMapping = codeDeltaCalculator.createOldPathMapping(
-                            rootNode, referenceRoot, mappedChanges, log);
-
-                    // calculate code changes
-                    log.logInfo("Obtaining code changes for files...");
-                    fileChangesProcessor.attachChangedCodeLines(rootNode, mappedChanges);
-
-                    // indirect coverage changes
-                    log.logInfo("Obtaining indirect coverage changes...");
-                    fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
-                            mappedChanges, oldPathMapping);
-
-                    // file coverage deltas
-                    log.logInfo("Obtaining coverage delta for files...");
-                    fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
-                }
-                catch (CodeDeltaException e) {
-                    log.logError("An error occurred while processing code and coverage changes:");
-                    log.logError("-> Message: " + e.getMessage());
-                    log.logError("-> Skipping calculating change coverage and indirect coverage changes");
-                }
-            }
+            delta.ifPresent(value -> createDeltaReports(rootNode, log, referenceRoot, codeDeltaCalculator, value));
 
             log.logInfo("Calculating coverage deltas...");
 
-            // filtered coverage trees
             Node changeCoverageRoot = rootNode.filterChanges();
 
             NavigableMap<Metric, Fraction> changeCoverageDelta;
@@ -135,7 +99,6 @@ public class CoverageReporter {
             NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
             Node indirectCoverageChangesTree = rootNode.filterByIndirectlyChangedCoverage();
 
-            var resultHandler = new RunResultHandler(build);
             QualityGateStatus qualityGateStatus;
             qualityGateStatus = evaluateQualityGates(rootNode, log,
                     changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
@@ -149,7 +112,6 @@ public class CoverageReporter {
                     indirectCoverageChangesTree.aggregateValues());
         }
         else {
-            var resultHandler = new RunResultHandler(build);
             QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
@@ -168,9 +130,42 @@ public class CoverageReporter {
         build.addOrReplaceAction(action);
     }
 
+    private void createDeltaReports(final Node rootNode, final FilteredLog log, final Node referenceRoot,
+            final CodeDeltaCalculator codeDeltaCalculator, final Delta delta) {
+        FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
+
+        try {
+            log.logInfo("Verify uniqueness of reference file paths...");
+            verifyPathUniqueness(referenceRoot, log);
+
+            log.logInfo("Preprocessing code changes...");
+            Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
+            var mappedChanges = codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
+            var oldPathMapping = codeDeltaCalculator.createOldPathMapping(rootNode, referenceRoot, mappedChanges, log);
+
+            // calculate code changes
+            log.logInfo("Obtaining code changes for files...");
+            fileChangesProcessor.attachChangedCodeLines(rootNode, mappedChanges);
+
+            // indirect coverage changes
+            log.logInfo("Obtaining indirect coverage changes...");
+            fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
+                    mappedChanges, oldPathMapping);
+
+            // file coverage deltas
+            log.logInfo("Obtaining coverage delta for files...");
+            fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
+        }
+        catch (CodeDeltaException e) {
+            log.logError("An error occurred while processing code and coverage changes:");
+            log.logError("-> Message: " + e.getMessage());
+            log.logError("-> Skipping calculating change coverage and indirect coverage changes");
+        }
+    }
+
     private QualityGateStatus evaluateQualityGates(final Node rootNode, final FilteredLog log,
             final List<Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
-            final NavigableMap<Metric, Fraction> coverageDelta, final RunResultHandler resultHandler,
+            final NavigableMap<Metric, Fraction> coverageDelta, final StageResultHandler resultHandler,
             final List<QualityGate> qualityGates) {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.addAll(qualityGates);
