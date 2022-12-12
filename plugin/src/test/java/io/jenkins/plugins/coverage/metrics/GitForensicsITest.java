@@ -174,13 +174,12 @@ class GitForensicsITest extends AbstractCoverageITest {
         var builder = new CoverageBuilder();
         assertThat(action.getChangeCoverage(LINE))
                 .isEqualTo(builder.setMetric(LINE).setCovered(1).setMissed(1).build());
-        assertThat(action.getChangeCoverage(BRANCH))
-                .isEqualTo(builder.setMetric(BRANCH).setCovered(0).setMissed(0).build());
+        assertThat(action.hasChangeCoverage(BRANCH)).isFalse();
 
         assertThat(action.formatChangeCoverageOverview()).isEqualTo("2 lines (2 files) are affected");
 
         assertThat(action.formatChangeCoverageDifference(LINE)).isEqualTo("-6.46%");
-        assertThat(action.formatChangeCoverageDifference(BRANCH)).isEqualTo("-59.13%");
+        assertThat(action.formatChangeCoverageDifference(BRANCH)).isEqualTo(Messages.Coverage_Not_Available());
     }
 
     /**
