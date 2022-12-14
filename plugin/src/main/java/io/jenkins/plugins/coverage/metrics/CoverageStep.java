@@ -16,8 +16,11 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -25,12 +28,20 @@ import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.Recorder;
+import hudson.tools.ToolDescriptor;
+import hudson.util.ComboBoxModel;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
+import io.jenkins.plugins.util.CharsetValidation;
+import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
  * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and
@@ -43,16 +54,20 @@ import io.jenkins.plugins.prism.SourceCodeRetention;
  * @author Ullrich Hafner
  */
 public class CoverageStep extends Step implements Serializable {
+    private static final long serialVersionUID = 34386077204781270L;
+
+    private List<CoverageTool> tools = new ArrayList<>();
+    private List<QualityGate> qualityGates = new ArrayList<>();
+    private String id = StringUtils.EMPTY;
+    private String name = StringUtils.EMPTY;
+    private boolean skipPublishingChecks = false;
+    private boolean failOnError = false;
+    private boolean enabledForFailure = false;
+    private boolean skipSymbolicLinks = false;
+    private String scm = StringUtils.EMPTY;
     private String sourceCodeEncoding = StringUtils.EMPTY;
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
-    private boolean skipPublishingChecks = false;
     private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.LAST_BUILD;
-    private List<CoverageTool> tools = new ArrayList<>();
-
-    private boolean failOnError;
-    private boolean enabledForFailure = true;
-    private List<QualityGate> qualityGates = new ArrayList<>();
-    private String scm = StringUtils.EMPTY;
 
     /**
      * Creates a new instance of {@link  CoverageStep}.
@@ -102,6 +117,44 @@ public class CoverageStep extends Step implements Serializable {
     }
 
     /**
+     * Overrides the default ID of the results. The ID is used as URL of the results and as identifier in UI elements.
+     * If no ID is given, then the default ID "coverage".
+     *
+     * @param id
+     *         the ID of the results
+     *
+     * @see ToolDescriptor#getId()
+     */
+    @DataBoundSetter
+    public void setId(final String id) {
+        new ModelValidation().ensureValidId(id);
+
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Overrides the name of the results. The name is used for all labels in the UI. If no name is given, then the
+     * default name is used.
+     *
+     * @param name
+     *         the name of the results
+     *
+     * @see #getName()
+     */
+    @DataBoundSetter
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Sets whether publishing checks should be skipped or not.
      *
      * @param skipPublishingChecks
@@ -114,6 +167,21 @@ public class CoverageStep extends Step implements Serializable {
 
     public boolean isSkipPublishingChecks() {
         return skipPublishingChecks;
+    }
+
+    /**
+     * Specify if traversal of symbolic links will be skipped during directory scanning for coverage reports.
+     *
+     * @param skipSymbolicLinks
+     *         if symbolic links should be skipped during directory scanning
+     */
+    @DataBoundSetter
+    public void setSkipSymbolicLinks(final boolean skipSymbolicLinks) {
+        this.skipSymbolicLinks = skipSymbolicLinks;
+    }
+
+    public boolean isSkipSymbolicLinks() {
+        return skipSymbolicLinks;
     }
 
     /**
@@ -227,6 +295,7 @@ public class CoverageStep extends Step implements Serializable {
     @SuppressFBWarnings(value = "THROWS", justification = "false positive")
     static class Execution extends AbstractExecution<Void> {
         private static final long serialVersionUID = -2840020502160375407L;
+        private static final Void UNUSED = null;
 
         private final CoverageStep step;
 
@@ -239,25 +308,21 @@ public class CoverageStep extends Step implements Serializable {
         @Override @CheckForNull
         protected Void run() throws IOException, InterruptedException {
             var recorder = new CoverageRecorder();
-            recorder.setQualityGates(step.getQualityGates());
-            recorder.setFailOnError(step.isFailOnError());
-            recorder.setSkipPublishingChecks(step.isSkipPublishingChecks());
-            recorder.setSourceDirectories(List.copyOf(step.getSourceDirectories()));
             recorder.setTools(step.getTools());
-            recorder.setScm(step.getScm());
+            recorder.setQualityGates(step.getQualityGates());
+            recorder.setId(step.getId());
+            recorder.setName(step.getName());
+            recorder.setSkipPublishingChecks(step.isSkipPublishingChecks());
+            recorder.setFailOnError(step.isFailOnError());
             recorder.setEnabledForFailure(step.isEnabledForFailure());
+            recorder.setScm(step.getScm());
             recorder.setSourceCodeEncoding(step.getSourceCodeEncoding());
+            recorder.setSourceDirectories(List.copyOf(step.getSourceDirectories()));
             recorder.setSourceCodeRetention(step.getSourceCodeRetention());
 
-            StageResultHandler statusHandler = new PipelineResultHandler(getRun(),
-                    getContext().get(FlowNode.class));
+            recorder.perform(getRun(), createWorkspace(), getTaskListener(), createStageResultHandler());
 
-            FilePath workspace = getWorkspace();
-            workspace.mkdirs();
-
-            recorder.perform(getRun(), workspace, getTaskListener(), statusHandler);
-
-            return null;
+            return UNUSED;
         }
     }
 
@@ -267,6 +332,10 @@ public class CoverageStep extends Step implements Serializable {
     @Extension
     @SuppressWarnings("unused") // most methods are used by the corresponding jelly view
     public static class Descriptor extends StepDescriptor {
+        private static final JenkinsFacade JENKINS = new JenkinsFacade();
+        private static final CharsetValidation CHARSET_VALIDATION = new CharsetValidation();
+        private static final ModelValidation MODEL_VALIDATION = new ModelValidation();
+
         @Override
         public String getFunctionName() {
             return "recordCoverage";
@@ -289,6 +358,89 @@ public class CoverageStep extends Step implements Serializable {
                 return formatted;
             }
             return namedArgs.toString();
+        }
+
+        /**
+         * Returns a model with all {@link SourceCodeRetention} strategies.
+         *
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link SourceCodeRetention} strategies.
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillSourceCodeRetentionItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                ListBoxModel options = new ListBoxModel();
+                add(options, SourceCodeRetention.NEVER);
+                add(options, SourceCodeRetention.LAST_BUILD);
+                add(options, SourceCodeRetention.EVERY_BUILD);
+                return options;
+            }
+            return new ListBoxModel();
+        }
+
+        private void add(final ListBoxModel options, final SourceCodeRetention sourceCodeRetention) {
+            options.add(sourceCodeRetention.getDisplayName(), sourceCodeRetention.name());
+        }
+
+        /**
+         * Returns a model with all available charsets.
+         *
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all available charsets
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ComboBoxModel doFillSourceCodeEncodingItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return CHARSET_VALIDATION.getAllCharsets();
+            }
+            return new ComboBoxModel();
+        }
+
+        /**
+         * Performs on-the-fly validation on the character encoding.
+         *
+         * @param project
+         *         the project that is configured
+         * @param sourceCodeEncoding
+         *         the character encoding
+         *
+         * @return the validation result
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public FormValidation doCheckSourceCodeEncoding(@AncestorInPath final AbstractProject<?, ?> project,
+                @QueryParameter final String sourceCodeEncoding) {
+            if (!JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return FormValidation.ok();
+            }
+
+            return CHARSET_VALIDATION.validateCharset(sourceCodeEncoding);
+        }
+
+        /**
+         * Performs on-the-fly validation of the ID.
+         *
+         * @param project
+         *         the project that is configured
+         * @param id
+         *         the ID of the tool
+         *
+         * @return the validation result
+         */
+        @POST
+        public FormValidation doCheckId(@AncestorInPath final AbstractProject<?, ?> project,
+                @QueryParameter final String id) {
+            if (!JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return FormValidation.ok();
+            }
+
+            return MODEL_VALIDATION.validateId(id);
         }
     }
 }

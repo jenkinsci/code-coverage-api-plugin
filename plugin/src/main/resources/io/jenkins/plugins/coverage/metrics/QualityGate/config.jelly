@@ -1,20 +1,20 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:cov="/coverage">
 
-  <f:entry title="${%title.threshold}" description="${%description.threshold}" field="threshold">
+  <f:entry title="${%title.threshold}" field="threshold">
     <f:number/>
   </f:entry>
 
-  <f:entry title="${%title.baseline}" description="${%description.baseline}" field="baseline">
+  <f:entry title="${%title.baseline}" field="baseline">
     <f:select/>
   </f:entry>
 
-  <f:entry title="${%title.metric}" description="${%description.metric}" field="metric">
+  <f:entry title="${%title.metric}" field="metric">
     <f:select/>
   </f:entry>
 
-  <f:entry title="${%title.warning}" description="${%description.warning}" field="unstable">
-    <f:booleanRadio true="Unstable" false="Failed"/>
+  <f:entry title="${%title.warning}" field="unstable">
+    <cov:boolean-radio id="${h.generateId()}" true="Unstable" false="Failed"/>
   </f:entry>
 
 </j:jelly>

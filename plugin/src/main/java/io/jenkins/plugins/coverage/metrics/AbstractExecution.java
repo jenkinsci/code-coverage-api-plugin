@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
+import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import hudson.FilePath;
@@ -133,4 +134,13 @@ abstract class AbstractExecution<T> extends SynchronousNonBlockingStepExecution<
         return new CharsetValidation().getCharset(charset);
     }
 
+    protected PipelineResultHandler createStageResultHandler() throws IOException, InterruptedException {
+        return new PipelineResultHandler(getRun(), getContext().get(FlowNode.class));
+    }
+
+    protected FilePath createWorkspace() throws IOException, InterruptedException {
+        FilePath workspace = getWorkspace();
+        workspace.mkdirs();
+        return workspace;
+    }
 }

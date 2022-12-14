@@ -1,0 +1,49 @@
+jobs:
+  - script: >
+      freeStyleJob('dsl-freestyle-job') {
+          publishers {
+              recordCoverage {
+                  tools {
+                      coverageTool {
+                          parser('JACOCO')
+                          pattern('jacoco-pattern.*')
+                      }
+                      coverageTool {
+                          parser('COBERTURA')
+                          pattern('cobertura-pattern.*')
+                      }
+                  }
+                  qualityGates {
+                      qualityGate {
+                          threshold(70)
+                          metric('LINE')
+                          baseline('PROJECT')
+                          unstable(true)
+                      }
+                      qualityGate {
+                          threshold(80)
+                          metric('BRANCH')
+                          baseline('CHANGE')
+                          unstable(false)
+                      }
+                  } 
+                  id('my-coverage')
+                  name('My Coverage')
+                  enabledForFailure(true)
+                  skipPublishingChecks(true)
+                  failOnError(true)
+                  skipSymbolicLinks(true)
+                  scm('my-git')
+                  sourceCodeEncoding('UTF-8')
+                  sourceCodeRetention('EVERY_BUILD')
+                  sourceDirectories {
+                        sourceCodeDirectory {
+                            path('directory-1')
+                        }
+                        sourceCodeDirectory {
+                            path('directory-2')
+                        }
+                  }
+              }
+          }
+      };

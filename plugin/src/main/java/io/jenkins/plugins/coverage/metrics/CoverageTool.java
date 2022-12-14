@@ -40,8 +40,6 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
 
     private JenkinsFacade jenkins = new JenkinsFacade();
 
-    private String id = StringUtils.EMPTY;
-    private String name = StringUtils.EMPTY;
     private String pattern = StringUtils.EMPTY;
     private CoverageParser parser = CoverageParser.JACOCO;
 
@@ -51,6 +49,11 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
     @DataBoundConstructor
     public CoverageTool() {
         // empty for stapler
+    }
+
+    CoverageTool(final CoverageParser parser, final String pattern) {
+        this.pattern = pattern;
+        this.parser = parser;
     }
 
     public CoverageParser getParser() {
@@ -84,60 +87,6 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
     }
 
     /**
-     * Overrides the default ID of the results. The ID is used as URL of the results and as identifier in UI elements.
-     * If no ID is given, then the default ID is used.
-     *
-     * @param id
-     *         the ID of the results
-     */
-    @DataBoundSetter
-    public void setId(final String id) {
-        new ModelValidation().ensureValidId(id);
-
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Returns the actual ID of the tool. If no user defined ID is given, then the default ID is returned.
-     *
-     * @return the ID
-     * @see #setId(String)
-     */
-    public String getActualId() {
-        return StringUtils.defaultIfBlank(getId(), getDescriptor().getId());
-    }
-
-    /**
-     * Overrides the name of the results. The name is used for all labels in the UI. If no name is given, then the
-     * default name is used.
-     *
-     * @param name
-     *         the name of the results
-     */
-    @DataBoundSetter
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
-     *
-     * @return the name
-     * @see #setName(String)
-     */
-    public String getActualName() {
-        return StringUtils.defaultIfBlank(getName(), getParser().getDisplayName());
-    }
-
-    /**
      * Sets the Ant file-set pattern of files to work with. If the pattern is undefined then the console log is
      * scanned.
      *
@@ -167,7 +116,7 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
 
     @Override
     public String toString() {
-        return String.format("%s (pattern: %s)", getActualName(), getActualPattern());
+        return String.format("%s (pattern: %s)", getParser(), getActualPattern());
     }
 
     @Override

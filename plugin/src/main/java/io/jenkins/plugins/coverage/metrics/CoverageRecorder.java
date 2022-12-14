@@ -35,6 +35,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.tools.ToolDescriptor;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -59,16 +60,20 @@ import io.jenkins.plugins.util.LogHandler;
  * @author Ullrich Hafner
  */
 public class CoverageRecorder extends Recorder {
+    private static final String DEFAULT_ID = "coverage";
+
+    private List<CoverageTool> tools = new ArrayList<>();
+    private List<QualityGate> qualityGates = new ArrayList<>();
+    private String id = StringUtils.EMPTY;
+    private String name = StringUtils.EMPTY;
+    private boolean skipPublishingChecks = false;
+    private boolean failOnError = false;
+    private boolean enabledForFailure = false;
+    private boolean skipSymbolicLinks = false;
+    private String scm = StringUtils.EMPTY;
     private String sourceCodeEncoding = StringUtils.EMPTY;
     private Set<SourceCodeDirectory> sourceDirectories = new HashSet<>();
-    private boolean skipPublishingChecks = false;
     private SourceCodeRetention sourceCodeRetention = SourceCodeRetention.LAST_BUILD;
-    private List<CoverageTool> tools = new ArrayList<>();
-
-    private boolean failOnError;
-    private boolean enabledForFailure = true;
-    private List<QualityGate> qualityGates = new ArrayList<>();
-    private String scm = StringUtils.EMPTY;
 
     /**
      * Creates a new instance of {@link  CoverageRecorder}.
@@ -113,6 +118,65 @@ public class CoverageRecorder extends Recorder {
     }
 
     /**
+     * Overrides the default ID of the results. The ID is used as URL of the results and as identifier in UI elements.
+     * If no ID is given, then the default ID "coverage".
+     *
+     * @param id
+     *         the ID of the results
+     *
+     * @see ToolDescriptor#getId()
+     */
+    @DataBoundSetter
+    public void setId(final String id) {
+        new ModelValidation().ensureValidId(id);
+
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the actual ID of the results. If no user defined ID is given, then the default ID {@link #DEFAULT_ID} is
+     * returned.
+     *
+     * @return the ID
+     * @see #setId(String)
+     */
+    public String getActualId() {
+        return StringUtils.defaultIfBlank(getId(), DEFAULT_ID);
+    }
+
+    /**
+     * Overrides the name of the results. The name is used for all labels in the UI. If no name is given, then the
+     * default name is used.
+     *
+     * @param name
+     *         the name of the results
+     *
+     * @see #getName()
+     */
+    @DataBoundSetter
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
+     *
+     * @return the name
+     * @see #setName(String)
+     */
+    public String getActualName() {
+        return StringUtils.defaultIfBlank(getName(), Messages.Coverage_Link_Name());
+    }
+
+    /**
      * Sets whether publishing checks should be skipped or not.
      *
      * @param skipPublishingChecks
@@ -125,6 +189,26 @@ public class CoverageRecorder extends Recorder {
 
     public boolean isSkipPublishingChecks() {
         return skipPublishingChecks;
+    }
+
+    /**
+     * Specify if traversal of symbolic links will be skipped during directory scanning for coverage reports.
+     *
+     * @param skipSymbolicLinks
+     *         if symbolic links should be skipped during directory scanning
+     */
+    @DataBoundSetter
+    public void setSkipSymbolicLinks(final boolean skipSymbolicLinks) {
+        this.skipSymbolicLinks = skipSymbolicLinks;
+    }
+
+    @SuppressWarnings({"unused", "PMD.BooleanGetMethodName"}) // called by Stapler
+    public boolean isSkipSymbolicLinks() {
+        return skipSymbolicLinks;
+    }
+
+    private boolean followSymlinks() {
+        return !isSkipSymbolicLinks();
     }
 
     /**
@@ -250,7 +334,7 @@ public class CoverageRecorder extends Recorder {
         return true;
     }
 
-    public void perform(final Run<?,?> run, final FilePath workspace, final TaskListener taskListener,
+    public void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
             final StageResultHandler resultHandler) throws InterruptedException {
         Result overallResult = run.getResult();
         LogHandler logHandler = new LogHandler(taskListener, "Coverage");
@@ -266,7 +350,7 @@ public class CoverageRecorder extends Recorder {
             else {
                 List<Node> results = new ArrayList<>();
                 for (CoverageTool tool : tools) {
-                    LogHandler toolHandler = new LogHandler(taskListener, tool.getActualName());
+                    LogHandler toolHandler = new LogHandler(taskListener, getActualName());
                     CoverageParser parser = tool.getParser();
                     if (StringUtils.isBlank(tool.getPattern())) {
                         toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
@@ -342,6 +426,7 @@ public class CoverageRecorder extends Recorder {
     public static class Descriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
         private static final CharsetValidation CHARSET_VALIDATION = new CharsetValidation();
+        private static final ModelValidation MODEL_VALIDATION = new ModelValidation();
 
         @NonNull
         @Override
@@ -415,6 +500,26 @@ public class CoverageRecorder extends Recorder {
             }
 
             return CHARSET_VALIDATION.validateCharset(sourceCodeEncoding);
+        }
+
+        /**
+         * Performs on-the-fly validation of the ID.
+         *
+         * @param project
+         *         the project that is configured
+         * @param id
+         *         the ID of the tool
+         *
+         * @return the validation result
+         */
+        @POST
+        public FormValidation doCheckId(@AncestorInPath final AbstractProject<?, ?> project,
+                @QueryParameter final String id) {
+            if (!JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return FormValidation.ok();
+            }
+
+            return MODEL_VALIDATION.validateId(id);
         }
     }
 }

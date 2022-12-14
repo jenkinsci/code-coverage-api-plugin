@@ -27,3 +27,5 @@ edu.hm.hafner.metric.SafeFraction
 edu.hm.hafner.metric.Value
 
 java.util.ImmutableCollections$ListN
+java.util.ImmutableCollections$SetN
+java.util.ImmutableCollections$Set12
