@@ -3,6 +3,7 @@ package io.jenkins.plugins.coverage.metrics;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +67,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     void shouldProvideIndirectCoverageChanges() {
         Node node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
 
-        CoverageViewModel model = new CoverageViewModel(mock(Run.class), new FilteredLog("Errors"), node);
+        CoverageViewModel model = createModel(node);
 
         assertThat(model.hasIndirectCoverageChanges()).isTrue();
     }
@@ -83,9 +84,14 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     }
 
     private CoverageViewModel createModelFromCodingStyleReport() {
-        var model = new CoverageViewModel(mock(Run.class), new FilteredLog("Errors"), readJacocoResult("jacoco-codingstyle.xml"));
+        var model = createModel(readJacocoResult("jacoco-codingstyle.xml"));
         assertThat(model.getDisplayName()).contains("'Java coding style'");
         return model;
+    }
+
+    private CoverageViewModel createModel(final Node node) {
+        return new CoverageViewModel(mock(Run.class), "id", StringUtils.EMPTY,
+                node, new FilteredLog("Errors"));
     }
 
 }

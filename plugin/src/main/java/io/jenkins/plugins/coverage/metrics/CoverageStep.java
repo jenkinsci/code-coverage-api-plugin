@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -111,7 +110,6 @@ public class CoverageStep extends Step implements Serializable {
         this.qualityGates = List.copyOf(qualityGates);
     }
 
-    @SuppressWarnings("unused") // used by Stapler view data binding
     public List<QualityGate> getQualityGates() {
         return qualityGates;
     }
@@ -248,14 +246,6 @@ public class CoverageStep extends Step implements Serializable {
 
     public Set<SourceCodeDirectory> getSourceDirectories() {
         return sourceDirectories;
-    }
-
-    private Set<String> getSourceDirectoriesPaths() {
-        Set<String> paths = sourceDirectories.stream()
-                .map(SourceCodeDirectory::getPath)
-                .collect(Collectors.toSet());
-        paths.add("src/main/java");
-        return paths;
     }
 
     /**

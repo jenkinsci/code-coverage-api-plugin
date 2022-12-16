@@ -7,6 +7,7 @@ import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -84,8 +85,10 @@ class CoverageBuildActionTest {
     }
 
     private static CoverageBuildAction createEmptyAction(final Node module) {
-        return new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(), module,
-                QualityGateStatus.INACTIVE, "-",
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
+                StringUtils.EMPTY, module,
+                QualityGateStatus.INACTIVE,
+                createLog(), "-",
                 new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);
     }
@@ -104,8 +107,10 @@ class CoverageBuildActionTest {
         Coverage percent80 = coverageBuilder.setMetric(Metric.LINE).setCovered(8).setMissed(2).build();
         coverages.add(percent80);
 
-        CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class), createLog(),
-                new ModuleNode("module"), QualityGateStatus.INACTIVE, "-",
+        CoverageBuildAction action = new CoverageBuildAction(mock(FreeStyleBuild.class),
+                CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY,
+                new ModuleNode("module"),
+                QualityGateStatus.INACTIVE, createLog(), "-",
                 deltas, coverages,
                 deltas, coverages, false);
 
@@ -307,7 +312,7 @@ class CoverageBuildActionTest {
         changeCoverageDifference.put(COVERAGE_METRIC, COVERAGE_FRACTION);
         var indirectCoverageChanges = List.of(VALUE);
 
-        return new CoverageBuildAction(build, createLog(), root, QualityGateStatus.INACTIVE, "-", deltas,
+        return new CoverageBuildAction(build, CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY, root, QualityGateStatus.INACTIVE, createLog(), "-", deltas,
                 changeCoverage, changeCoverageDifference, indirectCoverageChanges, false);
     }
 

@@ -135,7 +135,10 @@ class CoveragePluginITest extends AbstractCoverageITest {
     private void verifyOneJacocoResult(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        verifyJaCoCoAction(build.getAction(CoverageBuildAction.class));
+    }
+
+    private static void verifyJaCoCoAction(final CoverageBuildAction coverageResult) {
         assertThat(coverageResult.getAllValues(Baseline.PROJECT)).extracting(Value::getMetric)
                 .containsExactly(MODULE,
                         PACKAGE,
@@ -215,7 +218,10 @@ class CoveragePluginITest extends AbstractCoverageITest {
     private void verifyOneCoberturaResult(final ParameterizedJob<?, ?> project) {
         Run<?, ?> build = buildSuccessfully(project);
 
-        CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
+        verifyCoberturaAction(build.getAction(CoverageBuildAction.class));
+    }
+
+    private static void verifyCoberturaAction(final CoverageBuildAction coverageResult) {
         assertThat(coverageResult.getLineCoverage())
                 .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
                         .setMissed(COBERTURA_MISSED_LINES)
@@ -224,7 +230,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordCoberturaAndJacocoResultsInFreestyleJob() {
-        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+        FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE,
+                COBERTURA_HIGHER_COVERAGE_FILE);
 
         CoverageRecorder recorder = new CoverageRecorder();
 
@@ -308,5 +315,38 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     private static CoverageBuilder createLineCoverageBuilder() {
         return new CoverageBuilder().setMetric(Metric.LINE);
+    }
+
+    @Test
+    void shouldRecordResultsWithDifferentId() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, COBERTURA_HIGHER_COVERAGE_FILE);
+
+        setPipelineScript(job,
+                "recordCoverage "
+                        + "tools: [[parser: 'COBERTURA', pattern: '" + COBERTURA_HIGHER_COVERAGE_FILE + "']],"
+                        + "id: 'cobertura', name: 'Cobertura Results'\n"
+                        + "recordCoverage "
+                        + "tools: ["
+                        + "[parser: 'JACOCO', pattern: '" + JACOCO_ANALYSIS_MODEL_FILE + "']],"
+                        + "id: 'jacoco', name: 'JaCoCo Results'\n");
+
+        Run<?, ?> build = buildSuccessfully(job);
+
+        List<CoverageBuildAction> coverageResult = build.getActions(CoverageBuildAction.class);
+        assertThat(coverageResult).hasSize(2);
+
+        assertThat(coverageResult).element(0).satisfies(
+                a -> {
+                    assertThat(a.getUrlName()).isEqualTo("cobertura");
+                    assertThat(a.getDisplayName()).isEqualTo("Cobertura Results");
+                    verifyCoberturaAction(a);
+                }
+        );
+        assertThat(coverageResult).element(1).satisfies(
+                a -> {
+                    assertThat(a.getUrlName()).isEqualTo("jacoco");
+                    assertThat(a.getDisplayName()).isEqualTo("JaCoCo Results");
+                    verifyJaCoCoAction(a);
+                });
     }
 }

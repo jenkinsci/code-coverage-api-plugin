@@ -35,6 +35,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
     static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
     private static final String SOURCE_FILE_PATH = PACKAGE_PATH + SOURCE_FILE_NAME;
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
+    private static final String PATH_UTIL_COVERAGE_REPORT = "parth-util-parser.xml";
     static final String AGENT_LABEL = "coverage-agent";
 
     /** Verifies that the plugin reads source code from the workspace root. */
@@ -90,6 +91,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
 
         WorkflowJob job = createPipeline();
         copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
+        copySingleFileToAgentWorkspace(localAgent, job, PATH_UTIL_COVERAGE_REPORT, PATH_UTIL_COVERAGE_REPORT);
         copySourceFileToAgent(sourceDirectory, localAgent, job);
 
         // get the temporary directory - used by unit tests - to verify its content
@@ -130,7 +132,15 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
     private CpsFlowDefinition createPipelineWithSourceCode(final SourceCodeRetention sourceCodeRetention,
             final String sourceDirectory) {
         return new CpsFlowDefinition("node ('coverage-agent') {"
-                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '**/*xml']], \n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '"
+                + ACU_COBOL_PARSER_COVERAGE_REPORT
+                + "']], \n"
+                + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
+                + "         sourceCodeEncoding: 'UTF-8', \n"
+                + "         sourceDirectories: [[path: '" + sourceDirectory + "']]\n"
+                + "    recordCoverage id:'path',  tools: [[parser: 'JACOCO', pattern: '"
+                + PATH_UTIL_COVERAGE_REPORT
+                + "']], \n"
                 + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
                 + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"

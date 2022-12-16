@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.builder.Input;
@@ -221,8 +222,8 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
     CoverageBuildAction createAction() {
         var tree = createSerializable();
 
-        return new CoverageBuildAction(mock(FreeStyleBuild.class), new FilteredLog("Test"),
-                tree, QualityGateStatus.INACTIVE, "-",
+        return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY,
+                tree, QualityGateStatus.INACTIVE, new FilteredLog("Test"), "-",
                 new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);
     }

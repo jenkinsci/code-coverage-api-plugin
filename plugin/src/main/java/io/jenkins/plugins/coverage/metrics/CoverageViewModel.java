@@ -71,6 +71,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final String INFO_MESSAGES_VIEW_URL = "info";
 
     private final Run<?, ?> owner;
+    private final String optionalName;
     private final FilteredLog log;
     private final Node node;
     private final String id;
@@ -84,17 +85,25 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Creates a new view model instance.
      *
      * @param owner
-     *         the owner of this view
+     *         the associated build that created the statistics
+     * @param id
+     *         ID (URL) of the results
+     * @param optionalName
+     *         optional name that overrides the default name of the results
      * @param node
-     *         the coverage node to be shown
+     *         the coverage tree to be shown
+     * @param log
+     *         the logging statements of the recording step
      */
-    public CoverageViewModel(final Run<?, ?> owner, final FilteredLog log, final Node node) {
+    public CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
+            final FilteredLog log) {
         super();
 
         this.owner = owner;
+        this.id = id;
+        this.optionalName = optionalName;
         this.log = log;
         this.node = node;
-        id = "coverage"; // TODO: this needs to be a parameter
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         changeCoverageTreeRoot = node.filterChanges();
@@ -115,7 +124,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     @Override
     public String getDisplayName() {
-        return Messages.Coverage_Title(node.getName());
+        if (StringUtils.isBlank(optionalName)) {
+            return Messages.Coverage_Title(node.getName());
+        }
+        return String.format("%s: %s", optionalName, node.getName());
     }
 
     /**
@@ -308,7 +320,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     public String getUrlForBuild(final String selectedBuildDisplayName, final String currentUrl) {
-        return NAVIGATOR.getSameUrlForOtherBuild(owner, currentUrl, CoverageBuildAction.DETAILS_URL,
+        return NAVIGATOR.getSameUrlForOtherBuild(owner, currentUrl, id,
                 selectedBuildDisplayName).orElse(StringUtils.EMPTY);
     }
 
@@ -416,7 +428,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable(final Node coverageNode) {
-        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath()).canRead();
+        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath())
+                .canRead();
     }
 
     /**

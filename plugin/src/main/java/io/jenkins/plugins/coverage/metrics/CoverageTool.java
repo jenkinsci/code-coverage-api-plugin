@@ -203,18 +203,24 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
      * Supported coverage parsers.
      */
     public enum CoverageParser {
-        COBERTURA(Messages._Parser_Cobertura(), "**/cobertura.xml", CoberturaParser::new),
-        JACOCO(Messages._Parser_JaCoCo(), "**/jacoco.xml", JacocoParser::new),
-        PIT(Messages._Parser_PIT(), "**/pit.xml", PitestParser::new);
+        COBERTURA(Messages._Parser_Cobertura(), "**/cobertura.xml", CoberturaParser::new,
+                "symbol-footsteps-outline plugin-ionicons-api"),
+        JACOCO(Messages._Parser_JaCoCo(), "**/jacoco.xml", JacocoParser::new,
+                "symbol-footsteps-outline plugin-ionicons-api"),
+        PIT(Messages._Parser_PIT(), "**/mutations.xml", PitestParser::new,
+                "symbol-solid/virus-slash plugin-font-awesome-api");
 
         private final Localizable displayName;
         private final String defaultPattern;
         private final Supplier<XmlParser> parserSupplier;
+        private final String icon;
 
-        CoverageParser(final Localizable displayName, final String defaultPattern, final Supplier<XmlParser> parserSupplier) {
+        CoverageParser(final Localizable displayName, final String defaultPattern, final Supplier<XmlParser> parserSupplier,
+                final String icon) {
             this.displayName = displayName;
             this.defaultPattern = defaultPattern;
             this.parserSupplier = parserSupplier;
+            this.icon = icon;
         }
 
         public String getDisplayName() {
@@ -225,6 +231,15 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
             return defaultPattern;
         }
 
+        public String getIcon() {
+            return icon;
+        }
+
+        /**
+         * Creates a new parser to read the report XML files into a Java object model of {@link Node} instances.
+         *
+         * @return the parser
+         */
         public XmlParser createParser() {
             return parserSupplier.get();
         }

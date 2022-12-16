@@ -38,6 +38,7 @@ import hudson.tasks.Recorder;
 import hudson.tools.ToolDescriptor;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
@@ -60,7 +61,7 @@ import io.jenkins.plugins.util.LogHandler;
  * @author Ullrich Hafner
  */
 public class CoverageRecorder extends Recorder {
-    private static final String DEFAULT_ID = "coverage";
+    static final String DEFAULT_ID = "coverage";
 
     private List<CoverageTool> tools = new ArrayList<>();
     private List<QualityGate> qualityGates = new ArrayList<>();
@@ -145,7 +146,7 @@ public class CoverageRecorder extends Recorder {
      * @see #setId(String)
      */
     public String getActualId() {
-        return StringUtils.defaultIfBlank(getId(), DEFAULT_ID);
+        return StringUtils.defaultIfBlank(id, DEFAULT_ID);
     }
 
     /**
@@ -163,17 +164,7 @@ public class CoverageRecorder extends Recorder {
     }
 
     public String getName() {
-        return name;
-    }
-
-    /**
-     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
-     *
-     * @return the name
-     * @see #setName(String)
-     */
-    public String getActualName() {
-        return StringUtils.defaultIfBlank(getName(), Messages.Coverage_Link_Name());
+        return StringUtils.defaultString(name);
     }
 
     /**
@@ -205,10 +196,6 @@ public class CoverageRecorder extends Recorder {
     @SuppressWarnings({"unused", "PMD.BooleanGetMethodName"}) // called by Stapler
     public boolean isSkipSymbolicLinks() {
         return skipSymbolicLinks;
-    }
-
-    private boolean followSymlinks() {
-        return !isSkipSymbolicLinks();
     }
 
     /**
@@ -334,7 +321,7 @@ public class CoverageRecorder extends Recorder {
         return true;
     }
 
-    public void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
+    void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
             final StageResultHandler resultHandler) throws InterruptedException {
         Result overallResult = run.getResult();
         LogHandler logHandler = new LogHandler(taskListener, "Coverage");
@@ -342,54 +329,21 @@ public class CoverageRecorder extends Recorder {
             FilteredLog log = new FilteredLog("Errors while recording code coverage:");
             log.logInfo("Recording coverage results");
 
+            var validation = new ModelValidation().validateId(getId());
+            if (validation.kind != Kind.OK) {
+                failStage(resultHandler, logHandler, log, validation.getLocalizedMessage());
+            }
             if (tools.isEmpty()) {
-                log.logError("No tools defined that will record the coverage files");
-                run.setResult(Result.FAILURE); // use StageResultHandler of warnings plugin
-                logHandler.log(log);
+                failStage(resultHandler, logHandler, log,
+                        "No tools defined that will record the coverage files");
             }
             else {
-                List<Node> results = new ArrayList<>();
-                for (CoverageTool tool : tools) {
-                    LogHandler toolHandler = new LogHandler(taskListener, getActualName());
-                    CoverageParser parser = tool.getParser();
-                    if (StringUtils.isBlank(tool.getPattern())) {
-                        toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
-                                parser.getDefaultPattern());
-                    }
-
-                    String expandedPattern = expandPattern(run, tool.getActualPattern());
-                    if (!expandedPattern.equals(tool.getActualPattern())) {
-                        log.logInfo("Expanding pattern '%s' to '%s'", tool.getActualPattern(), expandedPattern);
-                    }
-
-                    try {
-                        FileVisitorResult<ModuleNode> result = workspace.act(
-                                new CoverageReportScanner(expandedPattern, "UTF-8", false, parser));
-                        log.merge(result.getLog());
-
-                        var coverageResults = result.getResults();
-                        if (result.hasErrors()) {
-                            if (failOnError) {
-                                var errorMessage = "Failing build due to some errors during recording of the coverage";
-                                log.logInfo(errorMessage);
-                                resultHandler.setResult(Result.FAILURE, errorMessage);
-                            }
-                            else {
-                                log.logInfo("Ignore errors and continue processing");
-                            }
-                        }
-                        results.addAll(coverageResults);
-                    }
-                    catch (IOException exception) {
-                        log.logException(exception, "Exception while parsing with tool " + tool);
-                    }
-
-                    toolHandler.log(log);
-                }
+                List<Node> results = recordCoverageResults(run, workspace, taskListener, resultHandler, log);
 
                 if (!results.isEmpty()) {
                     CoverageReporter reporter = new CoverageReporter();
-                    reporter.run(Node.merge(results), run, workspace, taskListener,
+                    reporter.publishAction(getActualId(), getName(), Node.merge(results),
+                            run, workspace, taskListener,
                             getQualityGates(),
                             getScm(), getSourceDirectoriesPaths(),
                             getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
@@ -399,6 +353,56 @@ public class CoverageRecorder extends Recorder {
         else {
             logHandler.log("Skipping execution of coverage recorder since overall result is '%s'", overallResult);
         }
+    }
+
+    private static void failStage(final StageResultHandler resultHandler, final LogHandler logHandler,
+            final FilteredLog log, final String message) {
+        log.logError(message);
+        resultHandler.setResult(Result.FAILURE, message);
+        logHandler.log(log);
+    }
+
+    private List<Node> recordCoverageResults(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
+            final StageResultHandler resultHandler, final FilteredLog log) throws InterruptedException {
+        List<Node> results = new ArrayList<>();
+        for (CoverageTool tool : tools) {
+            LogHandler toolHandler = new LogHandler(taskListener, tool.getDescriptor().getDisplayName());
+            CoverageParser parser = tool.getParser();
+            if (StringUtils.isBlank(tool.getPattern())) {
+                toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
+                        parser.getDefaultPattern());
+            }
+
+            String expandedPattern = expandPattern(run, tool.getActualPattern());
+            if (!expandedPattern.equals(tool.getActualPattern())) {
+                log.logInfo("Expanding pattern '%s' to '%s'", tool.getActualPattern(), expandedPattern);
+            }
+
+            try {
+                FileVisitorResult<ModuleNode> result = workspace.act(
+                        new CoverageReportScanner(expandedPattern, "UTF-8", isSkipSymbolicLinks(), parser));
+                log.merge(result.getLog());
+
+                var coverageResults = result.getResults();
+                if (result.hasErrors()) {
+                    if (isFailOnError()) {
+                        var errorMessage = "Failing build due to some errors during recording of the coverage";
+                        log.logInfo(errorMessage);
+                        resultHandler.setResult(Result.FAILURE, errorMessage);
+                    }
+                    else {
+                        log.logInfo("Ignore errors and continue processing");
+                    }
+                }
+                results.addAll(coverageResults);
+            }
+            catch (IOException exception) {
+                log.logException(exception, "Exception while parsing with tool " + tool);
+            }
+
+            toolHandler.log(log);
+        }
+        return results;
     }
 
     private String expandPattern(final Run<?, ?> run, final String actualPattern) {

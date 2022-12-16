@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.metric.Coverage;
@@ -47,8 +48,6 @@ import static hudson.model.Run.*;
  */
 @SuppressWarnings("PMD.GodClass")
 public class CoverageBuildAction extends BuildAction<Node> implements StaplerProxy {
-    /** Relative URL to the details of the code coverage results. */
-    public static final String DETAILS_URL = "coverage";
     /** The coverage report symbol from the Ionicons plugin. */
     public static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
 
@@ -57,6 +56,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     private static final String NO_REFERENCE_BUILD = "-";
 
     private static final ElementFormatter FORMATTER = new ElementFormatter();
+
+    private final String id;
+    private final String name;
 
     private final String referenceBuildId;
 
@@ -83,7 +85,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     static {
         CoverageXmlStream.registerConverters(XSTREAM2);
         XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "difference", new MetricFractionMapConverter());
-        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "changeCoverageDifference", new MetricFractionMapConverter());
+        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "changeCoverageDifference",
+                new MetricFractionMapConverter());
     }
 
     /**
@@ -91,17 +94,29 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *
      * @param owner
      *         the associated build that created the statistics
-     * @param log
-     *         the logging statements of the recording step
+     * @param id
+     *         ID (URL) of the results
+     * @param optionalName
+     *         optional name that overrides the default name of the results
      * @param result
      *         the coverage tree as result to persist with this action
      * @param qualityGateStatus
      *         status of the quality gates
+     * @param log
+     *         the logging statements of the recording step
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
-            final QualityGateStatus qualityGateStatus) {
-        this(owner, log, result, qualityGateStatus, NO_REFERENCE_BUILD, new TreeMap<>(), List.of(),
-                new TreeMap<>(), List.of());
+    public CoverageBuildAction(final Run<?, ?> owner,
+            final String id, final String optionalName,
+            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log) {
+        this(owner, id, optionalName, result, qualityGateStatus, log, NO_REFERENCE_BUILD,
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
+    }
+
+    @VisibleForTesting
+    CoverageBuildAction(final Run<?, ?> owner,
+            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log) {
+        this(owner, CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY, result, qualityGateStatus, log, NO_REFERENCE_BUILD,
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
     }
 
     /**
@@ -109,12 +124,16 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *
      * @param owner
      *         the associated build that created the statistics
-     * @param log
-     *         the logging statements of the recording step
+     * @param id
+     *         ID (URL) of the results
+     * @param optionalName
+     *         optional name that overrides the default name of the results
      * @param result
      *         the coverage tree as result to persist with this action
      * @param qualityGateStatus
      *         status of the quality gates
+     * @param log
+     *         the logging statements of the recording step
      * @param referenceBuildId
      *         the ID of the reference build
      * @param delta
@@ -127,21 +146,35 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *         the indirect coverage changes of the associated change request with respect to the reference build
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
-            final QualityGateStatus qualityGateStatus,
+    public CoverageBuildAction(final Run<?, ?> owner,
+            final String id, final String optionalName,
+            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final List<? extends Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final List<? extends Value> indirectCoverageChanges) {
-        this(owner, log, result, qualityGateStatus, referenceBuildId, delta, changeCoverage,
+        this(owner, id, optionalName, result, qualityGateStatus, log, referenceBuildId, delta, changeCoverage,
+                changeCoverageDifference, indirectCoverageChanges, true);
+    }
+
+    @VisibleForTesting
+    CoverageBuildAction(final Run<?, ?> owner,
+            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
+            final String referenceBuildId,
+            final NavigableMap<Metric, Fraction> delta,
+            final List<? extends Value> changeCoverage,
+            final NavigableMap<Metric, Fraction> changeCoverageDifference,
+            final List<? extends Value> indirectCoverageChanges) {
+        this(owner, CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY, result, qualityGateStatus, log, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CoverageBuildAction(final Run<?, ?> owner, final FilteredLog log, final Node result,
-            final QualityGateStatus qualityGateStatus,
+    CoverageBuildAction(final Run<?, ?> owner,
+            final String id, final String name,
+            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final List<? extends Value> changeCoverage,
@@ -150,7 +183,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
             final boolean canSerialize) {
         super(owner, result, canSerialize);
 
+        this.id = id;
+        this.name = name;
         this.log = log;
+
         projectValues = result.aggregateValues();
         this.qualityGateStatus = qualityGateStatus;
         difference = delta;
@@ -158,6 +194,15 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         this.changeCoverageDifference = changeCoverageDifference;
         this.indirectCoverageChanges = new ArrayList<>(indirectCoverageChanges);
         this.referenceBuildId = referenceBuildId;
+    }
+
+    /**
+     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
+     *
+     * @return the name
+     */
+    private String getActualName() {
+        return StringUtils.defaultIfBlank(name, Messages.Coverage_Link_Name());
     }
 
     public FilteredLog getLog() {
@@ -767,7 +812,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @Override
     public CoverageViewModel getTarget() {
-        return new CoverageViewModel(getOwner(), log, getResult());
+        return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(), log);
     }
 
     @CheckForNull
@@ -779,12 +824,12 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @NonNull
     @Override
     public String getDisplayName() {
-        return Messages.Coverage_Link_Name();
+        return getActualName();
     }
 
     @NonNull
     @Override
     public String getUrlName() {
-        return DETAILS_URL;
+        return id;
     }
 }

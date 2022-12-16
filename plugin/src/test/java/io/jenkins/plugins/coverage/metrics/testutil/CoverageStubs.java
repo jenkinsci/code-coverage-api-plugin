@@ -18,7 +18,6 @@ import edu.hm.hafner.util.VisibleForTesting;
 import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
 import io.jenkins.plugins.coverage.metrics.CoveragePercentage;
 
-import static io.jenkins.plugins.coverage.metrics.CoverageBuildAction.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -97,7 +96,7 @@ public final class CoverageStubs {
         when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
         when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(coverageValue);
 
-        when(action.getUrlName()).thenReturn(DETAILS_URL);
+        when(action.getUrlName()).thenReturn("coverage");
 
         return action;
     }

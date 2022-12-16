@@ -34,32 +34,8 @@ import static io.jenkins.plugins.coverage.metrics.FilePathValidator.*;
  * @author Ullrich Hafner
  */
 public class CoverageReporter {
-    /**
-     * Transforms the old model to the new model and invokes all steps that work on the new model. In the final step, a
-     * new {@link CoverageBuildAction} will be attached to the build.
-     *
-     * @param rootNode
-     *         the root result obtained from the old coverage API
-     * @param build
-     *         the build that owns these results
-     * @param workspace
-     *         the workspace on the agent that provides access to the source code files
-     * @param listener
-     *         logger
-     * @param scm
-     *         the SCM which is used for calculating the code delta to a reference build
-     * @param sourceDirectories
-     *         the source directories that have been configured in the associated job
-     * @param sourceCodeEncoding
-     *         the encoding of the source code files
-     * @param sourceCodeRetention
-     *         the source code retention strategy
-     *
-     * @throws InterruptedException
-     *         if the build has been aborted
-     */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public void run(final Node rootNode, final Run<?, ?> build, final FilePath workspace,
+    void publishAction(final String id, final String optionalName, final Node rootNode, final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final List<QualityGate> qualityGates, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
@@ -104,7 +80,7 @@ public class CoverageReporter {
                     changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus,
+            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateStatus, log,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.aggregateValues(),
@@ -115,7 +91,7 @@ public class CoverageReporter {
             QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, log, rootNode, qualityGateStatus);
+            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateStatus, log);
         }
 
         log.logInfo("Executing source code painting...");
@@ -127,7 +103,7 @@ public class CoverageReporter {
 
         logHandler.log(log);
 
-        build.addOrReplaceAction(action);
+        build.addAction(action);
     }
 
     private void createDeltaReports(final Node rootNode, final FilteredLog log, final Node referenceRoot,
