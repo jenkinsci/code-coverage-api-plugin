@@ -15,6 +15,6 @@ public class CoverageProcessorTest {
     public void testFloatRounding() {
         float number=-0.001f;
         float scaledNumber= CoverageProcessor.roundFloat(number,2);
-        Assert.assertEquals(scaledNumber,0.00);
+        Assert.assertEquals(scaledNumber,0.00,0);
     }
 }
