@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -252,7 +254,8 @@ public class CoverageProcessor {
     private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
             throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
-        if (coverageDiff < 0) {
+
+        if (roundFloat(coverageDiff,2) < 0) {
             String message = "Fail build because this change request decreases line coverage by " + coverageDiff;
             action.setFailMessage(message);
 
@@ -731,4 +734,15 @@ public class CoverageProcessor {
             return (CoverageResult) ois.readObject();
         }
     }
+
+    /**
+     * Round up float value to specified scaling factor using Round down strategy
+     * @param number
+     * @param scale
+     * @return float value (scaled)
+     */
+    public static float roundFloat(final float number, final int scale) {
+       return BigDecimal.valueOf(number).setScale(scale,RoundingMode.DOWN).floatValue();
+    }
+
 }
