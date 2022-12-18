@@ -251,7 +251,7 @@ public class CoverageProcessor {
         return Optional.empty();
     }
 
-    private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
+    void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
             throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
         if (roundFloat(coverageDiff,2) < 0) {
