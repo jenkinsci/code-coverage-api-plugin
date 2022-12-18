@@ -254,11 +254,9 @@ public class CoverageProcessor {
     private void failBuildIfChangeRequestDecreasedCoverage(final CoverageResult coverageResult, final CoverageAction action)
             throws CoverageException {
         float coverageDiff = coverageResult.getCoverageDelta(CoverageElement.LINE);
-
         if (roundFloat(coverageDiff,2) < 0) {
             String message = "Fail build because this change request decreases line coverage by " + coverageDiff;
             action.setFailMessage(message);
-
             throw new CoverageException(message);
         }
     }
@@ -734,7 +732,6 @@ public class CoverageProcessor {
             return (CoverageResult) ois.readObject();
         }
     }
-
     /**
      * Round up float value to specified scaling factor using Round down strategy
      * @param number
@@ -744,5 +741,4 @@ public class CoverageProcessor {
     public static float roundFloat(final float number, final int scale) {
        return BigDecimal.valueOf(number).setScale(scale,RoundingMode.DOWN).floatValue();
     }
-
 }
