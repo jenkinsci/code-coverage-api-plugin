@@ -732,12 +732,6 @@ public class CoverageProcessor {
             return (CoverageResult) ois.readObject();
         }
     }
-    /**
-     * Round up float value to specified scaling factor using Round down strategy
-     * @param number
-     * @param scale
-     * @return float value (scaled)
-     */
     public static float roundFloat(final float number, final int scale) {
        return BigDecimal.valueOf(number).setScale(scale,RoundingMode.DOWN).floatValue();
     }
