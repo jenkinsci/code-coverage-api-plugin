@@ -732,7 +732,7 @@ public class CoverageProcessor {
             return (CoverageResult) ois.readObject();
         }
     }
-    public static float roundFloat(final float number, final int scale) {
+    static float roundFloat(final float number, final int scale) {
        return BigDecimal.valueOf(number).setScale(scale,RoundingMode.DOWN).floatValue();
     }
 }
