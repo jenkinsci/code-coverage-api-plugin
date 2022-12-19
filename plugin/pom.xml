@@ -24,7 +24,7 @@
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
     <jenkins.baseline>2.361</jenkins.baseline>
-    <jenkins.version>2.361.3</jenkins.version>
+    <jenkins.version>2.361.4</jenkins.version>
     <jdk>11</jdk>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
