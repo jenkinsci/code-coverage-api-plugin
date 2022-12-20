@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.LinesChartModel;
@@ -8,7 +10,6 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Job;
 
-import io.jenkins.plugins.coverage.Messages;
 import io.jenkins.plugins.coverage.metrics.visualization.charts.CoverageTrendChart;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
@@ -21,8 +22,14 @@ import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
  * @author Ullrich Hafner
  */
 public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageBuildAction> {
-    CoverageJobAction(final Job<?, ?> owner) {
+    private final String id;
+    private final String name;
+
+    CoverageJobAction(final Job<?, ?> owner, final String id, final String name) {
         super(owner, CoverageBuildAction.class);
+
+        this.id = id;
+        this.name = name;
     }
 
     @Override
@@ -32,12 +39,12 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
 
     @Override
     public String getDisplayName() {
-        return Messages.CoverageProjectAction_displayName();
+        return StringUtils.defaultIfBlank(name, Messages.Coverage_Link_Name());
     }
 
     @Override @NonNull
     public String getUrlName() {
-        return "coverage";
+        return id;
     }
 
     public Job<?, ?> getProject() {

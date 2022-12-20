@@ -366,7 +366,7 @@ public class CoverageRecorder extends Recorder {
             final StageResultHandler resultHandler, final FilteredLog log) throws InterruptedException {
         List<Node> results = new ArrayList<>();
         for (CoverageTool tool : tools) {
-            LogHandler toolHandler = new LogHandler(taskListener, tool.getDescriptor().getDisplayName());
+            LogHandler toolHandler = new LogHandler(taskListener, tool.getDisplayName());
             CoverageParser parser = tool.getParser();
             if (StringUtils.isBlank(tool.getPattern())) {
                 toolHandler.log("Using default pattern '%s' since user defined pattern is not set",

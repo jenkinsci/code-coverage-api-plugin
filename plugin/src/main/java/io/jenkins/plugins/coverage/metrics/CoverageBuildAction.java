@@ -31,7 +31,6 @@ import hudson.Functions;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
-import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -802,12 +801,12 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @Override
     protected CoverageJobAction createProjectAction() {
-        return new CoverageJobAction(getOwner().getParent());
+        return new CoverageJobAction(getOwner().getParent(), getUrlName(), name);
     }
 
     @Override
     protected String getBuildResultBaseName() {
-        return "coverage.xml";
+        return String.format("%s.xml", id);
     }
 
     @Override
@@ -831,5 +830,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @Override
     public String getUrlName() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s): %s", getDisplayName(), getUrlName(), formatCoverage(Metric.LINE));
     }
 }

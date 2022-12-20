@@ -24,6 +24,7 @@ public class SourceCodePainter {
 
     private final Run<?, ?> build;
     private final FilePath workspace;
+    private final String id;
 
     /**
      * Creates a painter for the passed build, using the passed properties.
@@ -33,9 +34,10 @@ public class SourceCodePainter {
      * @param workspace
      *         The workspace which contains the source code files
      */
-    public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace) {
+    public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace, final String id) {
         this.build = build;
         this.workspace = workspace;
+        this.id = id;
     }
 
     /**
@@ -84,7 +86,7 @@ public class SourceCodePainter {
 
             FilteredLog agentLog = workspace.act(
                     new AgentCoveragePainter(paintedFiles, permittedSourceDirectories, requestedSourceDirectories,
-                            sourceCodeEncoding, "coverage"));
+                            sourceCodeEncoding, id));
             log.merge(agentLog);
         }
         catch (IOException exception) {

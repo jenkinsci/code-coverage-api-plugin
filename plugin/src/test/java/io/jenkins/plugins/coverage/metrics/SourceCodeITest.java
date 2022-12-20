@@ -29,13 +29,18 @@ import static org.assertj.core.api.Assertions.*;
  */
 abstract class SourceCodeITest extends AbstractCoverageITest {
     private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
+    private static final String PATH_UTIL = "public&nbsp;class&nbsp;PathUtil&nbsp;{";
     private static final String NO_SOURCE_CODE = "n/a";
-    static final String SOURCE_FILE_NAME = "AcuCobolParser.java";
-    static final String SOURCE_FILE = SOURCE_FILE_NAME + ".txt";
-    static final String PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
-    private static final String SOURCE_FILE_PATH = PACKAGE_PATH + SOURCE_FILE_NAME;
+    static final String ACU_COBOL_PARSER_FILE_NAME = "AcuCobolParser.java";
+    static final String ACU_COBOL_PARSER_SOURCE_FILE = ACU_COBOL_PARSER_FILE_NAME + ".txt";
+    static final String ACU_COBOL_PARSER_PACKAGE_PATH = "edu/hm/hafner/analysis/parser/";
+    private static final String ACU_COBOL_PARSER_SOURCE_FILE_PATH = ACU_COBOL_PARSER_PACKAGE_PATH + ACU_COBOL_PARSER_FILE_NAME;
     private static final String ACU_COBOL_PARSER_COVERAGE_REPORT = "jacoco-acu-cobol-parser.xml";
-    private static final String PATH_UTIL_COVERAGE_REPORT = "parth-util-parser.xml";
+    private static final String PATH_UTIL_COVERAGE_REPORT = "jacoco-path-util.xml";
+    static final String PATH_UTIL_FILE_NAME = "PathUtil.java";
+    static final String PATH_UTIL_SOURCE_FILE = PATH_UTIL_FILE_NAME + ".txt";
+    static final String PATH_UTIL_PACKAGE_PATH = "edu/hm/hafner/util/";
+    private static final String PATH_UTIL_SOURCE_FILE_PATH = PATH_UTIL_PACKAGE_PATH + PATH_UTIL_FILE_NAME;
     static final String AGENT_LABEL = "coverage-agent";
 
     /** Verifies that the plugin reads source code from the workspace root. */
@@ -69,7 +74,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
 
         WorkflowJob job = createPipeline();
         copySourceFileToAgent("ignore/", localAgent, job);
-        copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
+        copyReports(localAgent, job);
 
         job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
 
@@ -81,7 +86,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                         "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory));
 
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");
     }
 
@@ -90,8 +95,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         var localAgent = crateCoverageAgent();
 
         WorkflowJob job = createPipeline();
-        copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
-        copySingleFileToAgentWorkspace(localAgent, job, PATH_UTIL_COVERAGE_REPORT, PATH_UTIL_COVERAGE_REPORT);
+        copyReports(localAgent, job);
         copySourceFileToAgent(sourceDirectory, localAgent, job);
 
         // get the temporary directory - used by unit tests - to verify its content
@@ -104,24 +108,24 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         Run<?, ?> firstBuild = buildSuccessfully(job);
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting successfully");
-        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER);
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER, PATH_UTIL);
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER);
-        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER); // should be still available
+        verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER, PATH_UTIL);
+        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER, PATH_UTIL); // should be still available
 
         job.setDefinition(createPipelineWithSourceCode(LAST_BUILD, sourceDirectory));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER);
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER, PATH_UTIL);
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
 
         job.setDefinition(createPipelineWithSourceCode(NEVER, sourceDirectory));
         Run<?, ?> lastBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE);
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE, NO_SOURCE_CODE);
+        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
 
         assertThat(temporaryDirectory.listFiles()).isEqualTo(temporaryFiles);
 
@@ -129,52 +133,60 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         return firstBuild;
     }
 
+    private void copyReports(final hudson.model.Node localAgent, final WorkflowJob job) {
+        copySingleFileToAgentWorkspace(localAgent, job, ACU_COBOL_PARSER_COVERAGE_REPORT, ACU_COBOL_PARSER_COVERAGE_REPORT);
+        copySingleFileToAgentWorkspace(localAgent, job, PATH_UTIL_COVERAGE_REPORT, PATH_UTIL_COVERAGE_REPORT);
+    }
+
     private CpsFlowDefinition createPipelineWithSourceCode(final SourceCodeRetention sourceCodeRetention,
             final String sourceDirectory) {
         return new CpsFlowDefinition("node ('coverage-agent') {"
-                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '"
-                + ACU_COBOL_PARSER_COVERAGE_REPORT
-                + "']], \n"
+                + "    recordCoverage "
+                + "         tools: [[parser: 'JACOCO', pattern: '" + ACU_COBOL_PARSER_COVERAGE_REPORT + "']], \n"
                 + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
                 + "         sourceDirectories: [[path: '" + sourceDirectory + "']]\n"
-                + "    recordCoverage id:'path',  tools: [[parser: 'JACOCO', pattern: '"
-                + PATH_UTIL_COVERAGE_REPORT
-                + "']], \n"
+                + "    recordCoverage id:'path',  "
+                + "         tools: [[parser: 'JACOCO', pattern: '" + PATH_UTIL_COVERAGE_REPORT + "']], \n"
                 + "         sourceCodeRetention: '" + sourceCodeRetention.name() + "', \n"
                 + "         sourceCodeEncoding: 'UTF-8', \n"
                 + "         sourceDirectories: [[path: '" + sourceDirectory + "']]"
                 + "}", true);
     }
 
-    private void verifySourceCodeInBuild(final Run<?, ?> build, final String sourceCodeSnippet) {
-        CoverageViewModel model = verifyViewModel(build);
-
-        assertThat(model.getSourceCode(String.valueOf(SOURCE_FILE_PATH.hashCode()), "coverage-table"))
-                .contains(sourceCodeSnippet);
-    }
-
-    private CoverageViewModel verifyViewModel(final Run<?, ?> build) {
-        CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
-
+    private void verifySourceCodeInBuild(final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
+            final String pathUtilSourceCodeSnippet) {
         System.out.println(getConsoleLog(build));
 
-        assertThat(action.getLineCoverage())
-                .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(8).setMissed(0).build());
-
-        Optional<Node> fileNode = action.getResult().find(Metric.FILE, SOURCE_FILE_PATH);
-        assertThat(fileNode).isNotEmpty()
-                .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(SOURCE_FILE_PATH));
-
-        return action.getTarget();
+        List<CoverageBuildAction> actions = build.getActions(CoverageBuildAction.class);
+        var builder = new CoverageBuilder().setMetric(Metric.LINE).setMissed(0);
+        assertThat(actions).hasSize(2).satisfiesExactly(
+                action -> {
+                    assertThat(action.getLineCoverage()).isEqualTo(builder.setCovered(8).build());
+                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, ACU_COBOL_PARSER_SOURCE_FILE_PATH);
+                    assertThat(fileNode).isNotEmpty()
+                            .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
+                                    ACU_COBOL_PARSER_SOURCE_FILE_PATH));
+                    assertThat(action.getTarget().getSourceCode(String.valueOf(ACU_COBOL_PARSER_SOURCE_FILE_PATH.hashCode()), "coverage-table"))
+                            .contains(acuCobolParserSourceCodeSnippet);
+                },
+                action -> {
+                    assertThat(action.getLineCoverage()).isEqualTo(builder.setCovered(43).build());
+                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, PATH_UTIL_SOURCE_FILE_PATH);
+                    assertThat(fileNode).isNotEmpty()
+                            .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
+                                    PATH_UTIL_SOURCE_FILE_PATH));
+                    assertThat(action.getTarget().getSourceCode(String.valueOf(PATH_UTIL_SOURCE_FILE_PATH.hashCode()), "coverage-table"))
+                            .contains(pathUtilSourceCodeSnippet);
+                });
     }
 
-    String createDestinationPath(final String sourceDirectory) {
+    String createDestinationPath(final String sourceDirectory, final String packagePath, final String fileName) {
         if (sourceDirectory.isEmpty()) {
-            return PACKAGE_PATH + "AcuCobolParser.java";
+            return packagePath + fileName;
         }
         else {
-            return sourceDirectory + "/" + PACKAGE_PATH + "AcuCobolParser.java";
+            return sourceDirectory + "/" + packagePath + fileName;
         }
     }
 

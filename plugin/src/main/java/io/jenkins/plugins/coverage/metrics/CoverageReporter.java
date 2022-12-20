@@ -40,7 +40,6 @@ public class CoverageReporter {
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
-        LogHandler logHandler = new LogHandler(listener, "Coverage");
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
         verifyPathUniqueness(rootNode, log);
@@ -95,12 +94,13 @@ public class CoverageReporter {
         }
 
         log.logInfo("Executing source code painting...");
-        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace);
+        SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace, id);
         sourceCodePainter.processSourceCodePainting(rootNode, sourceDirectories,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
         log.logInfo("Finished coverage processing - adding the action to the build...");
 
+        LogHandler logHandler = new LogHandler(listener, "Coverage");
         logHandler.log(log);
 
         build.addAction(action);

@@ -31,7 +31,7 @@ class CoverageJobActionTest {
     void shouldIgnoreIndexIfNoActionFound() throws IOException {
         FreeStyleProject job = mock(FreeStyleProject.class);
 
-        CoverageJobAction action = new CoverageJobAction(job);
+        CoverageJobAction action = createAction(job);
 
         assertThat(action.getProject()).isSameAs(job);
 
@@ -39,6 +39,10 @@ class CoverageJobActionTest {
         action.doIndex(mock(StaplerRequest.class), response);
 
         verifyNoInteractions(response);
+    }
+
+    private static CoverageJobAction createAction(final FreeStyleProject job) {
+        return new CoverageJobAction(job, "coverage", "Coverage Results");
     }
 
     @Test
@@ -53,7 +57,7 @@ class CoverageJobActionTest {
         FreeStyleProject job = mock(FreeStyleProject.class);
         when(job.getLastBuild()).thenReturn(build);
 
-        CoverageJobAction jobAction = new CoverageJobAction(job);
+        CoverageJobAction jobAction = createAction(job);
 
         StaplerResponse response = mock(StaplerResponse.class);
         jobAction.doIndex(mock(StaplerRequest.class), response);
@@ -74,7 +78,7 @@ class CoverageJobActionTest {
         FreeStyleProject job = mock(FreeStyleProject.class);
         when(job.getLastBuild()).thenReturn(build);
 
-        CoverageJobAction jobAction = new CoverageJobAction(job);
+        CoverageJobAction jobAction = createAction(job);
 
         List<BuildResult<CoverageBuildAction>> history = new ArrayList<>();
         BuildResult<CoverageBuildAction> result = new BuildResult<>(new Build(buildNumber), action);

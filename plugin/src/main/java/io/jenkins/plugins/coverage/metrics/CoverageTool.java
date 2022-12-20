@@ -124,10 +124,14 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         return (CoverageToolDescriptor) jenkins.getDescriptorOrDie(getClass());
     }
 
+    public String getDisplayName() {
+        return getParser().getDisplayName();
+    }
+
     /** Descriptor for {@link CoverageTool}. **/
     @Extension
     public static class CoverageToolDescriptor extends Descriptor<CoverageTool> {
-        private final JenkinsFacade JENKINS = new JenkinsFacade();
+        private static final JenkinsFacade JENKINS = new JenkinsFacade();
 
         /**
          * Creates a new instance of {@link CoverageToolDescriptor}.

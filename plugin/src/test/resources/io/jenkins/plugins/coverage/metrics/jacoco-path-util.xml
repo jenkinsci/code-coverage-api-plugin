@@ -164,6 +164,5 @@
   <counter type="COMPLEXITY" missed="0" covered="21"/>
   <counter type="METHOD" missed="0" covered="14"/>
   <counter type="CLASS" missed="0" covered="1"/>
-    <counter type="PACKAGE" missed="0" covered="1"/>
-    <counter type="" missed="0" covered="1"/>
+  <counter type="PACKAGE" missed="0" covered="1"/>
 </report>

@@ -17,11 +17,18 @@ import hudson.model.Node;
 @Testcontainers(disabledWithoutDocker = true)
 class DockerAgentSourceCodeITest extends SourceCodeITest {
     private static final String SOURCES_IN_DOCKER_PATH = "/tmp/coverage";
-    private static final String CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + PACKAGE_PATH + SOURCE_FILE_NAME;
+    private static final String ACU_COBOL_PARSER_CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + ACU_COBOL_PARSER_PACKAGE_PATH + ACU_COBOL_PARSER_FILE_NAME;
+    private static final String PATH_UTIL_CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + PATH_UTIL_PACKAGE_PATH + PATH_UTIL_FILE_NAME;
 
+    private static final String RESOURCES = "io/jenkins/plugins/coverage/metrics/";
     @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer()
-            .withCopyFileToContainer(MountableFile.forClasspathResource("io/jenkins/plugins/coverage/metrics/" + SOURCE_FILE), CONTAINER_PATH);
+            .withCopyFileToContainer(
+                    MountableFile.forClasspathResource(RESOURCES + ACU_COBOL_PARSER_SOURCE_FILE),
+                    ACU_COBOL_PARSER_CONTAINER_PATH)
+            .withCopyFileToContainer(
+                    MountableFile.forClasspathResource(RESOURCES + PATH_UTIL_SOURCE_FILE),
+                    PATH_UTIL_CONTAINER_PATH);
 
     @Override
     protected Node crateCoverageAgent() {
@@ -36,14 +43,19 @@ class DockerAgentSourceCodeITest extends SourceCodeITest {
     }
 
     @Override
-    protected String createExternalFolder() throws IOException {
+    protected String createExternalFolder() {
         return SOURCES_IN_DOCKER_PATH;
     }
 
     @Override
     protected void copySourceFileToAgent(final String sourceDirectory, final Node localAgent, final WorkflowJob job) {
         if (!sourceDirectory.startsWith(SOURCES_IN_DOCKER_PATH)) {
-            copySingleFileToAgentWorkspace(localAgent, job, SOURCE_FILE, createDestinationPath(sourceDirectory));
+            copySingleFileToAgentWorkspace(localAgent, job,
+                    ACU_COBOL_PARSER_SOURCE_FILE,
+                    createDestinationPath(sourceDirectory, ACU_COBOL_PARSER_PACKAGE_PATH, ACU_COBOL_PARSER_FILE_NAME));
+            copySingleFileToAgentWorkspace(localAgent, job,
+                    PATH_UTIL_SOURCE_FILE,
+                    createDestinationPath(sourceDirectory, PATH_UTIL_PACKAGE_PATH, PATH_UTIL_FILE_NAME));
         }
     }
 }
