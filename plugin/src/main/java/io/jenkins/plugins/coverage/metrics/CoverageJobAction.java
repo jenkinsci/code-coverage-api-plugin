@@ -42,6 +42,18 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
         return StringUtils.defaultIfBlank(name, Messages.Coverage_Link_Name());
     }
 
+    /**
+     * Returns a label for the trend chart.
+     *
+     * @return a label for the trend chart
+     */
+    public String getTrendName() {
+        if (StringUtils.isBlank(name)) {
+            Messages.Coverage_Trend_Default_Name();
+        }
+        return Messages.Coverage_Trend_Name(name);
+    }
+
     @Override @NonNull
     public String getUrlName() {
         return id;

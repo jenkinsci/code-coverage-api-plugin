@@ -83,7 +83,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     static {
         CoverageXmlStream.registerConverters(XSTREAM2);
-        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "difference", new MetricFractionMapConverter());
+        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "difference",
+                new MetricFractionMapConverter());
         XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "changeCoverageDifference",
                 new MetricFractionMapConverter());
     }
@@ -108,13 +109,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
             final String id, final String optionalName,
             final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log) {
         this(owner, id, optionalName, result, qualityGateStatus, log, NO_REFERENCE_BUILD,
-                new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
-    }
-
-    @VisibleForTesting
-    CoverageBuildAction(final Run<?, ?> owner,
-            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log) {
-        this(owner, CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY, result, qualityGateStatus, log, NO_REFERENCE_BUILD,
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
     }
 
@@ -158,18 +152,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     @VisibleForTesting
-    CoverageBuildAction(final Run<?, ?> owner,
-            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
-            final String referenceBuildId,
-            final NavigableMap<Metric, Fraction> delta,
-            final List<? extends Value> changeCoverage,
-            final NavigableMap<Metric, Fraction> changeCoverageDifference,
-            final List<? extends Value> indirectCoverageChanges) {
-        this(owner, CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY, result, qualityGateStatus, log, referenceBuildId, delta, changeCoverage,
-                changeCoverageDifference, indirectCoverageChanges, true);
-    }
-
-    @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String name,
@@ -180,7 +162,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final List<? extends Value> indirectCoverageChanges,
             final boolean canSerialize) {
-        super(owner, result, canSerialize);
+        super(owner, result, false);
 
         this.id = id;
         this.name = name;
@@ -193,6 +175,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         this.changeCoverageDifference = changeCoverageDifference;
         this.indirectCoverageChanges = new ArrayList<>(indirectCoverageChanges);
         this.referenceBuildId = referenceBuildId;
+
+        if (canSerialize) {
+            createXmlStream().write(owner.getRootDir().toPath().resolve(getBuildResultBaseName()), result);
+        }
     }
 
     /**
@@ -312,6 +298,14 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         throw new NoSuchElementException("No such baseline: " + baseline);
     }
 
+    /**
+     * Returns a tooltip that renders all available values of the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the tooltip for
+     *
+     * @return the tooltip showing all available values
+     */
     @SuppressWarnings("unused") // Called by jelly view
     public String getTooltip(final Baseline baseline) {
         var values = getValueStream(baseline).map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
@@ -640,13 +634,13 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * Returns the change coverage delta for the passed metric, i.e. the coverage results of the current build minus the
      * same results of the reference build.
      *
-     * @param Metric
+     * @param metric
      *         The change coverage metric
      *
      * @return the delta for each available coverage metric
      */
-    public Fraction getChangeCoverageDifference(final Metric Metric) {
-        return changeCoverageDifference.get(Metric);
+    public Fraction getChangeCoverageDifference(final Metric metric) {
+        return changeCoverageDifference.get(metric);
     }
 
     /**
