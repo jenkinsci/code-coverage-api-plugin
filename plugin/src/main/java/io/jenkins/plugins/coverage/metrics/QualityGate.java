@@ -31,8 +31,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
     private final double threshold;
     private final Metric metric;
     private final Baseline baseline;
-    private final QualityGateStatus status;
-    private final QualityGateResult result;
+    private final QualityGateCriticality criticality;
 
     /**
      * Creates a new instance of {@link QualityGate}.
@@ -43,27 +42,16 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      *         the metric to compare
      * @param baseline
      *         the baseline to use the bto compare
-     * @param unstable
+     * @param criticality
      *         determines whether the build result will be set to unstable or failed if the quality gate is failed
      */
     @DataBoundConstructor
     public QualityGate(final double threshold, final Metric metric, final Baseline baseline,
-            final boolean unstable) {
-        this(threshold, metric, baseline,
-                unstable ? QualityGateResult.UNSTABLE : QualityGateResult.FAILURE);
-    }
-
-    QualityGate(final double threshold, final Metric metric, final Baseline baseline,
-            final QualityGateResult result) {
+            final QualityGateCriticality criticality) {
         this.threshold = threshold;
         this.metric = metric;
         this.baseline = baseline;
-        this.status = result == QualityGateResult.UNSTABLE ? QualityGateStatus.WARNING : QualityGateStatus.FAILED;
-        this.result = result;
-    }
-
-    public boolean getUnstable() {
-        return result == QualityGateResult.UNSTABLE;
+        this.criticality = criticality;
     }
 
     /**
@@ -88,19 +76,18 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         return baseline;
     }
 
-    /**
-     * Returns the status of the quality gate.
-     *
-     * @return the status
-     */
+    public QualityGateCriticality getCriticality() {
+        return criticality;
+    }
+
     public QualityGateStatus getStatus() {
-        return status;
+        return getCriticality().getStatus();
     }
 
     /**
      * Determines the Jenkins build result if the quality gate is failed.
      */
-    public enum QualityGateResult {
+    public enum QualityGateCriticality {
         /** The build will be marked as unstable. */
         UNSTABLE(QualityGateStatus.WARNING),
 
@@ -109,7 +96,7 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
 
         private final QualityGateStatus status;
 
-        QualityGateResult(final QualityGateStatus status) {
+        QualityGateCriticality(final QualityGateStatus status) {
             this.status = status;
         }
 
@@ -118,7 +105,6 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
          *
          * @return the status
          */
-        // TODO: do we need this mapping?
         public QualityGateStatus getStatus() {
             return status;
         }
@@ -205,6 +191,26 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
 
         private void add(final ListBoxModel options, final Baseline baseline) {
             options.add(ELEMENT_FORMATTER.getDisplayName(baseline), baseline.name());
+        }
+
+        /**
+         * Returns a model with all {@link Metric metrics} that can be used in quality gates.
+         *
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link Metric metrics}.
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillCriticalityItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
+                ListBoxModel options = new ListBoxModel();
+                options.add(Messages.QualityGate_Unstable(), QualityGateCriticality.UNSTABLE.name());
+                options.add(Messages.QualityGate_Failure(), QualityGateCriticality.FAILURE.name());
+                return options;
+            }
+            return new ListBoxModel();
         }
     }
 }

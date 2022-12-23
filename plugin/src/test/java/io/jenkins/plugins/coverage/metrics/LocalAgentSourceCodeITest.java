@@ -19,10 +19,12 @@ import hudson.slaves.DumbSlave;
 class LocalAgentSourceCodeITest extends SourceCodeITest {
     private static final PathUtil PATH_UTIL = new PathUtil();
 
+    @Override
     protected Node crateCoverageAgent() {
         return createAgent(AGENT_LABEL);
     }
 
+    @Override
     protected String createExternalFolder() throws IOException {
         Path tempDirectory = Files.createTempDirectory("coverage");
 

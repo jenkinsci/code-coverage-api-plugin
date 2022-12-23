@@ -12,7 +12,7 @@ import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Value;
 
-import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateResult;
+import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -37,20 +37,20 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.add(0, Metric.FILE, Baseline.PROJECT, QualityGateResult.UNSTABLE);
-        evaluator.add(0, Metric.LINE, Baseline.PROJECT, QualityGateResult.UNSTABLE);
-        evaluator.add(0, Metric.FILE, Baseline.CHANGE, QualityGateResult.UNSTABLE);
-        evaluator.add(0, Metric.LINE, Baseline.CHANGE, QualityGateResult.UNSTABLE);
-        evaluator.add(0, Metric.FILE, Baseline.FILE, QualityGateResult.UNSTABLE);
-        evaluator.add(0, Metric.LINE, Baseline.FILE, QualityGateResult.UNSTABLE);
+        evaluator.add(0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.FILE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.LINE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
 
         var minimum = -10;
-        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateResult.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
 
         assertThat(evaluator.isEnabled()).isEqualTo(true);
 
@@ -78,20 +78,20 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateResult.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateResult.UNSTABLE);
-        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateResult.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateResult.UNSTABLE);
-        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateResult.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateResult.UNSTABLE);
+        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
+        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
 
         var minimum = 10;
-        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateResult.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateResult.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
 
         QualityGateStatus result = evaluator.evaluate(statistics, logger);
 
@@ -117,20 +117,20 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateResult.FAILURE);
-        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateResult.FAILURE);
-        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateResult.FAILURE);
-        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateResult.FAILURE);
-        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateResult.FAILURE);
-        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateResult.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
+        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.FAILURE);
+        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateCriticality.FAILURE);
+        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateCriticality.FAILURE);
 
         var minimum = 10;
-        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateResult.FAILURE);
-        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateResult.FAILURE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateResult.FAILURE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateResult.FAILURE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateResult.FAILURE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateResult.FAILURE);
+        evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.FAILURE);
 
         QualityGateStatus result = evaluator.evaluate(statistics, logger);
 
@@ -156,8 +156,8 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateResult.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateResult.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
 
         assertThatStatusWillBeOverwritten(logger, statistics, evaluator);
     }
@@ -177,7 +177,7 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.add(50.0, Metric.PACKAGE, Baseline.PROJECT, QualityGateResult.FAILURE);
+        evaluator.add(50.0, Metric.PACKAGE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
 
         QualityGateStatus result = evaluator.evaluate(statistics, logger);
         assertThat(result).isEqualTo(QualityGateStatus.FAILED);
@@ -191,8 +191,8 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         CoverageStatistics statistics = createStatistics();
 
         List<QualityGate> qualityGates = List.of(
-                new QualityGate(76.0, Metric.FILE, Baseline.PROJECT, QualityGateResult.UNSTABLE),
-                new QualityGate(51.0, Metric.LINE, Baseline.PROJECT, QualityGateResult.FAILURE));
+                new QualityGate(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),
+                new QualityGate(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE));
 
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.addAll(qualityGates);

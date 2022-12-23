@@ -8,7 +8,7 @@ import com.google.errorprone.annotations.FormatMethod;
 
 import edu.hm.hafner.metric.Metric;
 
-import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateResult;
+import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
 /**
  * Evaluates a set of quality gates for a static analysis report.
@@ -65,11 +65,12 @@ public class QualityGateEvaluator {
                 qualityGate.getName(), actualResult, actualValue, qualityGate.getThreshold());
     }
 
-    private QualityGateStatus changeQualityStatusIfNotWorse(QualityGateStatus status, final QualityGate qualityGate) {
-        if (qualityGate.getStatus().isWorseThan(status)) {
-            status = qualityGate.getStatus();
+    private QualityGateStatus changeQualityStatusIfNotWorse(final QualityGateStatus existingStatus, final QualityGate qualityGate) {
+        var newStatus = qualityGate.getCriticality().getStatus();
+        if (newStatus.isWorseThan(existingStatus)) {
+            return newStatus;
         }
-        return status;
+        return existingStatus;
     }
 
     /**
@@ -84,7 +85,7 @@ public class QualityGateEvaluator {
      * @param result
      *         determines whether the quality gate is a warning or failure
      */
-    public void add(final double size, final Metric metric, final Baseline baseline, final QualityGateResult result) {
+    public void add(final double size, final Metric metric, final Baseline baseline, final QualityGateCriticality result) {
         qualityGates.add(new QualityGate(size, metric, baseline, result));
     }
 

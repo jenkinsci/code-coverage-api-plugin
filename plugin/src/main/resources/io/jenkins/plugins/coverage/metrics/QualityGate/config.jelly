@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:cov="/coverage">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
   <f:entry title="${%title.threshold}" field="threshold">
     <f:number/>
@@ -13,8 +13,8 @@
     <f:select/>
   </f:entry>
 
-  <f:entry title="${%title.warning}" field="unstable">
-    <cov:boolean-radio id="${h.generateId()}" true="Unstable" false="Failed"/>
+  <f:entry title="${%title.warning}" field="criticality">
+    <f:select/>
   </f:entry>
 
 </j:jelly>
