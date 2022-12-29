@@ -5,7 +5,6 @@ import java.nio.file.Files;
 
 import org.junitpioneer.jupiter.DefaultLocale;
 
-import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.parser.JacocoParser;
 import edu.hm.hafner.util.ResourceTest;
@@ -18,14 +17,7 @@ import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
  */
 @DefaultLocale("en")
 public abstract class AbstractCoverageTest extends ResourceTest {
-    static final Metric MODULE = Metric.MODULE;
-    static final Metric PACKAGE = Metric.PACKAGE;
-    static final Metric FILE = Metric.FILE;
-    static final Metric CLASS = Metric.CLASS;
-    static final Metric METHOD = Metric.METHOD;
-    static final Metric LINE = Metric.LINE;
-    static final Metric INSTRUCTION = Metric.INSTRUCTION;
-    static final Metric BRANCH = Metric.BRANCH;
+    static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
 
     /**
      * Reads and parses a JaCoCo coverage report.

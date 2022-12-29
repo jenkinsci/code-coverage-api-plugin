@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 
 import io.jenkins.plugins.forensics.delta.model.Change;
@@ -81,13 +82,13 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachChangedCodeLines(tree, CODE_CHANGES);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
+        assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> assertThat(node.get())
                         .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
                                         .containsExactly(
                             5, 6, 7, 8, 9, 14, 15, 16, 17, 18, 20, 21, 22, 33, 34, 35, 36)));
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_2.hashCode()))
+        assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_2.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> assertThat(node.get())
                             .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
@@ -101,7 +102,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
+        assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileNode.class);
@@ -117,12 +118,12 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
      */
     private void verifyFileCoverageDeltaOfTestFile1(final FileNode file) {
         assertThat(file.getName()).isEqualTo(TEST_FILE_1);
-        assertThat(file.getChangeCoverage(LINE)).isEqualTo(Fraction.getFraction(3, 117));
-        assertThat(file.getChangeCoverage(BRANCH)).isEqualTo(Fraction.getFraction(3, 24));
-        assertThat(file.getChangeCoverage(INSTRUCTION)).isEqualTo(Fraction.getFraction(90, 999));
-        assertThat(file.getChangeCoverage(METHOD)).isEqualTo(Fraction.getFraction(-4, 30));
-        assertThat(file.getChangeCoverage(CLASS)).isEqualTo(Fraction.ZERO);
-        assertThat(file.getChangeCoverage(FILE)).isEqualTo(Fraction.ZERO);
+        assertThat(file.getChangeCoverage(Metric.LINE)).isEqualTo(Fraction.getFraction(3, 117));
+        assertThat(file.getChangeCoverage(Metric.BRANCH)).isEqualTo(Fraction.getFraction(3, 24));
+        assertThat(file.getChangeCoverage(Metric.INSTRUCTION)).isEqualTo(Fraction.getFraction(90, 999));
+        assertThat(file.getChangeCoverage(Metric.METHOD)).isEqualTo(Fraction.getFraction(-4, 30));
+        assertThat(file.getChangeCoverage(Metric.CLASS)).isEqualTo(Fraction.ZERO);
+        assertThat(file.getChangeCoverage(Metric.FILE)).isEqualTo(Fraction.ZERO);
     }
 
     @Test
@@ -132,7 +133,7 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         Node tree = readJacocoResult(TEST_REPORT_AFTER);
         fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES, OLD_PATH_MAPPING);
 
-        assertThat(tree.findByHashCode(FILE, TEST_FILE_1_PATH.hashCode()))
+        assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> {
                     assertThat(node.get()).isInstanceOf(FileNode.class);

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
 
@@ -65,7 +66,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
     void shouldProvideIndirectCoverageChanges() {
-        Node node = createIndirectCoverageChangesNode(Fraction.ZERO, LINE, 1, 1);
+        Node node = createIndirectCoverageChangesNode(Fraction.ZERO, Metric.LINE, 1, 1);
 
         CoverageViewModel model = createModel(node);
 

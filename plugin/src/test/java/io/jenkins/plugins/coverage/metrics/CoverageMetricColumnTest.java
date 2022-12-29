@@ -176,7 +176,7 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
     }
 
     private Job<?, ?> createJobWithCoverageAction() {
-        var node = readJacocoResult("../../jacoco-codingstyle.xml");
+        var node = readJacocoResult(JACOCO_CODING_STYLE_FILE);
         var run = mock(Run.class);
         var delta = new TreeMap<Metric, Fraction>();
         delta.put(Metric.BRANCH, Fraction.getFraction("0.05"));
