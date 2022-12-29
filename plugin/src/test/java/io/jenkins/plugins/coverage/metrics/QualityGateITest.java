@@ -78,8 +78,8 @@ class QualityGateITest extends AbstractCoverageITest {
                 "recordCoverage("
                         + "tools: [[parser: '" + CoverageParser.JACOCO.name() + "', pattern: '**/*xml']],\n"
                         + "qualityGates: ["
-                        + "     [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', unstable: true], "
-                        + "     [threshold: 90.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])\n");
+                        + "     [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'UNSTABLE'], "
+                        + "     [threshold: 90.0, metric: 'BRANCH', baseline: 'PROJECT', criticality: 'UNSTABLE']])\n");
 
         WorkflowRun build = (WorkflowRun)buildWithResult(project, Result.UNSTABLE);
 

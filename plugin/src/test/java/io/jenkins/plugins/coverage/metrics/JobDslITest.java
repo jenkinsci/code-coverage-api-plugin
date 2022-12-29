@@ -16,7 +16,6 @@ import io.jenkins.plugins.casc.ConfigurationAsCode;
 import io.jenkins.plugins.casc.ConfiguratorException;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
-import io.jenkins.plugins.coverage.metrics.visualization.dashboard.CoverageMetricColumn;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
@@ -48,7 +47,7 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
                 .isInstanceOfSatisfying(CoverageMetricColumn.class,
                         c -> assertThat(c)
                                 .hasColumnCaption(Messages.Coverage_Column())
-                                .hasCoverageMetric(Metric.LINE.name()));
+                                .hasMetric(Metric.LINE));
     }
 
     /**

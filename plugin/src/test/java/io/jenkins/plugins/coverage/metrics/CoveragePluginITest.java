@@ -153,7 +153,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
                         LOC);
         assertThat(coverageResult.getMetricsForSummary())
                 .containsExactly(Metric.LINE, Metric.BRANCH, COMPLEXITY_DENSITY, Metric.LOC);
-        assertThat(coverageResult.getLineCoverage())
+        assertThat(coverageResult.getCoverage(LINE))
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
                         .setMissed(JACOCO_ANALYSIS_MODEL_TOTAL - JACOCO_ANALYSIS_MODEL_COVERED)
@@ -187,7 +187,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
+        assertThat(coverageResult.getCoverage(LINE))
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED)
                         .setMissed(JACOCO_ANALYSIS_MODEL_MISSED + JACOCO_CODING_STYLE_MISSED)
@@ -222,7 +222,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     }
 
     private static void verifyCoberturaAction(final CoverageBuildAction coverageResult) {
-        assertThat(coverageResult.getLineCoverage())
+        assertThat(coverageResult.getCoverage(LINE))
                 .isEqualTo(new CoverageBuilder().setMetric(Metric.LINE).setCovered(COBERTURA_COVERED_LINES)
                         .setMissed(COBERTURA_MISSED_LINES)
                         .build());
@@ -287,7 +287,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getLineCoverage())
+        assertThat(coverageResult.getCoverage(LINE))
                 .isEqualTo(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED + COBERTURA_COVERED_LINES)
                         .setMissed(JACOCO_ANALYSIS_MODEL_MISSED)

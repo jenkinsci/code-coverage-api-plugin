@@ -59,11 +59,11 @@ class DeltaComputationITest extends AbstractCoverageITest {
     private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
         var action = firstBuild.getAction(CoverageBuildAction.class);
 
-        var lineCoverage = action.getLineCoverage();
+        var lineCoverage = (Coverage)action.getCoverage(LINE);
         assertThat(lineCoverage.getCovered()).isEqualTo(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED);
         assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0));
 
-        var branchCoverage = action.getBranchCoverage();
+        var branchCoverage = (Coverage)action.getCoverage(BRANCH);
         assertThat(branchCoverage.getCovered()).isEqualTo(1544 + 109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.88, withPercentage(1.0));
 
@@ -74,11 +74,11 @@ class DeltaComputationITest extends AbstractCoverageITest {
     private static void verifySecondBuild(final Run<?, ?> secondBuild) {
         var action = secondBuild.getAction(CoverageBuildAction.class);
 
-        var lineCoverage = action.getLineCoverage();
+        var lineCoverage = (Coverage)action.getCoverage(LINE);
         assertThat(lineCoverage).extracting(Coverage::getCovered).isEqualTo(JACOCO_CODING_STYLE_COVERED);
         assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0));
 
-        var branchCoverage = action.getBranchCoverage();
+        var branchCoverage = (Coverage)action.getCoverage(BRANCH);
         assertThat(branchCoverage.getCovered()).isEqualTo(109);
         assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.94, withPercentage(1.0));
 

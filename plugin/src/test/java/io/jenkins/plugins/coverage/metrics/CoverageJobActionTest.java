@@ -103,8 +103,8 @@ class CoverageJobActionTest {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         when(action.getOwner()).thenAnswer(i -> build);
         when(action.getUrlName()).thenReturn("coverage");
-        when(action.getBranchCoverage()).thenReturn(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build());
-        when(action.getLineCoverage()).thenReturn(new CoverageBuilder().setMetric(Metric.LINE).setCovered(10).setMissed(10).build());
+        when(action.getAllValues(Baseline.PROJECT)).thenReturn(List.of(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build(),
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(10).setMissed(10).build()));
         return action;
     }
 }

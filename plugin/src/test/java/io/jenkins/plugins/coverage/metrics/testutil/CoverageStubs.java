@@ -1,6 +1,6 @@
 package io.jenkins.plugins.coverage.metrics.testutil;
 
-import java.util.NavigableMap;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -15,8 +15,8 @@ import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.VisibleForTesting;
 
+import io.jenkins.plugins.coverage.metrics.Baseline;
 import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
-import io.jenkins.plugins.coverage.metrics.CoveragePercentage;
 
 import static org.mockito.Mockito.*;
 
@@ -48,57 +48,10 @@ public final class CoverageStubs {
     public static BuildResult<CoverageBuildAction> createResult(final int buildNumber,
             final Coverage lineCoverage, final Coverage branchCoverage) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
-        when(action.getLineCoverage()).thenReturn(lineCoverage);
-        when(action.getBranchCoverage()).thenReturn(branchCoverage);
-
+        when(action.getAllValues(Baseline.PROJECT)).thenReturn(List.of(lineCoverage, branchCoverage));
         Build build = new Build(buildNumber);
 
         return new BuildResult<>(build, action);
-    }
-
-    /**
-     * Creates a mock of {@link CoverageBuildAction} which provides all available coverages.
-     *
-     * @param coverageMetric
-     *         The coverage metric
-     * @param coverageValue
-     *         The coverage value to be provided for all coverage types
-     *
-     * @return the created stub
-     */
-    @VisibleForTesting
-    public static CoverageBuildAction createCoverageBuildAction(
-            final Metric coverageMetric, final Fraction coverageValue) {
-        CoverageBuildAction action = mock(CoverageBuildAction.class);
-        Coverage coverage = createCoverage(coverageValue);
-        CoveragePercentage percentage = CoveragePercentage.valueOf(coverageValue);
-
-        NavigableMap<Metric, Fraction> deltas = mock(NavigableMap.class);
-        when(deltas.size()).thenReturn(1);
-        when(deltas.containsKey(coverageMetric)).thenReturn(true);
-        when(deltas.containsValue(coverageValue)).thenReturn(true);
-        when(deltas.get(coverageMetric)).thenReturn(coverageValue);
-
-        when(action.hasDelta(coverageMetric)).thenReturn(true);
-        when(action.getDelta()).thenReturn(deltas);
-
-        when(action.hasCoverage(coverageMetric)).thenReturn(true);
-        when(action.getCoverage(coverageMetric)).thenReturn(coverage);
-
-        when(action.hasChangeCoverage()).thenReturn(true);
-        when(action.hasChangeCoverage(coverageMetric)).thenReturn(true);
-        when(action.getChangeCoverage(coverageMetric)).thenReturn(coverage);
-
-        when(action.hasIndirectCoverageChanges()).thenReturn(true);
-        when(action.hasIndirectCoverageChanges(coverageMetric)).thenReturn(true);
-        when(action.getIndirectCoverageChanges(coverageMetric)).thenReturn(coverage);
-
-        when(action.hasChangeCoverageDifference(coverageMetric)).thenReturn(true);
-        when(action.getChangeCoverageDifference(coverageMetric)).thenReturn(coverageValue);
-
-        when(action.getUrlName()).thenReturn("coverage");
-
-        return action;
     }
 
     /**

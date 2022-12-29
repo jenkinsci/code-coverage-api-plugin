@@ -65,10 +65,8 @@ class CoverageBuildActionTest {
 
         assertThat(action.hasCoverage(Metric.LINE)).isTrue();
         assertThat(action.getCoverage(Metric.LINE)).isEqualTo(percent80);
-        assertThat(action.getLineCoverage()).isEqualTo(percent80);
         assertThat(action.hasCoverage(Metric.BRANCH)).isTrue();
         assertThat(action.getCoverage(Metric.BRANCH)).isEqualTo(percent50);
-        assertThat(action.getBranchCoverage()).isEqualTo(percent50);
 
         assertThat(action.hasCoverage(Metric.INSTRUCTION)).isFalse();
         assertThatExceptionOfType(NoSuchElementException.class)

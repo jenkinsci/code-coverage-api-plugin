@@ -13,6 +13,12 @@ import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Value;
 
+import hudson.util.ListBoxModel;
+
+import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
+
+import static io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.*;
+
 /**
  * A localized formatter for coverages, metrics, baselines, etc.
  *
@@ -45,9 +51,30 @@ public final class ElementFormatter {
             return String.valueOf(((IntegerValue) value).getValue());
         }
         if (value instanceof FractionValue) {
-            return String.format(locale, "%.2f%%", ((FractionValue) value).getFraction().doubleValue());
+            return formatDelta(value.getMetric(), ((FractionValue) value).getFraction(), locale);
         }
         return value.toString();
+    }
+
+    public DisplayColors colorize(final Value value, final ColorProvider colorProvider, final Baseline baseline) {
+        if (value instanceof Coverage) {
+            // FIXME: percentage vs. fraction?
+            return getDisplayColors(colorProvider, baseline, ((Coverage) value).getCoveredPercentage());
+        }
+        if (value instanceof MutationValue) {
+            return getDisplayColors(colorProvider, baseline, ((MutationValue) value).getCoveredPercentage());
+        }
+        if (value instanceof FractionValue) {
+            return getDisplayColors(colorProvider, baseline, ((FractionValue) value).getFraction());
+        }
+        return DEFAULT_COLOR;
+
+    }
+
+    private static DisplayColors getDisplayColors(final ColorProvider colorProvider, final Baseline baseline,
+            final Fraction fraction) {
+        var percentage = fraction.doubleValue();
+        return baseline.getDisplayColors(percentage * 100.0, colorProvider);
     }
 
     /**
@@ -206,4 +233,38 @@ public final class ElementFormatter {
         }
     }
 
+    public ListBoxModel getMetricItems() {
+        ListBoxModel options = new ListBoxModel();
+        add(options, Metric.MODULE);
+        add(options, Metric.PACKAGE);
+        add(options, Metric.FILE);
+        add(options, Metric.CLASS);
+        add(options, Metric.METHOD);
+        add(options, Metric.LINE);
+        add(options, Metric.BRANCH);
+        add(options, Metric.INSTRUCTION);
+        add(options, Metric.MUTATION);
+        add(options, Metric.COMPLEXITY);
+        add(options, Metric.LOC);
+        return options;
+    }
+
+    private void add(final ListBoxModel options, final Metric metric) {
+        options.add(getDisplayName(metric), metric.name());
+    }
+
+    public ListBoxModel getBaselineItems() {
+        ListBoxModel options = new ListBoxModel();
+        add(options, Baseline.PROJECT);
+        add(options, Baseline.CHANGE);
+        add(options, Baseline.FILE);
+        add(options, Baseline.PROJECT_DELTA);
+        add(options, Baseline.CHANGE_DELTA);
+        add(options, Baseline.FILE_DELTA);
+        return options;
+    }
+
+    private void add(final ListBoxModel options, final Baseline baseline) {
+        options.add(getDisplayName(baseline), baseline.name());
+    }
 }

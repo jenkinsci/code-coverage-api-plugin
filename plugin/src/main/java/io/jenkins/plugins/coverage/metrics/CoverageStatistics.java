@@ -17,7 +17,7 @@ import edu.hm.hafner.metric.Value;
 /**
  * Represents the different mappings of coverage metric and baseline to actual values.
  */
-class CoverageStatistics {
+public class CoverageStatistics {
     private final List<Value> projectValueMapping;
     private final NavigableMap<Metric, Value> projectDelta;
     private final List<Value> changeValueMapping;
@@ -26,11 +26,11 @@ class CoverageStatistics {
     private final NavigableMap<Metric, Value> fileDelta;
 
     CoverageStatistics(
-            final List<Value> projectValueMapping,
+            final List<? extends Value> projectValueMapping,
             final NavigableMap<Metric, Fraction> projectDelta,
-            final List<Value> changeValueMapping,
+            final List<? extends Value> changeValueMapping,
             final NavigableMap<Metric, Fraction> changeDelta,
-            final List<Value> fileValueMapping,
+            final List<? extends Value> fileValueMapping,
             final NavigableMap<Metric, Fraction> fileDelta)  {
         this.projectValueMapping = List.copyOf(projectValueMapping);
         this.changeValueMapping = List.copyOf(changeValueMapping);

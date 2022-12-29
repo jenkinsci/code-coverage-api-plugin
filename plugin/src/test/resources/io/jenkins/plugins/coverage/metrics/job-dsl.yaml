@@ -18,13 +18,13 @@ jobs:
                           threshold(70)
                           metric('LINE')
                           baseline('PROJECT')
-                          unstable(true)
+                          criticality('UNSTABLE')
                       }
                       qualityGate {
                           threshold(80)
                           metric('BRANCH')
                           baseline('CHANGE')
-                          unstable(false)
+                          criticality('FAILURE')
                       }
                   } 
                   id('my-coverage')

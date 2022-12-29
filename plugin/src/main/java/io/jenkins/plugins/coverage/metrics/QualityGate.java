@@ -7,6 +7,7 @@ import edu.hm.hafner.util.VisibleForTesting;
 
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -27,11 +28,25 @@ import io.jenkins.plugins.util.JenkinsFacade;
 public class QualityGate extends AbstractDescribableImpl<QualityGate> implements Serializable {
     private static final long serialVersionUID = -397278599489426668L;
 
-    private static final ElementFormatter ELEMENT_FORMATTER = new ElementFormatter();
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
     private final double threshold;
     private final Metric metric;
-    private final Baseline baseline;
-    private final QualityGateCriticality criticality;
+    private Baseline baseline = Baseline.PROJECT;
+    private QualityGateCriticality criticality = QualityGateCriticality.UNSTABLE;
+
+    /**
+     * Creates a new instance of {@link QualityGate}.
+     *
+     * @param threshold
+     *         minimum or maximum value that triggers this quality gate
+     * @param metric
+     *         the metric to compare
+     */
+    @DataBoundConstructor
+    public QualityGate(final double threshold, final Metric metric) {
+        this.threshold = threshold;
+        this.metric = metric;
+    }
 
     /**
      * Creates a new instance of {@link QualityGate}.
@@ -45,12 +60,34 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      * @param criticality
      *         determines whether the build result will be set to unstable or failed if the quality gate is failed
      */
-    @DataBoundConstructor
-    public QualityGate(final double threshold, final Metric metric, final Baseline baseline,
-            final QualityGateCriticality criticality) {
-        this.threshold = threshold;
-        this.metric = metric;
+    public QualityGate(final double threshold, final Metric metric,
+            final Baseline baseline, final QualityGateCriticality criticality) {
+        this(threshold, metric);
+
         this.baseline = baseline;
+        this.criticality = criticality;
+    }
+
+    /**
+     * Sets the baseline that will be used for the quality gate evaluation.
+     *
+     * @param baseline
+     *         the baseline to use
+     */
+    @DataBoundSetter
+    public void setBaseline(final Baseline baseline) {
+        this.baseline = baseline;
+    }
+
+    /**
+     * Sets the criticality of this quality gate. When a quality gate has been missed, this property determines whether
+     * the result of the associated coverage stage will be marked as unstable or failure.
+     *
+     * @param criticality
+     *         the criticality for this quality gate
+     */
+    @DataBoundSetter
+    public void setCriticality(final QualityGateCriticality criticality) {
         this.criticality = criticality;
     }
 
@@ -60,8 +97,8 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
      * @return a human-readable name
      */
     public String getName() {
-        return String.format("%s - %s", ELEMENT_FORMATTER.getDisplayName(getBaseline()),
-                ELEMENT_FORMATTER.getDisplayName(getMetric()));
+        return String.format("%s - %s", FORMATTER.getDisplayName(getBaseline()),
+                FORMATTER.getDisplayName(getMetric()));
     }
 
     public double getThreshold() {
@@ -144,25 +181,9 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillMetricItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (jenkins.hasPermission(Item.CONFIGURE, project)) {
-                ListBoxModel options = new ListBoxModel();
-                add(options, Metric.MODULE);
-                add(options, Metric.PACKAGE);
-                add(options, Metric.FILE);
-                add(options, Metric.CLASS);
-                add(options, Metric.METHOD);
-                add(options, Metric.LINE);
-                add(options, Metric.BRANCH);
-                add(options, Metric.INSTRUCTION);
-                add(options, Metric.MUTATION);
-                add(options, Metric.COMPLEXITY);
-                add(options, Metric.LOC);
-                return options;
+                return FORMATTER.getMetricItems();
             }
             return new ListBoxModel();
-        }
-
-        private void add(final ListBoxModel options, final Metric metric) {
-            options.add(ELEMENT_FORMATTER.getDisplayName(metric), metric.name());
         }
 
         /**
@@ -177,20 +198,9 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillBaselineItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (jenkins.hasPermission(Item.CONFIGURE, project)) {
-                ListBoxModel options = new ListBoxModel();
-                add(options, Baseline.PROJECT);
-                add(options, Baseline.CHANGE);
-                add(options, Baseline.FILE);
-                add(options, Baseline.PROJECT_DELTA);
-                add(options, Baseline.CHANGE_DELTA);
-                add(options, Baseline.FILE_DELTA);
-                return options;
+                return FORMATTER.getBaselineItems();
             }
             return new ListBoxModel();
-        }
-
-        private void add(final ListBoxModel options, final Baseline baseline) {
-            options.add(ELEMENT_FORMATTER.getDisplayName(baseline), baseline.name());
         }
 
         /**

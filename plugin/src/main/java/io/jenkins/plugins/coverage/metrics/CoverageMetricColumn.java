@@ -1,29 +1,33 @@
-package io.jenkins.plugins.coverage.metrics.visualization.dashboard;
+package io.jenkins.plugins.coverage.metrics;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
 import org.jenkinsci.Symbol;
 import hudson.Extension;
 import hudson.Functions;
+import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
 import hudson.views.ListViewColumn;
 import hudson.views.ListViewColumnDescriptor;
-import jenkins.model.Jenkins;
 
-import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
-import io.jenkins.plugins.coverage.metrics.CoveragePercentage;
-import io.jenkins.plugins.coverage.metrics.Messages;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.DisplayColors;
+import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**
@@ -32,18 +36,29 @@ import io.jenkins.plugins.util.JenkinsFacade;
  * @author Florian Orendi
  */
 public class CoverageMetricColumn extends ListViewColumn {
-    private CoverageColumnType selectedCoverageColumnType = new ProjectCoverage();
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
 
     private String columnName = Messages.Coverage_Column();
-    private String coverageMetric = Metric.LINE.name();
-    private String coverageType = selectedCoverageColumnType.getDisplayName();
+    private Metric metric = Metric.LINE;
+    private Baseline baseline = Baseline.PROJECT;
 
     /**
-     * Empty constructor.
+     * Creates a new column.
      */
     @DataBoundConstructor
     public CoverageMetricColumn() {
         super();
+    }
+
+    /**
+     * Sets the display name of the column.
+     *
+     * @param columnName
+     *         the human-readable name of the column
+     */
+    @DataBoundSetter
+    public void setColumnName(final String columnName) {
+        this.columnName = columnName;
     }
 
     public String getColumnName() {
@@ -51,60 +66,33 @@ public class CoverageMetricColumn extends ListViewColumn {
     }
 
     /**
-     * Sets the display name of the column.
+     * Sets the baseline of the values that will be shown.
      *
-     * @param columnName
-     *         The name of the column
+     * @param baseline
+     *         the baseline to use
      */
     @DataBoundSetter
-    public void setColumnName(final String columnName) {
-        this.columnName = columnName;
+    public void setBaseline(final Baseline baseline) {
+        this.baseline = baseline;
     }
 
-    public String getCoverageMetric() {
-        return coverageMetric;
+    public Baseline getBaseline() {
+        return baseline;
     }
 
     /**
-     * Defines which coverage type should be shown in the column.
+     * Sets the metric of the values that will be shown.
      *
-     * @param coverageType
-     *         The {@link CoverageColumnType type} to be shown
+     * @param metric
+     *         the metric to use
      */
     @DataBoundSetter
-    public void setCoverageType(final String coverageType) {
-        this.coverageType = coverageType;
-        if (Messages.Project_Coverage_Delta_Type().equals(coverageType)) {
-            selectedCoverageColumnType = new ProjectCoverageDelta();
-        }
-        else if (Messages.Change_Coverage_Type().equals(coverageType)) {
-            selectedCoverageColumnType = new ChangeCoverage();
-        }
-        else if (Messages.Change_Coverage_Delta_Type().equals(coverageType)) {
-            selectedCoverageColumnType = new ChangeCoverageDelta();
-        }
-        else if (Messages.Indirect_Coverage_Changes_Type().equals(coverageType)) {
-            selectedCoverageColumnType = new IndirectCoverageChanges();
-        }
-        else {
-            // the default
-            selectedCoverageColumnType = new ProjectCoverage();
-        }
+    public void setMetric(final Metric metric) {
+        this.metric = metric;
     }
 
-    public String getCoverageType() {
-        return coverageType;
-    }
-
-    /**
-     * Defines which coverage metric should be shown in the column.
-     *
-     * @param coverageMetric
-     *         The coverage metric to be shown
-     */
-    @DataBoundSetter
-    public void setCoverageMetric(final String coverageMetric) {
-        this.coverageMetric = coverageMetric;
+    public Metric getMetric() {
+        return metric;
     }
 
     /**
@@ -116,9 +104,10 @@ public class CoverageMetricColumn extends ListViewColumn {
      * @return the coverage text
      */
     public String getCoverageText(final Job<?, ?> job) {
-        Optional<CoveragePercentage> coverageValue = getCoverageValue(job);
+        Optional<? extends Value> coverageValue = getCoverageValue(job);
+        // FIXME create formatter with optional
         if (coverageValue.isPresent()) {
-            return selectedCoverageColumnType.formatCoverage(coverageValue.get(), Functions.getCurrentLocale());
+            return FORMATTER.format(coverageValue.get(), Functions.getCurrentLocale());
         }
         return Messages.Coverage_Not_Available();
     }
@@ -131,10 +120,11 @@ public class CoverageMetricColumn extends ListViewColumn {
      *
      * @return the coverage percentage
      */
-    public Optional<CoveragePercentage> getCoverageValue(final Job<?, ?> job) {
+    public Optional<? extends Value> getCoverageValue(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
             CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-            return selectedCoverageColumnType.getCoverage(action, Metric.valueOf(coverageMetric));
+
+            return action.getStatistics().getValue(getBaseline(), metric);
         }
         return Optional.empty();
     }
@@ -150,9 +140,14 @@ public class CoverageMetricColumn extends ListViewColumn {
      * @return the line color as hex string
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<CoveragePercentage> coverage) {
+    public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<? extends Value> coverage) {
         if (hasCoverageAction(job) && coverage.isPresent()) {
-            return selectedCoverageColumnType.getDisplayColors(coverage.get());
+            if (coverage.get() instanceof Coverage) {
+                return baseline.getDisplayColors(((Coverage)coverage.get()).getCoveredPercentage().doubleValue() * 100.0, ColorProviderFactory.createDefaultColorProvider());
+            }
+            else if (coverage.get() instanceof FractionValue) {
+                return baseline.getDisplayColors(((FractionValue)coverage.get()).getFraction().doubleValue(), ColorProviderFactory.createDefaultColorProvider());
+            }
         }
         return ColorProvider.DEFAULT_COLOR;
     }
@@ -168,7 +163,7 @@ public class CoverageMetricColumn extends ListViewColumn {
     public String getRelativeCoverageUrl(final Job<?, ?> job) {
         if (hasCoverageAction(job)) {
             CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
-            return action.getUrlName() + "/" + selectedCoverageColumnType.getAnchor();
+            return action.getUrlName() + "/" + baseline.getUrl();
         }
         return "";
     }
@@ -190,10 +185,6 @@ public class CoverageMetricColumn extends ListViewColumn {
         return "100%";
     }
 
-    public CoverageColumnType getSelectedCoverageColumnType() {
-        return selectedCoverageColumnType;
-    }
-
     /**
      * Checks whether a {@link CoverageBuildAction} exists within the completed build.
      *
@@ -213,6 +204,21 @@ public class CoverageMetricColumn extends ListViewColumn {
     @Extension(optional = true)
     @Symbol("coverageTotalsColumn")
     public static class CoverageDescriptor extends ListViewColumnDescriptor {
+        /**
+         * Creates a new descriptor.
+         */
+        @SuppressWarnings("unused") // Required for Jenkins Extensions
+        public CoverageDescriptor() {
+            this(new JenkinsFacade());
+        }
+
+        @VisibleForTesting
+        CoverageDescriptor(final JenkinsFacade jenkins) {
+            this.jenkins = jenkins;
+        }
+
+        private final JenkinsFacade jenkins;
+
         @NonNull
         @Override
         public String getDisplayName() {
@@ -220,35 +226,37 @@ public class CoverageMetricColumn extends ListViewColumn {
         }
 
         /**
-         * Returns the model for the select widget for selecting the displayed coverage type.
+         * Returns a model with all {@link Metric metrics} that can be used in quality gates.
          *
-         * @return the available coverage types
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link Metric metrics}.
          */
         @POST
-        public ListBoxModel doFillCoverageTypeItems() {
-            ListBoxModel model = new ListBoxModel();
-            if (new JenkinsFacade().hasPermission(Jenkins.READ)) {
-                for (String coverageType : CoverageColumnType.getAvailableCoverageTypeNames()) {
-                    model.add(coverageType);
-                }
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillMetricItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
+                return FORMATTER.getMetricItems();
             }
-            return model;
+            return new ListBoxModel();
         }
 
         /**
-         * Returns the model for the select widget for selecting the displayed coverage metric.
+         * Returns a model with all {@link Metric metrics} that can be used in quality gates.
          *
-         * @return the available coverage metrics
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link Metric metrics}.
          */
         @POST
-        public ListBoxModel doFillCoverageMetricItems() {
-            ListBoxModel model = new ListBoxModel();
-            if (new JenkinsFacade().hasPermission(Jenkins.READ)) {
-                for (Metric coverageMetric : Metric.values()) {
-                    model.add(coverageMetric.name());
-                }
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillBaselineItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
+                return FORMATTER.getBaselineItems();
             }
-            return model;
+            return new ListBoxModel();
         }
     }
 }

@@ -1,27 +1,32 @@
-package io.jenkins.plugins.coverage.metrics.visualization.dashboard;
+package io.jenkins.plugins.coverage.metrics;
 
+import java.awt.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.DefaultLocale;
 
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
+import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.util.FilteredLog;
 
 import hudson.Functions;
 import hudson.model.Job;
+import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
-import io.jenkins.plugins.coverage.metrics.CoveragePercentage;
-import io.jenkins.plugins.coverage.metrics.Messages;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageLevel;
 
-import static io.jenkins.plugins.coverage.metrics.testutil.CoverageStubs.*;
 import static io.jenkins.plugins.coverage.metrics.testutil.JobStubs.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link CoverageMetricColumn}.
@@ -29,10 +34,8 @@ import static org.assertj.core.api.Assertions.*;
  * @author Florian Orendi
  */
 @DefaultLocale("en")
-class CoverageMetricColumnTest {
+class CoverageMetricColumnTest extends AbstractCoverageTest {
     private static final String COLUMN_NAME = "Test Column";
-    private static final ProjectCoverage PROJECT_COVERAGE = new ProjectCoverage();
-    private static final ProjectCoverageDelta PROJECT_COVERAGE_DELTA = new ProjectCoverageDelta();
     private static final Metric COVERAGE_METRIC = Metric.BRANCH;
 
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
@@ -40,51 +43,43 @@ class CoverageMetricColumnTest {
     @Test
     void shouldHaveWorkingDataGetters() {
         CoverageMetricColumn column = createColumn();
+
         assertThat(column.getColumnName()).isEqualTo(COLUMN_NAME);
-        assertThat(column.getCoverageType()).isEqualTo(PROJECT_COVERAGE.getDisplayName());
-        assertThat(column.getCoverageMetric()).isEqualTo(COVERAGE_METRIC.name());
+        assertThat(column.getBaseline()).isEqualTo(Baseline.PROJECT);
+        assertThat(column.getMetric()).isEqualTo(COVERAGE_METRIC);
+        assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
     }
 
     @Test
     void shouldProvideSelectedColumn() {
         CoverageMetricColumn column = createColumn();
-        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction();
 
-        column.setCoverageType(Messages.Project_Coverage_Type());
-        assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Type());
-        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverage.class);
+        column.setBaseline(Baseline.PROJECT);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.PROJECT);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#overview");
 
-        column.setCoverageType(Messages.Project_Coverage_Delta_Type());
-        assertThat(column.getCoverageType()).isEqualTo(Messages.Project_Coverage_Delta_Type());
-        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ProjectCoverageDelta.class);
+        column.setBaseline(Baseline.PROJECT_DELTA);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.PROJECT_DELTA);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#overview");
 
-        column.setCoverageType(Messages.Change_Coverage_Type());
-        assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Type());
-        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverage.class);
+        column.setBaseline(Baseline.CHANGE);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.CHANGE);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
-        column.setCoverageType(Messages.Change_Coverage_Delta_Type());
-        assertThat(column.getCoverageType()).isEqualTo(Messages.Change_Coverage_Delta_Type());
-        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(ChangeCoverageDelta.class);
+        column.setBaseline(Baseline.CHANGE_DELTA);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.CHANGE_DELTA);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
-        column.setCoverageType(Messages.Indirect_Coverage_Changes_Type());
-        assertThat(column.getCoverageType()).isEqualTo(Messages.Indirect_Coverage_Changes_Type());
-        assertThat(column.getSelectedCoverageColumnType()).isInstanceOf(IndirectCoverageChanges.class);
+        column.setBaseline(Baseline.INDIRECT);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.INDIRECT);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#indirectCoverage");
-    }
-
-    @Test
-    void shouldProvideEmptyCoverageUrlWithoutAction() {
-        CoverageMetricColumn column = createColumn();
-        assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
     }
 
     @Test
     void shouldProvideBackgroundColorFillPercentage() {
         CoverageMetricColumn column = createColumn();
+
         assertThat(column.getBackgroundColorFillPercentage("+5,0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("+5.0%")).isEqualTo("100%");
         assertThat(column.getBackgroundColorFillPercentage("5,00%")).isEqualTo("5.00%");
@@ -99,7 +94,7 @@ class CoverageMetricColumnTest {
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
 
-        Optional<CoveragePercentage> coverageValue = column.getCoverageValue(job);
+        Optional<? extends Value> coverageValue = column.getCoverageValue(job);
         assertThat(coverageValue).isEmpty();
         assertThat(column.getDisplayColors(job, Optional.empty())).isEqualTo(ColorProvider.DEFAULT_COLOR);
     }
@@ -118,14 +113,14 @@ class CoverageMetricColumnTest {
     @Test
     void shouldShowNoResultForUnavailableMetric() {
         CoverageMetricColumn column = createColumn();
-        column.setCoverageMetric(Metric.CLASS.name());
+        column.setMetric(Metric.MUTATION);
 
-        Job<?, ?> job = createJobWithCoverageAction(Fraction.ZERO);
+        Job<?, ?> job = createJobWithCoverageAction();
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
 
-        column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
+        column.setBaseline(Baseline.PROJECT_DELTA);
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
         assertThat(column.getCoverageValue(job)).isEmpty();
@@ -137,66 +132,63 @@ class CoverageMetricColumnTest {
 
         Fraction coverageFraction = Fraction.getFraction(1, 2);
         CoveragePercentage coveragePercentage = CoveragePercentage.valueOf(coverageFraction);
-        String coveragePercentageText = coveragePercentage.formatPercentage(Functions.getCurrentLocale());
 
-        Job<?, ?> job = createJobWithCoverageAction(coverageFraction);
+        Job<?, ?> job = createJobWithCoverageAction();
 
-        assertThat(column.getCoverageText(job)).isEqualTo(coveragePercentageText);
+        assertThat(column.getCoverageText(job)).isEqualTo("93.97%");
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(coverage -> {
-                    assertThat(coverage.get()).isEqualTo(coveragePercentage);
-                    assertThat(column.getDisplayColors(job, coverage))
-                            .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(CoverageLevel.LVL_50.getColorizationId()));
+                    assertThat(coverage.get()).isEqualTo(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(109).setMissed(7).build());
+                    assertThat(column.getDisplayColors(job, coverage).getLineColor())
+                            .isEqualTo(Color.white);
                 });
     }
 
     @Test
     void shouldCalculateProjectCoverageDelta() {
         CoverageMetricColumn column = createColumn();
-        column.setCoverageType(PROJECT_COVERAGE_DELTA.getDisplayName());
+        column.setBaseline(Baseline.PROJECT_DELTA);
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
         CoveragePercentage coverageDeltaPercentage = CoveragePercentage.valueOf(coverageDelta);
         String coverageDeltaPercentageText =
                 coverageDeltaPercentage.formatDeltaPercentage(Functions.getCurrentLocale());
-        Job<?, ?> job = createJobWithCoverageAction(coverageDelta);
+        Job<?, ?> job = createJobWithCoverageAction();
 
         assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(coverage -> {
-                    assertThat(coverage.get()).isEqualTo(coverageDeltaPercentage);
+                    assertThat(coverage.get()).isEqualTo(new FractionValue(Metric.BRANCH, coverageDelta));
                     assertThat(column.getDisplayColors(job, coverage))
                             .isEqualTo(COLOR_PROVIDER.getDisplayColorsOf(
                                     CoverageChangeTendency.INCREASED.getColorizationId()));
                 });
     }
 
-    /**
-     * Creates a {@link CoverageMetricColumn} for displaying the project coverage.
-     *
-     * @return the created column.
-     */
     private CoverageMetricColumn createColumn() {
         CoverageMetricColumn column = new CoverageMetricColumn();
         column.setColumnName(COLUMN_NAME);
-        column.setCoverageType(PROJECT_COVERAGE.getDisplayName());
-        column.setCoverageMetric(COVERAGE_METRIC.name());
+        column.setBaseline(Baseline.PROJECT);
+        column.setMetric(COVERAGE_METRIC);
         return column;
     }
 
-    /**
-     * Creates a mock of {@link CoverageBuildAction} which provides all available coverages.
-     *
-     * @param coverage
-     *         The coverage to be provided
-     *
-     * @return the created mock
-     */
-    private Job<?, ?> createJobWithCoverageAction(final Fraction coverage) {
+    private Job<?, ?> createJobWithCoverageAction() {
+        var node = readJacocoResult("../../jacoco-codingstyle.xml");
+        var run = mock(Run.class);
+        var delta = new TreeMap<Metric, Fraction>();
+        delta.put(Metric.BRANCH, Fraction.getFraction("0.05"));
         CoverageBuildAction coverageBuildAction =
-                createCoverageBuildAction(COVERAGE_METRIC, coverage);
-        return createJobWithActions(coverageBuildAction);
+                new CoverageBuildAction(run, "coverage", "Code Coverage", node, QualityGateStatus.INACTIVE, new FilteredLog("Test"),
+                        "-", delta, List.of(), new TreeMap<>(), List.of(), false);
+        when(run.getAction(CoverageBuildAction.class)).thenReturn(coverageBuildAction);
+        when(run.getActions(CoverageBuildAction.class)).thenReturn(Collections.singletonList(coverageBuildAction));
+
+        var job = mock(Job.class);
+        when(job.getLastCompletedBuild()).thenReturn(run);
+
+        return job;
     }
 }

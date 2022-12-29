@@ -156,9 +156,9 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
-        assertThat(action.getLineCoverage())
+        assertThat(action.getCoverage(LINE))
                 .isEqualTo(builder.setMetric(LINE).setCovered(529).setMissed(408).build());
-        assertThat(action.getBranchCoverage())
+        assertThat(action.getCoverage(BRANCH))
                 .isEqualTo(builder.setMetric(BRANCH).setCovered(136).setMissed(94).build());
         assertThat(action.formatDelta(LINE)).isEqualTo("+0.72%");
         assertThat(action.formatDelta(BRANCH)).isEqualTo("+0.00%");

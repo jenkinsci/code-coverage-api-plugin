@@ -151,9 +151,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
+    // FIXME: constructor should be hidden into a test factory
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CoverageBuildAction(final Run<?, ?> owner,
+    public CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String name,
             final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
             final String referenceBuildId,
@@ -198,6 +199,11 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         return qualityGateStatus;
     }
 
+    public CoverageStatistics getStatistics() {
+        return new CoverageStatistics(projectValues, difference, changeCoverage, changeCoverageDifference,
+                List.of(), new TreeMap<>());
+    }
+
     /**
      * Returns the supported baselines.
      *
@@ -237,6 +243,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @throws NoSuchElementException
      *         if this baseline does not provide a delta baseline
      */
+    @SuppressWarnings("unused") // Called by jelly view
     public Baseline getDeltaBaseline(final Baseline baseline) {
         if (baseline == Baseline.PROJECT) {
             return Baseline.PROJECT_DELTA;
@@ -414,14 +421,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @VisibleForTesting
     NavigableSet<Metric> getMetricsForSummary() {
         return new TreeSet<>(Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY));
-    }
-
-    public Coverage getLineCoverage() {
-        return (Coverage) getCoverage(Metric.LINE);
-    }
-
-    public Coverage getBranchCoverage() {
-        return (Coverage) getCoverage(Metric.BRANCH);
     }
 
     /**

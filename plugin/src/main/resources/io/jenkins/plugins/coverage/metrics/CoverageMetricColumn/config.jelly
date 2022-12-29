@@ -3,10 +3,12 @@
     <f:entry title="${%title.columnName}" field="columnName">
         <f:textbox default="${%Coverage}"/>
     </f:entry>
-    <f:entry title="${%title.coverageType}" description="${%description.coverageType}" field="coverageType">
+
+    <f:entry title="${%title.baseline}" field="baseline">
         <f:select/>
     </f:entry>
-    <f:entry title="${%title.coverageMetric}" description="${%description.coverageMetric}" field="coverageMetric">
+
+    <f:entry title="${%title.metric}" field="metric">
         <f:select/>
     </f:entry>
 </j:jelly>

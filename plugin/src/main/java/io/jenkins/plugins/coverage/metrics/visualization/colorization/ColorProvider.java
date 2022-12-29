@@ -233,5 +233,10 @@ public class ColorProvider {
         public int hashCode() {
             return Objects.hash(lineColor, fillColor);
         }
+
+        @Override
+        public String toString() {
+            return String.format("%s - %s", lineColor, fillColor);
+        }
     }
 }

@@ -86,7 +86,8 @@ public class QualityGateEvaluator {
      *         determines whether the quality gate is a warning or failure
      */
     public void add(final double size, final Metric metric, final Baseline baseline, final QualityGateCriticality result) {
-        qualityGates.add(new QualityGate(size, metric, baseline, result));
+        var qualityGate = new QualityGate(size, metric, baseline, result);
+        qualityGates.add(qualityGate);
     }
 
     /**

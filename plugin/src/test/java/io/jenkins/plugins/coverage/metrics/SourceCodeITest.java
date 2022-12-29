@@ -162,7 +162,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         var builder = new CoverageBuilder().setMetric(Metric.LINE).setMissed(0);
         assertThat(actions).hasSize(2).satisfiesExactly(
                 action -> {
-                    assertThat(action.getLineCoverage()).isEqualTo(builder.setCovered(8).build());
+                    assertThat(action.getCoverage(Metric.LINE)).isEqualTo(builder.setCovered(8).build());
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, ACU_COBOL_PARSER_SOURCE_FILE_PATH);
                     assertThat(fileNode).isNotEmpty()
                             .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
@@ -171,7 +171,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                             .contains(acuCobolParserSourceCodeSnippet);
                 },
                 action -> {
-                    assertThat(action.getLineCoverage()).isEqualTo(builder.setCovered(43).build());
+                    assertThat(action.getCoverage(Metric.LINE)).isEqualTo(builder.setCovered(43).build());
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, PATH_UTIL_SOURCE_FILE_PATH);
                     assertThat(fileNode).isNotEmpty()
                             .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
