@@ -51,7 +51,7 @@ public class CoverageStatistics {
         return new TreeMap<>(original);
     }
 
-    public Optional<? extends Value> getValue(final Baseline baseline, final Metric metric) {
+    public Optional<Value> getValue(final Baseline baseline, final Metric metric) {
         if (baseline == Baseline.PROJECT) {
             return Value.findValue(metric, projectValueMapping);
         }

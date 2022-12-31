@@ -31,7 +31,7 @@
     <maven.compiler.release>11</maven.compiler.release>
     <maven.compiler.testRelease>11</maven.compiler.testRelease>
 
-    <coverage-model.version>0.5.0</coverage-model.version>
+    <coverage-model.version>0.6.0</coverage-model.version>
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>

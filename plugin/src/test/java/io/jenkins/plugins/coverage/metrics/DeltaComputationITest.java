@@ -2,7 +2,7 @@ package io.jenkins.plugins.coverage.metrics;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.CyclomaticComplexity;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.LinesOfCode;
@@ -16,7 +16,6 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.model.Assertions.*;
-import static org.assertj.core.data.Percentage.*;
 
 /**
  * Integration test for delta computation of reference builds.
@@ -59,31 +58,35 @@ class DeltaComputationITest extends AbstractCoverageITest {
     private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
         var action = firstBuild.getAction(CoverageBuildAction.class);
 
-        var lineCoverage = (Coverage)action.getCoverage(LINE);
-        assertThat(lineCoverage.getCovered()).isEqualTo(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED);
-        assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.95, withPercentage(1.0));
-
-        var branchCoverage = (Coverage)action.getCoverage(BRANCH);
-        assertThat(branchCoverage.getCovered()).isEqualTo(1544 + 109);
-        assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.88, withPercentage(1.0));
-
-        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(JACOCO_ANALYSIS_MODEL_TOTAL + JACOCO_CODING_STYLE_TOTAL));
-        assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(2718));
+        var builder = new CoverageBuilder();
+        assertThat(action.getAllValues(Baseline.PROJECT)).contains(
+                builder.setMetric(LINE)
+                        .setCovered(JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_CODING_STYLE_COVERED)
+                        .setMissed(JACOCO_ANALYSIS_MODEL_MISSED + JACOCO_CODING_STYLE_MISSED)
+                        .build(),
+                builder.setMetric(BRANCH)
+                        .setCovered(1544 + 109)
+                        .setMissed(1865 - (1544 + 109))
+                        .build(),
+                new LinesOfCode(JACOCO_ANALYSIS_MODEL_TOTAL + JACOCO_CODING_STYLE_TOTAL),
+                new CyclomaticComplexity(2718));
     }
 
     private static void verifySecondBuild(final Run<?, ?> secondBuild) {
         var action = secondBuild.getAction(CoverageBuildAction.class);
 
-        var lineCoverage = (Coverage)action.getCoverage(LINE);
-        assertThat(lineCoverage).extracting(Coverage::getCovered).isEqualTo(JACOCO_CODING_STYLE_COVERED);
-        assertThat(lineCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.91, withPercentage(1.0));
-
-        var branchCoverage = (Coverage)action.getCoverage(BRANCH);
-        assertThat(branchCoverage.getCovered()).isEqualTo(109);
-        assertThat(branchCoverage.getCoveredPercentage().doubleValue()).isCloseTo(0.94, withPercentage(1.0));
-
-        assertThat(action.getCoverage(LOC)).isEqualTo(new LinesOfCode(JACOCO_CODING_STYLE_TOTAL));
-        assertThat(action.getCoverage(COMPLEXITY)).isEqualTo(new CyclomaticComplexity(160));
+        var builder = new CoverageBuilder();
+        assertThat(action.getAllValues(Baseline.PROJECT)).contains(
+                builder.setMetric(LINE)
+                        .setCovered(JACOCO_CODING_STYLE_COVERED)
+                        .setMissed(JACOCO_CODING_STYLE_MISSED)
+                        .build(),
+                builder.setMetric(BRANCH)
+                        .setCovered(109)
+                        .setMissed(7)
+                        .build(),
+                new LinesOfCode(JACOCO_CODING_STYLE_TOTAL),
+                new CyclomaticComplexity(160));
     }
 
     /**
@@ -104,18 +107,10 @@ class DeltaComputationITest extends AbstractCoverageITest {
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
-        var delta = action.getDelta();
-        assertThat(delta.get(MODULE).doubleValue()).isCloseTo(0, withPercentage(1.0));
-        assertThat(delta.get(PACKAGE).doubleValue()).isCloseTo(0, withPercentage(1.0));
-        assertThat(delta.get(LINE).doubleValue()).isCloseTo(-0.0416, withPercentage(1.0));
-        assertThat(delta.get(BRANCH).doubleValue()).isCloseTo(0.0533, withPercentage(1.0));
-        assertThat(delta.get(COMPLEXITY).intValue()).isEqualTo(160 - 2718);
-        assertThat(delta.get(LOC).intValue()).isEqualTo(-JACOCO_ANALYSIS_MODEL_TOTAL);
-
-        assertThat(action.formatDelta(LINE)).isEqualTo("-4.14%");
-        assertThat(action.formatDelta(BRANCH)).isEqualTo("+5.33%");
-        assertThat(action.formatDelta(LOC)).isEqualTo(String.valueOf(-JACOCO_ANALYSIS_MODEL_TOTAL));
-        assertThat(action.formatDelta(COMPLEXITY)).isEqualTo(String.valueOf(160 - 2718));
+        assertThat(action.formatDelta(Baseline.PROJECT, LINE)).isEqualTo("-4.14%");
+        assertThat(action.formatDelta(Baseline.PROJECT, BRANCH)).isEqualTo("+5.33%");
+        assertThat(action.formatDelta(Baseline.PROJECT, LOC)).isEqualTo(String.valueOf(-JACOCO_ANALYSIS_MODEL_TOTAL));
+        assertThat(action.formatDelta(Baseline.PROJECT, COMPLEXITY)).isEqualTo(String.valueOf(160 - 2718));
 
         verifyChangeCoverage(action);
     }
@@ -128,19 +123,6 @@ class DeltaComputationITest extends AbstractCoverageITest {
      *         The created Jenkins action
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
-        verifyCodeDelta(action);
-        assertThat(action.hasChangeCoverage()).isFalse();
-        assertThat(action.hasChangeCoverageDifference(LINE)).isFalse();
-        assertThat(action.hasChangeCoverageDifference(BRANCH)).isFalse();
-    }
-
-    /**
-     * Verifies the calculated code delta.
-     *
-     * @param action
-     *         The created Jenkins action
-     */
-    private void verifyCodeDelta(final CoverageBuildAction action) {
         Node root = action.getResult();
         assertThat(root).isNotNull();
         assertThat(root.getAllFileNodes()).flatExtracting(FileNode::getChangedLines).isEmpty();

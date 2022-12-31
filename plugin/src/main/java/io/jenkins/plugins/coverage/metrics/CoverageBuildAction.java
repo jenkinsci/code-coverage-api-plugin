@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
@@ -16,8 +15,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
@@ -151,10 +148,9 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
-    // FIXME: constructor should be hidden into a test factory
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public CoverageBuildAction(final Run<?, ?> owner,
+    CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String name,
             final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
             final String referenceBuildId,
@@ -225,10 +221,10 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @SuppressWarnings("unused") // Called by jelly view
     public boolean hasBaselineResult(final Baseline baseline) {
         if (baseline == Baseline.CHANGE) {
-            return hasChangeCoverage();
+            return !changeCoverage.isEmpty();
         }
         if (baseline == Baseline.INDIRECT) {
-            return hasIndirectCoverageChanges();
+            return !indirectCoverageChanges.isEmpty();
         }
         return true;
     }
@@ -306,7 +302,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     /**
-     * Returns a tooltip that renders all available values of the specified baseline.
+     * Returns an HTML tooltip that renders all available values of the specified baseline.
      *
      * @param baseline
      *         the baseline to get the tooltip for
@@ -357,6 +353,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *
      * @return {@code true} if a delta is available for the specified baseline, {@code false} otherwise
      */
+    @SuppressWarnings("unused") // Called by jelly view
     public boolean hasDelta(final Baseline baseline) {
         return baseline == Baseline.PROJECT || baseline == Baseline.CHANGE;
     }
@@ -424,102 +421,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     /**
-     * Returns whether a {@link Coverage} for the specified metric exists.
-     *
-     * @param metric
-     *         the coverage metric
-     *
-     * @return {@code true} if a coverage is available for the specified metric, {@code false} otherwise
-     */
-    public boolean hasCoverage(final Metric metric) {
-        return containsMetric(metric, projectValues);
-    }
-
-    private boolean containsMetric(final Metric metric, final List<? extends Value> values) {
-        return values.stream()
-                .map(Value::getMetric)
-                .anyMatch(metric::equals);
-    }
-
-    /**
-     * Returns the {@link Coverage} for the specified metric.
-     *
-     * @param metric
-     *         the coverage metric
-     *
-     * @return the coverage
-     */
-    public Value getCoverage(final Metric metric) {
-        return Value.getValue(metric, projectValues);
-    }
-
-    /**
-     * Returns whether a change coverage exists at all.
-     *
-     * @return {@code true} if the change coverage exist, else {@code false}
-     */
-    public boolean hasChangeCoverage() {
-        return hasChangeCoverage(Metric.LINE) || hasChangeCoverage(Metric.BRANCH);
-    }
-
-    /**
-     * Returns whether a change coverage exists for the passed {@link Metric}.
-     *
-     * @param metric
-     *         The coverage metric
-     *
-     * @return {@code true} if the change coverage exist for the metric, else {@code false}
-     */
-    public boolean hasChangeCoverage(final Metric metric) {
-        return containsMetric(metric, changeCoverage);
-    }
-
-    /**
-     * Gets the {@link Coverage change coverage} for the passed metric.
-     *
-     * @param metric
-     *         The coverage metric
-     *
-     * @return the change coverage
-     */
-    public Value getChangeCoverage(final Metric metric) {
-        return Value.getValue(metric, changeCoverage);
-    }
-
-    /**
-     * Returns whether indirect coverage changes exist at all.
-     *
-     * @return {@code true} if indirect coverage changes exist, else {@code false}
-     */
-    public boolean hasIndirectCoverageChanges() {
-        return hasIndirectCoverageChanges(Metric.LINE) || hasIndirectCoverageChanges(Metric.BRANCH);
-    }
-
-    /**
-     * Returns whether indirect coverage changes exist for the passed {@link Metric}.
-     *
-     * @param metric
-     *         The coverage metric
-     *
-     * @return {@code true} if indirect coverage changes exist for the metric, else {@code false}
-     */
-    public boolean hasIndirectCoverageChanges(final Metric metric) {
-        return containsMetric(metric, indirectCoverageChanges);
-    }
-
-    /**
-     * Gets the {@link Coverage indirect coverage changes} for the passed metric.
-     *
-     * @param metric
-     *         The coverage metric
-     *
-     * @return the indirect coverage changes
-     */
-    public Value getIndirectCoverageChanges(final Metric metric) {
-        return Value.getValue(metric, indirectCoverageChanges);
-    }
-
-    /**
      * Returns the possible reference build that has been used to compute the coverage delta.
      *
      * @return the reference build, if available
@@ -540,251 +441,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @SuppressWarnings("unused") // Called by jelly view
     public String getReferenceBuildLink() {
         return ReferenceBuild.getReferenceBuildLink(referenceBuildId);
-    }
-
-    /**
-     * Returns the delta metrics, i.e. the coverage results of the current build minus the same results of the reference
-     * build.
-     *
-     * @return the delta for each available coverage metric
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public NavigableMap<Metric, Fraction> getDelta() {
-        return difference;
-    }
-
-    /**
-     * Returns whether a delta metric for the specified metric exist.
-     *
-     * @param metric
-     *         the metric to check
-     *
-     * @return {@code true} if a delta is available for the specified metric
-     */
-    public boolean hasDelta(final Metric metric) {
-        return difference.containsKey(metric);
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the delta for the specified metric (with respect to
-     * the reference build).
-     *
-     * @param metric
-     *         the metric to get the delta for
-     *
-     * @return the delta metric
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatDelta(final Metric metric) {
-        if (hasDelta(metric)) {
-            return FORMATTER.formatDelta(metric, difference.get(metric), Functions.getCurrentLocale());
-        }
-        return Messages.Coverage_Not_Available();
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the change coverage for the specified metric (with
-     * respect to the reference build).
-     *
-     * @param metric
-     *         the metric to get the change coverage for
-     *
-     * @return the change coverage metric
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatChangeCoverage(final Metric metric) {
-        return formatCoverageForMetric(metric, changeCoverage);
-    }
-
-    /**
-     * Returns a formatted and localized String representation of an overview of the indirect coverage changes (with
-     * respect to the reference build).
-     *
-     * @param metric
-     *         the metric to get the indirect coverage changes for
-     *
-     * @return the formatted representation of the indirect coverage changes
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatIndirectCoverageChanges(final Metric metric) {
-        return formatCoverageForMetric(metric, indirectCoverageChanges);
-    }
-
-    /**
-     * Returns a formatted and localized String representation of an overview of the passed coverage values.
-     *
-     * @param metric
-     *         the metric to get the coverage for
-     * @param values
-     *         the coverage values of a specific type, mapped by their metrics
-     *
-     * @return the formatted text representation of the coverage value corresponding to the passed metric
-     */
-    private String formatCoverageForMetric(final Metric metric, final List<? extends Value> values) {
-        var possibleValue = values.stream()
-                .filter(v -> metric.equals(v.getMetric()))
-                .findAny();
-        return metric + ": "
-                + possibleValue.map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
-                .orElse(Messages.Coverage_Not_Available());
-    }
-
-    /**
-     * Returns the change coverage delta for the passed metric, i.e. the coverage results of the current build minus the
-     * same results of the reference build.
-     *
-     * @param metric
-     *         The change coverage metric
-     *
-     * @return the delta for each available coverage metric
-     */
-    public Fraction getChangeCoverageDifference(final Metric metric) {
-        return changeCoverageDifference.get(metric);
-    }
-
-    /**
-     * Returns whether a change coverage delta metric for the specified metric exist.
-     *
-     * @param metric
-     *         the metric to check
-     *
-     * @return {@code true} if a delta is available for the specified metric
-     */
-    public boolean hasChangeCoverageDifference(final Metric metric) {
-        return changeCoverageDifference.containsKey(metric);
-    }
-
-    /**
-     * Checks whether any code changes have been detected no matter if the code coverage is affected or not.
-     *
-     * @return {@code true} whether code changes have been detected
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public boolean hasCodeChanges() {
-        return getResult().hasChangedLines();
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the change coverage delta for the specified metric
-     * (with respect to the reference build).
-     *
-     * @param metric
-     *         the metric to get the delta for
-     *
-     * @return the delta metric
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatChangeCoverageDifference(final Metric metric) {
-        if (hasChangeCoverage(metric)) {
-            return FORMATTER.formatDelta(metric, changeCoverageDifference.get(metric), Functions.getCurrentLocale());
-        }
-        return Messages.Coverage_Not_Available();
-    }
-
-    /**
-     * Returns a formatted and localized String representation of an overview of how many lines and files are affected
-     * by the change coverage (with respect to the reference build).
-     *
-     * @return the formatted representation of the change coverage
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatChangeCoverageOverview() {
-        if (hasChangeCoverage()) {
-            int fileAmount = getFileAmountWithChangedCoverage();
-            long lineAmount = getLineAmountWithChangedCoverage();
-            return getFormattedChangesOverview(lineAmount, fileAmount);
-        }
-        return Messages.Coverage_Not_Available();
-    }
-
-    /**
-     * Returns a formatted and localized String representation of an overview of how many lines and files are affected
-     * by the indirect coverage changes (with respect to the reference build).
-     *
-     * @return the formatted representation of the indirect coverage changes
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatIndirectCoverageChangesOverview() {
-        if (hasIndirectCoverageChanges()) {
-            int fileAmount = getFileAmountWithIndirectCoverageChanges();
-            long lineAmount = getLineAmountWithIndirectCoverageChanges();
-            return getFormattedChangesOverview(lineAmount, fileAmount);
-        }
-        return Messages.Coverage_Not_Available();
-    }
-
-    public int getFileAmountWithChangedCoverage() {
-        return extractFileNodesWithChangeCoverage().size();
-    }
-
-    public long getLineAmountWithChangedCoverage() {
-        return extractFileNodesWithChangeCoverage().stream()
-                .map(FileNode::getCoveredLinesOfChangeSet)
-                .mapToLong(Collection::size)
-                .sum();
-    }
-
-    private Set<FileNode> extractFileNodesWithChangeCoverage() {
-        var allFileNodes = getResult().filterChanges().getAllFileNodes();
-        return allFileNodes.stream()
-                .filter(FileNode::hasCoveredLinesInChangeSet)
-                .collect(Collectors.toSet());
-    }
-
-    public int getFileAmountWithIndirectCoverageChanges() {
-        return extractFileNodesWithIndirectCoverageChanges().size();
-    }
-
-    public long getLineAmountWithIndirectCoverageChanges() {
-        return extractFileNodesWithIndirectCoverageChanges().stream()
-                .map(node -> node.getIndirectCoverageChanges().values())
-                .mapToLong(Collection::size)
-                .sum();
-    }
-
-    private Set<FileNode> extractFileNodesWithIndirectCoverageChanges() {
-        return getResult().filterByIndirectlyChangedCoverage().getAllFileNodes().stream()
-                .filter(FileNode::hasIndirectCoverageChanges)
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * Gets a formatted String representation of an overview of how many lines in how many files changed.
-     *
-     * @param lineAmount
-     *         The amount of lines
-     * @param fileAmount
-     *         The amount of files
-     *
-     * @return the formatted string
-     */
-    private String getFormattedChangesOverview(final long lineAmount, final int fileAmount) {
-        String affected = "is affected";
-        String line = "line";
-        if (lineAmount > 1) {
-            line = "lines";
-            affected = "are affected";
-        }
-        String file = "file";
-        if (fileAmount > 1) {
-            file = "files";
-        }
-        return String.format("%d %s (%d %s) %s", lineAmount, line, fileAmount, file, affected);
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the coverage percentage for the specified metric (with
-     * respect to the reference build).
-     *
-     * @param metric
-     *         the metric to get the coverage percentage for
-     *
-     * @return the delta metric
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatCoverage(final Metric metric) {
-        return FORMATTER.getDisplayName(metric) + ": "
-                + FORMATTER.format(getCoverage(metric), Functions.getCurrentLocale());
     }
 
     @Override
@@ -827,6 +483,6 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @Override
     public String toString() {
-        return String.format("%s (%s): %s", getDisplayName(), getUrlName(), formatCoverage(Metric.LINE));
+        return String.format("%s (%s): %s", getDisplayName(), getUrlName(), projectValues);
     }
 }

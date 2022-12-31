@@ -156,12 +156,9 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyOverallCoverage(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
-        assertThat(action.getCoverage(LINE))
-                .isEqualTo(builder.setMetric(LINE).setCovered(529).setMissed(408).build());
-        assertThat(action.getCoverage(BRANCH))
-                .isEqualTo(builder.setMetric(BRANCH).setCovered(136).setMissed(94).build());
-        assertThat(action.formatDelta(LINE)).isEqualTo("+0.72%");
-        assertThat(action.formatDelta(BRANCH)).isEqualTo("+0.00%");
+        assertThat(action.getAllValues(Baseline.PROJECT)).contains(
+                builder.setMetric(LINE).setCovered(529).setMissed(408).build(),
+                builder.setMetric(BRANCH).setCovered(136).setMissed(94).build());
     }
 
     /**
@@ -172,14 +169,8 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
-        assertThat(action.getChangeCoverage(LINE))
-                .isEqualTo(builder.setMetric(LINE).setCovered(1).setMissed(1).build());
-        assertThat(action.hasChangeCoverage(BRANCH)).isFalse();
-
-        assertThat(action.formatChangeCoverageOverview()).isEqualTo("2 lines (2 files) are affected");
-
-        assertThat(action.formatChangeCoverageDifference(LINE)).isEqualTo("-6.46%");
-        assertThat(action.formatChangeCoverageDifference(BRANCH)).isEqualTo(Messages.Coverage_Not_Available());
+        assertThat(action.getAllValues(Baseline.CHANGE)).contains(
+                builder.setMetric(LINE).setCovered(1).setMissed(1).build());
     }
 
     /**
@@ -189,11 +180,16 @@ class GitForensicsITest extends AbstractCoverageITest {
      *         The created Jenkins action
      */
     private void verifyIndirectCoverageChanges(final CoverageBuildAction action) {
-        assertThat(action.getIndirectCoverageChanges(LINE)).isInstanceOfSatisfying(Coverage.class, coverage -> {
-            assertThat(coverage.getCovered()).isEqualTo(4);
-            assertThat(coverage.getMissed()).isEqualTo(0);
-        });
-        assertThat(action.hasIndirectCoverageChanges(BRANCH)).isFalse();
+        assertThat(action.getAllValues(Baseline.INDIRECT))
+                .filteredOn(coverage -> coverage.getMetric().equals(LINE))
+                .first()
+                .isInstanceOfSatisfying(Coverage.class, coverage -> {
+                    assertThat(coverage.getCovered()).isEqualTo(4);
+                    assertThat(coverage.getMissed()).isEqualTo(0);
+                });
+        assertThat(action.getAllValues(Baseline.INDIRECT))
+                .filteredOn(coverage -> coverage.getMetric().equals(BRANCH))
+                .isEmpty();
     }
 
     private void verifyCodeDelta(final CoverageBuildAction action) {
