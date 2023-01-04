@@ -2,15 +2,10 @@ package io.jenkins.plugins.coverage.metrics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
-import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Value;
 
 import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
@@ -198,25 +193,6 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         evaluator.addAll(qualityGates);
 
         assertThatStatusWillBeOverwritten(logger, statistics, evaluator);
-    }
-
-    private CoverageStatistics createStatistics() {
-        return new CoverageStatistics(fillValues(), fillDeltas(),
-                fillValues(), fillDeltas(),
-                fillValues(), fillDeltas());
-    }
-
-    private List<Value> fillValues() {
-        var builder = new CoverageBuilder();
-        return List.of(builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
-                builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
-    }
-
-    private NavigableMap<Metric, Fraction> fillDeltas() {
-        final NavigableMap<Metric, Fraction> deltaMapping = new TreeMap<>();
-        deltaMapping.put(Metric.FILE, Fraction.getFraction(-10, 1));
-        deltaMapping.put(Metric.LINE, Fraction.getFraction(5, 1));
-        return deltaMapping;
     }
 
     /**

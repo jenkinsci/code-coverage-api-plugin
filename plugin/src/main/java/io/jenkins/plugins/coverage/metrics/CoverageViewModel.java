@@ -34,6 +34,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import hudson.model.Api;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
@@ -72,6 +73,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final Run<?, ?> owner;
     private final String optionalName;
+    private final CoverageStatistics statistics;
     private final FilteredLog log;
     private final Node node;
     private final String id;
@@ -96,14 +98,18 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         the logging statements of the recording step
      */
     public CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
-            final FilteredLog log) {
+            final CoverageStatistics statistics, final FilteredLog log) {
         super();
 
         this.owner = owner;
+
         this.id = id;
         this.optionalName = optionalName;
-        this.log = log;
+
         this.node = node;
+        this.statistics = statistics;
+
+        this.log = log;
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         changeCoverageTreeRoot = node.filterChanges();
@@ -128,6 +134,15 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             return Messages.Coverage_Title(node.getName());
         }
         return String.format("%s: %s", optionalName, node.getName());
+    }
+
+    /**
+     * Gets the remote API for this action. Depending on the path, a different result is selected.
+     *
+     * @return the remote API
+     */
+    public Api getApi() {
+        return new Api(new CoverageApi(statistics));
     }
 
     /**

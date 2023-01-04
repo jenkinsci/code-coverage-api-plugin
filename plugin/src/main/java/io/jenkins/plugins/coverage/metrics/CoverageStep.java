@@ -39,6 +39,7 @@ import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
+import io.jenkins.plugins.util.AbstractExecution;
 import io.jenkins.plugins.util.CharsetValidation;
 import io.jenkins.plugins.util.JenkinsFacade;
 
@@ -310,7 +311,7 @@ public class CoverageStep extends Step implements Serializable {
             recorder.setSourceDirectories(List.copyOf(step.getSourceDirectories()));
             recorder.setSourceCodeRetention(step.getSourceCodeRetention());
 
-            recorder.perform(getRun(), createWorkspace(), getTaskListener(), createStageResultHandler());
+            recorder.perform(getRun(), getWorkspace(), getTaskListener(), createStageResultHandler());
 
             return UNUSED;
         }

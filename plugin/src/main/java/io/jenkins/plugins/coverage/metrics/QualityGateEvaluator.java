@@ -11,7 +11,7 @@ import edu.hm.hafner.metric.Metric;
 import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
 /**
- * Evaluates a set of quality gates for a static analysis report.
+ * Evaluates a given set of quality gates.
  *
  * @author Johannes Walter
  */

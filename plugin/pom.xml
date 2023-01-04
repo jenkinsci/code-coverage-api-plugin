@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>5.37.0</version>
+    <version>6.0.0</version>
     <relativePath />
   </parent>
 
@@ -22,14 +22,6 @@
     <revision>4.0.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
-
-    <jenkins.baseline>2.361</jenkins.baseline>
-    <jenkins.version>2.361.4</jenkins.version>
-    <jdk>11</jdk>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <maven.compiler.release>11</maven.compiler.release>
-    <maven.compiler.testRelease>11</maven.compiler.testRelease>
 
     <coverage-model.version>0.6.0</coverage-model.version>
 
@@ -156,7 +148,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>2.20.0</version>
+      <version>3.0.0-rc671.616d7b_b_f88a_0</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>

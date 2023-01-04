@@ -460,7 +460,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @Override
     public CoverageViewModel getTarget() {
-        return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(), log);
+        return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(), getStatistics(), log);
     }
 
     @CheckForNull

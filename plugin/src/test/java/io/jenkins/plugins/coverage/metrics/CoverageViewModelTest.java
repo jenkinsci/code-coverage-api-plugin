@@ -92,7 +92,6 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     private CoverageViewModel createModel(final Node node) {
         return new CoverageViewModel(mock(Run.class), "id", StringUtils.EMPTY,
-                node, new FilteredLog("Errors"));
+                node, AbstractCoverageTest.createStatistics(), new FilteredLog("Errors"));
     }
-
 }

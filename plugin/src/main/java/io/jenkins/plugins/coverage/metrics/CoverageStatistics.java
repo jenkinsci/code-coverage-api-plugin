@@ -47,10 +47,6 @@ public class CoverageStatistics {
                         TreeMap::new));
     }
 
-    private static <K, V> NavigableMap<K, V> copy(final NavigableMap<K, V> original) {
-        return new TreeMap<>(original);
-    }
-
     public Optional<Value> getValue(final Baseline baseline, final Metric metric) {
         if (baseline == Baseline.PROJECT) {
             return Value.findValue(metric, projectValueMapping);

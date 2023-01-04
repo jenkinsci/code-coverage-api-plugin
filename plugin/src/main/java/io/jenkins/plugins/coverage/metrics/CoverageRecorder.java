@@ -49,6 +49,8 @@ import io.jenkins.plugins.util.CharsetValidation;
 import io.jenkins.plugins.util.EnvironmentResolver;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
+import io.jenkins.plugins.util.RunResultHandler;
+import io.jenkins.plugins.util.StageResultHandler;
 
 /**
  * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and

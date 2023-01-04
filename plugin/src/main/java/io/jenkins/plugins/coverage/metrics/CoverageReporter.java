@@ -24,6 +24,7 @@ import io.jenkins.plugins.forensics.delta.model.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
+import io.jenkins.plugins.util.StageResultHandler;
 
 import static io.jenkins.plugins.coverage.metrics.FilePathValidator.*;
 
