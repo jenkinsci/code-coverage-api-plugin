@@ -38,6 +38,7 @@
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
     <xmlunit.version>2.9.0</xmlunit.version>
+    <plugin-util-api.version>3.0.0-rc671.616d7b_b_f88a_0</plugin-util-api.version>
   </properties>
 
   <developers>
@@ -148,7 +149,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>3.0.0-rc671.616d7b_b_f88a_0</version>
+      <version>${plugin-util-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -177,6 +178,7 @@
       <artifactId>plugin-util-api</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
+      <version>${plugin-util-api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.xmlunit</groupId>
