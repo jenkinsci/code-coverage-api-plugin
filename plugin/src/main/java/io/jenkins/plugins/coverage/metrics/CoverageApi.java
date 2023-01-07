@@ -30,10 +30,34 @@ public class CoverageApi {
      */
     @Exported(inline = true)
     public NavigableMap<String, String> getProjectStatistics() {
+        return mapToStrings(Baseline.PROJECT);
+    }
+
+    /**
+     * Returns the statistics for the coverage of modified files.
+     *
+     * @return a mapping of metrics to their values (only metrics with a value are included)
+     */
+    @Exported(inline = true)
+    public NavigableMap<String, String> getModifiedFilesStatistics() {
+        return mapToStrings(Baseline.FILE);
+    }
+
+    /**
+     * Returns the statistics for the coverage of modified lines.
+     *
+     * @return a mapping of metrics to their values (only metrics with a value are included)
+     */
+    @Exported(inline = true)
+    public NavigableMap<String, String> getModifiedLinesStatistics() {
+        return mapToStrings(Baseline.CHANGE);
+    }
+
+    private TreeMap<String, String> mapToStrings(final Baseline baseline) {
         var values = new TreeMap<String, String>();
 
         for (Metric metric : Metric.values()) {
-            statistics.getValue(Baseline.PROJECT, metric).ifPresent(value -> values.put(metric.name(), FORMATTER.format(value, Locale.ENGLISH)));
+            statistics.getValue(baseline, metric).ifPresent(value -> values.put(metric.toTagName(), FORMATTER.format(value, Locale.ENGLISH)));
         }
 
         return values;

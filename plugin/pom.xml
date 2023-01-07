@@ -23,7 +23,7 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
-    <coverage-model.version>0.6.0</coverage-model.version>
+    <coverage-model.version>0.7.0</coverage-model.version>
 
     <trove4j.version>3.0.3</trove4j.version>
     <saxon-he.version>11.4</saxon-he.version>

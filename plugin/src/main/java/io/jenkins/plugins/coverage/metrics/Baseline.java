@@ -12,6 +12,7 @@ import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageLe
 /**
  * The baseline for the code coverage computation.
  */
+// FIXME: replace CHANGE with MODIFIED_LINES and MODIFIED_FILES
 public enum Baseline {
     /**
      * Coverage of the whole project. This is an absolute value that might not change much from build to build.
@@ -25,7 +26,7 @@ public enum Baseline {
             CoverageChangeTendency::getDisplayColorsForTendency),
     /**
      * Coverage of the changed lines (e.g., within the changed lines of a pull or merge request) will focus on new or
-     * changed code only.
+     * modified code only.
      */
     CHANGE(Messages._Baseline_CHANGE(), "changeCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
     /**
@@ -35,8 +36,8 @@ public enum Baseline {
     CHANGE_DELTA(Messages._Baseline_CHANGE_DELTA(), "changeCoverage",
             CoverageChangeTendency::getDisplayColorsForTendency),
     /**
-     * Coverage of the changed files (e.g., within the files that have been touched in a pull or merge request) will
-     * focus on new or changed code only.
+     * Coverage of the modified files (e.g., within the files that have been touched in a pull or merge request) will
+     * focus on new or modified code only.
      */
     FILE(Messages._Baseline_FILE(), "fileCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
     /**

@@ -55,8 +55,6 @@ class QualityGateITest extends AbstractCoverageITest {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
-
-
     }
 
     @Test
