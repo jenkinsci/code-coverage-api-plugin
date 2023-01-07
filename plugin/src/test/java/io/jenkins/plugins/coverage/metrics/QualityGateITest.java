@@ -89,7 +89,6 @@ class QualityGateITest extends AbstractCoverageITest {
                 "-> [Overall project - Branch]: ≪WARNING≫ - (Actual value: BRANCH: 88.28% (1544/1749), Quality gate: 90.00)",
                 "-> Some quality gates have been missed: overall result is WARNING");
 
-
         FlowNode flowNode = new DepthFirstScanner().findFirstMatch(build.getExecution(),
                 node -> "recordCoverage".equals(Objects.requireNonNull(node).getDisplayFunctionName()));
         assertThat(flowNode).isNotNull();

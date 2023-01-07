@@ -34,6 +34,16 @@ public class CoverageApi {
     }
 
     /**
+     * Returns the delta values for the project coverage.
+     *
+     * @return a mapping of metrics to their values (only metrics with a value are included)
+     */
+    @Exported(inline = true)
+    public NavigableMap<String, String> getProjectDelta() {
+        return mapToStrings(Baseline.PROJECT_DELTA);
+    }
+
+    /**
      * Returns the statistics for the coverage of modified files.
      *
      * @return a mapping of metrics to their values (only metrics with a value are included)
@@ -44,6 +54,16 @@ public class CoverageApi {
     }
 
     /**
+     * Returns the delta values for the modified files coverage.
+     *
+     * @return a mapping of metrics to their delta values (only metrics with a value are included)
+     */
+    @Exported(inline = true)
+    public NavigableMap<String, String> getModifiedFilesDelta() {
+        return mapToStrings(Baseline.FILE_DELTA);
+    }
+
+    /**
      * Returns the statistics for the coverage of modified lines.
      *
      * @return a mapping of metrics to their values (only metrics with a value are included)
@@ -51,6 +71,16 @@ public class CoverageApi {
     @Exported(inline = true)
     public NavigableMap<String, String> getModifiedLinesStatistics() {
         return mapToStrings(Baseline.CHANGE);
+    }
+
+    /**
+     * Returns the delta values for the modified lines coverage.
+     *
+     * @return a mapping of metrics to their delta values (only metrics with a value are included)
+     */
+    @Exported(inline = true)
+    public NavigableMap<String, String> getModifiedLinesDelta() {
+        return mapToStrings(Baseline.CHANGE_DELTA);
     }
 
     private TreeMap<String, String> mapToStrings(final Baseline baseline) {
