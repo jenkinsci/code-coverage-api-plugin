@@ -28,7 +28,7 @@ import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static edu.hm.hafner.metric.Metric.*;
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
 
 /**

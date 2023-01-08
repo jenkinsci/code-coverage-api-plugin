@@ -38,7 +38,7 @@
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
     <xmlunit.version>2.9.0</xmlunit.version>
-    <plugin-util-api.version>3.0.0-rc671.616d7b_b_f88a_0</plugin-util-api.version>
+    <plugin-util-api.version>3.0.0-rc673.91d72411f430</plugin-util-api.version>
   </properties>
 
   <developers>
@@ -66,6 +66,12 @@
       <groupId>edu.hm.hafner</groupId>
       <artifactId>coverage-model</artifactId>
       <version>${coverage-model.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>edu.hm.hafner</groupId>
+          <artifactId>codingstyle</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -349,7 +355,7 @@
             <exclude>.*ITest.*</exclude>
             <exclude>.*CoverageXmlStream.*</exclude>
           </excludes>
-          <entryPointClassPackage>io.jenkins.plugins.coverage.model</entryPointClassPackage>
+          <entryPointClassPackage>io.jenkins.plugins.coverage.metrics</entryPointClassPackage>
         </configuration>
       </plugin>
       <plugin>

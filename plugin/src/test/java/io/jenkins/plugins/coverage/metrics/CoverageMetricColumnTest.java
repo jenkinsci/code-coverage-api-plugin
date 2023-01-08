@@ -181,7 +181,7 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
         var delta = new TreeMap<Metric, Fraction>();
         delta.put(Metric.BRANCH, Fraction.getFraction("0.05"));
         CoverageBuildAction coverageBuildAction =
-                new CoverageBuildAction(run, "coverage", "Code Coverage", node, QualityGateStatus.INACTIVE, new FilteredLog("Test"),
+                new CoverageBuildAction(run, "coverage", "Code Coverage", node, new QualityGateResult(), new FilteredLog("Test"),
                         "-", delta, List.of(), new TreeMap<>(), List.of(), false);
         when(run.getAction(CoverageBuildAction.class)).thenReturn(coverageBuildAction);
         when(run.getActions(CoverageBuildAction.class)).thenReturn(Collections.singletonList(coverageBuildAction));

@@ -30,7 +30,6 @@ import hudson.util.XStream2;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerLineMapConverter;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerSetConverter;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
-import io.jenkins.plugins.coverage.model.Assertions;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.BDDAssertions.*;
@@ -223,7 +222,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         var tree = createSerializable();
 
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY,
-                tree, QualityGateStatus.INACTIVE, new FilteredLog("Test"), "-",
+                tree, new QualityGateResult(), new FilteredLog("Test"), "-",
                 new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);
     }

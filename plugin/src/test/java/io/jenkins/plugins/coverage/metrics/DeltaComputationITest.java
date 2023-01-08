@@ -15,7 +15,7 @@ import hudson.model.Run;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 
 import static edu.hm.hafner.metric.Metric.*;
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test for delta computation of reference builds.

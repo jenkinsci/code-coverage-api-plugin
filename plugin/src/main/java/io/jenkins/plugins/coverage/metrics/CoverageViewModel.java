@@ -74,6 +74,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final Run<?, ?> owner;
     private final String optionalName;
     private final CoverageStatistics statistics;
+    private final QualityGateResult qualityGateResult;
+    private final String referenceBuildLink;
     private final FilteredLog log;
     private final Node node;
     private final String id;
@@ -94,11 +96,16 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         optional name that overrides the default name of the results
      * @param node
      *         the coverage tree to be shown
+     * @param statistics
+     *         the coverage statistics
+     * @param qualityGateResult
+     *         the quality gate result
      * @param log
      *         the logging statements of the recording step
      */
     public CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
-            final CoverageStatistics statistics, final FilteredLog log) {
+            final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
+            final String referenceBuildLink, final FilteredLog log) {
         super();
 
         this.owner = owner;
@@ -108,6 +115,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         this.node = node;
         this.statistics = statistics;
+        this.qualityGateResult = qualityGateResult;
+        this.referenceBuildLink = referenceBuildLink;
 
         this.log = log;
 
@@ -142,7 +151,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the remote API
      */
     public Api getApi() {
-        return new Api(new CoverageApi(statistics));
+        return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuildLink));
     }
 
     /**

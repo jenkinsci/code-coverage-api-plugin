@@ -20,7 +20,7 @@ import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 
 /**
  * Tests support for column and job configurations via the Job DSL Plugin.

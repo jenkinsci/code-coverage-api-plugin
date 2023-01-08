@@ -36,7 +36,8 @@ import static io.jenkins.plugins.coverage.metrics.FilePathValidator.*;
  */
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
-    void publishAction(final String id, final String optionalName, final Node rootNode, final Run<?, ?> build, final FilePath workspace,
+    void publishAction(final String id, final String optionalName, final Node rootNode, final Run<?, ?> build,
+            final FilePath workspace,
             final TaskListener listener, final List<QualityGate> qualityGates, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
@@ -75,12 +76,12 @@ public class CoverageReporter {
             NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
             Node indirectCoverageChangesTree = rootNode.filterByIndirectlyChangedCoverage();
 
-            QualityGateStatus qualityGateStatus;
-            qualityGateStatus = evaluateQualityGates(rootNode, log,
+            QualityGateResult qualityGateResult;
+            qualityGateResult = evaluateQualityGates(rootNode, log,
                     changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateStatus, log,
+            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateResult, log,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.aggregateValues(),
@@ -88,7 +89,7 @@ public class CoverageReporter {
                     indirectCoverageChangesTree.aggregateValues());
         }
         else {
-            QualityGateStatus qualityGateStatus = evaluateQualityGates(rootNode, log,
+            QualityGateResult qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateStatus, log);
@@ -140,33 +141,31 @@ public class CoverageReporter {
         }
     }
 
-    private QualityGateStatus evaluateQualityGates(final Node rootNode, final FilteredLog log,
+    private QualityGateResult evaluateQualityGates(final Node rootNode, final FilteredLog log,
             final List<Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
             final NavigableMap<Metric, Fraction> coverageDelta, final StageResultHandler resultHandler,
             final List<QualityGate> qualityGates) {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.addAll(qualityGates);
-        QualityGateStatus qualityGateStatus;
-        if (evaluator.isEnabled()) {
+        var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
+                changeCoverageDistribution, changeCoverageDelta,
+                List.of(), new TreeMap<>());
+        var qualityGateStatus = evaluator.evaluate(statistics);
+        if (qualityGateStatus.isInactive()) {
+            log.logInfo("No quality gates have been set - skipping");
+        }
+        else {
             log.logInfo("Evaluating quality gates");
-            var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
-                    changeCoverageDistribution, changeCoverageDelta,
-                    List.of(), new TreeMap<>());
-            qualityGateStatus = evaluator.evaluate(statistics, log::logInfo);
             if (qualityGateStatus.isSuccessful()) {
                 log.logInfo("-> All quality gates have been passed");
             }
             else {
-                log.logInfo("-> Some quality gates have been missed: overall result is %s", qualityGateStatus);
+                var message = String.format("-> Some quality gates have been missed: overall result is %s", qualityGateStatus.getOverallStatus());
+                log.logInfo(message);
+                resultHandler.setResult(qualityGateStatus.getOverallStatus().getResult(), message);
             }
-            if (!qualityGateStatus.isSuccessful()) {
-                resultHandler.setResult(qualityGateStatus.getResult(),
-                        "Some quality gates have been missed: overall result is " + qualityGateStatus.getResult());
-            }
-        }
-        else {
-            log.logInfo("No quality gates have been set - skipping");
-            qualityGateStatus = QualityGateStatus.INACTIVE;
+            log.logInfo("-> Details for each quality gate:");
+            qualityGateStatus.getMessages().forEach(log::logInfo);
         }
         return qualityGateStatus;
     }

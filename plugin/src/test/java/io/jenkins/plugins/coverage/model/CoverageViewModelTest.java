@@ -11,7 +11,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageViewModel.*;
 import static io.jenkins.plugins.coverage.model.testutil.CoverageStubs.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;

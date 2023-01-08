@@ -101,6 +101,11 @@ public class QualityGate extends AbstractDescribableImpl<QualityGate> implements
                 FORMATTER.getDisplayName(getMetric()));
     }
 
+    @Override
+    public String toString() {
+        return getName() + String.format(" - %s: %f", getCriticality(), getThreshold());
+    }
+
     public double getThreshold() {
         return threshold;
     }

@@ -57,24 +57,16 @@ class CoverageApiTest extends AbstractCoverageITest {
 
         var remoteApiResult = callRemoteApi(build);
         assertThatJson(remoteApiResult)
-                .node("projectStatistics").isEqualTo("{\n"
-                        + "  \"branch\": \"88.28%\",\n"
-                        + "  \"complexity\": \"2558\",\n"
-                        + "  \"complexity-density\": \"+44.12%\",\n"
-                        + "  \"file\": \"99.67%\",\n"
-                        + "  \"instruction\": \"96.11%\",\n"
-                        + "  \"line\": \"95.39%\",\n"
-                        + "  \"loc\": \"5798\",\n"
-                        + "  \"method\": \"97.29%\",\n"
-                        + "  \"module\": \"100.00%\",\n"
-                        + "  \"package\": \"100.00%\"}");
+                .node("qualityGates.overallResult").isEqualTo("UNSTABLE");
         assertThatJson(remoteApiResult)
-                .node("modifiedFilesStatistics").isEqualTo("{}");
-        assertThatJson(remoteApiResult)
-                .node("modifiedLinesStatistics").isEqualTo("{}");
+                .node("qualityGates.resultItems").isEqualTo("[{\n"
+                        + "  \"qualityGate\": \"Overall project - Line\",\n"
+                        + "  \"result\": \"UNSTABLE\",\n"
+                        + "  \"threshold\": 100.0,\n"
+                        + "  \"value\": \"95.39%\"\n"
+                        + "}]\n");
     }
 
-    // FIXME: reference build
     @Test
     void shouldShowDeltaInRemoteApi() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
@@ -99,6 +91,8 @@ class CoverageApiTest extends AbstractCoverageITest {
                         + "  \"module\": \"+0.00%\",\n"
                         + "  \"package\": \"+0.00%\"\n"
                         + "}");
+        assertThatJson(remoteApiResult).node("referenceBuild").asString()
+                .matches("<a href=\".*jenkins/job/test0/1/\".*>test0 #1</a>");
     }
 
     private JSONObject callRemoteApi(final Run<?, ?> build) {

@@ -19,8 +19,7 @@ import hudson.model.Run;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
-import static org.assertj.core.api.Assertions.*;
-
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 /**
  * Integration tests with active quality gates.
  */
@@ -32,7 +31,7 @@ class QualityGateITest extends AbstractCoverageITest {
         Run<?, ?> build = buildWithResult(job, Result.SUCCESS);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.INACTIVE);
+        assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.INACTIVE);
     }
 
     @Test
@@ -43,7 +42,7 @@ class QualityGateITest extends AbstractCoverageITest {
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.PASSED);
+        assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.PASSED);
     }
 
     @Test
@@ -54,7 +53,7 @@ class QualityGateITest extends AbstractCoverageITest {
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
+        assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.WARNING);
     }
 
     @Test
@@ -65,7 +64,7 @@ class QualityGateITest extends AbstractCoverageITest {
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.FAILED);
+        assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.FAILED);
     }
 
     @Test
@@ -82,7 +81,7 @@ class QualityGateITest extends AbstractCoverageITest {
         WorkflowRun build = (WorkflowRun)buildWithResult(project, Result.UNSTABLE);
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
-        assertThat(coverageResult.getQualityGateStatus()).isEqualTo(QualityGateStatus.WARNING);
+        assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.WARNING);
 
         assertThat(coverageResult.getLog().getInfoMessages()).contains("Evaluating quality gates",
                 "-> [Overall project - Line]: ≪PASSED≫ - (Actual value: LINE: 95.39% (5531/5798), Quality gate: 90.00)",

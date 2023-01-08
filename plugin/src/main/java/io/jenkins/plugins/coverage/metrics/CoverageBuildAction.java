@@ -58,7 +58,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     private final String referenceBuildId;
 
-    private final QualityGateStatus qualityGateStatus;
+    private final QualityGateResult qualityGateResult;
 
     // FIXME: Rethink if we need a separate result object that stores all data?
     private final FilteredLog log;
@@ -97,15 +97,15 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *         optional name that overrides the default name of the results
      * @param result
      *         the coverage tree as result to persist with this action
-     * @param qualityGateStatus
+     * @param qualityGateResult
      *         status of the quality gates
      * @param log
      *         the logging statements of the recording step
      */
     public CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String optionalName,
-            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log) {
-        this(owner, id, optionalName, result, qualityGateStatus, log, NO_REFERENCE_BUILD,
+            final Node result, final QualityGateResult qualityGateResult, final FilteredLog log) {
+        this(owner, id, optionalName, result, qualityGateResult, log, NO_REFERENCE_BUILD,
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
     }
 
@@ -120,7 +120,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *         optional name that overrides the default name of the results
      * @param result
      *         the coverage tree as result to persist with this action
-     * @param qualityGateStatus
+     * @param qualityGateResult
      *         status of the quality gates
      * @param log
      *         the logging statements of the recording step
@@ -138,13 +138,13 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @SuppressWarnings("checkstyle:ParameterNumber")
     public CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String optionalName,
-            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
+            final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final List<? extends Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final List<? extends Value> indirectCoverageChanges) {
-        this(owner, id, optionalName, result, qualityGateStatus, log, referenceBuildId, delta, changeCoverage,
+        this(owner, id, optionalName, result, qualityGateResult, log, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
@@ -152,7 +152,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction(final Run<?, ?> owner,
             final String id, final String name,
-            final Node result, final QualityGateStatus qualityGateStatus, final FilteredLog log,
+            final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final List<? extends Value> changeCoverage,
@@ -166,7 +166,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         this.log = log;
 
         projectValues = result.aggregateValues();
-        this.qualityGateStatus = qualityGateStatus;
+        this.qualityGateResult = qualityGateResult;
         difference = delta;
         this.changeCoverage = new ArrayList<>(changeCoverage);
         this.changeCoverageDifference = changeCoverageDifference;
@@ -191,8 +191,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         return log;
     }
 
-    public QualityGateStatus getQualityGateStatus() {
-        return qualityGateStatus;
+    public QualityGateResult getQualityGateResult() {
+        return qualityGateResult;
     }
 
     public CoverageStatistics getStatistics() {
@@ -220,13 +220,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public boolean hasBaselineResult(final Baseline baseline) {
-        if (baseline == Baseline.CHANGE) {
-            return !changeCoverage.isEmpty();
-        }
-        if (baseline == Baseline.INDIRECT) {
-            return !indirectCoverageChanges.isEmpty();
-        }
-        return true;
+        return !getValues(baseline).isEmpty();
     }
 
     /**
@@ -460,7 +454,8 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @Override
     public CoverageViewModel getTarget() {
-        return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(), getStatistics(), log);
+        return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(),
+                getStatistics(), getQualityGateResult(), getReferenceBuildLink(), log);
     }
 
     @CheckForNull

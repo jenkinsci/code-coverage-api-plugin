@@ -21,7 +21,7 @@ import io.jenkins.plugins.coverage.model.CoverageXmlStream.MetricPercentageMapCo
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 
 /**
  * Tests the class {@link CoverageXmlStream}.

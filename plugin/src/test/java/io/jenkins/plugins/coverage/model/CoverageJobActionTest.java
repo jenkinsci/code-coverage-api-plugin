@@ -15,7 +15,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.mockito.Mockito.*;
 

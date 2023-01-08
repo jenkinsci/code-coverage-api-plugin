@@ -46,7 +46,7 @@ class CoverageBuildActionTest {
 
         var coverages = List.of(percent50, percent80);
         var action = spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
-                StringUtils.EMPTY, module, QualityGateStatus.INACTIVE,
+                StringUtils.EMPTY, module, new QualityGateResult(),
                 createLog(), "-",
                 deltas, coverages,
                 deltas, coverages, false));
@@ -70,7 +70,7 @@ class CoverageBuildActionTest {
     private static CoverageBuildAction createEmptyAction(final Node module) {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
                 StringUtils.EMPTY, module,
-                QualityGateStatus.INACTIVE,
+                new QualityGateResult(),
                 createLog(), "-",
                 new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);

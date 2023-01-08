@@ -17,11 +17,38 @@
             </li>
           </span>
         </j:if>
-        <j:set var="q" value="${it.qualityGateStatus}"/>
-        <j:if test="${q.name() != 'INACTIVE'}">
-          <li>
-            ${%Quality gate}: ${q.description}
-            <l:icon style="width: 16px; height: 16px; margin-left: 0; position: relative; top: -0.1rem;" alt="${q.description}" class="${q.iconClass} icon-sm"/>
+        <j:set var="q" value="${it.qualityGateResult}"/>
+        <j:set var="status" value="${q.overallStatus}"/>
+        <j:if test="${status.name() != 'INACTIVE'}">
+          <j:set var="tooltip">
+            <div class="jenkins-tooltip healthReportDetails jenkins-tooltip--table-wrapper">
+              <table class="jenkins-table">
+                <thead>
+                  <tr>
+                    <th>${%S}</th>
+                    <th align="left">${%Quality Gate}</th>
+                    <th align="right">${%Threshold}</th>
+                    <th align="right">${%Actual}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <j:forEach var="item" items="${q.resultItems}">
+                    <tr>
+                      <td >
+                        <l:icon style="width: 16px; height: 16px; margin-left: 0; position: relative; top: -0.1rem;" alt="${item.status.description}" class="${item.status.iconClass} icon-sm"/>
+                      </td>
+                      <td align="left" style="white-space: nowrap;">${item.qualityGate.name}</td>
+                      <td align="right" style="white-space: nowrap;">${item.qualityGate.threshold}</td>
+                      <td align="right" style="white-space: nowrap;">${item.actualValue}</td>
+                    </tr>
+                  </j:forEach>
+                </tbody>
+              </table>
+            </div>
+          </j:set>
+          <li data-html-tooltip="${tooltip}" >
+            ${%Quality gate}: ${status.description}
+            <l:icon style="width: 16px; height: 16px; margin-left: 0; position: relative; top: -0.1rem;" alt="${status.description}" class="${status.iconClass} icon-sm"/>
           </li>
         </j:if>
       </ul>

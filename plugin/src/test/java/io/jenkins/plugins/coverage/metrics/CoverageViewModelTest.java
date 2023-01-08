@@ -15,8 +15,8 @@ import hudson.model.Run;
 
 import static io.jenkins.plugins.coverage.metrics.CoverageViewModel.*;
 import static io.jenkins.plugins.coverage.metrics.testutil.CoverageStubs.*;
-import static io.jenkins.plugins.coverage.model.Assertions.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -92,6 +92,6 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     private CoverageViewModel createModel(final Node node) {
         return new CoverageViewModel(mock(Run.class), "id", StringUtils.EMPTY,
-                node, AbstractCoverageTest.createStatistics(), new FilteredLog("Errors"));
+                node, AbstractCoverageTest.createStatistics(), new QualityGateResult(), "-", new FilteredLog("Errors"));
     }
 }

@@ -14,7 +14,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoverageMetric.*;
 
 /**

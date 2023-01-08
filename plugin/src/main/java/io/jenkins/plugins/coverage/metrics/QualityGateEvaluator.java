@@ -3,8 +3,7 @@ package io.jenkins.plugins.coverage.metrics;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import com.google.errorprone.annotations.FormatMethod;
+import java.util.Locale;
 
 import edu.hm.hafner.metric.Metric;
 
@@ -16,6 +15,7 @@ import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
  * @author Johannes Walter
  */
 public class QualityGateEvaluator {
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
     private final List<QualityGate> qualityGates = new ArrayList<>();
 
     /**
@@ -23,54 +23,29 @@ public class QualityGateEvaluator {
      *
      * @param report
      *         the report to evaluate
-     * @param logger
-     *         the logger that reports the passed and failed quality gate thresholds
      *
      * @return result of the evaluation, expressed by a build state
      */
-    public QualityGateStatus evaluate(final CoverageStatistics report, final FormattedLogger logger) {
+    public QualityGateResult evaluate(final CoverageStatistics report) {
         if (qualityGates.isEmpty()) {
-            logger.print("-> INACTIVE - No quality gate defined");
-
-            return QualityGateStatus.INACTIVE;
+            return new QualityGateResult();
         }
 
-        QualityGateStatus status = QualityGateStatus.PASSED;
-
+        var result = new QualityGateResult();
         for (QualityGate qualityGate : qualityGates) {
             var baseline = qualityGate.getBaseline();
             var possibleValue = report.getValue(baseline, qualityGate.getMetric());
             if (possibleValue.isPresent()) {
                 var actualValue = possibleValue.get();
-                if (actualValue.isBelowThreshold(qualityGate.getThreshold())) {
-                    printResult(logger, qualityGate, qualityGate.getStatus(), actualValue);
-                    status = changeQualityStatusIfNotWorse(status, qualityGate);
-                }
-                else {
-                    printResult(logger, qualityGate, QualityGateStatus.PASSED, actualValue);
-                }
+
+                var status = actualValue.isBelowThreshold(qualityGate.getThreshold()) ? qualityGate.getStatus() : QualityGateStatus.PASSED;
+                result.add(qualityGate, status, FORMATTER.format(actualValue, Locale.ENGLISH));
             }
             else {
-                status = changeQualityStatusIfNotWorse(status, qualityGate);
-                printResult(logger, qualityGate, qualityGate.getStatus(), "n/a");
+                result.add(qualityGate, qualityGate.getStatus(), "n/a");
             }
         }
-
-        return status;
-    }
-
-    private static void printResult(final FormattedLogger logger, final QualityGate qualityGate,
-            final QualityGateStatus actualResult, final Object actualValue) {
-        logger.print("-> [%s]: ≪%s≫ - (Actual value: %s, Quality gate: %.2f)",
-                qualityGate.getName(), actualResult, actualValue, qualityGate.getThreshold());
-    }
-
-    private QualityGateStatus changeQualityStatusIfNotWorse(final QualityGateStatus existingStatus, final QualityGate qualityGate) {
-        var newStatus = qualityGate.getCriticality().getStatus();
-        if (newStatus.isWorseThan(existingStatus)) {
-            return newStatus;
-        }
-        return existingStatus;
+        return result;
     }
 
     /**
@@ -107,24 +82,5 @@ public class QualityGateEvaluator {
      */
     public boolean isEnabled() {
         return !qualityGates.isEmpty();
-    }
-
-    /**
-     * Logs results of the quality gate evaluation.
-     */
-    @FunctionalInterface
-    public interface FormattedLogger {
-        /**
-         * Logs the specified message.
-         *
-         * @param format
-         *         A <a href="../util/Formatter.html#syntax">format string</a>
-         * @param args
-         *         Arguments referenced by the format specifiers in the format string.  If there are more arguments than
-         *         format specifiers, the extra arguments are ignored.  The number of arguments is variable and may be
-         *         zero.
-         */
-        @FormatMethod
-        void print(String format, Object... args);
     }
 }
