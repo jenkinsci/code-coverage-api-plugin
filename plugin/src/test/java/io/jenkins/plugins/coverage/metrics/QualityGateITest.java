@@ -20,6 +20,7 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 
 import static io.jenkins.plugins.coverage.metrics.Assertions.*;
+
 /**
  * Integration tests with active quality gates.
  */
@@ -84,9 +85,10 @@ class QualityGateITest extends AbstractCoverageITest {
         assertThat(coverageResult.getQualityGateResult()).hasOverallStatus(QualityGateStatus.WARNING);
 
         assertThat(coverageResult.getLog().getInfoMessages()).contains("Evaluating quality gates",
-                "-> [Overall project - Line]: ≪PASSED≫ - (Actual value: LINE: 95.39% (5531/5798), Quality gate: 90.00)",
-                "-> [Overall project - Branch]: ≪WARNING≫ - (Actual value: BRANCH: 88.28% (1544/1749), Quality gate: 90.00)",
-                "-> Some quality gates have been missed: overall result is WARNING");
+                "-> Some quality gates have been missed: overall result is UNSTABLE",
+                "-> Details for each quality gate:",
+                "-> [Overall project - Line]: ≪Success≫ - (Actual value: 95.39%, Quality gate: 90.00)",
+                "-> [Overall project - Branch]: ≪Unstable≫ - (Actual value: 88.28%, Quality gate: 90.00)");
 
         FlowNode flowNode = new DepthFirstScanner().findFirstMatch(build.getExecution(),
                 node -> "recordCoverage".equals(Objects.requireNonNull(node).getDisplayFunctionName()));
@@ -95,6 +97,6 @@ class QualityGateITest extends AbstractCoverageITest {
         WarningAction warningAction = flowNode.getPersistentAction(WarningAction.class);
         assertThat(warningAction).isNotNull();
         assertThat(warningAction.getMessage()).isEqualTo(
-                "Some quality gates have been missed: overall result is UNSTABLE");
+                "-> Some quality gates have been missed: overall result is UNSTABLE");
     }
 }

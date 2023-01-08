@@ -160,7 +160,7 @@ public class CoverageReporter {
                 log.logInfo("-> All quality gates have been passed");
             }
             else {
-                var message = String.format("-> Some quality gates have been missed: overall result is %s", qualityGateStatus.getOverallStatus());
+                var message = String.format("-> Some quality gates have been missed: overall result is %s", qualityGateStatus.getOverallStatus().getResult());
                 log.logInfo(message);
                 resultHandler.setResult(qualityGateStatus.getOverallStatus().getResult(), message);
             }
