@@ -79,7 +79,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldMapScmChangesToReportPaths() throws CodeDeltaException {
+    void shouldMapScmChangesToReportPaths() throws IllegalStateException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         Delta delta = createDeltaWithStubbedFileChanges();
         Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
@@ -99,7 +99,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldCreateEmptyMappingWithoutChanges() throws CodeDeltaException {
+    void shouldCreateEmptyMappingWithoutChanges() throws IllegalStateException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         Node tree = createStubbedCoverageTree();
         FilteredLog log = createFilteredLog();
@@ -109,7 +109,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldNotMapScmChangesWithAmbiguousPaths() throws CodeDeltaException {
+    void shouldNotMapScmChangesWithAmbiguousPaths() throws IllegalStateException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
 
@@ -123,12 +123,12 @@ class CodeDeltaCalculatorTest {
         when(tree.getFiles()).thenReturn(List.of(path));
 
         assertThatThrownBy(() -> codeDeltaCalculator.mapScmChangesToReportPaths(changes, tree, log))
-                .isInstanceOf(CodeDeltaException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage(AMBIGUOUS_PATHS_ERROR);
     }
 
     @Test
-    void shouldCreateOldPathMapping() throws CodeDeltaException {
+    void shouldCreateOldPathMapping() throws IllegalStateException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
         Node tree = createStubbedCoverageTree();
@@ -146,7 +146,7 @@ class CodeDeltaCalculatorTest {
     }
 
     @Test
-    void shouldNotCreateOldPathMappingWithMissingReferenceNodes() throws CodeDeltaException {
+    void shouldNotCreateOldPathMappingWithMissingReferenceNodes() throws IllegalStateException {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
 
@@ -175,7 +175,7 @@ class CodeDeltaCalculatorTest {
         changes.put(REPORT_PATH_MODIFY, createFileChanges(REPORT_PATH_MODIFY, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
 
         assertThatThrownBy(() -> codeDeltaCalculator.createOldPathMapping(tree, referenceTree, changes, log))
-                .isInstanceOf(CodeDeltaException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessageStartingWith(CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE)
                 .hasMessageContainingAll(
                         String.format("new: '%s' - former: '%s',", REPORT_PATH_RENAME, OLD_REPORT_PATH_RENAME),

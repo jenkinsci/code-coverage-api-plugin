@@ -134,9 +134,9 @@ public class CoverageReporter {
             log.logInfo("Obtaining coverage delta for files...");
             fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
         }
-        catch (CodeDeltaException e) {
+        catch (IllegalStateException exception) {
             log.logError("An error occurred while processing code and coverage changes:");
-            log.logError("-> Message: " + e.getMessage());
+            log.logError("-> Message: " + exception.getMessage());
             log.logError("-> Skipping calculating change coverage and indirect coverage changes");
         }
     }

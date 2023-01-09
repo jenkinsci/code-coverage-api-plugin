@@ -31,7 +31,7 @@ import io.jenkins.plugins.forensics.delta.model.FileEditType;
  *
  * @author Florian Orendi
  */
-public class CodeDeltaCalculator {
+class CodeDeltaCalculator {
     static final String AMBIGUOUS_PATHS_ERROR =
             "Failed to map SCM paths with coverage report paths due to ambiguous fully qualified names";
     static final String AMBIGUOUS_OLD_PATHS_ERROR =
@@ -62,7 +62,7 @@ public class CodeDeltaCalculator {
      * @param scm
      *         The selected SCM
      */
-    public CodeDeltaCalculator(final Run<?, ?> build, final FilePath workspace,
+    CodeDeltaCalculator(final Run<?, ?> build, final FilePath workspace,
             final TaskListener listener, final String scm) {
         this.build = build;
         this.workspace = workspace;
@@ -114,11 +114,11 @@ public class CodeDeltaCalculator {
      *         logger
      *
      * @return the created mapping of code changes
-     * @throws CodeDeltaException
+     * @throws IllegalStateException
      *         when creating the mapping failed due to ambiguous paths
      */
     public Map<String, FileChanges> mapScmChangesToReportPaths(
-            final Set<FileChanges> changes, final Node root, final FilteredLog log) throws CodeDeltaException {
+            final Set<FileChanges> changes, final Node root, final FilteredLog log) throws IllegalStateException {
         Set<String> reportPaths = new HashSet<>(root.getFiles());
         Set<String> scmPaths = changes.stream().map(FileChanges::getFileName).collect(Collectors.toSet());
 
@@ -149,12 +149,12 @@ public class CodeDeltaCalculator {
      *
      * @return the created mapping whose keys are the currently used paths and whose values are the paths before the
      *         modifications
-     * @throws CodeDeltaException
+     * @throws IllegalStateException
      *         if the SCM path mapping is ambiguous
      */
     public Map<String, String> createOldPathMapping(final Node root, final Node referenceRoot,
             final Map<String, FileChanges> changes, final FilteredLog log)
-            throws CodeDeltaException {
+            throws IllegalStateException {
         Set<String> oldReportPaths = new HashSet<>(referenceRoot.getFiles());
         // mapping between reference and current file paths which initially contains the SCM paths with renamings
         Map<String, String> oldPathMapping = changes.entrySet().stream()
@@ -171,7 +171,7 @@ public class CodeDeltaCalculator {
             oldPathMapping.replace(reportPath, oldReportPath);
         });
         if (!newReportPathsWithRename.equals(oldPathMapping.keySet())) {
-            throw new CodeDeltaException(AMBIGUOUS_OLD_PATHS_ERROR);
+            throw new IllegalStateException(AMBIGUOUS_OLD_PATHS_ERROR);
         }
 
         // adding the paths, which exist in both trees and contain no changes, to the mapping
@@ -219,16 +219,16 @@ public class CodeDeltaCalculator {
      * @param log
      *         The log
      *
-     * @throws CodeDeltaException
+     * @throws IllegalStateException
      *         when ambiguous paths has been detected
      */
     private void verifyScmToReportPathMapping(final Map<String, String> pathMapping, final FilteredLog log)
-            throws CodeDeltaException {
+            throws IllegalStateException {
         List<String> notEmptyValues = pathMapping.values().stream()
                 .filter(path -> !path.isEmpty())
                 .collect(Collectors.toList());
         if (notEmptyValues.size() != new HashSet<>(notEmptyValues).size()) {
-            throw new CodeDeltaException(AMBIGUOUS_PATHS_ERROR);
+            throw new IllegalStateException(AMBIGUOUS_PATHS_ERROR);
         }
         log.logInfo("Successfully mapped SCM paths to coverage report paths");
     }
@@ -266,11 +266,11 @@ public class CodeDeltaCalculator {
      * @param log
      *         The log
      *
-     * @throws CodeDeltaException
+     * @throws IllegalStateException
      *         when the mapping is ambiguous
      */
     static void verifyOldPathMapping(final Map<String, String> oldPathMapping, final FilteredLog log)
-            throws CodeDeltaException {
+            throws IllegalStateException {
         Set<String> duplicates = StreamEx.of(oldPathMapping.values())
                 .distinct(2)
                 .collect(Collectors.toSet());
@@ -286,7 +286,7 @@ public class CodeDeltaCalculator {
                     .collect(Collectors.joining("," + System.lineSeparator()));
             String errorMessage =
                     CODE_DELTA_TO_COVERAGE_DATA_MISMATCH_ERROR_TEMPLATE + System.lineSeparator() + mismatches;
-            throw new CodeDeltaException(errorMessage);
+            throw new IllegalStateException(errorMessage);
         }
         log.logInfo("Successfully verified that the coverage data matches with the code delta");
     }
