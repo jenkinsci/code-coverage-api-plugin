@@ -57,8 +57,8 @@ class CoverageBuildActionTest {
 
         assertThat(action.getStatistics().getValue(Baseline.PROJECT, Metric.BRANCH)).hasValue(percent50);
         assertThat(action.getStatistics().getValue(Baseline.PROJECT, Metric.LINE)).hasValue(percent80);
-        assertThat(action.getStatistics().getValue(Baseline.CHANGE, Metric.BRANCH)).hasValue(percent50);
-        assertThat(action.getStatistics().getValue(Baseline.CHANGE, Metric.LINE)).hasValue(percent80);
+        assertThat(action.getStatistics().getValue(Baseline.MODIFIED_LINES, Metric.BRANCH)).hasValue(percent50);
+        assertThat(action.getStatistics().getValue(Baseline.MODIFIED_LINES, Metric.LINE)).hasValue(percent80);
         assertThat(action.getStatistics().getValue(Baseline.PROJECT_DELTA, Metric.LINE))
                 .hasValue(new FractionValue(Metric.LINE, lineDelta));
         assertThat(action.getStatistics().getValue(Baseline.PROJECT_DELTA, Metric.BRANCH))

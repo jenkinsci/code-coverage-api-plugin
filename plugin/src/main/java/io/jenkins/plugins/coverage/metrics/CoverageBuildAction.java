@@ -207,7 +207,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public List<Baseline> getBaselines() {
-        return List.of(Baseline.PROJECT, Baseline.CHANGE, Baseline.INDIRECT);
+        return List.of(Baseline.PROJECT, Baseline.MODIFIED_LINES, Baseline.INDIRECT);
     }
 
     /**
@@ -238,11 +238,11 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         if (baseline == Baseline.PROJECT) {
             return Baseline.PROJECT_DELTA;
         }
-        if (baseline == Baseline.CHANGE) {
-            return Baseline.CHANGE_DELTA;
+        if (baseline == Baseline.MODIFIED_LINES) {
+            return Baseline.MODIFIED_LINES_DELTA;
         }
-        if (baseline == Baseline.FILE) {
-            return Baseline.FILE_DELTA;
+        if (baseline == Baseline.MODIFIED_FILES) {
+            return Baseline.MODIFIED_FILES_DELTA;
         }
         throw new NoSuchElementException("No delta baseline for this baseline: " + baseline);
     }
@@ -286,7 +286,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         if (baseline == Baseline.PROJECT) {
             return projectValues.stream();
         }
-        if (baseline == Baseline.CHANGE) {
+        if (baseline == Baseline.MODIFIED_LINES) {
             return changeCoverage.stream();
         }
         if (baseline == Baseline.INDIRECT) {
@@ -349,7 +349,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public boolean hasDelta(final Baseline baseline) {
-        return baseline == Baseline.PROJECT || baseline == Baseline.CHANGE;
+        return baseline == Baseline.PROJECT || baseline == Baseline.MODIFIED_LINES;
     }
 
     /**
@@ -366,7 +366,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
         if (baseline == Baseline.PROJECT) {
             return difference.containsKey(metric);
         }
-        if (baseline == Baseline.CHANGE) {
+        if (baseline == Baseline.MODIFIED_LINES) {
             return changeCoverageDifference.containsKey(metric)
                     && Set.of(Metric.BRANCH, Metric.LINE).contains(metric);
         }
@@ -395,7 +395,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
                         Functions.getCurrentLocale());
             }
         }
-        if (baseline == Baseline.CHANGE) {
+        if (baseline == Baseline.MODIFIED_LINES) {
             if (hasDelta(baseline, metric)) {
                 return FORMATTER.formatDelta(metric, changeCoverageDifference.get(metric),
                         Functions.getCurrentLocale());

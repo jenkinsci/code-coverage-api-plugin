@@ -23,7 +23,7 @@ jobs:
                       qualityGate {
                           threshold(80)
                           metric('BRANCH')
-                          baseline('CHANGE')
+                          baseline('MODIFIED_LINES')
                           criticality('FAILURE')
                       }
                   } 

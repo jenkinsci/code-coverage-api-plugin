@@ -218,16 +218,16 @@ public final class ElementFormatter {
         switch (baseline) {
             case PROJECT:
                 return Messages.Baseline_PROJECT();
-            case CHANGE:
-                return Messages.Baseline_CHANGE();
-            case FILE:
-                return Messages.Baseline_FILE();
+            case MODIFIED_LINES:
+                return Messages.Baseline_MODIFIED_LINES();
+            case MODIFIED_FILES:
+                return Messages.Baseline_MODIFIED_FILES();
             case PROJECT_DELTA:
                 return Messages.Baseline_PROJECT_DELTA();
-            case CHANGE_DELTA:
-                return Messages.Baseline_CHANGE_DELTA();
-            case FILE_DELTA:
-                return Messages.Baseline_FILE_DELTA();
+            case MODIFIED_LINES_DELTA:
+                return Messages.Baseline_MODIFIED_LINES_DELTA();
+            case MODIFIED_FILES_DELTA:
+                return Messages.Baseline_MODIFIED_FILES_DELTA();
             default:
                 throw new NoSuchElementException("No display name found for baseline " + baseline);
         }
@@ -256,11 +256,11 @@ public final class ElementFormatter {
     public ListBoxModel getBaselineItems() {
         ListBoxModel options = new ListBoxModel();
         add(options, Baseline.PROJECT);
-        add(options, Baseline.CHANGE);
-        add(options, Baseline.FILE);
+        add(options, Baseline.MODIFIED_LINES);
+        add(options, Baseline.MODIFIED_FILES);
         add(options, Baseline.PROJECT_DELTA);
-        add(options, Baseline.CHANGE_DELTA);
-        add(options, Baseline.FILE_DELTA);
+        add(options, Baseline.MODIFIED_LINES_DELTA);
+        add(options, Baseline.MODIFIED_FILES_DELTA);
         return options;
     }
 

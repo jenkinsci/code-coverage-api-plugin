@@ -63,12 +63,12 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
         assertThat(column.getBaseline()).isEqualTo(Baseline.PROJECT_DELTA);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#overview");
 
-        column.setBaseline(Baseline.CHANGE);
-        assertThat(column.getBaseline()).isEqualTo(Baseline.CHANGE);
+        column.setBaseline(Baseline.MODIFIED_LINES);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_LINES);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
-        column.setBaseline(Baseline.CHANGE_DELTA);
-        assertThat(column.getBaseline()).isEqualTo(Baseline.CHANGE_DELTA);
+        column.setBaseline(Baseline.MODIFIED_LINES_DELTA);
+        assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_LINES_DELTA);
         assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
 
         column.setBaseline(Baseline.INDIRECT);

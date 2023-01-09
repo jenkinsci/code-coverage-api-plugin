@@ -51,19 +51,19 @@ public class CoverageStatistics {
         if (baseline == Baseline.PROJECT) {
             return Value.findValue(metric, projectValueMapping);
         }
-        if (baseline == Baseline.FILE) {
+        if (baseline == Baseline.MODIFIED_FILES) {
             return Value.findValue(metric, fileValueMapping);
         }
-        if (baseline == Baseline.CHANGE) {
+        if (baseline == Baseline.MODIFIED_LINES) {
             return Value.findValue(metric, changeValueMapping);
         }
         if (baseline == Baseline.PROJECT_DELTA) {
             return getValue(metric, projectDelta);
         }
-        if (baseline == Baseline.CHANGE_DELTA) {
+        if (baseline == Baseline.MODIFIED_LINES_DELTA) {
             return getValue(metric, changeDelta);
         }
-        if (baseline == Baseline.FILE_DELTA) {
+        if (baseline == Baseline.MODIFIED_FILES_DELTA) {
             return getValue(metric, fileDelta);
         }
 

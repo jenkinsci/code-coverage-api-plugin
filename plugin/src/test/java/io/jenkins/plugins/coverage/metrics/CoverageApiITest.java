@@ -22,7 +22,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
  *
  * @author Ullrich Hafner
  */
-class CoverageApiTest extends AbstractCoverageITest {
+class CoverageApiITest extends AbstractCoverageITest {
     @Test
     void shouldProvideRemoteApi() {
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);

@@ -169,7 +169,7 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyChangeCoverage(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
-        assertThat(action.getAllValues(Baseline.CHANGE)).contains(
+        assertThat(action.getAllValues(Baseline.MODIFIED_LINES)).contains(
                 builder.setMetric(LINE).setCovered(1).setMissed(1).build());
     }
 

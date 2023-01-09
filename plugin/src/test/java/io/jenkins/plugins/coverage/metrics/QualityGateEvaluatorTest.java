@@ -29,18 +29,18 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.add(0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
         evaluator.add(0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
-        evaluator.add(0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(0, Metric.FILE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(0, Metric.LINE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.FILE, Baseline.MODIFIED_LINES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.LINE, Baseline.MODIFIED_LINES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.FILE, Baseline.MODIFIED_FILES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(0, Metric.LINE, Baseline.MODIFIED_FILES, QualityGateCriticality.UNSTABLE);
 
         var minimum = -10;
         evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
         evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE);
 
         assertThat(evaluator).isEnabled();
 
@@ -49,16 +49,16 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         assertThat(result).hasOverallStatus(QualityGateStatus.PASSED).isSuccessful().isNotInactive().hasMessages(
                 "-> [Overall project - File]: ≪Success≫ - (Actual value: 75.00%, Quality gate: 0.00)",
                 "-> [Overall project - Line]: ≪Success≫ - (Actual value: 50.00%, Quality gate: 0.00)",
-                "-> [Changed code lines - File]: ≪Success≫ - (Actual value: 75.00%, Quality gate: 0.00)",
-                "-> [Changed code lines - Line]: ≪Success≫ - (Actual value: 50.00%, Quality gate: 0.00)",
-                "-> [Changed files - File]: ≪Success≫ - (Actual value: 75.00%, Quality gate: 0.00)",
-                "-> [Changed files - Line]: ≪Success≫ - (Actual value: 50.00%, Quality gate: 0.00)",
+                "-> [Modified code lines - File]: ≪Success≫ - (Actual value: 75.00%, Quality gate: 0.00)",
+                "-> [Modified code lines - Line]: ≪Success≫ - (Actual value: 50.00%, Quality gate: 0.00)",
+                "-> [Modified files - File]: ≪Success≫ - (Actual value: 75.00%, Quality gate: 0.00)",
+                "-> [Modified files - Line]: ≪Success≫ - (Actual value: 50.00%, Quality gate: 0.00)",
                 "-> [Overall project (difference to reference job) - File]: ≪Success≫ - (Actual value: -10.00%, Quality gate: -10.00)",
                 "-> [Overall project (difference to reference job) - Line]: ≪Success≫ - (Actual value: +5.00%, Quality gate: -10.00)",
-                "-> [Changed code lines (difference to overall project) - File]: ≪Success≫ - (Actual value: -10.00%, Quality gate: -10.00)",
-                "-> [Changed code lines (difference to overall project) - Line]: ≪Success≫ - (Actual value: +5.00%, Quality gate: -10.00)",
-                "-> [Changed files (difference to overall project) - File]: ≪Success≫ - (Actual value: -10.00%, Quality gate: -10.00)",
-                "-> [Changed files (difference to overall project) - Line]: ≪Success≫ - (Actual value: +5.00%, Quality gate: -10.00)");
+                "-> [Modified code lines (difference to overall project) - File]: ≪Success≫ - (Actual value: -10.00%, Quality gate: -10.00)",
+                "-> [Modified code lines (difference to overall project) - Line]: ≪Success≫ - (Actual value: +5.00%, Quality gate: -10.00)",
+                "-> [Modified files (difference to overall project) - File]: ≪Success≫ - (Actual value: -10.00%, Quality gate: -10.00)",
+                "-> [Modified files (difference to overall project) - Line]: ≪Success≫ - (Actual value: +5.00%, Quality gate: -10.00)");
     }
 
     @Test
@@ -68,34 +68,34 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
         evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE);
-        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
-        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateCriticality.UNSTABLE);
+        evaluator.add(76.0, Metric.FILE, Baseline.MODIFIED_LINES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.MODIFIED_LINES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(76.0, Metric.FILE, Baseline.MODIFIED_FILES, QualityGateCriticality.UNSTABLE);
+        evaluator.add(51.0, Metric.LINE, Baseline.MODIFIED_FILES, QualityGateCriticality.UNSTABLE);
 
         var minimum = 10;
         evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
         evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE);
 
         QualityGateResult result = evaluator.evaluate(statistics);
 
         assertThat(result).hasOverallStatus(QualityGateStatus.WARNING).isNotSuccessful().isNotInactive().hasMessages(
                 "-> [Overall project - File]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
                 "-> [Overall project - Line]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Changed code lines - File]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Changed code lines - Line]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Changed files - File]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Changed files - Line]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified code lines - File]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified code lines - Line]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified files - File]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified files - Line]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
                 "-> [Overall project (difference to reference job) - File]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
                 "-> [Overall project (difference to reference job) - Line]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Changed code lines (difference to overall project) - File]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Changed code lines (difference to overall project) - Line]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Changed files (difference to overall project) - File]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Changed files (difference to overall project) - Line]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+                "-> [Modified code lines (difference to overall project) - File]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified code lines (difference to overall project) - Line]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - File]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - Line]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
     }
 
     @Test
@@ -105,34 +105,34 @@ class QualityGateEvaluatorTest extends AbstractCoverageTest {
         QualityGateEvaluator evaluator = new QualityGateEvaluator();
         evaluator.add(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
         evaluator.add(51.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE);
-        evaluator.add(76.0, Metric.FILE, Baseline.CHANGE, QualityGateCriticality.FAILURE);
-        evaluator.add(51.0, Metric.LINE, Baseline.CHANGE, QualityGateCriticality.FAILURE);
-        evaluator.add(76.0, Metric.FILE, Baseline.FILE, QualityGateCriticality.FAILURE);
-        evaluator.add(51.0, Metric.LINE, Baseline.FILE, QualityGateCriticality.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.MODIFIED_LINES, QualityGateCriticality.FAILURE);
+        evaluator.add(51.0, Metric.LINE, Baseline.MODIFIED_LINES, QualityGateCriticality.FAILURE);
+        evaluator.add(76.0, Metric.FILE, Baseline.MODIFIED_FILES, QualityGateCriticality.FAILURE);
+        evaluator.add(51.0, Metric.LINE, Baseline.MODIFIED_FILES, QualityGateCriticality.FAILURE);
 
         var minimum = 10;
         evaluator.add(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.FAILURE);
         evaluator.add(minimum, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.FAILURE);
-        evaluator.add(minimum, Metric.FILE, Baseline.CHANGE_DELTA, QualityGateCriticality.FAILURE);
-        evaluator.add(minimum, Metric.LINE, Baseline.CHANGE_DELTA, QualityGateCriticality.FAILURE);
-        evaluator.add(minimum, Metric.FILE, Baseline.FILE_DELTA, QualityGateCriticality.FAILURE);
-        evaluator.add(minimum, Metric.LINE, Baseline.FILE_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.FILE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.FAILURE);
+        evaluator.add(minimum, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.FAILURE);
 
         QualityGateResult result = evaluator.evaluate(statistics);
 
         assertThat(result).hasOverallStatus(QualityGateStatus.FAILED).isNotSuccessful().isNotInactive().hasMessages(
                 "-> [Overall project - File]: ≪Failed≫ - (Actual value: 75.00%, Quality gate: 76.00)",
                 "-> [Overall project - Line]: ≪Failed≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Changed code lines - File]: ≪Failed≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Changed code lines - Line]: ≪Failed≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Changed files - File]: ≪Failed≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Changed files - Line]: ≪Failed≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified code lines - File]: ≪Failed≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified code lines - Line]: ≪Failed≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified files - File]: ≪Failed≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified files - Line]: ≪Failed≫ - (Actual value: 50.00%, Quality gate: 51.00)",
                 "-> [Overall project (difference to reference job) - File]: ≪Failed≫ - (Actual value: -10.00%, Quality gate: 10.00)",
                 "-> [Overall project (difference to reference job) - Line]: ≪Failed≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Changed code lines (difference to overall project) - File]: ≪Failed≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Changed code lines (difference to overall project) - Line]: ≪Failed≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Changed files (difference to overall project) - File]: ≪Failed≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Changed files (difference to overall project) - Line]: ≪Failed≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+                "-> [Modified code lines (difference to overall project) - File]: ≪Failed≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified code lines (difference to overall project) - Line]: ≪Failed≫ - (Actual value: +5.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - File]: ≪Failed≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - Line]: ≪Failed≫ - (Actual value: +5.00%, Quality gate: 10.00)");
     }
 
     @Test

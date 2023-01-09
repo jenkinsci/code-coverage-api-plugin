@@ -77,7 +77,7 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
         assertThat(recorder.getQualityGates()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
                         new QualityGate(70.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),
-                        new QualityGate(80.0, Metric.BRANCH, Baseline.CHANGE, QualityGateCriticality.FAILURE));
+                        new QualityGate(80.0, Metric.BRANCH, Baseline.MODIFIED_LINES, QualityGateCriticality.FAILURE));
         assertThat(recorder.getSourceDirectories()).hasSize(2).extracting(SourceCodeDirectory::getPath)
                 .containsExactlyInAnyOrder("directory-1", "directory-2");
         assertThat(recorder)

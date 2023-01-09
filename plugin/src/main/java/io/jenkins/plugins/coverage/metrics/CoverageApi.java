@@ -70,7 +70,7 @@ public class CoverageApi {
      */
     @Exported(inline = true)
     public NavigableMap<String, String> getModifiedFilesStatistics() {
-        return mapToStrings(Baseline.FILE);
+        return mapToStrings(Baseline.MODIFIED_FILES);
     }
 
     /**
@@ -80,7 +80,7 @@ public class CoverageApi {
      */
     @Exported(inline = true)
     public NavigableMap<String, String> getModifiedFilesDelta() {
-        return mapToStrings(Baseline.FILE_DELTA);
+        return mapToStrings(Baseline.MODIFIED_FILES_DELTA);
     }
 
     /**
@@ -90,7 +90,7 @@ public class CoverageApi {
      */
     @Exported(inline = true)
     public NavigableMap<String, String> getModifiedLinesStatistics() {
-        return mapToStrings(Baseline.CHANGE);
+        return mapToStrings(Baseline.MODIFIED_LINES);
     }
 
     /**
@@ -100,7 +100,7 @@ public class CoverageApi {
      */
     @Exported(inline = true)
     public NavigableMap<String, String> getModifiedLinesDelta() {
-        return mapToStrings(Baseline.CHANGE_DELTA);
+        return mapToStrings(Baseline.MODIFIED_LINES_DELTA);
     }
 
     private TreeMap<String, String> mapToStrings(final Baseline baseline) {
