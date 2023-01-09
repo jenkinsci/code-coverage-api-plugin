@@ -62,6 +62,7 @@ import io.jenkins.plugins.util.StageResultHandler;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CoverageRecorder extends Recorder {
     static final String DEFAULT_ID = "coverage";
 

@@ -21,7 +21,6 @@ import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvi
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageLevel;
-import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.datatables.DetailedCell;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnBuilder;

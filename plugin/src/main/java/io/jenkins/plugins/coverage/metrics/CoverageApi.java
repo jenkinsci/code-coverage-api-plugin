@@ -38,7 +38,7 @@ public class CoverageApi {
         return new QualityGateResultApi(qualityGateResult);
     }
 
-    @Exported()
+    @Exported
     public String getReferenceBuild() {
         return referenceBuild;
     }
@@ -115,7 +115,7 @@ public class CoverageApi {
     }
 
     /**
-     * Remote API to list the details of the quality gates.
+     * Remote API to list the overview of the quality gate evaluation.
      */
     @ExportedBean
     public static class QualityGateResultApi {
@@ -137,7 +137,7 @@ public class CoverageApi {
     }
 
     /**
-     * Remote API to list the details of the quality gates.
+     * Remote API to show the content of an individual quality gate item.
      */
     @ExportedBean
     public static class QualityGateItemApi {
@@ -162,7 +162,7 @@ public class CoverageApi {
             return item.getStatus().getResult();
         }
 
-        @Exported(inline = true)
+        @Exported
         public String getValue() {
             return item.getActualValue();
         }

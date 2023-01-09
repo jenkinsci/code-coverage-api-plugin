@@ -105,7 +105,6 @@ public class CoverageMetricColumn extends ListViewColumn {
      */
     public String getCoverageText(final Job<?, ?> job) {
         Optional<? extends Value> coverageValue = getCoverageValue(job);
-        // FIXME create formatter with optional
         if (coverageValue.isPresent()) {
             return FORMATTER.format(coverageValue.get(), Functions.getCurrentLocale());
         }
@@ -194,7 +193,7 @@ public class CoverageMetricColumn extends ListViewColumn {
      * @return {@code true} whether the action exists, else {@code false}
      */
     private boolean hasCoverageAction(final Job<?, ?> job) {
-        final Run<?, ?> lastCompletedBuild = job.getLastCompletedBuild();
+        Run<?, ?> lastCompletedBuild = job.getLastCompletedBuild();
         return lastCompletedBuild != null && !lastCompletedBuild.getActions(CoverageBuildAction.class).isEmpty();
     }
 
@@ -203,17 +202,17 @@ public class CoverageMetricColumn extends ListViewColumn {
      */
     @Extension(optional = true)
     @Symbol("coverageTotalsColumn")
-    public static class CoverageDescriptor extends ListViewColumnDescriptor {
+    public static class CoverageMetricColumnDescriptor extends ListViewColumnDescriptor {
         /**
          * Creates a new descriptor.
          */
         @SuppressWarnings("unused") // Required for Jenkins Extensions
-        public CoverageDescriptor() {
+        public CoverageMetricColumnDescriptor() {
             this(new JenkinsFacade());
         }
 
         @VisibleForTesting
-        CoverageDescriptor(final JenkinsFacade jenkins) {
+        CoverageMetricColumnDescriptor(final JenkinsFacade jenkins) {
             this.jenkins = jenkins;
         }
 

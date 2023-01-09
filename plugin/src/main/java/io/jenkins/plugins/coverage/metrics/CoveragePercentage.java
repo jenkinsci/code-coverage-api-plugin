@@ -16,6 +16,7 @@ import edu.hm.hafner.metric.SafeFraction;
  *
  * @author Florian Orendi
  */
+// FIXME: not used anymore
 public final class CoveragePercentage implements Serializable {
     private static final long serialVersionUID = 3324942976687883481L;
 

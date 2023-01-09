@@ -44,14 +44,13 @@ import static hudson.model.Run.*;
  */
 @SuppressWarnings("PMD.GodClass")
 public class CoverageBuildAction extends BuildAction<Node> implements StaplerProxy {
+    private static final long serialVersionUID = -6023811049340671399L;
+
     /** The coverage report symbol from the Ionicons plugin. */
     public static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
 
-    private static final long serialVersionUID = -6023811049340671399L;
-
-    private static final String NO_REFERENCE_BUILD = "-";
-
     private static final ElementFormatter FORMATTER = new ElementFormatter();
+    private static final String NO_REFERENCE_BUILD = "-";
 
     private final String id;
     private final String name;
@@ -102,8 +101,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      * @param log
      *         the logging statements of the recording step
      */
-    public CoverageBuildAction(final Run<?, ?> owner,
-            final String id, final String optionalName,
+    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log) {
         this(owner, id, optionalName, result, qualityGateResult, log, NO_REFERENCE_BUILD,
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
@@ -136,8 +134,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      *         the indirect coverage changes of the associated change request with respect to the reference build
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public CoverageBuildAction(final Run<?, ?> owner,
-            final String id, final String optionalName,
+    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
@@ -150,8 +147,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CoverageBuildAction(final Run<?, ?> owner,
-            final String id, final String name,
+    CoverageBuildAction(final Run<?, ?> owner, final String id, final String name,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
