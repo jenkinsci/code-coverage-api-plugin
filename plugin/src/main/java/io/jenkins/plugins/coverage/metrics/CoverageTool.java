@@ -29,6 +29,7 @@ import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.JenkinsFacade;
+import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
  * A coverage tool that can produce a {@link Node coverage tree} by parsing a given report file.
@@ -37,6 +38,7 @@ import io.jenkins.plugins.util.JenkinsFacade;
  */
 public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implements Serializable {
     private static final long serialVersionUID = -8612521458890553037L;
+    private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
 
     private JenkinsFacade jenkins = new JenkinsFacade();
 
@@ -180,7 +182,7 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
                 return FormValidation.ok();
             }
 
-            return new ModelValidation().validateId(id);
+            return VALIDATION_UTILITIES.validateId(id);
         }
 
         /**
