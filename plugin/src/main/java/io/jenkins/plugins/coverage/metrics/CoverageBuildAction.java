@@ -387,13 +387,13 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     public String formatDelta(final Baseline baseline, final Metric metric) {
         if (baseline == Baseline.PROJECT) {
             if (hasDelta(baseline, metric)) {
-                return FORMATTER.formatDelta(metric, difference.get(metric),
+                return FORMATTER.formatDelta(difference.get(metric), metric,
                         Functions.getCurrentLocale());
             }
         }
         if (baseline == Baseline.MODIFIED_LINES) {
             if (hasDelta(baseline, metric)) {
-                return FORMATTER.formatDelta(metric, changeCoverageDifference.get(metric),
+                return FORMATTER.formatDelta(changeCoverageDifference.get(metric), metric,
                         Functions.getCurrentLocale());
             }
         }

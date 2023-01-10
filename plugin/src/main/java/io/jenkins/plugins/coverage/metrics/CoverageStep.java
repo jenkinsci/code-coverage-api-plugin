@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.hm.hafner.metric.Node;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -31,7 +30,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.Recorder;
 import hudson.tools.ToolDescriptor;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
@@ -40,21 +38,19 @@ import hudson.util.ListBoxModel;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.AbstractExecution;
-import io.jenkins.plugins.util.CharsetValidation;
 import io.jenkins.plugins.util.JenkinsFacade;
+import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
- * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and
- * adds the results to the persisted build results.
- * <p>
- * Stores the created issues in a {@link Node}. This result is then attached to the {@link Run build} by registering a
- * {@link CoverageBuildAction}.
- * </p>
+ * A pipeline {@code Step} that reads and parses coverage results in a build and adds the results to the persisted build
+ * results. This step only provides the entry point for pipelines, the actual computation is delegated to an associated
+ * Freestyle {@link CoverageRecorder} instance.
  *
  * @author Ullrich Hafner
  */
 public class CoverageStep extends Step implements Serializable {
     private static final long serialVersionUID = 34386077204781270L;
+    private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
 
     private List<CoverageTool> tools = new ArrayList<>();
     private List<QualityGate> qualityGates = new ArrayList<>();
@@ -126,7 +122,7 @@ public class CoverageStep extends Step implements Serializable {
      */
     @DataBoundSetter
     public void setId(final String id) {
-        new ModelValidation().ensureValidId(id);
+        VALIDATION_UTILITIES.ensureValidId(id);
 
         this.id = id;
     }
@@ -296,7 +292,8 @@ public class CoverageStep extends Step implements Serializable {
             this.step = step;
         }
 
-        @Override @CheckForNull
+        @Override
+        @CheckForNull
         protected Void run() throws IOException, InterruptedException {
             var recorder = new CoverageRecorder();
             recorder.setTools(step.getTools());
@@ -324,15 +321,14 @@ public class CoverageStep extends Step implements Serializable {
     @SuppressWarnings("unused") // most methods are used by the corresponding jelly view
     public static class Descriptor extends StepDescriptor {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-        private static final CharsetValidation CHARSET_VALIDATION = new CharsetValidation();
-        private static final ModelValidation MODEL_VALIDATION = new ModelValidation();
 
         @Override
         public String getFunctionName() {
             return "recordCoverage";
         }
 
-        @NonNull @Override
+        @NonNull
+        @Override
         public String getDisplayName() {
             return Messages.Recorder_Name();
         }
@@ -388,7 +384,7 @@ public class CoverageStep extends Step implements Serializable {
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ComboBoxModel doFillSourceCodeEncodingItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
-                return CHARSET_VALIDATION.getAllCharsets();
+                return VALIDATION_UTILITIES.getAllCharsets();
             }
             return new ComboBoxModel();
         }
@@ -411,7 +407,7 @@ public class CoverageStep extends Step implements Serializable {
                 return FormValidation.ok();
             }
 
-            return CHARSET_VALIDATION.validateCharset(sourceCodeEncoding);
+            return VALIDATION_UTILITIES.validateCharset(sourceCodeEncoding);
         }
 
         /**
@@ -431,7 +427,7 @@ public class CoverageStep extends Step implements Serializable {
                 return FormValidation.ok();
             }
 
-            return MODEL_VALIDATION.validateId(id);
+            return VALIDATION_UTILITIES.validateId(id);
         }
     }
 }

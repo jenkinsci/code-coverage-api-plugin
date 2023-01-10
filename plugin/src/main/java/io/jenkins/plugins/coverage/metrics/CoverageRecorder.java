@@ -45,12 +45,12 @@ import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.AgentFileVisitor.FileVisitorResult;
-import io.jenkins.plugins.util.CharsetValidation;
 import io.jenkins.plugins.util.EnvironmentResolver;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.LogHandler;
 import io.jenkins.plugins.util.RunResultHandler;
 import io.jenkins.plugins.util.StageResultHandler;
+import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
  * A pipeline {@code Step} or Freestyle or Maven {@link Recorder} that reads and parses coverage results in a build and
@@ -65,6 +65,7 @@ import io.jenkins.plugins.util.StageResultHandler;
 @SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CoverageRecorder extends Recorder {
     static final String DEFAULT_ID = "coverage";
+    private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
 
     private List<CoverageTool> tools = new ArrayList<>();
     private List<QualityGate> qualityGates = new ArrayList<>();
@@ -132,7 +133,7 @@ public class CoverageRecorder extends Recorder {
      */
     @DataBoundSetter
     public void setId(final String id) {
-        new ModelValidation().ensureValidId(id);
+        VALIDATION_UTILITIES.ensureValidId(id);
 
         this.id = id;
     }
@@ -332,7 +333,7 @@ public class CoverageRecorder extends Recorder {
             FilteredLog log = new FilteredLog("Errors while recording code coverage:");
             log.logInfo("Recording coverage results");
 
-            var validation = new ModelValidation().validateId(getId());
+            var validation = VALIDATION_UTILITIES.validateId(getId());
             if (validation.kind != Kind.OK) {
                 failStage(resultHandler, logHandler, log, validation.getLocalizedMessage());
             }
@@ -432,8 +433,6 @@ public class CoverageRecorder extends Recorder {
     @Symbol("recordCoverage")
     public static class Descriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-        private static final CharsetValidation CHARSET_VALIDATION = new CharsetValidation();
-        private static final ModelValidation MODEL_VALIDATION = new ModelValidation();
 
         @NonNull
         @Override
@@ -483,7 +482,7 @@ public class CoverageRecorder extends Recorder {
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ComboBoxModel doFillSourceCodeEncodingItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
-                return CHARSET_VALIDATION.getAllCharsets();
+                return VALIDATION_UTILITIES.getAllCharsets();
             }
             return new ComboBoxModel();
         }
@@ -506,7 +505,7 @@ public class CoverageRecorder extends Recorder {
                 return FormValidation.ok();
             }
 
-            return CHARSET_VALIDATION.validateCharset(sourceCodeEncoding);
+            return VALIDATION_UTILITIES.validateCharset(sourceCodeEncoding);
         }
 
         /**
@@ -526,7 +525,7 @@ public class CoverageRecorder extends Recorder {
                 return FormValidation.ok();
             }
 
-            return MODEL_VALIDATION.validateId(id);
+            return VALIDATION_UTILITIES.validateId(id);
         }
     }
 }

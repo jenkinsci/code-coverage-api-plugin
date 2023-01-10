@@ -15,10 +15,6 @@ import edu.hm.hafner.metric.Value;
 
 import hudson.util.ListBoxModel;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
-
-import static io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.*;
-
 /**
  * A localized formatter for coverages, metrics, baselines, etc.
  *
@@ -36,7 +32,7 @@ public final class ElementFormatter {
      * @param value
      *         the value to format
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted value as plain text
      */
@@ -51,30 +47,9 @@ public final class ElementFormatter {
             return String.valueOf(((IntegerValue) value).getValue());
         }
         if (value instanceof FractionValue) {
-            return formatDelta(value.getMetric(), ((FractionValue) value).getFraction(), locale);
+            return formatDelta(((FractionValue) value).getFraction(), value.getMetric(), locale);
         }
         return value.toString();
-    }
-
-    public DisplayColors colorize(final Value value, final ColorProvider colorProvider, final Baseline baseline) {
-        if (value instanceof Coverage) {
-            // FIXME: percentage vs. fraction?
-            return getDisplayColors(colorProvider, baseline, ((Coverage) value).getCoveredPercentage());
-        }
-        if (value instanceof MutationValue) {
-            return getDisplayColors(colorProvider, baseline, ((MutationValue) value).getCoveredPercentage());
-        }
-        if (value instanceof FractionValue) {
-            return getDisplayColors(colorProvider, baseline, ((FractionValue) value).getFraction());
-        }
-        return DEFAULT_COLOR;
-
-    }
-
-    private static DisplayColors getDisplayColors(final ColorProvider colorProvider, final Baseline baseline,
-            final Fraction fraction) {
-        var percentage = fraction.doubleValue();
-        return baseline.getDisplayColors(percentage * 100.0, colorProvider);
     }
 
     /**
@@ -85,7 +60,7 @@ public final class ElementFormatter {
      * @param value
      *         the value to format
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted value as plain text
      */
@@ -122,7 +97,7 @@ public final class ElementFormatter {
      * @param coverage
      *         the coverage to format
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted percentage as plain text
      */
@@ -140,7 +115,7 @@ public final class ElementFormatter {
      * @param fraction
      *         the fraction to format (in the interval [0, 1])
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted percentage as plain text
      */
@@ -157,7 +132,7 @@ public final class ElementFormatter {
      * @param total
      *         the number of total items
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted percentage as plain text
      */
@@ -169,18 +144,30 @@ public final class ElementFormatter {
      * Formats a delta percentage to its plain text representation with a leading sign and rounds the value to two
      * decimals.
      *
+     * @param fraction
+     *         the value of the delta
+     * @param metric
+     *         the metric of the value
      * @param locale
-     *         The used locale
+     *         the locale to use to render the values
      *
      * @return the formatted delta percentage as plain text with a leading sign
      */
-    public String formatDelta(final Metric metric, final Fraction fraction, final Locale locale) {
+    public String formatDelta(final Fraction fraction, final Metric metric, final Locale locale) {
         if (metric.equals(Metric.COMPLEXITY) || metric.equals(Metric.LOC)) { // TODO: move to metric?
             return String.format(locale, "%+d", fraction.intValue());
         }
         return String.format(locale, "%+.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
     }
 
+    /**
+     * Returns a localized human-readable name for the specified metric.
+     *
+     * @param metric
+     *         the metric to get the name for
+     *
+     * @return the display name
+     */
     public String getDisplayName(final Metric metric) {
         switch (metric) {
             case CONTAINER:
@@ -214,6 +201,14 @@ public final class ElementFormatter {
         }
     }
 
+    /**
+     * Returns a localized human-readable name for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the name for
+     *
+     * @return the display name
+     */
     public String getDisplayName(final Baseline baseline) {
         switch (baseline) {
             case PROJECT:
@@ -233,6 +228,11 @@ public final class ElementFormatter {
         }
     }
 
+    /**
+     * Returns all available metrics as a {@link ListBoxModel}.
+     *
+     * @return the metrics in a {@link ListBoxModel}
+     */
     public ListBoxModel getMetricItems() {
         ListBoxModel options = new ListBoxModel();
         add(options, Metric.MODULE);
@@ -253,6 +253,11 @@ public final class ElementFormatter {
         options.add(getDisplayName(metric), metric.name());
     }
 
+    /**
+     * Returns all available baselines as a {@link ListBoxModel}.
+     *
+     * @return the baselines in a {@link ListBoxModel}
+     */
     public ListBoxModel getBaselineItems() {
         ListBoxModel options = new ListBoxModel();
         add(options, Baseline.PROJECT);

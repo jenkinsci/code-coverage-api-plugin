@@ -140,7 +140,7 @@ public class CoverageMetricColumn extends ListViewColumn {
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<? extends Value> coverage) {
-        if (hasCoverageAction(job) && coverage.isPresent()) {
+        if (coverage.isPresent() && hasCoverageAction(job)) {
             if (coverage.get() instanceof Coverage) {
                 return baseline.getDisplayColors(((Coverage)coverage.get()).getCoveredPercentage().doubleValue() * 100.0, ColorProviderFactory.createDefaultColorProvider());
             }

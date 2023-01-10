@@ -52,18 +52,6 @@ class CoverageTableModel extends TableModel {
     private final RowRenderer renderer;
     private final String id;
 
-    /**
-     * Creates an indirect coverage changes table model.
-     *
-     * @param id
-     *         The ID of the table
-     * @param root
-     *         The root of the coverage tree
-     * @param renderer
-     *         the renderer to use for the file names
-     * @param colors
-     *         The {@link ColorProvider} which provides the used colors
-     */
     CoverageTableModel(final String id, final Node root, final RowRenderer renderer, final ColorProvider colors) {
         super();
 
@@ -177,7 +165,8 @@ class CoverageTableModel extends TableModel {
         private final RowRenderer renderer;
         private final ColorProvider colorProvider;
 
-        CoverageRow(final FileNode file, final Locale browserLocale, final RowRenderer renderer, final ColorProvider colors) {
+        CoverageRow(final FileNode file, final Locale browserLocale, final RowRenderer renderer,
+                final ColorProvider colors) {
             this.file = file;
             this.browserLocale = browserLocale;
             this.renderer = renderer;
@@ -225,6 +214,7 @@ class CoverageTableModel extends TableModel {
          *
          * @param coverage
          *         the coverage of the element
+         *
          * @return the new {@link DetailedCell}
          */
         protected DetailedCell<?> createColoredCoverageColumn(final Coverage coverage) {
@@ -247,6 +237,8 @@ class CoverageTableModel extends TableModel {
         /**
          * Creates a table cell which colorizes the tendency of the shown coverage delta.
          *
+         * @param metric
+         *         the metric to use
          * @param delta
          *         The coverage delta as percentage
          *
@@ -259,7 +251,7 @@ class CoverageTableModel extends TableModel {
                             div().withClasses(COVERAGE_COLUMN_INNER)
                                     .withStyle(String.format("background-color:%s;", colors.getFillColorAsRGBAHex(
                                             TABLE_COVERAGE_COLOR_ALPHA)))
-                                    .withText(FORMATTER.formatDelta(metric, delta, browserLocale)))
+                                    .withText(FORMATTER.formatDelta(delta, metric, browserLocale)))
                     .render();
             return new DetailedCell<>(cell, percentage);
         }
@@ -273,10 +265,9 @@ class CoverageTableModel extends TableModel {
          * {@link Metric}.
          *
          * @param metric
-         *         The coverage metric
+         *         the coverage metric
          *
          * @return the created {@link DetailedCell}
-         * @since 3.0.0
          */
         private DetailedCell<?> createColoredFileCoverageDeltaColumn(final Metric metric) {
             if (file.hasChangeCoverage(metric)) {

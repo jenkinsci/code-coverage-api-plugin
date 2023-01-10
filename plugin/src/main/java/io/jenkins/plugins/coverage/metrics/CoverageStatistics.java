@@ -31,7 +31,7 @@ public class CoverageStatistics {
             final List<? extends Value> changeValueMapping,
             final NavigableMap<Metric, Fraction> changeDelta,
             final List<? extends Value> fileValueMapping,
-            final NavigableMap<Metric, Fraction> fileDelta)  {
+            final NavigableMap<Metric, Fraction> fileDelta) {
         this.projectValueMapping = List.copyOf(projectValueMapping);
         this.changeValueMapping = List.copyOf(changeValueMapping);
         this.fileValueMapping = List.copyOf(fileValueMapping);
@@ -47,6 +47,16 @@ public class CoverageStatistics {
                         TreeMap::new));
     }
 
+    /**
+     * Returns the value for the specified baseline and metric.
+     *
+     * @param baseline
+     *         the baseline of the value
+     * @param metric
+     *         the metric of the value
+     *
+     * @return the value, if available
+     */
     public Optional<Value> getValue(final Baseline baseline, final Metric metric) {
         if (baseline == Baseline.PROJECT) {
             return Value.findValue(metric, projectValueMapping);
