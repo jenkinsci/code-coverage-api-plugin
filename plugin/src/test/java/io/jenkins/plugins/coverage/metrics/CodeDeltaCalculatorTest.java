@@ -20,9 +20,9 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.forensics.delta.model.Delta;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
-import io.jenkins.plugins.forensics.delta.model.FileEditType;
+import io.jenkins.plugins.forensics.delta.Delta;
+import io.jenkins.plugins.forensics.delta.FileChanges;
+import io.jenkins.plugins.forensics.delta.FileEditType;
 
 import static io.jenkins.plugins.coverage.metrics.CodeDeltaCalculator.*;
 import static org.assertj.core.api.Assertions.*;

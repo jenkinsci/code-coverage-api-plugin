@@ -19,9 +19,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
-import io.jenkins.plugins.forensics.delta.model.Delta;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
-import io.jenkins.plugins.forensics.delta.model.FileEditType;
+import io.jenkins.plugins.forensics.delta.Delta;
+import io.jenkins.plugins.forensics.delta.FileChanges;
+import io.jenkins.plugins.forensics.delta.FileEditType;
 
 import static io.jenkins.plugins.coverage.model.CodeDeltaCalculator.*;
 import static org.assertj.core.api.Assertions.*;

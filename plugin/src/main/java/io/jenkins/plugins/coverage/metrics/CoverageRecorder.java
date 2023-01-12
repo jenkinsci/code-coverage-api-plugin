@@ -68,7 +68,7 @@ public class CoverageRecorder extends Recorder {
     private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
 
     private List<CoverageTool> tools = new ArrayList<>();
-    private List<QualityGate> qualityGates = new ArrayList<>();
+    private List<CoverageQualityGate> qualityGates = new ArrayList<>();
     private String id = StringUtils.EMPTY;
     private String name = StringUtils.EMPTY;
     private boolean skipPublishingChecks = false;
@@ -113,12 +113,12 @@ public class CoverageRecorder extends Recorder {
      */
     @SuppressWarnings("unused") // used by Stapler view data binding
     @DataBoundSetter
-    public void setQualityGates(final List<QualityGate> qualityGates) {
+    public void setQualityGates(final List<CoverageQualityGate> qualityGates) {
         this.qualityGates = List.copyOf(qualityGates);
     }
 
     @SuppressWarnings("unused") // used by Stapler view data binding
-    public List<QualityGate> getQualityGates() {
+    public List<CoverageQualityGate> getQualityGates() {
         return qualityGates;
     }
 
@@ -457,11 +457,7 @@ public class CoverageRecorder extends Recorder {
         @SuppressWarnings("unused") // used by Stapler view data binding
         public ListBoxModel doFillSourceCodeRetentionItems(@AncestorInPath final AbstractProject<?, ?> project) {
             if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
-                ListBoxModel options = new ListBoxModel();
-                add(options, SourceCodeRetention.NEVER);
-                add(options, SourceCodeRetention.LAST_BUILD);
-                add(options, SourceCodeRetention.EVERY_BUILD);
-                return options;
+                return SourceCodeRetention.fillItems();
             }
             return new ListBoxModel();
         }

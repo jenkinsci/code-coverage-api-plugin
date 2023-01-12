@@ -13,7 +13,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
+import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 
@@ -50,7 +50,7 @@ class CoverageApiITest extends AbstractCoverageITest {
 
     @Test
     void shouldShowQualityGatesInRemoteApi() {
-        var qualityGates = List.of(new QualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
+        var qualityGates = List.of(new CoverageQualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);

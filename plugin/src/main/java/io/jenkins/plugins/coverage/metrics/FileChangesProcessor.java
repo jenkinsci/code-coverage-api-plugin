@@ -18,9 +18,9 @@ import java.util.stream.IntStream;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.forensics.delta.model.Change;
-import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
+import io.jenkins.plugins.forensics.delta.Change;
+import io.jenkins.plugins.forensics.delta.ChangeEditType;
+import io.jenkins.plugins.forensics.delta.FileChanges;
 
 /**
  * Calculates and attaches values to the {@link FileNode nodes} of the coverage tree which represent the changes

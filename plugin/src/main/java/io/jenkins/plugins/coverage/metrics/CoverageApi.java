@@ -12,7 +12,8 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import hudson.model.Result;
 
-import io.jenkins.plugins.coverage.metrics.QualityGateResult.QualityGateResultItem;
+import io.jenkins.plugins.util.QualityGateResult;
+import io.jenkins.plugins.util.QualityGateResult.QualityGateResultItem;
 
 /**
  * Remote API to list the details of the coverage results.

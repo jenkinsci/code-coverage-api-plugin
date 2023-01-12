@@ -19,11 +19,12 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodePainter;
-import io.jenkins.plugins.forensics.delta.model.Delta;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
+import io.jenkins.plugins.forensics.delta.Delta;
+import io.jenkins.plugins.forensics.delta.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
+import io.jenkins.plugins.util.QualityGateResult;
 import io.jenkins.plugins.util.StageResultHandler;
 
 import static io.jenkins.plugins.coverage.metrics.FilePathValidator.*;
@@ -38,7 +39,7 @@ public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
     void publishAction(final String id, final String optionalName, final Node rootNode, final Run<?, ?> build,
             final FilePath workspace,
-            final TaskListener listener, final List<QualityGate> qualityGates, final String scm,
+            final TaskListener listener, final List<CoverageQualityGate> qualityGates, final String scm,
             final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
@@ -144,13 +145,11 @@ public class CoverageReporter {
     private QualityGateResult evaluateQualityGates(final Node rootNode, final FilteredLog log,
             final List<Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
             final NavigableMap<Metric, Fraction> coverageDelta, final StageResultHandler resultHandler,
-            final List<QualityGate> qualityGates) {
-        QualityGateEvaluator evaluator = new QualityGateEvaluator();
-        evaluator.addAll(qualityGates);
+            final List<CoverageQualityGate> qualityGates) {
         var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
-                changeCoverageDistribution, changeCoverageDelta,
-                List.of(), new TreeMap<>());
-        var qualityGateStatus = evaluator.evaluate(statistics);
+                changeCoverageDistribution, changeCoverageDelta, List.of(), new TreeMap<>());
+        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, statistics);
+        var qualityGateStatus = evaluator.evaluate();
         if (qualityGateStatus.isInactive()) {
             log.logInfo("No quality gates have been set - skipping");
         }

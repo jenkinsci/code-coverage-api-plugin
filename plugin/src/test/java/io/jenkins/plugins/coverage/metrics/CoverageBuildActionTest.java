@@ -17,6 +17,8 @@ import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.FreeStyleBuild;
 
+import io.jenkins.plugins.util.QualityGateResult;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

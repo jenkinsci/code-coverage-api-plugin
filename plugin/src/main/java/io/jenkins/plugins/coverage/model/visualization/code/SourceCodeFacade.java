@@ -40,9 +40,9 @@ import jenkins.MasterToSlaveFileCallable;
 import io.jenkins.plugins.coverage.model.CoverageNode;
 import io.jenkins.plugins.coverage.model.FileCoverageNode;
 import io.jenkins.plugins.coverage.targets.CoveragePaint;
-import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
+import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
  * Facade to the source code file structure in Jenkins build folder. Access of those files should be done using an
@@ -421,7 +421,7 @@ public class SourceCodeFacade {
         }
 
         private Charset getCharset() {
-            return new CharsetValidation().getCharset(sourceCodeEncoding);
+            return new ValidationUtilities().getCharset(sourceCodeEncoding);
         }
 
         private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {

@@ -15,10 +15,10 @@ import hudson.views.ListViewColumn;
 import io.jenkins.plugins.casc.ConfigurationAsCode;
 import io.jenkins.plugins.casc.ConfiguratorException;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
+import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 
 import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 
@@ -76,8 +76,8 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
                         new CoverageTool(CoverageParser.COBERTURA, "cobertura-pattern.*"));
         assertThat(recorder.getQualityGates()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
-                        new QualityGate(70.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),
-                        new QualityGate(80.0, Metric.BRANCH, Baseline.MODIFIED_LINES, QualityGateCriticality.FAILURE));
+                        new CoverageQualityGate(70.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),
+                        new CoverageQualityGate(80.0, Metric.BRANCH, Baseline.MODIFIED_LINES, QualityGateCriticality.FAILURE));
         assertThat(recorder.getSourceDirectories()).hasSize(2).extracting(SourceCodeDirectory::getPath)
                 .containsExactlyInAnyOrder("directory-1", "directory-2");
         assertThat(recorder)

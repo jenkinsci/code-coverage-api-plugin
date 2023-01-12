@@ -13,6 +13,8 @@ import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.Run;
 
+import io.jenkins.plugins.util.QualityGateResult;
+
 import static io.jenkins.plugins.coverage.metrics.CoverageViewModel.*;
 import static io.jenkins.plugins.coverage.metrics.testutil.CoverageStubs.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;

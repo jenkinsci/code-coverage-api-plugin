@@ -17,9 +17,11 @@ import hudson.model.Result;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
-import io.jenkins.plugins.coverage.metrics.QualityGate.QualityGateCriticality;
+import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
+import io.jenkins.plugins.util.QualityGateStatus;
 
-import static io.jenkins.plugins.coverage.metrics.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.assertThat;
+import static io.jenkins.plugins.util.assertions.Assertions.assertThat;
 
 /**
  * Integration tests with active quality gates.
@@ -37,7 +39,7 @@ class QualityGateITest extends AbstractCoverageITest {
 
     @Test
     void shouldPassQualityGate() {
-        var qualityGates = List.of(new QualityGate(-100.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
+        var qualityGates = List.of(new CoverageQualityGate(-100.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
@@ -48,7 +50,7 @@ class QualityGateITest extends AbstractCoverageITest {
 
     @Test
     void shouldFailQualityGateWithUnstable() {
-        var qualityGates = List.of(new QualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
+        var qualityGates = List.of(new CoverageQualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
@@ -59,7 +61,7 @@ class QualityGateITest extends AbstractCoverageITest {
 
     @Test
     void shouldFailQualityGateWithFailure() {
-        var qualityGates = List.of(new QualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE));
+        var qualityGates = List.of(new CoverageQualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.FAILURE));
         FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.FAILURE);

@@ -46,9 +46,9 @@ import io.jenkins.plugins.coverage.exception.CoverageException;
 import io.jenkins.plugins.coverage.source.DefaultSourceFileResolver;
 import io.jenkins.plugins.coverage.source.SourceFileResolver;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import io.jenkins.plugins.prism.CharsetValidation;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.util.JenkinsFacade;
+import io.jenkins.plugins.util.ValidationUtilities;
 
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
@@ -337,7 +337,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public static final class CoveragePublisherDescriptor extends BuildStepDescriptor<Publisher> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
 
-        private final CharsetValidation validation = new CharsetValidation();
+        private final ValidationUtilities validation = new ValidationUtilities();
 
         public CoveragePublisherDescriptor() {
             super(CoveragePublisher.class);

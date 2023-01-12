@@ -21,10 +21,10 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import io.jenkins.plugins.forensics.delta.Delta;
 import io.jenkins.plugins.forensics.delta.DeltaCalculatorFactory;
-import io.jenkins.plugins.forensics.delta.model.Delta;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
-import io.jenkins.plugins.forensics.delta.model.FileEditType;
+import io.jenkins.plugins.forensics.delta.FileChanges;
+import io.jenkins.plugins.forensics.delta.FileEditType;
 
 /**
  * Calculates the code delta between a Jenkins build and a reference build.

@@ -30,6 +30,7 @@ import hudson.util.XStream2;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerLineMapConverter;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.IntegerSetConverter;
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
+import io.jenkins.plugins.util.QualityGateResult;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.BDDAssertions.*;

@@ -14,13 +14,13 @@ jobs:
                       }
                   }
                   qualityGates {
-                      qualityGate {
+                      coverageQualityGate {
                           threshold(70)
                           metric('LINE')
                           baseline('PROJECT')
                           criticality('UNSTABLE')
                       }
-                      qualityGate {
+                      coverageQualityGate {
                           threshold(80)
                           metric('BRANCH')
                           baseline('MODIFIED_LINES')

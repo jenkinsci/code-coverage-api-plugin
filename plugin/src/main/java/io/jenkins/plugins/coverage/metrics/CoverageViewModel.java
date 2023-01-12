@@ -50,6 +50,7 @@ import io.jenkins.plugins.coverage.metrics.visualization.tree.TreeMapNodeConvert
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableModel;
 import io.jenkins.plugins.util.BuildResultNavigator;
+import io.jenkins.plugins.util.QualityGateResult;
 
 /**
  * Server side model that provides the data for the details view of the coverage results. The layout of the associated
@@ -75,7 +76,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final String optionalName;
     private final CoverageStatistics statistics;
     private final QualityGateResult qualityGateResult;
-    private final String referenceBuildLink;
+    private final String referenceBuild;
     private final FilteredLog log;
     private final Node node;
     private final String id;
@@ -100,12 +101,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *         the coverage statistics
      * @param qualityGateResult
      *         the quality gate result
+     * @param referenceBuild a link to the reference build
      * @param log
      *         the logging statements of the recording step
      */
     public CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
             final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
-            final String referenceBuildLink, final FilteredLog log) {
+            final String referenceBuild, final FilteredLog log) {
         super();
 
         this.owner = owner;
@@ -116,7 +118,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         this.node = node;
         this.statistics = statistics;
         this.qualityGateResult = qualityGateResult;
-        this.referenceBuildLink = referenceBuildLink;
+        this.referenceBuild = referenceBuild;
 
         this.log = log;
 
@@ -151,7 +153,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the remote API
      */
     public Api getApi() {
-        return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuildLink));
+        return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuild));
     }
 
     /**

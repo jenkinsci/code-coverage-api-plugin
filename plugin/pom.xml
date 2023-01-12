@@ -32,13 +32,13 @@
     <json-unit-assertj.version>2.36.0</json-unit-assertj.version>
     <gson.version>2.10</gson.version>
     <jsoup.version>1.15.3</jsoup.version>
-    <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.6</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
     <echarts-api.version>5.4.0-1</echarts-api.version>
     <xmlunit.version>2.9.0</xmlunit.version>
-    <plugin-util-api.version>3.0.0-rc674.f33a_a_ee40321</plugin-util-api.version>
+    <prism-api.version>1.29.0-3-rc205.6b_6980cca_b_76</prism-api.version>
+    <plugin-util-api.version>3.0.0-rc676.39c5d554b_82f</plugin-util-api.version>
   </properties>
 
   <developers>
@@ -151,6 +151,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>forensics-api</artifactId>
+      <version>2.0.0-rc1380.c93c627cd828</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
