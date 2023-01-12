@@ -86,26 +86,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private ColorProvider colorProvider = ColorProviderFactory.createDefaultColorProvider();
 
-    /**
-     * Creates a new view model instance.
-     *
-     * @param owner
-     *         the associated build that created the statistics
-     * @param id
-     *         ID (URL) of the results
-     * @param optionalName
-     *         optional name that overrides the default name of the results
-     * @param node
-     *         the coverage tree to be shown
-     * @param statistics
-     *         the coverage statistics
-     * @param qualityGateResult
-     *         the quality gate result
-     * @param referenceBuild a link to the reference build
-     * @param log
-     *         the logging statements of the recording step
-     */
-    public CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
             final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
             final String referenceBuild, final FilteredLog log) {
         super();

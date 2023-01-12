@@ -32,6 +32,8 @@ public class SourceCodePainter {
      *         The build which processes the source code
      * @param workspace
      *         The workspace which contains the source code files
+     * @param id
+     *         the ID of the coverage results - each ID will store the files in a sepearate directory
      */
     public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace, final String id) {
         this.build = build;
@@ -62,7 +64,10 @@ public class SourceCodePainter {
             throws InterruptedException {
         SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
         if (sourceCodeRetention != SourceCodeRetention.NEVER) {
-            var files = node.getAllFileNodes().stream().map(SourceCodeFacade.PaintedNode::new).collect(Collectors.toList());
+            var files = node.getAllFileNodes()
+                    .stream()
+                    .map(SourceCodeFacade.PaintedNode::new)
+                    .collect(Collectors.toList());
             log.logInfo("Painting %d source files on agent", files.size());
 
             paintFilesOnAgent(files, sourceDirectories, sourceCodeEncoding, log);
