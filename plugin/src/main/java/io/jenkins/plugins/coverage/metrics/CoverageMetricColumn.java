@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -96,10 +97,50 @@ public class CoverageMetricColumn extends ListViewColumn {
     }
 
     /**
+     * Returns all available values for the specified baseline.
+     *
+     * @param job
+     *         the job in the current row
+     *
+     * @return the available values
+     */
+    // Called by jelly view
+    public List<Value> getAllValues(final Job<?, ?> job) {
+        return findAction(job).map(a -> a.getAllValues(baseline)).orElse(List.of());
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the specified value (without metric).
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatMetric(final Value value) {
+        return FORMATTER.getDisplayName(value.getMetric());
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the specified value (without metric).
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValue(final Value value) {
+        return FORMATTER.formatDetails(value, Functions.getCurrentLocale());
+    }
+
+
+    /**
      * Provides a text which represents the coverage percentage of the selected coverage type and metric.
      *
      * @param job
-     *         The processed job
+     *         the job in the current row
      *
      * @return the coverage text
      */
@@ -115,24 +156,27 @@ public class CoverageMetricColumn extends ListViewColumn {
      * Provides the coverage value of the selected coverage type and metric.
      *
      * @param job
-     *         The processed job
+     *         the job in the current row
      *
      * @return the coverage percentage
      */
     public Optional<? extends Value> getCoverageValue(final Job<?, ?> job) {
-        if (hasCoverageAction(job)) {
-            CoverageBuildAction action = job.getLastCompletedBuild().getAction(CoverageBuildAction.class);
+        return findAction(job).flatMap(action -> action.getStatistics().getValue(getBaseline(), metric));
+    }
 
-            return action.getStatistics().getValue(getBaseline(), metric);
+    private static Optional<CoverageBuildAction> findAction(final Job<?, ?> job) {
+        var lastCompletedBuild = job.getLastCompletedBuild();
+        if (lastCompletedBuild == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(lastCompletedBuild.getAction(CoverageBuildAction.class));
     }
 
     /**
      * Provides the line color for representing the passed coverage value.
      *
      * @param job
-     *         The processed job
+     *         the job in the current row
      * @param coverage
      *         The coverage value as percentage
      *
@@ -155,7 +199,7 @@ public class CoverageMetricColumn extends ListViewColumn {
      * Provides the relative URL which can be used for accessing the coverage report.
      *
      * @param job
-     *         The processed job
+     *         the job in the current row
      *
      * @return the relative URL or an empty string when there is no matching URL
      */
@@ -188,7 +232,7 @@ public class CoverageMetricColumn extends ListViewColumn {
      * Checks whether a {@link CoverageBuildAction} exists within the completed build.
      *
      * @param job
-     *         The processed job
+     *         the job in the current row
      *
      * @return {@code true} whether the action exists, else {@code false}
      */

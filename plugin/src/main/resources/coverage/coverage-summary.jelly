@@ -20,16 +20,28 @@
       </j:choose>
       <div class="${baseline}-summary">
         <j:set var="tooltip">
-          All recorded values:
-          <ul>
-            <j:forEach var="value" items="${it.getAllValues(baseline)}">
-              <li>${it.formatValueWithDetails(value)}</li>
-            </j:forEach>
-          </ul>
+          <div class="jenkins-tooltip healthReportDetails jenkins-tooltip--table-wrapper">
+            <table class="jenkins-table">
+              <thead>
+                <tr>
+                  <th align="left">${%Metric}</th>
+                  <th align="right">${%Value}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <j:forEach var="value" items="${it.getAllValues(baseline)}">
+                  <tr>
+                    <td align="left" style="white-space: nowrap;">${it.formatMetric(value)}</td>
+                    <td align="right" style="white-space: nowrap;">${it.formatValue(value)}</td>
+                  </tr>
+                </j:forEach>
+              </tbody>
+            </table>
+          </div>
         </j:set>
         <ul tooltip="${tooltip}" data-html-tooltip="${tooltip}">
           <j:forEach var="value" items="${it.getValues(baseline)}">
-            <li>${it.formatValue(value)}
+            <li>${it.formatValueWithMetric(value)}
               <j:if test="${it.hasDelta(baseline, value.metric)}">
                 <j:set var="delta" value="${it.formatDelta(baseline, value.metric)}"/>
                 <j:choose>

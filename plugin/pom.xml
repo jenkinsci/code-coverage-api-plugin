@@ -38,7 +38,7 @@
     <echarts-api.version>5.4.0-1</echarts-api.version>
     <xmlunit.version>2.9.0</xmlunit.version>
     <prism-api.version>1.29.0-3-rc205.6b_6980cca_b_76</prism-api.version>
-    <plugin-util-api.version>3.0.0-rc676.39c5d554b_82f</plugin-util-api.version>
+    <plugin-util-api.version>3.0.0-rc678.6c486d6f860f</plugin-util-api.version>
   </properties>
 
   <developers>

@@ -13,7 +13,28 @@
       <j:set var="url" value="${it.getRelativeCoverageUrl(job)}"/>
       <j:set var="fillPercentage" value="${it.getBackgroundColorFillPercentage(coverageText)}"/>
       <td align="right">
-        <div class="coverage-column-outer jenkins-table__link">
+        <j:set var="tooltip">
+          <div class="jenkins-tooltip healthReportDetails jenkins-tooltip--table-wrapper">
+            <table class="jenkins-table">
+              <thead>
+                <tr>
+                  <th align="left">${%Metric}</th>
+                  <th align="right">${%Value}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <j:forEach var="value" items="${it.getAllValues(job)}">
+                  <tr>
+                    <td align="left" style="white-space: nowrap;">${it.formatMetric(value)}</td>
+                    <td align="right" style="white-space: nowrap;">${it.formatValue(value)}</td>
+                  </tr>
+                </j:forEach>
+              </tbody>
+            </table>
+          </div>
+        </j:set>
+
+        <div class="coverage-column-outer jenkins-table__link" tooltip="${tooltip}" data-html-tooltip="${tooltip}">
           <div class="coverage-column-inner" style="background-image: linear-gradient(90deg, ${backgroundColor} ${fillPercentage}, transparent ${fillPercentage});">
             <j:choose>
               <j:when test="${url.isEmpty()}">

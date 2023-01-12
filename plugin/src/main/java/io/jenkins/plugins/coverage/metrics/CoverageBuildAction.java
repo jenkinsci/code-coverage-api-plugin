@@ -309,7 +309,34 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
     }
 
     /**
-     * Returns a formatted and localized String representation of the specified value.
+     * Returns a formatted and localized String representation of the specified value prefixed with the metric name.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValueWithMetric(final Value value) {
+        return FORMATTER.getDisplayName(value.getMetric()) + ": "
+                + FORMATTER.format(value, Functions.getCurrentLocale());
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the specified value (without metric).
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatMetric(final Value value) {
+        return FORMATTER.getDisplayName(value.getMetric());
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the specified value (without metric).
      *
      * @param value
      *         the value to format
@@ -318,8 +345,7 @@ public class CoverageBuildAction extends BuildAction<Node> implements StaplerPro
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatValue(final Value value) {
-        return FORMATTER.getDisplayName(value.getMetric()) + ": "
-                + FORMATTER.format(value, Functions.getCurrentLocale());
+        return FORMATTER.formatDetails(value, Functions.getCurrentLocale());
     }
 
     /**
