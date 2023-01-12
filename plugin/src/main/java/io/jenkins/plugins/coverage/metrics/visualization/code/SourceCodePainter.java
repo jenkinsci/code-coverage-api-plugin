@@ -21,7 +21,6 @@ import io.jenkins.plugins.prism.SourceCodeRetention;
  * Processes the source code painting for highlighting code coverage.
  */
 public class SourceCodePainter {
-
     private final Run<?, ?> build;
     private final FilePath workspace;
     private final String id;
@@ -63,7 +62,7 @@ public class SourceCodePainter {
             throws InterruptedException {
         SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
         if (sourceCodeRetention != SourceCodeRetention.NEVER) {
-            var files = node.getAllFileNodes().stream().map(PaintedNode::new).collect(Collectors.toList());
+            var files = node.getAllFileNodes().stream().map(SourceCodeFacade.PaintedNode::new).collect(Collectors.toList());
             log.logInfo("Painting %d source files on agent", files.size());
 
             paintFilesOnAgent(files, sourceDirectories, sourceCodeEncoding, log);
@@ -74,7 +73,7 @@ public class SourceCodePainter {
         sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
     }
 
-    private void paintFilesOnAgent(final List<PaintedNode> paintedFiles,
+    private void paintFilesOnAgent(final List<SourceCodeFacade.PaintedNode> paintedFiles,
             final Set<String> requestedSourceDirectories,
             final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
         try {

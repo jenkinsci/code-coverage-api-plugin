@@ -2,20 +2,24 @@ package io.jenkins.plugins.coverage.metrics.visualization.charts;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.LinesDataSet;
+import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.util.VisibleForTesting;
 
+import io.jenkins.plugins.coverage.metrics.Baseline;
 import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
 
-import static io.jenkins.plugins.coverage.metrics.testutil.CoverageStubs.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +29,29 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  */
 class CoverageSeriesBuilderTest {
+    /**
+     * Creates a new build result for the given build.
+     *
+     * @param buildNumber
+     *         the number of the build
+     * @param lineCoverage
+     *         the line coverage in the build
+     * @param branchCoverage
+     *         the branch coverage in the build
+     *
+     * @return the {@link BuildResult} stub, that contains a {@link CoverageBuildAction} instance with the specified
+     *         behavior
+     */
+    @VisibleForTesting
+    private BuildResult<CoverageBuildAction> createResult(final int buildNumber,
+            final Coverage lineCoverage, final Coverage branchCoverage) {
+        CoverageBuildAction action = mock(CoverageBuildAction.class);
+        when(action.getAllValues(Baseline.PROJECT)).thenReturn(List.of(lineCoverage, branchCoverage));
+        Build build = new Build(buildNumber);
+
+        return new BuildResult<>(build, action);
+    }
+
     @Test
     void shouldHaveEmptyDataSetForEmptyIterator() {
         CoverageSeriesBuilder builder = new CoverageSeriesBuilder();

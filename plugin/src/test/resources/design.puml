@@ -1,0 +1,14 @@
+@startuml
+
+skinparam componentStyle uml2
+skinparam component {
+  BorderColor #a0a0a0
+  BackgroundColor #f8f8f8
+}
+
+[Coverage] <<..coverage.metrics..>>
+[Visualization] <<..coverage.metrics.visualization.>>
+
+[Coverage] --> [Visualization]
+
+@enduml

@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.visualization.tree;
+package io.jenkins.plugins.coverage.metrics.visualization.charts;
 
 import edu.hm.hafner.echarts.ItemStyle;
 import edu.hm.hafner.echarts.Label;

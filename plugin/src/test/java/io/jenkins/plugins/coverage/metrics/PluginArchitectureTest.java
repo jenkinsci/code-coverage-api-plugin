@@ -9,7 +9,7 @@ import edu.hm.hafner.util.ArchitectureRules;
 import io.jenkins.plugins.util.PluginArchitectureRules;
 
 /**
- * Defines several architecture rules for the static analysis model and parsers.
+ * Checks several architecture rules for the Jenkins plugins.
  *
  * @author Ullrich Hafner
  */

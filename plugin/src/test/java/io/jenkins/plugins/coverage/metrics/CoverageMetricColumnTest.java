@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.util.FilteredLog;
+import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.Functions;
 import hudson.model.Job;
@@ -25,7 +27,6 @@ import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvi
 import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
 import io.jenkins.plugins.util.QualityGateResult;
 
-import static io.jenkins.plugins.coverage.metrics.testutil.JobStubs.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,6 +42,40 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
 
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
 
+    /**
+     * Creates a stub for a {@link Job} that has the specified actions attached.
+     *
+     * @param actions
+     *         The actions to attach, might be empty
+     *
+     * @return the created stub
+     */
+    @VisibleForTesting
+    public static Job<?, ?> createJobWithActions(final CoverageBuildAction... actions) {
+        Job job = mock(Job.class);
+        Run<?, ?> build = createBuildWithActions(actions);
+        when(job.getLastCompletedBuild()).thenReturn(build);
+        return job;
+    }
+
+    /**
+     * Creates a stub for a {@link Run} that has the specified actions attached.
+     *
+     * @param actions
+     *         the actions to attach, might be empty
+     *
+     * @return the created stub
+     */
+    @VisibleForTesting
+    public static Run<?, ?> createBuildWithActions(final CoverageBuildAction... actions) {
+        Run<?, ?> build = mock(Run.class);
+        when(build.getActions(CoverageBuildAction.class)).thenReturn(Arrays.asList(actions));
+        if (actions.length > 0) {
+            when(build.getAction(CoverageBuildAction.class)).thenReturn(actions[0]);
+        }
+        return build;
+    }
+
     @Test
     void shouldHaveWorkingDataGetters() {
         CoverageMetricColumn column = createColumn();
@@ -48,7 +83,7 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
         assertThat(column.getColumnName()).isEqualTo(COLUMN_NAME);
         assertThat(column.getBaseline()).isEqualTo(Baseline.PROJECT);
         assertThat(column.getMetric()).isEqualTo(COVERAGE_METRIC);
-        assertThat(column.getRelativeCoverageUrl(createJob())).isEmpty();
+        assertThat(column.getRelativeCoverageUrl(mock(Job.class))).isEmpty();
     }
 
     @Test
@@ -91,7 +126,7 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
     void shouldShowNoResultIfBuild() {
         CoverageMetricColumn column = createColumn();
 
-        Job<?, ?> job = createJob();
+        Job<?, ?> job = mock(Job.class);
 
         assertThat(column.getCoverageText(job)).isEqualTo(Messages.Coverage_Not_Available());
 
