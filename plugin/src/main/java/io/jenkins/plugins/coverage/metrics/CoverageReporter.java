@@ -18,7 +18,8 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
-import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodePainter;
+import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
+import io.jenkins.plugins.coverage.metrics.source.SourceCodePainter;
 import io.jenkins.plugins.forensics.delta.Delta;
 import io.jenkins.plugins.forensics.delta.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;

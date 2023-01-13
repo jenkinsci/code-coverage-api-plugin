@@ -26,6 +26,7 @@ import hudson.plugins.git.extensions.impl.RelativeTargetDirectory;
 import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;

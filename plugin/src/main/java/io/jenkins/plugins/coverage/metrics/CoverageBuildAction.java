@@ -28,6 +28,9 @@ import hudson.Functions;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageXmlStream.MetricFractionMapConverter;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;

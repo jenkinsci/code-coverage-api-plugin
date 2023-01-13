@@ -11,7 +11,7 @@ import edu.hm.hafner.metric.Node;
 
 import hudson.Functions;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.datatables.DetailedCell;
 import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableConfiguration.SelectStyle;

@@ -17,6 +17,8 @@ import edu.hm.hafner.metric.parser.JacocoParser;
 import edu.hm.hafner.util.ResourceTest;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
+import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
+
 /**
  * Base class for coverage tests that work on real coverage reports.
  *
@@ -54,7 +56,8 @@ public abstract class AbstractCoverageTest extends ResourceTest {
     private static List<Value> fillValues() {
         var builder = new CoverageBuilder();
         return List.of(builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
-                builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build());
+                builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build(),
+                builder.setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build());
     }
 
     private static NavigableMap<Metric, Fraction> fillDeltas() {

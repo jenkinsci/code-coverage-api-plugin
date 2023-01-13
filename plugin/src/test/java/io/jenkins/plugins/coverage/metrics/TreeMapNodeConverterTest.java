@@ -8,10 +8,10 @@ import edu.hm.hafner.echarts.TreeMapNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.coverage.metrics.visualization.charts.TreeMapNodeConverter;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.metrics.charts.TreeMapNodeConverter;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
+import io.jenkins.plugins.coverage.metrics.color.CoverageLevel;
 
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageITest.*;
 import static org.assertj.core.api.Assertions.*;

@@ -3,7 +3,7 @@
 
   <st:documentation>
     Provides a the summary for a given coverage baseline.
-    <st:attribute name="baseline" type="io.jenkins.plugins.coverage.metrics.Baseline">
+    <st:attribute name="baseline" type="io.jenkins.plugins.coverage.metrics.model.Baseline">
       The baseline to show.
     </st:attribute>
   </st:documentation>

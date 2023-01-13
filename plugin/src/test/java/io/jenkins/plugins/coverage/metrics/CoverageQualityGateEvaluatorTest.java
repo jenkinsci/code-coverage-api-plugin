@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.metric.Metric;
 
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 import io.jenkins.plugins.util.QualityGateResult;
 import io.jenkins.plugins.util.QualityGateStatus;

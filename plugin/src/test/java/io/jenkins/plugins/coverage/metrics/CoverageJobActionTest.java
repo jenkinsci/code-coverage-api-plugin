@@ -1,22 +1,17 @@
 package io.jenkins.plugins.coverage.metrics;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.echarts.Build;
-import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.LinesChartModel;
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.Metric;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 
+import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -66,24 +61,23 @@ class CoverageJobActionTest {
     }
 
     @Test
-    void shouldCreateTrendChartForLineAndBranchCoverage() throws IOException {
+    void shouldCreateTrendChartForLineAndBranchCoverage() {
         FreeStyleBuild build = mock(FreeStyleBuild.class);
 
         CoverageBuildAction action = createBuildAction(build);
-
         when(build.getAction(CoverageBuildAction.class)).thenReturn(action);
+        when(action.getStatistics()).thenReturn(createStatistics());
+
         int buildNumber = 15;
         when(build.getNumber()).thenReturn(buildNumber);
+        when(build.getDisplayName()).thenReturn("#" + buildNumber);
 
         FreeStyleProject job = mock(FreeStyleProject.class);
         when(job.getLastBuild()).thenReturn(build);
 
         CoverageJobAction jobAction = createAction(job);
 
-        List<BuildResult<CoverageBuildAction>> history = new ArrayList<>();
-        BuildResult<CoverageBuildAction> result = new BuildResult<>(new Build(buildNumber), action);
-        history.add(result);
-        LinesChartModel chart = jobAction.createChart(history, "{}");
+        LinesChartModel chart = jobAction.createChartModel("{}");
 
         assertThatJson(chart).node("buildNumbers").isArray().hasSize(1).containsExactly(buildNumber);
         assertThatJson(chart).node("domainAxisLabels").isArray().hasSize(1).containsExactly("#15");
@@ -103,8 +97,6 @@ class CoverageJobActionTest {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         when(action.getOwner()).thenAnswer(i -> build);
         when(action.getUrlName()).thenReturn("coverage");
-        when(action.getAllValues(Baseline.PROJECT)).thenReturn(List.of(new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build(),
-                new CoverageBuilder().setMetric(Metric.LINE).setCovered(10).setMissed(10).build()));
         return action;
     }
 }

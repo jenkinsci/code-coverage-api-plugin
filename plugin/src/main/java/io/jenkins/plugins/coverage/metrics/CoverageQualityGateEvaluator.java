@@ -3,6 +3,8 @@ package io.jenkins.plugins.coverage.metrics;
 import java.util.Collection;
 import java.util.Locale;
 
+import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.util.QualityGateEvaluator;
 import io.jenkins.plugins.util.QualityGateResult;
 import io.jenkins.plugins.util.QualityGateStatus;

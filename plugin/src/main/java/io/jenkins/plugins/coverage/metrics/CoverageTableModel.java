@@ -16,11 +16,12 @@ import edu.hm.hafner.metric.Node;
 
 import hudson.Functions;
 
-import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodeFacade;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.DisplayColors;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageLevel;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
+import io.jenkins.plugins.coverage.metrics.color.CoverageChangeTendency;
+import io.jenkins.plugins.coverage.metrics.color.CoverageLevel;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
+import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 import io.jenkins.plugins.datatables.DetailedCell;
 import io.jenkins.plugins.datatables.TableColumn;
 import io.jenkins.plugins.datatables.TableColumn.ColumnBuilder;

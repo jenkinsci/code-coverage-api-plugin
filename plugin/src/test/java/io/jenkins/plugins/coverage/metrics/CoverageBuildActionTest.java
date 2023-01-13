@@ -17,6 +17,7 @@ import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.FreeStyleBuild;
 
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.util.QualityGateResult;
 
 import static org.assertj.core.api.Assertions.*;

@@ -5,7 +5,7 @@ import java.util.Locale;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 
 /**
  * A coverage table model that handles the lines of code that have been indirectly changed with respect to a result of a

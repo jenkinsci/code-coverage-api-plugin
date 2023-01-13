@@ -26,9 +26,11 @@ import hudson.util.ListBoxModel;
 import hudson.views.ListViewColumn;
 import hudson.views.ListViewColumnDescriptor;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider.DisplayColors;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
+import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.util.JenkinsFacade;
 
 /**

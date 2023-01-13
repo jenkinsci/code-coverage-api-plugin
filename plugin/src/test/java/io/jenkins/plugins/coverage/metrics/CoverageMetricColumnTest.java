@@ -22,9 +22,10 @@ import hudson.Functions;
 import hudson.model.Job;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProviderFactory;
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.CoverageChangeTendency;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
+import io.jenkins.plugins.coverage.metrics.color.CoverageChangeTendency;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.util.QualityGateResult;
 
 import static org.assertj.core.api.Assertions.*;

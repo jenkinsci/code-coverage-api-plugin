@@ -10,7 +10,7 @@ import edu.hm.hafner.metric.Node;
 import hudson.model.ModelObject;
 import hudson.model.Run;
 
-import io.jenkins.plugins.coverage.metrics.visualization.code.SourceCodeFacade;
+import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 
 /**
  * Server side model that provides the data for the source code view of the coverage results. The layout of the

@@ -17,6 +17,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 import io.jenkins.plugins.util.QualityGateStatus;
 

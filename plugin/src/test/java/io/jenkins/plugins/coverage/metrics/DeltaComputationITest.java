@@ -13,6 +13,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;

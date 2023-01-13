@@ -12,6 +12,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.util.ListBoxModel;
 
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.QualityGate;
 

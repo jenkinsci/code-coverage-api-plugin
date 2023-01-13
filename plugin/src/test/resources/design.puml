@@ -6,9 +6,23 @@ skinparam component {
   BackgroundColor #f8f8f8
 }
 
-[Coverage] <<..coverage.metrics..>>
-[Visualization] <<..coverage.metrics.visualization.>>
+[Coverage] <<..metrics>>
+[Color] <<..metrics.color>>
+[Source] <<..metrics.source>>
+[Charts] <<..metrics.charts>>
+[Model] <<..metrics.model>>
 
-[Coverage] --> [Visualization]
+[Coverage] --> [Model]
+[Coverage] --> [Color]
+[Coverage] --> [Source]
+[Coverage] --> [Charts]
+
+[Charts] --> [Color]
+[Charts] --> [Model]
+
+[Source] --> [Model]
+
+[Model] --> [Color]
+
 
 @enduml

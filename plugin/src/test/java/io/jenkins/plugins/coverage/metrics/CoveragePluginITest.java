@@ -20,6 +20,7 @@ import hudson.model.Run;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.model.Baseline;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;
@@ -349,5 +350,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
                     assertThat(a.getDisplayName()).isEqualTo("JaCoCo Results");
                     verifyJaCoCoAction(a);
                 });
+
+        // FIXME: verify that two different trend charts are returned!
     }
 }

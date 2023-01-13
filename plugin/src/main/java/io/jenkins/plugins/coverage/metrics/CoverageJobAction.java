@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.metric.Node;
@@ -10,7 +9,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Job;
 
-import io.jenkins.plugins.coverage.metrics.visualization.charts.CoverageTrendChart;
+import io.jenkins.plugins.coverage.metrics.CoverageBuildActionIterator.CIterable;
+import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
 
 /**
@@ -69,10 +69,12 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
 
     @Override
     protected LinesChartModel createChartModel(final String configuration) {
-        return createChart(createBuildHistory(), configuration);
+        var iterator = new CIterable(getLatestAction(),
+                a -> getUrlName().equals(a.getUrlName()));
+        return createChart(iterator, configuration);
     }
 
-    LinesChartModel createChart(final Iterable<? extends BuildResult<CoverageBuildAction>> buildHistory,
+    LinesChartModel createChart(final CIterable buildHistory,
             final String configuration) {
         ChartModelConfiguration modelConfiguration = ChartModelConfiguration.fromJson(configuration);
         return new CoverageTrendChart().create(buildHistory, modelConfiguration);

@@ -5,7 +5,7 @@ import java.util.Locale;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Node;
 
-import io.jenkins.plugins.coverage.metrics.visualization.colorization.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableConfiguration.SelectStyle;
 
