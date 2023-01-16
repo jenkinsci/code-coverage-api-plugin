@@ -35,8 +35,9 @@
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.6</testcontainers.version>
     <job-dsl.version>1.81</job-dsl.version>
-    <echarts-api.version>5.4.0-1</echarts-api.version>
     <xmlunit.version>2.9.0</xmlunit.version>
+
+    <echarts-api.version>5.4.0-2-rc755.246591322dcd</echarts-api.version>
     <prism-api.version>1.29.0-3-rc205.6b_6980cca_b_76</prism-api.version>
     <plugin-util-api.version>3.0.0-rc678.6c486d6f860f</plugin-util-api.version>
   </properties>

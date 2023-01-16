@@ -10,8 +10,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageBuildActionIterator.CIterable;
 import io.jenkins.plugins.echarts.AsyncConfigurableTrendJobAction;
+import io.jenkins.plugins.echarts.GenericBuildActionIterator.BuildActionIterable;
 
 /**
  * Project level action for the coverage results. A job action displays a link on the side panel of a job that refers to
@@ -69,14 +69,8 @@ public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageB
 
     @Override
     protected LinesChartModel createChartModel(final String configuration) {
-        var iterator = new CIterable(getLatestAction(),
-                a -> getUrlName().equals(a.getUrlName()));
-        return createChart(iterator, configuration);
-    }
-
-    LinesChartModel createChart(final CIterable buildHistory,
-            final String configuration) {
-        ChartModelConfiguration modelConfiguration = ChartModelConfiguration.fromJson(configuration);
-        return new CoverageTrendChart().create(buildHistory, modelConfiguration);
+        var iterable = new BuildActionIterable<>(CoverageBuildAction.class, getLatestAction(),
+                action -> getUrlName().equals(action.getUrlName()), CoverageBuildAction::getStatistics);
+        return new CoverageTrendChart().create(iterable, ChartModelConfiguration.fromJson(configuration));
     }
 }
