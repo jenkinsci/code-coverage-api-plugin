@@ -25,20 +25,36 @@ public class CoverageStatistics {
     private final List<Value> fileValueMapping;
     private final NavigableMap<Metric, Value> fileDelta;
 
+    /**
+     * Creates a new instance of {@link CoverageStatistics}.
+     *
+     * @param projectValueMapping
+     *         mapping of metrics to values for {@link Baseline#PROJECT}
+     * @param projectDeltaMapping
+     *         mapping of metrics to delta values for {@link Baseline#PROJECT_DELTA}
+     * @param modifiedLinesValueMapping
+     *         mapping of metrics to values for {@link Baseline#MODIFIED_LINES}
+     * @param modifiedLinesDeltaMapping
+     *         mapping of metrics to delta values for {@link Baseline#MODIFIED_LINES_DELTA}
+     * @param modifiedFilesValueMapping
+     *         mapping of metrics to values for {@link Baseline#MODIFIED_FILES}
+     * @param modifiedFilesDeltaMapping
+     *         mapping of metrics to delta values for {@link Baseline#MODIFIED_FILES_DELTA}
+     */
     public CoverageStatistics(
             final List<? extends Value> projectValueMapping,
-            final NavigableMap<Metric, Fraction> projectDelta,
-            final List<? extends Value> changeValueMapping,
-            final NavigableMap<Metric, Fraction> changeDelta,
-            final List<? extends Value> fileValueMapping,
-            final NavigableMap<Metric, Fraction> fileDelta) {
+            final NavigableMap<Metric, Fraction> projectDeltaMapping,
+            final List<? extends Value> modifiedLinesValueMapping,
+            final NavigableMap<Metric, Fraction> modifiedLinesDeltaMapping,
+            final List<? extends Value> modifiedFilesValueMapping,
+            final NavigableMap<Metric, Fraction> modifiedFilesDeltaMapping) {
         this.projectValueMapping = List.copyOf(projectValueMapping);
-        this.changeValueMapping = List.copyOf(changeValueMapping);
-        this.fileValueMapping = List.copyOf(fileValueMapping);
+        this.changeValueMapping = List.copyOf(modifiedLinesValueMapping);
+        this.fileValueMapping = List.copyOf(modifiedFilesValueMapping);
 
-        this.projectDelta = asValueMap(projectDelta);
-        this.changeDelta = asValueMap(changeDelta);
-        this.fileDelta = asValueMap(fileDelta);
+        this.projectDelta = asValueMap(projectDeltaMapping);
+        this.changeDelta = asValueMap(modifiedLinesDeltaMapping);
+        this.fileDelta = asValueMap(modifiedFilesDeltaMapping);
     }
 
     private static TreeMap<Metric, Value> asValueMap(final NavigableMap<Metric, Fraction> projectDelta) {

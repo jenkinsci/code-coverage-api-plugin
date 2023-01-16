@@ -25,8 +25,19 @@ import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
  * @author Ullrich Hafner
  */
 @DefaultLocale("en")
+@SuppressWarnings("checkstyle:JavadocVariable")
 public abstract class AbstractCoverageTest extends ResourceTest {
-    static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
+    public static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
+    public static final int JACOCO_ANALYSIS_MODEL_COVERED = 5531;
+    public static final int JACOCO_ANALYSIS_MODEL_MISSED = 267;
+    public static final int JACOCO_ANALYSIS_MODEL_TOTAL
+            = JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_ANALYSIS_MODEL_MISSED;
+
+    public static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
+    public static final int JACOCO_CODING_STYLE_COVERED = 294;
+    public static final int JACOCO_CODING_STYLE_MISSED = 29;
+    public static final int JACOCO_CODING_STYLE_TOTAL
+            = JACOCO_CODING_STYLE_COVERED + JACOCO_CODING_STYLE_MISSED;
 
     /**
      * Reads and parses a JaCoCo coverage report.
@@ -36,7 +47,7 @@ public abstract class AbstractCoverageTest extends ResourceTest {
      *
      * @return the parsed coverage tree
      */
-    public Node readJacocoResult(final String fileName) {
+    protected Node readJacocoResult(final String fileName) {
         try {
             var node = new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)));
             node.splitPackages();
@@ -47,7 +58,12 @@ public abstract class AbstractCoverageTest extends ResourceTest {
         }
     }
 
-    static CoverageStatistics createStatistics() {
+    /**
+     * Creates coverage statistics that can be used in test cases.
+     *
+     * @return the coverage statistics
+     */
+    public static CoverageStatistics createStatistics() {
         return new CoverageStatistics(fillValues(), fillDeltas(),
                 fillValues(), fillDeltas(),
                 fillValues(), fillDeltas());

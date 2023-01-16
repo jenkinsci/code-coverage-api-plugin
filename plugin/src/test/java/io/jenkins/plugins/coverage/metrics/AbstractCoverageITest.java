@@ -8,7 +8,9 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 
-import io.jenkins.plugins.coverage.metrics.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 /**
@@ -17,18 +19,6 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
  * @author Ullrich Hafner
  */
 public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPerSuite {
-    static final String JACOCO_ANALYSIS_MODEL_FILE = "jacoco-analysis-model.xml";
-    static final int JACOCO_ANALYSIS_MODEL_COVERED = 5531;
-    static final int JACOCO_ANALYSIS_MODEL_MISSED = 267;
-    static final int JACOCO_ANALYSIS_MODEL_TOTAL
-            = JACOCO_ANALYSIS_MODEL_COVERED + JACOCO_ANALYSIS_MODEL_MISSED;
-
-    static final String JACOCO_CODING_STYLE_FILE = "jacoco-codingstyle.xml";
-    static final int JACOCO_CODING_STYLE_COVERED = 294;
-    static final int JACOCO_CODING_STYLE_MISSED = 29;
-    static final int JACOCO_CODING_STYLE_TOTAL
-            = JACOCO_CODING_STYLE_COVERED + JACOCO_CODING_STYLE_MISSED;
-
     protected FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
         return createFreestyleJob(parser, i -> { }, fileNames);
     }
@@ -42,7 +32,8 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
         return project;
     }
 
-    void addCoverageRecorder(final FreeStyleProject project, final CoverageParser parser, final String pattern) {
+    protected void addCoverageRecorder(final FreeStyleProject project,
+            final CoverageParser parser, final String pattern) {
         addCoverageRecorder(project, parser, pattern, i -> { });
     }
 

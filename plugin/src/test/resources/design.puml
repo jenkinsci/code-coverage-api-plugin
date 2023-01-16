@@ -6,16 +6,16 @@ skinparam component {
   BackgroundColor #f8f8f8
 }
 
-[Coverage] <<..metrics>>
+[Steps] <<..metrics.steps>>
 [Color] <<..metrics.color>>
 [Source] <<..metrics.source>>
 [Charts] <<..metrics.charts>>
 [Model] <<..metrics.model>>
 
-[Coverage] --> [Model]
-[Coverage] --> [Color]
-[Coverage] --> [Source]
-[Coverage] --> [Charts]
+[Steps] --> [Model]
+[Steps] --> [Color]
+[Steps] --> [Source]
+[Steps] --> [Charts]
 
 [Charts] --> [Color]
 [Charts] --> [Model]

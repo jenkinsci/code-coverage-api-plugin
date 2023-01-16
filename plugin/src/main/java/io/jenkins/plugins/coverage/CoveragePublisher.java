@@ -81,6 +81,7 @@ public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     public CoveragePublisher() {
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void perform(@NonNull final Run<?, ?> run, @NonNull final FilePath workspace,
             @NonNull final Launcher launcher, @NonNull final TaskListener listener)

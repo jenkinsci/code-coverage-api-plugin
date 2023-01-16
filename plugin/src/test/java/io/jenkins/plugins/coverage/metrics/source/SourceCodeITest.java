@@ -16,8 +16,8 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
-import io.jenkins.plugins.coverage.metrics.CoverageBuildAction;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageBuildAction;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
