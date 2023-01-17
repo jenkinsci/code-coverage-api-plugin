@@ -38,10 +38,9 @@ import static io.jenkins.plugins.coverage.metrics.steps.FilePathValidator.*;
  */
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
-    void publishAction(final String id, final String optionalName, final Node rootNode, final Run<?, ?> build,
-            final FilePath workspace,
-            final TaskListener listener, final List<CoverageQualityGate> qualityGates, final String scm,
-            final Set<String> sourceDirectories, final String sourceCodeEncoding,
+    void publishAction(final String id, final String optionalName, final String icon, final Node rootNode, final Run<?, ?> build,
+            final FilePath workspace, final TaskListener listener, final List<CoverageQualityGate> qualityGates,
+            final String scm, final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -83,7 +82,7 @@ public class CoverageReporter {
                     changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateResult, log,
+            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
                     changeCoverageRoot.aggregateValues(),
@@ -94,7 +93,7 @@ public class CoverageReporter {
             QualityGateResult qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, id, optionalName, rootNode, qualityGateStatus, log);
+            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateStatus, log);
         }
 
         log.logInfo("Executing source code painting...");

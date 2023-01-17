@@ -10,7 +10,6 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.IntegerValue;
 import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Value;
 
 import hudson.util.ListBoxModel;
@@ -40,9 +39,6 @@ public final class ElementFormatter {
         if (value instanceof Coverage) {
             return formatPercentage((Coverage) value, locale);
         }
-        if (value instanceof MutationValue) {
-            return formatPercentage(((MutationValue) value).getCoveredPercentage(), locale);
-        }
         if (value instanceof IntegerValue) {
             return String.valueOf(((IntegerValue) value).getValue());
         }
@@ -69,11 +65,6 @@ public final class ElementFormatter {
             var coverage = (Coverage) value;
             return formatPercentage(coverage, locale)
                     + formatRatio(coverage.getCovered(), coverage.getTotal());
-        }
-        if (value instanceof MutationValue) {
-            var mutations = (MutationValue) value;
-            return formatPercentage(mutations.getCoveredPercentage(), locale)
-                    + formatRatio(mutations.getKilled(), mutations.getTotal());
         }
         if (value instanceof IntegerValue) {
             return String.valueOf(((IntegerValue) value).getValue());

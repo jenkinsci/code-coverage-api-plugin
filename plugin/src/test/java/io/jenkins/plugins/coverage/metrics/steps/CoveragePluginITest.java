@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Value;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -21,7 +21,7 @@ import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
@@ -63,7 +63,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @EnumSource
     @ParameterizedTest(name = "{index} => Freestyle job with parser {0}")
     @DisplayName("Report error but do not fail build in freestyle job when no input files are found")
-    void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
+    void shouldReportErrorWhenNoFilesHaveBeenFoundInFreestyleJob(final Parser parser) {
         FreeStyleProject project = createFreestyleJob(parser);
 
         verifyLogMessageThatNoFilesFound(project);
@@ -72,7 +72,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @EnumSource
     @ParameterizedTest(name = "{index} => Pipeline with parser {0}")
     @DisplayName("Report error but do not fail build in pipeline when no input files are found")
-    void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
+    void shouldReportErrorWhenNoFilesHaveBeenFoundInPipeline(final Parser parser) {
         WorkflowJob job = createPipeline(parser);
 
         verifyLogMessageThatNoFilesFound(job);
@@ -88,7 +88,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @EnumSource
     @ParameterizedTest(name = "{index} => Freestyle job with parser {0}")
     @DisplayName("Report error and fail build in freestyle job when no input files are found")
-    void shouldFailBuildWhenNoFilesHaveBeenFoundInFreestyleJob(final CoverageParser parser) {
+    void shouldFailBuildWhenNoFilesHaveBeenFoundInFreestyleJob(final Parser parser) {
         FreeStyleProject project = createFreestyleJob(parser, r -> r.setFailOnError(true));
 
         verifyFailureWhenNoFilesFound(project);
@@ -97,7 +97,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
     @EnumSource
     @ParameterizedTest(name = "{index} => Pipeline with parser {0}")
     @DisplayName("Report error and fail build in pipeline when no input files are found")
-    void shouldFailBuildWhenNoFilesHaveBeenFoundInPipeline(final CoverageParser parser) {
+    void shouldFailBuildWhenNoFilesHaveBeenFoundInPipeline(final Parser parser) {
         WorkflowJob job = createPipeline();
 
         setPipelineScript(job,
@@ -116,21 +116,21 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordOneJacocoResultInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         verifyOneJacocoResult(project);
     }
 
     @Test
     void shouldRecordOneJacocoResultInPipeline() {
-        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+        WorkflowJob job = createPipeline(Parser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         verifyOneJacocoResult(job);
     }
 
     @Test
     void shouldRecordOneJacocoResultInDeclarativePipeline() {
-        WorkflowJob job = createDeclarativePipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+        WorkflowJob job = createDeclarativePipeline(Parser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         verifyOneJacocoResult(job);
     }
@@ -155,7 +155,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
                         COMPLEXITY_DENSITY,
                         LOC);
         assertThat(coverageResult.getMetricsForSummary())
-                .containsExactly(Metric.LINE, Metric.BRANCH, COMPLEXITY_DENSITY, Metric.LOC);
+                .containsExactly(Metric.LINE, Metric.BRANCH, Metric.MUTATION, COMPLEXITY_DENSITY, Metric.LOC);
         assertThat(coverageResult.getAllValues(Baseline.PROJECT))
                 .contains(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
@@ -165,14 +165,14 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordTwoJacocoResultsInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
         verifyTwoJacocoResults(project);
     }
 
     @Test
     void shouldRecordTwoJacocoResultsInPipeline() {
-        WorkflowJob job = createPipeline(CoverageParser.JACOCO,
+        WorkflowJob job = createPipeline(Parser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         verifyTwoJacocoResults(job);
@@ -180,7 +180,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordTwoJacocoResultsInDeclarativePipeline() {
-        WorkflowJob job = createDeclarativePipeline(CoverageParser.JACOCO,
+        WorkflowJob job = createDeclarativePipeline(Parser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         verifyTwoJacocoResults(job);
@@ -199,21 +199,21 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordOneCoberturaResultInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
+        FreeStyleProject project = createFreestyleJob(Parser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
         verifyOneCoberturaResult(project);
     }
 
     @Test
     void shouldRecordOneCoberturaResultInPipeline() {
-        WorkflowJob job = createPipeline(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
+        WorkflowJob job = createPipeline(Parser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
         verifyOneCoberturaResult(job);
     }
 
     @Test
     void shouldRecordOneCoberturaResultInDeclarativePipeline() {
-        WorkflowJob job = createDeclarativePipeline(CoverageParser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
+        WorkflowJob job = createDeclarativePipeline(Parser.COBERTURA, COBERTURA_HIGHER_COVERAGE_FILE);
 
         verifyOneCoberturaResult(job);
     }
@@ -238,12 +238,12 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
         CoverageRecorder recorder = new CoverageRecorder();
 
-        var cobertura = new CoverageTool();
-        cobertura.setParser(CoverageParser.COBERTURA);
+        var cobertura = new io.jenkins.plugins.coverage.metrics.steps.CoverageTool();
+        cobertura.setParser(Parser.COBERTURA);
         cobertura.setPattern(COBERTURA_HIGHER_COVERAGE_FILE);
 
-        var jacoco = new CoverageTool();
-        jacoco.setParser(CoverageParser.JACOCO);
+        var jacoco = new io.jenkins.plugins.coverage.metrics.steps.CoverageTool();
+        jacoco.setParser(Parser.JACOCO);
         jacoco.setPattern(JACOCO_ANALYSIS_MODEL_FILE);
 
         recorder.setTools(List.of(jacoco, cobertura));
@@ -299,7 +299,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     @Test
     void shouldRecordOnePitResultInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.PIT, "mutations.xml");
+        FreeStyleProject project = createFreestyleJob(Parser.PIT, "mutations.xml");
 
         verifyOnePitResult(project);
     }
@@ -311,8 +311,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
         assertThat(coverageResult.getAllValues(Baseline.PROJECT))
                 .filteredOn(Value::getMetric, MUTATION)
                 .first()
-                .isInstanceOfSatisfying(MutationValue.class, m -> {
-                    assertThat(m.getKilled()).isEqualTo(222);
+                .isInstanceOfSatisfying(Coverage.class, m -> {
+                    assertThat(m.getCovered()).isEqualTo(222);
                     assertThat(m.getTotal()).isEqualTo(246);
                 });
     }

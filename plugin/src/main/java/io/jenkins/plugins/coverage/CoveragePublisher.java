@@ -50,6 +50,7 @@ import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.ValidationUtilities;
 
+@SuppressWarnings("unchecked")
 public class CoveragePublisher extends Recorder implements SimpleBuildStep {
     private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
     private List<CoverageAdapter> adapters = new LinkedList<>();

@@ -27,7 +27,7 @@ import io.jenkins.plugins.coverage.CoveragePublisher;
 import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;
@@ -83,11 +83,11 @@ class GitForensicsITest extends AbstractCoverageITest {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO);
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO);
         project.setAssignedNode(agent);
 
         configureGit(project, COMMIT_REFERENCE);
-        addCoverageRecorder(project, CoverageParser.JACOCO, JACOCO_REFERENCE_FILE);
+        addCoverageRecorder(project, Parser.JACOCO, JACOCO_REFERENCE_FILE);
 
         copySingleFileToAgentWorkspace(agent, project, JACOCO_FILE, JACOCO_FILE);
         copySingleFileToAgentWorkspace(agent, project, JACOCO_REFERENCE_FILE, JACOCO_REFERENCE_FILE);
@@ -95,7 +95,7 @@ class GitForensicsITest extends AbstractCoverageITest {
         Run<?, ?> referenceBuild = buildSuccessfully(project);
 
         configureGit(project, COMMIT);
-        addCoverageRecorder(project, CoverageParser.JACOCO, JACOCO_FILE);
+        addCoverageRecorder(project, Parser.JACOCO, JACOCO_FILE);
 
         Run<?, ?> build = buildSuccessfully(project);
 

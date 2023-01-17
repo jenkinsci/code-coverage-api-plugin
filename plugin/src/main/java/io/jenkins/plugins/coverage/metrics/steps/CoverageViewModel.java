@@ -126,6 +126,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     @Override
     public String getDisplayName() {
+        if (StringUtils.isBlank(node.getName()) || "-".equals(node.getName())) {
+            if (StringUtils.isBlank(optionalName)) {
+                return Messages.Coverage_Link_Name();
+            }
+            return optionalName;
+        }
         if (StringUtils.isBlank(optionalName)) {
             return Messages.Coverage_Title(node.getName());
         }

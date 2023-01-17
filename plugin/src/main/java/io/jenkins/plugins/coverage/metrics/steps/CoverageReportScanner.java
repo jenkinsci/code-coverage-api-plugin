@@ -7,12 +7,12 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.parser.XmlParser;
+import edu.hm.hafner.metric.parser.CoverageParser;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.PathUtil;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.util.AgentFileVisitor;
 
 /**
@@ -26,7 +26,7 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     private static final long serialVersionUID = 6940864958150044554L;
 
     private static final PathUtil PATH_UTIL = new PathUtil();
-    private final CoverageParser parser;
+    private final Parser parser;
 
     /**
      * Creates a new instance of {@link CoverageReportScanner}.
@@ -41,7 +41,7 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
      *         the parser to use
      */
     public CoverageReportScanner(final String filePattern, final String encoding,
-            final boolean followSymbolicLinks, final CoverageParser parser) {
+            final boolean followSymbolicLinks, final Parser parser) {
         super(filePattern, encoding, followSymbolicLinks, true);
 
         this.parser = parser;
@@ -50,7 +50,7 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     @Override
     protected Optional<ModuleNode> processFile(final Path file, final Charset charset, final FilteredLog log) {
         try {
-            XmlParser xmlParser = parser.createParser();
+            CoverageParser xmlParser = parser.createParser();
             ModuleNode node = xmlParser.parse(Files.newBufferedReader(file, charset));
             log.logInfo("Successfully parsed file '%s'", PATH_UTIL.getAbsolutePath(file));
             node.aggregateValues().forEach(v -> log.logInfo("%s", v));

@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.LinesChartModel;
@@ -37,7 +38,7 @@ class CoverageJobActionTest {
     }
 
     private static CoverageJobAction createAction(final FreeStyleProject job) {
-        return new CoverageJobAction(job, "coverage", "Coverage Results");
+        return new CoverageJobAction(job, "coverage", "Coverage Results", StringUtils.EMPTY);
     }
 
     @Test

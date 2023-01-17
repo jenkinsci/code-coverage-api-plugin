@@ -24,17 +24,19 @@ import io.jenkins.plugins.echarts.GenericBuildActionIterator.BuildActionIterable
 public class CoverageJobAction extends AsyncConfigurableTrendJobAction<CoverageBuildAction> {
     private final String id;
     private final String name;
+    private final String icon;
 
-    CoverageJobAction(final Job<?, ?> owner, final String id, final String name) {
+    CoverageJobAction(final Job<?, ?> owner, final String id, final String name, final String icon) {
         super(owner, CoverageBuildAction.class);
 
         this.id = id;
         this.name = name;
+        this.icon = icon;
     }
 
     @Override
     public String getIconFileName() {
-        return CoverageBuildAction.ICON;
+        return icon;
     }
 
     @Override

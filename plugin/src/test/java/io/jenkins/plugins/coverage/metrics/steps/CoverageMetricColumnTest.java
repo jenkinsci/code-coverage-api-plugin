@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.DefaultLocale;
@@ -54,9 +55,9 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
      */
     @VisibleForTesting
     public static Job<?, ?> createJobWithActions(final CoverageBuildAction... actions) {
-        Job job = mock(Job.class);
+        Job<?, ?> job = mock(Job.class);
         Run<?, ?> build = createBuildWithActions(actions);
-        when(job.getLastCompletedBuild()).thenReturn(build);
+        when(job.getLastCompletedBuild()).thenAnswer(a -> build);
         return job;
     }
 
@@ -219,7 +220,8 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
         var delta = new TreeMap<Metric, Fraction>();
         delta.put(Metric.BRANCH, Fraction.getFraction("0.05"));
         CoverageBuildAction coverageBuildAction =
-                new CoverageBuildAction(run, "coverage", "Code Coverage", node, new QualityGateResult(), new FilteredLog("Test"),
+                new CoverageBuildAction(run, "coverage", "Code Coverage", StringUtils.EMPTY,
+                        node, new QualityGateResult(), new FilteredLog("Test"),
                         "-", delta, List.of(), new TreeMap<>(), List.of(), false);
         when(run.getAction(CoverageBuildAction.class)).thenReturn(coverageBuildAction);
         when(run.getActions(CoverageBuildAction.class)).thenReturn(Collections.singletonList(coverageBuildAction));

@@ -1,9 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:c="/controls" xmlns:fa="/font-awesome" xmlns:cov="/coverage">
-  <t:summary icon="symbol-footsteps-outline plugin-ionicons-api">
-    <div id="coverage-summary">
+  <t:summary icon="${it.iconFileName}">
+    <div id="coverage-summary-${it.urlName}">
       <j:set var="result" value="${it.result}"/>
-      <a id="coverage-hrefCoverageReport" href="coverage/">${%Coverage Report}</a>
+      <a id="coverage-action-link-${it.urlName}" href="${it.urlName}/">${it.displayName}</a>
       <fa:image-button label="${%Open log messages}" name="circle-info" tooltip="${%icon.info.tooltip}" url="${it.urlName}/info"/>
       <ul>
         <j:forEach var="baseline" items="${it.baselines}">

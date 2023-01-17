@@ -3,11 +3,13 @@ package io.jenkins.plugins.coverage;
 import hudson.DescriptorExtensionList;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageAdapterDescriptor;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapterDescriptor;
 import io.jenkins.plugins.coverage.targets.CoverageElementRegister;
 
+@SuppressWarnings("unchecked")
 public class CoverageElementInitializer {
 
     @Initializer(after = InitMilestone.PLUGINS_STARTED)

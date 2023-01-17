@@ -33,7 +33,6 @@ import edu.hm.hafner.metric.LinesOfCode;
 import edu.hm.hafner.metric.MethodNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.MutationValue;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.PackageNode;
 import edu.hm.hafner.metric.Value;
@@ -85,8 +84,6 @@ class CoverageXmlStream extends AbstractXmlStream<Node> {
 
         xStream.alias("coverage", Coverage.class);
         xStream.addImmutableType(Coverage.class, false);
-        xStream.alias("mutation", MutationValue.class);
-        xStream.addImmutableType(MutationValue.class, false);
         xStream.alias("complexity", CyclomaticComplexity.class);
         xStream.addImmutableType(CyclomaticComplexity.class, false);
         xStream.alias("loc", LinesOfCode.class);

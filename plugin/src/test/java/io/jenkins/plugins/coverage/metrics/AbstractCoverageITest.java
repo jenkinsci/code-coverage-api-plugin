@@ -9,8 +9,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
 
 import io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
 
 /**
@@ -19,11 +18,11 @@ import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerSuite;
  * @author Ullrich Hafner
  */
 public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPerSuite {
-    protected FreeStyleProject createFreestyleJob(final CoverageParser parser, final String... fileNames) {
+    protected FreeStyleProject createFreestyleJob(final Parser parser, final String... fileNames) {
         return createFreestyleJob(parser, i -> { }, fileNames);
     }
 
-    protected FreeStyleProject createFreestyleJob(final CoverageParser parser,
+    protected FreeStyleProject createFreestyleJob(final Parser parser,
             final Consumer<CoverageRecorder> configuration, final String... fileNames) {
         FreeStyleProject project = createFreeStyleProjectWithWorkspaceFiles(fileNames);
 
@@ -33,15 +32,15 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
     }
 
     protected void addCoverageRecorder(final FreeStyleProject project,
-            final CoverageParser parser, final String pattern) {
+            final Parser parser, final String pattern) {
         addCoverageRecorder(project, parser, pattern, i -> { });
     }
 
     void addCoverageRecorder(final FreeStyleProject project,
-            final CoverageParser parser, final String pattern, final Consumer<CoverageRecorder> configuration) {
+            final Parser parser, final String pattern, final Consumer<CoverageRecorder> configuration) {
         CoverageRecorder recorder = new CoverageRecorder();
 
-        var tool = new CoverageTool();
+        var tool = new io.jenkins.plugins.coverage.metrics.steps.CoverageTool();
         tool.setParser(parser);
         tool.setPattern(pattern);
         recorder.setTools(List.of(tool));
@@ -57,7 +56,7 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
         project.getPublishersList().add(recorder);
     }
 
-    protected WorkflowJob createPipeline(final CoverageParser parser, final String... fileNames) {
+    protected WorkflowJob createPipeline(final Parser parser, final String... fileNames) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(fileNames);
 
         setPipelineScript(job,
@@ -73,7 +72,7 @@ public abstract class AbstractCoverageITest extends IntegrationTestWithJenkinsPe
                         + " }\n", true));
     }
 
-    protected WorkflowJob createDeclarativePipeline(final CoverageParser parser, final String... fileNames) {
+    protected WorkflowJob createDeclarativePipeline(final Parser parser, final String... fileNames) {
         WorkflowJob job = createPipelineWithWorkspaceFiles(fileNames);
 
         job.setDefinition(new CpsFlowDefinition("pipeline {\n"

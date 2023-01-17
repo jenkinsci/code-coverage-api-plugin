@@ -12,10 +12,10 @@
     <li>
       <j:choose>
         <j:when test="${it.hasDelta(baseline)}">
-          <a href="coverage/#${baseline.url}">${it.getDeltaBaseline(baseline).title}</a>
+          <a href="${it.urlName}/#${baseline.url}">${it.getDeltaBaseline(baseline).title}</a>
         </j:when>
         <j:otherwise>
-          <a href="coverage/#${baseline.url}">${baseline.title}</a>
+          <a href="${it.urlName}/#${baseline.url}">${baseline.title}</a>
         </j:otherwise>
       </j:choose>
       <div class="${baseline}-summary">

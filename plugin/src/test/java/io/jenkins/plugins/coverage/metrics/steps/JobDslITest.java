@@ -15,7 +15,7 @@ import hudson.views.ListViewColumn;
 import io.jenkins.plugins.casc.ConfigurationAsCode;
 import io.jenkins.plugins.casc.ConfiguratorException;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
@@ -73,8 +73,8 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
     private void assertRecorderProperties(final CoverageRecorder recorder) {
         assertThat(recorder.getTools()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
-                        new CoverageTool(CoverageParser.JACOCO, "jacoco-pattern.*"),
-                        new CoverageTool(CoverageParser.COBERTURA, "cobertura-pattern.*"));
+                        new io.jenkins.plugins.coverage.metrics.steps.CoverageTool(Parser.JACOCO, "jacoco-pattern.*"),
+                        new io.jenkins.plugins.coverage.metrics.steps.CoverageTool(Parser.COBERTURA, "cobertura-pattern.*"));
         assertThat(recorder.getQualityGates()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
                         new CoverageQualityGate(70.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),

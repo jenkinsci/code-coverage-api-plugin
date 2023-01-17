@@ -20,7 +20,6 @@ import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.StaplerProxy;
@@ -50,9 +49,6 @@ import static hudson.model.Run.*;
 public final class CoverageBuildAction extends BuildAction<Node> implements StaplerProxy {
     private static final long serialVersionUID = -6023811049340671399L;
 
-    /** The coverage report symbol from the Ionicons plugin. */
-    public static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
-
     private static final ElementFormatter FORMATTER = new ElementFormatter();
     private static final String NO_REFERENCE_BUILD = "-";
 
@@ -63,6 +59,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
 
     private final QualityGateResult qualityGateResult;
 
+    private final String icon;
     // FIXME: Rethink if we need a separate result object that stores all data?
     private final FilteredLog log;
 
@@ -105,9 +102,9 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param log
      *         the logging statements of the recording step
      */
-    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName,
+    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName, final String icon,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log) {
-        this(owner, id, optionalName, result, qualityGateResult, log, NO_REFERENCE_BUILD,
+        this(owner, id, optionalName, icon, result, qualityGateResult, log, NO_REFERENCE_BUILD,
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of());
     }
 
@@ -138,20 +135,20 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      *         the indirect coverage changes of the associated change request with respect to the reference build
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName,
+    public CoverageBuildAction(final Run<?, ?> owner, final String id, final String optionalName, final String icon,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
             final List<? extends Value> changeCoverage,
             final NavigableMap<Metric, Fraction> changeCoverageDifference,
             final List<? extends Value> indirectCoverageChanges) {
-        this(owner, id, optionalName, result, qualityGateResult, log, referenceBuildId, delta, changeCoverage,
+        this(owner, id, optionalName, icon, result, qualityGateResult, log, referenceBuildId, delta, changeCoverage,
                 changeCoverageDifference, indirectCoverageChanges, true);
     }
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CoverageBuildAction(final Run<?, ?> owner, final String id, final String name,
+    CoverageBuildAction(final Run<?, ?> owner, final String id, final String name, final String icon,
             final Node result, final QualityGateResult qualityGateResult, final FilteredLog log,
             final String referenceBuildId,
             final NavigableMap<Metric, Fraction> delta,
@@ -163,6 +160,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
 
         this.id = id;
         this.name = name;
+        this.icon = icon;
         this.log = log;
 
         projectValues = result.aggregateValues();
@@ -437,7 +435,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      */
     @VisibleForTesting
     NavigableSet<Metric> getMetricsForSummary() {
-        return new TreeSet<>(Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY));
+        return new TreeSet<>(Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY, Metric.MUTATION));
     }
 
     /**
@@ -470,7 +468,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
 
     @Override
     protected CoverageJobAction createProjectAction() {
-        return new CoverageJobAction(getOwner().getParent(), getUrlName(), name);
+        return new CoverageJobAction(getOwner().getParent(), getUrlName(), name, icon);
     }
 
     @Override
@@ -484,10 +482,10 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
                 getStatistics(), getQualityGateResult(), getReferenceBuildLink(), log);
     }
 
-    @CheckForNull
+    @NonNull
     @Override
     public String getIconFileName() {
-        return ICON;
+        return icon;
     }
 
     @NonNull

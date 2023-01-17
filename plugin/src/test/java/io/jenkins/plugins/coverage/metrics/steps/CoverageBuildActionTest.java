@@ -49,10 +49,8 @@ class CoverageBuildActionTest {
 
         var coverages = List.of(percent50, percent80);
         var action = spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
-                StringUtils.EMPTY, module, new QualityGateResult(),
-                createLog(), "-",
-                deltas, coverages,
-                deltas, coverages, false));
+                StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(),
+                createLog(), "-", deltas, coverages, deltas, coverages, false));
 
         when(action.getResult()).thenThrow(new IllegalStateException("Result should not be accessed with getResult() when getting a coverage metric that is persisted in the build"));
 
@@ -72,11 +70,8 @@ class CoverageBuildActionTest {
 
     private static CoverageBuildAction createEmptyAction(final Node module) {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
-                StringUtils.EMPTY, module,
-                new QualityGateResult(),
-                createLog(), "-",
-                new TreeMap<>(), List.of(),
-                new TreeMap<>(), List.of(), false);
+                StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(), createLog(), "-",
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
     }
 
     private static FilteredLog createLog() {

@@ -14,7 +14,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
@@ -28,7 +28,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 class CoverageApiITest extends AbstractCoverageITest {
     @Test
     void shouldProvideRemoteApi() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.SUCCESS);
 
@@ -54,7 +54,7 @@ class CoverageApiITest extends AbstractCoverageITest {
     @Test
     void shouldShowQualityGatesInRemoteApi() {
         var qualityGates = List.of(new CoverageQualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
 
@@ -72,7 +72,7 @@ class CoverageApiITest extends AbstractCoverageITest {
 
     @Test
     void shouldShowDeltaInRemoteApi() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         buildSuccessfully(project);

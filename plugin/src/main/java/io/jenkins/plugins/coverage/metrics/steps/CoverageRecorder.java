@@ -41,7 +41,7 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.prism.SourceCodeDirectory;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.AgentFileVisitor.FileVisitorResult;
@@ -66,6 +66,9 @@ import io.jenkins.plugins.util.ValidationUtilities;
 public class CoverageRecorder extends Recorder {
     static final String DEFAULT_ID = "coverage";
     private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
+    /** The coverage report symbol from the Ionicons plugin. */
+    private static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
+
 
     private List<CoverageTool> tools = new ArrayList<>();
     private List<CoverageQualityGate> qualityGates = new ArrayList<>();
@@ -346,8 +349,8 @@ public class CoverageRecorder extends Recorder {
 
                 if (!results.isEmpty()) {
                     CoverageReporter reporter = new CoverageReporter();
-                    reporter.publishAction(getActualId(), getName(), Node.merge(results),
-                            run, workspace, taskListener,
+                    reporter.publishAction(getActualId(), getName(), getIcon(),
+                            Node.merge(results), run, workspace, taskListener,
                             getQualityGates(),
                             getScm(), getSourceDirectoriesPaths(),
                             getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
@@ -357,6 +360,14 @@ public class CoverageRecorder extends Recorder {
         else {
             logHandler.log("Skipping execution of coverage recorder since overall result is '%s'", overallResult);
         }
+    }
+
+    private String getIcon() {
+        var icons = tools.stream().map(CoverageTool::getParser).map(Parser::getIcon).collect(Collectors.toSet());
+        if (icons.size() == 1) {
+            return icons.iterator().next(); // unique icon
+        }
+        return ICON;
     }
 
     private static void failStage(final StageResultHandler resultHandler, final LogHandler logHandler,
@@ -371,7 +382,7 @@ public class CoverageRecorder extends Recorder {
         List<Node> results = new ArrayList<>();
         for (CoverageTool tool : tools) {
             LogHandler toolHandler = new LogHandler(taskListener, tool.getDisplayName());
-            CoverageParser parser = tool.getParser();
+            Parser parser = tool.getParser();
             if (StringUtils.isBlank(tool.getPattern())) {
                 toolHandler.log("Using default pattern '%s' since user defined pattern is not set",
                         parser.getDefaultPattern());

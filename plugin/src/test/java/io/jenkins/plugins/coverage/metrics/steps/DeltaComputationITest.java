@@ -14,7 +14,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
-import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.CoverageParser;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.*;
 class DeltaComputationITest extends AbstractCoverageITest {
     @Test
     void shouldComputeDeltaInFreestyleJob() {
-        FreeStyleProject project = createFreestyleJob(CoverageParser.JACOCO,
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO,
                 JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> firstBuild = buildSuccessfully(project);
@@ -43,7 +43,7 @@ class DeltaComputationITest extends AbstractCoverageITest {
 
     @Test
     void shouldComputeDeltaInPipeline() {
-        WorkflowJob job = createPipeline(CoverageParser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
+        WorkflowJob job = createPipeline(Parser.JACOCO, JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
         verifyFirstBuild(firstBuild);
