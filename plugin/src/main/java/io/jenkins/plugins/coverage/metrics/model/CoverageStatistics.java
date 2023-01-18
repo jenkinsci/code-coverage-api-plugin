@@ -99,4 +99,18 @@ public class CoverageStatistics {
     private Optional<Value> getValue(final Metric metric, final NavigableMap<Metric, Value> mapping) {
         return Optional.ofNullable(mapping.get(metric));
     }
+
+    /**
+     * Returns whether a value for the specified metric and baseline is available.
+     *
+     * @param baseline
+     *         the baseline of the value
+     * @param metric
+     *         the metric of the value
+     *
+     * @return {@code true}, if a value is available, {@code false} otherwise
+     */
+    public boolean containsValue(final Baseline baseline, final Metric metric) {
+        return getValue(baseline, metric).isPresent();
+    }
 }

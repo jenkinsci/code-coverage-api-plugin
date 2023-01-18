@@ -41,22 +41,34 @@ public class CoverageTrendChart {
         if (!dataSet.isEmpty()) {
             model.useContinuousRangeAxis();
             model.setRangeMax(100);
-            model.setRangeMin(Math.max(0,
-                    Math.min(createRangeMinFor(dataSet, CoverageSeriesBuilder.LINE_COVERAGE),
-                            createRangeMinFor(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE)
-                    )));
+            model.setRangeMin(Math.max(0, min(dataSet)));
 
-            LineSeries lineSeries = new LineSeries("Line", Palette.GREEN.getNormal(),
-                    StackedMode.SEPARATE_LINES, FilledMode.FILLED);
+            LineSeries lineSeries = new LineSeries("Line",
+                    Palette.GREEN.getNormal(), StackedMode.SEPARATE_LINES, FilledMode.FILLED);
             lineSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE));
             model.addSeries(lineSeries);
 
-            LineSeries branchSeries = new LineSeries("Branch", Palette.GREEN.getHover(),
-                    StackedMode.SEPARATE_LINES, FilledMode.FILLED);
-            branchSeries.addAll(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE));
-            model.addSeries(branchSeries);
+            addSecondSeries(dataSet, model, "Branch", CoverageSeriesBuilder.BRANCH_COVERAGE);
+            addSecondSeries(dataSet, model, "Mutation", CoverageSeriesBuilder.MUTATION_COVERAGE);
         }
         return model;
+    }
+
+    private static void addSecondSeries(final LinesDataSet dataSet, final LinesChartModel model,
+            final String name, final String id) {
+        if (dataSet.getDataSetIds().contains(id)) {
+            LineSeries branchSeries = new LineSeries(name,
+                    Palette.BLUE.getNormal(), StackedMode.SEPARATE_LINES, FilledMode.FILLED);
+            branchSeries.addAll(dataSet.getSeries(id));
+            model.addSeries(branchSeries);
+        }
+    }
+
+    private int min(final LinesDataSet dataSet) {
+        var lineMin = createRangeMinFor(dataSet, CoverageSeriesBuilder.LINE_COVERAGE);
+        var branchMin = createRangeMinFor(dataSet, CoverageSeriesBuilder.BRANCH_COVERAGE);
+        var mutationMin = createRangeMinFor(dataSet, CoverageSeriesBuilder.MUTATION_COVERAGE);
+        return Math.min(Math.min(lineMin, branchMin), mutationMin);
     }
 
     private int createRangeMinFor(final LinesDataSet dataSet, final String coverage) {
@@ -64,7 +76,13 @@ public class CoverageTrendChart {
     }
 
     // FIXME: move to echarts
-    private Integer min(final LinesDataSet dataSet, final String dataSetId) {
-        return dataSet.getSeries(dataSetId).stream().reduce(Math::min).orElse(0);
+    private int min(final LinesDataSet dataSet, final String dataSetId) {
+        var max = Integer.MAX_VALUE;
+        if (dataSet.getDataSetIds().contains(dataSetId)) {
+            return dataSet.getSeries(dataSetId).stream().reduce(Math::min).orElse(max);
+        }
+        else {
+            return max;
+        }
     }
 }

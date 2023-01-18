@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.hm.hafner.echarts.JacksonFacade;
-import edu.hm.hafner.echarts.LinesChartModel;
 import edu.hm.hafner.echarts.TreeMapNode;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
@@ -86,13 +85,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private final Node changeCoverageTreeRoot;
     private final Node indirectCoverageChangesTreeRoot;
+    private final Function<String, String> trendChartFunction;
 
     private ColorProvider colorProvider = ColorProviderFactory.createDefaultColorProvider();
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageViewModel(final Run<?, ?> owner, final String id, final String optionalName, final Node node,
             final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
-            final String referenceBuild, final FilteredLog log) {
+            final String referenceBuild, final FilteredLog log, final Function<String, String> trendChartFunction) {
         super();
 
         this.owner = owner;
@@ -110,6 +110,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         // initialize filtered coverage trees so that they will not be calculated multiple times
         changeCoverageTreeRoot = node.filterChanges();
         indirectCoverageChangesTreeRoot = node.filterByIndirectlyChangedCoverage();
+        this.trendChartFunction = trendChartFunction;
     }
 
     public String getId() {
@@ -206,19 +207,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @JavaScriptMethod
     @SuppressWarnings("unused")
     public String getTrendChart(final String configuration) {
-        return JACKSON_FACADE.toJson(createTrendChart(configuration));
-    }
-
-    private LinesChartModel createTrendChart(final String configuration) {
-        Optional<CoverageBuildAction> latestAction = getLatestAction();
-        if (latestAction.isPresent()) {
-            return latestAction.get().createProjectAction().createChartModel(configuration);
-        }
-        return new LinesChartModel();
-    }
-
-    private Optional<CoverageBuildAction> getLatestAction() {
-        return Optional.ofNullable(getOwner().getAction(CoverageBuildAction.class));
+        return trendChartFunction.apply(configuration);
     }
 
     /**
@@ -411,7 +400,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * Checks whether source files are stored.
      *
      * @return {@code true} when source files are stored, {@code false} otherwise
-     * @since 3.0.0
      */
     @JavaScriptMethod
     public boolean hasSourceCode() {

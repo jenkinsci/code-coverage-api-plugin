@@ -18,7 +18,6 @@ edu.hm.hafner.metric.Metric
 edu.hm.hafner.metric.ModuleNode
 edu.hm.hafner.metric.Mutation
 edu.hm.hafner.metric.MutationStatus
-edu.hm.hafner.metric.MutationValue
 edu.hm.hafner.metric.Mutator
 edu.hm.hafner.metric.Node
 edu.hm.hafner.metric.PackageNode

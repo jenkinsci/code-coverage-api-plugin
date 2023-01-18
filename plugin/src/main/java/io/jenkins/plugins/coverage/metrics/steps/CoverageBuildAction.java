@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
+import edu.hm.hafner.echarts.ChartModelConfiguration;
+import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
@@ -26,10 +28,12 @@ import org.kohsuke.stapler.StaplerProxy;
 import hudson.Functions;
 import hudson.model.Run;
 
+import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageXmlStream.MetricFractionMapConverter;
+import io.jenkins.plugins.echarts.GenericBuildActionIterator.BuildActionIterable;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
 import io.jenkins.plugins.util.BuildAction;
@@ -479,7 +483,14 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     @Override
     public CoverageViewModel getTarget() {
         return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(),
-                getStatistics(), getQualityGateResult(), getReferenceBuildLink(), log);
+                getStatistics(), getQualityGateResult(), getReferenceBuildLink(), log, this::createChartModel);
+    }
+
+    private String createChartModel(final String configuration) {
+        // FIXME: add without optional
+        var iterable = new BuildActionIterable<>(CoverageBuildAction.class, Optional.of(this),
+                action -> getUrlName().equals(action.getUrlName()), CoverageBuildAction::getStatistics);
+        return new JacksonFacade().toJson(new CoverageTrendChart().create(iterable, ChartModelConfiguration.fromJson(configuration)));
     }
 
     @NonNull
