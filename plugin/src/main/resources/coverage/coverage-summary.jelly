@@ -32,7 +32,25 @@
                 <j:forEach var="value" items="${it.getAllValues(baseline)}">
                   <tr>
                     <td align="left" style="white-space: nowrap;">${it.formatMetric(value)}</td>
-                    <td align="right" style="white-space: nowrap;">${it.formatValue(value)}</td>
+                    <td align="right" style="white-space: nowrap;">
+                      <j:choose>
+                        <j:when test="${it.showColors(value)}">
+                          <div class="coverage-column-outer jenkins-table__link" >
+                            <j:set var="displayColors" value="${it.getDisplayColors(baseline, value)}"/>
+                            <j:set var="backgroundColor" value="${displayColors.getFillColorAsRGBAHex(80)}"/>
+                            <j:set var="fillPercentage" value="${it.getBackgroundColorFillPercentage(value)}"/>
+
+                            <div class="coverage-column-inner" style="background-image: linear-gradient(90deg, ${backgroundColor} ${fillPercentage}, transparent ${fillPercentage});">
+                              ${it.formatValue(value)}
+                            </div>
+                          </div>
+                        </j:when>
+                        <j:otherwise>
+                          ${it.formatValue(value)}
+                        </j:otherwise>
+                      </j:choose>
+
+                    </td>
                   </tr>
                 </j:forEach>
               </tbody>

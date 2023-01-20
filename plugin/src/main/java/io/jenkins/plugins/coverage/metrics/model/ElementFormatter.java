@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.model;
 
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
@@ -14,6 +15,10 @@ import edu.hm.hafner.metric.Value;
 
 import hudson.util.ListBoxModel;
 
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
+import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
+
 /**
  * A localized formatter for coverages, metrics, baselines, etc.
  *
@@ -22,6 +27,7 @@ import hudson.util.ListBoxModel;
 public final class ElementFormatter {
     private static final Fraction HUNDRED = Fraction.getFraction("100.0");
     private static final String NO_COVERAGE_AVAILABLE = "-";
+    private static final Pattern PERCENTAGE = Pattern.compile("\\d+(\\.\\d+)?%");
 
     /**
      * Formats a generic value using a specific rendering method. The type of the given {@link Value} instance is used
@@ -73,6 +79,76 @@ public final class ElementFormatter {
             return String.format(locale, "%.2f%%", ((FractionValue) value).getFraction().doubleValue());
         }
         return value.toString();
+    }
+
+    /**
+     * Formats additional information for a generic value using a specific rendering method. This information can be
+     * added as a tooltip. The type of the given {@link Value} instance is used to select the best matching rendering
+     * method. This non-object-oriented approach is required since the {@link Value} instances are provided by a library
+     * that is not capable of localizing these values for the user.
+     *
+     * @param value
+     *         the value to format
+     * @return the formatted value as plain text
+     */
+    public String formatAdditionalInformation(final Value value) {
+        if (value instanceof Coverage) {
+            var coverage = (Coverage) value;
+            if (coverage.isSet()) {
+                if (coverage.getMetric() == Metric.MUTATION) {
+                    return formatCoverage(coverage, Messages.Metric_MUTATION_Killed(),
+                            Messages.Metric_MUTATION_Survived());
+                }
+                else {
+                    return formatCoverage(coverage, Messages.Metric_Coverage_Covered(),
+                            Messages.Metric_Coverage_Missed());
+                }
+            }
+            return StringUtils.EMPTY;
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private static String formatCoverage(final Coverage coverage, final String coveredText, final String missedText) {
+        return String.format("%s: %d - %s: %d", coveredText, coverage.getCovered(),
+                missedText, coverage.getMissed());
+    }
+
+    /**
+     * Provides the colors to render a given coverage percentage.
+     *
+     * @param baseline
+     *         the baseline to show
+     * @param value
+     *         the value to format
+     *
+     * @return the display colors to use
+     */
+    public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
+        if (value instanceof Coverage) {
+            return baseline.getDisplayColors(((Coverage)value).getCoveredPercentage().doubleValue() * 100.0, ColorProviderFactory.createDefaultColorProvider());
+        }
+        else if (value instanceof FractionValue) {
+            return baseline.getDisplayColors(((FractionValue)value).getFraction().doubleValue(), ColorProviderFactory.createDefaultColorProvider());
+        }
+        return ColorProvider.DEFAULT_COLOR;
+    }
+
+    /**
+     * Transforms percentages with a ',' decimal separator to a representation using a '.' in order to use the
+     * percentage for styling HTML tags.
+     *
+     * @param percentage
+     *         The text representation of a percentage
+     *
+     * @return the formatted percentage string
+     */
+    public String getBackgroundColorFillPercentage(final String percentage) {
+        String formattedPercentage = percentage.replace(",", ".");
+        if (PERCENTAGE.matcher(formattedPercentage).matches()) {
+            return formattedPercentage;
+        }
+        return "100%";
     }
 
     private String formatRatio(final int covered, final int total) {

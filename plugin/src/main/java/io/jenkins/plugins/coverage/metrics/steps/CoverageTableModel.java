@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.metric.Coverage;
+import edu.hm.hafner.metric.CyclomaticComplexity;
 import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.LinesOfCode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
@@ -99,43 +101,57 @@ class CoverageTableModel extends TableModel {
                 .withResponsivePriority(50_000)
                 .build();
         columns.add(packageName);
-        TableColumn lineCoverage = new ColumnBuilder().withHeaderLabel(Messages.Column_LineCoverage())
-                .withDataPropertyKey("lineCoverage")
-                .withDetailedCell()
-                .withType(ColumnType.NUMBER)
-                .withResponsivePriority(1)
-                .build();
-        columns.add(lineCoverage);
-        TableColumn lineCoverageDelta = new ColumnBuilder().withHeaderLabel(Messages.Column_DeltaLineCoverage("Δ"))
-                .withDataPropertyKey("lineCoverageDelta")
-                .withDetailedCell()
-                .withType(ColumnType.NUMBER)
-                .withResponsivePriority(2)
-                .build();
-        columns.add(lineCoverageDelta);
-        TableColumn branchCoverage = new ColumnBuilder().withHeaderLabel(Messages.Column_BranchCoverage())
-                .withDataPropertyKey("branchCoverage")
-                .withDetailedCell()
-                .withType(ColumnType.NUMBER)
-                .withResponsivePriority(1)
-                .build();
-        columns.add(branchCoverage);
-        TableColumn branchCoverageDelta = new ColumnBuilder().withHeaderLabel(
-                        Messages.Column_DeltaBranchCoverage("Δ"))
-                .withDataPropertyKey("branchCoverageDelta")
-                .withDetailedCell()
-                .withType(ColumnType.NUMBER)
-                .withResponsivePriority(2)
-                .build();
-        columns.add(branchCoverageDelta);
+
+        configureValueColumn("lineCoverage", Metric.LINE, Messages.Column_LineCoverage(),
+                Messages.Column_DeltaLineCoverage("Δ"), columns);
+        configureValueColumn("branchCoverage", Metric.BRANCH, Messages.Column_BranchCoverage(),
+                Messages.Column_DeltaBranchCoverage("Δ"), columns);
+        configureValueColumn("mutationCoverage", Metric.MUTATION, Messages.Column_MutationCoverage(),
+                Messages.Column_DeltaMutationCoverage("Δ"), columns);
         TableColumn loc = new ColumnBuilder().withHeaderLabel(Messages.Column_LinesOfCode())
                 .withDataPropertyKey("loc")
                 .withResponsivePriority(200)
                 .withType(ColumnType.NUMBER)
                 .build();
         columns.add(loc);
-
+        if (root.containsMetric(Metric.COMPLEXITY)) {
+            TableColumn complexity = new ColumnBuilder().withHeaderLabel(Messages.Column_Complexity())
+                    .withDataPropertyKey("complexity")
+                    .withResponsivePriority(500)
+                    .withType(ColumnType.NUMBER)
+                    .build();
+            columns.add(complexity);
+        }
+        if (root.containsMetric(Metric.COMPLEXITY_DENSITY)) {
+            TableColumn complexity = new ColumnBuilder().withHeaderLabel(Messages.Column_ComplexityDensity())
+                    .withDataPropertyKey("density")
+                    .withDetailedCell()
+                    .withResponsivePriority(700)
+                    .withType(ColumnType.NUMBER)
+                    .build();
+            columns.add(complexity);
+        }
         return columns;
+    }
+
+    private void configureValueColumn(final String key, final Metric metric, final String headerLabel,
+            final String deltaHeaderLabel, final List<TableColumn> columns) {
+        if (root.containsMetric(metric)) {
+            TableColumn lineCoverage = new ColumnBuilder().withHeaderLabel(headerLabel)
+                    .withDataPropertyKey(key)
+                    .withDetailedCell()
+                    .withType(ColumnType.NUMBER)
+                    .withResponsivePriority(1)
+                    .build();
+            columns.add(lineCoverage);
+            TableColumn lineCoverageDelta = new ColumnBuilder().withHeaderLabel(deltaHeaderLabel)
+                    .withDataPropertyKey(key + "Delta")
+                    .withDetailedCell()
+                    .withType(ColumnType.NUMBER)
+                    .withResponsivePriority(2)
+                    .build();
+            columns.add(lineCoverageDelta);
+        }
     }
 
     @Override
@@ -161,6 +177,9 @@ class CoverageTableModel extends TableModel {
         private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
         private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
         private static final ElementFormatter FORMATTER = new ElementFormatter();
+        private static final FractionValue ZERO_DENSITY = new FractionValue(Metric.COMPLEXITY_DENSITY, 0, 1);
+        private static final LinesOfCode ZERO_LOC = new LinesOfCode(0);
+        private static final CyclomaticComplexity ZERO_COMPLEXITY = new CyclomaticComplexity(0);
 
         private final FileNode file;
         private final Locale browserLocale;
@@ -195,6 +214,10 @@ class CoverageTableModel extends TableModel {
             return createColoredCoverageColumn(getCoverageOfNode(Metric.BRANCH));
         }
 
+        public DetailedCell<?> getMutationCoverage() {
+            return createColoredCoverageColumn(getCoverageOfNode(Metric.MUTATION));
+        }
+
         Coverage getCoverageOfNode(final Metric metric) {
             return file.getTypedValue(metric, Coverage.nullObject(metric));
         }
@@ -207,8 +230,23 @@ class CoverageTableModel extends TableModel {
             return createColoredFileCoverageDeltaColumn(Metric.BRANCH);
         }
 
+        public DetailedCell<?> getMutationCoverageDelta() {
+            return createColoredFileCoverageDeltaColumn(Metric.MUTATION);
+        }
+
         public int getLoc() {
-            return file.getTypedValue(Metric.LOC, new LinesOfCode(0)).getValue();
+            return file.getTypedValue(Metric.LOC, ZERO_LOC).getValue();
+        }
+
+        public int getComplexity() {
+            return file.getTypedValue(Metric.COMPLEXITY, ZERO_COMPLEXITY).getValue();
+        }
+
+        public DetailedCell<?> getDensity() {
+            double complexityDensity = file.getTypedValue(Metric.COMPLEXITY_DENSITY, ZERO_DENSITY)
+                    .getFraction()
+                    .doubleValue();
+            return new DetailedCell<>(String.format("%.2f", complexityDensity), complexityDensity);
         }
 
         /**
@@ -223,12 +261,16 @@ class CoverageTableModel extends TableModel {
             if (coverage.isSet()) {
                 double percentage = coverage.getCoveredPercentage().doubleValue() * 100.0;
                 DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, colorProvider);
-                String cell = div().withClasses(COVERAGE_COLUMN_OUTER).with(
+                String cell = div()
+                        .withClasses(COVERAGE_COLUMN_OUTER).with(
                                 div().withClasses(COVERAGE_COLUMN_INNER)
                                         .withStyle(String.format(
                                                 "background-image: linear-gradient(90deg, %s %f%%, transparent %f%%);",
                                                 colors.getFillColorAsRGBAHex(TABLE_COVERAGE_COLOR_ALPHA),
                                                 percentage, percentage))
+                                        .attr("data-bs-toggle", "tooltip")
+                                        .attr("data-bs-placement", "top")
+                                        .withTitle(FORMATTER.formatAdditionalInformation(coverage))
                                         .withText(FORMATTER.formatPercentage(coverage, browserLocale)))
                         .render();
                 return new DetailedCell<>(cell, percentage);

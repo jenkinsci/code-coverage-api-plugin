@@ -2,10 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.util.VisibleForTesting;
@@ -28,7 +25,6 @@ import hudson.views.ListViewColumnDescriptor;
 
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
-import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.util.JenkinsFacade;
@@ -187,12 +183,7 @@ public class CoverageMetricColumn extends ListViewColumn {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public DisplayColors getDisplayColors(final Job<?, ?> job, final Optional<? extends Value> coverage) {
         if (coverage.isPresent() && hasCoverageAction(job)) {
-            if (coverage.get() instanceof Coverage) {
-                return baseline.getDisplayColors(((Coverage)coverage.get()).getCoveredPercentage().doubleValue() * 100.0, ColorProviderFactory.createDefaultColorProvider());
-            }
-            else if (coverage.get() instanceof FractionValue) {
-                return baseline.getDisplayColors(((FractionValue)coverage.get()).getFraction().doubleValue(), ColorProviderFactory.createDefaultColorProvider());
-            }
+            return FORMATTER.getDisplayColors(baseline, coverage.get());
         }
         return ColorProvider.DEFAULT_COLOR;
     }
@@ -223,11 +214,7 @@ public class CoverageMetricColumn extends ListViewColumn {
      * @return the formatted percentage string
      */
     public String getBackgroundColorFillPercentage(final String percentage) {
-        String formattedPercentage = percentage.replace(",", ".");
-        if (Pattern.compile("\\d+(\\.\\d+)?%").matcher(formattedPercentage).matches()) {
-            return formattedPercentage;
-        }
-        return "100%";
+        return FORMATTER.getBackgroundColorFillPercentage(percentage);
     }
 
     /**

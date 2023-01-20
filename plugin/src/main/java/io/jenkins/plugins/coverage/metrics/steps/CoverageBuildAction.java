@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.JacksonFacade;
+import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
@@ -29,6 +31,7 @@ import hudson.Functions;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
+import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
@@ -368,6 +371,49 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     }
 
     /**
+     * Provides the line color for representing the passed coverage value.
+     *
+     * @param baseline
+     *         the baseline to show
+     * @param value
+     *         the value to format The coverage value as percentage
+     *
+     * @return the line color as hex string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
+        return FORMATTER.getDisplayColors(baseline, value);
+    }
+
+    /**
+     * Returns the fill percentage for the specified value.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the percentage string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String getBackgroundColorFillPercentage(final Value value) {
+        if (value instanceof Coverage) {
+            return FORMATTER.format(value, Locale.ENGLISH);
+        }
+        return "100%";
+    }
+
+    /**
+     * Returns whether the value should be rendered by using a color badge.
+     *
+     * @param value
+     *         the value to render
+     *
+     * @return {@code true} if the value should be rendered by using a color badge, {@code false} otherwise
+     */
+    public boolean showColors(final Value value) {
+        return value instanceof Coverage;
+    }
+
+    /**
      * Returns whether a delta metric for the specified baseline exists.
      *
      * @param baseline
@@ -439,7 +485,8 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      */
     @VisibleForTesting
     NavigableSet<Metric> getMetricsForSummary() {
-        return new TreeSet<>(Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY, Metric.MUTATION));
+        return new TreeSet<>(
+                Set.of(Metric.LINE, Metric.LOC, Metric.BRANCH, Metric.COMPLEXITY_DENSITY, Metric.MUTATION));
     }
 
     /**
@@ -490,7 +537,8 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         // FIXME: add without optional
         var iterable = new BuildActionIterable<>(CoverageBuildAction.class, Optional.of(this),
                 action -> getUrlName().equals(action.getUrlName()), CoverageBuildAction::getStatistics);
-        return new JacksonFacade().toJson(new CoverageTrendChart().create(iterable, ChartModelConfiguration.fromJson(configuration)));
+        return new JacksonFacade().toJson(
+                new CoverageTrendChart().create(iterable, ChartModelConfiguration.fromJson(configuration)));
     }
 
     @NonNull

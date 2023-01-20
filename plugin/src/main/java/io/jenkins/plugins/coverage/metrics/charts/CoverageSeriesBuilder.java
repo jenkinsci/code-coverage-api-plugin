@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.echarts.SeriesBuilder;
+import edu.hm.hafner.echarts.line.SeriesBuilder;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Metric;
 
@@ -23,8 +23,8 @@ public class CoverageSeriesBuilder extends SeriesBuilder<CoverageStatistics> {
     static final String MUTATION_COVERAGE = "mutation";
 
     @Override
-    protected Map<String, Integer> computeSeries(final CoverageStatistics statistics) {
-        Map<String, Integer> series = new HashMap<>();
+    protected Map<String, Double> computeSeries(final CoverageStatistics statistics) {
+        Map<String, Double> series = new HashMap<>();
 
         series.put(LINE_COVERAGE, getRoundedPercentage(statistics, Metric.LINE));
         if (statistics.containsValue(Baseline.PROJECT, Metric.BRANCH)) {
@@ -36,9 +36,9 @@ public class CoverageSeriesBuilder extends SeriesBuilder<CoverageStatistics> {
         return series;
     }
 
-    private int getRoundedPercentage(final CoverageStatistics statistics, final Metric metric) {
+    private double getRoundedPercentage(final CoverageStatistics statistics, final Metric metric) {
         Coverage coverage = (Coverage) statistics.getValue(Baseline.PROJECT, metric)
                 .orElse(Coverage.nullObject(metric));
-        return (int) Math.round(coverage.getCoveredPercentage().multiplyBy(Fraction.getFraction(100, 1)).doubleValue());
+        return coverage.getCoveredPercentage().multiplyBy(Fraction.getFraction(100, 1)).doubleValue();
     }
 }

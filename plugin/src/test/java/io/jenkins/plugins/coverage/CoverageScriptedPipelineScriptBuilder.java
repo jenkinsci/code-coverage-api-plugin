@@ -1,20 +1,22 @@
 package io.jenkins.plugins.coverage;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.jenkinsci.Symbol;
 import hudson.model.Descriptor;
 import hudson.model.Slave;
+
 import io.jenkins.plugins.coverage.adapter.CoverageAdapter;
 import io.jenkins.plugins.coverage.adapter.CoverageReportAdapter;
 import io.jenkins.plugins.coverage.detector.AntPathReportDetector;
 import io.jenkins.plugins.coverage.threshold.Threshold;
-import org.jenkinsci.Symbol;
 
-import java.util.LinkedList;
-import java.util.List;
-
+@SuppressWarnings("unchecked")
 public class CoverageScriptedPipelineScriptBuilder {
-    private List<CoverageAdapter> adapters = new LinkedList<>();
+    private final List<CoverageAdapter> adapters = new LinkedList<>();
 
-    private List<Threshold> globalThresholds = new LinkedList<>();
+    private final List<Threshold> globalThresholds = new LinkedList<>();
 
     private boolean failUnhealthy;
     private boolean failUnstable;
@@ -32,17 +34,17 @@ public class CoverageScriptedPipelineScriptBuilder {
         return new CoverageScriptedPipelineScriptBuilder();
     }
 
-    public CoverageScriptedPipelineScriptBuilder addAdapter(CoverageAdapter adapter) {
+    public CoverageScriptedPipelineScriptBuilder addAdapter(final CoverageAdapter adapter) {
         adapters.add(adapter);
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder addGlobalThreshold(Threshold threshold) {
+    public CoverageScriptedPipelineScriptBuilder addGlobalThreshold(final Threshold threshold) {
         globalThresholds.add(threshold);
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder onAgent(Slave slave) {
+    public CoverageScriptedPipelineScriptBuilder onAgent(final Slave slave) {
         this.agent = slave;
         return this;
     }
@@ -87,7 +89,7 @@ public class CoverageScriptedPipelineScriptBuilder {
         return sb.toString();
     }
 
-    private String generateSnippetForReportAdapter(CoverageReportAdapter adapter) {
+    private String generateSnippetForReportAdapter(final CoverageReportAdapter adapter) {
         Descriptor<CoverageAdapter> d = adapter.getDescriptor();
         Class c = d.getClass();
 
@@ -107,7 +109,7 @@ public class CoverageScriptedPipelineScriptBuilder {
         return "";
     }
 
-    private String generateSnippetForThresholds(List<Threshold> thresholds) {
+    private String generateSnippetForThresholds(final List<Threshold> thresholds) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("[");
@@ -127,27 +129,27 @@ public class CoverageScriptedPipelineScriptBuilder {
     }
 
 
-    public CoverageScriptedPipelineScriptBuilder setFailUnhealthy(boolean failUnhealthy) {
+    public CoverageScriptedPipelineScriptBuilder setFailUnhealthy(final boolean failUnhealthy) {
         this.failUnhealthy = failUnhealthy;
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder setFailUnstable(boolean failUnstable) {
+    public CoverageScriptedPipelineScriptBuilder setFailUnstable(final boolean failUnstable) {
         this.failUnstable = failUnstable;
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder setFailNoReports(boolean failNoReports) {
+    public CoverageScriptedPipelineScriptBuilder setFailNoReports(final boolean failNoReports) {
         this.failNoReports = failNoReports;
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder setApplyThresholdRecursively(boolean applyThresholdRecursively) {
+    public CoverageScriptedPipelineScriptBuilder setApplyThresholdRecursively(final boolean applyThresholdRecursively) {
         this.applyThresholdRecursively = applyThresholdRecursively;
         return this;
     }
 
-    public CoverageScriptedPipelineScriptBuilder setEnableSourceFileResolver(boolean enableSourceFileResolver) {
+    public CoverageScriptedPipelineScriptBuilder setEnableSourceFileResolver(final boolean enableSourceFileResolver) {
         this.enableSourceFileResolver = enableSourceFileResolver;
         return this;
     }

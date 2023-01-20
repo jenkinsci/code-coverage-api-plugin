@@ -10,8 +10,8 @@ import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
-import edu.hm.hafner.echarts.LinesChartModel;
-import edu.hm.hafner.echarts.LinesDataSet;
+import edu.hm.hafner.echarts.line.LinesChartModel;
+import edu.hm.hafner.echarts.line.LinesDataSet;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.Metric;
@@ -95,8 +95,8 @@ class CoverageSeriesBuilderTest {
                 CoverageSeriesBuilder.LINE_COVERAGE,
                 CoverageSeriesBuilder.BRANCH_COVERAGE);
 
-        assertThat(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE)).containsExactly(50);
-        assertThat(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE)).containsExactly(75);
+        assertThat(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE)).containsExactly(50.0);
+        assertThat(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE)).containsExactly(75.0);
     }
 
     private ChartModelConfiguration createConfiguration() {

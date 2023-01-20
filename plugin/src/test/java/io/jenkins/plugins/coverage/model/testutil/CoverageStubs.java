@@ -63,7 +63,7 @@ public final class CoverageStubs {
      *
      * @return the created stub
      */
-    @VisibleForTesting
+    @VisibleForTesting @SuppressWarnings("unchecked")
     public static CoverageBuildAction createCoverageBuildAction(
             final CoverageMetric coverageMetric, final Fraction coverageValue) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);

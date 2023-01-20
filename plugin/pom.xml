@@ -36,8 +36,8 @@
     <job-dsl.version>1.81</job-dsl.version>
     <xmlunit.version>2.9.0</xmlunit.version>
 
-    <coverage-model.version>0.8.0</coverage-model.version>
-    <echarts-api.version>5.4.0-2-rc755.246591322dcd</echarts-api.version>
+    <coverage-model.version>0.9.0</coverage-model.version>
+    <echarts-api.version>5.4.0-2-rc757.7b_26b_82505a_9</echarts-api.version>
     <prism-api.version>1.29.0-3-rc205.6b_6980cca_b_76</prism-api.version>
     <plugin-util-api.version>3.0.0-rc678.6c486d6f860f</plugin-util-api.version>
   </properties>
@@ -63,6 +63,12 @@
   </licenses>
 
   <dependencies>
+
+    <dependency>
+      <groupId>edu.hm.hafner</groupId>
+      <artifactId>echarts-build-trends</artifactId>
+      <version>4.0.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>edu.hm.hafner</groupId>
       <artifactId>coverage-model</artifactId>
