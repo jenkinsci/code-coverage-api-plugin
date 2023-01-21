@@ -39,7 +39,7 @@
                             <j:set var="displayColors" value="${it.getDisplayColors(baseline, value)}"/>
                             <j:set var="backgroundColor" value="${displayColors.getFillColorAsRGBAHex(80)}"/>
                             <j:set var="fillPercentage" value="${it.getBackgroundColorFillPercentage(value)}"/>
-
+x
                             <div class="coverage-column-inner" style="background-image: linear-gradient(90deg, ${backgroundColor} ${fillPercentage}, transparent ${fillPercentage});">
                               ${it.formatValue(value)}
                             </div>

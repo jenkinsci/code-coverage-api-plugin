@@ -74,8 +74,8 @@ class CoverageSeriesBuilderTest {
     private void verifySeriesDetails(final LinesChartModel lineCoverage) {
         assertThat(lineCoverage.getBuildNumbers()).containsExactly(1);
         assertThat(lineCoverage.getSeries()).hasSize(2);
-        assertThat(lineCoverage.getRangeMax()).isEqualTo(100);
-        assertThat(lineCoverage.getRangeMin()).isEqualTo(40);
+        assertThat(lineCoverage.getRangeMax()).isEqualTo(100.0);
+        assertThat(lineCoverage.getRangeMin()).isEqualTo(50.0);
     }
 
     @Test

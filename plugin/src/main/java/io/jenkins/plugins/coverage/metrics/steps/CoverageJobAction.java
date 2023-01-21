@@ -51,7 +51,7 @@ public class CoverageJobAction extends TrendChartJobAction<CoverageBuildAction> 
      */
     public String getTrendName() {
         if (StringUtils.isBlank(name)) {
-            Messages.Coverage_Trend_Default_Name();
+            return Messages.Coverage_Trend_Default_Name();
         }
         return Messages.Coverage_Trend_Name(name);
     }

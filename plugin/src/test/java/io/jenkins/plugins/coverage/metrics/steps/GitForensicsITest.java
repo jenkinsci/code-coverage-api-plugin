@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Florian Orendi
  */
 @Testcontainers(disabledWithoutDocker = true)
+@Disabled("FIXME: there is no incremental release for Git forensics plugin available right now")
 class GitForensicsITest extends AbstractCoverageITest {
     /**
      * The JaCoCo coverage report, generated for the commit {@link #COMMIT}.
