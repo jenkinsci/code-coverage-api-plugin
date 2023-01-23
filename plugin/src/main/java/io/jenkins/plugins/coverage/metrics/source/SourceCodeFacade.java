@@ -387,8 +387,7 @@ public class SourceCodeFacade {
 
                 Charset charset = getCharset();
                 int count = paintedFiles.parallelStream()
-                        .mapToInt(
-                                file -> paintSource(file, workspace, temporaryFolder, sourceDirectories, charset, log))
+                        .mapToInt(file -> paintSource(file, workspace, temporaryFolder, sourceDirectories, charset, log))
                         .sum();
 
                 if (count == paintedFiles.size()) {
@@ -585,11 +584,7 @@ public class SourceCodeFacade {
         }
 
         public boolean isPainted(final int line) {
-            var index = findLine(line);
-            if (index >= 0) {
-                return coveredPerLine[index] > 0;
-            }
-            return false;
+            return findLine(line) >= 0;
         }
 
         private int findLine(final int line) {
