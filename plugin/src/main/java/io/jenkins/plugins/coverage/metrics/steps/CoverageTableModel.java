@@ -93,6 +93,7 @@ class CoverageTableModel extends TableModel {
         columns.add(fileHash);
         TableColumn fileName = new ColumnBuilder().withHeaderLabel(Messages.Column_File())
                 .withDataPropertyKey("fileName")
+                .withDetailedCell()
                 .withResponsivePriority(1)
                 .build();
         columns.add(fileName);
@@ -198,8 +199,8 @@ class CoverageTableModel extends TableModel {
             return String.valueOf(file.getPath().hashCode());
         }
 
-        public String getFileName() {
-            return renderer.renderFileName(file.getName(), file.getPath());
+        public DetailedCell<?> getFileName() {
+            return new DetailedCell<>(renderer.renderFileName(file.getName(), file.getPath()), file.getName());
         }
 
         public String getPackageName() {
