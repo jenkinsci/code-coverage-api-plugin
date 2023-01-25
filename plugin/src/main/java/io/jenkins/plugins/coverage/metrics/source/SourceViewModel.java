@@ -73,7 +73,7 @@ public class SourceViewModel implements ModelObject {
      */
     @SuppressWarnings("unused") // Called by jelly view
     public boolean isSourceFileAvailable(final Node coverageNode) {
-        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath()).canRead();
+        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, coverageNode.getPath());
     }
 
     @Override

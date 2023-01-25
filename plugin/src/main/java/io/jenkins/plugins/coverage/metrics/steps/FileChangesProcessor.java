@@ -141,7 +141,7 @@ public class FileChangesProcessor {
      */
     private void attachIndirectCoverageChangeForFile(final FileNode fileNode,
             final SortedMap<Integer, Integer> referenceCoverageMapping) {
-        fileNode.getCoveredLines().forEach(line -> {
+        fileNode.getLinesWithCoverage().forEach(line -> {
             if (!fileNode.hasChangedLine(line) && referenceCoverageMapping.containsKey(line)) {
                 int referenceCovered = referenceCoverageMapping.get(line);
                 int covered = fileNode.getCoveredOfLine(line);

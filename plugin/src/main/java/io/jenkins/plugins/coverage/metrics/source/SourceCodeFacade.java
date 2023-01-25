@@ -1,20 +1,12 @@
 package io.jenkins.plugins.coverage.metrics.source;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -22,7 +14,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,14 +26,7 @@ import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;
 import hudson.model.Run;
-import hudson.remoting.VirtualChannel;
 import hudson.util.TextFile;
-import jenkins.MasterToSlaveFileCallable;
-
-import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
-import io.jenkins.plugins.prism.FilePermissionEnforcer;
-import io.jenkins.plugins.prism.SourceDirectoryFilter;
-import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
  * Facade to the source code file structure in Jenkins build folder. Access of those files should be done using an
@@ -57,6 +41,73 @@ public class SourceCodeFacade {
     static final String COVERAGE_SOURCES_ZIP = "coverage-sources.zip";
     static final int MAX_FILENAME_LENGTH = 245; // Windows has limitations on long file names
     static final String ZIP_FILE_EXTENSION = ".zip";
+
+    static String sanitizeFilename(final String inputName) {
+        return StringUtils.right(inputName.replaceAll("[^a-zA-Z0-9-_.]", "_"), MAX_FILENAME_LENGTH);
+    }
+
+    /**
+     * Reads the contents of the source file of the given file into a String.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         if of the coverage results
+     * @param path
+     *         relative path to the coverage node base filename of the coverage node
+     *
+     * @return the file content as String
+     */
+    public String read(final File buildResults, final String id, final String path)
+            throws IOException, InterruptedException {
+        Path tempDir = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
+        FilePath unzippedSourcesDir = new FilePath(tempDir.toFile());
+        try {
+            FilePath inputZipFile = new FilePath(createFileInBuildFolder(buildResults, id, path));
+            inputZipFile.unzip(unzippedSourcesDir);
+            String actualPaintedSourceFileName = StringUtils.removeEnd(sanitizeFilename(path), ZIP_FILE_EXTENSION);
+            File sourceFile = tempDir.resolve(actualPaintedSourceFileName).toFile();
+
+            return new TextFile(sourceFile).read();
+        }
+        finally {
+            unzippedSourcesDir.deleteRecursive();
+        }
+    }
+
+    /**
+     * Returns whether the source code is available for the specified source file.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         if of the coverage results
+     * @param path
+     *         relative path to the source code filename name
+     *
+     * @return the file content as String
+     */
+    public boolean canRead(final File buildResults, final String id, final String path) {
+        return createFileInBuildFolder(buildResults, id, path).canRead();
+    }
+
+    /**
+     * Checks whether any source files has been stored. Even if it is wanted, there might have been errors which cause
+     * the absence of any source files.
+     *
+     * @param buildResults
+     *         Jenkins directory for build results
+     * @param id
+     *         id of the coverage results
+     *
+     * @return {@code true} whether source files has been stored, else {@code false}
+     */
+    public boolean hasStoredSourceCode(final File buildResults, final String id) {
+        File sourceFolder = new File(buildResults, COVERAGE_SOURCES_DIRECTORY);
+        File elementFolder = new File(sourceFolder, id);
+        File[] files = elementFolder.listFiles();
+        return files != null && files.length > 0;
+    }
 
     String getCoverageSourcesDirectory() {
         return COVERAGE_SOURCES_DIRECTORY;
@@ -93,37 +144,7 @@ public class SourceCodeFacade {
     }
 
     /**
-     * Reads the contents of the source file of the given coverage node into a String.
-     *
-     * @param buildResults
-     *         Jenkins directory for build results
-     * @param id
-     *         if of the coverage results
-     * @param path
-     *         relative path to the coverage node base filename of the coverage node
-     *
-     * @return the file content as String
-     */
-    public String read(final File buildResults, final String id, final String path)
-            throws IOException, InterruptedException {
-        Path tempDir = Files.createTempDirectory(COVERAGE_SOURCES_DIRECTORY);
-        FilePath unzippedSourcesDir = new FilePath(tempDir.toFile());
-        try {
-            FilePath inputZipFile = new FilePath(
-                    new SourceCodeFacade().createFileInBuildFolder(buildResults, id, path));
-            inputZipFile.unzip(unzippedSourcesDir);
-            String actualPaintedSourceFileName = StringUtils.removeEnd(AgentCoveragePainter.sanitizeFilename(path),
-                    ZIP_FILE_EXTENSION);
-            File sourceFile = tempDir.resolve(actualPaintedSourceFileName).toFile();
-            return new TextFile(sourceFile).read();
-        }
-        finally {
-            unzippedSourcesDir.deleteRecursive();
-        }
-    }
-
-    /**
-     * Returns a file to the sources in release 2.1.0 and newer. Note that the file might not exist.
+     * Returns a file to a source file in Jenkins' build folder. Note that the file might not exist.
      *
      * @param buildResults
      *         Jenkins directory for build results
@@ -134,29 +155,11 @@ public class SourceCodeFacade {
      *
      * @return the file
      */
-    public File createFileInBuildFolder(final File buildResults, final String id, final String path) {
+    File createFileInBuildFolder(final File buildResults, final String id, final String path) {
         File sourceFolder = new File(buildResults, COVERAGE_SOURCES_DIRECTORY);
         File elementFolder = new File(sourceFolder, id);
 
-        return new File(elementFolder, AgentCoveragePainter.sanitizeFilename(path) + ZIP_FILE_EXTENSION);
-    }
-
-    /**
-     * Checks whether any source files has been stored. Even if it is wanted, there might have been errors which cause
-     * the absence of any source files.
-     *
-     * @param buildResults
-     *         Jenkins directory for build results
-     * @param id
-     *         id of the coverage results
-     *
-     * @return {@code true} whether source files has been stored, else {@code false}
-     */
-    public boolean hasStoredSourceCode(final File buildResults, final String id) {
-        File sourceFolder = new File(buildResults, COVERAGE_SOURCES_DIRECTORY);
-        File elementFolder = new File(sourceFolder, id);
-        File[] files = elementFolder.listFiles();
-        return files != null && files.length > 0;
+        return new File(elementFolder, sanitizeFilename(path) + ZIP_FILE_EXTENSION);
     }
 
     /**
@@ -170,7 +173,7 @@ public class SourceCodeFacade {
      * @return the filtered HTML sourcecode view
      */
     public String calculateChangeCoverageSourceCode(final String content, final FileNode fileNode) {
-        Set<Integer> lines = fileNode.getCoveredLines();
+        Set<Integer> lines = fileNode.getLinesWithCoverage();
         lines.retainAll(fileNode.getChangedLines());
         Set<String> linesAsText = lines.stream().map(String::valueOf).collect(Collectors.toSet());
         Document doc = Jsoup.parse(content, Parser.xmlParser());
@@ -316,295 +319,5 @@ public class SourceCodeFacade {
             linesMapping.put(String.valueOf(highestLine + 1), true);
         }
         return linesMapping;
-    }
-
-    /**
-     * Paints source code files on the agent using the recorded coverage information. All files are stored as zipped
-     * HTML files that contain the painted source code. In the last step all zipped source files are aggregated into a
-     * single archive to simplify copying to the controller.
-     */
-    static class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog> {
-        private static final long serialVersionUID = 3966282357309568323L;
-
-        private static String sanitizeFilename(final String inputName) {
-            return StringUtils.right(inputName.replaceAll("[^a-zA-Z0-9-_.]", "_"), MAX_FILENAME_LENGTH);
-        }
-
-        private final List<PaintedNode> paintedFiles;
-        private final Set<String> permittedSourceDirectories;
-
-        private final Set<String> requestedSourceDirectories;
-        private final String sourceCodeEncoding;
-
-        private final String directory;
-
-        /**
-         * Creates a new instance of {@link AgentCoveragePainter}.
-         *
-         * @param paintedFiles
-         *         the model for the file painting for each coverage node
-         * @param permittedSourceDirectories
-         *         the permitted source code directories (in Jenkins global configuration)
-         * @param requestedSourceDirectories
-         *         the requested relative and absolute source directories (in the step configuration)
-         * @param sourceCodeEncoding
-         *         the encoding of the source code files
-         * @param directory
-         *         the subdirectory where the source files will be stored in
-         */
-        AgentCoveragePainter(final List<PaintedNode> paintedFiles,
-                final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
-                final String sourceCodeEncoding, final String directory) {
-            super();
-
-            this.paintedFiles = paintedFiles;
-            this.permittedSourceDirectories = permittedSourceDirectories;
-            this.requestedSourceDirectories = requestedSourceDirectories;
-            this.sourceCodeEncoding = sourceCodeEncoding;
-            this.directory = directory;
-        }
-
-        @Override
-        public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel) {
-            FilteredLog log = new FilteredLog("Errors during source code painting:");
-            Set<String> sourceDirectories = filterSourceDirectories(workspaceFile, log);
-            if (sourceDirectories.isEmpty()) {
-                log.logInfo("Searching for source code files in root of workspace '%s'", workspaceFile);
-            }
-            else if (sourceDirectories.size() == 1) {
-                log.logInfo("Searching for source code files in '%s'", sourceDirectories.iterator().next());
-            }
-            else {
-                log.logInfo("Searching for source code files in:", workspaceFile);
-                sourceDirectories.forEach(dir -> log.logInfo("-> %s", dir));
-            }
-            FilePath workspace = new FilePath(workspaceFile);
-
-            try {
-                FilePath outputFolder = workspace.child(directory);
-                outputFolder.mkdirs();
-                Path temporaryFolder = Files.createTempDirectory(directory);
-
-                Charset charset = getCharset();
-                int count = paintedFiles.parallelStream()
-                        .mapToInt(file -> paintSource(file, workspace, temporaryFolder, sourceDirectories, charset, log))
-                        .sum();
-
-                if (count == paintedFiles.size()) {
-                    log.logInfo("-> finished painting successfully");
-                }
-                else {
-                    log.logInfo("-> finished painting (%d files have been painted, %d files failed)",
-                            count, paintedFiles.size() - count);
-                }
-
-                FilePath zipFile = workspace.child(COVERAGE_SOURCES_ZIP);
-                outputFolder.zip(zipFile);
-                log.logInfo("-> zipping sources from folder '%s' as '%s'", outputFolder, zipFile);
-
-                deleteFolder(temporaryFolder.toFile(), log);
-            }
-            catch (IOException exception) {
-                log.logException(exception,
-                        "Cannot create temporary directory in folder '%s' for the painted source files", workspace);
-            }
-            catch (InterruptedException exception) {
-                log.logException(exception,
-                        "Processing has been interrupted: skipping zipping of source files", workspace);
-            }
-
-            return log;
-        }
-
-        private Charset getCharset() {
-            return new ValidationUtilities().getCharset(sourceCodeEncoding);
-        }
-
-        private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
-            SourceDirectoryFilter filter = new SourceDirectoryFilter();
-            return filter.getPermittedSourceDirectories(workspace.getAbsolutePath(),
-                    permittedSourceDirectories, requestedSourceDirectories, log);
-        }
-
-        private int paintSource(final PaintedNode fileNode, final FilePath workspace, final Path temporaryFolder,
-                final Set<String> sourceSearchDirectories, final Charset sourceEncoding, final FilteredLog log) {
-            String relativePathIdentifier = fileNode.getPath();
-            FilePath paintedFilesDirectory = workspace.child(directory);
-            return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
-                    .map(resolvedPath -> paint(fileNode, relativePathIdentifier, resolvedPath,
-                            paintedFilesDirectory, temporaryFolder, sourceEncoding, log))
-                    .orElse(0);
-        }
-
-        private int paint(final PaintedNode paint, final String relativePathIdentifier, final FilePath resolvedPath,
-                final FilePath paintedFilesDirectory, final Path temporaryFolder,
-                final Charset charset, final FilteredLog log) {
-            String sanitizedFileName = sanitizeFilename(relativePathIdentifier);
-            FilePath zipOutputPath = paintedFilesDirectory.child(sanitizedFileName + ZIP_FILE_EXTENSION);
-            try {
-                Path paintedFilesFolder = Files.createTempDirectory(temporaryFolder, directory);
-                Path fullSourcePath = paintedFilesFolder.resolve(sanitizedFileName);
-                try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
-                    List<String> lines = Files.readAllLines(Paths.get(resolvedPath.getRemote()), charset);
-                    for (int line = 0; line < lines.size(); line++) {
-                        String content = lines.get(line);
-                        paintLine(line + 1, content, paint, output);
-                    }
-                }
-                new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
-                FileUtils.deleteDirectory(paintedFilesFolder.toFile());
-                return 1;
-            }
-            catch (IOException | InterruptedException exception) {
-                log.logException(exception, "Can't write coverage paint of '%s' to zipped source file '%s'",
-                        relativePathIdentifier, zipOutputPath);
-                return 0;
-            }
-        }
-
-        private void paintLine(final int line, final String content, final PaintedNode paint,
-                final BufferedWriter output) throws IOException {
-            if (paint.isPainted(line)) {
-                int covered = paint.getCovered(line);
-                int missed = paint.getMissed(line);
-                int total = missed + covered;
-
-                if (covered == 0) {
-                    output.write("<tr class=\"coverNone\">\n");
-                }
-                else {
-                    if (missed == 0) {
-                        output.write("<tr class=\"coverFull\">\n");
-                    }
-                    else {
-                        var formatter = new ElementFormatter();
-                        output.write("<tr class=\"coverPart\" tooltip=\"Line " + line + ": branch coverage "
-                                + formatter.formatPercentage(covered, total, Locale.ENGLISH) + "\">\n");
-                    }
-
-                }
-                output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
-                output.write("<td class=\"hits\">" + covered + "</td>\n");
-            }
-            else {
-                output.write("<tr class=\"noCover\">\n");
-                output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
-                output.write("<td class=\"hits\"></td>\n");
-            }
-            output.write("<td class=\"code\">"
-                    + content.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .replace(" ",
-                            "&nbsp;")
-                    .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>\n");
-            output.write("</tr>\n");
-        }
-
-        private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
-                final Set<String> sourceDirectories, final FilteredLog log) {
-            try {
-                FilePath absolutePath = new FilePath(new File(fileName));
-                if (absolutePath.exists()) {
-                    return enforcePermissionFor(absolutePath, workspace, sourceDirectories, log);
-                }
-
-                FilePath relativePath = workspace.child(fileName);
-                if (relativePath.exists()) {
-                    return enforcePermissionFor(relativePath, workspace, sourceDirectories, log);
-                }
-
-                for (String sourceFolder : sourceDirectories) {
-                    FilePath sourcePath = workspace.child(sourceFolder).child(fileName);
-                    if (sourcePath.exists()) {
-                        return enforcePermissionFor(sourcePath, workspace, sourceDirectories, log);
-                    }
-                }
-
-                log.logError("Source file '%s' not found", fileName);
-            }
-            catch (InvalidPathException | IOException | InterruptedException exception) {
-                log.logException(exception, "No valid path in coverage node: '%s'", fileName);
-            }
-            return Optional.empty();
-        }
-
-        private Optional<FilePath> enforcePermissionFor(final FilePath absolutePath, final FilePath workspace,
-                final Set<String> sourceDirectories, final FilteredLog log) {
-            FilePermissionEnforcer enforcer = new FilePermissionEnforcer();
-            if (enforcer.isInWorkspace(absolutePath.getRemote(), workspace, sourceDirectories)) {
-                return Optional.of(absolutePath);
-            }
-            log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
-                    absolutePath.getRemote());
-            return Optional.empty();
-        }
-
-        /**
-         * Deletes a folder.
-         *
-         * @param folder The directory to be deleted
-         * @param log The log
-         */
-        private void deleteFolder(final File folder, final FilteredLog log) {
-            if (folder.isDirectory()) {
-                try {
-                    FileUtils.deleteDirectory(folder);
-                }
-                catch (IOException e) {
-                    log.logError("The folder '%s' could not be deleted",
-                            folder.getAbsolutePath());
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Provides all required information for a {@link FileNode} so that its source code can be rendered in HTML.
-     */
-    static class PaintedNode implements Serializable {
-        private static final long serialVersionUID = -6044649044983631852L;
-        private final String path;
-        private final int[] linesToPaint;
-        private final int[] coveredPerLine;
-        private final int[] missedPerLine;
-
-        PaintedNode(final FileNode file) {
-            path = file.getPath();
-            linesToPaint = file.getCoveredLines().stream().mapToInt(i -> i).toArray();
-            coveredPerLine = file.getCoveredCounters();
-            missedPerLine = file.getMissedCounters();
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public boolean isPainted(final int line) {
-            return findLine(line) >= 0;
-        }
-
-        private int findLine(final int line) {
-            return Arrays.binarySearch(linesToPaint, line);
-        }
-
-        public int getCovered(final int line) {
-            return getCounter(line, coveredPerLine);
-        }
-
-        public int getMissed(final int line) {
-            return getCounter(line, missedPerLine);
-        }
-
-        private int getCounter(final int line, final int[] counters) {
-            var index = findLine(line);
-            if (index >= 0) {
-                return counters[index];
-            }
-            return 0;
-        }
     }
 }

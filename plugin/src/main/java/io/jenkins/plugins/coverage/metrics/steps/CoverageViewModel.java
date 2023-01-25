@@ -433,8 +433,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     public boolean isSourceFileAvailable(final Node coverageNode) {
-        return SOURCE_CODE_FACADE.createFileInBuildFolder(getOwner().getRootDir(), id, coverageNode.getPath())
-                .canRead();
+        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, coverageNode.getPath());
     }
 
     /**

@@ -341,7 +341,7 @@ class CoverageTableModel extends TableModel {
 
         @Override
         public String renderFileName(final String fileName, final String path) {
-            if (SOURCE_CODE_FACADE.createFileInBuildFolder(buildFolder, resultsId, path).canRead()) {
+            if (SOURCE_CODE_FACADE.canRead(buildFolder, resultsId, path)) {
                 return a().withHref(String.valueOf(path.hashCode())).withText(fileName).render();
             }
             return fileName;
