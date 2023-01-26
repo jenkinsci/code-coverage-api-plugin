@@ -453,6 +453,43 @@ class CoverageNodeTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldReturnCorrectPatshInFileCoverageNodesFromCoberturaReport() {
+        CoverageResult result = readCoberturaResult("cobertura-lots-of-data.xml");
+        CoverageNode tree = new CoverageNodeConverter().convert(result);
+        tree.splitPackages();
+        assertThat(tree.getAllFileCoverageNodes())
+                .hasSize(19)
+                .extracting(FileCoverageNode::getPath)
+                .containsOnly("org/apache/commons/cli/AlreadySelectedException.java",
+                              "org/apache/commons/cli/BasicParser.java",
+                              "org/apache/commons/cli/CommandLine.java",
+                              "org/apache/commons/cli/CommandLineParser.java",
+                              "org/apache/commons/cli/GnuParser.java",
+                              "org/apache/commons/cli/HelpFormatter.java",
+                              "org/apache/commons/cli/MissingArgumentException.java",
+                              "org/apache/commons/cli/MissingOptionException.java",
+                              "org/apache/commons/cli/NumberUtils.java",
+                              "org/apache/commons/cli/Option.java",
+                              "org/apache/commons/cli/OptionBuilder.java",
+                              "org/apache/commons/cli/OptionGroup.java",
+                              "org/apache/commons/cli/Options.java",
+                              "org/apache/commons/cli/ParseException.java",
+                              "org/apache/commons/cli/Parser.java",
+                              "org/apache/commons/cli/PatternOptionBuilder.java",
+                              "org/apache/commons/cli/PosixParser.java",
+                              "org/apache/commons/cli/TypeHandler.java",
+                              "org/apache/commons/cli/UnrecognizedOptionException.java");
+
+        result = readCoberturaResult("cobertura-package-root.xml");
+        tree = new CoverageNodeConverter().convert(result);
+        tree.splitPackages();
+        assertThat(tree.getAllFileCoverageNodes())
+                .hasSize(1)
+                .extracting(FileCoverageNode::getPath)
+                .containsOnly("__init__.py");
+    }
+
+    @Test
     void shouldProvideExistentChangeCoverage() {
         CoverageNode tree = createTreeWithMockedTreeCreator();
         assertThat(tree.hasCodeChanges()).isTrue();
