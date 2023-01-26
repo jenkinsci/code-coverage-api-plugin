@@ -107,7 +107,7 @@ public class CoverageApi {
         return mapToStrings(Baseline.MODIFIED_LINES_DELTA);
     }
 
-    private TreeMap<String, String> mapToStrings(final Baseline baseline) {
+    private NavigableMap<String, String> mapToStrings(final Baseline baseline) {
         var values = new TreeMap<String, String>();
 
         for (Metric metric : Metric.values()) {

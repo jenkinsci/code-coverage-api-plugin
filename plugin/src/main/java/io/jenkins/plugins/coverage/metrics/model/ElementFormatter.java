@@ -24,6 +24,7 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
  *
  * @author Florian Orendi
  */
+@SuppressWarnings("PMD.GodClass")
 public final class ElementFormatter {
     private static final Fraction HUNDRED = Fraction.getFraction("100.0");
     private static final String NO_COVERAGE_AVAILABLE = "-";
@@ -235,6 +236,7 @@ public final class ElementFormatter {
      *
      * @return the display name
      */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     public String getDisplayName(final Metric metric) {
         switch (metric) {
             case CONTAINER:

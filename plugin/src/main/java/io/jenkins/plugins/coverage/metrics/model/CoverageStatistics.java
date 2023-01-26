@@ -57,7 +57,7 @@ public class CoverageStatistics {
         this.fileDelta = asValueMap(modifiedFilesDeltaMapping);
     }
 
-    private static TreeMap<Metric, Value> asValueMap(final NavigableMap<Metric, Fraction> projectDelta) {
+    private static NavigableMap<Metric, Value> asValueMap(final NavigableMap<Metric, Fraction> projectDelta) {
         return projectDelta.entrySet().stream().collect(
                 Collectors.toMap(Entry::getKey, e -> new FractionValue(e.getKey(), e.getValue()), (o1, o2) -> o1,
                         TreeMap::new));
