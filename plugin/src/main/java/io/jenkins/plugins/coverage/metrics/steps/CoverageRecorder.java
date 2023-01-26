@@ -69,7 +69,6 @@ public class CoverageRecorder extends Recorder {
     /** The coverage report symbol from the Ionicons plugin. */
     private static final String ICON = "symbol-footsteps-outline plugin-ionicons-api";
 
-
     private List<CoverageTool> tools = new ArrayList<>();
     private List<CoverageQualityGate> qualityGates = new ArrayList<>();
     private String id = StringUtils.EMPTY;

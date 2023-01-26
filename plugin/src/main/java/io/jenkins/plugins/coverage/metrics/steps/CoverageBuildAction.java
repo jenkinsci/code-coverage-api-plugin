@@ -36,6 +36,7 @@ import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageXmlStream.MetricFractionMapConverter;
+import io.jenkins.plugins.coverage.model.Messages;
 import io.jenkins.plugins.echarts.GenericBuildActionIterator.BuildActionIterable;
 import io.jenkins.plugins.forensics.reference.ReferenceBuild;
 import io.jenkins.plugins.util.AbstractXmlStream;
@@ -52,7 +53,7 @@ import static hudson.model.Run.*;
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
 public final class CoverageBuildAction extends BuildAction<Node> implements StaplerProxy {
     private static final long serialVersionUID = -6023811049340671399L;
 
@@ -102,6 +103,8 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      *         ID (URL) of the results
      * @param optionalName
      *         optional name that overrides the default name of the results
+     * @param icon
+     *         name of the icon that should be used in actions and views
      * @param result
      *         the coverage tree as result to persist with this action
      * @param qualityGateResult
@@ -124,6 +127,8 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      *         ID (URL) of the results
      * @param optionalName
      *         optional name that overrides the default name of the results
+     * @param icon
+     *         name of the icon that should be used in actions and views
      * @param result
      *         the coverage tree as result to persist with this action
      * @param qualityGateResult

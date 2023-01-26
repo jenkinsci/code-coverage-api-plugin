@@ -133,7 +133,6 @@ public class CoverageMetricColumn extends ListViewColumn {
         return FORMATTER.formatDetails(value, Functions.getCurrentLocale());
     }
 
-
     /**
      * Provides a text which represents the coverage percentage of the selected coverage type and metric.
      *
