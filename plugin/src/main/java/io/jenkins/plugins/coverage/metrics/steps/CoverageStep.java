@@ -223,7 +223,6 @@ public class CoverageStep extends Step implements Serializable {
         this.sourceCodeEncoding = sourceCodeEncoding;
     }
 
-    @CheckForNull
     public String getSourceCodeEncoding() {
         return sourceCodeEncoding;
     }
@@ -362,10 +361,6 @@ public class CoverageStep extends Step implements Serializable {
                 return SourceCodeRetention.fillItems();
             }
             return new ListBoxModel();
-        }
-
-        private void add(final ListBoxModel options, final SourceCodeRetention sourceCodeRetention) {
-            options.add(sourceCodeRetention.getDisplayName(), sourceCodeRetention.name());
         }
 
         /**

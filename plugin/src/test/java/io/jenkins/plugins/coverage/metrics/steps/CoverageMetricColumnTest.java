@@ -169,9 +169,6 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
     void shouldCalculateProjectCoverage() {
         CoverageMetricColumn column = createColumn();
 
-        Fraction coverageFraction = Fraction.getFraction(1, 2);
-        CoveragePercentage coveragePercentage = CoveragePercentage.valueOf(coverageFraction);
-
         Job<?, ?> job = createJobWithCoverageAction();
 
         assertThat(column.getCoverageText(job)).isEqualTo("93.97%");

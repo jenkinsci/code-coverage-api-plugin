@@ -4,16 +4,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
 import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
-import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.model.Run;
 
@@ -33,37 +29,6 @@ import static org.mockito.Mockito.*;
  */
 @SuppressWarnings("PMD.TooManyStaticImports")
 class CoverageViewModelTest extends AbstractCoverageTest {
-    /**
-     * Creates a stub of {@link Node}, which represents indirect coverage changes and provides information about it.
-     *
-     * @param coverageChanges
-     *         The indirect coverage change
-     * @param metric
-     *         The coverage metric
-     * @param coverageFileChange
-     *         The amount of files which contain indirect coverage changes
-     * @param coverageLineChanges
-     *         The amount of lines which contain indirect coverage changes
-     *
-     * @return the created stub
-     */
-    @VisibleForTesting
-    public static Node createIndirectCoverageChangesNode(final Fraction coverageChanges,
-            final Metric metric, final int coverageFileChange, final long coverageLineChanges) {
-        var root = new ModuleNode("root");
-        var builder = new CoverageBuilder().setMetric(Metric.LINE);
-        for (int file = 0; file < 5; file++) {
-            var fileNode = new FileNode("File-" + file);
-
-            for (int line = 0; line < 2; line++) {
-                fileNode.addCounters(10 + line, 1, 1);
-                fileNode.addIndirectCoverageChange(10 + line, 2);
-            }
-            root.addChild(fileNode);
-        }
-        return root;
-    }
-
     @Test
     void shouldReturnEmptySourceViewForExistingLinkButMissingSourceFile() {
         CoverageViewModel model = createModelFromCodingStyleReport();
@@ -103,11 +68,25 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     @Test
     void shouldProvideIndirectCoverageChanges() {
-        Node node = createIndirectCoverageChangesNode(Fraction.ZERO, Metric.LINE, 1, 1);
+        Node node = createIndirectCoverageChangesNode();
 
         CoverageViewModel model = createModel(node);
 
         assertThat(model.hasIndirectCoverageChanges()).isTrue();
+    }
+
+    private Node createIndirectCoverageChangesNode() {
+        var root = new ModuleNode("root");
+        for (int file = 0; file < 5; file++) {
+            var fileNode = new FileNode("File-" + file);
+
+            for (int line = 0; line < 2; line++) {
+                fileNode.addCounters(10 + line, 1, 1);
+                fileNode.addIndirectCoverageChange(10 + line, 2);
+            }
+            root.addChild(fileNode);
+        }
+        return root;
     }
 
     @Test

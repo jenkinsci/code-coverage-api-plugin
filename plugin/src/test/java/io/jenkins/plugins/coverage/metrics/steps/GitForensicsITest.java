@@ -23,8 +23,6 @@ import hudson.plugins.git.BranchSpec;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.extensions.impl.RelativeTargetDirectory;
 
-import io.jenkins.plugins.coverage.CoveragePublisher;
-import io.jenkins.plugins.coverage.adapter.JacocoReportAdapter;
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
@@ -40,13 +38,9 @@ import static org.assertj.core.api.Assumptions.*;
  */
 @Testcontainers(disabledWithoutDocker = true)
 class GitForensicsITest extends AbstractCoverageITest {
-    /**
-     * The JaCoCo coverage report, generated for the commit {@link #COMMIT}.
-     */
+    /** The JaCoCo coverage report, generated for the commit {@link #COMMIT}. */
     private static final String JACOCO_FILE = "forensics_integration.xml";
-    /**
-     * The JaCoCo coverage report, generated for the reference commit {@link #COMMIT_REFERENCE}.
-     */
+    /** The JaCoCo coverage report, generated for the reference commit {@link #COMMIT_REFERENCE}. */
     private static final String JACOCO_REFERENCE_FILE = "forensics_integration_reference.xml";
 
     private static final String COMMIT = "518eebd7cf42e1bf66cea966328c1b8f22183920";
@@ -232,37 +226,7 @@ class GitForensicsITest extends AbstractCoverageITest {
                 + "}", true);
     }
 
-    /**
-     * Adds a {@link CoveragePublisher} to the passed {@link FreeStyleProject project} which uses the passed JaCoCo XML
-     * report.
-     *
-     * @param project
-     *         The Jenkins project
-     * @param jacocoXML
-     *         The content of the generated JaCoCo coverage report as XML
-     *
-     * @throws IOException
-     *         if removing currently existing coverage publishers failed
-     */
-    private void setCoveragePublisherForFreeStyleProject(final FreeStyleProject project, final String jacocoXML)
-            throws IOException {
-        CoveragePublisher coveragePublisher = new CoveragePublisher();
-        JacocoReportAdapter jacocoReportAdapter = new JacocoReportAdapter(jacocoXML);
-        coveragePublisher.setAdapters(Collections.singletonList(jacocoReportAdapter));
-        project.getPublishersList().removeAll(CoveragePublisher.class);
-        project.getPublishersList().add(coveragePublisher);
-    }
-
-    /**
-     * Adds a {@link GitSCM} to the passed {@link FreeStyleProject project} which represents the passed commit.
-     *
-     * @param project
-     *         The Jenkins project
-     * @param commit
-     *         The ID of the commit to be represented
-     */
-    private void configureGit(final FreeStyleProject project, final String commit)
-            throws IOException {
+    private void configureGit(final FreeStyleProject project, final String commit) throws IOException {
         GitSCM scm = new GitSCM(GitSCM.createRepoList(REPOSITORY, null),
                 Collections.singletonList(new BranchSpec(commit)), null, null,
                 Collections.singletonList(new RelativeTargetDirectory("code-coverage-api")));

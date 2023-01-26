@@ -39,7 +39,7 @@
     <coverage-model.version>0.10.0</coverage-model.version>
     <echarts-api.version>5.4.0-2-rc757.7b_26b_82505a_9</echarts-api.version>
     <prism-api.version>1.29.0-3-rc205.6b_6980cca_b_76</prism-api.version>
-    <plugin-util-api.version>3.0.0-rc678.6c486d6f860f</plugin-util-api.version>
+    <plugin-util-api.version>3.0.0-rc679.e40704a_a_f29f</plugin-util-api.version>
   </properties>
 
   <developers>

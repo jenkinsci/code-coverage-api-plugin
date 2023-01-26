@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.util.FilteredLog;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.AncestorInPath;
@@ -248,7 +247,6 @@ public class CoverageRecorder extends Recorder {
         this.sourceCodeEncoding = sourceCodeEncoding;
     }
 
-    @CheckForNull
     public String getSourceCodeEncoding() {
         return sourceCodeEncoding;
     }
@@ -470,10 +468,6 @@ public class CoverageRecorder extends Recorder {
                 return SourceCodeRetention.fillItems();
             }
             return new ListBoxModel();
-        }
-
-        private void add(final ListBoxModel options, final SourceCodeRetention sourceCodeRetention) {
-            options.add(sourceCodeRetention.getDisplayName(), sourceCodeRetention.name());
         }
 
         /**
