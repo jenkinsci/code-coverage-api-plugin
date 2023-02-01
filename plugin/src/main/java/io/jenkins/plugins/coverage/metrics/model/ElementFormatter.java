@@ -192,6 +192,20 @@ public final class ElementFormatter {
     }
 
     /**
+     * Returns a formatted and localized String representation of the specified value prefixed with the metric name.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValueWithMetric(final Value value) {
+        return getDisplayName(value.getMetric()) + ": "
+                + format(value, Functions.getCurrentLocale());
+    }
+
+    /**
      * Transforms percentages with a ',' decimal separator to a representation using a '.' in order to use the
      * percentage for styling HTML tags.
      *

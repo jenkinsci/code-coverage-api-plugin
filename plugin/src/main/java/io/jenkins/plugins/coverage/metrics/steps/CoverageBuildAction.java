@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
@@ -18,7 +17,6 @@ import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.JacksonFacade;
-import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
@@ -31,7 +29,6 @@ import hudson.Functions;
 import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
-import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
@@ -307,119 +304,6 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
             return indirectCoverageChanges.stream();
         }
         throw new NoSuchElementException("No such baseline: " + baseline);
-    }
-
-    /**
-     * Returns an HTML tooltip that renders all available values of the specified baseline.
-     *
-     * @param baseline
-     *         the baseline to get the tooltip for
-     *
-     * @return the tooltip showing all available values
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String getTooltip(final Baseline baseline) {
-        var values = getValueStream(baseline).map(v -> FORMATTER.format(v, Functions.getCurrentLocale()))
-                .collect(Collectors.joining("\n", "- ", ""));
-
-        return "All <b>Available Values</b>:\n" + values;
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the specified value prefixed with the metric name.
-     *
-     * @param value
-     *         the value to format
-     *
-     * @return the value formatted as a string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatValueWithMetric(final Value value) {
-        return FORMATTER.getDisplayName(value.getMetric()) + ": "
-                + FORMATTER.format(value, Functions.getCurrentLocale());
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the specified value (without metric).
-     *
-     * @param value
-     *         the value to format
-     *
-     * @return the value formatted as a string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatMetric(final Value value) {
-        return FORMATTER.getDisplayName(value.getMetric());
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the specified value (without metric).
-     *
-     * @param value
-     *         the value to format
-     *
-     * @return the value formatted as a string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatValue(final Value value) {
-        return FORMATTER.formatDetails(value, Functions.getCurrentLocale());
-    }
-
-    /**
-     * Returns a formatted and localized String representation of the specified value.
-     *
-     * @param value
-     *         the value to format
-     *
-     * @return the value formatted as a string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String formatValueWithDetails(final Value value) {
-        return FORMATTER.getDisplayName(value.getMetric()) + ": "
-                + FORMATTER.formatDetails(value, Functions.getCurrentLocale());
-    }
-
-    /**
-     * Provides the line color for representing the passed coverage value.
-     *
-     * @param baseline
-     *         the baseline to show
-     * @param value
-     *         the value to format The coverage value as percentage
-     *
-     * @return the line color as hex string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
-        return FORMATTER.getDisplayColors(baseline, value);
-    }
-
-    /**
-     * Returns the fill percentage for the specified value.
-     *
-     * @param value
-     *         the value to format
-     *
-     * @return the percentage string
-     */
-    @SuppressWarnings("unused") // Called by jelly view
-    public String getBackgroundColorFillPercentage(final Value value) {
-        if (value instanceof Coverage) {
-            return FORMATTER.format(value, Locale.ENGLISH);
-        }
-        return "100%";
-    }
-
-    /**
-     * Returns whether the value should be rendered by using a color badge.
-     *
-     * @param value
-     *         the value to render
-     *
-     * @return {@code true} if the value should be rendered by using a color badge, {@code false} otherwise
-     */
-    public boolean showColors(final Value value) {
-        return value instanceof Coverage;
     }
 
     /**
