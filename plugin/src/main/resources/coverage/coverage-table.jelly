@@ -8,6 +8,8 @@
     </st:attribute>
   </st:documentation>
 
+  <st:adjunct includes="io.jenkins.plugins.coverage.metrics.cell-style"/>
+
   <div class="row">
     <j:choose>
       <j:when test="${it.hasSourceCode()}">

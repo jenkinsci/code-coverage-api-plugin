@@ -175,8 +175,8 @@ class CoverageTableModel extends TableModel {
      * UI row model for the coverage details table.
      */
     static class CoverageRow {
-        private static final String COVERAGE_COLUMN_OUTER = "coverage-column-outer float-end";
-        private static final String COVERAGE_COLUMN_INNER = "coverage-column-inner";
+        private static final String COVERAGE_COLUMN_OUTER = "coverage-cell-outer float-end";
+        private static final String COVERAGE_COLUMN_INNER = "coverage-jenkins-cell-inner";
         private static final ElementFormatter FORMATTER = new ElementFormatter();
         private static final FractionValue ZERO_DENSITY = new FractionValue(Metric.COMPLEXITY_DENSITY, 0, 1);
         private static final LinesOfCode ZERO_LOC = new LinesOfCode(0);
@@ -260,7 +260,7 @@ class CoverageTableModel extends TableModel {
          */
         protected DetailedCell<?> createColoredCoverageColumn(final Coverage coverage) {
             if (coverage.isSet()) {
-                double percentage = coverage.getCoveredPercentage().doubleValue() * 100.0;
+                double percentage = coverage.getCoveredPercentage().toDouble();
                 DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(percentage, colorProvider);
                 String cell = div()
                         .withClasses(COVERAGE_COLUMN_OUTER).with(

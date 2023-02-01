@@ -49,6 +49,10 @@ public class CoverageMetricColumn extends ListViewColumn {
         super();
     }
 
+    public ElementFormatter getFormatter() {
+        return FORMATTER;
+    }
+
     /**
      * Sets the display name of the column.
      *

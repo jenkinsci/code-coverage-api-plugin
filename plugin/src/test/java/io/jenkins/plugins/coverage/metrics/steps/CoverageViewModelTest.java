@@ -63,7 +63,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
     private static void ensureValidPercentages(final List<Double> percentages) {
         assertThat(percentages).allSatisfy(d ->
-                assertThat(d).isLessThanOrEqualTo(1.0).isGreaterThanOrEqualTo(0.0));
+                assertThat(d).isLessThanOrEqualTo(100.0).isGreaterThanOrEqualTo(0.0));
     }
 
     @Test

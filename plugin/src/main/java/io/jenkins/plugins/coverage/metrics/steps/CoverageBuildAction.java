@@ -205,6 +205,10 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         return qualityGateResult;
     }
 
+    public ElementFormatter getFormatter() {
+        return FORMATTER;
+    }
+
     public CoverageStatistics getStatistics() {
         return new CoverageStatistics(projectValues, difference, changeCoverage, changeCoverageDifference,
                 List.of(), new TreeMap<>());

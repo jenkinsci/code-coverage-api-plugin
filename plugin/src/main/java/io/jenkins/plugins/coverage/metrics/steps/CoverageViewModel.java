@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.math.Fraction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,6 +26,7 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.metric.Percentage;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -516,12 +516,12 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         public List<Double> getMissedPercentages() {
-            return getPercentages(Coverage::getMissedPercentage);
+            return getPercentages(c -> Percentage.valueOf(c.getMissed(), c.getTotal()));
         }
 
-        private List<Double> getPercentages(final Function<Coverage, Fraction> displayType) {
+        private List<Double> getPercentages(final Function<Coverage, Percentage> displayType) {
             return sortCoverages().map(displayType)
-                    .map(Fraction::doubleValue)
+                    .map(Percentage::toDouble)
                     .collect(Collectors.toList());
         }
     }

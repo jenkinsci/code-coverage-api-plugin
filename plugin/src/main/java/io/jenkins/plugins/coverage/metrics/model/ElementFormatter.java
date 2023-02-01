@@ -11,8 +11,10 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.IntegerValue;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Percentage;
 import edu.hm.hafner.metric.Value;
 
+import hudson.Functions;
 import hudson.util.ListBoxModel;
 
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
@@ -37,6 +39,20 @@ public final class ElementFormatter {
      *
      * @param value
      *         the value to format
+     *
+     * @return the formatted value as plain text
+     */
+    public String format(final Value value) {
+        return format(value, Functions.getCurrentLocale());
+    }
+
+    /**
+     * Formats a generic value using a specific rendering method. The type of the given {@link Value} instance is used
+     * to select the best matching rendering method. This non-object-oriented approach is required since the
+     * {@link Value} instances are provided by a library that is not capable of localizing these values for the user.
+     *
+     * @param value
+     *         the value to format
      * @param locale
      *         the locale to use to render the values
      *
@@ -53,6 +69,20 @@ public final class ElementFormatter {
             return formatDelta(((FractionValue) value).getFraction(), value.getMetric(), locale);
         }
         return value.toString();
+    }
+
+    /**
+     * Formats a generic value using a specific rendering method. The type of the given {@link Value} instance is used
+     * to select the best matching rendering method. This non-object-oriented approach is required since the
+     * {@link Value} instances are provided by a library that is not capable of localizing these values for the user.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the formatted value as plain text
+     */
+    public String formatDetails(final Value value) {
+        return formatDetails(value, Functions.getCurrentLocale());
     }
 
     /**
@@ -116,6 +146,18 @@ public final class ElementFormatter {
     }
 
     /**
+     * Returns whether the value should be rendered by using a color badge.
+     *
+     * @param value
+     *         the value to render
+     *
+     * @return {@code true} if the value should be rendered by using a color badge, {@code false} otherwise
+     */
+    public boolean showColors(final Value value) {
+        return value instanceof Coverage;
+    }
+
+    /**
      * Provides the colors to render a given coverage percentage.
      *
      * @param baseline
@@ -126,13 +168,27 @@ public final class ElementFormatter {
      * @return the display colors to use
      */
     public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
+        var defaultColorProvider = ColorProviderFactory.createDefaultColorProvider();
         if (value instanceof Coverage) {
-            return baseline.getDisplayColors(((Coverage)value).getCoveredPercentage().doubleValue() * 100.0, ColorProviderFactory.createDefaultColorProvider());
+            return baseline.getDisplayColors(((Coverage)value).getCoveredPercentage().toDouble(), defaultColorProvider);
         }
         else if (value instanceof FractionValue) {
-            return baseline.getDisplayColors(((FractionValue)value).getFraction().doubleValue(), ColorProviderFactory.createDefaultColorProvider());
+            return baseline.getDisplayColors(((FractionValue)value).getFraction().doubleValue(), defaultColorProvider);
         }
         return ColorProvider.DEFAULT_COLOR;
+    }
+
+    /**
+     * Returns a formatted and localized String representation of the specified value (without metric).
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the value formatted as a string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String formatValue(final Value value) {
+        return formatDetails(value, Functions.getCurrentLocale());
     }
 
     /**
@@ -148,6 +204,22 @@ public final class ElementFormatter {
         String formattedPercentage = percentage.replace(",", ".");
         if (PERCENTAGE.matcher(formattedPercentage).matches()) {
             return formattedPercentage;
+        }
+        return "100%";
+    }
+
+    /**
+     * Returns the fill percentage for the specified value.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the percentage string
+     */
+    @SuppressWarnings("unused") // Called by jelly view
+    public String getBackgroundColorFillPercentage(final Value value) {
+        if (value instanceof Coverage) {
+            return format(value, Locale.ENGLISH);
         }
         return "100%";
     }
@@ -187,8 +259,8 @@ public final class ElementFormatter {
      *
      * @return the formatted percentage as plain text
      */
-    private String formatPercentage(final Fraction fraction, final Locale locale) {
-        return String.format(locale, "%.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
+    private String formatPercentage(final Percentage fraction, final Locale locale) {
+        return String.format(locale, "%.2f%%", fraction.toDouble());
     }
 
     /**
@@ -205,7 +277,7 @@ public final class ElementFormatter {
      * @return the formatted percentage as plain text
      */
     public String formatPercentage(final int covered, final int total, final Locale locale) {
-        return formatPercentage(Fraction.getFraction(covered, total), locale);
+        return formatPercentage(Percentage.valueOf(covered, total), locale);
     }
 
     /**

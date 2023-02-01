@@ -44,7 +44,7 @@ public class TreeMapNodeConverter {
             final ColorProvider colorProvider) {
         Coverage coverage = (Coverage)node.getValue(metric).orElse(Coverage.nullObject(metric));
 
-        double coveragePercentage = coverage.getCoveredPercentage().doubleValue() * 100.0;
+        double coveragePercentage = coverage.getCoveredPercentage().toDouble();
 
         DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider);
         String lineColor = colors.getLineColorAsRGBHex();

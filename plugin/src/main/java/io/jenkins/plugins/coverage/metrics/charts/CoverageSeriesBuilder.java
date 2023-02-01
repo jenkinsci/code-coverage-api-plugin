@@ -3,8 +3,6 @@ package io.jenkins.plugins.coverage.metrics.charts;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import edu.hm.hafner.echarts.line.SeriesBuilder;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.Metric;
@@ -39,6 +37,6 @@ public class CoverageSeriesBuilder extends SeriesBuilder<CoverageStatistics> {
     private double getRoundedPercentage(final CoverageStatistics statistics, final Metric metric) {
         Coverage coverage = (Coverage) statistics.getValue(Baseline.PROJECT, metric)
                 .orElse(Coverage.nullObject(metric));
-        return coverage.getCoveredPercentage().multiplyBy(Fraction.getFraction(100, 1)).doubleValue();
+        return (coverage.getCoveredPercentage().toDouble() / 100.0) * 100.0;
     }
 }

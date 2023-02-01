@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 class CoveragePluginITest extends AbstractCoverageITest {
     private static final String COBERTURA_HIGHER_COVERAGE_FILE = "cobertura-higher-coverage.xml";
-    private static final int COBERTURA_COVERED_LINES = 2;
+    private static final int COBERTURA_COVERED_LINES = 7;
     private static final int COBERTURA_MISSED_LINES = 0;
     private static final String NO_FILES_FOUND_ERROR_MESSAGE = "[-ERROR-] No files found for pattern '**/*xml'. Configuration error?";
 
