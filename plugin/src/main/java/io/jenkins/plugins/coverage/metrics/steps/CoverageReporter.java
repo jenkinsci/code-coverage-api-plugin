@@ -28,8 +28,6 @@ import io.jenkins.plugins.util.LogHandler;
 import io.jenkins.plugins.util.QualityGateResult;
 import io.jenkins.plugins.util.StageResultHandler;
 
-import static io.jenkins.plugins.coverage.metrics.steps.FilePathValidator.*;
-
 /**
  * Transforms the old model to the new model and invokes all steps that work on the new model. Currently, only the
  * source code painting and copying has been moved to this new reporter class.
@@ -44,8 +42,6 @@ public class CoverageReporter {
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
-
-        verifyPathUniqueness(rootNode, log);
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
@@ -114,9 +110,6 @@ public class CoverageReporter {
         FileChangesProcessor fileChangesProcessor = new FileChangesProcessor();
 
         try {
-            log.logInfo("Verify uniqueness of reference file paths...");
-            verifyPathUniqueness(referenceRoot, log);
-
             log.logInfo("Preprocessing code changes...");
             Set<FileChanges> changes = codeDeltaCalculator.getCoverageRelevantChanges(delta);
             var mappedChanges = codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
@@ -206,7 +199,7 @@ public class CoverageReporter {
                             coverageBuildAction.getOwner().getDisplayName()));
         }
 
-        if (!previousResult.isPresent()) {
+        if (previousResult.isEmpty()) {
             log.logInfo("-> Found no reference result in reference build");
 
             return Optional.empty();
