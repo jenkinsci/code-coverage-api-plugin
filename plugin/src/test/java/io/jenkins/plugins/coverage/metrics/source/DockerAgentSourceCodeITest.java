@@ -6,6 +6,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Node;
 
@@ -21,7 +23,7 @@ class DockerAgentSourceCodeITest extends SourceCodeITest {
     private static final String PATH_UTIL_CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + PATH_UTIL_PACKAGE_PATH + PATH_UTIL_FILE_NAME;
 
     private static final String RESOURCES = "io/jenkins/plugins/coverage/metrics/source/";
-    @Container
+    @Container @SuppressFBWarnings("BC")
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer()
             .withCopyFileToContainer(
                     MountableFile.forClasspathResource(RESOURCES + ACU_COBOL_PARSER_SOURCE_FILE),
