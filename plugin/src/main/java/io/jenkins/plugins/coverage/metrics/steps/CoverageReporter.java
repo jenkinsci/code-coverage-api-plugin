@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 
+import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
@@ -45,6 +46,7 @@ public class CoverageReporter {
 
         Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
 
+        List<FileNode> filesToStore;
         CoverageBuildAction action;
         if (possibleReferenceResult.isPresent()) {
             CoverageBuildAction referenceAction = possibleReferenceResult.get();
@@ -84,17 +86,25 @@ public class CoverageReporter {
                     changeCoverageRoot.aggregateValues(),
                     changeCoverageDelta,
                     indirectCoverageChangesTree.aggregateValues());
+            if (sourceCodeRetention == SourceCodeRetention.MODIFIED) {
+                filesToStore = changeCoverageRoot.getAllFileNodes();
+                log.logInfo("-> Selecting %d modified files for source code painting", filesToStore.size());
+            }
+            else {
+                filesToStore = rootNode.getAllFileNodes();
+            }
         }
         else {
             QualityGateResult qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateStatus, log);
+            filesToStore = rootNode.getAllFileNodes();
         }
 
         log.logInfo("Executing source code painting...");
         SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace, id);
-        sourceCodePainter.processSourceCodePainting(rootNode.getAllFileNodes(), sourceDirectories,
+        sourceCodePainter.processSourceCodePainting(filesToStore, sourceDirectories,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
         log.logInfo("Finished coverage processing - adding the action to the build...");
@@ -115,16 +125,13 @@ public class CoverageReporter {
             var mappedChanges = codeDeltaCalculator.mapScmChangesToReportPaths(changes, rootNode, log);
             var oldPathMapping = codeDeltaCalculator.createOldPathMapping(rootNode, referenceRoot, mappedChanges, log);
 
-            // calculate code changes
             log.logInfo("Obtaining code changes for files...");
             fileChangesProcessor.attachChangedCodeLines(rootNode, mappedChanges);
 
-            // indirect coverage changes
             log.logInfo("Obtaining indirect coverage changes...");
             fileChangesProcessor.attachIndirectCoveragesChanges(rootNode, referenceRoot,
                     mappedChanges, oldPathMapping);
 
-            // file coverage deltas
             log.logInfo("Obtaining coverage delta for files...");
             fileChangesProcessor.attachFileCoverageDeltas(rootNode, referenceRoot, oldPathMapping);
         }

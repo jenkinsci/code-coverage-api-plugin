@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -26,6 +29,7 @@ import hudson.plugins.git.extensions.impl.RelativeTargetDirectory;
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
+import io.jenkins.plugins.prism.SourceCodeRetention;
 
 import static edu.hm.hafner.metric.Metric.*;
 import static org.assertj.core.api.Assertions.*;
@@ -43,16 +47,22 @@ class GitForensicsITest extends AbstractCoverageITest {
     /** The JaCoCo coverage report, generated for the reference commit {@link #COMMIT_REFERENCE}. */
     private static final String JACOCO_REFERENCE_FILE = "forensics_integration_reference.xml";
 
-    private static final String COMMIT = "518eebd7cf42e1bf66cea966328c1b8f22183920";
-    private static final String COMMIT_REFERENCE = "fd43cd0eab09d6a96fd21880d228251838a4355a";
+    private static final String COMMIT = "518eebd";
+    private static final String COMMIT_REFERENCE = "fd43cd0";
 
     private static final String REPOSITORY = "https://github.com/jenkinsci/forensics-api-plugin.git";
 
     @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer();
 
-    @Test
-    void shouldIntegrateForensicsPluginInPipelineOnDockerAgent() {
+    @ParameterizedTest(name = "Source code retention {0} should store {1} files")
+    @CsvSource({
+            "EVERY_BUILD, 37",
+            "MODIFIED, 2"
+    })
+    @DisplayName("Should compute delta report and store selected source files")
+    void shouldComputeDeltaInPipelineOnDockerAgent(final SourceCodeRetention sourceCodeRetention,
+            final int expectedNumberOfFilesToBeStored) {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
@@ -65,15 +75,20 @@ class GitForensicsITest extends AbstractCoverageITest {
         Run<?, ?> referenceBuild = buildSuccessfully(project);
         verifyGitRepositoryForCommit(referenceBuild, COMMIT_REFERENCE);
 
-        project.setDefinition(createPipelineForCommit(node, COMMIT, JACOCO_FILE));
+        project.setDefinition(createPipelineForCommit(node, COMMIT, JACOCO_FILE, sourceCodeRetention));
         Run<?, ?> build = buildSuccessfully(project);
         verifyGitRepositoryForCommit(build, COMMIT);
 
+        System.out.println(getConsoleLog(build));
         verifyGitIntegration(build, referenceBuild);
+
+        assertThat(getConsoleLog(build)).contains(
+                "[Coverage] -> 18 files contain changes",
+                "[Coverage] Painting " + expectedNumberOfFilesToBeStored + " source files on agent");
     }
 
     @Test
-    void shouldIntegrateForensicsPluginInFreestyleJobOnAgent() throws IOException {
+    void shouldComputeDeltaInFreestyleJobOnDockerAgent() throws IOException {
         assumeThat(isWindows()).as("Running on Windows").isFalse();
 
         Node agent = createDockerAgent(AGENT_CONTAINER);
@@ -107,9 +122,8 @@ class GitForensicsITest extends AbstractCoverageITest {
     private void verifyGitRepositoryForCommit(final Run<?, ?> build, final String commit) {
         String consoleLog = getConsoleLog(build);
         assertThat(consoleLog)
-                .contains("remote.origin.url " + REPOSITORY)
-                .contains("Checking out Revision " + commit)
-                .contains("checkout -f " + commit);
+                .contains("Recording commits of 'git " + REPOSITORY)
+                .contains("Checking out Revision " + commit);
     }
 
     /**
@@ -216,13 +230,33 @@ class GitForensicsITest extends AbstractCoverageITest {
      * @return the created definition
      */
     private FlowDefinition createPipelineForCommit(final String node, final String commit, final String fileName) {
+        return createPipelineForCommit(node, commit, fileName, SourceCodeRetention.EVERY_BUILD);
+    }
+
+    /**
+     * Creates a {@link FlowDefinition} for a Jenkins pipeline which processes a JaCoCo coverage report.
+     *
+     * @param node
+     *         The node
+     * @param commit
+     *         The processed commit
+     * @param fileName
+     *         The content of the processed JaCoCo report
+     * @param sourceCodeRetentionStrategy
+     *         the source code retention strategy
+     *
+     * @return the created definition
+     */
+    private FlowDefinition createPipelineForCommit(final String node, final String commit, final String fileName,
+            final SourceCodeRetention sourceCodeRetentionStrategy) {
         return new CpsFlowDefinition(node + " {"
                 + "    checkout([$class: 'GitSCM', "
                 + "         branches: [[name: '" + commit + "' ]],\n"
                 + "         userRemoteConfigs: [[url: '" + REPOSITORY + "']],\n"
                 + "         extensions: [[$class: 'RelativeTargetDirectory', \n"
                 + "             relativeTargetDir: 'checkout']]])\n"
-                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '" + fileName + "']]\n"
+                + "    recordCoverage tools: [[parser: 'JACOCO', pattern: '" + fileName + "']], "
+                + "         sourceCodeRetention: '" + sourceCodeRetentionStrategy.name() + "'\n"
                 + "}", true);
     }
 
