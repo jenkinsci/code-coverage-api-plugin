@@ -31,7 +31,7 @@ public class TreeMapNodeConverter {
      *
      * @return the converted tree map representation
      */
-    public TreeMapNode toTeeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
+    public TreeMapNode toTreeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
         TreeMapNode root = toTreeMapNode(node, metric, colorProvider);
         for (TreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
@@ -42,8 +42,20 @@ public class TreeMapNodeConverter {
 
     private TreeMapNode toTreeMapNode(final Node node, final Metric metric,
             final ColorProvider colorProvider) {
-        Coverage coverage = (Coverage)node.getValue(metric).orElse(Coverage.nullObject(metric));
+        var value = node.getValue(metric);
+        if (value.isPresent()) {
+            var rootValue = value.get();
+            if (rootValue instanceof Coverage) {
+                return createCoverageTree((Coverage) rootValue, colorProvider, node, metric);
+            }
+            // TODO: does it make sense to render the other metrics?
+        }
 
+        return new TreeMapNode(node.getName());
+    }
+
+    private TreeMapNode createCoverageTree(final Coverage coverage, final ColorProvider colorProvider, final Node node,
+            final Metric metric) {
         double coveragePercentage = coverage.getCoveredPercentage().toDouble();
 
         DisplayColors colors = CoverageLevel.getDisplayColorsOfCoverageLevel(coveragePercentage, colorProvider);
@@ -54,18 +66,18 @@ public class TreeMapNodeConverter {
         Label upperLabel = new Label(true, lineColor);
 
         if (node instanceof FileNode) {
-            ItemStyle style = new ItemStyle(fillColor);
-            return new TreeMapNode(node.getName(), style, label, upperLabel, coverage.getTotal(), coverage.getCovered());
+            return new TreeMapNode(node.getName(), new ItemStyle(fillColor), label, upperLabel,
+                    coverage.getTotal(), coverage.getCovered());
         }
 
         ItemStyle packageStyle = new ItemStyle(fillColor, fillColor, 4);
-        TreeMapNode treeNode =
-                new TreeMapNode(node.getName(), packageStyle, label, upperLabel, coverage.getTotal(),
-                        coverage.getCovered());
+        TreeMapNode treeNode = new TreeMapNode(node.getName(), packageStyle, label, upperLabel,
+                coverage.getTotal(), coverage.getCovered());
 
         node.getChildren().stream()
                 .map(n -> toTreeMapNode(n, metric, colorProvider))
                 .forEach(treeNode::insertNode);
+
         return treeNode;
     }
 }

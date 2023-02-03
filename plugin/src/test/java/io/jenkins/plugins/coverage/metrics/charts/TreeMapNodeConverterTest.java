@@ -30,7 +30,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
         final double coveredLines = JACOCO_CODING_STYLE_COVERED;
         final double coveredPercentage = coveredLines / totalLines * 100.0;
 
-        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
+        TreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
         assertThat(root.getName()).isEqualTo("Java coding style");
         assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
         assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(coveredPercentage));
@@ -48,7 +48,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
     void shouldConvertAnalysisModelToTree() {
         Node tree = readJacocoResult(JACOCO_ANALYSIS_MODEL_FILE);
 
-        TreeMapNode root = new TreeMapNodeConverter().toTeeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
+        TreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
 
         double totalLines = JACOCO_ANALYSIS_MODEL_TOTAL;
         double coveredLines = JACOCO_ANALYSIS_MODEL_COVERED;

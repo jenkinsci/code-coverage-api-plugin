@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.echarts.TreeMapNode;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
@@ -63,7 +63,6 @@ import io.jenkins.plugins.util.QualityGateResult;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity"})
 public class CoverageViewModel extends DefaultAsyncTableContentProvider implements ModelObject {
-    private static final JacksonFacade JACKSON_FACADE = new JacksonFacade();
     private static final TreeMapNodeConverter TREE_MAP_NODE_CONVERTER = new TreeMapNodeConverter();
     private static final BuildResultNavigator NAVIGATOR = new BuildResultNavigator();
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
@@ -74,6 +73,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
 
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
+    private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH, Metric.MUTATION);
     private final Run<?, ?> owner;
     private final String optionalName;
     private final CoverageStatistics statistics;
@@ -123,6 +124,21 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     public Node getNode() {
         return node;
+    }
+
+    public ElementFormatter getFormatter() {
+        return FORMATTER;
+    }
+
+    /**
+     * Returns the value metrics that should be visualized in a tree map.
+     *
+     * @return the value metrics
+     */
+    public NavigableSet<Metric> getTreeMetrics() {
+        var valueMetrics = node.getValueMetrics();
+        valueMetrics.retainAll(TREE_METRICS);
+        return valueMetrics;
     }
 
     @Override
@@ -223,39 +239,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @SuppressWarnings("unused")
     public TreeMapNode getCoverageTree(final String coverageMetric) {
         Metric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(getNode(), metric, colorProvider);
-    }
-
-    /**
-     * Returns the root of the filtered tree of change coverage nodes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side. The tree is available for line and branch coverage.
-     *
-     * @param coverageMetric
-     *         The used coverage metric - the default is the line coverage
-     *
-     * @return the tree of change coverage nodes for the ECharts treemap
-     */
-    @JavaScriptMethod
-    @SuppressWarnings("unused")
-    public TreeMapNode getChangeCoverageTree(final String coverageMetric) {
-        Metric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(changeCoverageTreeRoot, metric, colorProvider);
-    }
-
-    /**
-     * Returns the root of the filtered tree of indirect coverage changes for the ECharts treemap. This tree is used as
-     * model for the chart on the client side. The tree is available for line and branch coverage.
-     *
-     * @param coverageMetric
-     *         The used coverage metric - the default is the line coverage
-     *
-     * @return the tree of indirect coverage changes nodes for the ECharts treemap
-     */
-    @JavaScriptMethod
-    @SuppressWarnings("unused")
-    public TreeMapNode getCoverageChangesTree(final String coverageMetric) {
-        Metric metric = getCoverageMetricFromText(coverageMetric);
-        return TREE_MAP_NODE_CONVERTER.toTeeChartModel(indirectCoverageChangesTreeRoot, metric, colorProvider);
+        return TREE_MAP_NODE_CONVERTER.toTreeChartModel(getNode(), metric, colorProvider);
     }
 
     /**
@@ -268,10 +252,26 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the coverage metric
      */
     private Metric getCoverageMetricFromText(final String text) {
-        if ("Branch".equals(text)) {
+        // FIXME: Move to metric
+        if (text.contains("line")) {
+            return Metric.LINE;
+        }
+        if (text.contains("branch")) {
             return Metric.BRANCH;
         }
-        return Metric.LINE;
+        if (text.contains("instruction")) {
+            return Metric.INSTRUCTION;
+        }
+        if (text.contains("mutation")) {
+            return Metric.MUTATION;
+        }
+        if (text.contains("loc")) {
+            return Metric.LOC;
+        }
+        if (text.contains("density")) {
+            return Metric.COMPLEXITY_DENSITY;
+        }
+        return Metric.COMPLEXITY;
     }
 
     /**
