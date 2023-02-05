@@ -315,8 +315,8 @@ class CoverageTableModel extends TableModel {
          * @return the created {@link DetailedCell}
          */
         private DetailedCell<?> createColoredFileCoverageDeltaColumn(final Metric metric) {
-            if (file.hasChangeCoverage(metric)) {
-                return createColoredCoverageDeltaColumn(metric, file.getChangeCoverage(metric));
+            if (file.hasModifiedLinesCoverage(metric)) {
+                return createColoredCoverageDeltaColumn(metric, file.getModifiedLinesCoverage(metric));
             }
             return NO_COVERAGE;
         }

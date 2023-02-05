@@ -149,8 +149,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
                         Metric.CLASS,
                         METHOD,
                         LINE,
-                        INSTRUCTION,
                         BRANCH,
+                        INSTRUCTION,
                         COMPLEXITY,
                         COMPLEXITY_DENSITY,
                         LOC);

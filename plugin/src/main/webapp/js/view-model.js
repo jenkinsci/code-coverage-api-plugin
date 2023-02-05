@@ -1,8 +1,10 @@
 /* global jQuery3, viewProxy, echartsJenkinsApi, bootstrap5 */
 
 const CoverageChartGenerator = function ($) {
+    var selectedTreeNode;
+
     function printPercentage(value) {
-        return Number(value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2});
+        return Number(value / 100.0).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2});
     }
 
     const openBuild = function (build) {
@@ -38,8 +40,8 @@ const CoverageChartGenerator = function ($) {
     }
 
     function createOverview(overview, id, jenkinsColors) {
-        const missedColor = getJenkinsColorById(jenkinsColors, "--light-red", "#ff4d65", 120);
-        const coveredColor = getJenkinsColorById(jenkinsColors, "--light-green", "#4bdf7c", 120);
+        const missedColor = getJenkinsColorById(jenkinsColors, "--red", "#ff4d65", 120);
+        const coveredColor = getJenkinsColorById(jenkinsColors, "--green", "#4bdf7c", 120);
 
         const summaryChartDiv = $('#' + id);
         summaryChartDiv.height(overview.metrics.length * 31 + 150 + 'px');
@@ -247,20 +249,16 @@ const CoverageChartGenerator = function ($) {
                     for (let i = 2; i < treePathInfo.length; i++) {
                         treePath.push(treePathInfo[i].name);
                     }
-
+                    selectedTreeNode = info.id;
                     const values = info.value;
                     const total = values[0];
-                    const covered = values[1];
+                    const tooltip = values[1];
 
-                    const title = '<div class="chart-tooltip-title">' + formatUtil.encodeHTML(treePath.join('.')) + '</div>';
+                    const title = '<div class="jenkins-tooltip healthReportDetails jenkins-tooltip--table-wrapper">' + formatUtil.encodeHTML(treePath.join('.')) + '</div>';
                     if (total === 0) {
                         return [title, coverageMetric + ': n/a',].join('');
                     }
-                    return [
-                        title,
-                        coverageMetric + ': ' + printPercentage(covered / total),
-                        ' (' + 'covered: ' + covered + ', missed: ' + (total - covered) + ')',
-                    ].join('');
+                    return [title, tooltip].join('');
                 }
             },
             series: [

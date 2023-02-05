@@ -45,14 +45,14 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
         CoverageOverview overview = model.getOverview();
 
-        var expectedMetrics = new String[] {"Package", "File", "Class", "Method", "Line", "Instruction", "Branch"};
+        var expectedMetrics = new String[] {"Package", "File", "Class", "Method", "Line", "Branch", "Instruction"};
         assertThat(overview.getMetrics()).containsExactly(expectedMetrics);
 
-        var expectedCovered = List.of(4, 7, 15, 97, 294, 1260, 109);
+        var expectedCovered = List.of(4, 7, 15, 97, 294, 109, 1260);
         assertThat(overview.getCovered()).containsExactlyElementsOf(expectedCovered);
         ensureValidPercentages(overview.getCoveredPercentages());
 
-        var expectedMissed = List.of(0, 3, 3, 5, 29, 90, 7);
+        var expectedMissed = List.of(0, 3, 3, 5, 29, 7, 90);
         assertThat(overview.getMissed()).containsExactlyElementsOf(expectedMissed);
         ensureValidPercentages(overview.getMissedPercentages());
 

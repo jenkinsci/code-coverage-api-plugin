@@ -107,8 +107,8 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                         "CLASS: 15/18",
                         "METHOD: 97/102",
                         "LINE: 294/323",
-                        "INSTRUCTION: 1260/1350",
                         "BRANCH: 109/116",
+                        "INSTRUCTION: 1260/1350",
                         "COMPLEXITY: 160",
                         "COMPLEXITY_DENSITY: 160/323",
                         "LOC: 323");
@@ -121,15 +121,23 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                         "CLASS: 15/18",
                         "METHOD: 97/102",
                         "LINE: 294/323",
-                        "INSTRUCTION: 1260/1350",
-                        "BRANCH: 109/116");
+                        "BRANCH: 109/116",
+                        "INSTRUCTION: 1260/1350");
 
         var action = file.read();
         assertThat(action).isNotNull().isInstanceOfSatisfying(CoverageBuildAction.class, a ->
                 Assertions.assertThat(serializeValues(a))
-                        .containsExactly("MODULE: 1/1", "PACKAGE: 1/1", "FILE: 7/10", "CLASS: 15/18",
-                                "METHOD: 97/102", "LINE: 294/323", "INSTRUCTION: 1260/1350", "BRANCH: 109/116",
-                                "COMPLEXITY: 160", "COMPLEXITY_DENSITY: 160/323", "LOC: 323"
+                        .containsExactly("MODULE: 1/1",
+                                "PACKAGE: 1/1",
+                                "FILE: 7/10",
+                                "CLASS: 15/18",
+                                "METHOD: 97/102",
+                                "LINE: 294/323",
+                                "BRANCH: 109/116",
+                                "INSTRUCTION: 1260/1350",
+                                "COMPLEXITY: 160",
+                                "COMPLEXITY_DENSITY: 160/323",
+                                "LOC: 323"
                         ));
     }
 

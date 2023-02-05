@@ -85,11 +85,11 @@ class CoverageJobActionTest {
         assertThatJson(chart).node("series").isArray().hasSize(2);
 
         assertThatJson(chart.getSeries().get(0)).satisfies(series -> {
-            assertThatJson(series).node("name").isEqualTo("Line");
+            assertThatJson(series).node("name").isEqualTo("Line Coverage");
             assertThatJson(series).node("data").isArray().containsExactly("50.0");
         });
         assertThatJson(chart.getSeries().get(1)).satisfies(series -> {
-            assertThatJson(series).node("name").isEqualTo("Branch");
+            assertThatJson(series).node("name").isEqualTo("Branch Coverage");
             assertThatJson(series).node("data").isArray().containsExactly("90.0");
         });
     }

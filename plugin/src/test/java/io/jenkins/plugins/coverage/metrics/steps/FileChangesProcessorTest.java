@@ -119,12 +119,12 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
      */
     private void verifyFileCoverageDeltaOfTestFile1(final FileNode file) {
         assertThat(file.getName()).isEqualTo(TEST_FILE_1);
-        assertThat(file.getChangeCoverage(Metric.LINE)).isEqualTo(Fraction.getFraction(3, 117));
-        assertThat(file.getChangeCoverage(Metric.BRANCH)).isEqualTo(Fraction.getFraction(3, 24));
-        assertThat(file.getChangeCoverage(Metric.INSTRUCTION)).isEqualTo(Fraction.getFraction(90, 999));
-        assertThat(file.getChangeCoverage(Metric.METHOD)).isEqualTo(Fraction.getFraction(-4, 30));
-        assertThat(file.getChangeCoverage(Metric.CLASS)).isEqualTo(Fraction.ZERO);
-        assertThat(file.getChangeCoverage(Metric.FILE)).isEqualTo(Fraction.ZERO);
+        assertThat(file.getModifiedLinesCoverage(Metric.LINE)).isEqualTo(Fraction.getFraction(3, 117));
+        assertThat(file.getModifiedLinesCoverage(Metric.BRANCH)).isEqualTo(Fraction.getFraction(3, 24));
+        assertThat(file.getModifiedLinesCoverage(Metric.INSTRUCTION)).isEqualTo(Fraction.getFraction(90, 999));
+        assertThat(file.getModifiedLinesCoverage(Metric.METHOD)).isEqualTo(Fraction.getFraction(-4, 30));
+        assertThat(file.getModifiedLinesCoverage(Metric.CLASS)).isEqualTo(Fraction.ZERO);
+        assertThat(file.getModifiedLinesCoverage(Metric.FILE)).isEqualTo(Fraction.ZERO);
     }
 
     @Test

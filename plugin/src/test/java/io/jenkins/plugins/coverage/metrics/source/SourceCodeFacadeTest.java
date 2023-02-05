@@ -57,17 +57,11 @@ class SourceCodeFacadeTest extends ResourceTest {
         return new SourceCodeFacade();
     }
 
-    /**
-     * Creates a {@link FileNode} which contains {@link #CODE_CHANGES}, {@link #INDIRECT_COVERAGE_CHANGES} and
-     * {@link #COVERAGE_PER_LINE}.
-     *
-     * @return the created node
-     */
     private FileNode createFileCoverageNode() {
         FileNode file = new FileNode("");
         List<Integer> lines = Arrays.asList(10, 11, 12, 16, 17, 18, 19);
         for (Integer line : lines) {
-            file.addChangedLine(line);
+            file.addModifiedLine(line);
         }
         file.addIndirectCoverageChange(6, -1);
         file.addIndirectCoverageChange(7, -1);

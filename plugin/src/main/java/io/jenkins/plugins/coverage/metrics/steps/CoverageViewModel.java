@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.hm.hafner.echarts.TreeMapNode;
+import edu.hm.hafner.echarts.LabeledTreeMapNode;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
@@ -237,7 +237,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     @JavaScriptMethod
     @SuppressWarnings("unused")
-    public TreeMapNode getCoverageTree(final String coverageMetric) {
+    public LabeledTreeMapNode getCoverageTree(final String coverageMetric) {
         Metric metric = getCoverageMetricFromText(coverageMetric);
         return TREE_MAP_NODE_CONVERTER.toTreeChartModel(getNode(), metric, colorProvider);
     }
@@ -484,7 +484,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         public List<String> getMetrics() {
             return sortCoverages()
                     .map(Coverage::getMetric)
-                    .map(ELEMENT_FORMATTER::getDisplayName)
+                    .map(ELEMENT_FORMATTER::getLabel)
                     .collect(Collectors.toList());
         }
 

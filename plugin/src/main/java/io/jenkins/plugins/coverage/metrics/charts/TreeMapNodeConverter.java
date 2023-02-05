@@ -2,15 +2,18 @@ package io.jenkins.plugins.coverage.metrics.charts;
 
 import edu.hm.hafner.echarts.ItemStyle;
 import edu.hm.hafner.echarts.Label;
+import edu.hm.hafner.echarts.LabeledTreeMapNode;
 import edu.hm.hafner.echarts.TreeMapNode;
 import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FileNode;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.ModuleNode;
 import edu.hm.hafner.metric.Node;
 
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
 import io.jenkins.plugins.coverage.metrics.color.CoverageLevel;
+import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 
 /**
  * Converts a tree of {@link Node coverage nodes} to a corresponding tree of
@@ -19,6 +22,8 @@ import io.jenkins.plugins.coverage.metrics.color.CoverageLevel;
  * @author Ullrich Hafner
  */
 public class TreeMapNodeConverter {
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
+
     /**
      * Converts a coverage tree of {@link Node nodes} to an ECharts tree map of {@link TreeMapNode}.
      *
@@ -31,16 +36,26 @@ public class TreeMapNodeConverter {
      *
      * @return the converted tree map representation
      */
-    public TreeMapNode toTreeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
-        TreeMapNode root = toTreeMapNode(node, metric, colorProvider);
-        for (TreeMapNode child : root.getChildren()) {
+    public LabeledTreeMapNode toTreeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
+        var tree = mergePackages(node);
+        LabeledTreeMapNode root = toTreeMapNode(tree, metric, colorProvider);
+        for (LabeledTreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
         }
 
         return root;
     }
 
-    private TreeMapNode toTreeMapNode(final Node node, final Metric metric,
+    private Node mergePackages(final Node node) {
+        if (node instanceof ModuleNode) {
+            ModuleNode copy = (ModuleNode) node.copyTree();
+            copy.splitPackages();
+            return copy;
+        }
+        return node;
+    }
+
+    private LabeledTreeMapNode toTreeMapNode(final Node node, final Metric metric,
             final ColorProvider colorProvider) {
         var value = node.getValue(metric);
         if (value.isPresent()) {
@@ -51,10 +66,10 @@ public class TreeMapNodeConverter {
             // TODO: does it make sense to render the other metrics?
         }
 
-        return new TreeMapNode(node.getName());
+        return new LabeledTreeMapNode(node.getPath(), node.getName());
     }
 
-    private TreeMapNode createCoverageTree(final Coverage coverage, final ColorProvider colorProvider, final Node node,
+    private LabeledTreeMapNode createCoverageTree(final Coverage coverage, final ColorProvider colorProvider, final Node node,
             final Metric metric) {
         double coveragePercentage = coverage.getCoveredPercentage().toDouble();
 
@@ -66,13 +81,13 @@ public class TreeMapNodeConverter {
         Label upperLabel = new Label(true, lineColor);
 
         if (node instanceof FileNode) {
-            return new TreeMapNode(node.getName(), new ItemStyle(fillColor), label, upperLabel,
-                    coverage.getTotal(), coverage.getCovered());
+            return new LabeledTreeMapNode(node.getPath(), node.getName(), new ItemStyle(fillColor), label, upperLabel,
+                    String.valueOf(coverage.getTotal()), FORMATTER.getTooltip(coverage));
         }
 
         ItemStyle packageStyle = new ItemStyle(fillColor, fillColor, 4);
-        TreeMapNode treeNode = new TreeMapNode(node.getName(), packageStyle, label, upperLabel,
-                coverage.getTotal(), coverage.getCovered());
+        LabeledTreeMapNode treeNode = new LabeledTreeMapNode(node.getPath(), node.getName(), packageStyle, label, upperLabel,
+                String.valueOf(coverage.getTotal()), FORMATTER.getTooltip(coverage));
 
         node.getChildren().stream()
                 .map(n -> toTreeMapNode(n, metric, colorProvider))

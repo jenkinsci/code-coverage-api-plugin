@@ -42,6 +42,20 @@ public final class ElementFormatter {
      *
      * @return the formatted value as plain text
      */
+    public String getTooltip(final Value value) {
+        return formatValueWithMetric(value) + " (" + formatAdditionalInformation(value) + ")";
+    }
+
+    /**
+     * Formats a generic value using a specific rendering method. The type of the given {@link Value} instance is used
+     * to select the best matching rendering method. This non-object-oriented approach is required since the
+     * {@link Value} instances are provided by a library that is not capable of localizing these values for the user.
+     *
+     * @param value
+     *         the value to format
+     *
+     * @return the formatted value as plain text
+     */
     public String format(final Value value) {
         return format(value, Functions.getCurrentLocale());
     }
@@ -353,6 +367,48 @@ public final class ElementFormatter {
                 return Messages.Metric_LOC();
             default:
                 throw new NoSuchElementException("No display name found for metric " + metric);
+        }
+    }
+
+    /**
+     * Returns a localized human-readable label for the specified metric.
+     *
+     * @param metric
+     *         the metric to get the label for
+     *
+     * @return the display name
+     */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    public String getLabel(final Metric metric) {
+        switch (metric) {
+            case CONTAINER:
+                return Messages.Metric_Short_CONTAINER();
+            case MODULE:
+                return Messages.Metric_Short_MODULE();
+            case PACKAGE:
+                return Messages.Metric_Short_PACKAGE();
+            case FILE:
+                return Messages.Metric_Short_FILE();
+            case CLASS:
+                return Messages.Metric_Short_CLASS();
+            case METHOD:
+                return Messages.Metric_Short_METHOD();
+            case LINE:
+                return Messages.Metric_Short_LINE();
+            case BRANCH:
+                return Messages.Metric_Short_BRANCH();
+            case INSTRUCTION:
+                return Messages.Metric_Short_INSTRUCTION();
+            case MUTATION:
+                return Messages.Metric_Short_MUTATION();
+            case COMPLEXITY:
+                return Messages.Metric_Short_COMPLEXITY();
+            case COMPLEXITY_DENSITY:
+                return Messages.Metric_Short_COMPLEXITY_DENSITY();
+            case LOC:
+                return Messages.Metric_Short_LOC();
+            default:
+                throw new NoSuchElementException("No label found for metric " + metric);
         }
     }
 
