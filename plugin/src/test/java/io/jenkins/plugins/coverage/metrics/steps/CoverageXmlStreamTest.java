@@ -159,7 +159,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         assertThat(converter.marshal(map)).isEqualTo("[BRANCH: 50/100]");
 
         map.put(LINE, Fraction.getFraction(3, 4));
-        assertThat(converter.marshal(map)).isEqualTo("[LINE: 3/4, BRANCH: 50/100]");
+        assertThat(converter.marshal(map)).isEqualTo("[BRANCH: 50/100, LINE: 3/4]");
     }
 
     @Test
@@ -170,7 +170,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         Fraction first = Fraction.getFraction(50, 100);
         Assertions.assertThat(converter.unmarshal("[BRANCH: 50/100]"))
                 .containsExactly(entry(BRANCH, first));
-        Assertions.assertThat(converter.unmarshal("[LINE: 3/4, BRANCH: 50/100]"))
+        Assertions.assertThat(converter.unmarshal("[LINE: 3/4]"))
                 .containsExactly(entry(LINE, Fraction.getFraction(3, 4)),
                         entry(BRANCH, first));
     }
@@ -230,7 +230,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY,
                 StringUtils.EMPTY,
                 tree, new QualityGateResult(), new FilteredLog("Test"), "-",
-                new TreeMap<>(), List.of(),
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);
     }
 

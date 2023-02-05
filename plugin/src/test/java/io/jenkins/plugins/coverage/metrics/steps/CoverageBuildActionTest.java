@@ -50,7 +50,7 @@ class CoverageBuildActionTest {
         var coverages = List.of(percent50, percent80);
         var action = spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
                 StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(),
-                createLog(), "-", deltas, coverages, deltas, coverages, false));
+                createLog(), "-", deltas, coverages, deltas, coverages, deltas, coverages, false));
 
         when(action.getResult()).thenThrow(new IllegalStateException("Result should not be accessed with getResult() when getting a coverage metric that is persisted in the build"));
 
@@ -60,6 +60,8 @@ class CoverageBuildActionTest {
         assertThat(action.getStatistics().getValue(Baseline.PROJECT, Metric.LINE)).hasValue(percent80);
         assertThat(action.getStatistics().getValue(Baseline.MODIFIED_LINES, Metric.BRANCH)).hasValue(percent50);
         assertThat(action.getStatistics().getValue(Baseline.MODIFIED_LINES, Metric.LINE)).hasValue(percent80);
+        assertThat(action.getStatistics().getValue(Baseline.MODIFIED_FILES, Metric.BRANCH)).hasValue(percent50);
+        assertThat(action.getStatistics().getValue(Baseline.MODIFIED_FILES, Metric.LINE)).hasValue(percent80);
         assertThat(action.getStatistics().getValue(Baseline.PROJECT_DELTA, Metric.LINE))
                 .hasValue(new FractionValue(Metric.LINE, lineDelta));
         assertThat(action.getStatistics().getValue(Baseline.PROJECT_DELTA, Metric.BRANCH))
@@ -71,7 +73,7 @@ class CoverageBuildActionTest {
     private static CoverageBuildAction createEmptyAction(final Node module) {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
                 StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(), createLog(), "-",
-                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
     }
 
     private static FilteredLog createLog() {

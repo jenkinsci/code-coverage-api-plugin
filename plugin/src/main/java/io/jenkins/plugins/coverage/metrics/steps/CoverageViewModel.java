@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +68,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
     static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
+
+    static final String CHANGED_FILES_COVERAGE_TABLE_ID = "changed-files-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
@@ -85,6 +86,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final String id;
 
     private final Node changeCoverageTreeRoot;
+    private final Node changedFilesCoverageTreeRoot;
     private final Node indirectCoverageChangesTreeRoot;
     private final Function<String, String> trendChartFunction;
 
@@ -110,6 +112,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         changeCoverageTreeRoot = node.filterChanges();
+        changedFilesCoverageTreeRoot = node.filterByChangedFilesCoverage();
         indirectCoverageChangesTreeRoot = node.filterByIndirectlyChangedCoverage();
         this.trendChartFunction = trendChartFunction;
     }
@@ -293,6 +296,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
                 return new CoverageTableModel(tableId, getNode(), renderer, colorProvider);
             case CHANGE_COVERAGE_TABLE_ID:
                 return new ChangeCoverageTableModel(tableId, getNode(), changeCoverageTreeRoot, renderer,
+                        colorProvider);
+            case CHANGED_FILES_COVERAGE_TABLE_ID:
+                return new ChangedFilesCoverageTable(tableId, getNode(), changeCoverageTreeRoot, renderer,
                         colorProvider);
             case INDIRECT_COVERAGE_TABLE_ID:
                 return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer,
@@ -489,14 +495,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         private Stream<Coverage> sortCoverages() {
-            return coverage.getMetrics()
-                    .stream()
-                    .map(m -> m.getValueFor(coverage))
-                    .flatMap(Optional::stream)
-                    .filter(value -> value instanceof Coverage)
-                    .map(Coverage.class::cast)
-                    .filter(c -> c.getTotal() > 1) // ignore elements that have a total of 1
-                    .sorted(Comparator.comparing(Coverage::getMetric));
+            return ELEMENT_FORMATTER.getSortedCoverageValues(coverage)
+                    .filter(c -> c.getTotal() > 1); // ignore elements that have a total of 1
         }
 
         public List<Integer> getCovered() {

@@ -63,6 +63,9 @@ import io.jenkins.plugins.util.ValidationUtilities;
  */
 @SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CoverageRecorder extends Recorder {
+    // TODO: make customizable?
+    private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
+
     static final String DEFAULT_ID = "coverage";
     private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
     /** The coverage report symbol from the Ionicons plugin. */
@@ -351,6 +354,14 @@ public class CoverageRecorder extends Recorder {
                             getQualityGates(),
                             getScm(), getSourceDirectoriesPaths(),
                             getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
+                }
+            }
+
+            if (!skipPublishingChecks) {
+                var coverageAction = run.getAction(CoverageBuildAction.class);
+                if (coverageAction != null) {
+                    var checksPublisher = new CoverageChecksPublisher(coverageAction, CHECKS_DEFAULT_NAME);
+                    checksPublisher.publishChecks(taskListener);
                 }
             }
         }
