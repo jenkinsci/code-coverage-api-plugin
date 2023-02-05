@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ import static org.mockito.Mockito.*;
  * @author Ullrich Hafner
  */
 class CoverageJobActionTest {
+
+    private static final String URL = "coverage";
+
     @Test
     void shouldIgnoreIndexIfNoActionFound() throws IOException {
         FreeStyleProject job = mock(FreeStyleProject.class);
@@ -38,7 +42,7 @@ class CoverageJobActionTest {
     }
 
     private static CoverageJobAction createAction(final FreeStyleProject job) {
-        return new CoverageJobAction(job, "coverage", "Coverage Results", StringUtils.EMPTY);
+        return new CoverageJobAction(job, URL, "Coverage Results", StringUtils.EMPTY);
     }
 
     @Test
@@ -47,11 +51,12 @@ class CoverageJobActionTest {
 
         CoverageBuildAction action = createBuildAction(build);
 
-        when(build.getAction(CoverageBuildAction.class)).thenReturn(action);
+        when(build.getActions(CoverageBuildAction.class)).thenReturn(List.of(action));
         when(build.getNumber()).thenReturn(15);
 
         FreeStyleProject job = mock(FreeStyleProject.class);
         when(job.getLastBuild()).thenReturn(build);
+        when(job.getUrl()).thenReturn(URL);
 
         CoverageJobAction jobAction = createAction(job);
 
@@ -66,7 +71,7 @@ class CoverageJobActionTest {
         FreeStyleBuild build = mock(FreeStyleBuild.class);
 
         CoverageBuildAction action = createBuildAction(build);
-        when(build.getAction(CoverageBuildAction.class)).thenReturn(action);
+        when(build.getActions(CoverageBuildAction.class)).thenReturn(List.of(action));
         when(action.getStatistics()).thenReturn(createStatistics());
 
         int buildNumber = 15;
@@ -97,7 +102,7 @@ class CoverageJobActionTest {
     private CoverageBuildAction createBuildAction(final FreeStyleBuild build) {
         CoverageBuildAction action = mock(CoverageBuildAction.class);
         when(action.getOwner()).thenAnswer(i -> build);
-        when(action.getUrlName()).thenReturn("coverage");
+        when(action.getUrlName()).thenReturn(URL);
         return action;
     }
 }
