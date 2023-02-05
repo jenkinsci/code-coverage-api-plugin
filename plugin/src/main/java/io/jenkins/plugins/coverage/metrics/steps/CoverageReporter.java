@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Optional;
@@ -62,11 +63,18 @@ public class CoverageReporter {
             Node changeCoverageRoot = rootNode.filterChanges();
 
             NavigableMap<Metric, Fraction> changeCoverageDelta;
+            List<Value> aggregatedChangedFilesCoverage;
+            NavigableMap<Metric, Fraction> changedFilesCoverageDelta;
             if (hasChangeCoverage(changeCoverageRoot)) {
                 changeCoverageDelta = changeCoverageRoot.computeDelta(rootNode);
+                Node changedFilesCoverageRoot = rootNode.filterByChangedFilesCoverage();
+                aggregatedChangedFilesCoverage = changedFilesCoverageRoot.aggregateValues();
+                changedFilesCoverageDelta = changedFilesCoverageRoot.computeDelta(rootNode);
             }
             else {
                 changeCoverageDelta = new TreeMap<>();
+                aggregatedChangedFilesCoverage = new ArrayList<>();
+                changedFilesCoverageDelta = new TreeMap<>();
                 if (rootNode.hasChangedLines()) {
                     log.logInfo("No detected code changes affect the code coverage");
                 }
@@ -85,6 +93,8 @@ public class CoverageReporter {
                     coverageDelta,
                     changeCoverageRoot.aggregateValues(),
                     changeCoverageDelta,
+                    aggregatedChangedFilesCoverage,
+                    changedFilesCoverageDelta,
                     indirectCoverageChangesTree.aggregateValues());
             if (sourceCodeRetention == SourceCodeRetention.MODIFIED) {
                 filesToStore = changeCoverageRoot.getAllFileNodes();

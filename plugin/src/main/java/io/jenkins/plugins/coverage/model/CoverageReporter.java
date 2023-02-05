@@ -225,7 +225,7 @@ public class CoverageReporter {
                             coverageBuildAction.getOwner().getDisplayName()));
         }
 
-        if (!previousResult.isPresent()) {
+        if (previousResult.isEmpty()) {
             log.logInfo("-> Found no reference result in reference build");
 
             return Optional.empty();
