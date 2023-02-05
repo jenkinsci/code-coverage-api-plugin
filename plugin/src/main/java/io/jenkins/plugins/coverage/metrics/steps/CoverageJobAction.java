@@ -1,5 +1,8 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.echarts.ChartModelConfiguration;
@@ -10,14 +13,14 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Job;
 
 import io.jenkins.plugins.coverage.metrics.charts.CoverageTrendChart;
+import io.jenkins.plugins.echarts.ActionSelector;
 import io.jenkins.plugins.echarts.GenericBuildActionIterator.BuildActionIterable;
 import io.jenkins.plugins.echarts.TrendChartJobAction;
 
 /**
  * Project level action for the coverage results. A job action displays a link on the side panel of a job that refers to
- * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link Node}
- * instance). This action also is responsible to render the historical trend via its associated 'floatingBox.jelly'
- * view.
+ * the last build that contains coverage results (i.e. a {@link CoverageBuildAction} with a {@link Node} instance). This
+ * action also is responsible to render the historical trend via its associated 'floatingBox.jelly' view.
  *
  * @author Ullrich Hafner
  */
@@ -69,10 +72,21 @@ public class CoverageJobAction extends TrendChartJobAction<CoverageBuildAction> 
         return getUrlName();
     }
 
+    // FIXME: move code to util class
     @Override
     protected LinesChartModel createChartModel(final String configuration) {
         var iterable = new BuildActionIterable<>(CoverageBuildAction.class, getLatestAction(),
-                action -> getUrlName().equals(action.getUrlName()), CoverageBuildAction::getStatistics);
+                selectByUrl(), CoverageBuildAction::getStatistics);
+
         return new CoverageTrendChart().create(iterable, ChartModelConfiguration.fromJson(configuration));
+    }
+
+    @Override
+    public Optional<CoverageBuildAction> getLatestAction() {
+        return new ActionSelector<>(CoverageBuildAction.class, selectByUrl()).findFirst(getOwner().getLastBuild());
+    }
+
+    private Predicate<CoverageBuildAction> selectByUrl() {
+        return action -> getUrlName().equals(action.getUrlName());
     }
 }
