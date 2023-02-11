@@ -104,19 +104,19 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
 
         column.setBaseline(Baseline.MODIFIED_LINES);
         assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_LINES);
-        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#modifiedLinesCoverage");
 
         column.setBaseline(Baseline.MODIFIED_LINES_DELTA);
         assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_LINES_DELTA);
-        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changeCoverage");
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#modifiedLinesCoverage");
 
         column.setBaseline(Baseline.MODIFIED_FILES);
         assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_FILES);
-        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changedFilesCoverage");
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#modifiedFilesCoverage");
 
         column.setBaseline(Baseline.MODIFIED_FILES_DELTA);
         assertThat(column.getBaseline()).isEqualTo(Baseline.MODIFIED_FILES_DELTA);
-        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#changedFilesCoverage");
+        assertThat(column.getRelativeCoverageUrl(job)).isEqualTo("coverage/#modifiedFilesCoverage");
 
         column.setBaseline(Baseline.INDIRECT);
         assertThat(column.getBaseline()).isEqualTo(Baseline.INDIRECT);

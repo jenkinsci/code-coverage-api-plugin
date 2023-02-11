@@ -55,7 +55,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getTitle()).isPresent()
                     .get()
-                    .isEqualTo("Change Coverage: Line: 50.00% (Lines of Code: 323)");
+                    .isEqualTo("Modified code lines: 50.00% (1/2)");
             assertThat(output.getText()).isEmpty();
             assertSummary(output);
             assertChecksAnnotations(output);
@@ -109,11 +109,11 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         var result = readJacocoResult("jacoco-codingstyle.xml");
         result.getAllFileNodes().stream().filter(file -> file.getName().equals("TreeStringBuilder.java")).findFirst()
                 .ifPresent(file -> {
-                    assertThat(file.getCoveredLines()).contains(160, 162, 163, 164);
-                    file.addChangedLine(160);
-                    file.addChangedLine(162);
-                    file.addChangedLine(163);
-                    file.addChangedLine(164);
+                    assertThat(file.getLinesWithCoverage()).contains(160, 162, 163, 164);
+                    file.addModifiedLine(160);
+                    file.addModifiedLine(162);
+                    file.addModifiedLine(163);
+                    file.addModifiedLine(164);
                 });
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result, new QualityGateResult()

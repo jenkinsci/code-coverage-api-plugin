@@ -35,7 +35,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
 
         String hash = String.valueOf("PathUtil.java".hashCode());
         assertThat(model.getSourceCode(hash, ABSOLUTE_COVERAGE_TABLE_ID)).isEqualTo("n/a");
-        assertThat(model.getSourceCode(hash, CHANGE_COVERAGE_TABLE_ID)).isEqualTo("n/a");
+        assertThat(model.getSourceCode(hash, MODIFIED_LINES_COVERAGE_TABLE_ID)).isEqualTo("n/a");
         assertThat(model.getSourceCode(hash, INDIRECT_COVERAGE_TABLE_ID)).isEqualTo("n/a");
     }
 
@@ -92,7 +92,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     @Test
     void shouldProvideRightTableModelById() {
         CoverageViewModel model = createModelFromCodingStyleReport();
-        assertThat(model.getTableModel(CHANGE_COVERAGE_TABLE_ID)).isInstanceOf(ChangeCoverageTableModel.class);
+        assertThat(model.getTableModel(MODIFIED_LINES_COVERAGE_TABLE_ID)).isInstanceOf(ModifiedLinesCoverageTableModel.class);
         assertThat(model.getTableModel(INDIRECT_COVERAGE_TABLE_ID)).isInstanceOf(IndirectCoverageChangesTable.class);
         assertThat(model.getTableModel(ABSOLUTE_COVERAGE_TABLE_ID)).isInstanceOf(CoverageTableModel.class);
 

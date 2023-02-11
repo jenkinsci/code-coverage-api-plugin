@@ -147,7 +147,7 @@ public final class CoveragePercentage implements Serializable {
      * @return the formatted delta percentage as plain text with a leading sign
      */
     public String formatDeltaPercentage(final Locale locale) {
-        return String.format(locale, "%+.2f", getDoubleValue());
+        return String.format(locale, "%+.2f%%", getDoubleValue());
     }
 
     public int getNumerator() {

@@ -154,7 +154,7 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyCoverage(final CoverageBuildAction action) {
         verifyOverallCoverage(action);
-        verifyChangeCoverage(action);
+        verifyModifiedLinesCoverage(action);
         verifyIndirectCoverageChanges(action);
     }
 
@@ -172,12 +172,12 @@ class GitForensicsITest extends AbstractCoverageITest {
     }
 
     /**
-     * Verifies the calculated change coverage including the change coverage delta.
+     * Verifies the calculated modified lines coverage including the modified lines coverage delta.
      *
      * @param action
      *         The created Jenkins action
      */
-    private void verifyChangeCoverage(final CoverageBuildAction action) {
+    private void verifyModifiedLinesCoverage(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
         assertThat(action.getAllValues(Baseline.MODIFIED_LINES)).contains(
                 builder.setMetric(LINE).setCovered(1).setMissed(1).build());
@@ -206,14 +206,14 @@ class GitForensicsITest extends AbstractCoverageITest {
         edu.hm.hafner.metric.Node root = action.getResult();
         assertThat(root).isNotNull();
 
-        List<FileNode> changedFiles = root.getAllFileNodes().stream()
+        List<FileNode> modifiedFiles = root.getAllFileNodes().stream()
                 .filter(FileNode::hasChangedLines)
                 .collect(Collectors.toList());
-        assertThat(changedFiles).hasSize(4);
-        assertThat(changedFiles).extracting(FileNode::getName)
+        assertThat(modifiedFiles).hasSize(4);
+        assertThat(modifiedFiles).extracting(FileNode::getName)
                 .containsExactlyInAnyOrder("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
-        assertThat(changedFiles).flatExtracting(FileNode::getChangedLines)
+        assertThat(modifiedFiles).flatExtracting(FileNode::getChangedLines)
                 .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
     }
 

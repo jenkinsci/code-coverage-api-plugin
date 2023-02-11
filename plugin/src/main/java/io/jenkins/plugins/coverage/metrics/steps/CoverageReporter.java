@@ -60,21 +60,21 @@ public class CoverageReporter {
 
             log.logInfo("Calculating coverage deltas...");
 
-            Node changeCoverageRoot = rootNode.filterChanges();
+            Node modifiedLinesCoverageRoot = rootNode.filterChanges();
 
-            NavigableMap<Metric, Fraction> changeCoverageDelta;
-            List<Value> aggregatedChangedFilesCoverage;
-            NavigableMap<Metric, Fraction> changedFilesCoverageDelta;
-            if (hasChangeCoverage(changeCoverageRoot)) {
-                changeCoverageDelta = changeCoverageRoot.computeDelta(rootNode);
-                Node changedFilesCoverageRoot = rootNode.filterByChangedFilesCoverage();
-                aggregatedChangedFilesCoverage = changedFilesCoverageRoot.aggregateValues();
-                changedFilesCoverageDelta = changedFilesCoverageRoot.computeDelta(rootNode);
+            NavigableMap<Metric, Fraction> modifiedLinesCoverageDelta;
+            List<Value> aggregatedModifiedFilesCoverage;
+            NavigableMap<Metric, Fraction> modifiedFilesCoverageDelta;
+            if (hasModifiedLinesCoverage(modifiedLinesCoverageRoot)) {
+                modifiedLinesCoverageDelta = modifiedLinesCoverageRoot.computeDelta(rootNode);
+                Node modifiedFilesCoverageRoot = rootNode.filterByModifiedFilesCoverage();
+                aggregatedModifiedFilesCoverage = modifiedFilesCoverageRoot.aggregateValues();
+                modifiedFilesCoverageDelta = modifiedFilesCoverageRoot.computeDelta(rootNode);
             }
             else {
-                changeCoverageDelta = new TreeMap<>();
-                aggregatedChangedFilesCoverage = new ArrayList<>();
-                changedFilesCoverageDelta = new TreeMap<>();
+                modifiedLinesCoverageDelta = new TreeMap<>();
+                aggregatedModifiedFilesCoverage = new ArrayList<>();
+                modifiedFilesCoverageDelta = new TreeMap<>();
                 if (rootNode.hasChangedLines()) {
                     log.logInfo("No detected code changes affect the code coverage");
                 }
@@ -85,19 +85,19 @@ public class CoverageReporter {
 
             QualityGateResult qualityGateResult;
             qualityGateResult = evaluateQualityGates(rootNode, log,
-                    changeCoverageRoot.aggregateValues(), changeCoverageDelta, coverageDelta,
+                    modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
                     referenceAction.getOwner().getExternalizableId(),
                     coverageDelta,
-                    changeCoverageRoot.aggregateValues(),
-                    changeCoverageDelta,
-                    aggregatedChangedFilesCoverage,
-                    changedFilesCoverageDelta,
+                    modifiedLinesCoverageRoot.aggregateValues(),
+                    modifiedLinesCoverageDelta,
+                    aggregatedModifiedFilesCoverage,
+                    modifiedFilesCoverageDelta,
                     indirectCoverageChangesTree.aggregateValues());
             if (sourceCodeRetention == SourceCodeRetention.MODIFIED) {
-                filesToStore = changeCoverageRoot.getAllFileNodes();
+                filesToStore = modifiedLinesCoverageRoot.getAllFileNodes();
                 log.logInfo("-> Selecting %d modified files for source code painting", filesToStore.size());
             }
             else {
@@ -148,16 +148,16 @@ public class CoverageReporter {
         catch (IllegalStateException exception) {
             log.logError("An error occurred while processing code and coverage changes:");
             log.logError("-> Message: " + exception.getMessage());
-            log.logError("-> Skipping calculating change coverage and indirect coverage changes");
+            log.logError("-> Skipping calculating Modified Lines Coverage and indirect coverage changes");
         }
     }
 
     private QualityGateResult evaluateQualityGates(final Node rootNode, final FilteredLog log,
-            final List<Value> changeCoverageDistribution, final NavigableMap<Metric, Fraction> changeCoverageDelta,
+            final List<Value> modifiedLinesCoverageDistribution, final NavigableMap<Metric, Fraction> modifiedLinesCoverageDelta,
             final NavigableMap<Metric, Fraction> coverageDelta, final StageResultHandler resultHandler,
             final List<CoverageQualityGate> qualityGates) {
         var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
-                changeCoverageDistribution, changeCoverageDelta, List.of(), new TreeMap<>());
+                modifiedLinesCoverageDistribution, modifiedLinesCoverageDelta, List.of(), new TreeMap<>());
         CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, statistics);
         var qualityGateStatus = evaluator.evaluate();
         if (qualityGateStatus.isInactive()) {
@@ -179,14 +179,14 @@ public class CoverageReporter {
         return qualityGateStatus;
     }
 
-    private boolean hasChangeCoverage(final Node changeCoverageRoot) {
-        Optional<Value> lineCoverage = changeCoverageRoot.getValue(Metric.LINE);
+    private boolean hasModifiedLinesCoverage(final Node modifiedLinesCoverageRoot) {
+        Optional<Value> lineCoverage = modifiedLinesCoverageRoot.getValue(Metric.LINE);
         if (lineCoverage.isPresent()) {
             if (((edu.hm.hafner.metric.Coverage) lineCoverage.get()).isSet()) {
                 return true;
             }
         }
-        Optional<Value> branchCoverage = changeCoverageRoot.getValue(Metric.BRANCH);
+        Optional<Value> branchCoverage = modifiedLinesCoverageRoot.getValue(Metric.BRANCH);
         return branchCoverage.filter(value -> ((edu.hm.hafner.metric.Coverage) value).isSet()).isPresent();
     }
 

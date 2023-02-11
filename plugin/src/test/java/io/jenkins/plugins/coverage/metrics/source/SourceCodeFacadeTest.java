@@ -21,19 +21,20 @@ import static org.assertj.core.api.Assertions.*;
  */
 class SourceCodeFacadeTest extends ResourceTest {
     private static final String WHOLE_SOURCE_CODE = "SourcecodeTest.html";
-    private static final String CHANGE_COVERAGE_SOURCE_CODE = "SourcecodeTestCC.html";
+    private static final String MODIFIED_LINES_COVERAGE_SOURCE_CODE = "SourcecodeTestCC.html";
     private static final String INDIRECT_COVERAGE_SOURCE_CODE = "SourcecodeTestICC.html";
 
     @Test
-    void shouldCalculateSourcecodeForChangeCoverage() throws IOException {
+    void shouldCalculateSourcecodeForModifiedLinesCoverage() throws IOException {
         SourceCodeFacade sourceCodeFacade = createSourceCodeFacade();
         String originalHtml = readHtml(WHOLE_SOURCE_CODE);
         FileNode node = createFileCoverageNode();
 
-        String requiredHtml = Jsoup.parse(readHtml(CHANGE_COVERAGE_SOURCE_CODE), Parser.xmlParser()).html();
+        String requiredHtml = Jsoup.parse(readHtml(MODIFIED_LINES_COVERAGE_SOURCE_CODE), Parser.xmlParser()).html();
 
-        String changeCoverageHtml = sourceCodeFacade.calculateChangeCoverageSourceCode(originalHtml, node);
-        assertThat(changeCoverageHtml).isEqualTo(requiredHtml);
+        String modifiedLinesCoverageHtml =
+                sourceCodeFacade.calculateModifiedLinesCoverageSourceCode(originalHtml, node);
+        assertThat(modifiedLinesCoverageHtml).isEqualTo(requiredHtml);
     }
 
     @Test
@@ -44,8 +45,8 @@ class SourceCodeFacadeTest extends ResourceTest {
 
         String requiredHtml = Jsoup.parse(readHtml(INDIRECT_COVERAGE_SOURCE_CODE), Parser.xmlParser()).html();
 
-        String changeCoverageHtml = sourceCodeFacade.calculateIndirectCoverageChangesSourceCode(originalHtml, node);
-        assertThat(changeCoverageHtml).isEqualTo(requiredHtml);
+        String modifiedLinesCoverageHtml = sourceCodeFacade.calculateIndirectCoverageChangesSourceCode(originalHtml, node);
+        assertThat(modifiedLinesCoverageHtml).isEqualTo(requiredHtml);
     }
 
     /**

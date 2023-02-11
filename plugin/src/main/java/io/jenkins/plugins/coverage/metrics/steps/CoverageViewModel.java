@@ -67,9 +67,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
     static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
-    static final String CHANGE_COVERAGE_TABLE_ID = "change-coverage-table";
-
-    static final String CHANGED_FILES_COVERAGE_TABLE_ID = "changed-files-coverage-table";
+    static final String MODIFIED_LINES_COVERAGE_TABLE_ID = "modifies-lines-coverage-table";
+    static final String MODIFIED_FILES_COVERAGE_TABLE_ID = "modified-files-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
@@ -85,8 +84,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final Node node;
     private final String id;
 
-    private final Node changeCoverageTreeRoot;
-    private final Node changedFilesCoverageTreeRoot;
+    private final Node modifiedLinesCoverageTreeRoot;
+    private final Node modifiedFilesCoverageTreeRoot;
     private final Node indirectCoverageChangesTreeRoot;
     private final Function<String, String> trendChartFunction;
 
@@ -111,8 +110,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         this.log = log;
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
-        changeCoverageTreeRoot = node.filterChanges();
-        changedFilesCoverageTreeRoot = node.filterByChangedFilesCoverage();
+        modifiedLinesCoverageTreeRoot = node.filterChanges();
+        modifiedFilesCoverageTreeRoot = node.filterByModifiedFilesCoverage();
         indirectCoverageChangesTreeRoot = node.filterByIndirectlyChangedCoverage();
         this.trendChartFunction = trendChartFunction;
     }
@@ -294,11 +293,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         switch (actualId) {
             case ABSOLUTE_COVERAGE_TABLE_ID:
                 return new CoverageTableModel(tableId, getNode(), renderer, colorProvider);
-            case CHANGE_COVERAGE_TABLE_ID:
-                return new ChangeCoverageTableModel(tableId, getNode(), changeCoverageTreeRoot, renderer,
+            case MODIFIED_LINES_COVERAGE_TABLE_ID:
+                return new ModifiedLinesCoverageTableModel(tableId, getNode(), modifiedLinesCoverageTreeRoot, renderer,
                         colorProvider);
-            case CHANGED_FILES_COVERAGE_TABLE_ID:
-                return new ChangedFilesCoverageTable(tableId, getNode(), changeCoverageTreeRoot, renderer,
+            case MODIFIED_FILES_COVERAGE_TABLE_ID:
+                return new ModifiedFilesCoverageTable(tableId, getNode(), modifiedFilesCoverageTreeRoot, renderer,
                         colorProvider);
             case INDIRECT_COVERAGE_TABLE_ID:
                 return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer,
@@ -389,8 +388,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         if (!content.isEmpty() && sourceNode instanceof FileNode) {
             FileNode fileNode = (FileNode) sourceNode;
             String cleanTableId = StringUtils.removeEnd(tableId, INLINE_SUFFIX);
-            if (CHANGE_COVERAGE_TABLE_ID.equals(cleanTableId)) {
-                return SOURCE_CODE_FACADE.calculateChangeCoverageSourceCode(content, fileNode);
+            if (MODIFIED_LINES_COVERAGE_TABLE_ID.equals(cleanTableId)) {
+                return SOURCE_CODE_FACADE.calculateModifiedLinesCoverageSourceCode(content, fileNode);
             }
             else if (INDIRECT_COVERAGE_TABLE_ID.equals(cleanTableId)) {
                 return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, fileNode);
@@ -413,11 +412,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Checks whether change coverage exists.
+     * Checks whether Modified Lines Coverage exists.
      *
-     * @return {@code true} whether change coverage exists, else {@code false}
+     * @return {@code true} whether Modified Lines Coverage exists, else {@code false}
      */
-    public boolean hasChangeCoverage() {
+    public boolean hasModifiedLinesCoverage() {
         return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasChangedLines);
     }
 

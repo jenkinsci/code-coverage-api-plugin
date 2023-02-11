@@ -17,32 +17,32 @@ import io.jenkins.plugins.datatables.TableConfiguration;
 import io.jenkins.plugins.datatables.TableConfiguration.SelectStyle;
 
 /**
- * {@link CoverageTableModel} implementation for visualizing the changed files coverage.
+ * {@link CoverageTableModel} implementation for visualizing the modified lines coverage.
  *
  * @since 4.0.0
  */
-class ChangedFilesCoverageTable extends CoverageTableModel {
-    private final Node changedFilesCoverageRoot;
+class ModifiedFilesCoverageTable extends CoverageTableModel {
+    private final Node modifiedFilesCoverageRoot;
 
     /**
-     * Creates a changed files coverage table model.
+     * Creates a modified lines coverage table model.
      *
      * @param id
      *         The ID of the table
      * @param root
      *         The root of the origin coverage tree
      * @param changeRoot
-     *         The root of the change coverage tree
+     *         The root of the Modified Lines Coverage tree
      * @param renderer
      *         the renderer to use for the file names
      * @param colorProvider
      *         The {@link ColorProvider} which provides the used colors
      */
-    ChangedFilesCoverageTable(final String id, final Node root, final Node changeRoot,
+    ModifiedFilesCoverageTable(final String id, final Node root, final Node changeRoot,
             final RowRenderer renderer, final ColorProvider colorProvider) {
         super(id, root, renderer, colorProvider);
 
-        this.changedFilesCoverageRoot = changeRoot;
+        this.modifiedFilesCoverageRoot = changeRoot;
     }
 
     @Override
@@ -53,8 +53,8 @@ class ChangedFilesCoverageTable extends CoverageTableModel {
     @Override
     public List<Object> getRows() {
         Locale browserLocale = Functions.getCurrentLocale();
-        return changedFilesCoverageRoot.getAllFileNodes().stream()
-                .map(file -> new ChangedFilesCoverageRow(
+        return modifiedFilesCoverageRoot.getAllFileNodes().stream()
+                .map(file -> new ModifiedFilesCoverageRow(
                         getOriginalNode(file), file, browserLocale, getRenderer(), getColorProvider()))
                 .collect(Collectors.toList());
     }
@@ -68,14 +68,14 @@ class ChangedFilesCoverageTable extends CoverageTableModel {
     }
 
     /**
-     * UI row model for the changed files coverage details table.
+     * UI row model for the modified lines coverage details table.
      *
      * @since 4.0.0
      */
-    private static class ChangedFilesCoverageRow extends CoverageRow {
+    private static class ModifiedFilesCoverageRow extends CoverageRow {
         private final FileNode originalFile;
 
-        ChangedFilesCoverageRow(final FileNode originalFile, final FileNode changedFileNode,
+        ModifiedFilesCoverageRow(final FileNode originalFile, final FileNode changedFileNode,
                 final Locale browserLocale, final RowRenderer renderer, final ColorProvider colorProvider) {
             super(changedFileNode, browserLocale, renderer, colorProvider);
 
@@ -84,20 +84,20 @@ class ChangedFilesCoverageTable extends CoverageTableModel {
 
         @Override
         public DetailedCell<?> getLineCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(Metric.LINE);
+            return createColoredModifiedLinesCoverageDeltaColumn(Metric.LINE);
         }
 
         @Override
         public DetailedCell<?> getBranchCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(Metric.BRANCH);
+            return createColoredModifiedLinesCoverageDeltaColumn(Metric.BRANCH);
         }
 
         @Override
         public int getLoc() {
-            return getFile().getCoveredLines().size();
+            return getFile().getLinesWithCoverage().size();
         }
 
-        private DetailedCell<?> createColoredChangeCoverageDeltaColumn(final Metric metric) {
+        private DetailedCell<?> createColoredModifiedLinesCoverageDeltaColumn(final Metric metric) {
             Coverage fileCoverage = getFile().getTypedValue(metric, Coverage.nullObject(metric));
             if (fileCoverage.isSet()) {
                 return createColoredCoverageDeltaColumn(metric,

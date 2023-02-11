@@ -78,7 +78,7 @@ class CoveragePercentageTest {
     @Test
     void shouldFormatDeltaPercentage() {
         CoveragePercentage coveragePercentage = CoveragePercentage.valueOf(COVERAGE_PERCENTAGE);
-        assertThat(coveragePercentage.formatDeltaPercentage(LOCALE)).isEqualTo("+50,00");
+        assertThat(coveragePercentage.formatDeltaPercentage(LOCALE)).isEqualTo("+50,00%");
     }
 
     @Test

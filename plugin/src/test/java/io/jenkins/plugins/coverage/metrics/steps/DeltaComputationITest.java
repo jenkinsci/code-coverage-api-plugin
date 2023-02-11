@@ -115,17 +115,17 @@ class DeltaComputationITest extends AbstractCoverageITest {
         assertThat(action.formatDelta(Baseline.PROJECT, LOC)).isEqualTo(String.valueOf(-JACOCO_ANALYSIS_MODEL_TOTAL));
         assertThat(action.formatDelta(Baseline.PROJECT, COMPLEXITY)).isEqualTo(String.valueOf(160 - 2718));
 
-        verifyChangeCoverage(action);
+        verifyModifiedLinesCoverage(action);
     }
 
     /**
-     * Verifies the calculated change coverage including the change coverage delta and the code delta. This makes sure
+     * Verifies the calculated modified lines coverage including the modified lines coverage delta and the code delta. This makes sure
      * these metrics are set properly even if there are no code changes.
      *
      * @param action
      *         The created Jenkins action
      */
-    private void verifyChangeCoverage(final CoverageBuildAction action) {
+    private void verifyModifiedLinesCoverage(final CoverageBuildAction action) {
         Node root = action.getResult();
         assertThat(root).isNotNull();
         assertThat(root.getAllFileNodes()).flatExtracting(FileNode::getChangedLines).isEmpty();
