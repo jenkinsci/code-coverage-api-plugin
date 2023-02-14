@@ -3,8 +3,8 @@
 const CoverageChartGenerator = function ($) {
     var selectedTreeNode;
 
-    function printPercentage(value) {
-        return Number(value / 100.0).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2});
+    function printPercentage(value, minimumFractionDigits = 2) {
+        return Number(value / 100.0).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: minimumFractionDigits});
     }
 
     const openBuild = function (build) {
@@ -95,7 +95,7 @@ const CoverageChartGenerator = function ($) {
                 type: 'value',
                 axisLabel: {
                     formatter: function (value) {
-                        return printPercentage(value);
+                        return printPercentage(value, 0);
                     },
                     color: textColor
                 }

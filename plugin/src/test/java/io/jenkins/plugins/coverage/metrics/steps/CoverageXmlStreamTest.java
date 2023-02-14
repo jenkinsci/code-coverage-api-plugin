@@ -50,7 +50,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
     @Override
     protected Node createSerializable() {
-        return new JacocoParser().parse(new InputStreamReader(asInputStream("jacoco-codingstyle.xml")));
+        return new JacocoParser().parse(new InputStreamReader(asInputStream("jacoco-codingstyle.xml")), new FilteredLog("Errors"));
     }
 
     @Test

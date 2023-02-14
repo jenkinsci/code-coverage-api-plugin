@@ -1,15 +1,12 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.Serializable;
-import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.metric.CoverageParser;
 import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.parser.CoberturaParser;
-import edu.hm.hafner.metric.parser.CoverageParser;
-import edu.hm.hafner.metric.parser.JacocoParser;
-import edu.hm.hafner.metric.parser.PitestParser;
+import edu.hm.hafner.metric.registry.ParserRegistry;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -209,23 +206,21 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
      * Supported coverage parsers.
      */
     public enum Parser {
-        COBERTURA(Messages._Parser_Cobertura(), "**/cobertura.xml", CoberturaParser::new,
+        COBERTURA(Messages._Parser_Cobertura(), "**/cobertura.xml",
                 "symbol-footsteps-outline plugin-ionicons-api"),
-        JACOCO(Messages._Parser_JaCoCo(), "**/jacoco.xml", JacocoParser::new,
+        JACOCO(Messages._Parser_JaCoCo(), "**/jacoco.xml",
                 "symbol-footsteps-outline plugin-ionicons-api"),
-        PIT(Messages._Parser_PIT(), "**/mutations.xml", PitestParser::new,
+        PIT(Messages._Parser_PIT(), "**/mutations.xml",
                 "symbol-solid/virus-slash plugin-font-awesome-api");
 
         private final Localizable displayName;
         private final String defaultPattern;
-        private final Supplier<CoverageParser> parserSupplier;
         private final String icon;
 
-        Parser(final Localizable displayName, final String defaultPattern, final Supplier<CoverageParser> parserSupplier,
+        Parser(final Localizable displayName, final String defaultPattern,
                 final String icon) {
             this.displayName = displayName;
             this.defaultPattern = defaultPattern;
-            this.parserSupplier = parserSupplier;
             this.icon = icon;
         }
 
@@ -247,7 +242,7 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
          * @return the parser
          */
         public CoverageParser createParser() {
-            return parserSupplier.get();
+            return new ParserRegistry().getParser(name());
         }
     }
 }
