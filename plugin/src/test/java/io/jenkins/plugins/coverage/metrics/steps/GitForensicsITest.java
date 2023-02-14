@@ -207,7 +207,7 @@ class GitForensicsITest extends AbstractCoverageITest {
         assertThat(root).isNotNull();
 
         List<FileNode> changedFiles = root.getAllFileNodes().stream()
-                .filter(FileNode::hasChangedLines)
+                .filter(FileNode::hasModifiedLines)
                 .collect(Collectors.toList());
         assertThat(changedFiles).hasSize(4);
         assertThat(changedFiles).extracting(FileNode::getName)
