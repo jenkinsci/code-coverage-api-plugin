@@ -361,7 +361,7 @@ public class CoverageRecorder extends Recorder {
                 var coverageAction = run.getAction(CoverageBuildAction.class);
                 if (coverageAction != null) {
                     var checksPublisher = new CoverageChecksPublisher(coverageAction, CHECKS_DEFAULT_NAME);
-                    checksPublisher.publishChecks(taskListener);
+                    checksPublisher.publishCoverageReport(taskListener);
                 }
             }
         }

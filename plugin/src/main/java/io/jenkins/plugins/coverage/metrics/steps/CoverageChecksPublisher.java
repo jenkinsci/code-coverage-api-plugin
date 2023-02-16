@@ -57,7 +57,13 @@ class CoverageChecksPublisher {
         this.checksName = checksName;
     }
 
-    void publishChecks(final TaskListener listener) {
+    /**
+     * Publishes the coverage report as Checks to SCM platforms.
+     *
+     * @param listener
+     *         The task listener
+     */
+    void publishCoverageReport(final TaskListener listener) {
         var publisher = ChecksPublisherFactory.fromRun(action.getOwner(), listener);
         publisher.publish(extractChecksDetails());
     }
@@ -228,7 +234,7 @@ class CoverageChecksPublisher {
      */
     // TODO: expand with summary of status of each defined quality gate
     private String getHealthReportSummary() {
-        return getSectionHeader(2, Messages.Checks_QualityGates(action.getQualityGateResult().toString()));
+        return getSectionHeader(2, Messages.Checks_QualityGates(action.getQualityGateResult().getOverallStatus().name()));
     }
 
     private String getProjectMetricsSummary(final Node result) {
@@ -260,7 +266,7 @@ class CoverageChecksPublisher {
     }
 
     private String formatCoverageForMetric(final Metric metric, final Baseline baseline) {
-        return String.format("%s (%s)",
+        return String.format("%s: %s / %s", FORMATTER.getDisplayName(metric),
                 action.formatValue(baseline, metric), action.formatDelta(baseline, metric));
     }
 
