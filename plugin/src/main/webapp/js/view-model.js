@@ -470,6 +470,14 @@ const CoverageChartGenerator = function ($) {
             initializeSourceCodeSelection('absolute-coverage');
             initializeSourceCodeSelection('change-coverage');
             initializeSourceCodeSelection('indirect-coverage');
+
+            $('input[name="changed"]').on('change', function () {
+                const showChanged = $(this).prop('checked');
+                $('table.data-table').each(function () {
+                    const table = $(this).DataTable();
+                    table.column(1).search(showChanged ? 'true' : '').draw();
+                });
+            });
         });
     }
 };
