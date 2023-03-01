@@ -38,8 +38,14 @@
     <coverage-model.version>0.14.0</coverage-model.version>
     <echarts-api.version>5.4.0-2-rc759.8b_4e78286216</echarts-api.version>
     <prism-api.version>1.29.0-3-rc207.f000c20b_dea_5</prism-api.version>
-    <plugin-util-api.version>3.0.0-rc679.e40704a_a_f29f</plugin-util-api.version>
     <git-forensics.version>1.11.0</git-forensics.version>
+
+    <jquery3-api.version>3.6.3-1-rc365.70899fb_d9e1d</jquery3-api.version>
+    <plugin-util-api.version>3.0.0-rc679.e40704a_a_f29f</plugin-util-api.version>
+    <bootstrap5-api.version>5.2.2-1-rc442.6631330fec41</bootstrap5-api.version>
+    <font-awesome-api.version>6.3.0-1-rc517.f6b_6e5a_dd4ef</font-awesome-api.version>
+
+    <font-awesome-api.version>6.3.0-1-SNAPSHOT</font-awesome-api.version>
   </properties>
 
   <developers>
@@ -139,11 +145,12 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>bootstrap5-api</artifactId>
-      <version>5.2.0-3</version>
+      <version>${bootstrap5-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jquery3-api</artifactId>
+      <version>${jquery3-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -152,7 +159,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>forensics-api</artifactId>
-      <version>2.0.0-rc1380.c93c627cd828</version>
+      <version>${forensics-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -162,6 +169,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>font-awesome-api</artifactId>
+      <version>${font-awesome-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
