@@ -38,7 +38,8 @@ import io.jenkins.plugins.util.StageResultHandler;
  */
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
-    void publishAction(final String id, final String optionalName, final String icon, final Node rootNode, final Run<?, ?> build,
+    void publishAction(final String id, final String optionalName, final String icon, final Node rootNode,
+            final Run<?, ?> build,
             final FilePath workspace, final TaskListener listener, final List<CoverageQualityGate> qualityGates,
             final String scm, final Set<String> sourceDirectories, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
@@ -148,12 +149,14 @@ public class CoverageReporter {
         catch (IllegalStateException exception) {
             log.logError("An error occurred while processing code and coverage changes:");
             log.logError("-> Message: " + exception.getMessage());
-            log.logError("-> Skipping calculating Modified Lines Coverage and indirect coverage changes");
+            log.logError("-> Skipping calculating modified lines coverage, modified files coverage"
+                    + " and indirect coverage changes");
         }
     }
 
     private QualityGateResult evaluateQualityGates(final Node rootNode, final FilteredLog log,
-            final List<Value> modifiedLinesCoverageDistribution, final NavigableMap<Metric, Fraction> modifiedLinesCoverageDelta,
+            final List<Value> modifiedLinesCoverageDistribution,
+            final NavigableMap<Metric, Fraction> modifiedLinesCoverageDelta,
             final NavigableMap<Metric, Fraction> coverageDelta, final StageResultHandler resultHandler,
             final List<CoverageQualityGate> qualityGates) {
         var statistics = new CoverageStatistics(rootNode.aggregateValues(), coverageDelta,
@@ -169,7 +172,8 @@ public class CoverageReporter {
                 log.logInfo("-> All quality gates have been passed");
             }
             else {
-                var message = String.format("-> Some quality gates have been missed: overall result is %s", qualityGateStatus.getOverallStatus().getResult());
+                var message = String.format("-> Some quality gates have been missed: overall result is %s",
+                        qualityGateStatus.getOverallStatus().getResult());
                 log.logInfo(message);
                 resultHandler.setResult(qualityGateStatus.getOverallStatus().getResult(), message);
             }

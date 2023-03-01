@@ -94,7 +94,7 @@ class CoverageChecksPublisher {
     private String getSummary() {
         var root = action.getResult();
         return getOverallCoverageSummary(root) + "\n\n"
-                + getHealthReportSummary() + "\n\n"
+                + getQualityGatesSummary() + "\n\n"
                 + getProjectMetricsSummary(root);
     }
 
@@ -233,7 +233,7 @@ class CoverageChecksPublisher {
      * @return the markdown string representing the status summary
      */
     // TODO: expand with summary of status of each defined quality gate
-    private String getHealthReportSummary() {
+    private String getQualityGatesSummary() {
         return getSectionHeader(2, Messages.Checks_QualityGates(action.getQualityGateResult().getOverallStatus().name()));
     }
 

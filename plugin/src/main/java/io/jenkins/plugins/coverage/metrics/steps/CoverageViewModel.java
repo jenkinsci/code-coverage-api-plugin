@@ -67,7 +67,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final SourceCodeFacade SOURCE_CODE_FACADE = new SourceCodeFacade();
 
     static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
-    static final String MODIFIED_LINES_COVERAGE_TABLE_ID = "change-coverage-table";
+    static final String MODIFIED_LINES_COVERAGE_TABLE_ID = "modified-lines-coverage-table";
+    static final String MODIFIED_FILES_COVERAGE_TABLE_ID = "modified-files-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
@@ -84,6 +85,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final String id;
 
     private final Node modifiedLinesCoverageTreeRoot;
+    private final Node modifiedFilesCoverageTreeRoot;
     private final Node indirectCoverageChangesTreeRoot;
     private final Function<String, String> trendChartFunction;
 
@@ -109,6 +111,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         modifiedLinesCoverageTreeRoot = node.filterByModifiedLines();
+        modifiedFilesCoverageTreeRoot = node.filterByModifiedFiles();
         indirectCoverageChangesTreeRoot = node.filterByIndirectChanges();
         this.trendChartFunction = trendChartFunction;
     }
@@ -293,6 +296,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             case MODIFIED_LINES_COVERAGE_TABLE_ID:
                 return new ModifiedLinesCoverageTableModel(tableId, getNode(), modifiedLinesCoverageTreeRoot, renderer,
                         colorProvider);
+            case MODIFIED_FILES_COVERAGE_TABLE_ID:
+                return new ModifiedFilesCoverageTableModel(tableId, getNode(), modifiedFilesCoverageTreeRoot, renderer,
+                        colorProvider);
             case INDIRECT_COVERAGE_TABLE_ID:
                 return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer,
                         colorProvider);
@@ -406,7 +412,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     }
 
     /**
-     * Checks whether Modified Lines Coverage exists.
+     * Checks whether modified lines coverage exists.
      *
      * @return {@code true} whether modified lines coverage exists, else {@code false}
      */

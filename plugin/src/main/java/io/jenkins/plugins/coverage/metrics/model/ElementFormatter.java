@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.metrics.model;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -140,6 +139,7 @@ public final class ElementFormatter {
      *
      * @param value
      *         the value to format
+     *
      * @return the formatted value as plain text
      */
     public String formatAdditionalInformation(final Value value) {
@@ -190,10 +190,11 @@ public final class ElementFormatter {
     public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
         var defaultColorProvider = ColorProviderFactory.createDefaultColorProvider();
         if (value instanceof Coverage) {
-            return baseline.getDisplayColors(((Coverage)value).getCoveredPercentage().toDouble(), defaultColorProvider);
+            return baseline.getDisplayColors(((Coverage) value).getCoveredPercentage().toDouble(),
+                    defaultColorProvider);
         }
         else if (value instanceof FractionValue) {
-            return baseline.getDisplayColors(((FractionValue)value).getFraction().doubleValue(), defaultColorProvider);
+            return baseline.getDisplayColors(((FractionValue) value).getFraction().doubleValue(), defaultColorProvider);
         }
         return ColorProvider.DEFAULT_COLOR;
     }
@@ -383,8 +384,6 @@ public final class ElementFormatter {
      */
     public List<String> getSortedCoverageDisplayNames() {
         return Metric.getCoverageMetrics().stream()
-                // use the default comparator which uses the enum ordinal
-                .sorted()
                 .map(this::getDisplayName)
                 .collect(Collectors.toList());
     }
@@ -417,8 +416,7 @@ public final class ElementFormatter {
                 .map(m -> m.getValueFor(coverage))
                 .flatMap(Optional::stream)
                 .filter(value -> value instanceof Coverage)
-                .map(Coverage.class::cast)
-                .sorted(Comparator.comparing(Coverage::getMetric));
+                .map(Coverage.class::cast);
     }
 
     /**

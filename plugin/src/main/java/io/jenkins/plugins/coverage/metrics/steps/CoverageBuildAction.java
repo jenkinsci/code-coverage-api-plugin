@@ -412,9 +412,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @return the formatted value
      */
     public String formatValue(final Baseline baseline, final Metric metric) {
-        var value = getAllValues(baseline).stream()
-                .filter(v -> v.getMetric() == metric)
-                .findFirst();
+        var value = getValueForMetric(baseline, metric);
         return value.isPresent() ? FORMATTER.formatValue(value.get()) : Messages.Coverage_Not_Available();
     }
 

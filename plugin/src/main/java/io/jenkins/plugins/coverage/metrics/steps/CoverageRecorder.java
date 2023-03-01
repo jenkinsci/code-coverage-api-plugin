@@ -63,7 +63,7 @@ import io.jenkins.plugins.util.ValidationUtilities;
  */
 @SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CoverageRecorder extends Recorder {
-    // TODO: make customizable?
+    // TODO: make customizable
     private static final String CHECKS_DEFAULT_NAME = "Code Coverage";
 
     static final String DEFAULT_ID = "coverage";

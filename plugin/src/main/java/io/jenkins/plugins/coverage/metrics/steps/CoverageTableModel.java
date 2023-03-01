@@ -120,7 +120,7 @@ class CoverageTableModel extends TableModel {
                 .withType(ColumnType.NUMBER)
                 .build();
         columns.add(loc);
-        if (root.getMetrics().contains(Metric.COMPLEXITY)) {
+        if (root.containsMetric(Metric.COMPLEXITY)) {
             TableColumn complexity = new ColumnBuilder().withHeaderLabel(Messages.Column_Complexity())
                     .withDataPropertyKey("complexity")
                     .withResponsivePriority(500)
@@ -128,7 +128,7 @@ class CoverageTableModel extends TableModel {
                     .build();
             columns.add(complexity);
         }
-        if (root.getMetrics().contains(Metric.COMPLEXITY_DENSITY)) {
+        if (root.containsMetric(Metric.COMPLEXITY_DENSITY)) {
             TableColumn complexity = new ColumnBuilder().withHeaderLabel(Messages.Column_ComplexityDensity())
                     .withDataPropertyKey("density")
                     .withDetailedCell()
@@ -142,7 +142,7 @@ class CoverageTableModel extends TableModel {
 
     private void configureValueColumn(final String key, final Metric metric, final String headerLabel,
             final String deltaHeaderLabel, final List<TableColumn> columns) {
-        if (root.getMetrics().contains(metric)) {
+        if (root.containsMetric(metric)) {
             TableColumn lineCoverage = new ColumnBuilder().withHeaderLabel(headerLabel)
                     .withDataPropertyKey(key)
                     .withDetailedCell()
