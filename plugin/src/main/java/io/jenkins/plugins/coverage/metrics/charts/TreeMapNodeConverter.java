@@ -1,5 +1,7 @@
 package io.jenkins.plugins.coverage.metrics.charts;
 
+import java.util.Optional;
+
 import edu.hm.hafner.echarts.ItemStyle;
 import edu.hm.hafner.echarts.Label;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
@@ -38,7 +40,8 @@ public class TreeMapNodeConverter {
      */
     public LabeledTreeMapNode toTreeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
         var tree = mergePackages(node);
-        LabeledTreeMapNode root = toTreeMapNode(tree, metric, colorProvider);
+        LabeledTreeMapNode root = toTreeMapNode(tree, metric, colorProvider).orElse(
+                new LabeledTreeMapNode(node.getPath(), node.getName()));
         for (LabeledTreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
         }
@@ -55,18 +58,18 @@ public class TreeMapNodeConverter {
         return node;
     }
 
-    private LabeledTreeMapNode toTreeMapNode(final Node node, final Metric metric,
+    private Optional<LabeledTreeMapNode> toTreeMapNode(final Node node, final Metric metric,
             final ColorProvider colorProvider) {
         var value = node.getValue(metric);
         if (value.isPresent()) {
             var rootValue = value.get();
             if (rootValue instanceof Coverage) {
-                return createCoverageTree((Coverage) rootValue, colorProvider, node, metric);
+                return Optional.of(createCoverageTree((Coverage) rootValue, colorProvider, node, metric));
             }
             // TODO: does it make sense to render the other metrics?
         }
 
-        return new LabeledTreeMapNode(node.getPath(), node.getName());
+        return Optional.empty();
     }
 
     private LabeledTreeMapNode createCoverageTree(final Coverage coverage, final ColorProvider colorProvider, final Node node,
@@ -91,6 +94,7 @@ public class TreeMapNodeConverter {
 
         node.getChildren().stream()
                 .map(n -> toTreeMapNode(n, metric, colorProvider))
+                .flatMap(Optional::stream)
                 .forEach(treeNode::insertNode);
 
         return treeNode;

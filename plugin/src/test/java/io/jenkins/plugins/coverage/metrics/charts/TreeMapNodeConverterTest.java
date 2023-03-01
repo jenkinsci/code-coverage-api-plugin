@@ -1,5 +1,8 @@
 package io.jenkins.plugins.coverage.metrics.charts;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
@@ -10,6 +13,8 @@ import io.jenkins.plugins.coverage.metrics.AbstractCoverageTest;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.color.CoverageLevel;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests the class {@link TreeMapNodeConverter}.
@@ -24,44 +29,44 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
     void shouldConvertCodingStyleToTree() {
         Node tree = readJacocoResult(JACOCO_CODING_STYLE_FILE);
 
-        final double totalLines = JACOCO_CODING_STYLE_TOTAL;
-        final double coveredLines = JACOCO_CODING_STYLE_COVERED;
-        final double coveredPercentage = coveredLines / totalLines * 100.0;
+        LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
+        assertThat(root.getName()).isEqualTo("Java coding style");
 
-//        LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
-//        assertThat(root.getName()).isEqualTo("Java coding style");
-//        assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
-//        assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(coveredPercentage));
-//
-//        assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-//                node -> {
-//                    assertThat(node.getName()).isEqualTo("edu.hm.hafner.util");
-//                    assertThat(node.getValue()).containsExactly(totalLines, coveredLines);
-//                    assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(coveredPercentage));
-//                }
-//        );
+        var overallCoverage = String.valueOf(JACOCO_CODING_STYLE_TOTAL);
+        assertThat(root.getValue()).contains(overallCoverage);
+
+        var overallCoveragePercentage = 100.0 * JACOCO_CODING_STYLE_COVERED / JACOCO_CODING_STYLE_TOTAL;
+        assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(overallCoveragePercentage));
+
+        assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
+                node -> {
+                    assertThat(node.getName()).isEqualTo("edu.hm.hafner.util");
+                    assertThat(node.getValue()).contains(overallCoverage);
+                    assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(overallCoveragePercentage));
+                }
+        );
     }
 
     @Test
-    void shouldConvertAnalysisModelToTree() {
+    void shouldReadBranchCoverage() {
         Node tree = readJacocoResult(JACOCO_ANALYSIS_MODEL_FILE);
 
-        LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
+        LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.BRANCH, COLOR_PROVIDER);
 
-        double totalLines = JACOCO_ANALYSIS_MODEL_TOTAL;
-        double coveredLines = JACOCO_ANALYSIS_MODEL_COVERED;
-        double coveredPercentage = coveredLines / totalLines * 100.0;
+        var nodes = aggregateChildren(root);
+        nodes.stream().filter(node -> node.getName().endsWith(".java")).forEach(node -> {
+            assertThat(node.getValue()).hasSize(2);
+        });
+    }
 
-//        assertThat(root.getName()).isEqualTo("Static Analysis Model and Parsers");
-//        assertThat(root.getValue()).containsExactly(totalLines, coveredLines);
-//        assertThat(root.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(coveredPercentage));
-//        assertThat(root.getChildren()).hasSize(1).element(0).satisfies(
-//                node -> {
-//                    assertThat(node.getName()).isEqualTo("edu.hm.hafner");
-//                    assertThat(node.getValue()).containsExactly(totalLines, coveredLines);
-//                    assertThat(node.getItemStyle().getColor()).isEqualTo(getNodeColorAsRGBHex(coveredPercentage));
-//                }
-//        );
+    private List<LabeledTreeMapNode> aggregateChildren(final LabeledTreeMapNode root) {
+        var children = root.getChildren();
+        var subChildren = children.stream()
+                .map(this::aggregateChildren)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        subChildren.addAll(children);
+        return subChildren;
     }
 
     @Override
