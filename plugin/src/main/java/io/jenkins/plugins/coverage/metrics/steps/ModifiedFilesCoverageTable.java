@@ -18,8 +18,6 @@ import io.jenkins.plugins.datatables.TableConfiguration.SelectStyle;
 
 /**
  * {@link CoverageTableModel} implementation for visualizing the modified lines coverage.
- *
- * @since 4.0.0
  */
 class ModifiedFilesCoverageTable extends CoverageTableModel {
     private final Node modifiedFilesCoverageRoot;
