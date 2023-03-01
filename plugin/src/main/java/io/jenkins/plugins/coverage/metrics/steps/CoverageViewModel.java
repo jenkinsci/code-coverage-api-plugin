@@ -408,7 +408,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     /**
      * Checks whether Modified Lines Coverage exists.
      *
-     * @return {@code true} whether Modified Lines Coverage exists, else {@code false}
+     * @return {@code true} whether modified lines coverage exists, else {@code false}
      */
     public boolean hasModifiedLinesCoverage() {
         return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasModifiedLines);
