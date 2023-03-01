@@ -45,7 +45,7 @@
     <bootstrap5-api.version>5.2.2-1-rc442.6631330fec41</bootstrap5-api.version>
     <font-awesome-api.version>6.3.0-1-rc517.f6b_6e5a_dd4ef</font-awesome-api.version>
 
-    <font-awesome-api.version>6.3.0-1-SNAPSHOT</font-awesome-api.version>
+    <forensics-api.version>2.0.0-rc1380.c93c627cd828</forensics-api.version>
   </properties>
 
   <developers>
