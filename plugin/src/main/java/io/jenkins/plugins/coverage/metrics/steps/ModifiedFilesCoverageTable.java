@@ -69,8 +69,6 @@ class ModifiedFilesCoverageTable extends CoverageTableModel {
 
     /**
      * UI row model for the modified lines coverage details table.
-     *
-     * @since 4.0.0
      */
     private static class ModifiedFilesCoverageRow extends CoverageRow {
         private final FileNode originalFile;
