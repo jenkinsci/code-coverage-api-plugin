@@ -205,7 +205,7 @@ class CoverageTableModel extends TableModel {
         }
 
         public boolean getModified() {
-            return file.hasChangedLines();
+            return file.hasModifiedLines();
         }
 
         public DetailedCell<?> getFileName() {

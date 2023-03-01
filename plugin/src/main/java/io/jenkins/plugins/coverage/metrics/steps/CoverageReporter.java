@@ -67,7 +67,7 @@ public class CoverageReporter {
             NavigableMap<Metric, Fraction> modifiedFilesCoverageDelta;
             if (hasModifiedLinesCoverage(modifiedLinesCoverageRoot)) {
                 modifiedLinesCoverageDelta = modifiedLinesCoverageRoot.computeDelta(rootNode);
-                Node modifiedFilesCoverageRoot = rootNode.filterByModifiedFilesCoverage();
+                Node modifiedFilesCoverageRoot = rootNode.filterByModifiedFiles();
                 aggregatedModifiedFilesCoverage = modifiedFilesCoverageRoot.aggregateValues();
                 modifiedFilesCoverageDelta = modifiedFilesCoverageRoot.computeDelta(rootNode);
             }

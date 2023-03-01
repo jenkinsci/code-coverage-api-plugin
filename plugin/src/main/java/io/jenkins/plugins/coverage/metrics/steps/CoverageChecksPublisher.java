@@ -100,7 +100,7 @@ class CoverageChecksPublisher {
 
     private List<ChecksAnnotation> getAnnotations() {
         var annotations = new ArrayList<ChecksAnnotation>();
-        for (var fileNode : action.getResult().filterChanges().getAllFileNodes()) {
+        for (var fileNode : action.getResult().filterByModifiedLines().getAllFileNodes()) {
             for (var aggregatedLines : getAggregatedMissingLines(fileNode)) {
                 ChecksAnnotationBuilder builder = new ChecksAnnotationBuilder()
                         .withPath(fileNode.getPath())
@@ -159,9 +159,9 @@ class CoverageChecksPublisher {
     private String getOverallCoverageSummary(final Node root) {
         String sectionHeader = getSectionHeader(2, Messages.Checks_Summary());
 
-        var modifiedFilesCoverageRoot = root.filterByModifiedFilesCoverage();
-        var modifiedLinesCoverageRoot = root.filterChanges();
-        var indirectlyChangedCoverage = root.filterByIndirectlyChangedCoverage();
+        var modifiedFilesCoverageRoot = root.filterByModifiedFiles();
+        var modifiedLinesCoverageRoot = root.filterByModifiedLines();
+        var indirectlyChangedCoverage = root.filterByIndirectChanges();
 
         var projectCoverageHeader = getBulletListItem(1,
                 formatText(TextFormat.BOLD, getUrlText(Baseline.PROJECT_DELTA.getTitle(),
