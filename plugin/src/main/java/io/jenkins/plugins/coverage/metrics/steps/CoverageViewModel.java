@@ -108,8 +108,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         this.log = log;
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
-        modifiedLinesCoverageTreeRoot = node.filterChanges();
-        indirectCoverageChangesTreeRoot = node.filterByIndirectlyChangedCoverage();
+        modifiedLinesCoverageTreeRoot = node.filterByModifiedLines();
+        indirectCoverageChangesTreeRoot = node.filterByIndirectChanges();
         this.trendChartFunction = trendChartFunction;
     }
 
@@ -411,7 +411,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether Modified Lines Coverage exists, else {@code false}
      */
     public boolean hasModifiedLinesCoverage() {
-        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasChangedLines);
+        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasModifiedLines);
     }
 
     /**

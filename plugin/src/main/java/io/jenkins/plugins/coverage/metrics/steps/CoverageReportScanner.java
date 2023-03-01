@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import edu.hm.hafner.metric.CoverageParser;
 import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.parser.CoverageParser;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.PathUtil;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
@@ -51,7 +51,7 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     protected Optional<ModuleNode> processFile(final Path file, final Charset charset, final FilteredLog log) {
         try {
             CoverageParser xmlParser = parser.createParser();
-            ModuleNode node = xmlParser.parse(Files.newBufferedReader(file, charset));
+            ModuleNode node = xmlParser.parse(Files.newBufferedReader(file, charset), log);
             log.logInfo("Successfully parsed file '%s'", PATH_UTIL.getAbsolutePath(file));
             node.aggregateValues().forEach(v -> log.logInfo("%s", v));
             return Optional.of(node);

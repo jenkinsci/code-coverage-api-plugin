@@ -14,6 +14,7 @@ import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Value;
 import edu.hm.hafner.metric.parser.JacocoParser;
+import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.ResourceTest;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;
 
@@ -38,6 +39,7 @@ public abstract class AbstractCoverageTest extends ResourceTest {
     public static final int JACOCO_CODING_STYLE_MISSED = 29;
     public static final int JACOCO_CODING_STYLE_TOTAL
             = JACOCO_CODING_STYLE_COVERED + JACOCO_CODING_STYLE_MISSED;
+    private final FilteredLog log = new FilteredLog("Errors");
 
     /**
      * Reads and parses a JaCoCo coverage report.
@@ -49,13 +51,17 @@ public abstract class AbstractCoverageTest extends ResourceTest {
      */
     protected Node readJacocoResult(final String fileName) {
         try {
-            var node = new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)));
+            var node = new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)), log);
             node.splitPackages();
             return node;
         }
         catch (ParsingException | IOException exception) {
             throw new AssertionError(exception);
         }
+    }
+
+    protected FilteredLog getLog() {
+        return log;
     }
 
     /**

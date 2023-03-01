@@ -60,7 +60,7 @@ public class CoverageReporter {
 
             log.logInfo("Calculating coverage deltas...");
 
-            Node modifiedLinesCoverageRoot = rootNode.filterChanges();
+            Node modifiedLinesCoverageRoot = rootNode.filterByModifiedLines();
 
             NavigableMap<Metric, Fraction> modifiedLinesCoverageDelta;
             List<Value> aggregatedModifiedFilesCoverage;
@@ -75,13 +75,13 @@ public class CoverageReporter {
                 modifiedLinesCoverageDelta = new TreeMap<>();
                 aggregatedModifiedFilesCoverage = new ArrayList<>();
                 modifiedFilesCoverageDelta = new TreeMap<>();
-                if (rootNode.hasChangedLines()) {
+                if (rootNode.hasModifiedLines()) {
                     log.logInfo("No detected code changes affect the code coverage");
                 }
             }
 
             NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
-            Node indirectCoverageChangesTree = rootNode.filterByIndirectlyChangedCoverage();
+            Node indirectCoverageChangesTree = rootNode.filterByIndirectChanges();
 
             QualityGateResult qualityGateResult;
             qualityGateResult = evaluateQualityGates(rootNode, log,
