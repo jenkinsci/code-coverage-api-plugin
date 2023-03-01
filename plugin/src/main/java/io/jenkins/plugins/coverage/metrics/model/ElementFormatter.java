@@ -390,7 +390,7 @@ public final class ElementFormatter {
     }
 
     /**
-     * Formats a stream of values to theis display representation by using the passed locale.
+     * Formats a stream of values to their display representation by using the given locale.
      *
      * @param values
      *         The values to be formatted
