@@ -163,7 +163,7 @@ public class SourceCodeFacade {
     }
 
     /**
-     * Filters the sourcecode coverage highlighting for analyzing the Modified Lines Coverage only.
+     * Filters the sourcecode coverage highlighting for analyzing the modified lines coverage only.
      *
      * @param content
      *         The original HTML content
