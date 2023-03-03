@@ -29,6 +29,7 @@ import io.jenkins.plugins.checks.api.ChecksPublisherFactory;
 import io.jenkins.plugins.checks.api.ChecksStatus;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder.ChecksAnnotationScope;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.QualityGateStatus;
 
@@ -38,23 +39,25 @@ import io.jenkins.plugins.util.QualityGateStatus;
  * @author Florian Orendi
  */
 class CoverageChecksPublisher {
-
-    private final ElementFormatter FORMATTER = new ElementFormatter();
+    private static final ElementFormatter FORMATTER = new ElementFormatter();
 
     private final CoverageBuildAction action;
     private final JenkinsFacade jenkinsFacade;
     private final String checksName;
+    private final ChecksAnnotationScope annotationScope;
 
-    CoverageChecksPublisher(final CoverageBuildAction action, final String checksName) {
-        this(action, checksName, new JenkinsFacade());
+    CoverageChecksPublisher(final CoverageBuildAction action, final String checksName,
+            final ChecksAnnotationScope annotationScope) {
+        this(action, checksName, annotationScope, new JenkinsFacade());
     }
 
     @VisibleForTesting
     CoverageChecksPublisher(final CoverageBuildAction action,
-            final String checksName, final JenkinsFacade jenkinsFacade) {
+            final String checksName, final ChecksAnnotationScope annotationScope, final JenkinsFacade jenkinsFacade) {
         this.jenkinsFacade = jenkinsFacade;
         this.action = action;
         this.checksName = checksName;
+        this.annotationScope = annotationScope;
     }
 
     /**
@@ -99,6 +102,10 @@ class CoverageChecksPublisher {
     }
 
     private List<ChecksAnnotation> getAnnotations() {
+        if (annotationScope == ChecksAnnotationScope.SKIP) {
+            return List.of();
+        }
+        // TODO: check if it makes sense to add annotations for all lines
         var annotations = new ArrayList<ChecksAnnotation>();
         for (var fileNode : action.getResult().filterByModifiedLines().getAllFileNodes()) {
             for (var aggregatedLines : getAggregatedMissingLines(fileNode)) {

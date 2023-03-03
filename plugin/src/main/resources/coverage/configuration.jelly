@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:st="jelly:stapler" xmlns:j="jelly:core" xmlns:p="/prism" xmlns:s="/forensics" xmlns:f="/lib/form">
+<j:jelly xmlns:st="jelly:stapler" xmlns:j="jelly:core" xmlns:p="/prism" xmlns:c="/controls"  xmlns:s="/forensics" xmlns:f="/lib/form">
 
   <st:documentation>
     Provides the configuration for the coverage recorder and step.
@@ -39,9 +39,6 @@
       <f:textbox/>
     </f:entry>
 
-    <f:entry field="skipPublishingChecks">
-      <f:checkbox title="${%skipPublishingChecks.title}"/>
-    </f:entry>
     <f:entry field="failOnError">
       <f:checkbox title="${%failOnError.title}"/>
     </f:entry>
@@ -52,7 +49,21 @@
       <f:checkbox title="${%title.skipSymbolicLinks}"/>
     </f:entry>
 
+    <c:hr title="${%SCM Options}"/>
+
+    <f:entry field="skipPublishingChecks">
+      <f:checkbox title="${%skipPublishingChecks.title}"/>
+    </f:entry>
+    <f:entry title="${%checksName.title}" field="checksName">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="${%checksAnnotationScope.title}" field="checksAnnotationScope">
+      <f:select default="MODIFIED_LINES"/>
+    </f:entry>
     <s:scm/>
+
+    <c:hr title="${%Source Code Processing Options}"/>
+
     <p:sourceConfig/>
 
     <f:entry title="${%sourceCodeRetention.title}" field="sourceCodeRetention">

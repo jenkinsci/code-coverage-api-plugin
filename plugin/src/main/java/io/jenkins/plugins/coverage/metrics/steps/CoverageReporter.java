@@ -38,7 +38,7 @@ import io.jenkins.plugins.util.StageResultHandler;
  */
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
-    void publishAction(final String id, final String optionalName, final String icon, final Node rootNode,
+    CoverageBuildAction publishAction(final String id, final String optionalName, final String icon, final Node rootNode,
             final Run<?, ?> build,
             final FilePath workspace, final TaskListener listener, final List<CoverageQualityGate> qualityGates,
             final String scm, final Set<String> sourceDirectories, final String sourceCodeEncoding,
@@ -124,6 +124,7 @@ public class CoverageReporter {
         logHandler.log(log);
 
         build.addAction(action);
+        return action;
     }
 
     private void createDeltaReports(final Node rootNode, final FilteredLog log, final Node referenceRoot,

@@ -8,7 +8,8 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
@@ -22,6 +23,7 @@ import io.jenkins.plugins.checks.api.ChecksDetails;
 import io.jenkins.plugins.checks.api.ChecksOutput;
 import io.jenkins.plugins.checks.api.ChecksStatus;
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageTest;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder.ChecksAnnotationScope;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.QualityGateResult;
 
@@ -35,10 +37,11 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final String COVERAGE_ID = "coverage";
     private static final String REPORT_NAME = "Name";
 
-    @Test
-    void shouldCreate() {
-        var action = createCoverageBuildAction();
-        var publisher = new CoverageChecksPublisher(action, REPORT_NAME, createJenkins());
+    @ParameterizedTest(name = "should create checks (skip annotations = {0})")
+    @ValueSource(booleans = {true, false})
+    void shouldCreateChecksReport(final boolean skip) {
+        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(), REPORT_NAME,
+                skip ? ChecksAnnotationScope.SKIP : ChecksAnnotationScope.MODIFIED_LINES, createJenkins());
 
         var checkDetails = publisher.extractChecksDetails();
 
@@ -48,17 +51,17 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThat(checkDetails.getDetailsURL()).isPresent()
                 .get()
                 .isEqualTo("http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage");
-        assertOutput(checkDetails);
+        assertThatDetailsAreCorrect(checkDetails, skip);
     }
 
-    private void assertOutput(final ChecksDetails checkDetails) {
+    private void assertThatDetailsAreCorrect(final ChecksDetails checkDetails, final boolean skip) {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getTitle()).isPresent()
                     .get()
                     .isEqualTo("Modified code lines: 50.00% (1/2)");
             assertThat(output.getText()).isEmpty();
             assertSummary(output);
-            assertChecksAnnotations(output);
+            assertChecksAnnotations(output, skip);
         });
     }
 
@@ -69,26 +72,31 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                 .isEqualTo(expectedContent);
     }
 
-    private void assertChecksAnnotations(final ChecksOutput checksOutput) {
-        assertThat(checksOutput.getChecksAnnotations()).hasSize(2);
-        assertThat(checksOutput.getChecksAnnotations().get(0)).satisfies(annotation -> {
-            assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
-            assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-            assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
-            assertThat(annotation.getMessage()).isPresent().get()
-                    .isEqualTo("Changed line #L160 is not covered by tests");
-            assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(160);
-            assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(160);
-        });
-        assertThat(checksOutput.getChecksAnnotations().get(1)).satisfies(annotation -> {
-            assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
-            assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-            assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
-            assertThat(annotation.getMessage()).isPresent().get()
-                    .isEqualTo("Changed lines #L162 - L164 are not covered by tests");
-            assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(162);
-            assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(164);
-        });
+    private void assertChecksAnnotations(final ChecksOutput checksOutput, final boolean skip) {
+        if (skip) {
+            assertThat(checksOutput.getChecksAnnotations()).isEmpty();
+        }
+        else {
+            assertThat(checksOutput.getChecksAnnotations()).hasSize(2);
+            assertThat(checksOutput.getChecksAnnotations().get(0)).satisfies(annotation -> {
+                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
+                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
+                assertThat(annotation.getMessage()).isPresent().get()
+                        .isEqualTo("Changed line #L160 is not covered by tests");
+                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(160);
+                assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(160);
+            });
+            assertThat(checksOutput.getChecksAnnotations().get(1)).satisfies(annotation -> {
+                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
+                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
+                assertThat(annotation.getMessage()).isPresent().get()
+                        .isEqualTo("Changed lines #L162 - L164 are not covered by tests");
+                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(162);
+                assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(164);
+            });
+        }
     }
 
     private JenkinsFacade createJenkins() {
@@ -116,8 +124,8 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     file.addModifiedLine(164);
                 });
 
-        return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result, new QualityGateResult()
-                , null, "refId",
+        return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
+                new QualityGateResult(), null, "refId",
                 new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF, Metric.MODULE, Fraction.ONE_FIFTH)),
                 List.of(testCoverage), new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage),
                 new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage), false);
