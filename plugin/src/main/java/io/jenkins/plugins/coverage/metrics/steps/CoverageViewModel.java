@@ -296,9 +296,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
             case MODIFIED_LINES_COVERAGE_TABLE_ID:
                 return new ModifiedLinesCoverageTableModel(tableId, getNode(), modifiedLinesCoverageTreeRoot, renderer,
                         colorProvider);
-            case MODIFIED_FILES_COVERAGE_TABLE_ID:
-                return new ModifiedFilesCoverageTableModel(tableId, getNode(), modifiedFilesCoverageTreeRoot, renderer,
-                        colorProvider);
             case INDIRECT_COVERAGE_TABLE_ID:
                 return new IndirectCoverageChangesTable(tableId, getNode(), indirectCoverageChangesTreeRoot, renderer,
                         colorProvider);
