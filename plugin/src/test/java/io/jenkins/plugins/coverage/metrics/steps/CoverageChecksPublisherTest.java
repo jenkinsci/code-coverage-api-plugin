@@ -9,7 +9,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.metric.Coverage.CoverageBuilder;
@@ -37,11 +37,10 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final String COVERAGE_ID = "coverage";
     private static final String REPORT_NAME = "Name";
 
-    @ParameterizedTest(name = "should create checks (skip annotations = {0})")
-    @ValueSource(booleans = {true, false})
-    void shouldCreateChecksReport(final boolean skip) {
-        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(), REPORT_NAME,
-                skip ? ChecksAnnotationScope.SKIP : ChecksAnnotationScope.MODIFIED_LINES, createJenkins());
+    @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
+    @CsvSource({"SKIP, 0", "ALL_LINES, 36", "MODIFIED_LINES, 3"})
+    void shouldCreateChecksReport(final ChecksAnnotationScope scope, final int expectedAnnotations) {
+        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(), REPORT_NAME, scope, createJenkins());
 
         var checkDetails = publisher.extractChecksDetails();
 
@@ -51,16 +50,16 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThat(checkDetails.getDetailsURL()).isPresent()
                 .get()
                 .isEqualTo("http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage");
-        assertThatDetailsAreCorrect(checkDetails, skip);
+        assertThatDetailsAreCorrect(checkDetails, expectedAnnotations);
     }
 
-    private void assertThatDetailsAreCorrect(final ChecksDetails checkDetails, final boolean skip) {
+    private void assertThatDetailsAreCorrect(final ChecksDetails checkDetails, final int expectedAnnotations) {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getTitle()).isPresent()
                     .get()
                     .isEqualTo("Modified code lines: 50.00% (1/2)");
             assertThat(output.getText()).isEmpty();
-            assertChecksAnnotations(output, skip);
+            assertChecksAnnotations(output, expectedAnnotations);
             assertSummary(output);
         });
     }
@@ -72,12 +71,9 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                 .isEqualTo(expectedContent);
     }
 
-    private void assertChecksAnnotations(final ChecksOutput checksOutput, final boolean skip) {
-        if (skip) {
-            assertThat(checksOutput.getChecksAnnotations()).isEmpty();
-        }
-        else {
-            assertThat(checksOutput.getChecksAnnotations()).hasSize(3).satisfiesExactly(
+    private void assertChecksAnnotations(final ChecksOutput checksOutput, final int expectedAnnotations) {
+        if (expectedAnnotations == 3) {
+            assertThat(checksOutput.getChecksAnnotations()).hasSize(expectedAnnotations).satisfiesExactly(
                     annotation -> {
                         assertThat(annotation.getTitle()).contains("Not covered line");
                         assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
@@ -99,6 +95,9 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                         assertThat(annotation.getMessage()).contains("Line 113 is only partially covered, one branch is missing");
                         assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(113);
                     });
+        }
+        else {
+            assertThat(checksOutput.getChecksAnnotations()).hasSize(expectedAnnotations);
         }
     }
 
