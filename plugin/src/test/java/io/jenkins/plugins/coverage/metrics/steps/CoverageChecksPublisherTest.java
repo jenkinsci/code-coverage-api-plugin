@@ -77,31 +77,28 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
             assertThat(checksOutput.getChecksAnnotations()).isEmpty();
         }
         else {
-            assertThat(checksOutput.getChecksAnnotations()).hasSize(3);
-            assertThat(checksOutput.getChecksAnnotations().get(0)).satisfies(annotation -> {
-                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Not covered line");
-                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
-                assertThat(annotation.getMessage()).isPresent().get()
-                        .isEqualTo("Line 61 is not covered by tests");
-                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(61);
-            });
-            assertThat(checksOutput.getChecksAnnotations().get(1)).satisfies(annotation -> {
-                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Not covered line");
-                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
-                assertThat(annotation.getMessage()).isPresent().get()
-                        .isEqualTo("Line 62 is not covered by tests");
-                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(62);
-            });
-            assertThat(checksOutput.getChecksAnnotations().get(2)).satisfies(annotation -> {
-                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Partially covered line");
-                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
-                assertThat(annotation.getMessage()).isPresent().get()
-                        .isEqualTo("Line 113 is only partially covered, one branch is missing");
-                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(113);
-            });
+            assertThat(checksOutput.getChecksAnnotations()).hasSize(3).satisfiesExactly(
+                    annotation -> {
+                        assertThat(annotation.getTitle()).contains("Not covered line");
+                        assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                        assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
+                        assertThat(annotation.getMessage()).contains("Line 61 is not covered by tests");
+                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(61);
+                    },
+                    annotation -> {
+                        assertThat(annotation.getTitle()).contains("Not covered line");
+                        assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                        assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
+                        assertThat(annotation.getMessage()).contains("Line 62 is not covered by tests");
+                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(62);
+                    },
+                    annotation -> {
+                        assertThat(annotation.getTitle()).contains("Partially covered line");
+                        assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                        assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
+                        assertThat(annotation.getMessage()).contains("Line 113 is only partially covered, one branch is missing");
+                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(113);
+                    });
         }
     }
 
