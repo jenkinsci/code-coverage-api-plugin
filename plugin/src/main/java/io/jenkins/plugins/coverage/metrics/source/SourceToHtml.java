@@ -29,17 +29,25 @@ public class SourceToHtml {
             int covered = paint.getCovered(line);
             int missed = paint.getMissed(line);
 
-            output.write("<tr class=\"" + selectColor(covered, missed) + "\" "
-                    + getTooltip(paint, missed, covered) + ">\n");
+            int survived = paint.getSurvived(line);
+            int killed = paint.getKilled(line);
+
+            output.write("<tr class=\"" + selectColor(covered, missed, survived) + "\" "
+                    + getTooltip(paint, missed, covered, survived, killed) + ">\n");
             output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
 
             String display;
-            if (covered + missed > 1) {
+
+            if (survived + killed > 0) {
+                display = String.format("%d/%d", killed, survived + killed);
+            }
+            else if (covered + missed > 1) {
                 display = String.format("%d/%d", covered, covered + missed);
             }
             else {
                 display = String.valueOf(covered);
             }
+
             output.write("<td class=\"hits\">" + display + "</td>\n");
 
         }
@@ -60,11 +68,12 @@ public class SourceToHtml {
         output.write("</tr>\n");
     }
 
-    private String selectColor(final int covered, final int missed) {
+    private String selectColor(final int covered, final int missed, final int survived) {
+        // TODO: what colors should be used for the different cases: Mutations or Branches?
         if (covered == 0) {
             return "coverNone";
         }
-        else if (missed == 0) {
+        else if (missed == 0 && survived == 0) {
             return "coverFull";
         }
         else {
@@ -72,8 +81,9 @@ public class SourceToHtml {
         }
     }
 
-    private String getTooltip(final PaintedNode paint, final int missed, final int covered) {
-        var tooltip = getTooltipValue(paint, missed, covered);
+    private String getTooltip(final PaintedNode paint,
+            final int missed, final int covered, final int survived, final int killed) {
+        var tooltip = getTooltipValue(paint, missed, covered, survived, killed);
         if (StringUtils.isBlank(tooltip)) {
             return StringUtils.EMPTY;
         }
@@ -81,27 +91,30 @@ public class SourceToHtml {
     }
 
     // TODO: Extract into classes so that we can paint the mutations as well
-    private String getTooltipValue(final PaintedNode paint, final int missed, final int covered) {
-        if (paint.isMutation()) {
-            if (missed + covered > 1) {
-                return String.format("Killed: %d, Survived: %d", covered, missed);
-            }
-            if (missed == 1) {
-                return "Survived: 1";
-            }
-            return "Killed: 1";
+    private String getTooltipValue(final PaintedNode paint,
+            final int missed, final int covered, final int survived, final int killed) {
+
+        if (survived + killed > 1) {
+            return String.format("Mutations survived: %d, mutations killed: %d", survived, killed);
         }
+        if (survived == 1) {
+            return "One survived mutation";
+        }
+        if (killed == 1) {
+            return "One killed mutation";
+        }
+
         if (covered + missed > 1) {
             if (missed == 0) {
-                return "Line covered with full branch coverage";
+                return "All branches covered";
             }
-            return String.format("Line covered, branch coverage: %d/%d", covered, covered + missed);
+            return String.format("Partially covered, branch coverage: %d/%d", covered, covered + missed);
         }
         else if (covered == 1) {
-            return "Line covered at least once";
+            return "Covered at least once";
         }
         else {
-            return "Line not covered"; // No tooltip required
+            return "Not covered";
         }
     }
 }

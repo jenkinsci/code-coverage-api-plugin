@@ -213,7 +213,7 @@ class GitForensicsITest extends AbstractCoverageITest {
         assertThat(modifiedFiles).extracting(FileNode::getName)
                 .containsExactlyInAnyOrder("MinerFactory.java", "RepositoryMinerStep.java",
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
-        assertThat(modifiedFiles).flatExtracting(FileNode::getChangedLines)
+        assertThat(modifiedFiles).flatExtracting(FileNode::getModifiedLines)
                 .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
     }
 

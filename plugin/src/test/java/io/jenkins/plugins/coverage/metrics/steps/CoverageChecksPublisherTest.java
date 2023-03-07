@@ -60,13 +60,13 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     .get()
                     .isEqualTo("Modified code lines: 50.00% (1/2)");
             assertThat(output.getText()).isEmpty();
-            assertSummary(output);
             assertChecksAnnotations(output, skip);
+            assertSummary(output);
         });
     }
 
     private void assertSummary(final ChecksOutput checksOutput) throws IOException {
-        var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.MD"));
+        var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.md"));
         assertThat(checksOutput.getSummary()).isPresent()
                 .get()
                 .isEqualTo(expectedContent);
@@ -77,24 +77,30 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
             assertThat(checksOutput.getChecksAnnotations()).isEmpty();
         }
         else {
-            assertThat(checksOutput.getChecksAnnotations()).hasSize(2);
+            assertThat(checksOutput.getChecksAnnotations()).hasSize(3);
             assertThat(checksOutput.getChecksAnnotations().get(0)).satisfies(annotation -> {
-                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
+                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Not covered line");
                 assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
                 assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
                 assertThat(annotation.getMessage()).isPresent().get()
-                        .isEqualTo("Changed line #L160 is not covered by tests");
-                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(160);
-                assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(160);
+                        .isEqualTo("Line 61 is not covered by tests");
+                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(61);
             });
             assertThat(checksOutput.getChecksAnnotations().get(1)).satisfies(annotation -> {
-                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Missing Coverage");
+                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Not covered line");
                 assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
                 assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
                 assertThat(annotation.getMessage()).isPresent().get()
-                        .isEqualTo("Changed lines #L162 - L164 are not covered by tests");
-                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(162);
-                assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(164);
+                        .isEqualTo("Line 62 is not covered by tests");
+                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(62);
+            });
+            assertThat(checksOutput.getChecksAnnotations().get(2)).satisfies(annotation -> {
+                assertThat(annotation.getTitle()).isPresent().get().isEqualTo("Partially covered line");
+                assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                assertThat(annotation.getPath()).isPresent().get().isEqualTo("edu/hm/hafner/util/TreeStringBuilder.java");
+                assertThat(annotation.getMessage()).isPresent().get()
+                        .isEqualTo("Line 113 is only partially covered, one branch is missing");
+                assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(113);
             });
         }
     }
@@ -115,13 +121,11 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         var run = mock(Run.class);
         when(run.getUrl()).thenReturn(BUILD_LINK);
         var result = readJacocoResult("jacoco-codingstyle.xml");
-        result.getAllFileNodes().stream().filter(file -> file.getName().equals("TreeStringBuilder.java")).findFirst()
+        result.findFile("TreeStringBuilder.java")
                 .ifPresent(file -> {
-                    assertThat(file.getLinesWithCoverage()).contains(160, 162, 163, 164);
-                    file.addModifiedLine(160);
-                    file.addModifiedLine(162);
-                    file.addModifiedLine(163);
-                    file.addModifiedLine(164);
+                    assertThat(file.getMissedLines()).contains(61, 62);
+                    assertThat(file.getPartiallyCoveredLines()).contains(entry(113, 1));
+                    file.addModifiedLines(61, 62, 113);
                 });
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,

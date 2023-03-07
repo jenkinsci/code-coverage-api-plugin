@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -105,58 +106,70 @@ class CoverageChecksPublisher {
         if (annotationScope == ChecksAnnotationScope.SKIP) {
             return List.of();
         }
-        // TODO: check if it makes sense to add annotations for all lines
-        var annotations = new ArrayList<ChecksAnnotation>();
-        for (var fileNode : action.getResult().filterByModifiedLines().getAllFileNodes()) {
-            for (var aggregatedLines : getAggregatedMissingLines(fileNode)) {
-                ChecksAnnotationBuilder builder = new ChecksAnnotationBuilder()
-                        .withPath(fileNode.getPath())
-                        .withTitle(Messages.Checks_Annotation_Title())
-                        .withAnnotationLevel(ChecksAnnotationLevel.WARNING)
-                        .withMessage(getAnnotationMessage(aggregatedLines))
-                        .withStartLine(aggregatedLines.startLine)
-                        .withEndLine(aggregatedLines.endLine);
 
-                annotations.add(builder.build());
-            }
+        var tree = action.getResult();
+        Node filtered;
+        if (annotationScope == ChecksAnnotationScope.ALL_LINES) {
+            filtered = tree;
+        }
+        else {
+            filtered = tree.filterByModifiedLines();
         }
 
+        var annotations = new ArrayList<ChecksAnnotation>();
+        for (var fileNode : filtered.getAllFileNodes()) {
+            annotations.addAll(getMissingLines(fileNode));
+            annotations.addAll(getPartiallyCoveredLines(fileNode));
+            annotations.addAll(getSurvivedMutations(fileNode));
+        }
         return annotations;
     }
 
-    private String getAnnotationMessage(final AggregatedMissingLines aggregatedMissingLines) {
-        if (aggregatedMissingLines.startLine == aggregatedMissingLines.endLine) {
-            return Messages.Checks_Annotation_Message_SingleLine(aggregatedMissingLines.startLine);
-        }
-        return Messages.Checks_Annotation_Message_MultiLine(aggregatedMissingLines.startLine,
-                aggregatedMissingLines.endLine);
+    private Collection<? extends ChecksAnnotation> getMissingLines(final FileNode fileNode) {
+        var builder = createAnnotationBuilder(fileNode).withTitle("Not covered line");
+
+        return fileNode.getMissedLines().stream()
+                .map(line -> builder.withMessage("Line " + line + " is not covered by tests").withStartLine(line).build())
+                .collect(Collectors.toList());
     }
 
-    private List<AggregatedMissingLines> getAggregatedMissingLines(final FileNode fileNode) {
-        var aggregatedMissingLines = new ArrayList<AggregatedMissingLines>();
+    private Collection<? extends ChecksAnnotation> getSurvivedMutations(final FileNode fileNode) {
+        var builder = createAnnotationBuilder(fileNode).withTitle("Mutation survived");
 
-        if (fileNode.hasCoveredLinesInChangeSet()) {
-            var linesWithCoverage = fileNode.getLinesWithCoverage();
-            // there has to be at least one line when it is a file node with changes
-            var previousLine = linesWithCoverage.first();
-            var aggregatedLines = new AggregatedMissingLines(previousLine);
-            linesWithCoverage.remove(previousLine);
+        return fileNode.getSurvivedMutations().entrySet().stream()
+                .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
+                        .withStartLine(entry.getKey()).build())
+                .collect(Collectors.toList());
+    }
 
-            for (final var line : linesWithCoverage) {
-                if (line == previousLine + 1) {
-                    aggregatedLines.increaseEndLine();
-                }
-                else {
-                    aggregatedMissingLines.add(aggregatedLines);
-                    aggregatedLines = new AggregatedMissingLines(line);
-                }
-                previousLine = line;
-            }
-
-            aggregatedMissingLines.add(aggregatedLines);
+    private String createMutationMessage(final int line, final int survived) {
+        if (survived == 1) {
+            return "One mutation survived in line " + line;
         }
+        return String.format("%d mutations survived in line %d", survived, line);
+    }
 
-        return aggregatedMissingLines;
+    private Collection<? extends ChecksAnnotation> getPartiallyCoveredLines(final FileNode fileNode) {
+        var builder = createAnnotationBuilder(fileNode).withTitle("Partially covered line");
+
+        return fileNode.getPartiallyCoveredLines().entrySet().stream()
+                .map(entry -> builder.withMessage(createBranchMessage(entry.getKey(), entry.getValue()))
+                        .withStartLine(entry.getKey()).build())
+                .collect(Collectors.toList());
+    }
+
+    private String createBranchMessage(final int line, final int missed) {
+        if (missed == 1) {
+            return "Line " + line + " is only partially covered, one branch is missing";
+
+        }
+        return "Line " + line + " is only partially covered, %d branches are missing.";
+    }
+
+    private ChecksAnnotationBuilder createAnnotationBuilder(final FileNode fileNode) {
+        return new ChecksAnnotationBuilder()
+                .withPath(fileNode.getPath())
+                .withAnnotationLevel(ChecksAnnotationLevel.WARNING);
     }
 
     private String getCoverageReportBaseUrl() {
@@ -241,7 +254,8 @@ class CoverageChecksPublisher {
      */
     // TODO: expand with summary of status of each defined quality gate
     private String getQualityGatesSummary() {
-        return getSectionHeader(2, Messages.Checks_QualityGates(action.getQualityGateResult().getOverallStatus().name()));
+        return getSectionHeader(2,
+                Messages.Checks_QualityGates(action.getQualityGateResult().getOverallStatus().name()));
     }
 
     private String getProjectMetricsSummary(final Node result) {
@@ -408,19 +422,5 @@ class CoverageChecksPublisher {
     private enum TextFormat {
         BOLD,
         CURSIVE
-    }
-
-    private static class AggregatedMissingLines {
-        private final int startLine;
-        private int endLine;
-
-        private AggregatedMissingLines(final int startLine) {
-            this.startLine = startLine;
-            this.endLine = startLine;
-        }
-
-        private void increaseEndLine() {
-            endLine++;
-        }
     }
 }

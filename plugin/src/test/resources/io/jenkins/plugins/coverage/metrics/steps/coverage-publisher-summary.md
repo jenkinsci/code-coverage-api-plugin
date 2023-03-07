@@ -13,7 +13,7 @@
 * **[Modified code lines (difference to overall project)](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#modifiedLinesCoverage)**
   * Line Coverage: 50.00% (1/2) / +50.00%
   * Branch Coverage: n/a / n/a
-  * Lines of Code: 4
+  * Lines of Code: 3
 * **[Indirect changes](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#indirectCoverage)**
   * Line Coverage: 50.00% (1/2) / n/a
   * Branch Coverage: n/a / n/a

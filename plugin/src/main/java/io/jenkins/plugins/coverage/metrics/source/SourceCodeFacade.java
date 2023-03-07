@@ -174,7 +174,7 @@ public class SourceCodeFacade {
      */
     public String calculateModifiedLinesCoverageSourceCode(final String content, final FileNode fileNode) {
         Set<Integer> lines = fileNode.getLinesWithCoverage();
-        lines.retainAll(fileNode.getChangedLines());
+        lines.retainAll(fileNode.getModifiedLines());
         Set<String> linesAsText = lines.stream().map(String::valueOf).collect(Collectors.toSet());
         Document doc = Jsoup.parse(content, Parser.xmlParser());
         int maxLine = Integer.parseInt(Objects.requireNonNull(

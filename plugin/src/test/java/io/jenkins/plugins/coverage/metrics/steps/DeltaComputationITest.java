@@ -128,6 +128,6 @@ class DeltaComputationITest extends AbstractCoverageITest {
     private void verifyModifiedLinesCoverage(final CoverageBuildAction action) {
         Node root = action.getResult();
         assertThat(root).isNotNull();
-        assertThat(root.getAllFileNodes()).flatExtracting(FileNode::getChangedLines).isEmpty();
+        assertThat(root.getAllFileNodes()).flatExtracting(FileNode::getModifiedLines).isEmpty();
     }
 }
