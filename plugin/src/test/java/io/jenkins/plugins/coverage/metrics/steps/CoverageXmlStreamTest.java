@@ -230,7 +230,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         return new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID, StringUtils.EMPTY,
                 StringUtils.EMPTY,
                 tree, new QualityGateResult(), new FilteredLog("Test"), "-",
-                new TreeMap<>(), List.of(),
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(),
                 new TreeMap<>(), List.of(), false);
     }
 

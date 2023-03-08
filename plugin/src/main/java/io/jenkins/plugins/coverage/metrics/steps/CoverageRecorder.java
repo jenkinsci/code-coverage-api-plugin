@@ -63,6 +63,8 @@ import io.jenkins.plugins.util.ValidationUtilities;
  */
 @SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CoverageRecorder extends Recorder {
+    static final String CHECKS_DEFAULT_NAME = "Code Coverage";
+
     static final String DEFAULT_ID = "coverage";
     private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();
     /** The coverage report symbol from the Ionicons plugin. */
@@ -73,6 +75,8 @@ public class CoverageRecorder extends Recorder {
     private String id = StringUtils.EMPTY;
     private String name = StringUtils.EMPTY;
     private boolean skipPublishingChecks = false;
+    private String checksName = StringUtils.EMPTY;
+    private ChecksAnnotationScope checksAnnotationScope = ChecksAnnotationScope.MODIFIED_LINES;
     private boolean failOnError = false;
     private boolean enabledForFailure = false;
     private boolean skipSymbolicLinks = false;
@@ -185,6 +189,36 @@ public class CoverageRecorder extends Recorder {
 
     public boolean isSkipPublishingChecks() {
         return skipPublishingChecks;
+    }
+
+    /**
+     * Changes the default name for the SCM checks report.
+     *
+     * @param checksName
+     *         the name that should be used for the SCM checks report
+     */
+    @DataBoundSetter
+    public void setChecksName(final String checksName) {
+        this.checksName = checksName;
+    }
+
+    public String getChecksName() {
+        return StringUtils.defaultIfBlank(checksName, CHECKS_DEFAULT_NAME);
+    }
+
+    /**
+     * Sets the scope of the annotations that should be published to SCM checks.
+     *
+     * @param checksAnnotationScope
+     *         the scope to use
+     */
+    @DataBoundSetter
+    public void setChecksAnnotationScope(final ChecksAnnotationScope checksAnnotationScope) {
+        this.checksAnnotationScope = checksAnnotationScope;
+    }
+
+    public ChecksAnnotationScope getChecksAnnotationScope() {
+        return checksAnnotationScope;
     }
 
     /**
@@ -342,20 +376,30 @@ public class CoverageRecorder extends Recorder {
                         "No tools defined that will record the coverage files");
             }
             else {
-                List<Node> results = recordCoverageResults(run, workspace, taskListener, resultHandler, log);
-
-                if (!results.isEmpty()) {
-                    CoverageReporter reporter = new CoverageReporter();
-                    reporter.publishAction(getActualId(), getName(), getIcon(),
-                            Node.merge(results), run, workspace, taskListener,
-                            getQualityGates(),
-                            getScm(), getSourceDirectoriesPaths(),
-                            getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
-                }
+                perform(run, workspace, taskListener, resultHandler, log);
             }
+
         }
         else {
             logHandler.log("Skipping execution of coverage recorder since overall result is '%s'", overallResult);
+        }
+    }
+
+    private void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
+            final StageResultHandler resultHandler, final FilteredLog log) throws InterruptedException {
+        List<Node> results = recordCoverageResults(run, workspace, taskListener, resultHandler, log);
+
+        if (!results.isEmpty()) {
+            CoverageReporter reporter = new CoverageReporter();
+            var action = reporter.publishAction(getActualId(), getName(), getIcon(),
+                    Node.merge(results), run, workspace, taskListener,
+                    getQualityGates(),
+                    getScm(), getSourceDirectoriesPaths(),
+                    getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
+            if (!skipPublishingChecks) {
+                var checksPublisher = new CoverageChecksPublisher(action, getChecksName(), getChecksAnnotationScope());
+                checksPublisher.publishCoverageReport(taskListener);
+            }
         }
     }
 
@@ -471,6 +515,23 @@ public class CoverageRecorder extends Recorder {
         }
 
         /**
+         * Returns a model with all {@link ChecksAnnotationScope} scopes.
+         *
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link ChecksAnnotationScope} scopes.
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillChecksAnnotationScopeItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return ChecksAnnotationScope.fillItems();
+            }
+            return new ListBoxModel();
+        }
+
+        /**
          * Returns a model with all available charsets.
          *
          * @param project
@@ -526,6 +587,26 @@ public class CoverageRecorder extends Recorder {
             }
 
             return VALIDATION_UTILITIES.validateId(id);
+        }
+    }
+
+    /**
+     * Defines the scope of SCM checks annotations.
+     */
+    enum ChecksAnnotationScope {
+        /** No annotations are created. */
+        SKIP,
+        /** Only changed lines are annotated. */
+        MODIFIED_LINES,
+        /** All lines are annotated. */
+        ALL_LINES;
+
+        static ListBoxModel fillItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add(Messages.ChecksAnnotationScope_Skip(), ChecksAnnotationScope.SKIP.name());
+            items.add(Messages.ChecksAnnotationScope_ModifiedLines(), ChecksAnnotationScope.MODIFIED_LINES.name());
+            items.add(Messages.ChecksAnnotationScope_AllLines(), ChecksAnnotationScope.ALL_LINES.name());
+            return items;
         }
     }
 }

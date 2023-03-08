@@ -27,23 +27,23 @@ public enum Baseline {
      * Coverage of the modified lines (e.g., within the modified lines of a pull or merge request) will focus on new or
      * modified code only.
      */
-    MODIFIED_LINES(Messages._Baseline_MODIFIED_LINES(), "changeCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
+    MODIFIED_LINES(Messages._Baseline_MODIFIED_LINES(), "modifiedLinesCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
     /**
      * Difference between the project coverage and the modified lines coverage of the current build. Teams can use this delta
      * value to ensure that the coverage of pull requests is better than the whole project coverage.
      */
-    MODIFIED_LINES_DELTA(Messages._Baseline_MODIFIED_LINES_DELTA(), "changeCoverage",
+    MODIFIED_LINES_DELTA(Messages._Baseline_MODIFIED_LINES_DELTA(), "modifiedLinesCoverage",
             CoverageChangeTendency::getDisplayColorsForTendency),
     /**
      * Coverage of the modified files (e.g., within the files that have been touched in a pull or merge request) will
      * focus on new or modified code only.
      */
-    MODIFIED_FILES(Messages._Baseline_MODIFIED_FILES(), "fileCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
+    MODIFIED_FILES(Messages._Baseline_MODIFIED_FILES(), "modifiedFilesCoverage", CoverageLevel::getDisplayColorsOfCoverageLevel),
     /**
      * Difference between the project coverage and the modified file coverage of the current build. Teams can use this delta
      * value to ensure that the coverage of pull requests is better than the whole project coverage.
      */
-    MODIFIED_FILES_DELTA(Messages._Baseline_MODIFIED_FILES_DELTA(), "fileCoverage", CoverageChangeTendency::getDisplayColorsForTendency),
+    MODIFIED_FILES_DELTA(Messages._Baseline_MODIFIED_FILES_DELTA(), "modifiedFilesCoverage", CoverageChangeTendency::getDisplayColorsForTendency),
     /**
      * Indirect changes of the overall code coverage that are not part of the changed code. These changes might occur,
      * if new tests will be added without touching the underlying code under test.

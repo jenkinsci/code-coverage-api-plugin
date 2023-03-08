@@ -1,10 +1,13 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:st="jelly:stapler" xmlns:fa="/font-awesome" >
+<j:jelly xmlns:j="jelly:core" xmlns:bs="/bootstrap5" xmlns:dt="/data-tables" xmlns:st="jelly:stapler" xmlns:fa="/font-awesome" xmlns:f="/lib/form">
 
   <st:documentation>
     Provides a table to render the file coverage nodes without the source code.
     <st:attribute name="tableId" type="String">
       The ID of the table.
+    </st:attribute>
+    <st:attribute name="showChangedToggle" type="Boolean">
+      Determines whether to show the changed files filter toggle.
     </st:attribute>
   </st:documentation>
 
@@ -15,11 +18,17 @@
       <j:when test="${it.hasSourceCode()}">
         <div class="col-12 d-xxl-none">
           <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100" >
+            <j:if test="${showChangedToggle}">
+              <f:toggleSwitch name="changed" title="Show only changed files" />
+            </j:if>
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>
         </div>
         <div class="col-xxl-6 d-none d-xxl-block">
           <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
+            <j:if test="${showChangedToggle}">
+              <f:toggleSwitch name="changed" title="Show only changed files" />
+            </j:if>
             <dt:table model="${it.getTableModel(tableId + '-table-inline')}"/>
           </bs:card>
         </div>
@@ -51,6 +60,9 @@
       </j:when>
       <j:otherwise>
         <div class="col-12">
+          <j:if test="${showChangedToggle}">
+            <f:toggleSwitch name="changed" title="Show only changed files" />
+          </j:if>
           <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>

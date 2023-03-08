@@ -1,8 +1,12 @@
 package io.jenkins.plugins.coverage.metrics.model;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
@@ -11,6 +15,7 @@ import edu.hm.hafner.metric.Coverage;
 import edu.hm.hafner.metric.FractionValue;
 import edu.hm.hafner.metric.IntegerValue;
 import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Node;
 import edu.hm.hafner.metric.Percentage;
 import edu.hm.hafner.metric.Value;
 
@@ -134,6 +139,7 @@ public final class ElementFormatter {
      *
      * @param value
      *         the value to format
+     *
      * @return the formatted value as plain text
      */
     public String formatAdditionalInformation(final Value value) {
@@ -184,10 +190,11 @@ public final class ElementFormatter {
     public DisplayColors getDisplayColors(final Baseline baseline, final Value value) {
         var defaultColorProvider = ColorProviderFactory.createDefaultColorProvider();
         if (value instanceof Coverage) {
-            return baseline.getDisplayColors(((Coverage)value).getCoveredPercentage().toDouble(), defaultColorProvider);
+            return baseline.getDisplayColors(((Coverage) value).getCoveredPercentage().toDouble(),
+                    defaultColorProvider);
         }
         else if (value instanceof FractionValue) {
-            return baseline.getDisplayColors(((FractionValue)value).getFraction().doubleValue(), defaultColorProvider);
+            return baseline.getDisplayColors(((FractionValue) value).getFraction().doubleValue(), defaultColorProvider);
         }
         return ColorProvider.DEFAULT_COLOR;
     }
@@ -368,6 +375,48 @@ public final class ElementFormatter {
             default:
                 throw new NoSuchElementException("No display name found for metric " + metric);
         }
+    }
+
+    /**
+     * Gets the display names of the existing {@link Metric coverage metrics}, sorted by the metrics ordinal.
+     *
+     * @return the sorted metric display names
+     */
+    public List<String> getSortedCoverageDisplayNames() {
+        return Metric.getCoverageMetrics().stream()
+                .map(this::getDisplayName)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Formats a stream of values to their display representation by using the given locale.
+     *
+     * @param values
+     *         The values to be formatted
+     * @param locale
+     *         The locale to be used for formatting
+     *
+     * @return the formatted values in the origin order of the stream
+     */
+    public List<String> getFormattedValues(final Stream<? extends Value> values, final Locale locale) {
+        return values.map(value -> formatDetails(value, locale)).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a stream of {@link Coverage} values for the given root node sorted by the metric ordinal.
+     *
+     * @param coverage
+     *         The coverage root node
+     *
+     * @return a stream containing the existent coverage values
+     */
+    public Stream<Coverage> getSortedCoverageValues(final Node coverage) {
+        return Metric.getCoverageMetrics()
+                .stream()
+                .map(m -> m.getValueFor(coverage))
+                .flatMap(Optional::stream)
+                .filter(value -> value instanceof Coverage)
+                .map(Coverage.class::cast);
     }
 
     /**

@@ -86,13 +86,13 @@ class FileChangesProcessorTest extends AbstractCoverageTest {
         assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_1_PATH.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> assertThat(node.get())
-                        .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
+                        .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getModifiedLines())
                                         .containsExactly(
                             5, 6, 7, 8, 9, 14, 15, 16, 17, 18, 20, 21, 22, 33, 34, 35, 36)));
         assertThat(tree.findByHashCode(Metric.FILE, TEST_FILE_2.hashCode()))
                 .isNotEmpty()
                 .satisfies(node -> assertThat(node.get())
-                            .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getChangedLines())
+                            .isInstanceOfSatisfying(FileNode.class, f -> assertThat(f.getModifiedLines())
                             .isEmpty()));
     }
 

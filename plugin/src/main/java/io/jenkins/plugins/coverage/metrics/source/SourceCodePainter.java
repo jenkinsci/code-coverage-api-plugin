@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 
 import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.metric.Mutation;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
@@ -328,27 +328,31 @@ public class SourceCodePainter {
         private final int[] linesToPaint;
         private final int[] coveredPerLine;
         private final int[] missedPerLine;
-        private final Type type;
+        private final int[] survivedPerLine;
+        private final int[] killedPerLine;
 
         PaintedNode(final FileNode file) {
             path = file.getPath();
+
             linesToPaint = file.getLinesWithCoverage().stream().mapToInt(i -> i).toArray();
             coveredPerLine = file.getCoveredCounters();
             missedPerLine = file.getMissedCounters();
-            if (file.containsMetric(Metric.MUTATION)) { // FIXME: this needs to be generalized
-                type = Type.MUTATION;
-            }
-            else {
-                type = Type.COVERAGE;
+
+            survivedPerLine = new int[linesToPaint.length];
+            killedPerLine = new int[linesToPaint.length];
+
+            for (Mutation mutation : file.getMutations()) { // FIXME: this needs to be generalized
+                if (mutation.hasSurvived()) {
+                    survivedPerLine[findLine(mutation.getLine())]++;
+                }
+                else if (mutation.isKilled()) {
+                    killedPerLine[findLine(mutation.getLine())]++;
+                }
             }
         }
 
         public String getPath() {
             return path;
-        }
-
-        public boolean isMutation() {
-            return type == Type.MUTATION;
         }
 
         public boolean isPainted(final int line) {
@@ -365,6 +369,14 @@ public class SourceCodePainter {
 
         public int getMissed(final int line) {
             return getCounter(line, missedPerLine);
+        }
+
+        public int getSurvived(final int line) {
+            return getCounter(line, survivedPerLine);
+        }
+
+        public int getKilled(final int line) {
+            return getCounter(line, killedPerLine);
         }
 
         private int getCounter(final int line, final int[] counters) {

@@ -17,7 +17,7 @@
 
     <j:set var="formatter" value="${it.formatter}"/>
 
-    <j:set var="hasChangeCoverage" value="${it.hasChangeCoverage()}"/>
+    <j:set var="hasModifiedLinesCoverage" value="${it.hasModifiedLinesCoverage()}"/>
     <j:set var="hasIndirectCoverageChanges" value="${it.hasIndirectCoverageChanges()}"/>
 
     <div class="tabBarFrame">
@@ -33,9 +33,9 @@
         <li class="nav-item tab" role="presentation">
           <a class="nav-link" id="fileCoverage-tab" data-bs-toggle="tab" data-bs-target="#fileCoverage" type="button" role="tab" aria-controls="fileCoverage" aria-selected="false">File Coverage</a>
         </li>
-        <j:if test="${hasChangeCoverage}">
+        <j:if test="${hasModifiedLinesCoverage}">
           <li class="nav-item tab" role="presentation">
-            <a class="nav-link" id="changeCoverage-tab" data-bs-toggle="tab" data-bs-target="#changeCoverage" type="button" role="tab" aria-controls="changeCoverage" aria-selected="false">Change Coverage</a>
+            <a class="nav-link" id="changeCoverage-tab" data-bs-toggle="tab" data-bs-target="#changeCoverage" type="button" role="tab" aria-controls="changeCoverage" aria-selected="false">Modified Lines Coverage</a>
           </li>
         </j:if>
         <j:if test="${hasIndirectCoverageChanges}">
@@ -72,10 +72,10 @@
       </j:forEach>
 
       <div role="tabpanel" id="fileCoverage" class="tab-pane fade" aria-labelledby="fileCoverage-tab">
-        <cov:coverage-table tableId="absolute-coverage"/>
+        <cov:coverage-table showChangedToggle="true" tableId="absolute-coverage"/>
       </div>
 
-      <j:if test="${hasChangeCoverage}">
+      <j:if test="${hasModifiedLinesCoverage}">
         <div role="tabpanel" id="changeCoverage" class="tab-pane fade" aria-labelledby="changeCoverage-tab">
           <cov:coverage-table tableId="change-coverage"/>
         </div>

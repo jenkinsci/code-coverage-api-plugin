@@ -61,7 +61,7 @@ public class FileChangesProcessor {
     private void attachChanges(final FileNode changedNode, final Set<Change> relevantChanges) {
         for (Change change : relevantChanges) {
             for (int i = change.getFromLine(); i <= change.getToLine(); i++) {
-                changedNode.addModifiedLine(i);
+                changedNode.addModifiedLines(i);
             }
         }
     }
@@ -142,7 +142,7 @@ public class FileChangesProcessor {
     private void attachIndirectCoverageChangeForFile(final FileNode fileNode,
             final SortedMap<Integer, Integer> referenceCoverageMapping) {
         fileNode.getLinesWithCoverage().forEach(line -> {
-            if (!fileNode.hasChangedLine(line) && referenceCoverageMapping.containsKey(line)) {
+            if (!fileNode.hasModifiedLine(line) && referenceCoverageMapping.containsKey(line)) {
                 int referenceCovered = referenceCoverageMapping.get(line);
                 int covered = fileNode.getCoveredOfLine(line);
                 if (covered != referenceCovered) {

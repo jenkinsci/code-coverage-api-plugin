@@ -64,19 +64,19 @@ abstract class ChangesTableModel extends CoverageTableModel {
 
         @Override
         public DetailedCell<?> getLineCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(Metric.LINE);
+            return createColoredModifiedLinesCoverageDeltaColumn(Metric.LINE);
         }
 
         @Override
         public DetailedCell<?> getBranchCoverageDelta() {
-            return createColoredChangeCoverageDeltaColumn(Metric.BRANCH);
+            return createColoredModifiedLinesCoverageDeltaColumn(Metric.BRANCH);
         }
 
-        DetailedCell<?> createColoredChangeCoverageDeltaColumn(final Metric metric) {
-            Coverage changeCoverage = getFile().getTypedValue(metric, Coverage.nullObject(metric));
-            if (changeCoverage.isSet()) {
+        DetailedCell<?> createColoredModifiedLinesCoverageDeltaColumn(final Metric metric) {
+            Coverage modifiedLinesCoverage = getFile().getTypedValue(metric, Coverage.nullObject(metric));
+            if (modifiedLinesCoverage.isSet()) {
                 return createColoredCoverageDeltaColumn(metric,
-                        changeCoverage.delta(originalFile.getTypedValue(metric, Coverage.nullObject(metric))));
+                        modifiedLinesCoverage.delta(originalFile.getTypedValue(metric, Coverage.nullObject(metric))));
             }
             return NO_COVERAGE;
         }

@@ -41,6 +41,8 @@ import io.jenkins.plugins.util.AbstractExecution;
 import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.ValidationUtilities;
 
+import static io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder.*;
+
 /**
  * A pipeline {@code Step} that reads and parses coverage results in a build and adds the results to the persisted build
  * results. This step only provides the entry point for pipelines, the actual computation is delegated to an associated
@@ -57,6 +59,8 @@ public class CoverageStep extends Step implements Serializable {
     private String id = StringUtils.EMPTY;
     private String name = StringUtils.EMPTY;
     private boolean skipPublishingChecks = false;
+    private String checksName =  StringUtils.EMPTY;
+    private ChecksAnnotationScope checksAnnotationScope = ChecksAnnotationScope.MODIFIED_LINES;
     private boolean failOnError = false;
     private boolean enabledForFailure = false;
     private boolean skipSymbolicLinks = false;
@@ -162,6 +166,36 @@ public class CoverageStep extends Step implements Serializable {
 
     public boolean isSkipPublishingChecks() {
         return skipPublishingChecks;
+    }
+
+    /**
+     * Changes the default name for the SCM checks report.
+     *
+     * @param checksName
+     *         the name that should be used for the SCM checks report
+     */
+    @DataBoundSetter
+    public void setChecksName(final String checksName) {
+        this.checksName = checksName;
+    }
+
+    public String getChecksName() {
+        return checksName;
+    }
+
+    /**
+     * Sets the scope of the annotations that should be published to SCM checks.
+     *
+     * @param checksAnnotationScope
+     *         the scope to use
+     */
+    @DataBoundSetter
+    public void setChecksAnnotationScope(final ChecksAnnotationScope checksAnnotationScope) {
+        this.checksAnnotationScope = checksAnnotationScope;
+    }
+
+    public ChecksAnnotationScope getChecksAnnotationScope() {
+        return checksAnnotationScope;
     }
 
     /**
@@ -300,6 +334,8 @@ public class CoverageStep extends Step implements Serializable {
             recorder.setId(step.getId());
             recorder.setName(step.getName());
             recorder.setSkipPublishingChecks(step.isSkipPublishingChecks());
+            recorder.setChecksName(step.getChecksName());
+            recorder.setChecksAnnotationScope(step.getChecksAnnotationScope());
             recorder.setFailOnError(step.isFailOnError());
             recorder.setEnabledForFailure(step.isEnabledForFailure());
             recorder.setScm(step.getScm());
@@ -362,6 +398,24 @@ public class CoverageStep extends Step implements Serializable {
             }
             return new ListBoxModel();
         }
+
+        /**
+         * Returns a model with all {@link ChecksAnnotationScope} scopes.
+         *
+         * @param project
+         *         the project that is configured
+         *
+         * @return a model with all {@link ChecksAnnotationScope} scopes.
+         */
+        @POST
+        @SuppressWarnings("unused") // used by Stapler view data binding
+        public ListBoxModel doFillChecksAnnotationScopeItems(@AncestorInPath final AbstractProject<?, ?> project) {
+            if (JENKINS.hasPermission(Item.CONFIGURE, project)) {
+                return ChecksAnnotationScope.fillItems();
+            }
+            return new ListBoxModel();
+        }
+
 
         /**
          * Returns a model with all available charsets.

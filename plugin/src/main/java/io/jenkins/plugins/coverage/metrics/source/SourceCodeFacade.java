@@ -163,7 +163,7 @@ public class SourceCodeFacade {
     }
 
     /**
-     * Filters the sourcecode coverage highlighting for analyzing the change coverage only.
+     * Filters the sourcecode coverage highlighting for analyzing the modified lines coverage only.
      *
      * @param content
      *         The original HTML content
@@ -172,9 +172,9 @@ public class SourceCodeFacade {
      *
      * @return the filtered HTML sourcecode view
      */
-    public String calculateChangeCoverageSourceCode(final String content, final FileNode fileNode) {
+    public String calculateModifiedLinesCoverageSourceCode(final String content, final FileNode fileNode) {
         Set<Integer> lines = fileNode.getLinesWithCoverage();
-        lines.retainAll(fileNode.getChangedLines());
+        lines.retainAll(fileNode.getModifiedLines());
         Set<String> linesAsText = lines.stream().map(String::valueOf).collect(Collectors.toSet());
         Document doc = Jsoup.parse(content, Parser.xmlParser());
         int maxLine = Integer.parseInt(Objects.requireNonNull(
