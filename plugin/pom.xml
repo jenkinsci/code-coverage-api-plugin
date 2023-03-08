@@ -29,7 +29,7 @@
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
     <json-unit-assertj.version>2.36.1</json-unit-assertj.version>
     <gson.version>2.10.1</gson.version>
-    <jsoup.version>1.15.3</jsoup.version>
+    <jsoup.version>1.15.4</jsoup.version>
     <prism-api.version>1.28.0-2</prism-api.version>
     <docker-fixtures.version>1.11</docker-fixtures.version>
     <testcontainers.version>1.17.6</testcontainers.version>
