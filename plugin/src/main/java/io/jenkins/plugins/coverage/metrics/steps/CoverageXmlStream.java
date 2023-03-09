@@ -23,19 +23,19 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-import edu.hm.hafner.metric.ClassNode;
-import edu.hm.hafner.metric.ContainerNode;
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.CyclomaticComplexity;
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.FractionValue;
-import edu.hm.hafner.metric.LinesOfCode;
-import edu.hm.hafner.metric.MethodNode;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.PackageNode;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.ClassNode;
+import edu.hm.hafner.coverage.ContainerNode;
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.CyclomaticComplexity;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.FractionValue;
+import edu.hm.hafner.coverage.LinesOfCode;
+import edu.hm.hafner.coverage.MethodNode;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.ModuleNode;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.PackageNode;
+import edu.hm.hafner.coverage.Value;
 
 import hudson.util.XStream2;
 

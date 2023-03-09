@@ -6,7 +6,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Metric;
 
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;

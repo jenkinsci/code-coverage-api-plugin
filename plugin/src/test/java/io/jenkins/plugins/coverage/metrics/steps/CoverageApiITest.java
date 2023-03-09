@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Metric;
 
 import net.sf.json.JSONObject;
 

@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.hm.hafner.metric.CoverageParser;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.registry.ParserRegistry;
+import edu.hm.hafner.coverage.CoverageParser;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.registry.ParserRegistry;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 

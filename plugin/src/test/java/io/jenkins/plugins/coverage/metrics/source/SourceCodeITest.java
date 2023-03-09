@@ -7,9 +7,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;

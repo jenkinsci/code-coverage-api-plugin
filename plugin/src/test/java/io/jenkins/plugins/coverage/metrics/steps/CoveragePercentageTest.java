@@ -5,8 +5,8 @@ import java.util.Locale;
 import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.Metric;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 

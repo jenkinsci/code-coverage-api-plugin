@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Metric;
 
 import org.jenkinsci.plugins.workflow.actions.WarningAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;

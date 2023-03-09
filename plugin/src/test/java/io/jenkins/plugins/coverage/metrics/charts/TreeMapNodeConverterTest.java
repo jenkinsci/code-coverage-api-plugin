@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageTest;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;

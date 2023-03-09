@@ -12,10 +12,10 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.DefaultLocale;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.FractionValue;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.FractionValue;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.VisibleForTesting;
 

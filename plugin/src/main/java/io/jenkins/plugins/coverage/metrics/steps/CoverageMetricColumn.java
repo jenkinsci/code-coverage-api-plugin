@@ -3,8 +3,8 @@ package io.jenkins.plugins.coverage.metrics.steps;
 import java.util.List;
 import java.util.Optional;
 
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.NonNull;
 

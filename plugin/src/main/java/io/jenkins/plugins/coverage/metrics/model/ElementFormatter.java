@@ -11,13 +11,13 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.FractionValue;
-import edu.hm.hafner.metric.IntegerValue;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Percentage;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.FractionValue;
+import edu.hm.hafner.coverage.IntegerValue;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Percentage;
+import edu.hm.hafner.coverage.Value;
 
 import hudson.Functions;
 import hudson.util.ListBoxModel;

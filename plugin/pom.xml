@@ -35,7 +35,7 @@
     <job-dsl.version>1.81</job-dsl.version>
     <xmlunit.version>2.9.0</xmlunit.version>
 
-    <coverage-model.version>0.15.0</coverage-model.version>
+    <coverage-model.version>0.18.0</coverage-model.version>
     <echarts-api.version>5.4.0-2-rc759.8b_4e78286216</echarts-api.version>
     <prism-api.version>1.29.0-3-rc207.f000c20b_dea_5</prism-api.version>
     <git-forensics.version>1.11.0</git-forensics.version>

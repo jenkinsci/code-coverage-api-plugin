@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.ModuleNode;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.NonNull;
 

@@ -9,11 +9,11 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.math.Fraction;
 import org.junitpioneer.jupiter.DefaultLocale;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Value;
-import edu.hm.hafner.metric.parser.JacocoParser;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Value;
+import edu.hm.hafner.coverage.parser.JacocoParser;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.ResourceTest;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;

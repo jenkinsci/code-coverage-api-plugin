@@ -1,6 +1,6 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import org.kohsuke.stapler.AncestorInPath;

@@ -21,7 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
-import edu.hm.hafner.metric.FileNode;
+import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.FilePath;

@@ -8,11 +8,11 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.DefaultLocale;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.FractionValue;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.FractionValue;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.ModuleNode;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.FreeStyleBuild;

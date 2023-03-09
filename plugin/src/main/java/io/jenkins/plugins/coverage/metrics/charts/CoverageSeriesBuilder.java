@@ -3,9 +3,9 @@ package io.jenkins.plugins.coverage.metrics.charts;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.echarts.line.SeriesBuilder;
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.Metric;
 
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;

@@ -2,11 +2,11 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.CyclomaticComplexity;
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.LinesOfCode;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.CyclomaticComplexity;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.LinesOfCode;
+import edu.hm.hafner.coverage.Node;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.FreeStyleProject;
@@ -16,7 +16,7 @@ import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 
-import static edu.hm.hafner.metric.Metric.*;
+import static edu.hm.hafner.coverage.Metric.*;
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
 import static org.assertj.core.api.Assertions.*;
 

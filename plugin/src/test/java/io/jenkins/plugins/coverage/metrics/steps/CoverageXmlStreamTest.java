@@ -15,10 +15,10 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.builder.Input;
 
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Value;
-import edu.hm.hafner.metric.parser.JacocoParser;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Value;
+import edu.hm.hafner.coverage.parser.JacocoParser;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.SerializableTest;
 
@@ -33,7 +33,7 @@ import io.jenkins.plugins.coverage.metrics.steps.CoverageXmlStream.IntegerSetCon
 import io.jenkins.plugins.coverage.metrics.steps.CoverageXmlStream.MetricFractionMapConverter;
 import io.jenkins.plugins.util.QualityGateResult;
 
-import static edu.hm.hafner.metric.Metric.*;
+import static edu.hm.hafner.coverage.Metric.*;
 import static org.assertj.core.api.BDDAssertions.*;
 import static org.mockito.Mockito.*;
 import static org.xmlunit.assertj.XmlAssert.assertThat;

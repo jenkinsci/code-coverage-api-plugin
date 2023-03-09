@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.FractionValue;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.FractionValue;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Value;
 
 /**
  * Represents the different mappings of coverage metric and baseline to actual values.

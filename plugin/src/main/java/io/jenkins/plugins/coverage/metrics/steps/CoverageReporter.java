@@ -9,10 +9,10 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Value;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
@@ -67,10 +67,10 @@ public class CoverageReporter {
             List<Value> aggregatedModifiedFilesCoverage;
             NavigableMap<Metric, Fraction> modifiedFilesCoverageDelta;
             if (hasModifiedLinesCoverage(modifiedLinesCoverageRoot)) {
-                modifiedLinesCoverageDelta = modifiedLinesCoverageRoot.computeDelta(rootNode);
                 Node modifiedFilesCoverageRoot = rootNode.filterByModifiedFiles();
                 aggregatedModifiedFilesCoverage = modifiedFilesCoverageRoot.aggregateValues();
                 modifiedFilesCoverageDelta = modifiedFilesCoverageRoot.computeDelta(rootNode);
+                modifiedLinesCoverageDelta = modifiedLinesCoverageRoot.computeDelta(modifiedFilesCoverageRoot);
             }
             else {
                 modifiedLinesCoverageDelta = new TreeMap<>();
@@ -82,21 +82,17 @@ public class CoverageReporter {
             }
 
             NavigableMap<Metric, Fraction> coverageDelta = rootNode.computeDelta(referenceRoot);
-            Node indirectCoverageChangesTree = rootNode.filterByIndirectChanges();
 
-            QualityGateResult qualityGateResult;
-            qualityGateResult = evaluateQualityGates(rootNode, log,
+            QualityGateResult qualityGateResult = evaluateQualityGates(rootNode, log,
                     modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
             action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
-                    referenceAction.getOwner().getExternalizableId(),
-                    coverageDelta,
-                    modifiedLinesCoverageRoot.aggregateValues(),
-                    modifiedLinesCoverageDelta,
-                    aggregatedModifiedFilesCoverage,
-                    modifiedFilesCoverageDelta,
-                    indirectCoverageChangesTree.aggregateValues());
+                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
+                    modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta,
+                    aggregatedModifiedFilesCoverage, modifiedFilesCoverageDelta,
+                    rootNode.filterByIndirectChanges().aggregateValues());
+
             if (sourceCodeRetention == SourceCodeRetention.MODIFIED) {
                 filesToStore = modifiedLinesCoverageRoot.getAllFileNodes();
                 log.logInfo("-> Selecting %d modified files for source code painting", filesToStore.size());
@@ -187,12 +183,12 @@ public class CoverageReporter {
     private boolean hasModifiedLinesCoverage(final Node modifiedLinesCoverageRoot) {
         Optional<Value> lineCoverage = modifiedLinesCoverageRoot.getValue(Metric.LINE);
         if (lineCoverage.isPresent()) {
-            if (((edu.hm.hafner.metric.Coverage) lineCoverage.get()).isSet()) {
+            if (((edu.hm.hafner.coverage.Coverage) lineCoverage.get()).isSet()) {
                 return true;
             }
         }
         Optional<Value> branchCoverage = modifiedLinesCoverageRoot.getValue(Metric.BRANCH);
-        return branchCoverage.filter(value -> ((edu.hm.hafner.metric.Coverage) value).isSet()).isPresent();
+        return branchCoverage.filter(value -> ((edu.hm.hafner.coverage.Coverage) value).isSet()).isPresent();
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

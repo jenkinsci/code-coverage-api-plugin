@@ -20,12 +20,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Percentage;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.Node;
-import edu.hm.hafner.metric.Percentage;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 

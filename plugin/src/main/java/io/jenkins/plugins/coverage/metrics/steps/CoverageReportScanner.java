@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import edu.hm.hafner.metric.CoverageParser;
-import edu.hm.hafner.metric.ModuleNode;
+import edu.hm.hafner.coverage.CoverageParser;
+import edu.hm.hafner.coverage.ModuleNode;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.PathUtil;
 import edu.hm.hafner.util.SecureXmlParserFactory.ParsingException;

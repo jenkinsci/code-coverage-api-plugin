@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Mutation;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.Mutation;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.NonNull;
 

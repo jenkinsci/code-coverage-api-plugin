@@ -2,7 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.Metric;
+import edu.hm.hafner.coverage.Metric;
 
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;

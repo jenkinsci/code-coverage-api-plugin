@@ -10,7 +10,7 @@
   * Branch Coverage: n/a / n/a
   * Complexity Density: +43.40%
   * Lines of Code: 53
-* **[Modified code lines (difference to overall project)](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#modifiedLinesCoverage)**
+* **[Modified code lines (difference to modified files)](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#modifiedLinesCoverage)**
   * Line Coverage: 50.00% (1/2) / +50.00%
   * Branch Coverage: n/a / n/a
   * Lines of Code: 3

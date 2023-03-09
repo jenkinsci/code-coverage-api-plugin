@@ -6,15 +6,15 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.echarts.Build;
 import edu.hm.hafner.echarts.BuildResult;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.line.LinesChartModel;
 import edu.hm.hafner.echarts.line.LinesDataSet;
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.Coverage.CoverageBuilder;
-import edu.hm.hafner.metric.Metric;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;

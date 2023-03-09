@@ -2,15 +2,15 @@ package io.jenkins.plugins.coverage.metrics.charts;
 
 import java.util.Optional;
 
+import edu.hm.hafner.coverage.Coverage;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.ModuleNode;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.echarts.ItemStyle;
 import edu.hm.hafner.echarts.Label;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
 import edu.hm.hafner.echarts.TreeMapNode;
-import edu.hm.hafner.metric.Coverage;
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Metric;
-import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
 
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
@@ -66,7 +66,6 @@ public class TreeMapNodeConverter {
             if (rootValue instanceof Coverage) {
                 return Optional.of(createCoverageTree((Coverage) rootValue, colorProvider, node, metric));
             }
-            // TODO: does it make sense to render the other metrics?
         }
 
         return Optional.empty();

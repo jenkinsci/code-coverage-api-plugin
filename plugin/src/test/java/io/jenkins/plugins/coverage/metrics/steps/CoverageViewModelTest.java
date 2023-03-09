@@ -6,9 +6,9 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.ModuleNode;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.ModuleNode;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
 
 import hudson.model.Run;

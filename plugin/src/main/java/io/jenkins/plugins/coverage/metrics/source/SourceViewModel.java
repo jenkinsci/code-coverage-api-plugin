@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import edu.hm.hafner.metric.FileNode;
-import edu.hm.hafner.metric.Node;
+import edu.hm.hafner.coverage.FileNode;
+import edu.hm.hafner.coverage.Node;
 
 import hudson.model.ModelObject;
 import hudson.model.Run;

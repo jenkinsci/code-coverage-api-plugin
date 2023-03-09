@@ -7,7 +7,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.metric.SafeFraction;
+import edu.hm.hafner.coverage.SafeFraction;
 
 /**
  * Represents a coverage percentage value which can be used in order to show and serialize coverage values. The class
