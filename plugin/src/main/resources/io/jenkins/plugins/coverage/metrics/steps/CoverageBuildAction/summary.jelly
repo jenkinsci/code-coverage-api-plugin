@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:c="/controls" xmlns:fa="/font-awesome" xmlns:cov="/coverage" xmlns:st="jelly:stapler">
+<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:fa="/font-awesome" xmlns:cov="/coverage" xmlns:st="jelly:stapler">
   <t:summary icon="${it.iconFileName}">
     <st:adjunct includes="io.jenkins.plugins.coverage.metrics.cell-style"/>
 
