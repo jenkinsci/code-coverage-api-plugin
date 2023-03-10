@@ -19,7 +19,6 @@ import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.VisibleForTesting;
 
-import hudson.Functions;
 import hudson.model.Job;
 import hudson.model.Run;
 
@@ -195,12 +194,9 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
         column.setBaseline(Baseline.PROJECT_DELTA);
 
         Fraction coverageDelta = Fraction.getFraction(1, 20);
-        CoveragePercentage coverageDeltaPercentage = CoveragePercentage.valueOf(coverageDelta);
-        String coverageDeltaPercentageText =
-                coverageDeltaPercentage.formatDeltaPercentage(Functions.getCurrentLocale());
         Job<?, ?> job = createJobWithCoverageAction();
 
-        assertThat(column.getCoverageText(job)).isEqualTo(coverageDeltaPercentageText);
+        assertThat(column.getCoverageText(job)).isEqualTo("+5.00%");
         assertThat(column.getCoverageValue(job))
                 .isNotEmpty()
                 .satisfies(coverage -> {
