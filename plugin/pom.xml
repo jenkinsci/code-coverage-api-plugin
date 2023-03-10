@@ -36,7 +36,6 @@
     <xmlunit.version>2.9.0</xmlunit.version>
 
     <coverage-model.version>0.18.0</coverage-model.version>
-    <echarts-api.version>5.4.0-2-rc782.9c5f6d6f6eeb_</echarts-api.version>
     <prism-api.version>1.29.0-3-rc207.f000c20b_dea_5</prism-api.version>
     <git-forensics.version>1.11.0</git-forensics.version>
 
@@ -44,6 +43,8 @@
     <plugin-util-api.version>3.0.0-rc693.c098b_871ea_49</plugin-util-api.version>
     <bootstrap5-api.version>5.2.2-1-rc442.6631330fec41</bootstrap5-api.version>
     <font-awesome-api.version>6.3.0-1-rc517.f6b_6e5a_dd4ef</font-awesome-api.version>
+    <data-tables-api.version>1.13.3-1-rc820.45d6725d5802</data-tables-api.version>
+    <echarts-api.version>5.4.0-2-rc782.9c5f6d6f6eeb_</echarts-api.version>
 
     <forensics-api.version>2.0.0-rc1380.c93c627cd828</forensics-api.version>
   </properties>
@@ -179,6 +180,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>data-tables-api</artifactId>
+      <version>${data-tables-api.version}</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
