@@ -36,7 +36,7 @@
     <xmlunit.version>2.9.0</xmlunit.version>
 
     <coverage-model.version>0.18.0</coverage-model.version>
-    <echarts-api.version>5.4.1-1-SNAPSHOT</echarts-api.version>
+    <echarts-api.version>5.4.0-2-rc782.9c5f6d6f6eeb_</echarts-api.version>
     <prism-api.version>1.29.0-3-rc207.f000c20b_dea_5</prism-api.version>
     <git-forensics.version>1.11.0</git-forensics.version>
 
