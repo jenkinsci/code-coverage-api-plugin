@@ -23,7 +23,7 @@
     <j:choose>
       <j:when test="${it.hasSourceCode()}">
         <div class="col-12 d-xxl-none">
-          <bs:card title="${tableTitle}" symbol="${symbol}" class="flex-fill h-100" >
+          <bs:card title="${title}" symbol="${symbol}" class="flex-fill h-100" >
             <j:if test="${showChangedToggle}">
               <f:toggleSwitch name="changed" title="Show only changed files" />
             </j:if>
@@ -31,7 +31,7 @@
           </bs:card>
         </div>
         <div class="col-xxl-6 d-none d-xxl-block">
-          <bs:card title="${tableTitle}" symbol="${symbol}" class="flex-fill h-100">
+          <bs:card title="${title}" symbol="${symbol}" class="flex-fill h-100">
             <j:if test="${showChangedToggle}">
               <f:toggleSwitch name="changed" title="Show only changed files" />
             </j:if>

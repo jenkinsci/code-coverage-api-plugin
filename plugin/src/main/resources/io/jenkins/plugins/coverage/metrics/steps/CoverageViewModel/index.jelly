@@ -83,7 +83,7 @@
 
       <j:if test="${hasIndirectCoverageChanges}">
         <div role="tabpanel" id="indirectCoverage" class="tab-pane fade" aria-labelledby="indirectCoverage-tab">
-          <cov:coverage-table id="indirect-coverage" title="${%Indirect coverage changes}" symbol="symbol-happy-outline plugin-ionicons-api"/>
+          <cov:coverage-table id="indirect-coverage" title="${%Indirect coverage changes}" symbol="symbol-regular/face-smile plugin-font-awesome-api"/>
         </div>
       </j:if>
 
