@@ -211,6 +211,10 @@ public class CoverageColumn extends ListViewColumn {
      */
     @Extension(optional = true)
     public static class CoverageDescriptor extends ListViewColumnDescriptor {
+        @Override
+        public boolean shownByDefault() {
+            return false;
+        }
 
         @NonNull
         @Override

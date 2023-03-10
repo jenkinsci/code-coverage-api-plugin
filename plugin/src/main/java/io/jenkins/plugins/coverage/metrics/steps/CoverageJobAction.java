@@ -72,7 +72,6 @@ public class CoverageJobAction extends TrendChartJobAction<CoverageBuildAction> 
         return getUrlName();
     }
 
-    // FIXME: move code to util class
     @Override
     protected LinesChartModel createChartModel(final String configuration) {
         var iterable = new BuildActionIterable<>(CoverageBuildAction.class, getLatestAction(),

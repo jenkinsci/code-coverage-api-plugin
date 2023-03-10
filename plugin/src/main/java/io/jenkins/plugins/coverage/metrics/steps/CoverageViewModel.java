@@ -208,7 +208,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
     }
 
-    // FIXME: check why this model works on a filtered view
     @JavaScriptMethod
     public CoverageOverview getOverview() {
         return new CoverageOverview(node);
@@ -230,10 +229,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     /**
      * Returns the root of the tree of nodes for the ECharts treemap. This tree is used as model for the chart on the
-     * client side. The tree is available for line and branch coverage.
+     * client side.
      *
      * @param coverageMetric
-     *         The used coverage metric - the default is the line coverage
+     *         the used coverage metric (line, branch, instruction, mutation)
      *
      * @return the tree of nodes for the ECharts treemap
      */
@@ -254,7 +253,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the coverage metric
      */
     private Metric getCoverageMetricFromText(final String text) {
-        // FIXME: Move to metric
         if (text.contains("line")) {
             return Metric.LINE;
         }
@@ -414,7 +412,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether modified lines coverage exists, else {@code false}
      */
     public boolean hasModifiedLinesCoverage() {
-        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasModifiedLines);
+        return !modifiedLinesCoverageTreeRoot.isEmpty();
     }
 
     /**
@@ -423,7 +421,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return {@code true} whether indirect coverage changes exist, else {@code false}
      */
     public boolean hasIndirectCoverageChanges() {
-        return getNode().getAllFileNodes().stream().anyMatch(FileNode::hasIndirectCoverageChanges);
+        return !indirectCoverageChangesTreeRoot.isEmpty();
     }
 
     /**

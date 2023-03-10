@@ -72,18 +72,18 @@
       </j:forEach>
 
       <div role="tabpanel" id="fileCoverage" class="tab-pane fade" aria-labelledby="fileCoverage-tab">
-        <cov:coverage-table showChangedToggle="true" tableId="absolute-coverage"/>
+        <cov:coverage-table showChangedToggle="true" tableId="absolute-coverage" tableTitle="${%Coverage of all files}"/>
       </div>
 
       <j:if test="${hasModifiedLinesCoverage}">
         <div role="tabpanel" id="changeCoverage" class="tab-pane fade" aria-labelledby="changeCoverage-tab">
-          <cov:coverage-table tableId="change-coverage"/>
+          <cov:coverage-table tableId="modified-lines-coverage" tableTitle="${%Coverage of modified lines}"/>
         </div>
       </j:if>
 
       <j:if test="${hasIndirectCoverageChanges}">
         <div role="tabpanel" id="indirectCoverage" class="tab-pane fade" aria-labelledby="indirectCoverage-tab">
-          <cov:coverage-table tableId="indirect-coverage"/>
+          <cov:coverage-table tableId="indirect-coverage" tableTitle="${%Indirect coverage changes}" />
         </div>
       </j:if>
 

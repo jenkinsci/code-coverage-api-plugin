@@ -6,6 +6,9 @@
     <st:attribute name="tableId" type="String">
       The ID of the table.
     </st:attribute>
+    <st:attribute name="tableTitle" type="String">
+      The title of the table.
+    </st:attribute>
     <st:attribute name="showChangedToggle" type="Boolean">
       Determines whether to show the changed files filter toggle.
     </st:attribute>
@@ -17,7 +20,7 @@
     <j:choose>
       <j:when test="${it.hasSourceCode()}">
         <div class="col-12 d-xxl-none">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100" >
+          <bs:card title="${tableTitle}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100" >
             <j:if test="${showChangedToggle}">
               <f:toggleSwitch name="changed" title="Show only changed files" />
             </j:if>
@@ -25,7 +28,7 @@
           </bs:card>
         </div>
         <div class="col-xxl-6 d-none d-xxl-block">
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
+          <bs:card title="${tableTitle}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
             <j:if test="${showChangedToggle}">
               <f:toggleSwitch name="changed" title="Show only changed files" />
             </j:if>
@@ -63,7 +66,7 @@
           <j:if test="${showChangedToggle}">
             <f:toggleSwitch name="changed" title="Show only changed files" />
           </j:if>
-          <bs:card title="${%Coverage of all files}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
+          <bs:card title="${tableTitle}" fontAwesomeIcon="file-lines" fontAwesomeStyle="regular" class="flex-fill h-100">
             <dt:table model="${it.getTableModel(tableId + '-table')}"/>
           </bs:card>
         </div>

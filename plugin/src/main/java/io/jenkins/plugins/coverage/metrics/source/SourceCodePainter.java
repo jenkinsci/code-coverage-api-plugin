@@ -341,7 +341,7 @@ public class SourceCodePainter {
             survivedPerLine = new int[linesToPaint.length];
             killedPerLine = new int[linesToPaint.length];
 
-            for (Mutation mutation : file.getMutations()) { // FIXME: this needs to be generalized
+            for (Mutation mutation : file.getMutations()) {
                 if (mutation.hasSurvived()) {
                     survivedPerLine[findLine(mutation.getLine())]++;
                 }

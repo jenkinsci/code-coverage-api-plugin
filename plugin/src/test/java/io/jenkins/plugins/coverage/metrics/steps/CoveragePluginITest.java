@@ -353,6 +353,6 @@ class CoveragePluginITest extends AbstractCoverageITest {
                     verifyJaCoCoAction(a);
                 });
 
-        // FIXME: verify that two different trend charts are returned!
+        // TODO: verify that two different trend charts are returned!
     }
 }
