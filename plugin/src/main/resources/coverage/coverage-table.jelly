@@ -39,7 +39,7 @@
           </bs:card>
         </div>
         <div class="col-xxl-6 d-none d-xxl-block">
-          <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular"
+          <bs:card title="${%Source code view}" symbol="symbol-regular/file-code plugin-font-awesome-api"
                    class="flex-fill h-100">
             <div id="${id}-source-file-content">
               <table id="${id}-source-file" class="source">
