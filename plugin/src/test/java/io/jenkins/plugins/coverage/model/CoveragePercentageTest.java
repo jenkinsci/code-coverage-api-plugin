@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
-import static io.jenkins.plugins.coverage.model.Assertions.assertThat;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static io.jenkins.plugins.coverage.model.CoveragePercentage.*;
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Test class for {@link CoveragePercentage}.

@@ -1,0 +1,26 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:fa="/font-awesome" xmlns:cov="/coverage" xmlns:st="jelly:stapler" xmlns:c="/controls">
+  <t:summary icon="${it.iconFileName}">
+    <st:adjunct includes="io.jenkins.plugins.coverage.metrics.cell-style"/>
+
+    <div id="coverage-summary-${it.urlName}">
+      <j:set var="result" value="${it.result}"/>
+      <a id="coverage-action-link-${it.urlName}" href="${it.urlName}/">${it.displayName}</a>
+      <fa:image-button label="${%Open log messages}" name="circle-info" tooltip="${%icon.info.tooltip}" url="${it.urlName}/info"/>
+      <ul>
+        <j:forEach var="baseline" items="${it.baselines}">
+          <cov:coverage-summary baseline="${baseline}" />
+        </j:forEach>
+        <j:if test="${it.referenceBuild.present}">
+          <span id="coverage-reference">
+            <li>
+              Reference build:
+              <j:out value="${it.referenceBuildLink}"/>
+            </li>
+          </span>
+        </j:if>
+        <c:qualityGate result="${it.qualityGateResult}" />
+      </ul>
+    </div>
+  </t:summary>
+</j:jelly>

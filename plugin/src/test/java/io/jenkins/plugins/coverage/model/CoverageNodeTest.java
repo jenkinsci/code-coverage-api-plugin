@@ -14,7 +14,7 @@ import nl.jqno.equalsverifier.Warning;
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**

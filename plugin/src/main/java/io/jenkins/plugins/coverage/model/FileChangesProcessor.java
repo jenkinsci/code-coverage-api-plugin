@@ -16,9 +16,9 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.math.Fraction;
 
-import io.jenkins.plugins.forensics.delta.model.Change;
-import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
+import io.jenkins.plugins.forensics.delta.Change;
+import io.jenkins.plugins.forensics.delta.ChangeEditType;
+import io.jenkins.plugins.forensics.delta.FileChanges;
 
 /**
  * Calculates and attaches values to the {@link FileCoverageNode nodes} of the coverage tree which represent the changes

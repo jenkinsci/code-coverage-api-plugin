@@ -1,0 +1,89 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+
+  <st:documentation>
+    Provides a the summary for a given coverage baseline.
+    <st:attribute name="baseline" type="io.jenkins.plugins.coverage.metrics.model.Baseline">
+      The baseline to show.
+    </st:attribute>
+  </st:documentation>
+
+  <j:if test="${it.hasBaselineResult(baseline)}">
+    <li>
+      <j:choose>
+        <j:when test="${it.hasDelta(baseline)}">
+          <a href="${it.urlName}/#${baseline.url}">${it.getDeltaBaseline(baseline).title}</a>
+        </j:when>
+        <j:otherwise>
+          <a href="${it.urlName}/#${baseline.url}">${baseline.title}</a>
+        </j:otherwise>
+      </j:choose>
+      <div class="${baseline}-summary">
+        <j:set var="values" value="${it.getAllValues(baseline)}"/>
+        <j:set var="formatter" value="${it.formatter}"/>
+        <j:set var="tooltip">
+          <!-- This is an exact copy of the tooltip in CoverageMetricColumn -->
+          <div class="jenkins-tooltip healthReportDetails jenkins-tooltip--table-wrapper">
+            <table class="jenkins-table">
+              <thead>
+                <tr>
+                  <th align="left">${%Metric}</th>
+                  <th align="right">${%Value}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <j:forEach var="value" items="${values}">
+                  <tr>
+                    <td align="left" style="white-space: nowrap;">${formatter.getDisplayName(value.metric)}</td>
+                    <td align="right" style="white-space: nowrap;">
+                      <j:choose>
+                        <j:when test="${formatter.showColors(value)}">
+                          <div class="coverage-cell-outer jenkins-table__link">
+                            <j:set var="displayColors" value="${formatter.getDisplayColors(baseline, value)}"/>
+                            <j:set var="backgroundColor" value="${displayColors.getFillColorAsRGBAHex(80)}"/>
+                            <j:set var="fillPercentage" value="${formatter.getBackgroundColorFillPercentage(value)}"/>
+                            <div class="coverage-cell-inner"
+                                 style="background-image: linear-gradient(90deg, ${backgroundColor} ${fillPercentage}, transparent ${fillPercentage});">
+                              ${formatter.format(value)}
+                            </div>
+                          </div>
+                        </j:when>
+                        <j:otherwise>
+                          ${formatter.format(value)}
+                        </j:otherwise>
+                      </j:choose>
+
+                    </td>
+                  </tr>
+                </j:forEach>
+              </tbody>
+            </table>
+          </div>
+
+        </j:set>
+
+        <ul tooltip="${tooltip}" data-html-tooltip="${tooltip}">
+          <j:forEach var="value" items="${it.getValues(baseline)}">
+            <li>${formatter.formatValueWithMetric(value)}
+              <j:if test="${it.hasDelta(baseline, value.metric)}">
+                <j:set var="delta" value="${it.formatDelta(baseline, value.metric)}"/>
+                <j:choose>
+                  <j:when test="${delta.startsWith('-')}">
+                    <j:set var="color" value="var(--red)"/>
+                  </j:when>
+                  <j:otherwise>
+                    <j:set var="color" value="var(--green)"/>
+                  </j:otherwise>
+                </j:choose>
+                <span style="color: ${color}">(${delta})</span>
+              </j:if>
+            </li>
+          </j:forEach>
+        </ul>
+      </div>
+
+    </li>
+  </j:if>
+
+</j:jelly>
+

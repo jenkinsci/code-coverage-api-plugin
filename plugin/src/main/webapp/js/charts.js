@@ -389,7 +389,7 @@ const CoverageChartGenerator = function ($) {
          * Event handler to resizes all charts.
          */
         function redrawCharts() {
-            renderTrendChart(); // rerender since the configuration might have changed
+            renderTrendChart(); // re-render since the configuration might have changed
 
             resizeChartOf('#coverage-overview');
             resizeChartOf('#project-line-coverage');

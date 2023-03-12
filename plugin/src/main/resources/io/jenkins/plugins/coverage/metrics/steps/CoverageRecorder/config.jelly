@@ -1,0 +1,6 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:cov="/coverage">
+
+  <cov:configuration/>
+
+</j:jelly>

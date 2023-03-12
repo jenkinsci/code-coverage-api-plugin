@@ -17,8 +17,8 @@ import hudson.model.TaskListener;
 import io.jenkins.plugins.coverage.model.exception.CodeDeltaException;
 import io.jenkins.plugins.coverage.model.visualization.code.SourceCodePainter;
 import io.jenkins.plugins.coverage.targets.CoverageResult;
-import io.jenkins.plugins.forensics.delta.model.Delta;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
+import io.jenkins.plugins.forensics.delta.Delta;
+import io.jenkins.plugins.forensics.delta.FileChanges;
 import io.jenkins.plugins.forensics.reference.ReferenceFinder;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 import io.jenkins.plugins.util.LogHandler;
@@ -225,7 +225,7 @@ public class CoverageReporter {
                             coverageBuildAction.getOwner().getDisplayName()));
         }
 
-        if (!previousResult.isPresent()) {
+        if (previousResult.isEmpty()) {
             log.logInfo("-> Found no reference result in reference build");
 
             return Optional.empty();

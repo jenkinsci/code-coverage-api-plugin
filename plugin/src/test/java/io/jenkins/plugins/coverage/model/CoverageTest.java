@@ -11,7 +11,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 
 import io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 import static io.jenkins.plugins.coverage.model.Coverage.CoverageBuilder.*;
 
 /**

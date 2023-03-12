@@ -8,10 +8,10 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.jenkins.plugins.forensics.delta.model.Change;
-import io.jenkins.plugins.forensics.delta.model.ChangeEditType;
-import io.jenkins.plugins.forensics.delta.model.FileChanges;
-import io.jenkins.plugins.forensics.delta.model.FileEditType;
+import io.jenkins.plugins.forensics.delta.Change;
+import io.jenkins.plugins.forensics.delta.ChangeEditType;
+import io.jenkins.plugins.forensics.delta.FileChanges;
+import io.jenkins.plugins.forensics.delta.FileEditType;
 
 import static org.assertj.core.api.Assertions.*;
 

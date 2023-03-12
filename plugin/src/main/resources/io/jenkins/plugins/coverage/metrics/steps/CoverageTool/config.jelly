@@ -1,0 +1,13 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <f:entry title="${%parser.title}" field="parser">
+    <f:select/>
+  </f:entry>
+
+  <f:entry title="${%title.pattern}" field="pattern"
+           description="${%description.pattern('https://ant.apache.org/manual/Types/fileset.html')}">
+    <f:textbox/>
+  </f:entry>
+
+</j:jelly>

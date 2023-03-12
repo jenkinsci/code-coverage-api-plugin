@@ -10,7 +10,7 @@ import io.jenkins.plugins.casc.ConfiguratorException;
 import io.jenkins.plugins.coverage.model.visualization.dashboard.CoverageColumn;
 import io.jenkins.plugins.util.IntegrationTestWithJenkinsPerTest;
 
-import static io.jenkins.plugins.coverage.model.Assertions.*;
+import static io.jenkins.plugins.coverage.metrics.Assertions.*;
 
 /**
  * Tests the Job DSL Plugin.
