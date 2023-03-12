@@ -36,7 +36,7 @@
     <xmlunit.version>2.9.0</xmlunit.version>
 
     <coverage-model.version>0.18.0</coverage-model.version>
-    <prism-api.version>1.29.0-3-rc207.f000c20b_dea_5</prism-api.version>
+    <prism-api.version>1.29.0-3</prism-api.version>
     <git-forensics.version>1.11.0</git-forensics.version>
 
     <jquery3-api.version>3.6.3-1</jquery3-api.version>
