@@ -31,7 +31,7 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
  *
  * @author Florian Orendi
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public final class ElementFormatter {
     private static final Fraction HUNDRED = Fraction.getFraction("100.0");
     private static final String NO_COVERAGE_AVAILABLE = "-";

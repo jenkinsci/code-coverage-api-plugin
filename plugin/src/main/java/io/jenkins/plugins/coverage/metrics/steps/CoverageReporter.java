@@ -182,13 +182,15 @@ public class CoverageReporter {
 
     private boolean hasModifiedLinesCoverage(final Node modifiedLinesCoverageRoot) {
         Optional<Value> lineCoverage = modifiedLinesCoverageRoot.getValue(Metric.LINE);
-        if (lineCoverage.isPresent()) {
-            if (((edu.hm.hafner.coverage.Coverage) lineCoverage.get()).isSet()) {
-                return true;
-            }
+        if (lineCoverage.isPresent() && hasLineCoverageSet(lineCoverage.get())) {
+            return true;
         }
         Optional<Value> branchCoverage = modifiedLinesCoverageRoot.getValue(Metric.BRANCH);
-        return branchCoverage.filter(value -> ((edu.hm.hafner.coverage.Coverage) value).isSet()).isPresent();
+        return branchCoverage.filter(this::hasLineCoverageSet).isPresent();
+    }
+
+    private boolean hasLineCoverageSet(final Value value) {
+        return ((edu.hm.hafner.coverage.Coverage) value).isSet();
     }
 
     private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {

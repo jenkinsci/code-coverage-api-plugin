@@ -429,23 +429,15 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      */
     @SuppressWarnings("unused") // Called by jelly view
     public String formatDelta(final Baseline baseline, final Metric metric) {
-        if (baseline == Baseline.PROJECT) {
-            if (hasDelta(baseline, metric)) {
-                return FORMATTER.formatDelta(difference.get(metric), metric,
-                        Functions.getCurrentLocale());
-            }
+        var currentLocale = Functions.getCurrentLocale();
+        if (baseline == Baseline.PROJECT && hasDelta(baseline, metric)) {
+            return FORMATTER.formatDelta(difference.get(metric), metric, currentLocale);
         }
-        if (baseline == Baseline.MODIFIED_LINES) {
-            if (hasDelta(baseline, metric)) {
-                return FORMATTER.formatDelta(modifiedLinesCoverageDifference.get(metric), metric,
-                        Functions.getCurrentLocale());
-            }
+        if (baseline == Baseline.MODIFIED_LINES && hasDelta(baseline, metric)) {
+            return FORMATTER.formatDelta(modifiedLinesCoverageDifference.get(metric), metric, currentLocale);
         }
-        if (baseline == Baseline.MODIFIED_FILES) {
-            if (hasDelta(baseline, metric)) {
-                return FORMATTER.formatDelta(modifiedFilesCoverageDifference.get(metric), metric,
-                        Functions.getCurrentLocale());
-            }
+        if (baseline == Baseline.MODIFIED_FILES && hasDelta(baseline, metric)) {
+            return FORMATTER.formatDelta(modifiedFilesCoverageDifference.get(metric), metric, currentLocale);
         }
         return Messages.Coverage_Not_Available();
     }

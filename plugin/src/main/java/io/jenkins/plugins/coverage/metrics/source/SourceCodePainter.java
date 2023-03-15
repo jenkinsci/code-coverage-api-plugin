@@ -379,7 +379,7 @@ public class SourceCodePainter {
             return getCounter(line, killedPerLine);
         }
 
-        private int getCounter(final int line, final int[] counters) {
+        private int getCounter(final int line, final int... counters) {
             var index = findLine(line);
             if (index >= 0) {
                 return counters[index];

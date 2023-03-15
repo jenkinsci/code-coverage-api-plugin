@@ -249,6 +249,8 @@ public class CoverageMetricColumn extends ListViewColumn {
 
         @VisibleForTesting
         CoverageMetricColumnDescriptor(final JenkinsFacade jenkins) {
+            super();
+
             this.jenkins = jenkins;
         }
 

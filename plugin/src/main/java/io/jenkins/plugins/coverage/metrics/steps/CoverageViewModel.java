@@ -75,6 +75,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     private static final ElementFormatter FORMATTER = new ElementFormatter();
     private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH, Metric.MUTATION);
+    private static final String UNDEFINED = "-";
     private final Run<?, ?> owner;
     private final String optionalName;
     private final CoverageStatistics statistics;
@@ -85,7 +86,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private final String id;
 
     private final Node modifiedLinesCoverageTreeRoot;
-    private final Node modifiedFilesCoverageTreeRoot;
     private final Node indirectCoverageChangesTreeRoot;
     private final Function<String, String> trendChartFunction;
 
@@ -111,7 +111,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
         // initialize filtered coverage trees so that they will not be calculated multiple times
         modifiedLinesCoverageTreeRoot = node.filterByModifiedLines();
-        modifiedFilesCoverageTreeRoot = node.filterByModifiedFiles();
         indirectCoverageChangesTreeRoot = node.filterByIndirectChanges();
         this.trendChartFunction = trendChartFunction;
     }
@@ -145,7 +144,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     @Override
     public String getDisplayName() {
-        if (StringUtils.isBlank(node.getName()) || "-".equals(node.getName())) {
+        if (StringUtils.isBlank(node.getName()) || UNDEFINED.equals(node.getName())) {
             if (StringUtils.isBlank(optionalName)) {
                 return Messages.Coverage_Link_Name();
             }

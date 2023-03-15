@@ -17,13 +17,14 @@ import hudson.model.Node;
  * @author Ullrich Hafner
  */
 @Testcontainers(disabledWithoutDocker = true)
+@SuppressFBWarnings("BC")
 class DockerAgentSourceCodeITest extends SourceCodeITest {
     private static final String SOURCES_IN_DOCKER_PATH = "/tmp/coverage";
     private static final String ACU_COBOL_PARSER_CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + ACU_COBOL_PARSER_PACKAGE_PATH + ACU_COBOL_PARSER_FILE_NAME;
     private static final String PATH_UTIL_CONTAINER_PATH = SOURCES_IN_DOCKER_PATH + "/" + PATH_UTIL_PACKAGE_PATH + PATH_UTIL_FILE_NAME;
 
     private static final String RESOURCES = "io/jenkins/plugins/coverage/metrics/source/";
-    @Container @SuppressFBWarnings("BC")
+    @Container
     private static final AgentContainer AGENT_CONTAINER = new AgentContainer()
             .withCopyFileToContainer(
                     MountableFile.forClasspathResource(RESOURCES + ACU_COBOL_PARSER_SOURCE_FILE),

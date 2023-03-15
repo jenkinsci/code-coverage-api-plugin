@@ -50,6 +50,7 @@ import static io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder.*;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("PMD.DataClass")
 public class CoverageStep extends Step implements Serializable {
     private static final long serialVersionUID = 34386077204781270L;
     private static final ValidationUtilities VALIDATION_UTILITIES = new ValidationUtilities();

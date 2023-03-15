@@ -39,6 +39,7 @@ import io.jenkins.plugins.util.QualityGateStatus;
  *
  * @author Florian Orendi
  */
+@SuppressWarnings("PMD.GodClass")
 class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
 
@@ -375,7 +376,7 @@ class CoverageChecksPublisher {
         for (Object column : columns) {
             row.append(String.format("|%s", column));
         }
-        if (columns.size() > 0) {
+        if (!columns.isEmpty()) {
             row.append('|');
         }
         row.append('\n');

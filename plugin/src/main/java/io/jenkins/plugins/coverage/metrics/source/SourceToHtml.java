@@ -33,7 +33,7 @@ public class SourceToHtml {
             int killed = paint.getKilled(line);
 
             output.write("<tr class=\"" + selectColor(covered, missed, survived) + "\" "
-                    + getTooltip(paint, missed, covered, survived, killed) + ">\n");
+                    + getTooltip(missed, covered, survived, killed) + ">\n");
             output.write("<td class=\"line\"><a name='" + line + "'>" + line + "</a></td>\n");
 
             String display;
@@ -81,9 +81,8 @@ public class SourceToHtml {
         }
     }
 
-    private String getTooltip(final PaintedNode paint,
-            final int missed, final int covered, final int survived, final int killed) {
-        var tooltip = getTooltipValue(paint, missed, covered, survived, killed);
+    private String getTooltip(final int missed, final int covered, final int survived, final int killed) {
+        var tooltip = getTooltipValue(missed, covered, survived, killed);
         if (StringUtils.isBlank(tooltip)) {
             return StringUtils.EMPTY;
         }
@@ -91,8 +90,7 @@ public class SourceToHtml {
     }
 
     // TODO: Extract into classes so that we can paint the mutations as well
-    private String getTooltipValue(final PaintedNode paint,
-            final int missed, final int covered, final int survived, final int killed) {
+    private String getTooltipValue(final int missed, final int covered, final int survived, final int killed) {
 
         if (survived + killed > 1) {
             return String.format("Mutations survived: %d, mutations killed: %d", survived, killed);

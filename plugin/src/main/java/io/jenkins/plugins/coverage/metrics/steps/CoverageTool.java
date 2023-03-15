@@ -47,10 +47,13 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
      */
     @DataBoundConstructor
     public CoverageTool() {
+        super();
         // empty for stapler
     }
 
     CoverageTool(final Parser parser, final String pattern) {
+        super();
+
         this.pattern = pattern;
         this.parser = parser;
     }
@@ -127,7 +130,7 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         return getParser().getDisplayName();
     }
 
-    /** Descriptor for {@link io.jenkins.plugins.coverage.metrics.steps.CoverageTool}. **/
+    /** Descriptor for {@link CoverageTool}. **/
     @Extension
     public static class CoverageToolDescriptor extends Descriptor<io.jenkins.plugins.coverage.metrics.steps.CoverageTool> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
@@ -137,6 +140,8 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
          */
         public CoverageToolDescriptor() {
             super();
+
+            // empty constructor required for stapler
         }
 
         /**

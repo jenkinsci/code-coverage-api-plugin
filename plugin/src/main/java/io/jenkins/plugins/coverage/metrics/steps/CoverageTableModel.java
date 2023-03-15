@@ -204,6 +204,7 @@ class CoverageTableModel extends TableModel {
             return String.valueOf(file.getPath().hashCode());
         }
 
+        @SuppressWarnings("PMD.BooleanGetMethodName")
         public boolean getModified() {
             return file.hasModifiedLines();
         }
