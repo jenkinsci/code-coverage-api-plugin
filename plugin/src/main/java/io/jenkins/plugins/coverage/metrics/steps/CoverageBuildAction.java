@@ -74,7 +74,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     /** The delta of this build's coverages with respect to the reference build. */
     private final NavigableMap<Metric, Fraction> difference;
 
-    /** The coverages filtered by changed lines of the associated change request. */
+    /** The coverages filtered by modified lines of the associated change request. */
     private final List<? extends Value> modifiedLinesCoverage;
 
     /** The delta of the coverages of the associated change request with respect to the reference build. */
@@ -143,9 +143,13 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param delta
      *         delta of this build's coverages with respect to the reference build
      * @param modifiedLinesCoverage
-     *         the coverages filtered by changed lines of the associated change request
+     *         the coverages filtered by modified lines of the associated change request
      * @param modifiedLinesCoverageDifference
-     *         the delta of the coverages of the associated change request with respect to the reference build
+     *         difference between the project coverage and the modified lines coverage of the current build
+     * @param modifiedFilesCoverage
+     *         the coverages filtered by changed files of the associated change request
+     * @param modifiedFilesCoverageDifference
+     *         difference between the project coverage and the modified files coverage of the current build
      * @param indirectCoverageChanges
      *         the indirect coverage changes of the associated change request with respect to the reference build
      */
@@ -288,17 +292,27 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         return getValueStream(baseline).collect(Collectors.toList());
     }
 
-    public NavigableMap<Metric, Fraction> getAllDeltas(final Baseline deltaBaseline) {
-        if (deltaBaseline == Baseline.PROJECT_DELTA) {
+    /**
+     * Returns all available deltas for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the deltas for
+     *
+     * @return the available values
+     * @throws NoSuchElementException
+     *         if this baseline does not provide deltas
+     */
+    public NavigableMap<Metric, Fraction> getAllDeltas(final Baseline baseline) {
+        if (baseline == Baseline.PROJECT_DELTA) {
             return difference;
         }
-        else if (deltaBaseline == Baseline.MODIFIED_LINES_DELTA) {
+        else if (baseline == Baseline.MODIFIED_LINES_DELTA) {
             return modifiedLinesCoverageDifference;
         }
-        else if (deltaBaseline == Baseline.MODIFIED_FILES_DELTA) {
+        else if (baseline == Baseline.MODIFIED_FILES_DELTA) {
             return modifiedFilesCoverageDifference;
         }
-        throw new NoSuchElementException("No delta baseline: " + deltaBaseline);
+        throw new NoSuchElementException("No delta baseline: " + baseline);
     }
 
     /**
@@ -316,6 +330,16 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         return filterImportantMetrics(getValueStream(baseline));
     }
 
+    /**
+     * Returns the value for the specified metric, if available.
+     *
+     * @param baseline
+     *         the baseline to get the value for
+     * @param metric
+     *         the metric to get the value for
+     *
+     * @return the optional value
+     */
     public Optional<Value> getValueForMetric(final Baseline baseline, final Metric metric) {
         return getAllValues(baseline).stream()
                 .filter(value -> value.getMetric() == metric)

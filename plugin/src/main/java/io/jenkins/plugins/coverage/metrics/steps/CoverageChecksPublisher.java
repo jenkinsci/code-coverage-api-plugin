@@ -319,6 +319,7 @@ class CoverageChecksPublisher {
      *         The metrics which should be displayed
      * @param deltas
      *         The delta calculation mapped by their metric
+     * @return the delta for each metric to be shown in the MD file
      */
     private Collection<String> formatCoverageDelta(final Collection<Metric> requiredMetrics,
             final NavigableMap<Metric, Fraction> deltas) {
