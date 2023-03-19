@@ -69,7 +69,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     }
 
     private void assertSummary(final ChecksOutput checksOutput) throws IOException {
-        var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.md"));
+        var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.checks-expected-result"));
         assertThat(checksOutput.getSummary()).isPresent()
                 .get()
                 .isEqualTo(expectedContent);

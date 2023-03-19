@@ -77,18 +77,18 @@
       </div>
 
       <div role="tabpanel" id="fileCoverage" class="tab-pane fade" aria-labelledby="fileCoverage-tab">
-        <cov:coverage-table tableId="absolute-coverage"/>
+        <cov:deprecated-coverage-table tableId="absolute-coverage"/>
       </div>
 
       <j:if test="${hasChangeCoverage}">
         <div role="tabpanel" id="changeCoverage" class="tab-pane fade" aria-labelledby="changeCoverage-tab">
-          <cov:coverage-table tableId="change-coverage"/>
+          <cov:deprecated-coverage-table tableId="change-coverage"/>
         </div>
       </j:if>
 
       <j:if test="${hasIndirectCoverageChanges}">
         <div role="tabpanel" id="indirectCoverage" class="tab-pane fade" aria-labelledby="indirectCoverage-tab">
-          <cov:coverage-table tableId="indirect-coverage"/>
+          <cov:deprecated-coverage-table tableId="indirect-coverage"/>
         </div>
       </j:if>
 
