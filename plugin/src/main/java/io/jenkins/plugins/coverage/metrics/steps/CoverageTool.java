@@ -132,17 +132,8 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
 
     /** Descriptor for {@link CoverageTool}. **/
     @Extension
-    public static class CoverageToolDescriptor extends Descriptor<io.jenkins.plugins.coverage.metrics.steps.CoverageTool> {
+    public static class CoverageToolDescriptor extends Descriptor<CoverageTool> {
         private static final JenkinsFacade JENKINS = new JenkinsFacade();
-
-        /**
-         * Creates a new instance of {@link CoverageToolDescriptor}.
-         */
-        public CoverageToolDescriptor() {
-            super();
-
-            // empty constructor required for stapler
-        }
 
         /**
          * Returns a model with all {@link SourceCodeRetention} strategies.

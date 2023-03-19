@@ -73,8 +73,8 @@ class JobDslITest extends IntegrationTestWithJenkinsPerTest {
     private void assertRecorderProperties(final CoverageRecorder recorder) {
         assertThat(recorder.getTools()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
-                        new io.jenkins.plugins.coverage.metrics.steps.CoverageTool(Parser.JACOCO, "jacoco-pattern.*"),
-                        new io.jenkins.plugins.coverage.metrics.steps.CoverageTool(Parser.COBERTURA, "cobertura-pattern.*"));
+                        new CoverageTool(Parser.JACOCO, "jacoco-pattern.*"),
+                        new CoverageTool(Parser.COBERTURA, "cobertura-pattern.*"));
         assertThat(recorder.getQualityGates()).hasSize(2).usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(
                         new CoverageQualityGate(70.0, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE),
