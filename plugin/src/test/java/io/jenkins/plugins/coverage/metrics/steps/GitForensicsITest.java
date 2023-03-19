@@ -79,7 +79,6 @@ class GitForensicsITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
         verifyGitRepositoryForCommit(build, COMMIT);
 
-        System.out.println(getConsoleLog(build));
         verifyGitIntegration(build, referenceBuild);
 
         assertThat(getConsoleLog(build)).contains(

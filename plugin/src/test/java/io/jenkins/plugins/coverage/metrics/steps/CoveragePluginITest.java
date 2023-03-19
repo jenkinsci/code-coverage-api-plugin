@@ -23,7 +23,6 @@ import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 
-import static edu.hm.hafner.coverage.Metric.*;
 import static io.jenkins.plugins.coverage.metrics.AbstractCoverageTest.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -143,19 +142,19 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
     private static void verifyJaCoCoAction(final CoverageBuildAction coverageResult) {
         assertThat(coverageResult.getAllValues(Baseline.PROJECT)).extracting(Value::getMetric)
-                .containsExactly(MODULE,
-                        PACKAGE,
+                .containsExactly(Metric.MODULE,
+                        Metric.PACKAGE,
                         Metric.FILE,
                         Metric.CLASS,
-                        METHOD,
-                        LINE,
-                        BRANCH,
-                        INSTRUCTION,
-                        COMPLEXITY,
-                        COMPLEXITY_DENSITY,
-                        LOC);
+                        Metric.METHOD,
+                        Metric.LINE,
+                        Metric.BRANCH,
+                        Metric.INSTRUCTION,
+                        Metric.COMPLEXITY,
+                        Metric.COMPLEXITY_DENSITY,
+                        Metric.LOC);
         assertThat(coverageResult.getMetricsForSummary())
-                .containsExactly(Metric.LINE, Metric.BRANCH, Metric.MUTATION, COMPLEXITY_DENSITY, Metric.LOC);
+                .containsExactly(Metric.LINE, Metric.BRANCH, Metric.MUTATION, Metric.COMPLEXITY_DENSITY, Metric.LOC);
         assertThat(coverageResult.getAllValues(Baseline.PROJECT))
                 .contains(createLineCoverageBuilder()
                         .setCovered(JACOCO_ANALYSIS_MODEL_COVERED)
@@ -238,11 +237,11 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
         CoverageRecorder recorder = new CoverageRecorder();
 
-        var cobertura = new io.jenkins.plugins.coverage.metrics.steps.CoverageTool();
+        var cobertura = new CoverageTool();
         cobertura.setParser(Parser.COBERTURA);
         cobertura.setPattern(COBERTURA_HIGHER_COVERAGE_FILE);
 
-        var jacoco = new io.jenkins.plugins.coverage.metrics.steps.CoverageTool();
+        var jacoco = new CoverageTool();
         jacoco.setParser(Parser.JACOCO);
         jacoco.setPattern(JACOCO_ANALYSIS_MODEL_FILE);
 
@@ -309,7 +308,7 @@ class CoveragePluginITest extends AbstractCoverageITest {
 
         CoverageBuildAction coverageResult = build.getAction(CoverageBuildAction.class);
         assertThat(coverageResult.getAllValues(Baseline.PROJECT))
-                .filteredOn(Value::getMetric, MUTATION)
+                .filteredOn(Value::getMetric, Metric.MUTATION)
                 .first()
                 .isInstanceOfSatisfying(Coverage.class, m -> {
                     assertThat(m.getCovered()).isEqualTo(222);

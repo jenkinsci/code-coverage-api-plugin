@@ -14,6 +14,7 @@ import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
 import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
 
 import hudson.model.Run;
 
@@ -36,11 +37,14 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final String BUILD_LINK = "job/pipeline-coding-style/job/5";
     private static final String COVERAGE_ID = "coverage";
     private static final String REPORT_NAME = "Name";
+    private static final int ANNOTATIONS_COUNT_FOR_MODIFIED = 3;
 
     @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
     @CsvSource({"SKIP, 0", "ALL_LINES, 36", "MODIFIED_LINES, 3"})
     void shouldCreateChecksReport(final ChecksAnnotationScope scope, final int expectedAnnotations) {
-        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(), REPORT_NAME, scope, createJenkins());
+        var result = readJacocoResult("jacoco-codingstyle.xml");
+
+        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(result), result, REPORT_NAME, scope, createJenkins());
 
         var checkDetails = publisher.extractChecksDetails();
 
@@ -72,7 +76,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     }
 
     private void assertChecksAnnotations(final ChecksOutput checksOutput, final int expectedAnnotations) {
-        if (expectedAnnotations == 3) {
+        if (expectedAnnotations == ANNOTATIONS_COUNT_FOR_MODIFIED) {
             assertThat(checksOutput.getChecksAnnotations()).hasSize(expectedAnnotations).satisfiesExactly(
                     annotation -> {
                         assertThat(annotation.getTitle()).contains("Not covered line");
@@ -108,7 +112,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         return jenkinsFacade;
     }
 
-    private CoverageBuildAction createCoverageBuildAction() {
+    private CoverageBuildAction createCoverageBuildAction(final Node result) {
         var testCoverage = new CoverageBuilder().setMetric(Metric.LINE)
                 .setCovered(1)
                 .setMissed(1)
@@ -116,7 +120,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
 
         var run = mock(Run.class);
         when(run.getUrl()).thenReturn(BUILD_LINK);
-        var result = readJacocoResult("jacoco-codingstyle.xml");
+
         result.findFile("TreeStringBuilder.java")
                 .ifPresent(file -> {
                     assertThat(file.getMissedLines()).contains(61, 62);

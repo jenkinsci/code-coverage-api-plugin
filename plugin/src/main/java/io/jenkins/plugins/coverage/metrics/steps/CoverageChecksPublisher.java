@@ -44,18 +44,20 @@ class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
 
     private final CoverageBuildAction action;
+    private final Node rootNode;
     private final JenkinsFacade jenkinsFacade;
     private final String checksName;
     private final ChecksAnnotationScope annotationScope;
 
-    CoverageChecksPublisher(final CoverageBuildAction action, final String checksName,
+    CoverageChecksPublisher(final CoverageBuildAction action, final Node rootNode, final String checksName,
             final ChecksAnnotationScope annotationScope) {
-        this(action, checksName, annotationScope, new JenkinsFacade());
+        this(action, rootNode, checksName, annotationScope, new JenkinsFacade());
     }
 
     @VisibleForTesting
-    CoverageChecksPublisher(final CoverageBuildAction action,
-            final String checksName, final ChecksAnnotationScope annotationScope, final JenkinsFacade jenkinsFacade) {
+    CoverageChecksPublisher(final CoverageBuildAction action, final Node rootNode, final String checksName,
+            final ChecksAnnotationScope annotationScope, final JenkinsFacade jenkinsFacade) {
+        this.rootNode = rootNode;
         this.jenkinsFacade = jenkinsFacade;
         this.action = action;
         this.checksName = checksName;
@@ -97,7 +99,7 @@ class CoverageChecksPublisher {
     }
 
     private String getSummary() {
-        var root = action.getResult();
+        var root = rootNode;
         return getOverallCoverageSummary(root) + "\n\n"
                 + getQualityGatesSummary() + "\n\n"
                 + getProjectMetricsSummary(root);
@@ -108,7 +110,7 @@ class CoverageChecksPublisher {
             return List.of();
         }
 
-        var tree = action.getResult();
+        var tree = rootNode;
         Node filtered;
         if (annotationScope == ChecksAnnotationScope.ALL_LINES) {
             filtered = tree;

@@ -391,13 +391,12 @@ public class CoverageRecorder extends Recorder {
 
         if (!results.isEmpty()) {
             CoverageReporter reporter = new CoverageReporter();
-            var action = reporter.publishAction(getActualId(), getName(), getIcon(),
-                    Node.merge(results), run, workspace, taskListener,
-                    getQualityGates(),
-                    getScm(), getSourceDirectoriesPaths(),
+            var rootNode = Node.merge(results);
+            var action = reporter.publishAction(getActualId(), getName(), getIcon(), rootNode, run,
+                    workspace, taskListener, getQualityGates(), getScm(), getSourceDirectoriesPaths(),
                     getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
             if (!skipPublishingChecks) {
-                var checksPublisher = new CoverageChecksPublisher(action, getChecksName(), getChecksAnnotationScope());
+                var checksPublisher = new CoverageChecksPublisher(action, rootNode, getChecksName(), getChecksAnnotationScope());
                 checksPublisher.publishCoverageReport(taskListener);
             }
         }
