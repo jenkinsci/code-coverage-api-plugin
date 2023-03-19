@@ -159,8 +159,6 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
 
     private void verifySourceCodeInBuild(final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
             final String pathUtilSourceCodeSnippet) {
-        System.out.println(getConsoleLog(build));
-
         List<CoverageBuildAction> actions = build.getActions(CoverageBuildAction.class);
         var builder = new CoverageBuilder().setMetric(Metric.LINE).setMissed(0);
         assertThat(actions).hasSize(2).satisfiesExactly(
