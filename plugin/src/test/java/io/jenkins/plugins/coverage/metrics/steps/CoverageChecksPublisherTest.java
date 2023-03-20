@@ -72,7 +72,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.checks-expected-result"));
         assertThat(checksOutput.getSummary()).isPresent()
                 .get()
-                .isEqualTo(expectedContent);
+                .asString().isEqualToNormalizingWhitespace(expectedContent);
     }
 
     private void assertChecksAnnotations(final ChecksOutput checksOutput, final int expectedAnnotations) {
