@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junitpioneer.jupiter.DefaultLocale;
@@ -15,6 +16,7 @@ import org.junitpioneer.jupiter.DefaultLocale;
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.parser.PitestParser;
 
 import hudson.model.Run;
 
@@ -39,6 +41,35 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final String REPORT_NAME = "Name";
     private static final int ANNOTATIONS_COUNT_FOR_MODIFIED = 3;
 
+    @Test
+    void shouldShowProjectBaselineForJaCoCo() {
+        var result = readJacocoResult("jacoco-codingstyle.xml");
+
+        var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result), result, REPORT_NAME,
+                ChecksAnnotationScope.SKIP, createJenkins());
+
+        assertThatTitleIs(publisher, "Line Coverage: 91.02% (294/323), Branch Coverage: 93.97% (109/116).");
+    }
+
+    @Test
+    void shouldShowProjectBaselineForPit() {
+        var result = readResult("mutations.xml", new PitestParser());
+
+        var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result), result, REPORT_NAME,
+                ChecksAnnotationScope.SKIP, createJenkins());
+
+        assertThatTitleIs(publisher, "Line Coverage: 93.84% (198/211), Mutation Coverage: 90.24% (222/246).");
+    }
+
+    private void assertThatTitleIs(final CoverageChecksPublisher publisher, final String expectedTitle) {
+        var checkDetails = publisher.extractChecksDetails();
+        assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
+            assertThat(output.getTitle()).isPresent()
+                    .get()
+                    .isEqualTo(expectedTitle);
+        });
+    }
+
     @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
     @CsvSource({"SKIP, 0", "ALL_LINES, 36", "MODIFIED_LINES, 3"})
     void shouldCreateChecksReport(final ChecksAnnotationScope scope, final int expectedAnnotations) {
@@ -61,7 +92,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getTitle()).isPresent()
                     .get()
-                    .isEqualTo("Modified code lines: 50.00% (1/2)");
+                    .isEqualTo("Line Coverage: 50.00% (1/2) (+50.00%)");
             assertThat(output.getText()).isEmpty();
             assertChecksAnnotations(output, expectedAnnotations);
             assertSummary(output);
@@ -133,5 +164,14 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                 new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF, Metric.MODULE, Fraction.ONE_FIFTH)),
                 List.of(testCoverage), new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage),
                 new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage), false);
+    }
+
+    private CoverageBuildAction createActionWithoutDelta(final Node result) {
+        var run = mock(Run.class);
+        when(run.getUrl()).thenReturn(BUILD_LINK);
+
+        return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
+                new QualityGateResult(), null, "refId",
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
     }
 }

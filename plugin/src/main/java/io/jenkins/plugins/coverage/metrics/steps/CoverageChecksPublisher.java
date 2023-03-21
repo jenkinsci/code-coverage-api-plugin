@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -93,9 +96,37 @@ class CoverageChecksPublisher {
     }
 
     private String getChecksTitle() {
-        return String.format("%s: %s",
-                FORMATTER.getDisplayName(Baseline.MODIFIED_LINES),
-                action.formatValue(Baseline.MODIFIED_LINES, Metric.LINE));
+        Baseline baseline = selectBaseline();
+        return getMetricsForTitle().stream()
+                .filter(metric -> action.hasValue(baseline, metric))
+                .map(metric -> format(baseline, metric))
+                .collect(Collectors.joining(", ", "", "."));
+    }
+
+    private Baseline selectBaseline() {
+        if (action.hasBaselineResult(Baseline.MODIFIED_LINES)) {
+            return Baseline.MODIFIED_LINES;
+        }
+        else {
+            return Baseline.PROJECT;
+        }
+    }
+
+    private String format(final Baseline baseline, final Metric metric) {
+        String suffix;
+        if (action.hasDelta(baseline, metric)) {
+            suffix = String.format(" (%s)", action.formatDelta(baseline, metric));
+        }
+        else {
+            suffix = "";
+        }
+        return String.format("%s: %s%s",
+                FORMATTER.getDisplayName(metric), action.formatValue(baseline, metric), suffix);
+    }
+
+    private NavigableSet<Metric> getMetricsForTitle() {
+        return new TreeSet<>(
+                Set.of(Metric.LINE, Metric.BRANCH, Metric.MUTATION));
     }
 
     private String getSummary() {

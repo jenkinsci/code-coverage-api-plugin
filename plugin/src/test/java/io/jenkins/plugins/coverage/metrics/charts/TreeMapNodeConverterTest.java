@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import edu.hm.hafner.coverage.CoverageParser;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
@@ -70,7 +71,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
     }
 
     @Override
-    protected Node readJacocoResult(final String fileName) {
+    protected Node readResult(final String fileName, final CoverageParser parser) {
         return super.readJacocoResult("../steps/" + fileName);
     }
 
