@@ -156,7 +156,9 @@ def params = [
                         if (params?.jacoco) {
                           jacocoArguments.putAll(params.jacoco as Map)
                         }
+                        archiveArtifacts artifacts: '**/jacoco.xml'
                         recordCoverage jacocoArguments
+
                       }
                     }
                   }
