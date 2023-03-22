@@ -163,7 +163,10 @@ class CoverageChecksPublisher {
         var builder = createAnnotationBuilder(fileNode).withTitle("Not covered line");
 
         return fileNode.getMissedLines().stream()
-                .map(line -> builder.withMessage("Line " + line + " is not covered by tests").withStartLine(line).build())
+                .map(line -> builder.withMessage("Line " + line + " is not covered by tests")
+                        .withStartLine(line)
+                        .withEndLine(line)
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -172,7 +175,9 @@ class CoverageChecksPublisher {
 
         return fileNode.getSurvivedMutations().entrySet().stream()
                 .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
-                        .withStartLine(entry.getKey()).build())
+                        .withStartLine(entry.getKey())
+                        .withEndLine(entry.getKey())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -188,7 +193,9 @@ class CoverageChecksPublisher {
 
         return fileNode.getPartiallyCoveredLines().entrySet().stream()
                 .map(entry -> builder.withMessage(createBranchMessage(entry.getKey(), entry.getValue()))
-                        .withStartLine(entry.getKey()).build())
+                        .withStartLine(entry.getKey())
+                        .withEndLine(entry.getKey())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -213,19 +220,21 @@ class CoverageChecksPublisher {
     private String getOverallCoverageSummary(final Node root) {
         String sectionHeader = getSectionHeader(2, Messages.Checks_Summary());
 
-        var modifiedFilesCoverageRoot = root.filterByModifiedFiles();
-        var modifiedLinesCoverageRoot = root.filterByModifiedLines();
-        var indirectlyChangedCoverage = root.filterByIndirectChanges();
-
         var projectCoverageHeader = getBulletListItem(1,
                 formatText(TextFormat.BOLD, getUrlText(Baseline.PROJECT_DELTA.getTitle(),
                         getCoverageReportBaseUrl() + Baseline.PROJECT_DELTA.getUrl())));
+
+        var modifiedFilesCoverageRoot = root.filterByModifiedFiles();
         var modifiedFilesCoverageHeader = getBulletListItem(1,
                 formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_FILES_DELTA.getTitle(),
                         getCoverageReportBaseUrl() + Baseline.MODIFIED_FILES_DELTA.getUrl())));
+
+        var modifiedLinesCoverageRoot = root.filterByModifiedLines();
         var modifiedLinesCoverageHeader = getBulletListItem(1,
                 formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_LINES_DELTA.getTitle(),
                         getCoverageReportBaseUrl() + Baseline.MODIFIED_LINES_DELTA.getUrl())));
+
+        var indirectlyChangedCoverage = root.filterByIndirectChanges();
         var indirectCoverageChangesHeader = getBulletListItem(1,
                 formatText(TextFormat.BOLD, getUrlText(Baseline.INDIRECT.getTitle(),
                         getCoverageReportBaseUrl() + Baseline.INDIRECT.getUrl())));
