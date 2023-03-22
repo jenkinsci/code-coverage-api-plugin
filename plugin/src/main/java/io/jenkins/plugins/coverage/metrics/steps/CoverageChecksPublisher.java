@@ -17,6 +17,7 @@ import edu.hm.hafner.coverage.Coverage;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.Functions;
@@ -90,7 +91,7 @@ class CoverageChecksPublisher {
                 .withName(checksName)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(getCheckConclusion(action.getQualityGateResult().getOverallStatus()))
-                .withDetailsURL(getCoverageReportBaseUrl())
+                .withDetailsURL(getBaseUrl())
                 .withOutput(output)
                 .build();
     }
@@ -213,81 +214,41 @@ class CoverageChecksPublisher {
                 .withAnnotationLevel(ChecksAnnotationLevel.WARNING);
     }
 
-    private String getCoverageReportBaseUrl() {
+    private String getBaseUrl() {
         return jenkinsFacade.getAbsoluteUrl(action.getOwner().getUrl(), action.getUrlName());
     }
 
+    private List<Baseline> getBaselines() {
+        return List.of(Baseline.PROJECT, Baseline.MODIFIED_FILES, Baseline.MODIFIED_LINES, Baseline.INDIRECT);
+    }
+
+
     private String getOverallCoverageSummary(final Node root) {
-        String sectionHeader = getSectionHeader(2, Messages.Checks_Summary());
+        StringBuilder description = new StringBuilder(getSectionHeader(2, Messages.Checks_Summary()));
 
-        var projectCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.PROJECT_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.PROJECT_DELTA.getUrl())));
-
-        var modifiedFilesCoverageRoot = root.filterByModifiedFiles();
-        var modifiedFilesCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_FILES_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.MODIFIED_FILES_DELTA.getUrl())));
-
-        var modifiedLinesCoverageRoot = root.filterByModifiedLines();
-        var modifiedLinesCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_LINES_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.MODIFIED_LINES_DELTA.getUrl())));
-
-        var indirectlyChangedCoverage = root.filterByIndirectChanges();
-        var indirectCoverageChangesHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.INDIRECT.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.INDIRECT.getUrl())));
-
-        var projectCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.PROJECT));
-        var projectCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.PROJECT));
-        var projectCoverageComplexity = getBulletListItem(2, formatRootValueOfMetric(root, Metric.COMPLEXITY_DENSITY));
-        var projectCoverageLoc = getBulletListItem(2, formatRootValueOfMetric(root, Metric.LOC));
-
-        var modifiedFilesCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.MODIFIED_FILES));
-        var modifiedFilesCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.MODIFIED_FILES));
-        var modifiedFilesCoverageComplexity = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedFilesCoverageRoot, Metric.COMPLEXITY_DENSITY));
-        var modifiedFilesCoverageLoc = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedFilesCoverageRoot, Metric.LOC));
-
-        var modifiedLinesCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.MODIFIED_LINES));
-        var modifiedLinesCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.MODIFIED_LINES));
-        var modifiedLinesCoverageLoc = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedLinesCoverageRoot, Metric.LOC));
-
-        var indirectCoverageChangesLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.INDIRECT));
-        var indirectCoverageChangesBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.INDIRECT));
-        var indirectCoverageChangesLoc = getBulletListItem(2,
-                formatRootValueOfMetric(indirectlyChangedCoverage, Metric.LOC));
-
-        return sectionHeader
-                + projectCoverageHeader
-                + projectCoverageLine
-                + projectCoverageBranch
-                + projectCoverageComplexity
-                + projectCoverageLoc
-                + modifiedFilesCoverageHeader
-                + modifiedFilesCoverageLine
-                + modifiedFilesCoverageBranch
-                + modifiedFilesCoverageComplexity
-                + modifiedFilesCoverageLoc
-                + modifiedLinesCoverageHeader
-                + modifiedLinesCoverageLine
-                + modifiedLinesCoverageBranch
-                + modifiedLinesCoverageLoc
-                + indirectCoverageChangesHeader
-                + indirectCoverageChangesLine
-                + indirectCoverageChangesBranch
-                + indirectCoverageChangesLoc;
+        for (Baseline baseline : getBaselines()) {
+            if (action.hasBaselineResult(baseline)) {
+                String title;
+                if (action.hasDelta(baseline)) {
+                    title = action.getDeltaBaseline(baseline).getTitle();
+                }
+                else {
+                    title = baseline.getTitle();
+                }
+                description.append(getBulletListItem(1,
+                        formatText(TextFormat.BOLD,
+                                getUrlText(title, getBaseUrl() + baseline.getUrl()))));
+                for (Value value : action.getValues(baseline)) {
+                    String display = String.format("%s: %s", action.getFormatter().getDisplayName(value.getMetric()),
+                            action.getFormatter().formatValue(value));
+                    if (action.hasDelta(baseline, value.getMetric())) {
+                        display += String.format(" (%s)", action.formatDelta(baseline, value.getMetric()));
+                    }
+                    description.append(getBulletListItem(2, display));
+                }
+            }
+        }
+        return description.toString();
     }
 
     /**
