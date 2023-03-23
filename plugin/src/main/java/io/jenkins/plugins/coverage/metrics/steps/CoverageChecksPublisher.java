@@ -228,21 +228,13 @@ class CoverageChecksPublisher {
 
         for (Baseline baseline : getBaselines()) {
             if (action.hasBaselineResult(baseline)) {
-                String title;
-                if (action.hasDelta(baseline)) {
-                    title = action.getDeltaBaseline(baseline).getTitle();
-                }
-                else {
-                    title = baseline.getTitle();
-                }
                 description.append(getBulletListItem(1,
                         formatText(TextFormat.BOLD,
-                                getUrlText(title, getBaseUrl() + baseline.getUrl()))));
+                                getUrlText(action.getTitle(baseline), getBaseUrl() + baseline.getUrl()))));
                 for (Value value : action.getValues(baseline)) {
-                    String display = String.format("%s: %s", action.getFormatter().getDisplayName(value.getMetric()),
-                            action.getFormatter().formatValue(value));
+                    String display = FORMATTER.formatDetailedValueWithMetric(value);
                     if (action.hasDelta(baseline, value.getMetric())) {
-                        display += String.format(" (%s)", action.formatDelta(baseline, value.getMetric()));
+                        display += String.format(" - Delta: %s", action.formatDelta(baseline, value.getMetric()));
                     }
                     description.append(getBulletListItem(2, display));
                 }

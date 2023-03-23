@@ -10,14 +10,7 @@
 
   <j:if test="${it.hasBaselineResult(baseline)}">
     <li>
-      <j:choose>
-        <j:when test="${it.hasDelta(baseline)}">
-          <a href="${it.urlName}/#${baseline.url}">${it.getDeltaBaseline(baseline).title}</a>
-        </j:when>
-        <j:otherwise>
-          <a href="${it.urlName}/#${baseline.url}">${baseline.title}</a>
-        </j:otherwise>
-      </j:choose>
+      <a href="${it.urlName}/#${baseline.url}">${it.getTitle(baseline)}</a>
       <div class="${baseline}-summary">
         <j:set var="values" value="${it.getAllValues(baseline)}"/>
         <j:set var="formatter" value="${it.formatter}"/>

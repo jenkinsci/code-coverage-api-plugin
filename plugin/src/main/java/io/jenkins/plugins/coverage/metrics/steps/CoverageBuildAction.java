@@ -278,6 +278,23 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     }
 
     /**
+     * Returns the title text for the specified baseline.
+     *
+     * @param baseline
+     *         the baseline to get the title for
+     *
+     * @return the title
+     */
+    public String getTitle(final Baseline baseline) {
+        if (hasDelta(baseline)) {
+            return getDeltaBaseline(baseline).getTitle();
+        }
+        else {
+            return baseline.getTitle();
+        }
+    }
+
+    /**
      * Returns all available values for the specified baseline.
      *
      * @param baseline
