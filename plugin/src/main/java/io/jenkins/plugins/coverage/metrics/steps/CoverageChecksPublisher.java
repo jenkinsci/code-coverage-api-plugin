@@ -132,7 +132,7 @@ class CoverageChecksPublisher {
 
     private String getSummary() {
         var root = rootNode;
-        return getOverallCoverageSummary(root) + "\n\n"
+        return getOverallCoverageSummary() + "\n\n"
                 + getQualityGatesSummary() + "\n\n"
                 + getProjectMetricsSummary(root);
     }
@@ -223,7 +223,7 @@ class CoverageChecksPublisher {
     }
 
 
-    private String getOverallCoverageSummary(final Node root) {
+    private String getOverallCoverageSummary() {
         StringBuilder description = new StringBuilder(getSectionHeader(2, Messages.Checks_Summary()));
 
         for (Baseline baseline : getBaselines()) {
