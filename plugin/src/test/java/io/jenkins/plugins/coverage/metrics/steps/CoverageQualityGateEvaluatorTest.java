@@ -67,6 +67,30 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldSkipIfValueNotDefined() {
+        Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
+
+        qualityGates.add(new CoverageQualityGate(0, Metric.FILE, Baseline.MODIFIED_LINES, QualityGateCriticality.UNSTABLE));
+        qualityGates.add(new CoverageQualityGate(0, Metric.FILE, Baseline.MODIFIED_FILES, QualityGateCriticality.UNSTABLE));
+        qualityGates.add(new CoverageQualityGate(0, Metric.LINE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE));
+        qualityGates.add(new CoverageQualityGate(0, Metric.FILE, Baseline.MODIFIED_LINES_DELTA, QualityGateCriticality.UNSTABLE));
+        qualityGates.add(new CoverageQualityGate(0, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE));
+
+        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createOnlyProjectStatistics());
+
+        assertThat(evaluator).isEnabled();
+
+        QualityGateResult result = evaluator.evaluate();
+
+        assertThat(result).hasOverallStatus(QualityGateStatus.INACTIVE).isInactive().hasMessages(
+                "-> [Modified code lines - File Coverage]: ≪Not built≫ - (Actual value: n/a, Quality gate: 0.00)",
+                "-> [Modified files - File Coverage]: ≪Not built≫ - (Actual value: n/a, Quality gate: 0.00)",
+                "-> [Overall project (difference to reference job) - Line Coverage]: ≪Not built≫ - (Actual value: n/a, Quality gate: 0.00)",
+                "-> [Modified code lines (difference to modified files) - File Coverage]: ≪Not built≫ - (Actual value: n/a, Quality gate: 0.00)",
+                "-> [Modified files (difference to overall project) - Line Coverage]: ≪Not built≫ - (Actual value: n/a, Quality gate: 0.00)");
+    }
+
+    @Test
     void shouldReportUnstableIfBelowThreshold() {
         Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
 
@@ -150,18 +174,6 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
 
         CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
         assertThatStatusWillBeOverwritten(evaluator);
-    }
-
-    @Test
-    void shouldFailIfValueIsNotFound() {
-        Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
-
-        qualityGates.add(new CoverageQualityGate(50.0, Metric.PACKAGE, Baseline.PROJECT, QualityGateCriticality.FAILURE));
-
-        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
-        QualityGateResult result = evaluator.evaluate();
-        assertThat(result).hasOverallStatus(QualityGateStatus.FAILED).isNotSuccessful().hasMessages(
-                "-> [Overall project - Package Coverage]: ≪Failed≫ - (Actual value: n/a, Quality gate: 50.00)");
     }
 
     @Test

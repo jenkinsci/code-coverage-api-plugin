@@ -90,6 +90,16 @@ public abstract class AbstractCoverageTest extends ResourceTest {
                 fillValues(), fillDeltas());
     }
 
+    /**
+     * Creates coverage statistics that can be used in test cases.
+     *
+     * @return the coverage statistics
+     */
+    public static CoverageStatistics createOnlyProjectStatistics() {
+        return new CoverageStatistics(fillValues(),
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>());
+    }
+
     private static List<Value> fillValues() {
         var builder = new CoverageBuilder();
         return List.of(builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
