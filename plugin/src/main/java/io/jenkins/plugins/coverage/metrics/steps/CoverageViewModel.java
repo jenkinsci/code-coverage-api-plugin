@@ -68,7 +68,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
 
     static final String ABSOLUTE_COVERAGE_TABLE_ID = "absolute-coverage-table";
     static final String MODIFIED_LINES_COVERAGE_TABLE_ID = "modified-lines-coverage-table";
-    static final String MODIFIED_FILES_COVERAGE_TABLE_ID = "modified-files-coverage-table";
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
