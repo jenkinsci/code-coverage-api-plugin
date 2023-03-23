@@ -222,7 +222,6 @@ class CoverageChecksPublisher {
         return List.of(Baseline.PROJECT, Baseline.MODIFIED_FILES, Baseline.MODIFIED_LINES, Baseline.INDIRECT);
     }
 
-
     private String getOverallCoverageSummary() {
         StringBuilder description = new StringBuilder(getSectionHeader(2, Messages.Checks_Summary()));
 
