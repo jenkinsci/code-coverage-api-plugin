@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import edu.hm.hafner.coverage.CoverageParser;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.echarts.LabeledTreeMapNode;
@@ -23,12 +22,12 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 class TreeMapNodeConverterTest extends AbstractCoverageTest {
-
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
+    private static final String PREFIX = "../steps/";
 
     @Test
     void shouldConvertCodingStyleToTree() {
-        Node tree = readJacocoResult(JACOCO_CODING_STYLE_FILE);
+        Node tree = readJacocoResult(PREFIX + JACOCO_CODING_STYLE_FILE);
 
         LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.LINE, COLOR_PROVIDER);
         assertThat(root.getName()).isEqualTo("Java coding style");
@@ -50,7 +49,7 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
 
     @Test
     void shouldReadBranchCoverage() {
-        Node tree = readJacocoResult(JACOCO_ANALYSIS_MODEL_FILE);
+        Node tree = readJacocoResult(PREFIX + JACOCO_ANALYSIS_MODEL_FILE);
 
         LabeledTreeMapNode root = new TreeMapNodeConverter().toTreeChartModel(tree, Metric.BRANCH, COLOR_PROVIDER);
 
@@ -68,11 +67,6 @@ class TreeMapNodeConverterTest extends AbstractCoverageTest {
                 .collect(Collectors.toList());
         subChildren.addAll(children);
         return subChildren;
-    }
-
-    @Override
-    protected Node readResult(final String fileName, final CoverageParser parser) {
-        return super.readJacocoResult("../steps/" + fileName);
     }
 
     /**
