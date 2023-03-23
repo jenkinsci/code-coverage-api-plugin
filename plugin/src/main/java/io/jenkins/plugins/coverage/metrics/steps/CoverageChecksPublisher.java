@@ -281,17 +281,6 @@ class CoverageChecksPublisher {
                 + projectCoverageDeltaRow;
     }
 
-    private String formatCoverageForMetric(final Metric metric, final Baseline baseline) {
-        return String.format("%s: %s / %s", FORMATTER.getDisplayName(metric),
-                action.formatValue(baseline, metric), action.formatDelta(baseline, metric));
-    }
-
-    private String formatRootValueOfMetric(final Node root, final Metric metric) {
-        var value = root.getValue(metric);
-        return value.map(FORMATTER::formatValueWithMetric)
-                .orElseGet(() -> FORMATTER.getDisplayName(metric) + ": " + Messages.Coverage_Not_Available());
-    }
-
     private String formatText(final TextFormat format, final String text) {
         switch (format) {
             case BOLD:
