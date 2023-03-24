@@ -81,6 +81,7 @@ def params = [
               if (doArchiveArtifacts) {
                 archivedArtifacts = true
               }
+
               boolean incrementals // cf. JEP-305
 
               stage("Checkout (${stageIdentifier})") {
