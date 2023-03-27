@@ -6,11 +6,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.coverage.Coverage;
@@ -97,32 +99,36 @@ class CoverageChecksPublisher {
     }
 
     private String getChecksTitle() {
-        Baseline baseline = selectBaseline();
         return getMetricsForTitle().stream()
-                .filter(metric -> action.hasValue(baseline, metric))
-                .map(metric -> format(baseline, metric))
+                .map(this::format)
+                .flatMap(Optional::stream)
                 .collect(Collectors.joining(", ", "", "."));
+    }
+
+    private Optional<String> format(final Metric metric) {
+        var baseline = selectBaseline();
+        return action.getValueForMetric(baseline, metric)
+                .map(value -> formatValue(baseline, metric, value));
+
     }
 
     private Baseline selectBaseline() {
         if (action.hasBaselineResult(Baseline.MODIFIED_LINES)) {
             return Baseline.MODIFIED_LINES;
         }
-        else {
-            return Baseline.PROJECT;
-        }
+        return Baseline.PROJECT;
     }
 
-    private String format(final Baseline baseline, final Metric metric) {
-        String suffix;
-        if (action.hasDelta(baseline, metric)) {
-            suffix = String.format(" (%s)", action.formatDelta(baseline, metric));
-        }
-        else {
-            suffix = "";
-        }
+    private String formatValue(final Baseline baseline, final Metric metric, final Value value) {
         return String.format("%s: %s%s",
-                FORMATTER.getDisplayName(metric), action.formatValue(baseline, metric), suffix);
+                FORMATTER.getDisplayName(metric), FORMATTER.format(value), getDeltaDetails(baseline, metric));
+    }
+
+    private String getDeltaDetails(final Baseline baseline, final Metric metric) {
+        if (action.hasDelta(baseline, metric)) {
+            return String.format(" (%s)", action.formatDelta(baseline, metric));
+        }
+        return StringUtils.EMPTY;
     }
 
     private NavigableSet<Metric> getMetricsForTitle() {
@@ -131,10 +137,9 @@ class CoverageChecksPublisher {
     }
 
     private String getSummary() {
-        var root = rootNode;
         return getOverallCoverageSummary() + "\n\n"
                 + getQualityGatesSummary() + "\n\n"
-                + getProjectMetricsSummary(root);
+                + getProjectMetricsSummary(rootNode);
     }
 
     private List<ChecksAnnotation> getAnnotations() {
@@ -142,22 +147,22 @@ class CoverageChecksPublisher {
             return List.of();
         }
 
-        var tree = rootNode;
-        Node filtered;
-        if (annotationScope == ChecksAnnotationScope.ALL_LINES) {
-            filtered = tree;
-        }
-        else {
-            filtered = tree.filterByModifiedLines();
-        }
-
         var annotations = new ArrayList<ChecksAnnotation>();
-        for (var fileNode : filtered.getAllFileNodes()) {
+        for (var fileNode : filterAnnotations().getAllFileNodes()) {
             annotations.addAll(getMissingLines(fileNode));
             annotations.addAll(getPartiallyCoveredLines(fileNode));
             annotations.addAll(getSurvivedMutations(fileNode));
         }
         return annotations;
+    }
+
+    private Node filterAnnotations() {
+        if (annotationScope == ChecksAnnotationScope.ALL_LINES) {
+            return rootNode;
+        }
+        else {
+            return rootNode.filterByModifiedLines();
+        }
     }
 
     private Collection<? extends ChecksAnnotation> getMissingLines(final FileNode fileNode) {

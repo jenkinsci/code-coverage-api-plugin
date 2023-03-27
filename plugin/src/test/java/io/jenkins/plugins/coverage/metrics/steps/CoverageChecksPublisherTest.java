@@ -48,7 +48,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result), result, REPORT_NAME,
                 ChecksAnnotationScope.SKIP, createJenkins());
 
-        assertThatTitleIs(publisher, "Line Coverage: 91.02% (294/323), Branch Coverage: 93.97% (109/116).");
+        assertThatTitleIs(publisher, "Line Coverage: 91.02%, Branch Coverage: 93.97%.");
     }
 
     @Test
@@ -58,7 +58,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result), result, REPORT_NAME,
                 ChecksAnnotationScope.SKIP, createJenkins());
 
-        assertThatTitleIs(publisher, "Line Coverage: 93.84% (198/211), Mutation Coverage: 90.24% (222/246).");
+        assertThatTitleIs(publisher, "Line Coverage: 93.84%, Mutation Coverage: 90.24%.");
     }
 
     private void assertThatTitleIs(final CoverageChecksPublisher publisher, final String expectedTitle) {
@@ -92,7 +92,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getTitle()).isPresent()
                     .get()
-                    .isEqualTo("Line Coverage: 50.00% (1/2) (+50.00%).");
+                    .isEqualTo("Line Coverage: 50.00% (+50.00%).");
             assertThat(output.getText()).isEmpty();
             assertChecksAnnotations(output, expectedAnnotations);
             assertSummary(output);
