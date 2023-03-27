@@ -8,7 +8,8 @@ def params = [
     configurations: configurations,
     checkstyle: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
     pmd: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
-    jacoco: [sourceCodeRetention: 'MODIFIED', sourceDirectories: ['plugin/src/main/java'] ]
+    jacoco: [sourceCodeRetention: 'MODIFIED', sourceDirectories: ['plugin/src/main/java']]
+    ]
 
   properties([
     disableConcurrentBuilds(abortPrevious: true),
