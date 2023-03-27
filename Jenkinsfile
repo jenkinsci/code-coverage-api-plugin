@@ -153,7 +153,7 @@ def params = [
                         discoverReferenceBuild()
                         // Default configuration for JaCoCo can be overwritten using a `jacoco` parameter (map).
                         // Configuration see: https://www.jenkins.io/doc/pipeline/steps/code-coverage-api/#recordcoverage-record-code-coverage-results
-                        Map jacocoArguments = [tools: [[parser: 'JACOCO']]]
+                        Map jacocoArguments = [tools: [[parser: 'JACOCO', pattern: '**/jacoco/jacoco.xml']]]
                         if (params?.jacoco) {
                           jacocoArguments.putAll(params.jacoco as Map)
                         }
