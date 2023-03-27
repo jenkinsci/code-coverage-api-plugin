@@ -1,6 +1,6 @@
 # Jenkins Code Coverage Plug-in
 
-[![Gitter](https://badges.gitter.im/jenkinsci/code-coverage-api-plugin.svg)](https://gitter.im/jenkinsci/code-coverage-api-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Join the chat at Gitter/Matrix](https://badges.gitter.im/jenkinsci/code-coverage-api-plugin.svg)](https://gitter.im/jenkinsci/code-coverage-api-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/code-coverage-api.svg?color=red)](https://plugins.jenkins.io/code-coverage-api)
 [![Jenkins](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/master/badge/icon?subject=Jenkins%20CI)](https://ci.jenkins.io/job/Plugins/job/code-coverage-api-plugin/job/master/)
 [![GitHub Actions](https://github.com/jenkinsci/code-coverage-api-plugin/workflows/GitHub%20CI/badge.svg?branch=master)](https://github.com/jenkinsci/code-coverage-api-plugin/actions)

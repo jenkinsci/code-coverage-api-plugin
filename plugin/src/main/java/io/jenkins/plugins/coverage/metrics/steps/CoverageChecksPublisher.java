@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -14,6 +17,7 @@ import edu.hm.hafner.coverage.Coverage;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.Functions;
@@ -87,20 +91,48 @@ class CoverageChecksPublisher {
                 .withName(checksName)
                 .withStatus(ChecksStatus.COMPLETED)
                 .withConclusion(getCheckConclusion(action.getQualityGateResult().getOverallStatus()))
-                .withDetailsURL(getCoverageReportBaseUrl())
+                .withDetailsURL(getBaseUrl())
                 .withOutput(output)
                 .build();
     }
 
     private String getChecksTitle() {
-        return String.format("%s: %s",
-                FORMATTER.getDisplayName(Baseline.MODIFIED_LINES),
-                action.formatValue(Baseline.MODIFIED_LINES, Metric.LINE));
+        Baseline baseline = selectBaseline();
+        return getMetricsForTitle().stream()
+                .filter(metric -> action.hasValue(baseline, metric))
+                .map(metric -> format(baseline, metric))
+                .collect(Collectors.joining(", ", "", "."));
+    }
+
+    private Baseline selectBaseline() {
+        if (action.hasBaselineResult(Baseline.MODIFIED_LINES)) {
+            return Baseline.MODIFIED_LINES;
+        }
+        else {
+            return Baseline.PROJECT;
+        }
+    }
+
+    private String format(final Baseline baseline, final Metric metric) {
+        String suffix;
+        if (action.hasDelta(baseline, metric)) {
+            suffix = String.format(" (%s)", action.formatDelta(baseline, metric));
+        }
+        else {
+            suffix = "";
+        }
+        return String.format("%s: %s%s",
+                FORMATTER.getDisplayName(metric), action.formatValue(baseline, metric), suffix);
+    }
+
+    private NavigableSet<Metric> getMetricsForTitle() {
+        return new TreeSet<>(
+                Set.of(Metric.LINE, Metric.BRANCH, Metric.MUTATION));
     }
 
     private String getSummary() {
         var root = rootNode;
-        return getOverallCoverageSummary(root) + "\n\n"
+        return getOverallCoverageSummary() + "\n\n"
                 + getQualityGatesSummary() + "\n\n"
                 + getProjectMetricsSummary(root);
     }
@@ -132,7 +164,10 @@ class CoverageChecksPublisher {
         var builder = createAnnotationBuilder(fileNode).withTitle("Not covered line");
 
         return fileNode.getMissedLines().stream()
-                .map(line -> builder.withMessage("Line " + line + " is not covered by tests").withStartLine(line).build())
+                .map(line -> builder.withMessage("Line " + line + " is not covered by tests")
+                        .withStartLine(line)
+                        .withEndLine(line)
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -141,7 +176,9 @@ class CoverageChecksPublisher {
 
         return fileNode.getSurvivedMutations().entrySet().stream()
                 .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
-                        .withStartLine(entry.getKey()).build())
+                        .withStartLine(entry.getKey())
+                        .withEndLine(entry.getKey())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -157,7 +194,9 @@ class CoverageChecksPublisher {
 
         return fileNode.getPartiallyCoveredLines().entrySet().stream()
                 .map(entry -> builder.withMessage(createBranchMessage(entry.getKey(), entry.getValue()))
-                        .withStartLine(entry.getKey()).build())
+                        .withStartLine(entry.getKey())
+                        .withEndLine(entry.getKey())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -175,79 +214,32 @@ class CoverageChecksPublisher {
                 .withAnnotationLevel(ChecksAnnotationLevel.WARNING);
     }
 
-    private String getCoverageReportBaseUrl() {
+    private String getBaseUrl() {
         return jenkinsFacade.getAbsoluteUrl(action.getOwner().getUrl(), action.getUrlName());
     }
 
-    private String getOverallCoverageSummary(final Node root) {
-        String sectionHeader = getSectionHeader(2, Messages.Checks_Summary());
+    private List<Baseline> getBaselines() {
+        return List.of(Baseline.PROJECT, Baseline.MODIFIED_FILES, Baseline.MODIFIED_LINES, Baseline.INDIRECT);
+    }
 
-        var modifiedFilesCoverageRoot = root.filterByModifiedFiles();
-        var modifiedLinesCoverageRoot = root.filterByModifiedLines();
-        var indirectlyChangedCoverage = root.filterByIndirectChanges();
+    private String getOverallCoverageSummary() {
+        StringBuilder description = new StringBuilder(getSectionHeader(2, Messages.Checks_Summary()));
 
-        var projectCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.PROJECT_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.PROJECT_DELTA.getUrl())));
-        var modifiedFilesCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_FILES_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.MODIFIED_FILES_DELTA.getUrl())));
-        var modifiedLinesCoverageHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.MODIFIED_LINES_DELTA.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.MODIFIED_LINES_DELTA.getUrl())));
-        var indirectCoverageChangesHeader = getBulletListItem(1,
-                formatText(TextFormat.BOLD, getUrlText(Baseline.INDIRECT.getTitle(),
-                        getCoverageReportBaseUrl() + Baseline.INDIRECT.getUrl())));
-
-        var projectCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.PROJECT));
-        var projectCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.PROJECT));
-        var projectCoverageComplexity = getBulletListItem(2, formatRootValueOfMetric(root, Metric.COMPLEXITY_DENSITY));
-        var projectCoverageLoc = getBulletListItem(2, formatRootValueOfMetric(root, Metric.LOC));
-
-        var modifiedFilesCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.MODIFIED_FILES));
-        var modifiedFilesCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.MODIFIED_FILES));
-        var modifiedFilesCoverageComplexity = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedFilesCoverageRoot, Metric.COMPLEXITY_DENSITY));
-        var modifiedFilesCoverageLoc = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedFilesCoverageRoot, Metric.LOC));
-
-        var modifiedLinesCoverageLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.MODIFIED_LINES));
-        var modifiedLinesCoverageBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.MODIFIED_LINES));
-        var modifiedLinesCoverageLoc = getBulletListItem(2,
-                formatRootValueOfMetric(modifiedLinesCoverageRoot, Metric.LOC));
-
-        var indirectCoverageChangesLine = getBulletListItem(2,
-                formatCoverageForMetric(Metric.LINE, Baseline.INDIRECT));
-        var indirectCoverageChangesBranch = getBulletListItem(2,
-                formatCoverageForMetric(Metric.BRANCH, Baseline.INDIRECT));
-        var indirectCoverageChangesLoc = getBulletListItem(2,
-                formatRootValueOfMetric(indirectlyChangedCoverage, Metric.LOC));
-
-        return sectionHeader
-                + projectCoverageHeader
-                + projectCoverageLine
-                + projectCoverageBranch
-                + projectCoverageComplexity
-                + projectCoverageLoc
-                + modifiedFilesCoverageHeader
-                + modifiedFilesCoverageLine
-                + modifiedFilesCoverageBranch
-                + modifiedFilesCoverageComplexity
-                + modifiedFilesCoverageLoc
-                + modifiedLinesCoverageHeader
-                + modifiedLinesCoverageLine
-                + modifiedLinesCoverageBranch
-                + modifiedLinesCoverageLoc
-                + indirectCoverageChangesHeader
-                + indirectCoverageChangesLine
-                + indirectCoverageChangesBranch
-                + indirectCoverageChangesLoc;
+        for (Baseline baseline : getBaselines()) {
+            if (action.hasBaselineResult(baseline)) {
+                description.append(getBulletListItem(1,
+                        formatText(TextFormat.BOLD,
+                                getUrlText(action.getTitle(baseline), getBaseUrl() + baseline.getUrl()))));
+                for (Value value : action.getValues(baseline)) {
+                    String display = FORMATTER.formatDetailedValueWithMetric(value);
+                    if (action.hasDelta(baseline, value.getMetric())) {
+                        display += String.format(" - Delta: %s", action.formatDelta(baseline, value.getMetric()));
+                    }
+                    description.append(getBulletListItem(2, display));
+                }
+            }
+        }
+        return description.toString();
     }
 
     /**
@@ -287,17 +279,6 @@ class CoverageChecksPublisher {
                 + headerSeparator
                 + projectCoverageRow
                 + projectCoverageDeltaRow;
-    }
-
-    private String formatCoverageForMetric(final Metric metric, final Baseline baseline) {
-        return String.format("%s: %s / %s", FORMATTER.getDisplayName(metric),
-                action.formatValue(baseline, metric), action.formatDelta(baseline, metric));
-    }
-
-    private String formatRootValueOfMetric(final Node root, final Metric metric) {
-        var value = root.getValue(metric);
-        return value.map(FORMATTER::formatValueWithMetric)
-                .orElseGet(() -> FORMATTER.getDisplayName(metric) + ": " + Messages.Coverage_Not_Available());
     }
 
     private String formatText(final TextFormat format, final String text) {

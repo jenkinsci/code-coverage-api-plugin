@@ -10,6 +10,7 @@ import org.apache.commons.lang3.math.Fraction;
 import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.CoverageParser;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
@@ -50,8 +51,22 @@ public abstract class AbstractCoverageTest extends ResourceTest {
      * @return the parsed coverage tree
      */
     protected Node readJacocoResult(final String fileName) {
+        return readResult(fileName, new JacocoParser());
+    }
+
+    /**
+     * Reads and parses a JaCoCo coverage report.
+     *
+     * @param fileName
+     *         the name of the coverage report file
+     * @param parser
+     *         the parser to use
+     *
+     * @return the parsed coverage tree
+     */
+    protected Node readResult(final String fileName, final CoverageParser parser) {
         try {
-            var node = new JacocoParser().parse(Files.newBufferedReader(getResourceAsFile(fileName)), log);
+            var node = parser.parse(Files.newBufferedReader(getResourceAsFile(fileName)), log);
             node.splitPackages();
             return node;
         }
@@ -73,6 +88,16 @@ public abstract class AbstractCoverageTest extends ResourceTest {
         return new CoverageStatistics(fillValues(), fillDeltas(),
                 fillValues(), fillDeltas(),
                 fillValues(), fillDeltas());
+    }
+
+    /**
+     * Creates coverage statistics that can be used in test cases.
+     *
+     * @return the coverage statistics
+     */
+    public static CoverageStatistics createOnlyProjectStatistics() {
+        return new CoverageStatistics(fillValues(),
+                new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>());
     }
 
     private static List<Value> fillValues() {
