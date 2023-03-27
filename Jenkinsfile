@@ -6,10 +6,14 @@ def configurations = [
 def params = [
     failFast: false,
     configurations: configurations,
-    checkstyle: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
-    pmd: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
+    checkstyle: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
+            filters:[includePackage('io.jenkins.plugins.coverage.metrics')]],
+    pmd: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
+            filters:[includePackage('io.jenkins.plugins.coverage.metrics')]],
+    spotbugs: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
+            filters:[includePackage('io.jenkins.plugins.coverage.metrics')]],
     jacoco: [sourceCodeRetention: 'MODIFIED', sourceDirectories: [[path: 'plugin/src/main/java']]]
-    ]
+]
 
   properties([
     disableConcurrentBuilds(abortPrevious: true),
