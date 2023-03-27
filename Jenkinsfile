@@ -8,7 +8,7 @@ def params = [
     configurations: configurations,
     checkstyle: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
     pmd: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]]],
-    jacoco: [sourceCodeRetention: 'MODIFIED'] ]
+    jacoco: [sourceCodeRetention: 'MODIFIED', sourceDirectories: ['plugin/src/main/java'] ]
 
   properties([
     disableConcurrentBuilds(abortPrevious: true),
@@ -157,7 +157,6 @@ def params = [
                         if (params?.jacoco) {
                           jacocoArguments.putAll(params.jacoco as Map)
                         }
-                        archiveArtifacts artifacts: '**/jacoco.xml'
                         recordCoverage jacocoArguments
 
                       }
