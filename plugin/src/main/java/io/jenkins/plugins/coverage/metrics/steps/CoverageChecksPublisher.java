@@ -102,7 +102,7 @@ class CoverageChecksPublisher {
         return getMetricsForTitle().stream()
                 .map(this::format)
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining(", ", "", "."));
+                .collect(Collectors.joining(", "));
     }
 
     private Optional<String> format(final Metric metric) {
