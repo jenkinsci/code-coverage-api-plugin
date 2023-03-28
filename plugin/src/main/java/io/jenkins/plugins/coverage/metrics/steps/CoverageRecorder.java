@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.ModuleNode;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
@@ -392,8 +394,17 @@ public class CoverageRecorder extends Recorder {
         if (!results.isEmpty()) {
             CoverageReporter reporter = new CoverageReporter();
             var rootNode = Node.merge(results);
+            // TODO: move code to coverage model
+            var sources = rootNode.getAll(Metric.MODULE)
+                    .stream()
+                    .filter(ModuleNode.class::isInstance)
+                    .map(ModuleNode.class::cast)
+                    .map(ModuleNode::getSources)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+            sources.addAll(getSourceDirectoriesPaths());
             var action = reporter.publishAction(getActualId(), getName(), getIcon(), rootNode, run,
-                    workspace, taskListener, getQualityGates(), getScm(), getSourceDirectoriesPaths(),
+                    workspace, taskListener, getQualityGates(), getScm(), sources,
                     getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
             if (!skipPublishingChecks) {
                 var checksPublisher = new CoverageChecksPublisher(action, rootNode, getChecksName(), getChecksAnnotationScope());
