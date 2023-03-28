@@ -34,7 +34,7 @@
 
     <coverage-model.version>0.19.0</coverage-model.version>
     <git-forensics.version>2.0.0</git-forensics.version>
-    <prism-api.version>1.29.0-3</prism-api.version>
+    <prism-api.version>1.29.0-4</prism-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
 
   </properties>
