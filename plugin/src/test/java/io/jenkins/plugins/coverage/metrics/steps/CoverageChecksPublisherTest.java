@@ -93,7 +93,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     .get()
                     .isEqualTo("Line Coverage: 50.00% (+50.00%)");
             var expectedDetails = toString("coverage-publisher-details.checks-expected-result");
-            assertThat(output.getText()).contains(expectedDetails);
+            assertThat(output.getText()).isPresent().get().asString().isEqualToNormalizingWhitespace(expectedDetails);
             assertChecksAnnotations(output, expectedAnnotations);
             assertSummary(output);
         });
