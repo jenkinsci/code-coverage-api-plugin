@@ -363,6 +363,7 @@ class CoverageChecksPublisher {
         String sectionHeader = getSectionHeader(TITLE_HEADER_LEVEL, "Project coverage details");
 
         List<String> coverageDisplayNames = FORMATTER.getSortedCoverageDisplayNames();
+        coverageDisplayNames.set(0, "");
         String header = formatRow(coverageDisplayNames);
         String headerSeparator = formatRow(
                 getTableSeparators(ColumnAlignment.CENTER, coverageDisplayNames.size()));

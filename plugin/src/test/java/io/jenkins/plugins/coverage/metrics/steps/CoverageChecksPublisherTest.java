@@ -94,7 +94,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     .get()
                     .isEqualTo("Line Coverage: 50.00% (+50.00%)");
             assertThat(output.getText()).contains("#### Project coverage details\n\n"
-                    + "|Container Coverage|Module Coverage|Package Coverage|File Coverage|Class Coverage|Method Coverage|Line Coverage|Branch Coverage|Instruction Coverage|\n"
+                    + "||Module Coverage|Package Coverage|File Coverage|Class Coverage|Method Coverage|Line Coverage|Branch Coverage|Instruction Coverage|\n"
                     + "|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|\n"
                     + "|:white_check_mark: **Overall project**|100.00% (1/1)|100.00% (4/4)|70.00% (7/10)|83.33% (15/18)|95.10% (97/102)|91.02% (294/323)|93.97% (109/116)|93.33% (1260/1350)|\n"
                     + "|:chart_with_upwards_trend: **Overall project (difference to reference job)**|-|+20.00% :arrow_up:|-|-|-|-|+50.00% :arrow_up:|-|-|\n");
