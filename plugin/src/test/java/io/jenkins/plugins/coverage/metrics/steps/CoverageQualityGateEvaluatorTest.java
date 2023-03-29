@@ -128,8 +128,7 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
         qualityGates.add(new CoverageQualityGate(minimum, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE));
 
         CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
-        QualityGateResult result = evaluator.evaluate();
-        return result;
+        return evaluator.evaluate();
     }
 
     @Test

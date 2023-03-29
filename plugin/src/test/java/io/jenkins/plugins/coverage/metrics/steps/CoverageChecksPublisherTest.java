@@ -49,25 +49,12 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                 ChecksAnnotationScope.SKIP, createJenkins());
 
         var checkDetails = publisher.extractChecksDetails();
+        var expectedSummary = toString("coverage-publisher-quality-gate.checks-expected-result");
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
             assertThat(output.getSummary()).isPresent()
                     .get()
                     .asString()
-                    .containsIgnoringWhitespaces("#### Quality Gates Summary\n"
-                            + "\n"
-                            + "Overall result: Unstable\n"
-                            + "- Overall project - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
-                            + "- Overall project - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
-                            + "- Modified code lines - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
-                            + "- Modified code lines - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
-                            + "- Modified files - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
-                            + "- Modified files - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
-                            + "- Overall project (difference to reference job) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
-                            + "- Overall project (difference to reference job) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)\n"
-                            + "- Modified code lines (difference to modified files) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
-                            + "- Modified code lines (difference to modified files) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)\n"
-                            + "- Modified files (difference to overall project) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
-                            + "- Modified files (difference to overall project) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+                    .containsIgnoringWhitespaces(expectedSummary);
         });
     }
 
