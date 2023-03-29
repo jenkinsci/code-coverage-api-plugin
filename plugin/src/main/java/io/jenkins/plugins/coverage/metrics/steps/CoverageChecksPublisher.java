@@ -6,26 +6,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.Fraction;
 
-import edu.hm.hafner.coverage.Coverage;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
 
-import hudson.Functions;
 import hudson.model.TaskListener;
 
 import io.jenkins.plugins.checks.api.ChecksAnnotation;
@@ -53,6 +49,7 @@ class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
     private static final int TITLE_HEADER_LEVEL = 4;
     private static final char NEW_LINE = '\n';
+    private static final String COLUMN = "|";
 
     private final CoverageBuildAction action;
     private final Node rootNode;
@@ -91,7 +88,7 @@ class CoverageChecksPublisher {
         var output = new ChecksOutputBuilder()
                 .withTitle(getChecksTitle())
                 .withSummary(getSummary())
-                .withText(getProjectMetricsSummary(rootNode))
+                .withText(getProjectMetricsSummary())
                 .withAnnotations(getAnnotations())
                 .build();
 
@@ -190,7 +187,8 @@ class CoverageChecksPublisher {
         summary.append(NEW_LINE);
     }
 
-    private void createBranchCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles, final StringBuilder summary) {
+    private void createBranchCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles,
+            final StringBuilder summary) {
         if (filteredRoot.containsMetric(Metric.BRANCH)) {
             var partiallyCovered = modifiedFiles.stream()
                     .map(FileNode::getPartiallyCoveredLines)
@@ -206,7 +204,8 @@ class CoverageChecksPublisher {
         }
     }
 
-    private void createMutationCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles, final StringBuilder summary) {
+    private void createMutationCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles,
+            final StringBuilder summary) {
         if (filteredRoot.containsMetric(Metric.MUTATION)) {
             var survived = modifiedFiles.stream()
                     .map(FileNode::getSurvivedMutations)
@@ -359,33 +358,52 @@ class CoverageChecksPublisher {
         return Collectors.joining("\n", "- ", "\n");
     }
 
-    private String getProjectMetricsSummary(final Node result) {
-        String sectionHeader = getSectionHeader(TITLE_HEADER_LEVEL, "Project coverage details");
+    private String getProjectMetricsSummary() {
+        var builder = new StringBuilder(getSectionHeader(TITLE_HEADER_LEVEL, "Project coverage details"));
+        builder.append(COLUMN);
+        builder.append(COLUMN);
+        builder.append(getMetricStream()
+                .map(FORMATTER::getDisplayName)
+                .collect(asColumn()));
+        builder.append(COLUMN);
+        builder.append(":---:");
+        builder.append(COLUMN);
+        builder.append(getMetricStream()
+                .map(i -> ":---:")
+                .collect(asColumn()));
+        for (Baseline baseline : action.getBaselines()) {
+            if (action.hasBaselineResult(baseline)) {
+                builder.append(String.format("%s **%s**|", Icon.FEET.markdown,
+                        FORMATTER.getDisplayName(baseline)));
+                builder.append(getMetricStream()
+                        .map(metric -> action.formatValue(baseline, metric))
+                        .collect(asColumn()));
 
-        List<String> coverageDisplayNames = FORMATTER.getSortedCoverageDisplayNames();
-        coverageDisplayNames.set(0, "");
-        String header = formatRow(coverageDisplayNames);
-        String headerSeparator = formatRow(
-                getTableSeparators(ColumnAlignment.CENTER, coverageDisplayNames.size()));
+                var deltaBaseline = action.getDeltaBaseline(baseline);
+                if (deltaBaseline != baseline) {
+                    builder.append(String.format("%s **%s**|", Icon.CHART_UPWARDS_TREND.markdown,
+                            FORMATTER.getDisplayName(deltaBaseline)));
+                    builder.append(getMetricStream()
+                            .map(metric -> getFormatDelta(baseline, metric))
+                            .collect(asColumn()));
+                }
+            }
+        }
 
-        String projectCoverageName = String.format("|%s **%s**", Icon.WHITE_CHECK_MARK.markdown,
-                FORMATTER.getDisplayName(Baseline.PROJECT));
-        List<String> projectCoverage = FORMATTER.getFormattedValues(FORMATTER.getSortedCoverageValues(result),
-                Functions.getCurrentLocale());
-        String projectCoverageRow = projectCoverageName + formatRow(projectCoverage);
+        return builder.toString();
+    }
 
-        String projectCoverageDeltaName = String.format("|%s **%s**", Icon.CHART_UPWARDS_TREND.markdown,
-                FORMATTER.getDisplayName(Baseline.PROJECT_DELTA));
-        Collection<String> projectCoverageDelta = formatCoverageDelta(Metric.getCoverageMetrics(),
-                action.getAllDeltas(Baseline.PROJECT_DELTA));
-        String projectCoverageDeltaRow =
-                projectCoverageDeltaName + formatRow(projectCoverageDelta);
+    private String getFormatDelta(final Baseline baseline, final Metric metric) {
+        var delta = action.formatDelta(baseline, metric);
+        return delta + getTrendIcon(delta);
+    }
 
-        return sectionHeader
-                + header
-                + headerSeparator
-                + projectCoverageRow
-                + projectCoverageDeltaRow;
+    private Stream<Metric> getMetricStream() {
+        return Metric.getCoverageMetrics().stream().skip(1);
+    }
+
+    private Collector<CharSequence, ?, String> asColumn() {
+        return Collectors.joining(COLUMN, "", "\n");
     }
 
     private String formatText(final TextFormat format, final String text) {
@@ -399,58 +417,17 @@ class CoverageChecksPublisher {
         }
     }
 
-    /**
-     * Formats the passed delta computation to a collection of its display representations, which is sorted by the
-     * metric ordinal. Also, a collection of required metrics is passed. This is used to fill not existent metrics which
-     * are required for the representation. Coverage deltas might not be existent if the reference does not contain a
-     * reference value of the metric.
-     *
-     * @param requiredMetrics
-     *         The metrics which should be displayed
-     * @param deltas
-     *         The delta calculation mapped by their metric
-     * @return the delta for each metric to be shown in the MD file
-     */
-    private Collection<String> formatCoverageDelta(final Collection<Metric> requiredMetrics,
-            final NavigableMap<Metric, Fraction> deltas) {
-        var coverageDelta = new TreeMap<Metric, String>();
-        for (Metric metric : requiredMetrics) {
-            if (deltas.containsKey(metric)) {
-                var coverage = deltas.get(metric);
-                coverageDelta.putIfAbsent(metric,
-                        FORMATTER.formatDelta(coverage, metric, Functions.getCurrentLocale())
-                                + getTrendIcon(coverage.doubleValue()));
-            }
-            else {
-                coverageDelta.putIfAbsent(metric,
-                        FORMATTER.formatPercentage(Coverage.nullObject(metric), Functions.getCurrentLocale()));
-            }
-        }
-        return coverageDelta.values();
-    }
-
-    private String getTrendIcon(final double trend) {
-        if (trend > 0) {
+    private String getTrendIcon(final String trend) {
+        if (trend.startsWith("+")) {
             return " " + Icon.ARROW_UP.markdown;
         }
-        else if (trend < 0) {
+        else if (trend.startsWith("-")) {
             return " " + Icon.ARROW_DOWN.markdown;
         }
-        else {
-            return " " + Icon.ARROW_RIGHT.markdown;
+        else if (trend.startsWith("n/a")) {
+            return StringUtils.EMPTY;
         }
-    }
-
-    private List<String> getTableSeparators(final ColumnAlignment alignment, final int count) {
-        switch (alignment) {
-            case LEFT:
-                return Collections.nCopies(count, ":---");
-            case RIGHT:
-                return Collections.nCopies(count, "---:");
-            case CENTER:
-            default:
-                return Collections.nCopies(count, ":---:");
-        }
+        return " " + Icon.ARROW_RIGHT.markdown;
     }
 
     private String getBulletListItem(final int level, final String text) {
@@ -498,6 +475,7 @@ class CoverageChecksPublisher {
     }
 
     private enum Icon {
+        FEET(":feet:"),
         WHITE_CHECK_MARK(":white_check_mark:"),
         CHART_UPWARDS_TREND(":chart_with_upwards_trend:"),
         ARROW_UP(":arrow_up:"),

@@ -274,6 +274,9 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         if (baseline == Baseline.MODIFIED_FILES) {
             return Baseline.MODIFIED_FILES_DELTA;
         }
+        if (baseline == Baseline.INDIRECT) {
+            return Baseline.INDIRECT;
+        }
         throw new NoSuchElementException("No delta baseline for this baseline: " + baseline);
     }
 

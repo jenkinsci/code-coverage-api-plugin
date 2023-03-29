@@ -498,6 +498,8 @@ public final class ElementFormatter {
                 return Messages.Baseline_MODIFIED_LINES_DELTA();
             case MODIFIED_FILES_DELTA:
                 return Messages.Baseline_MODIFIED_FILES_DELTA();
+            case INDIRECT:
+                return Messages.Baseline_INDIRECT();
             default:
                 throw new NoSuchElementException("No display name found for baseline " + baseline);
         }
