@@ -41,6 +41,37 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final int ANNOTATIONS_COUNT_FOR_MODIFIED = 3;
 
     @Test
+    void shouldShowQualityGateDetails() {
+        var result = readJacocoResult("jacoco-codingstyle.xml");
+
+        var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result,
+                CoverageQualityGateEvaluatorTest.createQualityGateResult()), result, REPORT_NAME,
+                ChecksAnnotationScope.SKIP, createJenkins());
+
+        var checkDetails = publisher.extractChecksDetails();
+        assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
+            assertThat(output.getSummary()).isPresent()
+                    .get()
+                    .asString()
+                    .containsIgnoringWhitespaces("#### Quality Gates Summary\n"
+                            + "\n"
+                            + "Overall result: Unstable\n"
+                            + "- Overall project - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
+                            + "- Overall project - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
+                            + "- Modified code lines - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
+                            + "- Modified code lines - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
+                            + "- Modified files - File Coverage: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)\n"
+                            + "- Modified files - Line Coverage: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)\n"
+                            + "- Overall project (difference to reference job) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
+                            + "- Overall project (difference to reference job) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)\n"
+                            + "- Modified code lines (difference to modified files) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
+                            + "- Modified code lines (difference to modified files) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)\n"
+                            + "- Modified files (difference to overall project) - File Coverage: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)\n"
+                            + "- Modified files (difference to overall project) - Line Coverage: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+        });
+    }
+
+    @Test
     void shouldShowProjectBaselineForJaCoCo() {
         var result = readJacocoResult("jacoco-codingstyle.xml");
 
@@ -170,11 +201,15 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     }
 
     private CoverageBuildAction createActionWithoutDelta(final Node result) {
+        return createActionWithoutDelta(result, new QualityGateResult());
+    }
+
+    CoverageBuildAction createActionWithoutDelta(final Node result, final QualityGateResult qualityGateResult) {
         var run = mock(Run.class);
         when(run.getUrl()).thenReturn(BUILD_LINK);
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
-                new QualityGateResult(), null, "refId",
+                qualityGateResult, null, "refId",
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
     }
 }

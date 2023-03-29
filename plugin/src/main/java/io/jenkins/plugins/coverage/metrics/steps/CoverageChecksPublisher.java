@@ -351,11 +351,14 @@ class CoverageChecksPublisher {
         }
         return summary
                 + "Overall result: " + qualityGateResult.getOverallStatus().getDescription() + "\n"
-                + qualityGateResult.getMessages().stream().collect(asSeparateLines());
+                + qualityGateResult.getMessages().stream()
+                .map(s -> s.replaceAll("-> ", ""))
+                .map(s -> s.replaceAll("[\\[\\]]", ""))
+                .collect(asSeparateLines());
     }
 
     private Collector<CharSequence, ?, String> asSeparateLines() {
-        return Collectors.joining("\n", "- ", "\n");
+        return Collectors.joining("\n- ", "- ", "\n");
     }
 
     private String getProjectMetricsSummary() {
@@ -437,18 +440,6 @@ class CoverageChecksPublisher {
 
     private String getUrlText(final String text, final String url) {
         return String.format("[%s](%s)", text, url);
-    }
-
-    private String formatRow(final Collection<String> columns) {
-        StringBuilder row = new StringBuilder();
-        for (Object column : columns) {
-            row.append(String.format("|%s", column));
-        }
-        if (!columns.isEmpty()) {
-            row.append('|');
-        }
-        row.append(NEW_LINE);
-        return row.toString();
     }
 
     private String getSectionHeader(final int level, final String text) {
