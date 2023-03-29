@@ -1,4 +1,9 @@
-## Coverage Report Overview
+Modified lines summary:
+- 1 line has been modified
+- 1 line is not covered
+- 1 line is covered only partially
+
+#### Overview by baseline
 
 * **[Overall project (difference to reference job)](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#overview)**
   * Line Coverage: 91.02% (294/323) - Delta: +50.00%
@@ -12,12 +17,11 @@
 * **[Indirect changes](http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage#indirectCoverage)**
   * Line Coverage: 50.00% (1/2)
 
+#### Quality Gates Summary
 
-## Quality Gates Summary - INACTIVE
+No active quality gates.
 
-
-
-## Project Coverage Summary
+#### Project coverage details
 
 |Container Coverage|Module Coverage|Package Coverage|File Coverage|Class Coverage|Method Coverage|Line Coverage|Branch Coverage|Instruction Coverage|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|

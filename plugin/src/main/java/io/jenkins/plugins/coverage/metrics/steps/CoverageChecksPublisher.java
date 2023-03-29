@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -48,6 +50,7 @@ import io.jenkins.plugins.util.QualityGateStatus;
 @SuppressWarnings("PMD.GodClass")
 class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
+    private static final int TITLE_HEADER_LEVEL = 4;
 
     private final CoverageBuildAction action;
     private final Node rootNode;
@@ -137,9 +140,95 @@ class CoverageChecksPublisher {
     }
 
     private String getSummary() {
-        return getOverallCoverageSummary() + "\n\n"
+        return getAnnotationSummary() + "\n\n"
+                + getOverallCoverageSummary() + "\n\n"
                 + getQualityGatesSummary() + "\n\n"
                 + getProjectMetricsSummary(rootNode);
+    }
+
+    private String getAnnotationSummary() {
+        if (rootNode.hasModifiedLines()) {
+            var filteredRoot = rootNode.filterByModifiedLines();
+            var modifiedFiles = filteredRoot.getAllFileNodes();
+
+            var summary = new StringBuilder("Modified lines summary:\n");
+
+            createTotalLinesSummary(modifiedFiles, summary);
+            createLineCoverageSummary(modifiedFiles, summary);
+            createBranchCoverageSummary(filteredRoot, modifiedFiles, summary);
+            createMutationCoverageSummary(filteredRoot, modifiedFiles, summary);
+
+            return summary.toString();
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private void createTotalLinesSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
+        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).map(Set::size).count();
+        if (total == 1) {
+            summary.append("- 1 line has been modified");
+        }
+        else {
+            summary.append(String.format("- %d lines have been modified", total));
+        }
+        summary.append('\n');
+    }
+
+    private void createLineCoverageSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
+        var missed = modifiedFiles.stream().map(FileNode::getMissedLines).map(Set::size).count();
+        if (missed == 0) {
+            summary.append("- all lines are covered");
+        }
+        else if (missed == 1) {
+            summary.append("- 1 line is not covered");
+        }
+        else {
+            summary.append(String.format("- %d lines are not covered", missed));
+        }
+        summary.append('\n');
+    }
+
+    private void createBranchCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles, final StringBuilder summary) {
+        if (filteredRoot.containsMetric(Metric.BRANCH)) {
+            var partiallyCovered = modifiedFiles.stream()
+                    .map(FileNode::getPartiallyCoveredLines)
+                    .map(Map::size)
+                    .count();
+            if (partiallyCovered == 1) {
+                summary.append("- 1 line is covered only partially");
+            }
+            else {
+                summary.append(String.format("- %d lines are covered only partially", partiallyCovered));
+            }
+            summary.append('\n');
+        }
+    }
+
+    private void createMutationCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles, final StringBuilder summary) {
+        if (filteredRoot.containsMetric(Metric.MUTATION)) {
+            var survived = modifiedFiles.stream()
+                    .map(FileNode::getSurvivedMutations)
+                    .map(Map::entrySet)
+                    .flatMap(Collection::stream)
+                    .map(Entry::getValue)
+                    .count();
+            var mutations = modifiedFiles.stream().map(FileNode::getMutations).mapToLong(Collection::size).sum();
+            if (survived == 0) {
+                if (mutations == 1) {
+                    summary.append("- 1 mutation has been killed");
+                }
+                else {
+                    summary.append(String.format("- all %d mutations have been killed", mutations));
+                }
+            }
+            if (survived == 1) {
+                summary.append(String.format("- 1 mutation survived (of %d)", mutations));
+            }
+            else {
+                summary.append(String.format("- %d mutations survived (of %d)", survived, mutations));
+            }
+            summary.append('\n');
+        }
     }
 
     private List<ChecksAnnotation> getAnnotations() {
@@ -228,7 +317,7 @@ class CoverageChecksPublisher {
     }
 
     private String getOverallCoverageSummary() {
-        StringBuilder description = new StringBuilder(getSectionHeader(2, Messages.Checks_Summary()));
+        StringBuilder description = new StringBuilder(getSectionHeader(TITLE_HEADER_LEVEL, "Overview by baseline"));
 
         for (Baseline baseline : getBaselines()) {
             if (action.hasBaselineResult(baseline)) {
@@ -240,7 +329,7 @@ class CoverageChecksPublisher {
                     if (action.hasDelta(baseline, value.getMetric())) {
                         display += String.format(" - Delta: %s", action.formatDelta(baseline, value.getMetric()));
                     }
-                    description.append(getBulletListItem(2, display));
+                    description.append(getBulletListItem(TITLE_HEADER_LEVEL, display));
                 }
             }
         }
@@ -254,12 +343,17 @@ class CoverageChecksPublisher {
      */
     // TODO: expand with summary of status of each defined quality gate
     private String getQualityGatesSummary() {
-        return getSectionHeader(2,
-                Messages.Checks_QualityGates(action.getQualityGateResult().getOverallStatus().name()));
+        String summary = getSectionHeader(TITLE_HEADER_LEVEL, "Quality Gates Summary");
+        var qualityGateResult = action.getQualityGateResult();
+        if (qualityGateResult.isInactive()) {
+            return summary + "No active quality gates.";
+        }
+        return summary + "Overall result: " + qualityGateResult.getOverallStatus().getDescription() + "\n"
+                + qualityGateResult.getMessages().stream().collect(Collectors.joining("\n", "- ", ""));
     }
 
     private String getProjectMetricsSummary(final Node result) {
-        String sectionHeader = getSectionHeader(2, Messages.Checks_ProjectOverview());
+        String sectionHeader = getSectionHeader(TITLE_HEADER_LEVEL, "Project coverage details");
 
         List<String> coverageDisplayNames = FORMATTER.getSortedCoverageDisplayNames();
         String header = formatRow(coverageDisplayNames);
@@ -352,7 +446,7 @@ class CoverageChecksPublisher {
     }
 
     private String getBulletListItem(final int level, final String text) {
-        int whitespaces = (level - 1) * 2;
+        int whitespaces = (level - 1) * TITLE_HEADER_LEVEL;
         return String.join("", Collections.nCopies(whitespaces, " ")) + "* " + text + "\n";
     }
 
