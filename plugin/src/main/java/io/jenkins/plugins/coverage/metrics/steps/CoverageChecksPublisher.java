@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,7 @@ import io.jenkins.plugins.util.QualityGateStatus;
 class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
     private static final int TITLE_HEADER_LEVEL = 4;
+    private static final char NEW_LINE = '\n';
 
     private final CoverageBuildAction action;
     private final Node rootNode;
@@ -89,6 +91,7 @@ class CoverageChecksPublisher {
         var output = new ChecksOutputBuilder()
                 .withTitle(getChecksTitle())
                 .withSummary(getSummary())
+                .withText(getProjectMetricsSummary(rootNode))
                 .withAnnotations(getAnnotations())
                 .build();
 
@@ -140,10 +143,9 @@ class CoverageChecksPublisher {
     }
 
     private String getSummary() {
-        return getAnnotationSummary() + "\n\n"
-                + getOverallCoverageSummary() + "\n\n"
-                + getQualityGatesSummary() + "\n\n"
-                + getProjectMetricsSummary(rootNode);
+        return getAnnotationSummary()
+                + getOverallCoverageSummary()
+                + getQualityGatesSummary();
     }
 
     private String getAnnotationSummary() {
@@ -171,7 +173,7 @@ class CoverageChecksPublisher {
         else {
             summary.append(String.format("- %d lines have been modified", total));
         }
-        summary.append('\n');
+        summary.append(NEW_LINE);
     }
 
     private void createLineCoverageSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
@@ -185,7 +187,7 @@ class CoverageChecksPublisher {
         else {
             summary.append(String.format("- %d lines are not covered", missed));
         }
-        summary.append('\n');
+        summary.append(NEW_LINE);
     }
 
     private void createBranchCoverageSummary(final Node filteredRoot, final List<FileNode> modifiedFiles, final StringBuilder summary) {
@@ -200,7 +202,7 @@ class CoverageChecksPublisher {
             else {
                 summary.append(String.format("- %d lines are covered only partially", partiallyCovered));
             }
-            summary.append('\n');
+            summary.append(NEW_LINE);
         }
     }
 
@@ -227,7 +229,7 @@ class CoverageChecksPublisher {
             else {
                 summary.append(String.format("- %d mutations survived (of %d)", survived, mutations));
             }
-            summary.append('\n');
+            summary.append(NEW_LINE);
         }
     }
 
@@ -333,6 +335,7 @@ class CoverageChecksPublisher {
                 }
             }
         }
+        description.append(NEW_LINE);
         return description.toString();
     }
 
@@ -341,15 +344,19 @@ class CoverageChecksPublisher {
      *
      * @return the markdown string representing the status summary
      */
-    // TODO: expand with summary of status of each defined quality gate
     private String getQualityGatesSummary() {
         String summary = getSectionHeader(TITLE_HEADER_LEVEL, "Quality Gates Summary");
         var qualityGateResult = action.getQualityGateResult();
         if (qualityGateResult.isInactive()) {
             return summary + "No active quality gates.";
         }
-        return summary + "Overall result: " + qualityGateResult.getOverallStatus().getDescription() + "\n"
-                + qualityGateResult.getMessages().stream().collect(Collectors.joining("\n", "- ", ""));
+        return summary
+                + "Overall result: " + qualityGateResult.getOverallStatus().getDescription() + "\n"
+                + qualityGateResult.getMessages().stream().collect(asSeparateLines());
+    }
+
+    private Collector<CharSequence, ?, String> asSeparateLines() {
+        return Collectors.joining("\n", "- ", "\n");
     }
 
     private String getProjectMetricsSummary(final Node result) {
@@ -462,7 +469,7 @@ class CoverageChecksPublisher {
         if (!columns.isEmpty()) {
             row.append('|');
         }
-        row.append('\n');
+        row.append(NEW_LINE);
         return row.toString();
     }
 
