@@ -1,5 +1,6 @@
 package io.jenkins.plugins.coverage;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -728,7 +729,7 @@ public class CoverageProcessor {
     public static CoverageResult recoverCoverageResult(final Run<?, ?> run) throws IOException, ClassNotFoundException {
         File reportFile = new File(run.getRootDir(), DEFAULT_REPORT_SAVE_NAME);
 
-        try (ObjectInputStream ois = new CompatibleObjectInputStream(new FileInputStream(reportFile))) {
+        try (ObjectInputStream ois = new CompatibleObjectInputStream(new BufferedInputStream(new FileInputStream(reportFile)))) {
             return (CoverageResult) ois.readObject();
         }
     }
