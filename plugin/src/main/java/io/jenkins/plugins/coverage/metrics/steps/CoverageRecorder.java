@@ -399,7 +399,7 @@ public class CoverageRecorder extends Recorder {
                     .stream()
                     .filter(ModuleNode.class::isInstance)
                     .map(ModuleNode.class::cast)
-                    .map(ModuleNode::getSources)
+                    .map(ModuleNode::getSourceFolders)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
             sources.addAll(getSourceDirectoriesPaths());
