@@ -3,7 +3,6 @@ package io.jenkins.plugins.coverage.metrics.model;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +14,6 @@ import edu.hm.hafner.coverage.Coverage;
 import edu.hm.hafner.coverage.FractionValue;
 import edu.hm.hafner.coverage.IntegerValue;
 import edu.hm.hafner.coverage.Metric;
-import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Percentage;
 import edu.hm.hafner.coverage.Value;
 
@@ -415,23 +413,6 @@ public final class ElementFormatter {
      */
     public List<String> getFormattedValues(final Stream<? extends Value> values, final Locale locale) {
         return values.map(value -> formatDetails(value, locale)).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns a stream of {@link Coverage} values for the given root node sorted by the metric ordinal.
-     *
-     * @param coverage
-     *         The coverage root node
-     *
-     * @return a stream containing the existent coverage values
-     */
-    public Stream<Coverage> getSortedCoverageValues(final Node coverage) {
-        return Metric.getCoverageMetrics()
-                .stream()
-                .map(m -> m.getValueFor(coverage))
-                .flatMap(Optional::stream)
-                .filter(value -> value instanceof Coverage)
-                .map(Coverage.class::cast);
     }
 
     /**
