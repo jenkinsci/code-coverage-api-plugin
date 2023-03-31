@@ -31,6 +31,7 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
  *
  * @author Florian Orendi
  */
+// TODO: create instances for the different types
 @SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public final class ElementFormatter {
     private static final Fraction HUNDRED = Fraction.getFraction("100.0");
@@ -344,7 +345,9 @@ public final class ElementFormatter {
      * @return the formatted delta percentage as plain text with a leading sign
      */
     public String formatDelta(final Fraction fraction, final Metric metric, final Locale locale) {
-        if (metric.equals(Metric.COMPLEXITY) || metric.equals(Metric.LOC)) { // TODO: move to metric?
+        if (metric.equals(Metric.COMPLEXITY)
+                || metric.equals(Metric.COMPLEXITY_MAXIMUM)
+                || metric.equals(Metric.LOC)) { // TODO: move to metric?
             return String.format(locale, "%+d", fraction.intValue());
         }
         return String.format(locale, "%+.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
@@ -385,6 +388,8 @@ public final class ElementFormatter {
                 return Messages.Metric_COMPLEXITY();
             case COMPLEXITY_DENSITY:
                 return Messages.Metric_COMPLEXITY_DENSITY();
+            case COMPLEXITY_MAXIMUM:
+                return Messages.Metric_COMPLEXITY_MAXIMUM();
             case LOC:
                 return Messages.Metric_LOC();
             default:
@@ -469,6 +474,8 @@ public final class ElementFormatter {
                 return Messages.Metric_Short_COMPLEXITY();
             case COMPLEXITY_DENSITY:
                 return Messages.Metric_Short_COMPLEXITY_DENSITY();
+            case COMPLEXITY_MAXIMUM:
+                return Messages.Metric_Short_COMPLEXITY_MAXIMUM();
             case LOC:
                 return Messages.Metric_Short_LOC();
             default:
@@ -520,6 +527,7 @@ public final class ElementFormatter {
         add(options, Metric.INSTRUCTION);
         add(options, Metric.MUTATION);
         add(options, Metric.COMPLEXITY);
+        add(options, Metric.COMPLEXITY_MAXIMUM);
         add(options, Metric.LOC);
         return options;
     }
