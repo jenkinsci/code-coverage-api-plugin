@@ -1,7 +1,6 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,6 +39,24 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private static final String COVERAGE_ID = "coverage";
     private static final String REPORT_NAME = "Name";
     private static final int ANNOTATIONS_COUNT_FOR_MODIFIED = 3;
+
+    @Test
+    void shouldShowQualityGateDetails() {
+        var result = readJacocoResult("jacoco-codingstyle.xml");
+
+        var publisher = new CoverageChecksPublisher(createActionWithoutDelta(result,
+                CoverageQualityGateEvaluatorTest.createQualityGateResult()), result, REPORT_NAME,
+                ChecksAnnotationScope.SKIP, createJenkins());
+
+        var checkDetails = publisher.extractChecksDetails();
+        var expectedSummary = toString("coverage-publisher-quality-gate.checks-expected-result");
+        assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
+            assertThat(output.getSummary()).isPresent()
+                    .get()
+                    .asString()
+                    .containsIgnoringWhitespaces(expectedSummary);
+        });
+    }
 
     @Test
     void shouldShowProjectBaselineForJaCoCo() {
@@ -93,14 +110,15 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
             assertThat(output.getTitle()).isPresent()
                     .get()
                     .isEqualTo("Line Coverage: 50.00% (+50.00%)");
-            assertThat(output.getText()).isEmpty();
+            var expectedDetails = toString("coverage-publisher-details.checks-expected-result");
+            assertThat(output.getText()).isPresent().get().asString().isEqualToNormalizingWhitespace(expectedDetails);
             assertChecksAnnotations(output, expectedAnnotations);
             assertSummary(output);
         });
     }
 
     private void assertSummary(final ChecksOutput checksOutput) throws IOException {
-        var expectedContent = Files.readString(getResourceAsFile("coverage-publisher-summary.checks-expected-result"));
+        var expectedContent = toString("coverage-publisher-summary.checks-expected-result");
         assertThat(checksOutput.getSummary()).isPresent()
                 .get()
                 .asString().isEqualToNormalizingWhitespace(expectedContent);
@@ -170,11 +188,15 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     }
 
     private CoverageBuildAction createActionWithoutDelta(final Node result) {
+        return createActionWithoutDelta(result, new QualityGateResult());
+    }
+
+    CoverageBuildAction createActionWithoutDelta(final Node result, final QualityGateResult qualityGateResult) {
         var run = mock(Run.class);
         when(run.getUrl()).thenReturn(BUILD_LINK);
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
-                new QualityGateResult(), null, "refId",
+                qualityGateResult, null, "refId",
                 new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), new TreeMap<>(), List.of(), false);
     }
 }

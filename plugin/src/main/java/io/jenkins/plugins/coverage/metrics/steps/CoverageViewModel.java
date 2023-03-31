@@ -487,8 +487,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         }
 
         private Stream<Coverage> sortCoverages() {
-            return ELEMENT_FORMATTER.getSortedCoverageValues(coverage)
+            return getSortedCoverageValues()
                     .filter(c -> c.getTotal() > 1); // ignore elements that have a total of 1
+        }
+
+        private Stream<Coverage> getSortedCoverageValues() {
+            return Metric.getCoverageMetrics()
+                    .stream()
+                    .map(m -> m.getValueFor(coverage))
+                    .flatMap(Optional::stream)
+                    .filter(value -> value instanceof Coverage)
+                    .map(Coverage.class::cast);
         }
 
         public List<Integer> getCovered() {

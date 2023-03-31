@@ -92,6 +92,24 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
 
     @Test
     void shouldReportUnstableIfBelowThreshold() {
+        QualityGateResult result = createQualityGateResult();
+
+        assertThat(result).hasOverallStatus(QualityGateStatus.WARNING).isNotSuccessful().isNotInactive().hasMessages(
+                "-> [Overall project - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Overall project - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified code lines - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified code lines - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Modified files - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
+                "-> [Modified files - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
+                "-> [Overall project (difference to reference job) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Overall project (difference to reference job) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
+                "-> [Modified code lines (difference to modified files) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified code lines (difference to modified files) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
+                "-> [Modified files (difference to overall project) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+    }
+
+    static QualityGateResult createQualityGateResult() {
         Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
 
         qualityGates.add(new CoverageQualityGate(76.0, Metric.FILE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
@@ -110,21 +128,7 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
         qualityGates.add(new CoverageQualityGate(minimum, Metric.LINE, Baseline.MODIFIED_FILES_DELTA, QualityGateCriticality.UNSTABLE));
 
         CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
-        QualityGateResult result = evaluator.evaluate();
-
-        assertThat(result).hasOverallStatus(QualityGateStatus.WARNING).isNotSuccessful().isNotInactive().hasMessages(
-                "-> [Overall project - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Overall project - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Modified code lines - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Modified code lines - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Modified files - File Coverage]: ≪Unstable≫ - (Actual value: 75.00%, Quality gate: 76.00)",
-                "-> [Modified files - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%, Quality gate: 51.00)",
-                "-> [Overall project (difference to reference job) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Overall project (difference to reference job) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Modified code lines (difference to modified files) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Modified code lines (difference to modified files) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)",
-                "-> [Modified files (difference to overall project) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%, Quality gate: 10.00)",
-                "-> [Modified files (difference to overall project) - Line Coverage]: ≪Unstable≫ - (Actual value: +5.00%, Quality gate: 10.00)");
+        return evaluator.evaluate();
     }
 
     @Test
