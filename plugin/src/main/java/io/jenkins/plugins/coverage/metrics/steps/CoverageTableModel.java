@@ -128,6 +128,14 @@ class CoverageTableModel extends TableModel {
                     .build();
             columns.add(complexity);
         }
+        if (root.containsMetric(Metric.COMPLEXITY_MAXIMUM)) {
+            TableColumn maxComplexity = new ColumnBuilder().withHeaderLabel(Messages.Column_MaxComplexity())
+                    .withDataPropertyKey("maxComplexity")
+                    .withResponsivePriority(900)
+                    .withType(ColumnType.NUMBER)
+                    .build();
+            columns.add(maxComplexity);
+        }
         if (root.containsMetric(Metric.COMPLEXITY_DENSITY)) {
             TableColumn complexity = new ColumnBuilder().withHeaderLabel(Messages.Column_ComplexityDensity())
                     .withDataPropertyKey("density")
@@ -251,6 +259,10 @@ class CoverageTableModel extends TableModel {
 
         public int getComplexity() {
             return file.getTypedValue(Metric.COMPLEXITY, ZERO_COMPLEXITY).getValue();
+        }
+
+        public int getMaxComplexity() {
+            return file.getTypedValue(Metric.COMPLEXITY_MAXIMUM, ZERO_COMPLEXITY).getValue();
         }
 
         public DetailedCell<?> getDensity() {
