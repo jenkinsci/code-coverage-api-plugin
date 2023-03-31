@@ -31,7 +31,7 @@ class CoverageQualityGateEvaluator extends QualityGateEvaluator<CoverageQualityG
         if (possibleValue.isPresent()) {
             var actualValue = possibleValue.get();
 
-            var status = actualValue.isBelowThreshold(
+            var status = actualValue.isOutOfValidRange(
                     qualityGate.getThreshold()) ? qualityGate.getStatus() : QualityGateStatus.PASSED;
             result.add(qualityGate, status, FORMATTER.format(actualValue, Locale.ENGLISH));
         }
