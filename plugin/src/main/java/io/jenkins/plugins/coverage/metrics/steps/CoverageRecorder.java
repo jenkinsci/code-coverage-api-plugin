@@ -205,7 +205,8 @@ public class CoverageRecorder extends Recorder {
     }
 
     public String getChecksName() {
-        return StringUtils.defaultIfBlank(checksName, CHECKS_DEFAULT_NAME);
+        return StringUtils.defaultIfBlank(checksName,
+                StringUtils.defaultIfBlank(getName(), CHECKS_DEFAULT_NAME));
     }
 
     /**
