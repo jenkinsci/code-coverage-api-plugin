@@ -174,7 +174,8 @@ def params = [
                           recordCoverage(
                                 tools: [[parser: 'PIT', pattern: '**/pit-reports/mutations.xml']],
                                 id: 'pit',
-                                name: 'Mutation Coverage')
+                                name: 'Mutation Coverage',
+                                checksName: 'Mutation Coverage')
                         }
                       }
                     }
