@@ -364,6 +364,25 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <targetClasses>
+            <param>io.jenkins.plugins.coverage.metrics.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>io.jenkins.plugins.coverage.metrics.*</param>
+          </targetTests>
+          <excludedTestClasses>
+            <param>*Assert</param>
+            <param>*Assertions</param>
+            <param>*ArchitectureTest</param>
+            <param>*ITest</param>
+            <param>*jmh_generated*</param>
+          </excludedTestClasses>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>

@@ -345,7 +345,7 @@ public final class ElementFormatter {
     public String formatDelta(final Fraction fraction, final Metric metric, final Locale locale) {
         if (metric.equals(Metric.COMPLEXITY)
                 || metric.equals(Metric.COMPLEXITY_MAXIMUM)
-                || metric.equals(Metric.LOC)) { // TODO: move to metric?
+                || metric.equals(Metric.LOC)) {
             return String.format(locale, "%+d", fraction.intValue());
         }
         return String.format(locale, "%+.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
@@ -384,10 +384,10 @@ public final class ElementFormatter {
                 return Messages.Metric_MUTATION();
             case COMPLEXITY:
                 return Messages.Metric_COMPLEXITY();
-            case COMPLEXITY_DENSITY:
-                return Messages.Metric_COMPLEXITY_DENSITY();
             case COMPLEXITY_MAXIMUM:
                 return Messages.Metric_COMPLEXITY_MAXIMUM();
+            case COMPLEXITY_DENSITY:
+                return Messages.Metric_COMPLEXITY_DENSITY();
             case LOC:
                 return Messages.Metric_LOC();
             default:
@@ -453,10 +453,10 @@ public final class ElementFormatter {
                 return Messages.Metric_Short_MUTATION();
             case COMPLEXITY:
                 return Messages.Metric_Short_COMPLEXITY();
-            case COMPLEXITY_DENSITY:
-                return Messages.Metric_Short_COMPLEXITY_DENSITY();
             case COMPLEXITY_MAXIMUM:
                 return Messages.Metric_Short_COMPLEXITY_MAXIMUM();
+            case COMPLEXITY_DENSITY:
+                return Messages.Metric_Short_COMPLEXITY_DENSITY();
             case LOC:
                 return Messages.Metric_Short_LOC();
             default:
