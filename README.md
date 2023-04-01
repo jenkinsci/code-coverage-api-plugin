@@ -13,7 +13,7 @@ The Jenkins code coverage plug-in collects reports of code coverage or mutation 
 - [Cobertura](https://cobertura.github.io/cobertura/)
 - [PIT](https://pitest.org/)
 
-If your coverage tool is not yet supported by the code coverage plugin you can provide a pull request for the [Coverage Model](https://github.com/uhafner/coverage-model/pulls).
+If your coverage tool is not yet supported by the code coverage plugin you can provide a pull request for the [Coverage Model](https://github.com/jenkinsci/coverage-model/pulls).
 
 The plugin publishes a report of the code coverage and mutation coverage in your build, so you can navigate to a summary report from the main build page. From there you can also dive into the details:
 - tree charts that show the distribution of coverage by type (line, instruction, branch, method, class, etc.)
