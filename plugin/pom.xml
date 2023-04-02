@@ -15,7 +15,7 @@
   <packaging>hpi</packaging>
 
   <name>Code Coverage API Plugin</name>
-  <description>Code Coverage API Plugin</description>
+  <description>Code Coverage Plugin</description>
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
