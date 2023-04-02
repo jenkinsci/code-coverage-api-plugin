@@ -297,10 +297,10 @@ class CoverageChecksPublisher {
 
     private String createBranchMessage(final int line, final int missed) {
         if (missed == 1) {
-            return "Line " + line + " is only partially covered, one branch is missing";
+            return String.format("Line %d is only partially covered, one branch is missing", line);
 
         }
-        return "Line " + line + " is only partially covered, %d branches are missing.";
+        return String.format("Line %d is only partially covered, %d branches are missing", line, missed);
     }
 
     private ChecksAnnotationBuilder createAnnotationBuilder(final FileNode fileNode) {
