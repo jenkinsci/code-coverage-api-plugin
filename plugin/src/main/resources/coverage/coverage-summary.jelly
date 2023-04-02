@@ -59,16 +59,15 @@
           <j:forEach var="value" items="${it.getValues(baseline)}">
             <li>${formatter.formatValueWithMetric(value)}
               <j:if test="${it.hasDelta(baseline, value.metric)}">
-                <j:set var="delta" value="${it.formatDelta(baseline, value.metric)}"/>
                 <j:choose>
-                  <j:when test="${delta.startsWith('-')}">
-                    <j:set var="color" value="var(--red)"/>
+                  <j:when test="${it.isPositiveTrend(baseline, value.metric)}">
+                    <j:set var="color" value="var(--green)"/>
                   </j:when>
                   <j:otherwise>
-                    <j:set var="color" value="var(--green)"/>
+                    <j:set var="color" value="var(--red)"/>
                   </j:otherwise>
                 </j:choose>
-                <span style="color: ${color}">(${delta})</span>
+                <span style="color: ${color}">(${it.formatDelta(baseline, value.metric)})</span>
               </j:if>
             </li>
           </j:forEach>

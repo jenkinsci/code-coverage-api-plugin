@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Metric.MetricTendency;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
@@ -430,6 +431,29 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     }
 
     /**
+     * Returns whether a delta metric for the specified metric exists.
+     *
+     * @param baseline
+     *         the baseline to use
+     * @param metric
+     *         the metric to check
+     *
+     * @return {@code true} if a delta is available for the specified metric, {@code false} otherwise
+     */
+    public Optional<Fraction> getDelta(final Baseline baseline, final Metric metric) {
+        if (baseline == Baseline.PROJECT) {
+            return Optional.ofNullable(difference.get(metric));
+        }
+        if (baseline == Baseline.MODIFIED_LINES) {
+            return Optional.ofNullable(modifiedLinesCoverageDifference.get(metric));
+        }
+        if (baseline == Baseline.MODIFIED_FILES) {
+            return Optional.ofNullable(modifiedFilesCoverageDifference.get(metric));
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Returns whether a value for the specified metric exists.
      *
      * @param baseline
@@ -484,6 +508,27 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
             return FORMATTER.formatDelta(modifiedFilesCoverageDifference.get(metric), metric, currentLocale);
         }
         return Messages.Coverage_Not_Available();
+    }
+
+    /**
+     * Returns whether the trend of the values for the specific metric is positive or negative.
+     *
+     * @param baseline
+     *         the baseline to use
+     * @param metric
+     *         the metric to check
+     *
+     * @return {@code true} if the trend is positive, {@code false} otherwise
+     */
+    public boolean isPositiveTrend(final Baseline baseline, final Metric metric) {
+        var delta = getDelta(baseline, metric);
+        if (delta.isPresent()) {
+            if (delta.get().compareTo(Fraction.ZERO) > 0) {
+                return metric.getTendency() == MetricTendency.LARGER_IS_BETTER;
+            }
+            return metric.getTendency() == MetricTendency.SMALLER_IS_BETTER;
+        }
+        return true;
     }
 
     /**

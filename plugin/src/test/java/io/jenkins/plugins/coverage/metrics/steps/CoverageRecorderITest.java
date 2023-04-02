@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Ullrich Hafner
  */
-class CoverageRecorderTest extends IntegrationTestWithJenkinsPerSuite {
+class CoverageRecorderITest extends IntegrationTestWithJenkinsPerSuite {
     @Test
     void shouldIgnoreEmptyListOfFiles() {
         WorkflowJob job = createPipeline();

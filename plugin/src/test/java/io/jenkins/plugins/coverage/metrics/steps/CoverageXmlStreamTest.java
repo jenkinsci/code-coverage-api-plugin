@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.NavigableMap;
@@ -50,11 +51,12 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
 
     @Override
     protected Node createSerializable() {
-        return new JacocoParser().parse(new InputStreamReader(asInputStream("jacoco-codingstyle.xml")), new FilteredLog("Errors"));
+        return new JacocoParser().parse(new InputStreamReader(asInputStream("jacoco-codingstyle.xml"),
+                        StandardCharsets.UTF_8), new FilteredLog("Errors"));
     }
 
     @Test
-    void shouldSaveAndRestoreTree() throws IOException {
+    void shouldSaveAndRestoreTree() {
         Path saved = createTempFile();
         Node convertedNode = createSerializable();
 
@@ -94,13 +96,13 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
     void shouldStoreActionCompactly() throws IOException {
         Path saved = createTempFile();
         var xmlStream = new TestXmlStream();
-        xmlStream.read(saved);
+        xmlStream.read(saved); // create the stream
 
         var file = new XmlFile(xmlStream.getStream(), saved.toFile());
         file.write(createAction());
 
         assertThat(Input.from(saved)).nodesByXPath("//" + ACTION_QUALIFIED_NAME + "/projectValues/*")
-                .hasSize(11).extractingText()
+                .hasSize(12).extractingText()
                 .containsExactly("MODULE: 1/1",
                         "PACKAGE: 1/1",
                         "FILE: 7/10",
@@ -111,6 +113,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                         "INSTRUCTION: 1260/1350",
                         "COMPLEXITY: 160",
                         "COMPLEXITY_DENSITY: 160/323",
+                        "COMPLEXITY_MAXIMUM: 6",
                         "LOC: 323");
 
         assertThat(Input.from(saved)).nodesByXPath("//" + ACTION_QUALIFIED_NAME + "/projectValues/coverage")
@@ -131,7 +134,7 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                                 "PACKAGE: 1/1", "FILE: 7/10", "CLASS: 15/18",
                                 "METHOD: 97/102", "LINE: 294/323", "BRANCH: 109/116",
                                 "INSTRUCTION: 1260/1350", "COMPLEXITY: 160",
-                                "COMPLEXITY_DENSITY: 160/323", "LOC: 323"
+                                "COMPLEXITY_DENSITY: 160/323", "COMPLEXITY_MAXIMUM: 6", "LOC: 323"
                         ));
     }
 

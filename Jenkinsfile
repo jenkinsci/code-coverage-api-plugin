@@ -5,6 +5,7 @@ def configurations = [
 
 def params = [
     failFast: false,
+    pit: true,
     configurations: configurations,
     checkstyle: [qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
             filters:[includePackage('io.jenkins.plugins.coverage.metrics')]],
@@ -86,7 +87,6 @@ def params = [
               if (doArchiveArtifacts) {
                 archivedArtifacts = true
               }
-
               boolean incrementals // cf. JEP-305
 
               stage("Checkout (${stageIdentifier})") {
@@ -96,7 +96,8 @@ def params = [
                     readFile('.mvn/extensions.xml').contains('git-changelist-maven-extension')
                 final String gitUnavailableMessage = '[buildPlugin] Git CLI may not be available'
                 withEnv(["GITUNAVAILABLEMESSAGE=${gitUnavailableMessage}"]) {
-                  if (incrementals) { // Incrementals needs 'git status -s' to be empty at start of job
+                  if (incrementals) {
+                    // Incrementals needs 'git status -s' to be empty at start of job
                     if (isUnix()) {
                       sh 'git clean -xffd || echo "$GITUNAVAILABLEMESSAGE"'
                     } else {
@@ -135,9 +136,11 @@ def params = [
                   if (isUnix()) {
                     mavenOptions += '-Penable-jacoco'
                   }
-                  if (incrementals) { // set changelist and activate produce-incrementals profile
+                  if (incrementals) {
+                    // set changelist and activate produce-incrementals profile
                     mavenOptions += '-Dset.changelist'
-                    if (doArchiveArtifacts) { // ask Maven for the value of -rc999.abc123def456
+                    if (doArchiveArtifacts) {
+                      // ask Maven for the value of -rc999.abc123def456
                       changelistF = "${pwd tmp: true}/changelist"
                       mavenOptions += "help:evaluate -Dexpression=changelist -Doutput=$changelistF"
                     }
@@ -149,8 +152,12 @@ def params = [
                     mavenOptions += '-DskipTests'
                   }
                   mavenOptions += 'clean install'
+                  def pit = params.containsKey('pit') ? params.pit : false
+                  if (pit && first) {
+                    mavenOptions += '-Ppit'
+                  }
                   try {
-                    infra.runMaven(mavenOptions, jdk, null, null, addToolEnv, useArtifactCachingProxy)
+                    infra.runMaven(mavenOptions, jdk, null, addToolEnv, useArtifactCachingProxy)
                   } finally {
                     if (!skipTests) {
                       junit('**/target/surefire-reports/**/*.xml,**/target/failsafe-reports/**/*.xml,**/target/invoker-reports/**/*.xml')
@@ -163,7 +170,13 @@ def params = [
                           jacocoArguments.putAll(params.jacoco as Map)
                         }
                         recordCoverage jacocoArguments
-
+                        if (pit) {
+                          recordCoverage(
+                                tools: [[parser: 'PIT', pattern: '**/pit-reports/mutations.xml']],
+                                id: 'pit',
+                                name: 'Mutation Coverage',
+                                checksName: 'Mutation Coverage')
+                        }
                       }
                     }
                   }
@@ -198,7 +211,8 @@ def params = [
                 }
 
                 if (first) {
-                  if (skipTests) { // otherwise the reference build has been computed already
+                  if (skipTests) {
+                    // otherwise the reference build has been computed already
                     discoverReferenceBuild()
                   }
                   echo "Recording static analysis results on '${stageIdentifier}'"
@@ -270,6 +284,19 @@ def params = [
                       )
                   if (failFast && currentBuild.result == 'UNSTABLE') {
                     error 'Static analysis quality gates not passed; halting early'
+                  }
+                  /*
+                   * If the current build was successful, we send the commits to Launchable so that
+                   * the result can be consumed by a Launchable build in the future. We do not
+                   * attempt to record commits for non-incrementalified plugins because such
+                   * plugins' PR builds could not be consumed by anything else anyway, and all
+                   * plugins currently in the BOM are incrementalified. We do not attempt to record
+                   * commits on Windows because our Windows agents do not have Python installed.
+                   */
+                  if (incrementals && platform != 'windows' && currentBuild.currentResult == 'SUCCESS') {
+                    launchable.install()
+                    launchable('verify')
+                    launchable('record commit')
                   }
                 } else {
                   echo "Skipping static analysis results for ${stageIdentifier}"

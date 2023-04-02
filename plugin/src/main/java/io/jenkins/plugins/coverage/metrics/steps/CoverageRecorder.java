@@ -205,7 +205,8 @@ public class CoverageRecorder extends Recorder {
     }
 
     public String getChecksName() {
-        return StringUtils.defaultIfBlank(checksName, CHECKS_DEFAULT_NAME);
+        return StringUtils.defaultIfBlank(checksName,
+                StringUtils.defaultIfBlank(getName(), CHECKS_DEFAULT_NAME));
     }
 
     /**
@@ -399,7 +400,7 @@ public class CoverageRecorder extends Recorder {
                     .stream()
                     .filter(ModuleNode.class::isInstance)
                     .map(ModuleNode.class::cast)
-                    .map(ModuleNode::getSources)
+                    .map(ModuleNode::getSourceFolders)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
             sources.addAll(getSourceDirectoriesPaths());

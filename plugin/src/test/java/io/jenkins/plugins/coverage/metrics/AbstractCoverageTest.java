@@ -11,6 +11,8 @@ import org.junitpioneer.jupiter.DefaultLocale;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
 import edu.hm.hafner.coverage.CoverageParser;
+import edu.hm.hafner.coverage.CyclomaticComplexity;
+import edu.hm.hafner.coverage.LinesOfCode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
@@ -102,15 +104,22 @@ public abstract class AbstractCoverageTest extends ResourceTest {
 
     private static List<Value> fillValues() {
         var builder = new CoverageBuilder();
-        return List.of(builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
+        return List.of(
+                builder.setMetric(Metric.FILE).setCovered(3).setMissed(1).build(),
                 builder.setMetric(Metric.LINE).setCovered(2).setMissed(2).build(),
-                builder.setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build());
+                builder.setMetric(Metric.BRANCH).setCovered(9).setMissed(1).build(),
+                new CyclomaticComplexity(150),
+                new CyclomaticComplexity(15, Metric.COMPLEXITY_MAXIMUM),
+                new LinesOfCode(1000)
+        );
     }
 
     private static NavigableMap<Metric, Fraction> fillDeltas() {
         final NavigableMap<Metric, Fraction> deltaMapping = new TreeMap<>();
         deltaMapping.put(Metric.FILE, Fraction.getFraction(-10, 100));
         deltaMapping.put(Metric.LINE, Fraction.getFraction(5, 100));
+        deltaMapping.put(Metric.COMPLEXITY, Fraction.getFraction(-10, 1));
+        deltaMapping.put(Metric.LOC, Fraction.getFraction(5, 1));
         return deltaMapping;
     }
 }

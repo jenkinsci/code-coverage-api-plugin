@@ -32,7 +32,7 @@
     <testcontainers.version>1.17.6</testcontainers.version>
     <job-dsl.version>1.83</job-dsl.version>
 
-    <coverage-model.version>0.19.1</coverage-model.version>
+    <coverage-model.version>0.21.0</coverage-model.version>
     <git-forensics.version>2.0.0</git-forensics.version>
     <prism-api.version>1.29.0-4</prism-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
@@ -364,6 +364,25 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <targetClasses>
+            <param>io.jenkins.plugins.coverage.metrics.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>io.jenkins.plugins.coverage.metrics.*</param>
+          </targetTests>
+          <excludedTestClasses>
+            <param>*Assert</param>
+            <param>*Assertions</param>
+            <param>*ArchitectureTest</param>
+            <param>*ITest</param>
+            <param>*jmh_generated*</param>
+          </excludedTestClasses>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
@@ -372,6 +391,28 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>pit</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <executions>
+              <execution>
+                <id>test</id>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
