@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>acceptance-test-harness</artifactId>
-      <version>5504.v485694f31cdf</version>
+      <version>5528.v806749710b_83</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
