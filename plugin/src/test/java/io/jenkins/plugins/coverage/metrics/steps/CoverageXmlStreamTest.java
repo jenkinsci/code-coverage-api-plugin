@@ -112,8 +112,8 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
                         "BRANCH: 109/116",
                         "INSTRUCTION: 1260/1350",
                         "COMPLEXITY: 160",
-                        "COMPLEXITY_DENSITY: 160/323",
                         "COMPLEXITY_MAXIMUM: 6",
+                        "COMPLEXITY_DENSITY: 160/323",
                         "LOC: 323");
 
         assertThat(Input.from(saved)).nodesByXPath("//" + ACTION_QUALIFIED_NAME + "/projectValues/coverage")
@@ -130,11 +130,11 @@ class CoverageXmlStreamTest extends SerializableTest<Node> {
         var action = file.read();
         assertThat(action).isNotNull().isInstanceOfSatisfying(CoverageBuildAction.class, a ->
                 Assertions.assertThat(serializeValues(a))
-                        .containsExactly("MODULE: 1/1",
-                                "PACKAGE: 1/1", "FILE: 7/10", "CLASS: 15/18",
-                                "METHOD: 97/102", "LINE: 294/323", "BRANCH: 109/116",
-                                "INSTRUCTION: 1260/1350", "COMPLEXITY: 160",
-                                "COMPLEXITY_DENSITY: 160/323", "COMPLEXITY_MAXIMUM: 6", "LOC: 323"
+                        .containsExactly("MODULE: 1/1", "PACKAGE: 1/1", "FILE: 7/10", "CLASS: 15/18",
+                                "METHOD: 97/102",
+                                "LINE: 294/323", "BRANCH: 109/116", "INSTRUCTION: 1260/1350",
+                                "COMPLEXITY: 160", "COMPLEXITY_MAXIMUM: 6", "COMPLEXITY_DENSITY: 160/323",
+                                "LOC: 323"
                         ));
     }
 

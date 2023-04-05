@@ -332,7 +332,7 @@ public class SourceCodePainter {
         private final int[] killedPerLine;
 
         PaintedNode(final FileNode file) {
-            path = file.getPath();
+            path = file.getRelativePath();
 
             linesToPaint = file.getLinesWithCoverage().stream().mapToInt(i -> i).toArray();
             coveredPerLine = file.getCoveredCounters();

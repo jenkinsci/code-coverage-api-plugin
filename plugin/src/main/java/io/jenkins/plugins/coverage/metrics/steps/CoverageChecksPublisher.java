@@ -150,7 +150,7 @@ class CoverageChecksPublisher {
             var filteredRoot = rootNode.filterByModifiedLines();
             var modifiedFiles = filteredRoot.getAllFileNodes();
 
-            var summary = new StringBuilder("Modified lines summary:\n");
+            var summary = new StringBuilder("#### Summary for modified lines\n");
 
             createTotalLinesSummary(modifiedFiles, summary);
             createLineCoverageSummary(modifiedFiles, summary);
@@ -305,7 +305,7 @@ class CoverageChecksPublisher {
 
     private ChecksAnnotationBuilder createAnnotationBuilder(final FileNode fileNode) {
         return new ChecksAnnotationBuilder()
-                .withPath(fileNode.getPath())
+                .withPath(fileNode.getRelativePath())
                 .withAnnotationLevel(ChecksAnnotationLevel.WARNING);
     }
 

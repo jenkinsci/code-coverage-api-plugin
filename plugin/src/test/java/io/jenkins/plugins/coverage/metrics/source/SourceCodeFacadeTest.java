@@ -59,7 +59,7 @@ class SourceCodeFacadeTest extends ResourceTest {
     }
 
     private FileNode createFileCoverageNode() {
-        FileNode file = new FileNode("");
+        FileNode file = new FileNode("", "path");
         List<Integer> lines = Arrays.asList(10, 11, 12, 16, 17, 18, 19);
         for (Integer line : lines) {
             file.addModifiedLines(line);

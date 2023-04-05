@@ -118,7 +118,7 @@ class CodeDeltaCalculatorTest {
 
         Node tree = mock(Node.class);
         FileNode file1 = mock(FileNode.class);
-        when(file1.getPath()).thenReturn(path);
+        when(file1.getRelativePath()).thenReturn(path);
         when(tree.getAllFileNodes()).thenReturn(List.of(file1));
         when(tree.getFiles()).thenReturn(Set.of(path));
 
@@ -150,8 +150,8 @@ class CodeDeltaCalculatorTest {
         CodeDeltaCalculator codeDeltaCalculator = createCodeDeltaCalculator();
         FilteredLog log = createFilteredLog();
 
-        Node tree = new FileNode(REPORT_PATH_RENAME);
-        Node referenceTree = new FileNode(REPORT_PATH_MODIFY);
+        Node tree = new FileNode("Test_Renamed.java", REPORT_PATH_RENAME);
+        Node referenceTree = new FileNode("Test.java", REPORT_PATH_MODIFY);
         Map<String, FileChanges> changes = new HashMap<>();
         changes.put(REPORT_PATH_RENAME, createFileChanges(SCM_PATH_RENAME, OLD_SCM_PATH_RENAME, FileEditType.RENAME));
 
@@ -257,16 +257,16 @@ class CodeDeltaCalculatorTest {
      */
     private Node createStubbedCoverageTree() {
         FileNode addFile1 = mock(FileNode.class);
-        when(addFile1.getPath()).thenReturn(REPORT_PATH_ADD_1);
+        when(addFile1.getRelativePath()).thenReturn(REPORT_PATH_ADD_1);
         FileNode addFile2 = mock(FileNode.class);
-        when(addFile2.getPath()).thenReturn(REPORT_PATH_ADD_2);
+        when(addFile2.getRelativePath()).thenReturn(REPORT_PATH_ADD_2);
         FileNode modifyFile = mock(FileNode.class);
-        when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
+        when(modifyFile.getRelativePath()).thenReturn(REPORT_PATH_MODIFY);
         FileNode renameFile = mock(FileNode.class);
-        when(renameFile.getPath()).thenReturn(REPORT_PATH_RENAME);
+        when(renameFile.getRelativePath()).thenReturn(REPORT_PATH_RENAME);
         Node root = mock(Node.class);
         when(root.getAllFileNodes()).thenReturn(Arrays.asList(addFile1, addFile2, modifyFile, renameFile));
-        var files = root.getAllFileNodes().stream().map(FileNode::getPath).collect(Collectors.toSet());
+        var files = root.getAllFileNodes().stream().map(FileNode::getRelativePath).collect(Collectors.toSet());
         when(root.getFiles()).thenReturn(files);
 
         return root;
@@ -280,12 +280,12 @@ class CodeDeltaCalculatorTest {
      */
     private Node createStubbedReferenceCoverageTree() {
         FileNode modifyFile = mock(FileNode.class);
-        when(modifyFile.getPath()).thenReturn(REPORT_PATH_MODIFY);
+        when(modifyFile.getRelativePath()).thenReturn(REPORT_PATH_MODIFY);
         FileNode renameFile = mock(FileNode.class);
-        when(renameFile.getPath()).thenReturn(OLD_REPORT_PATH_RENAME);
+        when(renameFile.getRelativePath()).thenReturn(OLD_REPORT_PATH_RENAME);
         Node root = mock(Node.class);
         when(root.getAllFileNodes()).thenReturn(Arrays.asList(renameFile, modifyFile));
-        var files = root.getAllFileNodes().stream().map(FileNode::getPath).collect(Collectors.toSet());
+        var files = root.getAllFileNodes().stream().map(FileNode::getRelativePath).collect(Collectors.toSet());
         when(root.getFiles()).thenReturn(files);
 
         return root;

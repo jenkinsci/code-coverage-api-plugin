@@ -40,13 +40,23 @@ public class TreeMapNodeConverter {
      */
     public LabeledTreeMapNode toTreeChartModel(final Node node, final Metric metric, final ColorProvider colorProvider) {
         var tree = mergePackages(node);
-        LabeledTreeMapNode root = toTreeMapNode(tree, metric, colorProvider).orElse(
-                new LabeledTreeMapNode(node.getPath(), node.getName()));
+        LabeledTreeMapNode root = toTreeMapNode(tree, metric, colorProvider)
+                .orElse(new LabeledTreeMapNode(getId(node), node.getName()));
         for (LabeledTreeMapNode child : root.getChildren()) {
             child.collapseEmptyPackages();
         }
 
         return root;
+    }
+
+    private String getId(final Node node) {
+        String id = node.getName();
+        if (node.isRoot()) {
+            return id;
+        }
+        else {
+            return getId(node.getParent()) + '/' + id;
+        }
     }
 
     private Node mergePackages(final Node node) {
@@ -82,13 +92,14 @@ public class TreeMapNodeConverter {
         Label label = new Label(true, lineColor);
         Label upperLabel = new Label(true, lineColor);
 
+        var id = getId(node);
         if (node instanceof FileNode) {
-            return new LabeledTreeMapNode(node.getPath(), node.getName(), new ItemStyle(fillColor), label, upperLabel,
+            return new LabeledTreeMapNode(id, node.getName(), new ItemStyle(fillColor), label, upperLabel,
                     String.valueOf(coverage.getTotal()), FORMATTER.getTooltip(coverage));
         }
 
         ItemStyle packageStyle = new ItemStyle(fillColor, fillColor, 4);
-        LabeledTreeMapNode treeNode = new LabeledTreeMapNode(node.getPath(), node.getName(), packageStyle, label, upperLabel,
+        LabeledTreeMapNode treeNode = new LabeledTreeMapNode(id, node.getName(), packageStyle, label, upperLabel,
                 String.valueOf(coverage.getTotal()), FORMATTER.getTooltip(coverage));
 
         node.getChildren().stream()

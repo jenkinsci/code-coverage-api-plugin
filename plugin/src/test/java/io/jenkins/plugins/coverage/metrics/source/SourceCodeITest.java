@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
+import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 
@@ -76,7 +77,8 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         String sourceDirectory = createExternalFolder();
 
         WorkflowJob job = createPipeline();
-        copySourceFileToAgent("ignore/", localAgent, job);
+        var subFolder = "ignore/";
+        copySourceFileToAgent(subFolder, localAgent, job);
         copyReports(localAgent, job);
 
         job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
@@ -84,22 +86,23 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
         assertThat(getConsoleLog(firstBuild))
+                .contains("-> finished resolving of absolute paths (found: 0, not found: 1)")
                 .contains("-> finished painting (0 files have been painted, 1 files failed)")
                 .contains(String.format(
                         "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory));
 
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(subFolder, firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");
     }
 
-    private Run<?, ?> runCoverageWithSourceCode(final String sourceDirectory)
+    private Run<?, ?> runCoverageWithSourceCode(final String sourceDir)
             throws IOException {
         var localAgent = crateCoverageAgent();
 
         WorkflowJob job = createPipeline();
         copyReports(localAgent, job);
-        copySourceFileToAgent(sourceDirectory, localAgent, job);
+        copySourceFileToAgent(sourceDir, localAgent, job);
 
         // get the temporary directory - used by unit tests - to verify its content
         File temporaryDirectory = new File(System.getProperty("java.io.tmpdir"));
@@ -107,28 +110,29 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         assertThat(temporaryDirectory.isDirectory()).isTrue();
         File[] temporaryFiles = temporaryDirectory.listFiles();
 
-        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDir));
         Run<?, ?> firstBuild = buildSuccessfully(job);
         assertThat(getConsoleLog(firstBuild))
+                .contains("-> resolved absolute paths for all 1 source files")
                 .contains("-> finished painting successfully");
-        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER, PATH_UTIL);
+        verifySourceCodeInBuild(sourceDir, firstBuild, ACU_COBOL_PARSER, PATH_UTIL);
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(secondBuild, ACU_COBOL_PARSER, PATH_UTIL);
-        verifySourceCodeInBuild(firstBuild, ACU_COBOL_PARSER, PATH_UTIL); // should be still available
+        verifySourceCodeInBuild(sourceDir, secondBuild, ACU_COBOL_PARSER, PATH_UTIL);
+        verifySourceCodeInBuild(sourceDir, firstBuild, ACU_COBOL_PARSER, PATH_UTIL); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode(LAST_BUILD, sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(LAST_BUILD, sourceDir));
         Run<?, ?> thirdBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(thirdBuild, ACU_COBOL_PARSER, PATH_UTIL);
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(sourceDir, thirdBuild, ACU_COBOL_PARSER, PATH_UTIL);
+        verifySourceCodeInBuild(sourceDir, firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(sourceDir, secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
 
-        job.setDefinition(createPipelineWithSourceCode(NEVER, sourceDirectory));
+        job.setDefinition(createPipelineWithSourceCode(NEVER, sourceDir));
         Run<?, ?> lastBuild = buildSuccessfully(job);
-        verifySourceCodeInBuild(lastBuild, NO_SOURCE_CODE, NO_SOURCE_CODE);
-        verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
-        verifySourceCodeInBuild(thirdBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(sourceDir, lastBuild, NO_SOURCE_CODE, NO_SOURCE_CODE);
+        verifySourceCodeInBuild(sourceDir, firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(sourceDir, secondBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild(sourceDir, thirdBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
 
         assertThat(temporaryDirectory.listFiles()).isEqualTo(temporaryFiles);
 
@@ -157,27 +161,29 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 + "}", true);
     }
 
-    private void verifySourceCodeInBuild(final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
+    private void verifySourceCodeInBuild(final String path, final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
             final String pathUtilSourceCodeSnippet) {
         List<CoverageBuildAction> actions = build.getActions(CoverageBuildAction.class);
         var builder = new CoverageBuilder().setMetric(Metric.LINE).setMissed(0);
         assertThat(actions).hasSize(2).satisfiesExactly(
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(8).build());
-                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, ACU_COBOL_PARSER_SOURCE_FILE_PATH);
-                    assertThat(fileNode).isNotEmpty()
-                            .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
-                                    ACU_COBOL_PARSER_SOURCE_FILE_PATH));
-                    assertThat(action.getTarget().getSourceCode(String.valueOf(ACU_COBOL_PARSER_SOURCE_FILE_PATH.hashCode()), "coverage-table"))
+                    var relativePath = path + "/" + ACU_COBOL_PARSER_SOURCE_FILE_PATH;
+                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
+                    assertThat(fileNode).isNotEmpty().get()
+                            .isInstanceOfSatisfying(FileNode.class,
+                                    node -> assertThat(node.getRelativePath()).isEqualTo(relativePath));
+                    assertThat(action.getTarget().getSourceCode(String.valueOf(relativePath.hashCode()), "coverage-table"))
                             .contains(acuCobolParserSourceCodeSnippet);
                 },
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(43).build());
-                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, PATH_UTIL_SOURCE_FILE_PATH);
-                    assertThat(fileNode).isNotEmpty()
-                            .hasValueSatisfying(node -> assertThat(node.getPath()).isEqualTo(
-                                    PATH_UTIL_SOURCE_FILE_PATH));
-                    assertThat(action.getTarget().getSourceCode(String.valueOf(PATH_UTIL_SOURCE_FILE_PATH.hashCode()), "coverage-table"))
+                    var relativePath = path + "/" + PATH_UTIL_SOURCE_FILE_PATH;
+                    Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
+                    assertThat(fileNode).isNotEmpty().get()
+                            .isInstanceOfSatisfying(FileNode.class,
+                                    node -> assertThat(node.getRelativePath()).isEqualTo(relativePath));
+                    assertThat(action.getTarget().getSourceCode(String.valueOf(relativePath.hashCode()), "coverage-table"))
                             .contains(pathUtilSourceCodeSnippet);
                 });
     }
