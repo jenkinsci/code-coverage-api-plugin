@@ -182,11 +182,21 @@ public class PathResolver {
             FilePermissionEnforcer enforcer = new FilePermissionEnforcer();
             var fileName = absolutePath.getRemote();
             if (enforcer.isInWorkspace(fileName, workspace, sourceDirectories)) {
-                return Optional.of(PATH_UTIL.getRelativePath(workspace.getRemote(), fileName));
+                if (isWithinWorkspace(fileName, workspace)) {
+                    return Optional.of(PATH_UTIL.getRelativePath(workspace.getRemote(), fileName));
+                }
+                else {
+                    return Optional.of(PATH_UTIL.getAbsolutePath(fileName));
+                }
             }
             log.logError("Skipping resolving of file: %s (not part of workspace or permitted source code folders)",
                     fileName);
             return Optional.empty();
+        }
+
+        private boolean isWithinWorkspace(final String fileName, final FilePath workspace) {
+            var workspacePath = PATH_UTIL.getAbsolutePath(workspace.getRemote());
+            return PATH_UTIL.getAbsolutePath(fileName).startsWith(workspacePath);
         }
     }
 

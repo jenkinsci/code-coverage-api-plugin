@@ -378,14 +378,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         if (isSourceFileAvailable(sourceNode)) {
             content = SOURCE_CODE_FACADE.read(rootDir, getId(), sourceNode.getRelativePath());
         }
-        if (!content.isEmpty() && sourceNode instanceof FileNode) {
-            FileNode fileNode = sourceNode;
+        if (!content.isEmpty()) {
             String cleanTableId = StringUtils.removeEnd(tableId, INLINE_SUFFIX);
             if (MODIFIED_LINES_COVERAGE_TABLE_ID.equals(cleanTableId)) {
-                return SOURCE_CODE_FACADE.calculateModifiedLinesCoverageSourceCode(content, fileNode);
+                return SOURCE_CODE_FACADE.calculateModifiedLinesCoverageSourceCode(content, sourceNode);
             }
             else if (INDIRECT_COVERAGE_TABLE_ID.equals(cleanTableId)) {
-                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, fileNode);
+                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, sourceNode);
             }
             else {
                 return content;

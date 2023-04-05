@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.source;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,7 +93,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                         "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory));
 
-        verifySourceCodeInBuild(subFolder, firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
+        verifySourceCodeInBuild("", firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");
     }
 
@@ -168,7 +169,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         assertThat(actions).hasSize(2).satisfiesExactly(
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(8).build());
-                    var relativePath = path + "/" + ACU_COBOL_PARSER_SOURCE_FILE_PATH;
+                    var relativePath = Paths.get(path, ACU_COBOL_PARSER_SOURCE_FILE_PATH).toString();
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
                     assertThat(fileNode).isNotEmpty().get()
                             .isInstanceOfSatisfying(FileNode.class,
@@ -178,7 +179,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 },
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(43).build());
-                    var relativePath = path + "/" + PATH_UTIL_SOURCE_FILE_PATH;
+                    var relativePath = Paths.get(path, PATH_UTIL_SOURCE_FILE_PATH).toString();
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
                     assertThat(fileNode).isNotEmpty().get()
                             .isInstanceOfSatisfying(FileNode.class,
