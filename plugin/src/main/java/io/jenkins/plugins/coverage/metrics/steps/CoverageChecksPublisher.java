@@ -163,7 +163,7 @@ class CoverageChecksPublisher {
     }
 
     private void createTotalLinesSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
-        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).map(Set::size).count();
+        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).mapToInt(Set::size).sum();
         if (total == 1) {
             summary.append("- 1 line has been modified");
         }
