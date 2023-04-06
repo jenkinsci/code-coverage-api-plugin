@@ -120,7 +120,7 @@ public class PathResolver {
             }
 
             var workspace = new FilePath(workspaceFile);
-            var mapping = relativePaths.parallelStream()
+            var mapping = relativePaths.stream()
                     .map(path -> new SimpleEntry<>(path, locateSource(path, workspace, sourceDirectories, log)))
                     .filter(entry -> entry.getValue().isPresent())
                     .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().get()));
