@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -27,11 +26,7 @@ import hudson.model.Run;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 
-import io.jenkins.plugins.prism.FilePermissionEnforcer;
-import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
-import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceCodeRetention;
-import io.jenkins.plugins.prism.SourceDirectoryFilter;
 import io.jenkins.plugins.util.ValidationUtilities;
 
 /**
@@ -51,7 +46,7 @@ public class SourceCodePainter {
      * @param workspace
      *         The workspace which contains the source code files
      * @param id
-     *         the ID of the coverage results - each ID will store the files in a sepearate directory
+     *         the ID of the coverage results - each ID will store the files in a separate directory
      */
     public SourceCodePainter(@NonNull final Run<?, ?> build, @NonNull final FilePath workspace, final String id) {
         this.build = build;
@@ -64,8 +59,6 @@ public class SourceCodePainter {
      *
      * @param files
      *         the files to paint
-     * @param sourceDirectories
-     *         the source directories that have been configured in the associated job
      * @param sourceCodeEncoding
      *         the encoding of the source code files
      * @param sourceCodeRetention
@@ -76,7 +69,7 @@ public class SourceCodePainter {
      * @throws InterruptedException
      *         if the painting process has been interrupted
      */
-    public void processSourceCodePainting(final List<FileNode> files, final Set<String> sourceDirectories,
+    public void processSourceCodePainting(final List<FileNode> files,
             final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
             throws InterruptedException {
@@ -87,7 +80,7 @@ public class SourceCodePainter {
                     .collect(Collectors.toList());
             log.logInfo("Painting %d source files on agent", paintedFiles.size());
 
-            paintFilesOnAgent(paintedFiles, sourceDirectories, sourceCodeEncoding, log);
+            paintFilesOnAgent(paintedFiles, sourceCodeEncoding, log);
             log.logInfo("Copying painted sources from agent to build folder");
 
             sourceCodeFacade.copySourcesToBuildFolder(build, workspace, log);
@@ -96,17 +89,9 @@ public class SourceCodePainter {
     }
 
     private void paintFilesOnAgent(final List<PaintedNode> paintedFiles,
-            final Set<String> requestedSourceDirectories,
             final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
         try {
-            Set<String> permittedSourceDirectories = PrismConfiguration.getInstance()
-                    .getSourceDirectories()
-                    .stream()
-                    .map(PermittedSourceCodeDirectory::getPath)
-                    .collect(Collectors.toSet());
-
-            var painter = new AgentCoveragePainter(paintedFiles, permittedSourceDirectories,
-                    requestedSourceDirectories, sourceCodeEncoding, id);
+            var painter = new AgentCoveragePainter(paintedFiles, sourceCodeEncoding, id);
             FilteredLog agentLog = workspace.act(painter);
             log.merge(agentLog);
         }
@@ -124,11 +109,7 @@ public class SourceCodePainter {
         private static final long serialVersionUID = 3966282357309568323L;
 
         private final List<PaintedNode> paintedFiles;
-        private final Set<String> permittedSourceDirectories;
-
-        private final Set<String> requestedSourceDirectories;
         private final String sourceCodeEncoding;
-
         private final String directory;
 
         /**
@@ -136,23 +117,16 @@ public class SourceCodePainter {
          *
          * @param paintedFiles
          *         the model for the file painting for each coverage node
-         * @param permittedSourceDirectories
-         *         the permitted source code directories (in Jenkins global configuration)
-         * @param requestedSourceDirectories
-         *         the requested relative and absolute source directories (in the step configuration)
          * @param sourceCodeEncoding
          *         the encoding of the source code files
          * @param directory
          *         the subdirectory where the source files will be stored in
          */
-        AgentCoveragePainter(final List<PaintedNode> paintedFiles,
-                final Set<String> permittedSourceDirectories, final Set<String> requestedSourceDirectories,
-                final String sourceCodeEncoding, final String directory) {
+        AgentCoveragePainter(final List<PaintedNode> paintedFiles, final String sourceCodeEncoding,
+                final String directory) {
             super();
 
             this.paintedFiles = paintedFiles;
-            this.permittedSourceDirectories = permittedSourceDirectories;
-            this.requestedSourceDirectories = requestedSourceDirectories;
             this.sourceCodeEncoding = sourceCodeEncoding;
             this.directory = directory;
         }
@@ -160,17 +134,6 @@ public class SourceCodePainter {
         @Override
         public FilteredLog invoke(final File workspaceFile, final VirtualChannel channel) {
             FilteredLog log = new FilteredLog("Errors during source code painting:");
-            Set<String> sourceDirectories = filterSourceDirectories(workspaceFile, log);
-            if (sourceDirectories.isEmpty()) {
-                log.logInfo("Searching for source code files in root of workspace '%s'", workspaceFile);
-            }
-            else if (sourceDirectories.size() == 1) {
-                log.logInfo("Searching for source code files in '%s'", sourceDirectories.iterator().next());
-            }
-            else {
-                log.logInfo("Searching for source code files in:", workspaceFile);
-                sourceDirectories.forEach(dir -> log.logInfo("-> %s", dir));
-            }
             FilePath workspace = new FilePath(workspaceFile);
 
             try {
@@ -180,7 +143,7 @@ public class SourceCodePainter {
                 Path temporaryFolder = Files.createTempDirectory(directory);
 
                 int count = paintedFiles.parallelStream()
-                        .mapToInt(file -> paintSource(file, workspace, temporaryFolder, sourceDirectories, log))
+                        .mapToInt(file -> paintSource(file, workspace, temporaryFolder, log))
                         .sum();
 
                 if (count == paintedFiles.size()) {
@@ -213,25 +176,19 @@ public class SourceCodePainter {
             return new ValidationUtilities().getCharset(sourceCodeEncoding);
         }
 
-        private Set<String> filterSourceDirectories(final File workspace, final FilteredLog log) {
-            SourceDirectoryFilter filter = new SourceDirectoryFilter();
-            return filter.getPermittedSourceDirectories(workspace.getAbsolutePath(),
-                    permittedSourceDirectories, requestedSourceDirectories, log);
-        }
-
-        private int paintSource(final PaintedNode fileNode, final FilePath workspace, final Path temporaryFolder,
-                final Set<String> sourceSearchDirectories, final FilteredLog log) {
+        private int paintSource(final PaintedNode fileNode, final FilePath workspace,
+                final Path temporaryFolder, final FilteredLog log) {
             String relativePathIdentifier = fileNode.getPath();
             FilePath paintedFilesDirectory = workspace.child(directory);
-            return findSourceFile(workspace, relativePathIdentifier, sourceSearchDirectories, log)
+            return findSourceFile(workspace, relativePathIdentifier, log)
                     .map(resolvedPath -> paint(fileNode, relativePathIdentifier, resolvedPath,
                             paintedFilesDirectory, temporaryFolder, getCharset(), log))
                     .orElse(0);
         }
 
-        private int paint(final PaintedNode paint, final String relativePathIdentifier, final FilePath resolvedPath,
-                final FilePath paintedFilesDirectory, final Path temporaryFolder,
-                final Charset charset, final FilteredLog log) {
+        private int paint(final PaintedNode paint, final String relativePathIdentifier,
+                final FilePath resolvedPath, final FilePath paintedFilesDirectory,
+                final Path temporaryFolder, final Charset charset, final FilteredLog log) {
             String sanitizedFileName = SourceCodeFacade.sanitizeFilename(relativePathIdentifier);
             FilePath zipOutputPath = paintedFilesDirectory.child(
                     sanitizedFileName + SourceCodeFacade.ZIP_FILE_EXTENSION);
@@ -254,23 +211,16 @@ public class SourceCodePainter {
         }
 
         private Optional<FilePath> findSourceFile(final FilePath workspace, final String fileName,
-                final Set<String> sourceDirectories, final FilteredLog log) {
+                final FilteredLog log) {
             try {
                 FilePath absolutePath = new FilePath(new File(fileName));
                 if (absolutePath.exists()) {
-                    return enforcePermissionFor(absolutePath, workspace, sourceDirectories, log);
+                    return Optional.of(absolutePath);
                 }
 
                 FilePath relativePath = workspace.child(fileName);
                 if (relativePath.exists()) {
-                    return enforcePermissionFor(relativePath, workspace, sourceDirectories, log);
-                }
-
-                for (String sourceFolder : sourceDirectories) {
-                    FilePath sourcePath = workspace.child(sourceFolder).child(fileName);
-                    if (sourcePath.exists()) {
-                        return enforcePermissionFor(sourcePath, workspace, sourceDirectories, log);
-                    }
+                    return Optional.of(relativePath);
                 }
 
                 log.logError("Source file '%s' not found", fileName);
@@ -278,17 +228,6 @@ public class SourceCodePainter {
             catch (InvalidPathException | IOException | InterruptedException exception) {
                 log.logException(exception, "No valid path in coverage node: '%s'", fileName);
             }
-            return Optional.empty();
-        }
-
-        private Optional<FilePath> enforcePermissionFor(final FilePath absolutePath, final FilePath workspace,
-                final Set<String> sourceDirectories, final FilteredLog log) {
-            FilePermissionEnforcer enforcer = new FilePermissionEnforcer();
-            if (enforcer.isInWorkspace(absolutePath.getRemote(), workspace, sourceDirectories)) {
-                return Optional.of(absolutePath);
-            }
-            log.logError("Skipping coloring of file: %s (not part of workspace or permitted source code folders)",
-                    absolutePath.getRemote());
             return Optional.empty();
         }
 

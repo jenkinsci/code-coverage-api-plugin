@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.source;
+package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.File;
 import java.io.IOException;
