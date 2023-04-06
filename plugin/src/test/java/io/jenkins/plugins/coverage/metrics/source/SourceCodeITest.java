@@ -12,6 +12,7 @@ import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
+import edu.hm.hafner.util.PathUtil;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -47,6 +48,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
     static final String PATH_UTIL_PACKAGE_PATH = "edu/hm/hafner/util/";
     private static final String PATH_UTIL_SOURCE_FILE_PATH = PATH_UTIL_PACKAGE_PATH + PATH_UTIL_FILE_NAME;
     static final String AGENT_LABEL = "coverage-agent";
+    private static final PathUtil UTIL = new PathUtil();
 
     /** Verifies that the plugin reads source code from the workspace root. */
     @Test
@@ -162,14 +164,14 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 + "}", true);
     }
 
-    private void verifySourceCodeInBuild(final String path, final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
+    private void verifySourceCodeInBuild(final String pathPrefix, final Run<?, ?> build, final String acuCobolParserSourceCodeSnippet,
             final String pathUtilSourceCodeSnippet) {
         List<CoverageBuildAction> actions = build.getActions(CoverageBuildAction.class);
         var builder = new CoverageBuilder().setMetric(Metric.LINE).setMissed(0);
         assertThat(actions).hasSize(2).satisfiesExactly(
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(8).build());
-                    var relativePath = Paths.get(path, ACU_COBOL_PARSER_SOURCE_FILE_PATH).toString();
+                    var relativePath = getRelativePath(pathPrefix, ACU_COBOL_PARSER_SOURCE_FILE_PATH);
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
                     assertThat(fileNode).isNotEmpty().get()
                             .isInstanceOfSatisfying(FileNode.class,
@@ -179,7 +181,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 },
                 action -> {
                     assertThat(action.getAllValues(Baseline.PROJECT)).contains(builder.setCovered(43).build());
-                    var relativePath = Paths.get(path, PATH_UTIL_SOURCE_FILE_PATH).toString();
+                    var relativePath = getRelativePath(pathPrefix, PATH_UTIL_SOURCE_FILE_PATH);
                     Optional<Node> fileNode = action.getResult().find(Metric.FILE, relativePath);
                     assertThat(fileNode).isNotEmpty().get()
                             .isInstanceOfSatisfying(FileNode.class,
@@ -187,6 +189,10 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                     assertThat(action.getTarget().getSourceCode(String.valueOf(relativePath.hashCode()), "coverage-table"))
                             .contains(pathUtilSourceCodeSnippet);
                 });
+    }
+
+    private String getRelativePath(final String path, final String filePath) {
+        return UTIL.getRelativePath(Paths.get(path, filePath));
     }
 
     String createDestinationPath(final String sourceDirectory, final String packagePath, final String fileName) {
