@@ -209,7 +209,7 @@ public class PathResolver {
      * @author Ullrich Hafner
      */
     // FIXME: replace with plugin-util class once released
-    private static class RemoteResultWrapper<T extends Serializable> extends FilteredLog {
+    static final class RemoteResultWrapper<T extends Serializable> extends FilteredLog {
         private static final long serialVersionUID = -6411417555105688927L;
 
         private final T result;
@@ -240,13 +240,16 @@ public class PathResolver {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
+            if (!super.equals(o)) {
+                return false;
+            }
             RemoteResultWrapper<?> that = (RemoteResultWrapper<?>) o;
             return Objects.equals(result, that.result);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(result);
+            return Objects.hash(super.hashCode(), result);
         }
     }
 }
