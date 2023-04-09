@@ -215,7 +215,7 @@ public class CoverageStep extends Step implements Serializable {
     }
 
     /**
-     * Determines whether to fail the build on errors during the step of recording coverage reports.
+     * Determines whether to fail the step on errors during the step of recording coverage reports.
      *
      * @param failOnError
      *         if {@code true} then the build will be failed on errors, {@code false} then errors are only reported in
