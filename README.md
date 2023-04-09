@@ -28,6 +28,7 @@ This project was part of [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-
 The code coverage plug-in provides the following features when added as a post build action (or step) to a job:
 
 * Coverage analysis of projects and pull requests: The plugin now computes and shows the absolute coverage of the project, the coverage of the modified files and the coverage of the modified lines, so you can see how the changes actually affect the code coverage. Additionally, the delta of these coverages with respect to the reference build are computed and the coverage changes created by changed test cases (indirect coverage changes).
+
  ![Coverage overview and trend](./images/summary.png)
 
 * Coverage overview and trend:
@@ -51,22 +52,28 @@ The code coverage plug-in provides the following features when added as a post b
   ![Specific source code view for Indirect Coverage Changes](./images/reportICC_screen.PNG)
 
 * Customizable coverage overview for the Jenkins dashboard view and for build results:
+
   ![alt text](./images/dashboard_screen.PNG "Analysis overview for Jenkins dashboard")
 
 * Quality Gates: You can specify an arbitrary number of quality gates that allow to set the build to unstable or failed if the thresholds are not met. For each quality gate the metric (branch coverage, complexity, etc.) and the baseline (whole project, changed files, etc.) can be defined.
+
   ![Quality Gates](./images/quality-gates.png)
 
 * Cyclomatic Complexity and LOC metrics: Several coverage parsers support the measurement of cyclomatic complexity and lines of code. These metrics are now computed and recorded as well:
+
   ![Cyclomatic Complexity and LOC metrics](./images/all-metrics.png)
 
 * The recorder has been extended with a native step that is capable of setting the step status (unstable, failed, ok):
+
   ![Native step](./images/step.png)
 
 * GitHub checks report to show the detailed line and branch coverage results for pull request:
+
   ![Code Coverage Checks Overview](./images/jacoco-coverage-checks.png)
   ![Code Coverage Checks Annotations](./images/jacoco-coverage-checks-annotations.png)
 
 * GitHub checks report to show the detailed line and mutation coverage results for pull request:
+
   ![Mutation Coverage Checks Overview](./images/pit-coverage-checks.png)
   ![Mutation Coverage Checks Annotations](./images/pit-coverage-checks-annotations.png)
 
