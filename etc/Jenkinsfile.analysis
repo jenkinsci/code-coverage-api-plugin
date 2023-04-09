@@ -18,7 +18,7 @@ node('java-agent') {
         recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
 
         junit testResults: '**/target/*-reports/TEST-*.xml'
-        recordCoverage tools: [[parser: 'JACOCO']], sourceCodeRetention: 'EVERY_BUILD',
+        recordCoverage tools: [[parser: 'JACOCO', pattern: '**/jacoco/jacoco.xml']], sourceCodeRetention: 'EVERY_BUILD',
             qualityGates: [ [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'UNSTABLE']],
             sourceDirectories: [[path: 'plugin/src/main/java']]
         recordIssues tools: [checkStyle(pattern: 'target/checkstyle-result.xml'),
