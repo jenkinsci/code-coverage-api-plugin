@@ -19,7 +19,8 @@ node('java-agent') {
 
         junit testResults: '**/target/*-reports/TEST-*.xml'
         recordCoverage tools: [[parser: 'JACOCO']], sourceCodeRetention: 'EVERY_BUILD',
-            qualityGates: [ [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'UNSTABLE']]
+            qualityGates: [ [threshold: 90.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'UNSTABLE']],
+            sourceDirectories: [[path: 'plugin/src/main/java']]
         recordIssues tools: [checkStyle(pattern: 'target/checkstyle-result.xml'),
             spotBugs(pattern: 'target/spotbugsXml.xml'),
             pmdParser(pattern: 'target/pmd.xml'),
