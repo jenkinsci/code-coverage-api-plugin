@@ -150,7 +150,7 @@ class CoverageChecksPublisher {
             var filteredRoot = rootNode.filterByModifiedLines();
             var modifiedFiles = filteredRoot.getAllFileNodes();
 
-            var summary = new StringBuilder("Modified lines summary:\n");
+            var summary = new StringBuilder("#### Summary for modified lines\n");
 
             createTotalLinesSummary(modifiedFiles, summary);
             createLineCoverageSummary(modifiedFiles, summary);
@@ -163,7 +163,7 @@ class CoverageChecksPublisher {
     }
 
     private void createTotalLinesSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
-        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).map(Set::size).count();
+        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).mapToInt(Set::size).sum();
         if (total == 1) {
             summary.append("- 1 line has been modified");
         }
@@ -305,7 +305,7 @@ class CoverageChecksPublisher {
 
     private ChecksAnnotationBuilder createAnnotationBuilder(final FileNode fileNode) {
         return new ChecksAnnotationBuilder()
-                .withPath(fileNode.getPath())
+                .withPath(fileNode.getRelativePath())
                 .withAnnotationLevel(ChecksAnnotationLevel.WARNING);
     }
 

@@ -39,7 +39,7 @@ abstract class ChangesTableModel extends CoverageTableModel {
 
     FileNode getOriginalNode(final FileNode fileNode) {
         return getRoot().getAllFileNodes().stream()
-                .filter(node -> node.getPath().equals(fileNode.getPath())
+                .filter(node -> node.getRelativePath().equals(fileNode.getRelativePath())
                         && node.getName().equals(fileNode.getName()))
                 .findFirst()
                 .orElse(fileNode); // return this as fallback to prevent exceptions

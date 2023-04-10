@@ -39,7 +39,7 @@ public class FileChangesProcessor {
      */
     public void attachChangedCodeLines(final Node coverageNode, final Map<String, FileChanges> codeChanges) {
         Map<String, FileNode> nodePathMapping = coverageNode.getAllFileNodes().stream()
-                .collect(Collectors.toMap(Node::getPath, Function.identity()));
+                .collect(Collectors.toMap(FileNode::getRelativePath, Function.identity()));
 
         codeChanges.forEach((path, fileChange) -> {
             if (nodePathMapping.containsKey(path)) {
@@ -122,7 +122,7 @@ public class FileChangesProcessor {
                     getReferenceCoveragePerLine(referenceFileNodes, referencePath);
             if (referenceCoveragePerLine.isPresent()) {
                 SortedMap<Integer, Integer> referenceCoverageMapping = new TreeMap<>(referenceCoveragePerLine.get());
-                String currentPath = fileNode.getPath();
+                String currentPath = fileNode.getRelativePath();
                 if (codeChanges.containsKey(currentPath)) {
                     adjustedCoveragePerLine(referenceCoverageMapping, codeChanges.get(currentPath));
                 }
@@ -278,8 +278,8 @@ public class FileChangesProcessor {
     private Map<String, FileNode> getFileNodeMappingWithReferencePaths(
             final Node root, final Map<String, String> oldPathMapping) {
         return root.getAllFileNodes().stream()
-                .filter(node -> oldPathMapping.containsKey(node.getPath()))
-                .collect(Collectors.toMap(node -> oldPathMapping.get(node.getPath()), Function.identity()));
+                .filter(node -> oldPathMapping.containsKey(node.getRelativePath()))
+                .collect(Collectors.toMap(node -> oldPathMapping.get(node.getRelativePath()), Function.identity()));
     }
 
     /**
@@ -296,8 +296,8 @@ public class FileChangesProcessor {
     private Map<String, FileNode> getReferenceFileNodeMapping(
             final Map<String, FileNode> nodeMapping, final Node referenceNode) {
         return referenceNode.getAllFileNodes().stream()
-                .filter(reference -> nodeMapping.containsKey(reference.getPath()))
-                .collect(Collectors.toMap(FileNode::getPath, Function.identity()));
+                .filter(reference -> nodeMapping.containsKey(reference.getRelativePath()))
+                .collect(Collectors.toMap(FileNode::getRelativePath, Function.identity()));
     }
 
     /**

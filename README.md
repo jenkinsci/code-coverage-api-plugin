@@ -7,7 +7,7 @@
 [![Codecov](https://codecov.io/gh/jenkinsci/code-coverage-api/branch/master/graph/badge.svg)](https://codecov.io/gh/jenkinsci/code-coverage-api-plugin/branch/master)
 [![CodeQL](https://github.com/jenkinsci/code-coverage-api/workflows/CodeQL/badge.svg?branch=master)](https://github.com/jenkinsci/code-coverage-api/actions/workflows/codeql.yml)
 
-The Jenkins code coverage plug-in collects reports of code coverage or mutation coverage tools. It has support for the following report formats:
+The Jenkins Code Coverage Plug-in collects reports of code coverage or mutation coverage tools. It has support for the following report formats:
 
 - [JaCoCo](https://www.jacoco.org/jacoco)
 - [Cobertura](https://cobertura.github.io/cobertura/)
@@ -25,46 +25,66 @@ This project was part of [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-
 
 ## Features
 
-The code coverage plug-in provides the following features when added as a post build action (or step)
-to a job:
+The code coverage plug-in provides the following features when added as a post build action (or step) to a job:
 
-* **Coverage analysis of projects and pull requests:**
-  * all project code (Project Coverage)
-  * code changes (Modified Lines or Files Coverage)
-  * coverage changes created by changed test cases (Indirect Coverage Changes)
-* **Modernized coverage report visualization:**
-  * Coverage overview and trend
+* Coverage analysis of projects and pull requests: The plugin now computes and shows the absolute coverage of the project, the coverage of the modified files and the coverage of the modified lines, so you can see how the changes actually affect the code coverage. Additionally, the delta of these coverages with respect to the reference build are computed and the coverage changes created by changed test cases (indirect coverage changes).
 
-    ![alt text](./images/reportOverview_screen.PNG "Coverage overview and trend")
+ ![Coverage overview and trend](./images/summary.png)
+
+* Coverage overview and trend:
+
+  ![Coverage overview and trend](./images/reportOverview_screen.PNG)
   
-  * Colored project coverage tree map for line and branch coverage
+* Colored project coverage tree map for line, branch, instruction and mutation coverage:
 
-    ![alt text](./images/reportTree_screen.PNG "Colored project coverage tree map")
+  ![Colored project coverage tree map](./images/reportTree_screen.PNG)
   
-  * Source code navigation
+* Source code navigation with a configuration option to store the source code files for all builds, for current build only, or for changed files only:
 
-    ![alt text](./images/reportFile_screen.PNG "Source code navigation")
+  ![Source code navigation](./images/reportFile_screen.PNG)
   
-  * Specific source code view for specifically analyzing the coverage of code changes (Change Coverage):
+* Specific source code view for analyzing the coverage of changed code lines:
 
-    ![alt text](./images/reportCC_screen.PNG "Specific source code view for Change Coverage")
+  ![Specific source code view for Change Coverage](./images/reportCC_screen.PNG)
    
-  * Specific source code view for specifically analyzing the coverage after test changes (Indirect Coverage Changes):
+* Specific source code view for analyzing the coverage changes that are a result of test changes (indirect coverage changes):
 
-    ![alt text](./images/reportICC_screen.PNG "Specific source code view for Indirect Coverage Changes")
+  ![Specific source code view for Indirect Coverage Changes](./images/reportICC_screen.PNG)
 
-* **Customizable coverage overview for the Jenkins dashboard view and for build results:**
+* Customizable coverage overview for the Jenkins dashboard view and for build results:
+
   ![alt text](./images/dashboard_screen.PNG "Analysis overview for Jenkins dashboard")
-  ![alt text](./images/buildview_screen.PNG "Analysis overview for Jenkins build result")
+
+* Quality Gates: You can specify an arbitrary number of quality gates that allow to set the build to unstable or failed if the thresholds are not met. For each quality gate the metric (branch coverage, complexity, etc.) and the baseline (whole project, changed files, etc.) can be defined.
+
+  ![Quality Gates](./images/quality-gates.png)
+
+* Cyclomatic Complexity and LOC metrics: Several coverage parsers support the measurement of cyclomatic complexity and lines of code. These metrics are now computed and recorded as well:
+
+  ![Cyclomatic Complexity and LOC metrics](./images/all-metrics.png)
+
+* The recorder has been extended with a native step that is capable of setting the step status (unstable, failed, ok):
+
+  ![Native step](./images/step.png)
+
+* GitHub checks report to show the detailed line and branch coverage results for pull request:
+
+  ![Code Coverage Checks Overview](./images/jacoco-coverage-checks.png)
+  ![Code Coverage Checks Annotations](./images/jacoco-coverage-checks-annotations.png)
+
+* GitHub checks report to show the detailed line and mutation coverage results for pull request:
+
+  ![Mutation Coverage Checks Overview](./images/pit-coverage-checks.png)
+  ![Mutation Coverage Checks Annotations](./images/pit-coverage-checks-annotations.png)
+
 
 ## Usage
 
-:exclamation: The plugin does not run the code coverage, it just visualizes the results reported by such tools.
-You still need to enable and configure the code coverage tool in your build file or Jenkinsfile.
+:exclamation: The plugin does not run the code coverage, it just visualizes the results reported by such tools. You still need to enable and configure the code coverage tool in your build file or Jenkinsfile. :exclamation:
 
 ### Supported project types
 
-The Warnings Next Generation plugin supports the following Jenkins project types:
+The Code Coverage Plug-in supports the following Jenkins project types:
 
 - Freestyle Project
 - Maven Project

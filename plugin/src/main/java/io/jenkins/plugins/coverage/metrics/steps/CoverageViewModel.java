@@ -347,7 +347,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         if (targetResult.isPresent()) {
             try {
                 Node fileNode = targetResult.get();
-                return readSourceCode(fileNode, tableId);
+                return readSourceCode((FileNode)fileNode, tableId);
             }
             catch (IOException | InterruptedException exception) {
                 return ExceptionUtils.getStackTrace(exception);
@@ -371,21 +371,20 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @throws InterruptedException
      *         if reading failed
      */
-    private String readSourceCode(final Node sourceNode, final String tableId)
+    private String readSourceCode(final FileNode sourceNode, final String tableId)
             throws IOException, InterruptedException {
         String content = "";
         File rootDir = getOwner().getRootDir();
         if (isSourceFileAvailable(sourceNode)) {
-            content = SOURCE_CODE_FACADE.read(rootDir, getId(), sourceNode.getPath());
+            content = SOURCE_CODE_FACADE.read(rootDir, getId(), sourceNode.getRelativePath());
         }
-        if (!content.isEmpty() && sourceNode instanceof FileNode) {
-            FileNode fileNode = (FileNode) sourceNode;
+        if (!content.isEmpty()) {
             String cleanTableId = StringUtils.removeEnd(tableId, INLINE_SUFFIX);
             if (MODIFIED_LINES_COVERAGE_TABLE_ID.equals(cleanTableId)) {
-                return SOURCE_CODE_FACADE.calculateModifiedLinesCoverageSourceCode(content, fileNode);
+                return SOURCE_CODE_FACADE.calculateModifiedLinesCoverageSourceCode(content, sourceNode);
             }
             else if (INDIRECT_COVERAGE_TABLE_ID.equals(cleanTableId)) {
-                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, fileNode);
+                return SOURCE_CODE_FACADE.calculateIndirectCoverageChangesSourceCode(content, sourceNode);
             }
             else {
                 return content;
@@ -430,8 +429,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
-    public boolean isSourceFileAvailable(final Node coverageNode) {
-        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, coverageNode.getPath());
+    public boolean isSourceFileAvailable(final FileNode coverageNode) {
+        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, coverageNode.getRelativePath());
     }
 
     /**

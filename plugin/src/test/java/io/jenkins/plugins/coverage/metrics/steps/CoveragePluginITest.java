@@ -151,8 +151,8 @@ class CoveragePluginITest extends AbstractCoverageITest {
                         Metric.BRANCH,
                         Metric.INSTRUCTION,
                         Metric.COMPLEXITY,
-                        Metric.COMPLEXITY_DENSITY,
                         Metric.COMPLEXITY_MAXIMUM,
+                        Metric.COMPLEXITY_DENSITY,
                         Metric.LOC);
         assertThat(coverageResult.getMetricsForSummary())
                 .containsExactly(Metric.LINE, Metric.BRANCH, Metric.MUTATION, Metric.COMPLEXITY_DENSITY, Metric.LOC);

@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import edu.hm.hafner.coverage.FileNode;
-import edu.hm.hafner.coverage.Node;
 
 import hudson.model.ModelObject;
 import hudson.model.Run;
@@ -43,10 +42,9 @@ public class SourceViewModel implements ModelObject {
         return owner;
     }
 
-    public Node getNode() {
+    public FileNode getNode() {
         return fileNode;
     }
-
 
     /**
      * Returns the source file rendered in HTML.
@@ -56,7 +54,7 @@ public class SourceViewModel implements ModelObject {
     @SuppressWarnings("unused") // Called by jelly view
     public String getSourceFileContent() {
         try {
-            return SOURCE_CODE_FACADE.read(getOwner().getRootDir(), id, getNode().getPath());
+            return SOURCE_CODE_FACADE.read(getOwner().getRootDir(), id, getNode().getRelativePath());
         }
         catch (IOException | InterruptedException exception) {
             return ExceptionUtils.getStackTrace(exception);
@@ -66,14 +64,11 @@ public class SourceViewModel implements ModelObject {
     /**
      * Returns whether the source file is available in Jenkins build folder.
      *
-     * @param coverageNode
-     *         The {@link Node} which is checked if there is a source file available
-     *
      * @return {@code true} if the source file is available, {@code false} otherwise
      */
     @SuppressWarnings("unused") // Called by jelly view
-    public boolean isSourceFileAvailable(final Node coverageNode) {
-        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, coverageNode.getPath());
+    public boolean isSourceFileAvailable() {
+        return SOURCE_CODE_FACADE.canRead(getOwner().getRootDir(), id, fileNode.getRelativePath());
     }
 
     @Override

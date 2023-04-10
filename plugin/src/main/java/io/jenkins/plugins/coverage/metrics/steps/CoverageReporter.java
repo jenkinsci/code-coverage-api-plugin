@@ -6,6 +6,7 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -14,6 +15,7 @@ import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.FilteredLog;
+import edu.hm.hafner.util.TreeStringBuilder;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
@@ -36,6 +38,7 @@ import io.jenkins.plugins.util.StageResultHandler;
  *
  * @author Ullrich Hafner
  */
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction publishAction(final String id, final String optionalName, final String icon, final Node rootNode,
@@ -87,12 +90,6 @@ public class CoverageReporter {
                     modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta, coverageDelta,
                     resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
-                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
-                    modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta,
-                    aggregatedModifiedFilesCoverage, modifiedFilesCoverageDelta,
-                    rootNode.filterByIndirectChanges().aggregateValues());
-
             if (sourceCodeRetention == SourceCodeRetention.MODIFIED) {
                 filesToStore = modifiedLinesCoverageRoot.getAllFileNodes();
                 log.logInfo("-> Selecting %d modified files for source code painting", filesToStore.size());
@@ -100,18 +97,29 @@ public class CoverageReporter {
             else {
                 filesToStore = rootNode.getAllFileNodes();
             }
+
+            resolveAbsolutePaths(rootNode, workspace, sourceDirectories, log, filesToStore);
+
+            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
+                    referenceAction.getOwner().getExternalizableId(), coverageDelta,
+                    modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta,
+                    aggregatedModifiedFilesCoverage, modifiedFilesCoverageDelta,
+                    rootNode.filterByIndirectChanges().aggregateValues());
         }
         else {
             QualityGateResult qualityGateStatus = evaluateQualityGates(rootNode, log,
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
-            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateStatus, log);
             filesToStore = rootNode.getAllFileNodes();
+
+            resolveAbsolutePaths(rootNode, workspace, sourceDirectories, log, filesToStore);
+
+            action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateStatus, log);
         }
 
         log.logInfo("Executing source code painting...");
         SourceCodePainter sourceCodePainter = new SourceCodePainter(build, workspace, id);
-        sourceCodePainter.processSourceCodePainting(filesToStore, sourceDirectories,
+        sourceCodePainter.processSourceCodePainting(filesToStore,
                 sourceCodeEncoding, sourceCodeRetention, log);
 
         log.logInfo("Finished coverage processing - adding the action to the build...");
@@ -121,6 +129,22 @@ public class CoverageReporter {
 
         build.addAction(action);
         return action;
+    }
+
+    private void resolveAbsolutePaths(final Node rootNode, final FilePath workspace, final Set<String> sourceDirectories,
+            final FilteredLog log, final List<FileNode> filesToStore) throws InterruptedException {
+        log.logInfo("Resolving source code files...");
+        var relativePaths = filesToStore.stream().map(FileNode::getRelativePath).collect(Collectors.toSet());
+        var pathMapping = new PathResolver().resolvePaths(relativePaths, sourceDirectories, workspace, log);
+
+        if (!pathMapping.isEmpty()) {
+            log.logInfo("Making paths of " + pathMapping.size() + " source code files relative to workspace root...");
+            var builder = new TreeStringBuilder();
+            rootNode.getAllFileNodes().stream()
+                    .filter(file -> pathMapping.containsKey(file.getRelativePath()))
+                    .forEach(file -> file.setRelativePath(builder.intern(pathMapping.get(file.getRelativePath()))));
+            builder.dedup();
+        }
     }
 
     private void createDeltaReports(final Node rootNode, final FilteredLog log, final Node referenceRoot,

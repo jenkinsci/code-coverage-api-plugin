@@ -13,7 +13,7 @@
         <div id="file-table">
           <bs:card title="${%Source code view}" fontAwesomeIcon="file-code" fontAwesomeStyle="regular" class="flex-fill">
             <j:choose>
-              <j:when test="${it.isSourceFileAvailable(it.node)}">
+              <j:when test="${it.sourceFileAvailable}">
                 <div style="overflow-x:scroll;">
                   <table class="source">
                     <j:out value="${it.sourceFileContent}"/>

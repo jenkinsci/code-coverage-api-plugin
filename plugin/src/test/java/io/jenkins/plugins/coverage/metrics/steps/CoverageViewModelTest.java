@@ -78,7 +78,7 @@ class CoverageViewModelTest extends AbstractCoverageTest {
     private Node createIndirectCoverageChangesNode() {
         var root = new ModuleNode("root");
         for (int file = 0; file < 5; file++) {
-            var fileNode = new FileNode("File-" + file);
+            var fileNode = new FileNode("File-" + file, "path");
 
             for (int line = 0; line < 2; line++) {
                 fileNode.addCounters(10 + line, 1, 1);

@@ -209,7 +209,7 @@ class CoverageTableModel extends TableModel {
         }
 
         public String getFileHash() {
-            return String.valueOf(file.getPath().hashCode());
+            return String.valueOf(file.getRelativePath().hashCode());
         }
 
         @SuppressWarnings("PMD.BooleanGetMethodName")
@@ -218,7 +218,7 @@ class CoverageTableModel extends TableModel {
         }
 
         public DetailedCell<?> getFileName() {
-            return new DetailedCell<>(renderer.renderFileName(file.getName(), file.getPath()), file.getName());
+            return new DetailedCell<>(renderer.renderFileName(file.getName(), file.getRelativePath()), file.getName());
         }
 
         public String getPackageName() {
