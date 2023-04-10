@@ -222,8 +222,6 @@ public class SourceCodePainter {
                 if (relativePath.exists()) {
                     return Optional.of(relativePath);
                 }
-
-                log.logError("Source file '%s' not found", fileName);
             }
             catch (InvalidPathException | IOException | InterruptedException exception) {
                 log.logException(exception, "No valid path in coverage node: '%s'", fileName);

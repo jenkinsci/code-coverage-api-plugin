@@ -93,7 +93,8 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 .contains("-> finished painting (0 files have been painted, 1 files failed)")
                 .contains(String.format(
                         "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
-                        sourceDirectory));
+                        sourceDirectory))
+                .contains("- Source file '" + ACU_COBOL_PARSER_SOURCE_FILE_PATH + "' not found");
 
         verifySourceCodeInBuild("", firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");

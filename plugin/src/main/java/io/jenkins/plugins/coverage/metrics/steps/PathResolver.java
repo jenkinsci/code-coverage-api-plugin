@@ -105,7 +105,7 @@ public class PathResolver {
         @Override
         public RemoteResultWrapper<HashMap<String, String>> invoke(
                 final File workspaceFile, final VirtualChannel channel) {
-            FilteredLog log = new FilteredLog("-");
+            FilteredLog log = new FilteredLog("Errors while resolving source files on agent:");
 
             Set<String> sourceDirectories = filterSourceDirectories(workspaceFile, log);
             if (sourceDirectories.isEmpty()) {
@@ -169,7 +169,7 @@ public class PathResolver {
                     }
                 }
 
-                log.logError("Source file '%s' not found", relativePath);
+                log.logError("- Source file '%s' not found", relativePath);
             }
             catch (InvalidPathException | IOException | InterruptedException exception) {
                 log.logException(exception, "No valid path in coverage node: '%s'", relativePath);
@@ -189,7 +189,7 @@ public class PathResolver {
                     return Optional.of(PATH_UTIL.getAbsolutePath(fileName));
                 }
             }
-            log.logError("Skipping resolving of file: %s (not part of workspace or permitted source code folders)",
+            log.logError("- Skipping resolving of file: %s (not part of workspace or permitted source code folders)",
                     fileName);
             return Optional.empty();
         }
