@@ -59,6 +59,10 @@ The code coverage plug-in provides the following features when added as a post b
 
   ![Quality Gates](./images/quality-gates.png)
 
+* Quality gate result: The detailed result of the quality gate evaluation is available as tooltip in the build summary:
+
+  ![Quality Gate Result](images/quality-gates-result.png)
+
 * Cyclomatic Complexity and LOC metrics: Several coverage parsers support the measurement of cyclomatic complexity and lines of code. These metrics are now computed and recorded as well:
 
   ![Cyclomatic Complexity and LOC metrics](./images/all-metrics.png)
