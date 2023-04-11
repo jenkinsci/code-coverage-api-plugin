@@ -153,7 +153,7 @@ def params = [
                   }
                   mavenOptions += 'clean install'
                   def pit = params?.pit as Map ?: [:]
-                  def runWithPit = pit.containsKey('skip') && pit.get('skip') == true // use same convention as in tests.skip
+                  def runWithPit = pit.containsKey('skip') && !pit['skip'] // use same convention as in tests.skip
                   if (runWithPit && first) {
                     mavenOptions += '-Ppit'
                   }
