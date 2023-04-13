@@ -6,7 +6,6 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.Fraction;
 
@@ -15,7 +14,6 @@ import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.FilteredLog;
-import edu.hm.hafner.util.TreeStringBuilder;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import hudson.FilePath;
@@ -42,9 +40,8 @@ import io.jenkins.plugins.util.StageResultHandler;
 public class CoverageReporter {
     @SuppressWarnings("checkstyle:ParameterNumber")
     CoverageBuildAction publishAction(final String id, final String optionalName, final String icon, final Node rootNode,
-            final Run<?, ?> build,
-            final FilePath workspace, final TaskListener listener, final List<CoverageQualityGate> qualityGates,
-            final String scm, final Set<String> sourceDirectories, final String sourceCodeEncoding,
+            final Run<?, ?> build, final FilePath workspace, final TaskListener listener,
+            final List<CoverageQualityGate> qualityGates, final String scm, final String sourceCodeEncoding,
             final SourceCodeRetention sourceCodeRetention, final StageResultHandler resultHandler)
             throws InterruptedException {
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
@@ -98,8 +95,6 @@ public class CoverageReporter {
                 filesToStore = rootNode.getAllFileNodes();
             }
 
-            resolveAbsolutePaths(rootNode, workspace, sourceDirectories, log, filesToStore);
-
             action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateResult, log,
                     referenceAction.getOwner().getExternalizableId(), coverageDelta,
                     modifiedLinesCoverageRoot.aggregateValues(), modifiedLinesCoverageDelta,
@@ -111,8 +106,6 @@ public class CoverageReporter {
                     List.of(), new TreeMap<>(), new TreeMap<>(), resultHandler, qualityGates);
 
             filesToStore = rootNode.getAllFileNodes();
-
-            resolveAbsolutePaths(rootNode, workspace, sourceDirectories, log, filesToStore);
 
             action = new CoverageBuildAction(build, id, optionalName, icon, rootNode, qualityGateStatus, log);
         }
@@ -129,22 +122,6 @@ public class CoverageReporter {
 
         build.addAction(action);
         return action;
-    }
-
-    private void resolveAbsolutePaths(final Node rootNode, final FilePath workspace, final Set<String> sourceDirectories,
-            final FilteredLog log, final List<FileNode> filesToStore) throws InterruptedException {
-        log.logInfo("Resolving source code files...");
-        var relativePaths = filesToStore.stream().map(FileNode::getRelativePath).collect(Collectors.toSet());
-        var pathMapping = new PathResolver().resolvePaths(relativePaths, sourceDirectories, workspace, log);
-
-        if (!pathMapping.isEmpty()) {
-            log.logInfo("Making paths of " + pathMapping.size() + " source code files relative to workspace root...");
-            var builder = new TreeStringBuilder();
-            rootNode.getAllFileNodes().stream()
-                    .filter(file -> pathMapping.containsKey(file.getRelativePath()))
-                    .forEach(file -> file.setRelativePath(builder.intern(pathMapping.get(file.getRelativePath()))));
-            builder.dedup();
-        }
     }
 
     private void createDeltaReports(final Node rootNode, final FilteredLog log, final Node referenceRoot,
