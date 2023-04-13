@@ -1,6 +1,5 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -78,6 +77,35 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
         assertThatTitleIs(publisher, "Line Coverage: 93.84%, Mutation Coverage: 90.24%");
     }
 
+    @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
+    @CsvSource({"SKIP, 0", "ALL_LINES, 18", "MODIFIED_LINES, 1"})
+    void shouldCreateChecksReportPit(final ChecksAnnotationScope scope, final int expectedAnnotations) {
+        var result = readResult("mutations.xml", new PitestParser());
+
+        var publisher = new CoverageChecksPublisher(createCoverageBuildAction(result), result, REPORT_NAME,
+                scope, createJenkins());
+
+        assertThat(publisher.extractChecksDetails().getOutput()).isPresent().get().satisfies(output -> {
+            assertSummary(output, "coverage-publisher-summary.checks-expected-result-pit");
+            assertMutationAnnotations(output, expectedAnnotations);
+        });
+    }
+
+    private void assertMutationAnnotations(final ChecksOutput output, final int expectedAnnotations) {
+        assertThat(output.getChecksAnnotations()).hasSize(expectedAnnotations);
+        if (expectedAnnotations == 1) {
+            assertThat(output.getChecksAnnotations()).satisfiesExactly(
+                    annotation -> {
+                        assertThat(annotation.getTitle()).contains("Mutation survived");
+                        assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                        assertThat(annotation.getPath()).contains("edu/hm/hafner/coverage/parser/CoberturaParser.java");
+                        assertThat(annotation.getMessage()).contains("One mutation survived in line 251");
+                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(251);
+                        assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(251);
+                    });
+        }
+    }
+
     private void assertThatTitleIs(final CoverageChecksPublisher publisher, final String expectedTitle) {
         var checkDetails = publisher.extractChecksDetails();
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
@@ -89,7 +117,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
 
     @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
     @CsvSource({"SKIP, 0", "ALL_LINES, 36", "MODIFIED_LINES, 3"})
-    void shouldCreateChecksReport(final ChecksAnnotationScope scope, final int expectedAnnotations) {
+    void shouldCreateChecksReportJaCoCo(final ChecksAnnotationScope scope, final int expectedAnnotations) {
         var result = readJacocoResult("jacoco-codingstyle.xml");
 
         var publisher = new CoverageChecksPublisher(createCoverageBuildAction(result), result, REPORT_NAME, scope, createJenkins());
@@ -113,15 +141,14 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
             var expectedDetails = toString("coverage-publisher-details.checks-expected-result");
             assertThat(output.getText()).isPresent().get().asString().isEqualToNormalizingWhitespace(expectedDetails);
             assertChecksAnnotations(output, expectedAnnotations);
-            assertSummary(output);
+            assertSummary(output, "coverage-publisher-summary.checks-expected-result");
         });
     }
 
-    private void assertSummary(final ChecksOutput checksOutput) throws IOException {
-        var expectedContent = toString("coverage-publisher-summary.checks-expected-result");
+    private void assertSummary(final ChecksOutput checksOutput, final String fileName) {
         assertThat(checksOutput.getSummary()).isPresent()
                 .get()
-                .asString().isEqualToNormalizingWhitespace(expectedContent);
+                .asString().isEqualToNormalizingWhitespace(toString(fileName));
     }
 
     private void assertChecksAnnotations(final ChecksOutput checksOutput, final int expectedAnnotations) {
@@ -178,6 +205,11 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     assertThat(file.getMissedLines()).contains(61, 62);
                     assertThat(file.getPartiallyCoveredLines()).contains(entry(113, 1));
                     file.addModifiedLines(61, 62, 113);
+                });
+        result.findFile("CoberturaParser.java")
+                .ifPresent(file -> {
+                    assertThat(file.getSurvivedMutations()).containsKey(251);
+                    file.addModifiedLines(251);
                 });
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
