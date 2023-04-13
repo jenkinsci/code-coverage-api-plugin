@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,10 +9,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.ModuleNode;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
+import edu.hm.hafner.util.TreeStringBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.kohsuke.stapler.AncestorInPath;
@@ -63,7 +62,7 @@ import io.jenkins.plugins.util.ValidationUtilities;
  *
  * @author Ullrich Hafner
  */
-@SuppressWarnings({"checkstyle:ClassFanOutComplexity", "PMD.GodClass"})
+@SuppressWarnings({"PMD.GodClass", "checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public class CoverageRecorder extends Recorder {
     static final String CHECKS_DEFAULT_NAME = "Code Coverage";
 
@@ -379,7 +378,7 @@ public class CoverageRecorder extends Recorder {
                         "No tools defined that will record the coverage files");
             }
             else {
-                perform(run, workspace, taskListener, resultHandler, log);
+                perform(run, workspace, taskListener, resultHandler, log, logHandler);
             }
 
         }
@@ -389,28 +388,41 @@ public class CoverageRecorder extends Recorder {
     }
 
     private void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
-            final StageResultHandler resultHandler, final FilteredLog log) throws InterruptedException {
+            final StageResultHandler resultHandler, final FilteredLog log, final LogHandler logHandler) throws InterruptedException {
         List<Node> results = recordCoverageResults(run, workspace, taskListener, resultHandler, log);
 
         if (!results.isEmpty()) {
             CoverageReporter reporter = new CoverageReporter();
             var rootNode = Node.merge(results);
-            // TODO: move code to coverage model
-            var sources = rootNode.getAll(Metric.MODULE)
-                    .stream()
-                    .filter(ModuleNode.class::isInstance)
-                    .map(ModuleNode.class::cast)
-                    .map(ModuleNode::getSourceFolders)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
+
+            var sources = rootNode.getSourceFolders();
             sources.addAll(getSourceDirectoriesPaths());
+
+            resolveAbsolutePaths(rootNode, workspace, sources, log);
+            logHandler.log(log);
+            
             var action = reporter.publishAction(getActualId(), getName(), getIcon(), rootNode, run,
-                    workspace, taskListener, getQualityGates(), getScm(), sources,
+                    workspace, taskListener, getQualityGates(), getScm(),
                     getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
             if (!skipPublishingChecks) {
                 var checksPublisher = new CoverageChecksPublisher(action, rootNode, getChecksName(), getChecksAnnotationScope());
                 checksPublisher.publishCoverageReport(taskListener);
             }
+        }
+    }
+
+    private void resolveAbsolutePaths(final Node rootNode, final FilePath workspace, final Set<String> sources,
+            final FilteredLog log) throws InterruptedException {
+        log.logInfo("Resolving source code files...");
+        var pathMapping = new PathResolver().resolvePaths(rootNode.getFiles(), sources, workspace, log);
+
+        if (!pathMapping.isEmpty()) {
+            log.logInfo("Making paths of " + pathMapping.size() + " source code files relative to workspace root...");
+            var builder = new TreeStringBuilder();
+            rootNode.getAllFileNodes().stream()
+                    .filter(file -> pathMapping.containsKey(file.getRelativePath()))
+                    .forEach(file -> file.setRelativePath(builder.intern(pathMapping.get(file.getRelativePath()))));
+            builder.dedup();
         }
     }
 
