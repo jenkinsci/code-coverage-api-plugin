@@ -15,6 +15,7 @@ import edu.hm.hafner.coverage.FractionValue;
 import edu.hm.hafner.coverage.IntegerValue;
 import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Percentage;
+import edu.hm.hafner.coverage.SafeFraction;
 import edu.hm.hafner.coverage.Value;
 
 import hudson.Functions;
@@ -348,7 +349,7 @@ public final class ElementFormatter {
                 || metric.equals(Metric.LOC)) {
             return String.format(locale, "%+d", fraction.intValue());
         }
-        return String.format(locale, "%+.2f%%", fraction.multiplyBy(HUNDRED).doubleValue());
+        return String.format(locale, "%+.2f%%", new SafeFraction(fraction).multiplyBy(HUNDRED).doubleValue());
     }
 
     /**
