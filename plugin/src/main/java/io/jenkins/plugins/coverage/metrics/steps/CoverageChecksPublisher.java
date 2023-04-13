@@ -227,7 +227,7 @@ class CoverageChecksPublisher {
                     summary.append(String.format("- all %d mutations have been killed", mutations));
                 }
             }
-            if (survived == 1) {
+            else if (survived == 1) {
                 summary.append(String.format("- 1 mutation survived (of %d)", mutations));
             }
             else {
