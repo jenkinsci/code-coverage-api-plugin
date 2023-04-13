@@ -378,7 +378,7 @@ public class CoverageRecorder extends Recorder {
                         "No tools defined that will record the coverage files");
             }
             else {
-                perform(run, workspace, taskListener, resultHandler, log);
+                perform(run, workspace, taskListener, resultHandler, log, logHandler);
             }
 
         }
@@ -388,7 +388,7 @@ public class CoverageRecorder extends Recorder {
     }
 
     private void perform(final Run<?, ?> run, final FilePath workspace, final TaskListener taskListener,
-            final StageResultHandler resultHandler, final FilteredLog log) throws InterruptedException {
+            final StageResultHandler resultHandler, final FilteredLog log, final LogHandler logHandler) throws InterruptedException {
         List<Node> results = recordCoverageResults(run, workspace, taskListener, resultHandler, log);
 
         if (!results.isEmpty()) {
@@ -399,6 +399,8 @@ public class CoverageRecorder extends Recorder {
             sources.addAll(getSourceDirectoriesPaths());
 
             resolveAbsolutePaths(rootNode, workspace, sources, log);
+            logHandler.log(log);
+            
             var action = reporter.publishAction(getActualId(), getName(), getIcon(), rootNode, run,
                     workspace, taskListener, getQualityGates(), getScm(),
                     getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
