@@ -10,6 +10,7 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -163,7 +164,7 @@ class CoverageChecksPublisher {
     }
 
     private void createTotalLinesSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
-        var total = modifiedFiles.stream().map(FileNode::getModifiedLines).mapToInt(Set::size).sum();
+        var total = countLines(modifiedFiles, FileNode::getModifiedLines);
         if (total == 1) {
             summary.append("- 1 line has been modified");
         }
@@ -173,8 +174,12 @@ class CoverageChecksPublisher {
         summary.append(NEW_LINE);
     }
 
+    private int countLines(final List<FileNode> modifiedFiles, final Function<FileNode, Collection<?>> linesGetter) {
+        return modifiedFiles.stream().map(linesGetter).mapToInt(Collection::size).sum();
+    }
+
     private void createLineCoverageSummary(final List<FileNode> modifiedFiles, final StringBuilder summary) {
-        var missed = modifiedFiles.stream().map(FileNode::getMissedLines).map(Set::size).count();
+        var missed = countLines(modifiedFiles, FileNode::getMissedLines);
         if (missed == 0) {
             summary.append("- all lines are covered");
         }
@@ -213,7 +218,7 @@ class CoverageChecksPublisher {
                     .flatMap(Collection::stream)
                     .map(Entry::getValue)
                     .count();
-            var mutations = modifiedFiles.stream().map(FileNode::getMutations).mapToLong(Collection::size).sum();
+            var mutations = countLines(modifiedFiles, FileNode::getMutations);
             if (survived == 0) {
                 if (mutations == 1) {
                     summary.append("- 1 mutation has been killed");
