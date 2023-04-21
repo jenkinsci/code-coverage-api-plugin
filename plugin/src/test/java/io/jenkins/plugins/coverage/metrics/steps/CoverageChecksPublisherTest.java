@@ -98,6 +98,8 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                     annotation -> {
                         assertThat(annotation.getTitle()).contains("Mutation survived");
                         assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
+                        assertThat(annotation.getRawDetails()).contains("Survived mutations:\n"
+                                + "- Replaced integer addition with subtraction (org.pitest.mutationtest.engine.gregor.mutators.MathMutator)\n");
                         assertThat(annotation.getPath()).contains("edu/hm/hafner/coverage/parser/CoberturaParser.java");
                         assertThat(annotation.getMessage()).contains("One mutation survived in line 251");
                         assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(251);
