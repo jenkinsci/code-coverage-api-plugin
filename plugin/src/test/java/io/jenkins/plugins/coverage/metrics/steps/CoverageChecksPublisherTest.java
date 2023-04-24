@@ -210,7 +210,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                 });
         result.findFile("CoberturaParser.java")
                 .ifPresent(file -> {
-                    assertThat(file.getSurvivedMutations()).containsKey(251);
+                    assertThat(file.getSurvivedMutationsPerLine()).containsKey(251);
                     file.addModifiedLines(251);
                 });
 

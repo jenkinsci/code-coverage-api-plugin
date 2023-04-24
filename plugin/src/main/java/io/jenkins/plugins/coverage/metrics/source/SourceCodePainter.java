@@ -3,13 +3,11 @@ package io.jenkins.plugins.coverage.metrics.source;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,7 +15,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 
 import edu.hm.hafner.coverage.FileNode;
-import edu.hm.hafner.coverage.Mutation;
+import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
@@ -57,6 +56,8 @@ public class SourceCodePainter {
     /**
      * Processes the source code painting.
      *
+     * @param rootNode
+     *         the root of the tree
      * @param files
      *         the files to paint
      * @param sourceCodeEncoding
@@ -69,14 +70,13 @@ public class SourceCodePainter {
      * @throws InterruptedException
      *         if the painting process has been interrupted
      */
-    public void processSourceCodePainting(final List<FileNode> files,
-            final String sourceCodeEncoding,
-            final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
+    public void processSourceCodePainting(final Node rootNode, final List<FileNode> files,
+            final String sourceCodeEncoding, final SourceCodeRetention sourceCodeRetention, final FilteredLog log)
             throws InterruptedException {
         SourceCodeFacade sourceCodeFacade = new SourceCodeFacade();
         if (sourceCodeRetention != SourceCodeRetention.NEVER) {
             var paintedFiles = files.stream()
-                    .map(PaintedNode::new)
+                    .map(f -> createFileModel(rootNode, f))
                     .collect(Collectors.toList());
             log.logInfo("Painting %d source files on agent", paintedFiles.size());
 
@@ -88,7 +88,16 @@ public class SourceCodePainter {
         sourceCodeRetention.cleanup(build, sourceCodeFacade.getCoverageSourcesDirectory(), log);
     }
 
-    private void paintFilesOnAgent(final List<PaintedNode> paintedFiles,
+    private CoverageSourcePrinter createFileModel(final Node rootNode, final FileNode fileNode) {
+        if (rootNode.getValue(Metric.MUTATION).isPresent()) {
+            return new MutationSourcePrinter(fileNode);
+        }
+        else {
+            return new CoverageSourcePrinter(fileNode);
+        }
+    }
+
+    private void paintFilesOnAgent(final List<? extends CoverageSourcePrinter> paintedFiles,
             final String sourceCodeEncoding, final FilteredLog log) throws InterruptedException {
         try {
             var painter = new AgentCoveragePainter(paintedFiles, sourceCodeEncoding, id);
@@ -108,25 +117,25 @@ public class SourceCodePainter {
     static class AgentCoveragePainter extends MasterToSlaveFileCallable<FilteredLog> {
         private static final long serialVersionUID = 3966282357309568323L;
 
-        private final List<PaintedNode> paintedFiles;
+        private final List<? extends CoverageSourcePrinter> paintedFiles;
         private final String sourceCodeEncoding;
         private final String directory;
 
         /**
          * Creates a new instance of {@link AgentCoveragePainter}.
          *
-         * @param paintedFiles
-         *         the model for the file painting for each coverage node
+         * @param files
+         *         the pretty printers for the files to create the HTML reports for
          * @param sourceCodeEncoding
          *         the encoding of the source code files
          * @param directory
          *         the subdirectory where the source files will be stored in
          */
-        AgentCoveragePainter(final List<PaintedNode> paintedFiles, final String sourceCodeEncoding,
+        AgentCoveragePainter(final List<? extends CoverageSourcePrinter> files, final String sourceCodeEncoding,
                 final String directory) {
             super();
 
-            this.paintedFiles = paintedFiles;
+            this.paintedFiles = files;
             this.sourceCodeEncoding = sourceCodeEncoding;
             this.directory = directory;
         }
@@ -176,7 +185,7 @@ public class SourceCodePainter {
             return new ValidationUtilities().getCharset(sourceCodeEncoding);
         }
 
-        private int paintSource(final PaintedNode fileNode, final FilePath workspace,
+        private int paintSource(final CoverageSourcePrinter fileNode, final FilePath workspace,
                 final Path temporaryFolder, final FilteredLog log) {
             String relativePathIdentifier = fileNode.getPath();
             FilePath paintedFilesDirectory = workspace.child(directory);
@@ -186,7 +195,7 @@ public class SourceCodePainter {
                     .orElse(0);
         }
 
-        private int paint(final PaintedNode paint, final String relativePathIdentifier,
+        private int paint(final CoverageSourcePrinter paint, final String relativePathIdentifier,
                 final FilePath resolvedPath, final FilePath paintedFilesDirectory,
                 final Path temporaryFolder, final Charset charset, final FilteredLog log) {
             String sanitizedFileName = SourceCodeFacade.sanitizeFilename(relativePathIdentifier);
@@ -197,7 +206,9 @@ public class SourceCodePainter {
                 Path fullSourcePath = paintedFilesFolder.resolve(sanitizedFileName);
                 try (BufferedWriter output = Files.newBufferedWriter(fullSourcePath)) {
                     List<String> lines = Files.readAllLines(Paths.get(resolvedPath.getRemote()), charset);
-                    new SourceToHtml().paintSourceCodeWithCoverageInformation(paint, output, lines);
+                    for (int line = 0; line < lines.size(); line++) {
+                        output.write(paint.renderLine(line + 1, lines.get(line)));
+                    }
                 }
                 new FilePath(fullSourcePath.toFile()).zip(zipOutputPath);
                 FileUtils.deleteDirectory(paintedFilesFolder.toFile());
@@ -250,78 +261,4 @@ public class SourceCodePainter {
         }
     }
 
-    /**
-     * Provides all required information for a {@link FileNode} so that its source code can be rendered in HTML.
-     */
-    static class PaintedNode implements Serializable {
-        private static final long serialVersionUID = -6044649044983631852L;
-
-        private enum Type {
-            MUTATION,
-            COVERAGE
-        }
-
-        private final String path;
-        private final int[] linesToPaint;
-        private final int[] coveredPerLine;
-        private final int[] missedPerLine;
-        private final int[] survivedPerLine;
-        private final int[] killedPerLine;
-
-        PaintedNode(final FileNode file) {
-            path = file.getRelativePath();
-
-            linesToPaint = file.getLinesWithCoverage().stream().mapToInt(i -> i).toArray();
-            coveredPerLine = file.getCoveredCounters();
-            missedPerLine = file.getMissedCounters();
-
-            survivedPerLine = new int[linesToPaint.length];
-            killedPerLine = new int[linesToPaint.length];
-
-            for (Mutation mutation : file.getMutations()) {
-                if (mutation.hasSurvived()) {
-                    survivedPerLine[findLine(mutation.getLine())]++;
-                }
-                else if (mutation.isKilled()) {
-                    killedPerLine[findLine(mutation.getLine())]++;
-                }
-            }
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public boolean isPainted(final int line) {
-            return findLine(line) >= 0;
-        }
-
-        private int findLine(final int line) {
-            return Arrays.binarySearch(linesToPaint, line);
-        }
-
-        public int getCovered(final int line) {
-            return getCounter(line, coveredPerLine);
-        }
-
-        public int getMissed(final int line) {
-            return getCounter(line, missedPerLine);
-        }
-
-        public int getSurvived(final int line) {
-            return getCounter(line, survivedPerLine);
-        }
-
-        public int getKilled(final int line) {
-            return getCounter(line, killedPerLine);
-        }
-
-        private int getCounter(final int line, final int... counters) {
-            var index = findLine(line);
-            if (index >= 0) {
-                return counters[index];
-            }
-            return 0;
-        }
-    }
 }

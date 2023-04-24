@@ -214,7 +214,7 @@ class CoverageChecksPublisher {
             final StringBuilder summary) {
         if (filteredRoot.containsMetric(Metric.MUTATION)) {
             var survived = modifiedFiles.stream()
-                    .map(FileNode::getSurvivedMutations)
+                    .map(FileNode::getSurvivedMutationsPerLine)
                     .map(Map::entrySet)
                     .flatMap(Collection::stream)
                     .map(Entry::getValue)
@@ -275,7 +275,7 @@ class CoverageChecksPublisher {
     private Collection<? extends ChecksAnnotation> getSurvivedMutations(final FileNode fileNode) {
         var builder = createAnnotationBuilder(fileNode).withTitle("Mutation survived");
 
-        return fileNode.getSurvivedMutations().entrySet().stream()
+        return fileNode.getSurvivedMutationsPerLine().entrySet().stream()
                 .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
                         .withStartLine(entry.getKey())
                         .withEndLine(entry.getKey())
