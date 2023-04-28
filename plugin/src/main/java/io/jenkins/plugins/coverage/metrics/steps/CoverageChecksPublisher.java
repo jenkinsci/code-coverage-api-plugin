@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Metric;
+import edu.hm.hafner.coverage.Mutation;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
@@ -213,7 +214,7 @@ class CoverageChecksPublisher {
             final StringBuilder summary) {
         if (filteredRoot.containsMetric(Metric.MUTATION)) {
             var survived = modifiedFiles.stream()
-                    .map(FileNode::getSurvivedMutations)
+                    .map(FileNode::getSurvivedMutationsPerLine)
                     .map(Map::entrySet)
                     .flatMap(Collection::stream)
                     .map(Entry::getValue)
@@ -274,19 +275,26 @@ class CoverageChecksPublisher {
     private Collection<? extends ChecksAnnotation> getSurvivedMutations(final FileNode fileNode) {
         var builder = createAnnotationBuilder(fileNode).withTitle("Mutation survived");
 
-        return fileNode.getSurvivedMutations().entrySet().stream()
+        return fileNode.getSurvivedMutationsPerLine().entrySet().stream()
                 .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
                         .withStartLine(entry.getKey())
                         .withEndLine(entry.getKey())
+                        .withRawDetails(createMutationDetails(entry.getValue()))
                         .build())
                 .collect(Collectors.toList());
     }
 
-    private String createMutationMessage(final int line, final int survived) {
-        if (survived == 1) {
+    private String createMutationDetails(final List<Mutation> mutations) {
+        return mutations.stream()
+                .map(mutation -> String.format("- %s (%s)", mutation.getDescription(), mutation.getMutator()))
+                .collect(Collectors.joining("\n", "Survived mutations:\n", ""));
+    }
+
+    private String createMutationMessage(final int line, final List<Mutation> survived) {
+        if (survived.size() == 1) {
             return "One mutation survived in line " + line;
         }
-        return String.format("%d mutations survived in line %d", survived, line);
+        return String.format("%d mutations survived in line %d", survived.size(), line);
     }
 
     private Collection<? extends ChecksAnnotation> getPartiallyCoveredLines(final FileNode fileNode) {
@@ -462,12 +470,6 @@ class CoverageChecksPublisher {
             default:
                 throw new IllegalArgumentException("Unsupported quality gate status: " + status);
         }
-    }
-
-    private enum ColumnAlignment {
-        CENTER,
-        LEFT,
-        RIGHT
     }
 
     private enum Icon {

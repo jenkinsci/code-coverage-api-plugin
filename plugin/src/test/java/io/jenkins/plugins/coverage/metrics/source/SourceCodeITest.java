@@ -34,8 +34,8 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 abstract class SourceCodeITest extends AbstractCoverageITest {
-    private static final String ACU_COBOL_PARSER = "public&nbsp;class&nbsp;AcuCobolParser&nbsp;extends&nbsp;LookaheadParser&nbsp;{";
-    private static final String PATH_UTIL = "public&nbsp;class&nbsp;PathUtil&nbsp;{";
+    private static final String ACU_COBOL_PARSER = "<tr class=\"coverFull\" data-html-tooltip=\"Covered at least once\"><td class=\"line\"><a name=\"27\">27</a></td><td class=\"hits\">1</td><td class=\"code\">        super(ACU_COBOL_WARNING_PATTERN);</td></tr>";
+    private static final String PATH_UTIL = "<tr class=\"coverFull\" data-html-tooltip=\"Covered at least once\"><td class=\"line\"><a name=\"20\">20</a></td><td class=\"hits\">1</td><td class=\"code\">public class PathUtil {<!-- --></td></tr>";
     private static final String NO_SOURCE_CODE = "n/a";
     static final String ACU_COBOL_PARSER_FILE_NAME = "AcuCobolParser.java";
     static final String ACU_COBOL_PARSER_SOURCE_FILE = ACU_COBOL_PARSER_FILE_NAME + ".txt";
