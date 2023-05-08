@@ -52,6 +52,7 @@ class CoverageChecksPublisher {
     private static final int TITLE_HEADER_LEVEL = 4;
     private static final char NEW_LINE = '\n';
     private static final String COLUMN = "|";
+    private static final String GAP = " ";
 
     private final CoverageBuildAction action;
     private final Node rootNode;
@@ -434,21 +435,21 @@ class CoverageChecksPublisher {
     }
 
     private String getTrendIcon(final String trend) {
-        if (trend.startsWith("+")) {
-            return " " + Icon.ARROW_UP.markdown;
-        }
-        else if (trend.startsWith("-")) {
-            return " " + Icon.ARROW_DOWN.markdown;
-        }
-        else if (trend.startsWith("n/a")) {
+        if (!StringUtils.containsAny(trend, "123456789") || trend.startsWith("n/a")) {
             return StringUtils.EMPTY;
         }
-        return " " + Icon.ARROW_RIGHT.markdown;
+        if (trend.startsWith("+")) {
+            return GAP + Icon.ARROW_UP.markdown;
+        }
+        else if (trend.startsWith("-")) {
+            return GAP + Icon.ARROW_DOWN.markdown;
+        }
+        return GAP + Icon.ARROW_RIGHT.markdown;
     }
 
     private String getBulletListItem(final int level, final String text) {
         int whitespaces = (level - 1) * TITLE_HEADER_LEVEL;
-        return String.join("", Collections.nCopies(whitespaces, " ")) + "* " + text + "\n";
+        return String.join("", Collections.nCopies(whitespaces, GAP)) + "* " + text + "\n";
     }
 
     private String getUrlText(final String text, final String url) {
@@ -456,7 +457,7 @@ class CoverageChecksPublisher {
     }
 
     private String getSectionHeader(final int level, final String text) {
-        return String.join("", Collections.nCopies(level, "#")) + " " + text + "\n\n";
+        return String.join("", Collections.nCopies(level, "#")) + GAP + text + "\n\n";
     }
 
     private ChecksConclusion getCheckConclusion(final QualityGateStatus status) {
