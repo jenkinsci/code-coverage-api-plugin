@@ -438,13 +438,7 @@ class CoverageChecksPublisher {
         if (!StringUtils.containsAny(trend, "123456789") || trend.startsWith("n/a")) {
             return StringUtils.EMPTY;
         }
-        if (trend.startsWith("+")) {
-            return GAP + Icon.ARROW_UP.markdown;
-        }
-        else if (trend.startsWith("-")) {
-            return GAP + Icon.ARROW_DOWN.markdown;
-        }
-        return GAP + Icon.ARROW_RIGHT.markdown;
+        return GAP + (trend.startsWith("+") ? Icon.ARROW_UP.markdown : Icon.ARROW_DOWN.markdown);
     }
 
     private String getBulletListItem(final int level, final String text) {
