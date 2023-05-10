@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +26,7 @@ import edu.hm.hafner.echarts.JacksonFacade;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.kohsuke.stapler.StaplerProxy;
 import hudson.Functions;
@@ -73,28 +76,32 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     private final List<? extends Value> projectValues;
 
     /** The delta of this build's coverages with respect to the reference build. */
-    private final NavigableMap<Metric, Fraction> difference;
+    private NavigableMap<Metric, Fraction> difference;
 
     /** The coverages filtered by modified lines of the associated change request. */
     private final List<? extends Value> modifiedLinesCoverage;
 
-    /** The delta of the coverages of the associated change request with respect to the reference build. */
-    private final NavigableMap<Metric, Fraction> modifiedLinesCoverageDifference;
+    /** The coverage delta of the associated change request with respect to the reference build. */
+    private NavigableMap<Metric, Fraction> modifiedLinesCoverageDifference;
 
     /** The coverage of the modified lines. */
     private final List<? extends Value> modifiedFilesCoverage;
 
     /** The coverage delta of the modified lines. */
-    private final NavigableMap<Metric, Fraction> modifiedFilesCoverageDifference;
+    private NavigableMap<Metric, Fraction> modifiedFilesCoverageDifference;
 
     /** The indirect coverage changes of the associated change request with respect to the reference build. */
     private final List<? extends Value> indirectCoverageChanges;
 
     static {
         CoverageXmlStream.registerConverters(XSTREAM2);
-        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "difference",
-                new MetricFractionMapConverter());
-        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, "modifiedLinesCoverageDifference",
+        registerMapConverter("difference");
+        registerMapConverter("modifiedLinesCoverageDifference");
+        registerMapConverter("modifiedFilesCoverageDifference");
+    }
+
+    private static void registerMapConverter(final String difference) {
+        XSTREAM2.registerLocalConverter(CoverageBuildAction.class, difference,
                 new MetricFractionMapConverter());
     }
 
@@ -110,7 +117,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param icon
      *         name of the icon that should be used in actions and views
      * @param result
-     *         the coverage tree as result to persist with this action
+     *         the coverage tree as a result to persist with this action
      * @param qualityGateResult
      *         status of the quality gates
      * @param log
@@ -134,7 +141,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param icon
      *         name of the icon that should be used in actions and views
      * @param result
-     *         the coverage tree as result to persist with this action
+     *         the coverage tree as a result to persist with this action
      * @param qualityGateResult
      *         status of the quality gates
      * @param log
@@ -205,8 +212,27 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
         }
     }
 
+    @Override @SuppressFBWarnings(value = "CRLF_INJECTION_LOGS", justification = "getOwner().toString() is under our control")
+    protected Object readResolve() {
+        super.readResolve();
+        if (difference == null) {
+            difference = new TreeMap<>();
+            Logger.getLogger(CoverageBuildAction.class.getName()).log(Level.FINE, "Difference serialization was null: " + getOwner().getDisplayName());
+        }
+        if (modifiedLinesCoverageDifference == null) {
+            modifiedLinesCoverageDifference = new TreeMap<>();
+            Logger.getLogger(CoverageBuildAction.class.getName()).log(Level.FINE, "Modified lines serialization was null: " + getOwner().getDisplayName());
+        }
+        if (modifiedFilesCoverageDifference == null) {
+            modifiedFilesCoverageDifference = new TreeMap<>();
+            Logger.getLogger(CoverageBuildAction.class.getName()).log(Level.FINE, "Modified files serialization was null: " + getOwner().getDisplayName());
+        }
+
+        return this;
+    }
+
     /**
-     * Returns the actual name of the tool. If no user defined name is given, then the default name is returned.
+     * Returns the actual name of the tool. If no user-defined name is given, then the default name is returned.
      *
      * @return the name
      */
