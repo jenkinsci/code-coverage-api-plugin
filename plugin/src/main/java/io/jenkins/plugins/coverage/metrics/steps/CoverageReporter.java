@@ -46,7 +46,7 @@ public class CoverageReporter {
             throws InterruptedException {
         FilteredLog log = new FilteredLog("Errors while reporting code coverage results:");
 
-        Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, log);
+        Optional<CoverageBuildAction> possibleReferenceResult = getReferenceBuildAction(build, id, log);
 
         List<FileNode> filesToStore;
         CoverageBuildAction action;
@@ -194,7 +194,7 @@ public class CoverageReporter {
         return ((edu.hm.hafner.coverage.Coverage) value).isSet();
     }
 
-    private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final FilteredLog log) {
+    private Optional<CoverageBuildAction> getReferenceBuildAction(final Run<?, ?> build, final String id, final FilteredLog log) {
         log.logInfo("Obtaining action of reference build");
 
         ReferenceFinder referenceFinder = new ReferenceFinder();
@@ -204,7 +204,7 @@ public class CoverageReporter {
         if (reference.isPresent()) {
             Run<?, ?> referenceBuild = reference.get();
             log.logInfo("-> Using reference build '%s'", referenceBuild);
-            previousResult = getPreviousResult(reference.get());
+            previousResult = getPreviousResult(id, reference.get());
             if (previousResult.isPresent()) {
                 Run<?, ?> fallbackBuild = previousResult.get().getOwner();
                 if (!fallbackBuild.equals(referenceBuild)) {
@@ -214,7 +214,7 @@ public class CoverageReporter {
             }
         }
         else {
-            previousResult = getPreviousResult(build.getPreviousBuild());
+            previousResult = getPreviousResult(id, build.getPreviousBuild());
             previousResult.ifPresent(coverageBuildAction ->
                     log.logInfo("-> No reference build defined, falling back to previous build: '%s'",
                             coverageBuildAction.getOwner().getDisplayName()));
@@ -232,11 +232,13 @@ public class CoverageReporter {
         return Optional.of(referenceAction);
     }
 
-    private Optional<CoverageBuildAction> getPreviousResult(@CheckForNull final Run<?, ?> startSearch) {
+    private Optional<CoverageBuildAction> getPreviousResult(final String id, @CheckForNull final Run<?, ?> startSearch) {
         for (Run<?, ?> build = startSearch; build != null; build = build.getPreviousBuild()) {
-            CoverageBuildAction action = build.getAction(CoverageBuildAction.class);
-            if (action != null) {
-                return Optional.of(action);
+            List<CoverageBuildAction> actions = build.getActions(CoverageBuildAction.class);
+            for (CoverageBuildAction action : actions) {
+                if (action.getUrlName().equals(id)) {
+                    return Optional.of(action);
+                }
             }
         }
         return Optional.empty();
