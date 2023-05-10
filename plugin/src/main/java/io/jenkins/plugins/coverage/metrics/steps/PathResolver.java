@@ -28,13 +28,13 @@ import io.jenkins.plugins.prism.SourceDirectoryFilter;
 
 /**
  * Resolves source code files on the agent using the stored paths of the coverage reports. Since these paths are
- * relative this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
+ * relative, this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
  * evaluates the defined source paths as prefixes when resolving the absolute paths.
  */
 public class PathResolver {
     /**
      * Resolves source code files on the agent using the stored paths of the coverage reports. Since these paths are
-     * relative this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
+     * relative, this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
      * evaluates the defined source paths as prefixes when resolving the absolute paths.
      *
      * @param relativePaths
@@ -71,7 +71,7 @@ public class PathResolver {
 
     /**
      * Resolves source code files on the agent using the stored paths of the coverage reports. Since these paths are
-     * relative this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
+     * relative, this resolver tries to find the absolute paths by guessing the prefix to the relative path. It also
      * evaluates the defined source paths as prefixes when resolving the absolute paths.
      */
     static class AgentPathResolver extends MasterToSlaveFileCallable<RemoteResultWrapper<HashMap<String, String>>> {
