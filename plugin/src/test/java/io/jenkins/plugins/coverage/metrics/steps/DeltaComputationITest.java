@@ -32,7 +32,7 @@ class DeltaComputationITest extends AbstractCoverageITest {
         Run<?, ?> firstBuild = buildSuccessfully(project);
         verifyFirstBuild(firstBuild);
 
-        // update parser pattern to pick only the coding style results
+        // update the parser pattern to pick only the coding style results
         project.getPublishersList().get(CoverageRecorder.class).getTools().get(0).setPattern(JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> secondBuild = buildSuccessfully(project);
@@ -48,7 +48,24 @@ class DeltaComputationITest extends AbstractCoverageITest {
         Run<?, ?> firstBuild = buildSuccessfully(job);
         verifyFirstBuild(firstBuild);
 
-        // update parser pattern to pick only the codingstyle results
+        computeDeltaInSecondBuild(job, firstBuild);
+    }
+
+    @Test
+    void shouldSelectResultByIdInReferenceBuild() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE, "mutations.xml");
+
+        // Create a build with two different actions
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations.xml']], id: 'pit'\n"
+                + "recordCoverage tools: [[parser: '" + Parser.JACOCO.name() + "', pattern: '**/jacoco*xml']]\n");
+
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+
+        computeDeltaInSecondBuild(job, firstBuild);
+    }
+
+    private void computeDeltaInSecondBuild(final WorkflowJob job, final Run<?, ?> firstBuild) {
         setPipelineScript(job,
                 "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
 
@@ -119,8 +136,8 @@ class DeltaComputationITest extends AbstractCoverageITest {
     }
 
     /**
-     * Verifies the calculated modified lines coverage including the modified lines coverage delta and the code delta. This makes sure
-     * these metrics are set properly even if there are no code changes.
+     * Verifies the calculated modified lines coverage including the modified lines coverage delta and the code delta.
+     * This makes sure these metrics are set properly even if there are no code changes.
      *
      * @param action
      *         The created Jenkins action

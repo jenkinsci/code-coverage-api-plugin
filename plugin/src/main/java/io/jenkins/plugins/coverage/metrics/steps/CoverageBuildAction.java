@@ -546,6 +546,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      *
      * @return {@code true} if the trend is positive, {@code false} otherwise
      */
+    @SuppressWarnings("unused") // Called by jelly view
     public boolean isPositiveTrend(final Baseline baseline, final Metric metric) {
         var delta = getDelta(baseline, metric);
         if (delta.isPresent()) {
@@ -581,7 +582,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
     }
 
     /**
-     * Renders the reference build as HTML link.
+     * Renders the reference build as HTML-link.
      *
      * @return the reference build
      * @see #getReferenceBuild()
