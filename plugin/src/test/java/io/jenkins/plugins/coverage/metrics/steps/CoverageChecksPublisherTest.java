@@ -216,7 +216,10 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
 
         return new CoverageBuildAction(run, COVERAGE_ID, REPORT_NAME, StringUtils.EMPTY, result,
                 new QualityGateResult(), null, "refId",
-                new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF, Metric.MODULE, Fraction.ONE_FIFTH)),
+                new TreeMap<>(Map.of(
+                        Metric.LINE, Fraction.ONE_HALF,
+                        Metric.MODULE, Fraction.ZERO,
+                        Metric.PACKAGE, Fraction.ONE_HALF.negate())),
                 List.of(testCoverage), new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage),
                 new TreeMap<>(Map.of(Metric.LINE, Fraction.ONE_HALF)), List.of(testCoverage), false);
     }
