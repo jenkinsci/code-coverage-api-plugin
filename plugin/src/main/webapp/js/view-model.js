@@ -14,41 +14,16 @@ const CoverageChartGenerator = function ($) {
             }
         });
     };
-
-    function getTextColor() {
-        return getComputedStyle(document.body).getPropertyValue('--text-color') || '#333';
-    }
-
-    /**
-     * Searches for a Jenkins color by a color id.
-     *
-     * @param jenkinsColors The available Jenkins colors
-     * @param id The color id
-     * @param defaultValue The default value if the id does not exist
-     * @param alpha The alpha value between [0;255]
-     * @returns {string} the hex code of the Jenkins color or, if not existent, the default value
-     */
-    function getJenkinsColorById(jenkinsColors, id, defaultValue, alpha) {
-        const alphaHex = alpha.toString(16);
-        if (jenkinsColors.has(id)) {
-            const color = jenkinsColors.get(id);
-            if (color.match(/^#[a-fA-F0-9]{6}$/) !== null) {
-                return color + alphaHex;
-            }
-        }
-        return defaultValue + alphaHex;
-    }
-
-    function createOverview(overview, id, jenkinsColors) {
-        const missedColor = getJenkinsColorById(jenkinsColors, "--red", "#ff4d65", 120);
-        const coveredColor = getJenkinsColorById(jenkinsColors, "--green", "#4bdf7c", 120);
+    function createOverview(overview, id) {
+        const missedColor = echartsJenkinsApi.resolveJenkinsColor("--red");
+        const coveredColor = echartsJenkinsApi.resolveJenkinsColor("--green");
 
         const summaryChartDiv = $('#' + id);
         summaryChartDiv.height(overview.metrics.length * 31 + 150 + 'px');
         const summaryChart = echarts.init(summaryChartDiv[0]);
         summaryChartDiv[0].echart = summaryChart;
 
-        const textColor = getTextColor();
+        const textColor = echartsJenkinsApi.getTextColor();
 
         const summaryOption = {
             tooltip: {
@@ -359,7 +334,7 @@ const CoverageChartGenerator = function ($) {
             renderTrendChart();
 
             viewProxy.getOverview(function (t) {
-                createOverview(t.responseObject(), 'coverage-overview', jenkinsColors);
+                createOverview(t.responseObject(), 'coverage-overview');
             });
 
             $('.tree-chart').each(function () {

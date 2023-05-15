@@ -154,6 +154,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>echarts-api</artifactId>
+      <version>5.4.0-4-rc815.a_ff2e0060885</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -343,6 +344,12 @@
           <groupId>xmlunit</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>echarts-api</artifactId>
+      <version>5.4.0-4-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
