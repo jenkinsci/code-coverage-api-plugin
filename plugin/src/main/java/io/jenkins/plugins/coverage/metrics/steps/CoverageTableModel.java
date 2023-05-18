@@ -77,7 +77,9 @@ class CoverageTableModel extends TableModel {
     public TableConfiguration getTableConfiguration() {
         TableConfiguration tableConfiguration = new TableConfiguration();
         tableConfiguration.responsive();
-        tableConfiguration.select(SelectStyle.SINGLE);
+        if (getId().contains("inline")) {
+            tableConfiguration.select(SelectStyle.SINGLE);
+        }
         renderer.configureTable(tableConfiguration);
         return tableConfiguration;
     }
