@@ -15,10 +15,12 @@ import edu.hm.hafner.echarts.ChartModelConfiguration;
 import edu.hm.hafner.echarts.ChartModelConfiguration.AxisType;
 import edu.hm.hafner.echarts.line.LinesChartModel;
 import edu.hm.hafner.echarts.line.LinesDataSet;
+import edu.hm.hafner.util.ResourceTest;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -27,7 +29,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Ullrich Hafner
  */
-class CoverageSeriesBuilderTest {
+class CoverageSeriesBuilderTest extends ResourceTest {
     @Test
     void shouldHaveEmptyDataSetForEmptyIterator() {
         CoverageSeriesBuilder builder = new CoverageSeriesBuilder();
@@ -97,6 +99,37 @@ class CoverageSeriesBuilderTest {
 
         assertThat(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE)).containsExactly(50.0);
         assertThat(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE)).containsExactly(75.0);
+    }
+
+    @Test
+    void shouldHaveTwoValuesForTwoBuilds() {
+        CoverageSeriesBuilder builder = new CoverageSeriesBuilder();
+
+        BuildResult<CoverageStatistics> first = createResult(1,
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(1).setMissed(1).build(),
+                new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(3).setMissed(1).build());
+        BuildResult<CoverageStatistics> second = createResult(2,
+                new CoverageBuilder().setMetric(Metric.LINE).setCovered(1).setMissed(3).build(),
+                new CoverageBuilder().setMetric(Metric.BRANCH).setCovered(1).setMissed(3).build());
+
+        LinesDataSet dataSet = builder.createDataSet(createConfiguration(), List.of(first, second));
+
+        assertThat(dataSet.getDomainAxisSize()).isEqualTo(2);
+        assertThat(dataSet.getDomainAxisLabels()).containsExactly("#1", "#2");
+
+        assertThat(dataSet.getDataSetIds()).containsExactlyInAnyOrder(
+                CoverageSeriesBuilder.LINE_COVERAGE,
+                CoverageSeriesBuilder.BRANCH_COVERAGE);
+
+        assertThat(dataSet.getSeries(CoverageSeriesBuilder.LINE_COVERAGE))
+                .containsExactly(50.0, 25.0);
+        assertThat(dataSet.getSeries(CoverageSeriesBuilder.BRANCH_COVERAGE))
+                .containsExactly(75.0, 25.0);
+
+        CoverageTrendChart trendChart = new CoverageTrendChart();
+        var model = trendChart.create(List.of(first, second), createConfiguration());
+
+        assertThatJson(model).isEqualTo(toString("chart.json"));
     }
 
     private ChartModelConfiguration createConfiguration() {
