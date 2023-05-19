@@ -20,6 +20,8 @@ import edu.hm.hafner.util.VisibleForTesting;
 
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**

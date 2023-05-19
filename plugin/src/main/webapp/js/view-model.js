@@ -1,5 +1,17 @@
 /* global jQuery3, viewProxy, echartsJenkinsApi, bootstrap5 */
 
+getJenkinsColors = function (colors) {
+    // TODO: also handle HSL colors and parse them to hex in order to use dark mode colors
+    const colorHexMapping = new Map;
+    colors.forEach(function (jenkinsId) {
+        const colorHex = getComputedStyle(document.body).getPropertyValue(jenkinsId);
+        if (colorHex.match(/^#[a-fA-F0-9]{6}$/) !== null) {
+            colorHexMapping.set(jenkinsId, colorHex);
+        }
+    })
+    return colorHexMapping;
+};
+
 const CoverageChartGenerator = function ($) {
     var selectedTreeNode;
 
@@ -16,7 +28,9 @@ const CoverageChartGenerator = function ($) {
     };
     function createOverview(overview, id) {
         const missedColor = echartsJenkinsApi.resolveJenkinsColor("--red");
+        const missedText = echartsJenkinsApi.resolveJenkinsColor("--white");
         const coveredColor = echartsJenkinsApi.resolveJenkinsColor("--green");
+        const coveredText = echartsJenkinsApi.resolveJenkinsColor("--white");
 
         const summaryChartDiv = $('#' + id);
         summaryChartDiv.height(overview.metrics.length * 31 + 150 + 'px');
@@ -118,7 +132,8 @@ const CoverageChartGenerator = function ($) {
                     label: {
                         show: true,
                         position: 'insideLeft',
-                        color: 'black',
+                        color: coveredText,
+                        fontWeight: 'bold',
                         formatter: function (obj) {
                             return overview.covered[obj.dataIndex];
                         }
@@ -137,7 +152,8 @@ const CoverageChartGenerator = function ($) {
                     label: {
                         show: true,
                         position: 'insideRight',
-                        color: 'black',
+                        color: missedText,
+                        fontWeight: 'bold',
                         formatter: function (obj) {
                             return overview.missed[obj.dataIndex];
                         }
