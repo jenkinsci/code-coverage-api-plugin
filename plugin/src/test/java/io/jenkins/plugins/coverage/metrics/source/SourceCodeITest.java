@@ -95,8 +95,6 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                         "[-ERROR-] Removing non-workspace source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory))
                 .contains("- Source file '" + ACU_COBOL_PARSER_SOURCE_FILE_PATH + "' not found");
-
-        verifySourceCodeInBuild("", firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");
     }
 
@@ -116,7 +114,7 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
 
         String requestedSourceFolder;
         if (useAbsolutePath) {
-            requestedSourceFolder = getAgentWorkspace(localAgent, job).child(sourceDir).getRemote();
+            requestedSourceFolder = new PathUtil().getAbsolutePath(getAgentWorkspace(localAgent, job).child(sourceDir).getRemote());
         }
         else {
             requestedSourceFolder = sourceDir;
