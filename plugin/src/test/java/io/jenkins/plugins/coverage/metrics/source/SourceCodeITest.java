@@ -76,6 +76,8 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
 
     @Test
     void refuseSourceCodePaintingInNotApprovedExternalFolder() throws IOException {
+        PrismConfiguration.getInstance().setSourceDirectories(List.of());
+
         var localAgent = crateCoverageAgent();
         String sourceDirectory = createExternalFolder();
 
