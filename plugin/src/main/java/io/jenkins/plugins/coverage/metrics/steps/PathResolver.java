@@ -2,14 +2,12 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.InvalidPathException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +23,7 @@ import io.jenkins.plugins.prism.FilePermissionEnforcer;
 import io.jenkins.plugins.prism.PermittedSourceCodeDirectory;
 import io.jenkins.plugins.prism.PrismConfiguration;
 import io.jenkins.plugins.prism.SourceDirectoryFilter;
+import io.jenkins.plugins.util.RemoteResultWrapper;
 
 /**
  * Resolves source code files on the agent using the stored paths of the coverage reports. Since these paths are
@@ -197,59 +196,6 @@ public class PathResolver {
         private boolean isWithinWorkspace(final String fileName, final FilePath workspace) {
             var workspacePath = PATH_UTIL.getAbsolutePath(workspace.getRemote());
             return PATH_UTIL.getAbsolutePath(fileName).startsWith(workspacePath);
-        }
-    }
-
-    /**
-     * A serializable result combined with a logger. Enables remote calls to return a result and a corresponding log.
-     *
-     * @param <T>
-     *         the type of the result
-     *
-     * @author Ullrich Hafner
-     */
-    // FIXME: replace with plugin-util class once released
-    static final class RemoteResultWrapper<T extends Serializable> extends FilteredLog {
-        private static final long serialVersionUID = -6411417555105688927L;
-
-        private final T result;
-
-        /**
-         * Creates a new instance of {@link RemoteResultWrapper}.
-         *
-         * @param result
-         *         the wrapped result
-         * @param title
-         *         the title of the error messages
-         */
-        RemoteResultWrapper(final T result, final String title) {
-            super(title);
-
-            this.result = result;
-        }
-
-        public T getResult() {
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            if (!super.equals(o)) {
-                return false;
-            }
-            RemoteResultWrapper<?> that = (RemoteResultWrapper<?>) o;
-            return Objects.equals(result, that.result);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), result);
         }
     }
 }
