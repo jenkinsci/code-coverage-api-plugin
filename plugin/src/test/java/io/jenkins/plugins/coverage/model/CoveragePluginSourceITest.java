@@ -98,7 +98,7 @@ class CoveragePluginSourceITest extends IntegrationTestWithJenkinsPerSuite {
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> finished painting (0 files have been painted, 1 files failed)")
                 .contains(String.format(
-                        "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
+                        "[-ERROR-] Removing non-workspace source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory));
 
         verifySourceCodeInBuild(firstBuild, NO_SOURCE_CODE); // should be still available

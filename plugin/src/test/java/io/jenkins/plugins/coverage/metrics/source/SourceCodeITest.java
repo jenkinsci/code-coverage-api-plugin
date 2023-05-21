@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;
 import edu.hm.hafner.coverage.FileNode;
@@ -29,7 +31,7 @@ import static io.jenkins.plugins.prism.SourceCodeRetention.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Verifies if source code copying and rendering works on agents.
+ * Verifies the source code copying and rendering on agents.
  *
  * @author Ullrich Hafner
  */
@@ -50,32 +52,32 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
     static final String AGENT_LABEL = "coverage-agent";
     private static final PathUtil UTIL = new PathUtil();
 
-    /** Verifies that the plugin reads source code from the workspace root. */
-    @Test
-    void coveragePluginPipelineWithSourceCode() throws IOException {
-        runCoverageWithSourceCode("");
+    @ParameterizedTest(name = "Entries of `sourceDirectories` use absolute paths: {0}")
+    @ValueSource(booleans = {true, false})
+    void verifySourcesInWorkspaceRoot(final boolean useAbsolutePath) throws IOException {
+        runCoverageWithSourceCode("", useAbsolutePath);
     }
 
-    /** Verifies that the plugin reads source code in subdirectories of the workspace. */
-    @Test
-    void coveragePluginPipelineWithSourceCodeInSubdirectory() throws IOException {
-        runCoverageWithSourceCode("sub-dir");
+    @ParameterizedTest(name = "Entries of `sourceDirectories` use absolute paths: {0}")
+    @ValueSource(booleans = {true, false})
+    void verifySourcesInWorkspaceSubFolder(final boolean useAbsolutePath) throws IOException {
+        runCoverageWithSourceCode("sub-dir", useAbsolutePath);
     }
 
-    /** Verifies that the plugin reads source code in external but approved directories. */
     @Test
-    void coveragePluginPipelineWithSourceCodeInPermittedDirectory() throws IOException {
+    void verifySourcesInApprovedExternalFolder() throws IOException {
         String directory = createExternalFolder();
         PrismConfiguration.getInstance().setSourceDirectories(List.of(new PermittedSourceCodeDirectory(directory)));
 
-        Run<?, ?> externalDirectory = runCoverageWithSourceCode(directory);
+        Run<?, ?> externalDirectory = runCoverageWithSourceCode(directory, false);
         assertThat(getConsoleLog(externalDirectory))
                 .contains("Searching for source code files in:", "-> " + directory);
     }
 
-    /** Verifies that the plugin refuses source code in directories that are not approved in Jenkins' configuration. */
     @Test
-    void coveragePluginPipelineNotRegisteredSourceCodeDirectory() throws IOException {
+    void refuseSourceCodePaintingInNotApprovedExternalFolder() throws IOException {
+        PrismConfiguration.getInstance().setSourceDirectories(List.of());
+
         var localAgent = crateCoverageAgent();
         String sourceDirectory = createExternalFolder();
 
@@ -92,15 +94,13 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
                 .contains("-> finished resolving of absolute paths (found: 0, not found: 1)")
                 .contains("-> finished painting (0 files have been painted, 1 files failed)")
                 .contains(String.format(
-                        "[-ERROR-] Removing source directory '%s' - it has not been approved in Jenkins' global configuration.",
+                        "[-ERROR-] Removing non-workspace source directory '%s' - it has not been approved in Jenkins' global configuration.",
                         sourceDirectory))
                 .contains("- Source file '" + ACU_COBOL_PARSER_SOURCE_FILE_PATH + "' not found");
-
-        verifySourceCodeInBuild("", firstBuild, NO_SOURCE_CODE, NO_SOURCE_CODE); // should be still available
         localAgent.setLabelString("<null>");
     }
 
-    private Run<?, ?> runCoverageWithSourceCode(final String sourceDir)
+    private Run<?, ?> runCoverageWithSourceCode(final String sourceDir, final boolean useAbsolutePath)
             throws IOException {
         var localAgent = crateCoverageAgent();
 
@@ -114,7 +114,14 @@ abstract class SourceCodeITest extends AbstractCoverageITest {
         assertThat(temporaryDirectory.isDirectory()).isTrue();
         File[] temporaryFiles = temporaryDirectory.listFiles();
 
-        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, sourceDir));
+        String requestedSourceFolder;
+        if (useAbsolutePath) {
+            requestedSourceFolder = new PathUtil().getAbsolutePath(getAgentWorkspace(localAgent, job).child(sourceDir).getRemote());
+        }
+        else {
+            requestedSourceFolder = sourceDir;
+        }
+        job.setDefinition(createPipelineWithSourceCode(EVERY_BUILD, requestedSourceFolder));
         Run<?, ?> firstBuild = buildSuccessfully(job);
         assertThat(getConsoleLog(firstBuild))
                 .contains("-> resolved absolute paths for all 1 source files")
