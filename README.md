@@ -100,7 +100,7 @@ The Code Coverage Plug-in supports the following Jenkins project types:
 
 Enable the "Record code coverage results" publisher in the Post-build Actions section of your job. Select at least one coverage tool and specify the path to the report file. If you do not specify a path, the plugin will search for the report file in the workspace using the default pattern of the tool. 
 
-:info: Since version 4.0.0 the old step "Publish code coverage results" has been marked as deprecated. This old step uses a deprecated internal model and is not supported anymore. Please migrate your jobs to the new step in order to improve from the new features of the plugin.
+:warning: Since version 4.0.0 the old step "Publish code coverage results" has been marked as deprecated. This old step uses a deprecated internal model and is not supported anymore. Please migrate your jobs to the new step in order to benefit from the new features of the plugin.
 
 #### Pipeline example
 
@@ -148,6 +148,23 @@ This algorithm can be used for plain Git SCM freestyle projects or pipelines as 
 ```groovy
 discoverGitReferenceBuild referenceJob: 'my-reference-job'
 recordCoverage(tools: [[parser: 'JACOCO']])
+```
+
+## Rendering of the source code
+
+The plugin will automatically find your source code files to create a report that shows the source code in combination with the achieved code coverage results. You can change the strategy that should be used to store the colored source code files with the property `sourceCodeRetention`. If your server has not enough free space available to store the sources for all builds it might make sense to store only the coverage results of the last build. In this case, the plugin will automatically discard old results before the new sources will be stored. Or, if you do not need the source files at all, you can deactivate the storing of source code files. The following options are supported:
+
+- `NEVER`: Never store source code files.</dd>
+- `LAST_BUILD` (default): Store source code files of the last build, delete older artifacts.
+- `EVERY_BUILD`: Store source code files for all builds, never delete those files automatically.
+- `MODIFIED`: Store only changed source code files for all builds, never delete those files automatically.
+
+For Java projects, the source code rendering typically works out-of-the-box since the coverage tools export the results into a report that contains the exact locations of the source code files (absolute path). If this automatic detection does not work in your case, then you can specify a path prefix to the sources by using the option `sourceDirectories`. This property can be filled with one or more relative paths within the workspace that should be searched for the source code. You can also specify absolute paths, but then you need to make sure that those paths are approved by an administrator in the configuration section of the Prism plugin in Jenkins´ global configuration. The following example shows how to specify such a path prefix: 
+
+```groovy
+recordCoverage(tools: [[parser: 'JACOCO']], 
+            sourceCodeRetention: 'MODIFIED', 
+            sourceDirectories: [[path: 'plugin/src/main/java']])
 ```
 
 ## Remote API
