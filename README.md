@@ -27,7 +27,7 @@ This project was part of [GSoC 2018](https://jenkins.io/projects/gsoc/2018/code-
 
 The code coverage plug-in provides the following features when added as a post build action (or step) to a job:
 
-* Coverage analysis of projects and pull requests: The plugin now computes and shows the absolute coverage of the project, the coverage of the modified files and the coverage of the modified lines, so you can see how the changes actually affect the code coverage. Additionally, the delta of these coverages with respect to the reference build are computed and the coverage changes created by changed test cases (indirect coverage changes).
+* Coverage analysis of projects and pull requests: The plugin now computes and shows the absolute coverage of the project, the coverage of the modified files and the coverage of the modified lines, so you can see how the changes actually affect the code coverage. Additionally, the delta values of these coverages with respect to the reference build are computed and the coverage changes created by changed test cases (indirect coverage changes).
 
  ![Coverage overview and trend](./images/summary.png)
 
@@ -96,25 +96,58 @@ The Code Coverage Plug-in supports the following Jenkins project types:
 - Declarative Pipeline (sequential and parallel steps)
 - Multi-branch Pipeline
 
-### Freestyle project 
+#### Freestyle project 
 
-Enable the "Record code coverage results" publisher in the Post-build Actions section of your job. Select at least one coverage tool and specify the path to the report file. If you do not specify a path, the plugin will search for the report file in the workspace using the default pattern of the tool.
+Enable the "Record code coverage results" publisher in the Post-build Actions section of your job. Select at least one coverage tool and specify the path to the report file. If you do not specify a path, the plugin will search for the report file in the workspace using the default pattern of the tool. 
 
-The plugin can compare the coverage results of the current build with the results of a reference build. The reference build will be discovered using the [forensics-api](https://github.com/jenkinsci/forensics-api-plugin) plugin.
+:info: Since version 4.0.0 the old step "Publish code coverage results" has been marked as deprecated. This old step uses a deprecated internal model and is not supported anymore. Please migrate your jobs to the new step in order to improve from the new features of the plugin.
 
-### Pipeline example
+#### Pipeline example
 
-We also support pipeline configuration, you can generate pipeline code in Jenkins' Snippet Generator.
+The recording step also supports pipeline configuration (scripted or declarative). The simplest way to generate the corresponding pipeline code is by using Jenkins' Snippet Generator: there you can configure all available properties of the step by using a rich user interface with inline help and validation. A sample step definition is given in the following code snippet. This step records coverage results of JaCoCo with the default file name pattern. The coverage information is rendered with the source code for every build, and quality gates have been set up for line and branch coverages. I.e., if the line or branch coverage does not reach the threshold of 60%, then the build will be marked as unstable.
 
 ```groovy
-
 recordCoverage(tools: [[parser: 'JACOCO']],
         id: 'jacoco', name: 'JaCoCo Coverage',
         sourceCodeRetention: 'EVERY_BUILD',
         qualityGates: [
                 [threshold: 60.0, metric: 'LINE', baseline: 'PROJECT', unstable: true],
                 [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])
+```
 
+## Reference build (baseline)
+
+One unique feature of the Coverage plugin is the delta computation of coverage metrics with respect to a baseline build (reference build). The plugin reads the results of the reference build and compares these results with the current results: for each coverage metric, a delta value is computed. The delta values are shown as absolute coverages of the project, the coverages of the modified files, or the coverages of the modified lines. This helps to see how the code changes actually affect the code coverage.
+
+In order to compute this classification, the plugin requires a reference build (baseline). When selecting a baseline, we need to distinguish two different use cases, which are documented in the next sections.
+
+### Selecting a baseline from the current job
+
+When a team wants to investigate how the coverage of the project changes over the time, we need to simply look back in the history of the same Jenkins job and select another build that we can use to compare the results with. Such a Jenkins job typically builds the main branch of the source control system. This behavior is available out-of-the-box without any additional configuration. 
+
+### Selecting a baseline in the target job
+
+:warning: This feature requires the installation of an additional plugin:
+[Git Forensics Plugin](https://github.com/jenkinsci/git-forensics-plugin).
+
+For more complex branch source projects (i.e., projects that build several branches and pull requests in a connected job hierarchy) it makes more sense to select a reference build from a job that builds the actual target branch (i.e., the branch the current changes will be merged into). Here one typically is interested what changed in the branch or pull request over the main branch (or any other target branch). That means we want to see how the coverage changes when new code will be submitted by a branch or pull request.
+
+If you are using a Git branch source project, the Jenkins job that builds the target branch will be selected automatically by running the reference recorder step. Simply call the step `discoverGitReferenceBuild` before the step to record the code coverage:
+
+```groovy
+discoverGitReferenceBuild()
+recordCoverage(tools: [[parser: 'JACOCO']])
+```
+
+Selecting the correct reference build is not that easy as it looks, since the main branch of a project will evolve more frequently than a specific feature or bugfix branch. That means if we want to compare the results of a pull request with the results of the main branch we need to select a build from the main branch that contains only commits that are also part of the branch of the associated pull request.
+
+Therefore, the Git Forensics plugin automatically tracks all commits of a Jenkins build and uses this information to identify a build in the target branch that matches best with the commits in the current branch. Please have a look at the [documentation of the Git Forensics plugin](https://github.com/jenkinsci/git-forensics-plugin) to see how this is achieved in detail.
+
+This algorithm can be used for plain Git SCM freestyle projects or pipelines as well. In this case, we cannot get the target branch information automatically from the Git branch source API. Therefore, you need to manually specify the Jenkins job that builds the target branch in the parameter `referenceJob`. See the following sample pipeline snippet for an example on how to discover a baseline from such a reference job:
+
+```groovy
+discoverGitReferenceBuild referenceJob: 'my-reference-job'
+recordCoverage(tools: [[parser: 'JACOCO']])
 ```
 
 ## Remote API
