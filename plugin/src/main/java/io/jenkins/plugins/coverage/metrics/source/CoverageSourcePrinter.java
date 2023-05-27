@@ -84,6 +84,9 @@ class CoverageSourcePrinter implements Serializable {
             if (missed == 0) {
                 return "All branches covered";
             }
+            if (covered == 0) {
+                return "No branches covered";
+            }
             return String.format("Partially covered, branch coverage: %d/%d", covered, covered + missed);
         }
         else if (covered == 1) {

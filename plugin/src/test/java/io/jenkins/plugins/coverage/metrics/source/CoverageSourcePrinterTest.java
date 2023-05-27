@@ -45,6 +45,17 @@ class CoverageSourcePrinterTest extends AbstractCoverageTest {
     }
 
     @Test
+    void shouldRenderNoBrnachCoverage() {
+        var tree = readResult("../steps/jacoco-analysis-model.xml", new JacocoParser());
+
+        var file = new CoverageSourcePrinter(tree.findFile("LineRangeList.java").get());
+
+        assertThat(file.getSummaryColumn(265)).isEqualTo("0/2");
+        assertThat(file.getTooltip(265)).isEqualTo("No branches covered");
+        assertThat(file.getColorClass(265)).isEqualTo(CoverageSourcePrinter.NO_COVERAGE);
+    }
+
+    @Test
     void shouldRenderWholeLine() {
         var tree = readResult("../steps/jacoco-codingstyle.xml", new JacocoParser());
 
