@@ -462,7 +462,7 @@ const CoverageChartGenerator = function ($) {
             initializeSourceCodeSelection('change-coverage');
             initializeSourceCodeSelection('indirect-coverage');
 
-            $('input[name="changed"]').on('change', function () {
+            $('input[id ^= "changed"]').on('change', function () {
                 const showChanged = $(this).prop('checked');
                 $('table.data-table').each(function () {
                     const table = $(this).DataTable();
