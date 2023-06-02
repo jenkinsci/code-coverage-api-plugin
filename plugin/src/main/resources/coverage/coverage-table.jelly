@@ -25,7 +25,7 @@
         <div class="col-12 d-xxl-none">
           <bs:card title="${title}" symbol="${symbol}" class="flex-fill h-100" >
             <j:if test="${showChangedToggle}">
-              <f:toggleSwitch name="changed" title="Show only changed files" />
+              <f:toggleSwitch id="changed-${id + '-table'}" title="${%changed.files}" />
             </j:if>
             <dt:table model="${it.getTableModel(id + '-table')}"/>
           </bs:card>
@@ -33,7 +33,7 @@
         <div class="col-xxl-6 d-none d-xxl-block">
           <bs:card title="${title}" symbol="${symbol}" class="flex-fill h-100">
             <j:if test="${showChangedToggle}">
-              <f:toggleSwitch name="changed" title="Show only changed files" />
+              <f:toggleSwitch id="changed-${id + '-table-inline'}" title="${%changed.files}" />
             </j:if>
             <dt:table model="${it.getTableModel(id + '-table-inline')}"/>
           </bs:card>
@@ -50,7 +50,7 @@
                 <fa:svg-icon name="hand-point-left" class="no-selection-banner"/>
               </div>
               <div class="text-center">
-                <h5 class="card-title">${%Please select a file in the table to open the source code}</h5>
+                <h5 class="card-title">${%select.row}</h5>
               </div>
             </div>
             <div id="${id}-no-source">
@@ -58,7 +58,7 @@
                 <fa:svg-icon name="ban" class="no-selection-banner"/>
               </div>
               <div class="text-center">
-                <h5 class="card-title">${%No source code available for this file}</h5>
+                <h5 class="card-title">${%no.sourcecode}</h5>
               </div>
             </div>
           </bs:card>
@@ -67,7 +67,7 @@
       <j:otherwise>
         <div class="col-12">
           <j:if test="${showChangedToggle}">
-            <f:toggleSwitch name="changed" title="Show only changed files" />
+            <f:toggleSwitch id="changed-${id + '-table'}" title="${%changed.files}" />
           </j:if>
           <bs:card title="${title}" symbol="${symbol}" class="flex-fill h-100">
             <dt:table model="${it.getTableModel(id + '-table')}"/>

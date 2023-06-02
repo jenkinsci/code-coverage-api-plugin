@@ -21,7 +21,7 @@
     <div class="tabBarFrame">
       <ul class="flex-wrap tabBar" role="tablist" id="tab-details">
         <li class="nav-item tab" role="presentation">
-          <a class="nav-link" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="false">Overview</a>
+          <a class="nav-link" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="false">${%tab.name.overview}</a>
         </li>
         <j:forEach var="metric" items="${it.treeMetrics}">
           <li class="nav-item tab" role="presentation">
@@ -29,16 +29,16 @@
           </li>
         </j:forEach>
         <li class="nav-item tab" role="presentation">
-          <a class="nav-link" id="fileCoverage-tab" data-bs-toggle="tab" data-bs-target="#fileCoverage" type="button" role="tab" aria-controls="fileCoverage" aria-selected="false">File Coverage</a>
+          <a class="nav-link" id="fileCoverage-tab" data-bs-toggle="tab" data-bs-target="#fileCoverage" type="button" role="tab" aria-controls="fileCoverage" aria-selected="false">${%tab.name.files}</a>
         </li>
         <j:if test="${hasModifiedLinesCoverage}">
           <li class="nav-item tab" role="presentation">
-            <a class="nav-link" id="changeCoverage-tab" data-bs-toggle="tab" data-bs-target="#changeCoverage" type="button" role="tab" aria-controls="changeCoverage" aria-selected="false">Modified Lines Coverage</a>
+            <a class="nav-link" id="changeCoverage-tab" data-bs-toggle="tab" data-bs-target="#changeCoverage" type="button" role="tab" aria-controls="changeCoverage" aria-selected="false">${%tab.name.lines}</a>
           </li>
         </j:if>
         <j:if test="${hasIndirectCoverageChanges}">
           <li class="nav-item tab" role="presentation">
-            <a class="nav-link" id="indirectCoverage-tab" data-bs-toggle="tab" data-bs-target="#indirectCoverage" type="button" role="tab" aria-controls="indirectCoverage" aria-selected="false">Indirect Coverage Changes</a>
+            <a class="nav-link" id="indirectCoverage-tab" data-bs-toggle="tab" data-bs-target="#indirectCoverage" type="button" role="tab" aria-controls="indirectCoverage" aria-selected="false">${%tab.name.indirect}</a>
           </li>
         </j:if>
       </ul>
