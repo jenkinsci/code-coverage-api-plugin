@@ -24,8 +24,8 @@ class CoverageTokenMacroITest extends AbstractCoverageITest {
                         + "tools: [[parser: '" + Parser.JACOCO.name() + "', pattern: '**/*xml']])\n"
                         + "def lineCoverage = tm('${COVERAGE}')\n"
                         + "def branchCoverage = tm('${COVERAGE, metric=\"BRANCH\"}')\n"
-                        + "def delta = tm('${COVERAGE, baseline=\"MODIFIED_LINES_DELTA\"}')\n"
-                        + "def na = tm('${COVERAGE, id=\"\"}')\n"
+                        + "def delta = tm('${COVERAGE, baseline=\"MODIFIED_LINES\"}')\n"
+                        + "def na = tm('${COVERAGE, id=\"unknown\"}')\n"
                         + "echo '[lineCoverage=' + lineCoverage + ']' \n"
                         + "echo '[branchCoverage=' + branchCoverage + ']' \n"
                         + "echo '[delta=' + delta + ']' \n"
@@ -36,7 +36,7 @@ class CoverageTokenMacroITest extends AbstractCoverageITest {
 
         assertThat(getConsoleLog(build)).contains("[lineCoverage=95.39%]");
         assertThat(getConsoleLog(build)).contains("[branchCoverage=88.28%]");
-        assertThat(getConsoleLog(build)).contains("[delta=-10.00%]");
+        assertThat(getConsoleLog(build)).contains("[delta=n/a]");
         assertThat(getConsoleLog(build)).contains("[na=n/a]");
     }
 }
