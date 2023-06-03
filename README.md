@@ -70,7 +70,7 @@ The code coverage plug-in provides the following features when added as a post b
 * The recorder has been extended with a native step that is capable of setting the step status (unstable, failed, ok):
 
   ![Native step](./images/step.png)
-
+* 
 * GitHub checks report to show the detailed line and branch coverage results for pull request:
 
   ![Code Coverage Checks Overview](./images/jacoco-coverage-checks.png)
@@ -81,6 +81,7 @@ The code coverage plug-in provides the following features when added as a post b
   ![Mutation Coverage Checks Overview](./images/pit-coverage-checks.png)
   ![Mutation Coverage Checks Annotations](./images/pit-coverage-checks-annotations.png)
 
+* Token macro support: The recorder has been extended with a token macro that allows to use the coverage results in other plugins (e.g. email-ext) or pipeline scripts.
 
 ## Usage
 
@@ -154,7 +155,7 @@ recordCoverage(tools: [[parser: 'JACOCO']])
 
 The plugin will automatically find your source code files to create a report that shows the source code in combination with the achieved code coverage results. You can change the strategy that should be used to store the colored source code files with the property `sourceCodeRetention`. If your server has not enough free space available to store the sources for all builds it might make sense to store only the coverage results of the last build. In this case, the plugin will automatically discard old results before the new sources will be stored. Or, if you do not need the source files at all, you can deactivate the storing of source code files. The following options are supported:
 
-- `NEVER`: Never store source code files.</dd>
+- `NEVER`: Never store source code files.
 - `LAST_BUILD` (default): Store source code files of the last build, delete older artifacts.
 - `EVERY_BUILD`: Store source code files for all builds, never delete those files automatically.
 - `MODIFIED`: Store only changed source code files for all builds, never delete those files automatically.
@@ -166,6 +167,20 @@ recordCoverage(tools: [[parser: 'JACOCO']],
             sourceCodeRetention: 'MODIFIED', 
             sourceDirectories: [[path: 'plugin/src/main/java']])
 ```
+
+## Token macro support
+
+The coverage plugin provides the token `COVERAGE` that could be used in additional post build processing steps, e.g. in the mailer. In order to use this token you need to install the [Token Macro plugin](https://plugins.jenkins.io/token-macro).
+The token has the following optional parameters:
+- `id`: selects a particular coverage result, if not defined the defauult  result that are published under the URL "coverage" are shown.
+- `metric`: selects the coverage metric to evaluate, see [Metric help](https://github.com/jenkinsci/code-coverage-api-plugin/blob/master/plugin/src/main/resources/io/jenkins/plugins/coverage/metrics/steps/CoverageMetricColumn/help-metric.html) for all possible values. 
+- `baseline`: selects the baseline to use, see [Baseline help](https://github.com/jenkinsci/code-coverage-api-plugin/blob/master/plugin/src/main/resources/io/jenkins/plugins/coverage/metrics/steps/CoverageMetricColumn/help-baseline.html) for all possible values. .
+ 
+Examples:
+
+- `${COVERAGE}`: shows the line coverage of the whole project
+- `${COVERAGE, metric="BRANCH"}`: shows the branch coverage of the whole project
+- `${COVERAGE, metric="MUTATION", baseline="MODIFIED_LINES"}`: shows the mutation coverage of the modified lines 
 
 ## Remote API
 
