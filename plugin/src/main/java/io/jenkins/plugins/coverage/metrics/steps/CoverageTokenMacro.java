@@ -36,6 +36,7 @@ public class CoverageTokenMacro extends DataBoundTokenMacro {
      * @param id
      *         the ID of the results to select
      */
+    @Parameter
     public void setId(final String id) {
         this.id = id;
     }
