@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edu.hm.hafner.coverage.Metric;
 
@@ -137,6 +139,51 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
                 "-> [Modified files (difference to overall project) - Line Coverage]: ≪Success≫ - (Actual value: +5.00%, Quality gate: 0.00)");
     }
 
+    @ParameterizedTest(name = "A quality gate of {0} should not be passed if the coverage drops by 10%")
+    @ValueSource(ints = {8, 1, 0, -1, -8})
+    void shouldHandleNegativeValues(final double minimum) {
+        Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
+
+        qualityGates.add(new CoverageQualityGate(minimum, Metric.FILE, Baseline.PROJECT_DELTA, QualityGateCriticality.UNSTABLE));
+
+        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
+        QualityGateResult result = evaluator.evaluate();
+
+        assertThat(result).hasOverallStatus(QualityGateStatus.WARNING).isNotSuccessful().isNotInactive().hasMessages(
+                String.format(
+                "-> [Overall project (difference to reference job) - File Coverage]: ≪Unstable≫ - (Actual value: -10.00%%, Quality gate: %.2f)", minimum));
+    }
+
+    @ParameterizedTest(name = "A quality gate of {0} should be passed if the coverage is at 50%")
+    @ValueSource(ints = {-10, 0, 10, 50})
+    void shouldPassAllThresholds(final double minimum) {
+        Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
+
+        qualityGates.add(new CoverageQualityGate(minimum, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
+
+        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
+        QualityGateResult result = evaluator.evaluate();
+
+        assertThat(result).hasOverallStatus(QualityGateStatus.PASSED).isSuccessful().isNotInactive().hasMessages(
+                String.format(
+                "-> [Overall project - Line Coverage]: ≪Success≫ - (Actual value: 50.00%%, Quality gate: %.2f)", minimum));
+    }
+
+    @ParameterizedTest(name = "A quality gate of {0} should not be passed if the coverage is at 50%")
+    @ValueSource(ints = {51, 60, 70, 200})
+    void shouldFailAllThresholds(final double minimum) {
+        Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
+
+        qualityGates.add(new CoverageQualityGate(minimum, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
+
+        CoverageQualityGateEvaluator evaluator = new CoverageQualityGateEvaluator(qualityGates, createStatistics());
+        QualityGateResult result = evaluator.evaluate();
+
+        assertThat(result).hasOverallStatus(QualityGateStatus.WARNING).isNotSuccessful().isNotInactive().hasMessages(
+                String.format(
+                "-> [Overall project - Line Coverage]: ≪Unstable≫ - (Actual value: 50.00%%, Quality gate: %.2f)", minimum));
+    }
+
     @Test
     void shouldReportUnstableIfLargerThanThreshold() {
         Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
@@ -155,7 +202,7 @@ class CoverageQualityGateEvaluatorTest extends AbstractCoverageTest {
     }
 
     @Test
-    void shouldReportUnstableIfWorseAndSuccessIfBetter2() {
+    void shouldReportUnstableIfWorseAndSuccessIfLargerThanThreshold() {
         Collection<CoverageQualityGate> qualityGates = new ArrayList<>();
 
         var minimum = 0;
