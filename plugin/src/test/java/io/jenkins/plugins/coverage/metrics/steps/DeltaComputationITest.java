@@ -36,8 +36,8 @@ class DeltaComputationITest extends AbstractCoverageITest {
         project.getPublishersList().get(CoverageRecorder.class).getTools().get(0).setPattern(JACOCO_CODING_STYLE_FILE);
 
         Run<?, ?> secondBuild = buildSuccessfully(project);
-        verifySecondBuild(secondBuild);
-
+        var action = secondBuild.getAction(CoverageBuildAction.class);
+        verifyJaCoCoProjectValues(action);
         verifyDeltaComputation(firstBuild, secondBuild);
     }
 
@@ -48,31 +48,71 @@ class DeltaComputationITest extends AbstractCoverageITest {
         Run<?, ?> firstBuild = buildSuccessfully(job);
         verifyFirstBuild(firstBuild);
 
-        computeDeltaInSecondBuild(job, firstBuild);
-    }
-
-    @Test
-    void shouldSelectResultByIdInReferenceBuild() {
-        WorkflowJob job = createPipelineWithWorkspaceFiles(JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE, "mutations.xml");
-
-        // Create a build with two different actions
-        setPipelineScript(job,
-                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations.xml']], id: 'pit'\n"
-                + "recordCoverage tools: [[parser: '" + Parser.JACOCO.name() + "', pattern: '**/jacoco*xml']]\n");
-
-        Run<?, ?> firstBuild = buildSuccessfully(job);
-
-        computeDeltaInSecondBuild(job, firstBuild);
-    }
-
-    private void computeDeltaInSecondBuild(final WorkflowJob job, final Run<?, ?> firstBuild) {
         setPipelineScript(job,
                 "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
-        verifySecondBuild(secondBuild);
-
+        var action = secondBuild.getAction(CoverageBuildAction.class);
+        verifyJaCoCoProjectValues(action);
         verifyDeltaComputation(firstBuild, secondBuild);
+    }
+
+    @Test
+    void shouldSelectResultByIdInReferenceBuild() {
+        WorkflowJob job = createPipelineWithWorkspaceFiles(
+                JACOCO_ANALYSIS_MODEL_FILE, JACOCO_CODING_STYLE_FILE,
+                "mutations.xml", "mutations-codingstyle.xml");
+
+        // Create a build with two different actions
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations*.xml']], id: 'pit'\n"
+                + "recordCoverage tools: [[parser: '" + Parser.JACOCO.name() + "', pattern: '**/jacoco*xml']]\n");
+
+        Run<?, ?> firstBuild = buildSuccessfully(job);
+
+        setPipelineScript(job,
+                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations.xml']], id: 'pit'\n"
+                + "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
+
+        Run<?, ?> secondBuild = buildSuccessfully(job);
+        var actions = secondBuild.getActions(CoverageBuildAction.class);
+
+        var jacoco = actions.get(1);
+        assertThat(jacoco.getReferenceBuild())
+                .isPresent()
+                .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
+
+        verifyJaCoCoProjectValues(jacoco);
+        verifyJaCoCoDelta(jacoco);
+
+        var pit = actions.get(0);
+
+        assertThat(pit.getReferenceBuild())
+                .isPresent()
+                .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
+
+        verifyPitProjectValues(pit);
+        verifyPitDelta(pit);
+    }
+
+    private void verifyPitDelta(final CoverageBuildAction pit) {
+        assertThat(pit.formatDelta(Baseline.PROJECT, LINE)).isEqualTo("-2.16%");
+        assertThat(pit.formatDelta(Baseline.PROJECT, MUTATION)).isEqualTo("+3.37%");
+        assertThat(pit.formatDelta(Baseline.PROJECT, LOC)).isEqualTo(String.valueOf(-214));
+    }
+
+    private void verifyPitProjectValues(final CoverageBuildAction pit) {
+        CoverageBuilder builder = new CoverageBuilder();
+        assertThat(pit.getAllValues(Baseline.PROJECT)).contains(
+                builder.setMetric(LINE)
+                        .setCovered(198)
+                        .setMissed(211 - 198)
+                        .build(),
+                builder.setMetric(MUTATION)
+                        .setCovered(222)
+                        .setMissed(246 - 222)
+                        .build(),
+                new LinesOfCode(211));
     }
 
     private static void verifyFirstBuild(final Run<?, ?> firstBuild) {
@@ -92,9 +132,7 @@ class DeltaComputationITest extends AbstractCoverageITest {
                 new CyclomaticComplexity(2718));
     }
 
-    private static void verifySecondBuild(final Run<?, ?> secondBuild) {
-        var action = secondBuild.getAction(CoverageBuildAction.class);
-
+    private void verifyJaCoCoProjectValues(final CoverageBuildAction action) {
         var builder = new CoverageBuilder();
         assertThat(action.getAllValues(Baseline.PROJECT)).contains(
                 builder.setMetric(LINE)
@@ -127,6 +165,10 @@ class DeltaComputationITest extends AbstractCoverageITest {
                 .isPresent()
                 .satisfies(reference -> assertThat(reference.get()).isEqualTo(firstBuild));
 
+        verifyJaCoCoDelta(action);
+    }
+
+    private void verifyJaCoCoDelta(final CoverageBuildAction action) {
         assertThat(action.formatDelta(Baseline.PROJECT, LINE)).isEqualTo("-4.14%");
         assertThat(action.formatDelta(Baseline.PROJECT, BRANCH)).isEqualTo("+5.33%");
         assertThat(action.formatDelta(Baseline.PROJECT, LOC)).isEqualTo(String.valueOf(-JACOCO_ANALYSIS_MODEL_TOTAL));
