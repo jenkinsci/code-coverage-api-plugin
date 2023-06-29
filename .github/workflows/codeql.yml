@@ -37,14 +37,19 @@ jobs:
           java-version: 17
           cache: maven
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.3
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: ${{ matrix.language }}
           queries: +security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+      - name: Build with Maven
+        run: mvn -V --color always -ntp clean verify --file pom.xml -Pskip
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
