@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
@@ -18,9 +19,20 @@ public class LineCoverageViewModel {
         for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
             FileWithChangedLinesCoverageModel changedFile = new FileWithChangedLinesCoverageModel(fileNode.getRelativePath());
 
-            var listOfCoveredLines = new ArrayList<>(fileNode.getLinesWithCoverage());
             var listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
             var listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
+            List<Integer> listOfCoveredLines = new ArrayList<>();
+
+            int i = 0;
+            for (Integer a:fileNode.getLinesWithCoverage()
+            ) {
+                if (fileNode.getCoveredCounters()[i] > 0 && fileNode.getMissedCounters()[i] == 0) {
+                    listOfCoveredLines.add(a);
+                }
+                i++;
+            }
+
+            //var listOfCoveredLines = new ArrayList<>(fileNode.getLinesWithCoverage());
 
             var changedLinesModelList = new ArrayList<ChangedLinesModel>();
 
@@ -35,14 +47,16 @@ public class LineCoverageViewModel {
         return filesWithChangedLinesList;
     }
 
-    public static void getChangedLineBlocks(final ArrayList<Integer> changedLines,
+    public static void getChangedLineBlocks(final List<Integer> changedLines,
             final ArrayList<ChangedLinesModel> changedLinesModels, final Type type) {
         int currentLine = changedLines.get(0);
         for (int i = 0; i < changedLines.size(); i++){
-            if (!changedLines.get(i).equals(changedLines.get(i + 1) - 1)) {
-                ChangedLinesModel changedLinesBlock = new ChangedLinesModel(currentLine, i, type);
+            if (i == changedLines.size() - 1 || !changedLines.get(i).equals(changedLines.get(i + 1) - 1)) {
+                var changedLinesBlock = new ChangedLinesModel(currentLine, changedLines.get(i), type);
                 changedLinesModels.add(changedLinesBlock);
-                currentLine = i + 1;
+                if (i < changedLines.size() - 1) {
+                    currentLine = changedLines.get(i + 1);
+                }
             }
         }
     }

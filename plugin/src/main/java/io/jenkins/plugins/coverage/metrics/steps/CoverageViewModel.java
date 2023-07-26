@@ -50,10 +50,6 @@ import io.jenkins.plugins.coverage.metrics.source.SourceViewModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.InlineRowRenderer;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.LinkedRowRenderer;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.RowRenderer;
-import io.jenkins.plugins.coverage.model.visualization.ChangedLinesModel;
-import io.jenkins.plugins.coverage.model.visualization.FileWithChangedLinesCoverageModel;
-import io.jenkins.plugins.coverage.model.visualization.Side;
-import io.jenkins.plugins.coverage.model.visualization.Type;
 import io.jenkins.plugins.datatables.DefaultAsyncTableContentProvider;
 import io.jenkins.plugins.datatables.TableModel;
 import io.jenkins.plugins.util.BuildResultNavigator;
@@ -161,51 +157,6 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return String.format("%s: %s", optionalName, node.getName());
     }
 
-    public List<FileWithChangedLinesCoverageModel> getFilesWithChangedLines() {
-        List<FileWithChangedLinesCoverageModel> filesWithChangedLinesList = new ArrayList<>();
-
-        for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
-            FileWithChangedLinesCoverageModel changedFile = new FileWithChangedLinesCoverageModel(fileNode.getRelativePath());
-
-            ArrayList<Integer> listOfCoveredLines = new ArrayList<>(fileNode.getLinesWithCoverage());
-            ArrayList<Integer> listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
-
-            //???
-            ArrayList<Integer> listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
-
-            List<ChangedLinesModel> changedLinesModelList = new ArrayList<>();
-            int currentLine = listOfCoveredLines.get(0);
-            for (int i = 0; i < listOfCoveredLines.size(); i++){
-                if (!listOfCoveredLines.get(i).equals(listOfCoveredLines.get(i + 1) - 1)) {
-                    ChangedLinesModel changedLinesWithCoverage = new ChangedLinesModel(currentLine, i, Type.COVERED, Side.RIGHT);
-                    changedLinesModelList.add(changedLinesWithCoverage);
-                    currentLine = i + 1;
-                }
-            }
-
-            currentLine = listOfMissedLines.get(0);
-            for (int i = 0; i < listOfMissedLines.size(); i++){
-                if (!listOfMissedLines.get(i).equals(listOfMissedLines.get(i + 1) - 1)) {
-                    ChangedLinesModel changedLinesWithoutCoverage = new ChangedLinesModel(currentLine, i, Type.MISSED, Side.RIGHT);
-                    changedLinesModelList.add(changedLinesWithoutCoverage);
-                    currentLine = i + 1;
-                }
-            }
-
-            currentLine = listOfPartialLines.get(0);
-            for (int i = 0; i < listOfPartialLines.size(); i++){
-                if (!listOfPartialLines.get(i).equals(listOfPartialLines.get(i + 1) - 1)) {
-                    ChangedLinesModel changedLinesWithPartialCoverage = new ChangedLinesModel(currentLine, i, Type.PARTRIALLY_COVERED, Side.RIGHT);
-                    changedLinesModelList.add(changedLinesWithPartialCoverage);
-                    currentLine = i + 1;
-                }
-            }
-
-            changedFile.setListOfChangedLines(changedLinesModelList);
-            filesWithChangedLinesList.add(changedFile);
-        }
-        return filesWithChangedLinesList;
-    }
     /**
      * Gets the remote API for this action. Depending on the path, a different result is selected.
      *

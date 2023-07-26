@@ -1,31 +1,31 @@
 package io.jenkins.plugins.coverage.metrics.model;
 
 public class ChangedLinesModel {
-    private int start_line;
-    private int end_line;
+    private int startLine;
+    private int endLine;
     private Type type;
 
 
     public ChangedLinesModel(final int start_line, final int end_line, final Type type) {
-        this.setStart_line(start_line);
-        this.setEnd_line(end_line);
+        this.setStartLine(start_line);
+        this.setEndLine(end_line);
         this.setType(type);
     }
 
-    public int getStart_line() {
-        return start_line;
+    public int getStartLine() {
+        return startLine;
     }
 
-    public void setStart_line(final int start_line) {
-        this.start_line = start_line;
+    public void setStartLine(final int startLine) {
+        this.startLine = startLine;
     }
 
-    public int getEnd_line() {
-        return end_line;
+    public int getEndLine() {
+        return endLine;
     }
 
-    public void setEnd_line(final int end_line) {
-        this.end_line = end_line;
+    public void setEndLine(final int endLine) {
+        this.endLine = endLine;
     }
 
     public Type getType() {
