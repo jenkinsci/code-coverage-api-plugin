@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableSet;
 
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;

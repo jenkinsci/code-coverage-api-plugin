@@ -2,8 +2,6 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +43,7 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.color.CoverageColorJenkinsId;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
+import io.jenkins.plugins.coverage.metrics.model.FileWithChangedLinesCoverageModel;
 import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 import io.jenkins.plugins.coverage.metrics.source.SourceViewModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.InlineRowRenderer;
@@ -164,6 +163,13 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      */
     public Api getApi() {
         return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuild));
+    }
+
+    public Api getChangedLineCoverage() {
+        List<FileWithChangedLinesCoverageModel> filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(
+                node);
+
+        return new Api(new ChangedAndCoveredLinesApi(filesWithChangedLines));
     }
 
     /**
