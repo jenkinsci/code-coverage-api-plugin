@@ -8,10 +8,10 @@ import org.kohsuke.stapler.export.ExportedBean;
 import io.jenkins.plugins.coverage.metrics.model.FileWithChangedLinesCoverageModel;
 
 @ExportedBean
-public class ChangedAndCoveredLinesApi {
+public class CoolApi {
     private final List<FileWithChangedLinesCoverageModel> filesWithChangedLines;
 
-    public ChangedAndCoveredLinesApi(final List<FileWithChangedLinesCoverageModel> filesWithChangedLines
+    public CoolApi(final List<FileWithChangedLinesCoverageModel> filesWithChangedLines
     ) {
 
         this.filesWithChangedLines = filesWithChangedLines;

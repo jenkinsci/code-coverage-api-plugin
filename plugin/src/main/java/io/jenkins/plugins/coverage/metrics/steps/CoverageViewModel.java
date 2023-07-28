@@ -165,12 +165,14 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuild));
     }
 
-    public Api getChangedLineCoverage() {
+    public Api getHooky() {
         List<FileWithChangedLinesCoverageModel> filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(
                 node);
 
-        return new Api(new ChangedAndCoveredLinesApi(filesWithChangedLines));
+        return new Api(new CoolApi(filesWithChangedLines));
     }
+
+
 
     /**
      * Gets a set of color IDs which can be used to dynamically load the defined Jenkins colors.
