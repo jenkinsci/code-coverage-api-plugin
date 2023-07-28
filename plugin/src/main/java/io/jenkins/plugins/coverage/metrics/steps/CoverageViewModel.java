@@ -171,11 +171,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      * @return the remote API
      */
     public Api getLinecoverage() {
-        //List<FileWithChangedLinesCoverageModel> filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(
-        //        node);
-
         return new Api(new LineCoverageViewModel(node));
-        //return new Api(new CoolApi(filesWithChangedLines));
     }
 
 
