@@ -6,11 +6,21 @@ import java.util.List;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
 
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
+
 import io.jenkins.plugins.coverage.metrics.model.ChangedLinesModel;
 import io.jenkins.plugins.coverage.metrics.model.FileWithChangedLinesCoverageModel;
 import io.jenkins.plugins.coverage.metrics.model.Type;
 
+@ExportedBean
 public class LineCoverageViewModel {
+
+    private final List<FileWithChangedLinesCoverageModel> filesWithChangedLines;
+
+    public LineCoverageViewModel(final Node node) {
+        this.filesWithChangedLines = getFilesWithChangedLines(node);
+    }
 
     public static List<FileWithChangedLinesCoverageModel> getFilesWithChangedLines(final Node node) {
         var filesWithChangedLinesList = new ArrayList<FileWithChangedLinesCoverageModel>();
@@ -31,8 +41,6 @@ public class LineCoverageViewModel {
                 i++;
             }
 
-            //var listOfCoveredLines = new ArrayList<>(fileNode.getLinesWithCoverage());
-
             var changedLinesModelList = new ArrayList<ChangedLinesModel>();
 
             getChangedLineBlocks(listOfCoveredLines, changedLinesModelList, Type.COVERED);
@@ -44,6 +52,11 @@ public class LineCoverageViewModel {
             filesWithChangedLinesList.add(changedFile);
         }
         return filesWithChangedLinesList;
+    }
+
+    @Exported(inline = true)
+    public List<FileWithChangedLinesCoverageModel> getFilesWithChangedLines() {
+        return filesWithChangedLines;
     }
 
     public static void getChangedLineBlocks(final List<Integer> changedLines,

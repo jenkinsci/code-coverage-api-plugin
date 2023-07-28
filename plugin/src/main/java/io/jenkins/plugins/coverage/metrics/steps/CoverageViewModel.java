@@ -165,11 +165,17 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         return new Api(new CoverageApi(statistics, qualityGateResult, referenceBuild));
     }
 
-    public Api getHooky() {
-        List<FileWithChangedLinesCoverageModel> filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(
-                node);
+    /**
+     * Gets the remote API for line coverage data.
+     *
+     * @return the remote API
+     */
+    public Api getLinecoverage() {
+        //List<FileWithChangedLinesCoverageModel> filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(
+        //        node);
 
-        return new Api(new CoolApi(filesWithChangedLines));
+        return new Api(new LineCoverageViewModel(node));
+        //return new Api(new CoolApi(filesWithChangedLines));
     }
 
 
