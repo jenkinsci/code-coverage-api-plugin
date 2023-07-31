@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hamcrest.core.IsCollectionContaining;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
@@ -18,10 +17,10 @@ import static org.hamcrest.core.Is.*;
 /**
  * TODO: JavaDoc me
  */
-class RenameMeTest extends AbstractModifiedFilesCoverageTest {
+class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
 
     @Test
-    void testSomeMethod() {
+    void shouldContainAllChangedAndCoveredLines() {
         var node = createCoverageTree();
         node.filterByModifiedLines();
         var filesWithChangedLines = LineCoverageViewModel.getFilesWithChangedLines(node);
@@ -50,7 +49,6 @@ class RenameMeTest extends AbstractModifiedFilesCoverageTest {
         assertThat(filesWithChangedLines.get(0).getListOfChangedLines().get(3).getEndLine(), is(20));
         assertThat(filesWithChangedLines.get(0).getListOfChangedLines().get(3).getType(), is(Type.PARTRIALLY_COVERED));
 
-        //FileWithChangedLinesCoverageModel fileOne = createTestObject("/path/Test.java", Type.COVERED, 15, 16);
 
         var fileOneLinesList = createListOfChangedLines(Type.COVERED, 15, 16, 21, 22);
         fileOneLinesList.addAll(createListOfChangedLines(Type.MISSED, 35, 36));
@@ -62,16 +60,6 @@ class RenameMeTest extends AbstractModifiedFilesCoverageTest {
         assertThat(filesWithChangedLines, IsCollectionContaining.hasItem(fileOne));
 
 
-    }
-
-    private static FileWithChangedLinesCoverageModel createTestObject(String filePath, Type type, Integer... lines) {
-        FileWithChangedLinesCoverageModel fileWithChangedLines = new FileWithChangedLinesCoverageModel(filePath);
-        List<ChangedLinesModel> changedLinesModels = new ArrayList<>();
-
-        changedLinesModels.add(new ChangedLinesModel(lines[0],lines[1], type));
-        fileWithChangedLines.setListOfChangedLines(changedLinesModels);
-
-        return fileWithChangedLines;
     }
 
     private static List<ChangedLinesModel> createListOfChangedLines(Type type, Integer... lines) {
