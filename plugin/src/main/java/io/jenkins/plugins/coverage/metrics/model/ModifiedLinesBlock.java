@@ -2,12 +2,12 @@ package io.jenkins.plugins.coverage.metrics.model;
 
 import java.util.Objects;
 
-public class ChangedLinesModel {
+public class ModifiedLinesBlock {
     private int startLine;
     private int endLine;
-    private Type type;
+    private LineCoverageType type;
 
-    public ChangedLinesModel(final int start_line, final int end_line, final Type type) {
+    public ModifiedLinesBlock(final int start_line, final int end_line, final LineCoverageType type) {
         this.setStartLine(start_line);
         this.setEndLine(end_line);
         this.setType(type);
@@ -18,10 +18,10 @@ public class ChangedLinesModel {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ChangedLinesModel)) {
+        if (!(o instanceof ModifiedLinesBlock)) {
             return false;
         }
-        ChangedLinesModel that = (ChangedLinesModel) o;
+        ModifiedLinesBlock that = (ModifiedLinesBlock) o;
         return getStartLine() == that.getStartLine() && getEndLine() == that.getEndLine()
                 && getType() == that.getType();
     }
@@ -47,11 +47,11 @@ public class ChangedLinesModel {
         this.endLine = endLine;
     }
 
-    public Type getType() {
+    public LineCoverageType getType() {
         return type;
     }
 
-    public void setType(final Type type) {
+    public void setType(final LineCoverageType type) {
         this.type = type;
     }
 }

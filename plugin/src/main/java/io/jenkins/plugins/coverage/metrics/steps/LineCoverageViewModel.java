@@ -9,24 +9,24 @@ import edu.hm.hafner.coverage.Node;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import io.jenkins.plugins.coverage.metrics.model.ChangedLinesModel;
-import io.jenkins.plugins.coverage.metrics.model.FileWithChangedLinesCoverageModel;
-import io.jenkins.plugins.coverage.metrics.model.Type;
+import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
+import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
+import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 
 @ExportedBean
 public class LineCoverageViewModel {
 
-    private final List<FileWithChangedLinesCoverageModel> filesWithChangedLines;
+    private final List<FileWithModifiedLines> filesWithModifiedLines;
 
     public LineCoverageViewModel(final Node node) {
-        this.filesWithChangedLines = getFilesWithChangedLines(node);
+        this.filesWithModifiedLines = getFilesWithModifiedLines(node);
     }
 
-    public static List<FileWithChangedLinesCoverageModel> getFilesWithChangedLines(final Node node) {
-        var filesWithChangedLinesList = new ArrayList<FileWithChangedLinesCoverageModel>();
+    public static List<FileWithModifiedLines> getFilesWithModifiedLines(final Node node) {
+        var filesWithChangedLinesList = new ArrayList<FileWithModifiedLines>();
 
         for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
-            FileWithChangedLinesCoverageModel changedFile = new FileWithChangedLinesCoverageModel(fileNode.getRelativePath());
+            FileWithModifiedLines changedFile = new FileWithModifiedLines(fileNode.getRelativePath());
 
             var listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
             var listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
@@ -41,31 +41,31 @@ public class LineCoverageViewModel {
                 i++;
             }
 
-            var changedLinesModelList = new ArrayList<ChangedLinesModel>();
+            var changedLinesModelList = new ArrayList<ModifiedLinesBlock>();
 
-            getChangedLineBlocks(listOfCoveredLines, changedLinesModelList, Type.COVERED);
-            getChangedLineBlocks(listOfMissedLines, changedLinesModelList, Type.MISSED);
-            getChangedLineBlocks(listOfPartialLines, changedLinesModelList, Type.PARTRIALLY_COVERED);
+            getModifiedLineBlocks(listOfCoveredLines, changedLinesModelList, LineCoverageType.COVERED);
+            getModifiedLineBlocks(listOfMissedLines, changedLinesModelList, LineCoverageType.MISSED);
+            getModifiedLineBlocks(listOfPartialLines, changedLinesModelList, LineCoverageType.PARTRIALLY_COVERED);
 
 
-            changedFile.setListOfChangedLines(changedLinesModelList);
+            changedFile.setListOfModifiedLines(changedLinesModelList);
             filesWithChangedLinesList.add(changedFile);
         }
         return filesWithChangedLinesList;
     }
 
     @Exported(inline = true)
-    public List<FileWithChangedLinesCoverageModel> getFilesWithChangedLines() {
-        return filesWithChangedLines;
+    public List<FileWithModifiedLines> getFilesWithModifiedLines() {
+        return filesWithModifiedLines;
     }
 
-    public static void getChangedLineBlocks(final List<Integer> changedLines,
-            final ArrayList<ChangedLinesModel> changedLinesModels, final Type type) {
+    public static void getModifiedLineBlocks(final List<Integer> changedLines,
+            final ArrayList<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
         int currentLine = changedLines.get(0);
         for (int i = 0; i < changedLines.size(); i++){
             if (i == changedLines.size() - 1 || !changedLines.get(i).equals(changedLines.get(i + 1) - 1)) {
-                var changedLinesBlock = new ChangedLinesModel(currentLine, changedLines.get(i), type);
-                changedLinesModels.add(changedLinesBlock);
+                var changedLinesBlock = new ModifiedLinesBlock(currentLine, changedLines.get(i), type);
+                modifiedLinesBlocks.add(changedLinesBlock);
                 if (i < changedLines.size() - 1) {
                     currentLine = changedLines.get(i + 1);
                 }

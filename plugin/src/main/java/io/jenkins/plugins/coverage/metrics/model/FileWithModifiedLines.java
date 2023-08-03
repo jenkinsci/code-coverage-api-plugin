@@ -7,30 +7,30 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 @ExportedBean
-public class FileWithChangedLinesCoverageModel {
+public class FileWithModifiedLines {
     private String relativePath;
-    List<ChangedLinesModel> listOfChangedLines;
+    List<ModifiedLinesBlock> listOfModifiedLines;
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FileWithChangedLinesCoverageModel)) {
+        if (!(o instanceof FileWithModifiedLines)) {
             return false;
         }
-        FileWithChangedLinesCoverageModel file = (FileWithChangedLinesCoverageModel) o;
+        FileWithModifiedLines file = (FileWithModifiedLines) o;
         return Objects.equals(getRelativePath(), file.getRelativePath())
                 //&& Objects.equals(getListOfChangedLines(), file.getListOfChangedLines());
-                && getListOfChangedLines().containsAll(file.getListOfChangedLines());
+                && getListOfModifiedLines().containsAll(file.getListOfModifiedLines());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRelativePath(), getListOfChangedLines());
+        return Objects.hash(getRelativePath(), getListOfModifiedLines());
     }
 
-    public FileWithChangedLinesCoverageModel(final String relativePath) {
+    public FileWithModifiedLines(final String relativePath) {
         this.setRelativePath(relativePath);
     }
 
@@ -44,12 +44,12 @@ public class FileWithChangedLinesCoverageModel {
     }
 
     @Exported(inline = true)
-    public List<ChangedLinesModel> getListOfChangedLines() {
-        return listOfChangedLines;
+    public List<ModifiedLinesBlock> getListOfModifiedLines() {
+        return listOfModifiedLines;
     }
 
-    public void setListOfChangedLines(
-            final List<ChangedLinesModel> listOfChangedLines) {
-        this.listOfChangedLines = listOfChangedLines;
+    public void setListOfModifiedLines(
+            final List<ModifiedLinesBlock> listOfModifiedLines) {
+        this.listOfModifiedLines = listOfModifiedLines;
     }
 }

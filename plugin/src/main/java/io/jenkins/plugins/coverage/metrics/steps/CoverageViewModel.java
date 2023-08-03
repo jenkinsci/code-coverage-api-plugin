@@ -43,7 +43,6 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.color.CoverageColorJenkinsId;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
-import io.jenkins.plugins.coverage.metrics.model.FileWithChangedLinesCoverageModel;
 import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 import io.jenkins.plugins.coverage.metrics.source.SourceViewModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.InlineRowRenderer;

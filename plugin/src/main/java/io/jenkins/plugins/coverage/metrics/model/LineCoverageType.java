@@ -1,6 +1,6 @@
 package io.jenkins.plugins.coverage.metrics.model;
 
-public enum Type {
+public enum LineCoverageType {
     COVERED,
     MISSED,
     PARTRIALLY_COVERED
