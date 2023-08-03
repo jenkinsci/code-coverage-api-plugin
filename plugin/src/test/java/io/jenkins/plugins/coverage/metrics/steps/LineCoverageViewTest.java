@@ -54,8 +54,7 @@ class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
         fileOneLinesList.addAll(createListOfChangedLines(LineCoverageType.MISSED, 35, 36));
         fileOneLinesList.addAll(createListOfChangedLines(LineCoverageType.PARTRIALLY_COVERED, 20, 20));
 
-        var fileOne = new FileWithModifiedLines("test/example/Test1.java");
-        fileOne.setListOfModifiedLines(fileOneLinesList);
+        var fileOne = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
 
         assertThat(filesWithChangedLines, IsCollectionContaining.hasItem(fileOne));
 

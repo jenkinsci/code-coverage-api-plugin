@@ -8,8 +8,26 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 @ExportedBean
 public class FileWithModifiedLines {
-    private String relativePath;
-    List<ModifiedLinesBlock> listOfModifiedLines;
+    private final String relativePath;
+    private final List<ModifiedLinesBlock> listOfModifiedLines;
+
+    public FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
+        this.relativePath = relativePath;
+        this.listOfModifiedLines = listOfModifiedLines;
+    }
+
+    @Exported(inline = true)
+    public String getRelativePath() {
+        return relativePath;
+    }
+
+
+    @Exported(inline = true)
+    public List<ModifiedLinesBlock> getListOfModifiedLines() {
+        return listOfModifiedLines;
+    }
+
+
 
     @Override
     public boolean equals(final Object o) {
@@ -28,28 +46,5 @@ public class FileWithModifiedLines {
     @Override
     public int hashCode() {
         return Objects.hash(getRelativePath(), getListOfModifiedLines());
-    }
-
-    public FileWithModifiedLines(final String relativePath) {
-        this.setRelativePath(relativePath);
-    }
-
-    @Exported(inline = true)
-    public String getRelativePath() {
-        return relativePath;
-    }
-
-    public void setRelativePath(final String relativePath) {
-        this.relativePath = relativePath;
-    }
-
-    @Exported(inline = true)
-    public List<ModifiedLinesBlock> getListOfModifiedLines() {
-        return listOfModifiedLines;
-    }
-
-    public void setListOfModifiedLines(
-            final List<ModifiedLinesBlock> listOfModifiedLines) {
-        this.listOfModifiedLines = listOfModifiedLines;
     }
 }

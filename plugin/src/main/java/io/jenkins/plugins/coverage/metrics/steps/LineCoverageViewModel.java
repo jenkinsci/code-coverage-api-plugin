@@ -23,10 +23,10 @@ public class LineCoverageViewModel {
     }
 
     public static List<FileWithModifiedLines> getFilesWithModifiedLines(final Node node) {
-        var filesWithChangedLinesList = new ArrayList<FileWithModifiedLines>();
+        var filesWithModifiedLinesList = new ArrayList<FileWithModifiedLines>();
 
         for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
-            FileWithModifiedLines changedFile = new FileWithModifiedLines(fileNode.getRelativePath());
+
 
             var listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
             var listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
@@ -41,17 +41,16 @@ public class LineCoverageViewModel {
                 i++;
             }
 
-            var changedLinesModelList = new ArrayList<ModifiedLinesBlock>();
+            var modifiedLinesBlocksList = new ArrayList<ModifiedLinesBlock>();
 
-            getModifiedLineBlocks(listOfCoveredLines, changedLinesModelList, LineCoverageType.COVERED);
-            getModifiedLineBlocks(listOfMissedLines, changedLinesModelList, LineCoverageType.MISSED);
-            getModifiedLineBlocks(listOfPartialLines, changedLinesModelList, LineCoverageType.PARTRIALLY_COVERED);
+            getModifiedLineBlocks(listOfCoveredLines, modifiedLinesBlocksList, LineCoverageType.COVERED);
+            getModifiedLineBlocks(listOfMissedLines, modifiedLinesBlocksList, LineCoverageType.MISSED);
+            getModifiedLineBlocks(listOfPartialLines, modifiedLinesBlocksList, LineCoverageType.PARTRIALLY_COVERED);
 
-
-            changedFile.setListOfModifiedLines(changedLinesModelList);
-            filesWithChangedLinesList.add(changedFile);
+            FileWithModifiedLines changedFile = new FileWithModifiedLines(fileNode.getRelativePath(), modifiedLinesBlocksList);
+            filesWithModifiedLinesList.add(changedFile);
         }
-        return filesWithChangedLinesList;
+        return filesWithModifiedLinesList;
     }
 
     @Exported(inline = true)
