@@ -2,6 +2,10 @@ package io.jenkins.plugins.coverage.metrics.model;
 
 import java.util.Objects;
 
+/**
+ * Model class containing data pertained to consecutive lines of modified code. Each object possesses a starting and ending
+ * line number and the type of coverage of the block. Each object is associated with a FileWithModifiedLines object.
+ */
 public class ModifiedLinesBlock {
     private final int startLine;
     private final int endLine;

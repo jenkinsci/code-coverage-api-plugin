@@ -6,6 +6,10 @@ import java.util.Objects;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
+/**
+ * Model class containing data pertaining to files with modified lines of code.
+ * Each object contains a relative file path and a list of ModifiedLinesBlock objects.
+ */
 @ExportedBean
 public class FileWithModifiedLines {
     private final String relativePath;

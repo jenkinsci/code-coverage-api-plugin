@@ -6,15 +6,20 @@ import java.util.List;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
 
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
-
+import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
 import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
-import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 
+/**
+ * Server side model that provides data for the details of line coverage results in modified lines.
+ */
 public class LineCoverageViewModel {
 
+    /**
+     * Static method to extract modified lines of code and their respective coverage status from passed Node object.
+     * @param node the root of the tree from which modified lines are extracted.
+     * @return returns a List of FileWithModifiedLines objects.
+     */
     public static List<FileWithModifiedLines> getFilesWithModifiedLines(final Node node) {
         var filesWithModifiedLinesList = new ArrayList<FileWithModifiedLines>();
 
@@ -46,15 +51,22 @@ public class LineCoverageViewModel {
         return filesWithModifiedLinesList;
     }
 
-    public static void getModifiedLineBlocks(final List<Integer> changedLines,
+    /**
+     * This method parses over the modified lines of a file and combines consecutive line numbers with the same coverage type
+     * into a modifiedLinesBlock object.
+     * @param modifiedLines list containing the integer numbers of modified lines.
+     * @param modifiedLinesBlocks list containing modifiedLinesBlock objects.
+     * @param type type of coverage pertaining to each line of code (COVERED, MISSED, or PARTIALLY_COVERED)
+     */
+    public static void getModifiedLineBlocks(final List<Integer> modifiedLines,
             final ArrayList<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
-        int currentLine = changedLines.get(0);
-        for (int i = 0; i < changedLines.size(); i++){
-            if (i == changedLines.size() - 1 || !changedLines.get(i).equals(changedLines.get(i + 1) - 1)) {
-                var changedLinesBlock = new ModifiedLinesBlock(currentLine, changedLines.get(i), type);
-                modifiedLinesBlocks.add(changedLinesBlock);
-                if (i < changedLines.size() - 1) {
-                    currentLine = changedLines.get(i + 1);
+        int currentLine = modifiedLines.get(0);
+        for (int i = 0; i < modifiedLines.size(); i++){
+            if (i == modifiedLines.size() - 1 || !modifiedLines.get(i).equals(modifiedLines.get(i + 1) - 1)) {
+                var changedlinesblock = new ModifiedLinesBlock(currentLine, modifiedLines.get(i), type);
+                modifiedLinesBlocks.add(changedlinesblock);
+                if (i < modifiedLines.size() - 1) {
+                    currentLine = modifiedLines.get(i + 1);
                 }
             }
         }
