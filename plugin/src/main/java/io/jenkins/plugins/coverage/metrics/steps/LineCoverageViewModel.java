@@ -15,12 +15,6 @@ import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 
 public class LineCoverageViewModel {
 
-    //private final List<FileWithModifiedLines> filesWithModifiedLines;
-
-    /*public LineCoverageViewModel(final Node node) {
-        this.filesWithModifiedLines = getFilesWithModifiedLines(node);
-    }*/
-
     public static List<FileWithModifiedLines> getFilesWithModifiedLines(final Node node) {
         var filesWithModifiedLinesList = new ArrayList<FileWithModifiedLines>();
 
@@ -51,11 +45,6 @@ public class LineCoverageViewModel {
         }
         return filesWithModifiedLinesList;
     }
-
-   /* @Exported(inline = true)
-    public List<FileWithModifiedLines> getFilesWithModifiedLines() {
-        return filesWithModifiedLines;
-    }*/
 
     public static void getModifiedLineBlocks(final List<Integer> changedLines,
             final ArrayList<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {

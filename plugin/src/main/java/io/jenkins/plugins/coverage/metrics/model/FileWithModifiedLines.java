@@ -38,9 +38,9 @@ public class FileWithModifiedLines {
             return false;
         }
         FileWithModifiedLines file = (FileWithModifiedLines) o;
-        return Objects.equals(getRelativePath(), file.getRelativePath())
-                //&& Objects.equals(getListOfChangedLines(), file.getListOfChangedLines());
-                && getListOfModifiedLines().containsAll(file.getListOfModifiedLines());
+        return Objects.equals(this.getRelativePath(), file.getRelativePath())
+                && this.getListOfModifiedLines().containsAll(file.getListOfModifiedLines())
+                && this.getListOfModifiedLines().size() == file.getListOfModifiedLines().size();
     }
 
     @Override

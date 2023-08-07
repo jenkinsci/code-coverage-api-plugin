@@ -203,6 +203,12 @@
 
     <!-- Test Dependencies -->
     <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.23.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
       <classifier>tests</classifier>
