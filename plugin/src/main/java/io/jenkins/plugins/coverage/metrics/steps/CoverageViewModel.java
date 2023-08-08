@@ -169,6 +169,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return the remote API
      */
+    //TODO: http request in browser shows 4 empty indexes in array. Why?
     public Api getLinecoverage() {
         return new Api(new LineCoverageApi(LineCoverageViewModel.getFilesWithModifiedLines(node)));
     }
