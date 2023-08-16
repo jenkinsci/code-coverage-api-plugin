@@ -2,10 +2,14 @@ package io.jenkins.plugins.coverage.metrics.model;
 
 import java.util.Objects;
 
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
+
 /**
  * Model class containing data pertained to consecutive lines of modified code. Each object possesses a starting and ending
  * line number and the type of coverage of the block. Each object is associated with a FileWithModifiedLines object.
  */
+@ExportedBean
 public class ModifiedLinesBlock {
     private final int startLine;
     private final int endLine;
@@ -35,14 +39,17 @@ public class ModifiedLinesBlock {
         return Objects.hash(getStartLine(), getEndLine(), getType());
     }
 
+    @Exported
     public int getStartLine() {
         return startLine;
     }
 
+    @Exported
     public int getEndLine() {
         return endLine;
     }
 
+    @Exported
     public LineCoverageType getType() {
         return type;
     }
