@@ -25,13 +25,10 @@ public class FileWithModifiedLines {
         return relativePath;
     }
 
-
     @Exported(inline = true)
     public List<ModifiedLinesBlock> getListOfModifiedLines() {
         return listOfModifiedLines;
     }
-
-
 
     @Override
     public boolean equals(final Object o) {

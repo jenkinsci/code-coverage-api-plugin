@@ -24,9 +24,6 @@ public class LineCoverageViewModel {
         var filesWithModifiedLinesList = new ArrayList<FileWithModifiedLines>();
 
         for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
-
-
-            //TODO: get missed lines returns an empty array. Why? FIX!
             var listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
             var listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
             List<Integer> listOfCoveredLines = new ArrayList<>();
@@ -67,10 +64,12 @@ public class LineCoverageViewModel {
         }
 
         int currentLine = modifiedLines.get(0);
-        for (int i = 0; i < modifiedLines.size(); i++){
+        for (int i = 0; i < modifiedLines.size(); i++) {
             if (i == modifiedLines.size() - 1 || !modifiedLines.get(i).equals(modifiedLines.get(i + 1) - 1)) {
-                var changedlinesblock = new ModifiedLinesBlock(currentLine, modifiedLines.get(i), type);
-                modifiedLinesBlocks.add(changedlinesblock);
+
+                var modifiedLinesBlock = new ModifiedLinesBlock(currentLine, modifiedLines.get(i), type);
+                modifiedLinesBlocks.add(modifiedLinesBlock);
+
                 if (i < modifiedLines.size() - 1) {
                     currentLine = modifiedLines.get(i + 1);
                 }
