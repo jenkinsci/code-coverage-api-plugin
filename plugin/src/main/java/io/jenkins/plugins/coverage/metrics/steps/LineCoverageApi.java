@@ -14,6 +14,10 @@ import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 public class LineCoverageApi {
     private final List<FileWithModifiedLines> filesWithModifiedLines;
 
+    /**
+     * Constructor for the LineCoverageApi class.
+     * @param filesWithModifiedLines List of files with modified lines to expose via the api.
+     */
     public LineCoverageApi(final List<FileWithModifiedLines> filesWithModifiedLines) {
         this.filesWithModifiedLines = filesWithModifiedLines;
     }

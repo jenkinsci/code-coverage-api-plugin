@@ -15,9 +15,15 @@ public class ModifiedLinesBlock {
     private final int endLine;
     private final LineCoverageType type;
 
-    public ModifiedLinesBlock(final int start_line, final int end_line, final LineCoverageType type) {
-        this.startLine = start_line;
-        this.endLine = end_line;
+    /**
+     * Constructor for the ModifiedLinesBlock class.
+     * @param startLine number of the first line of code associated with this block.
+     * @param endLine number of the last line of code associated with this block.
+     * @param type type of coverage.
+     */
+    public ModifiedLinesBlock(final int startLine, final int endLine, final LineCoverageType type) {
+        this.startLine = startLine;
+        this.endLine = endLine;
         this.type = type;
     }
 

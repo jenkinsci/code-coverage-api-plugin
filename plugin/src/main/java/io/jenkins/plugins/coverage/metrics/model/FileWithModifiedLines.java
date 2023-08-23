@@ -15,6 +15,11 @@ public class FileWithModifiedLines {
     private final String relativePath;
     private final List<ModifiedLinesBlock> listOfModifiedLines;
 
+    /**
+     * Constructor for the FileWithModifiedLines class.
+     * @param relativePath the relative path of the file
+     * @param listOfModifiedLines all modified lines inside the file
+     */
     public FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
         this.relativePath = relativePath;
         this.listOfModifiedLines = listOfModifiedLines;

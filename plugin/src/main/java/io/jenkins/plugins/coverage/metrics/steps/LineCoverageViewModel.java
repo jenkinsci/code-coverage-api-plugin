@@ -10,10 +10,15 @@ import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
 import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 
+//TODO: rename to util
 /**
  * Server side model that provides data for the details of line coverage results in modified lines.
  */
 public class LineCoverageViewModel {
+
+    private LineCoverageViewModel() {
+        //this is a utility class
+    }
 
     /**
      * Static method to extract modified lines of code and their respective coverage status from passed Node object.
@@ -25,12 +30,11 @@ public class LineCoverageViewModel {
 
         for (FileNode fileNode :  node.filterByModifiedLines().getAllFileNodes()) {
             var listOfMissedLines = new ArrayList<>(fileNode.getMissedLines());
-            var listOfPartialLines = new ArrayList<>((fileNode.getPartiallyCoveredLines().keySet()));
+            var listOfPartialLines = new ArrayList<>(fileNode.getPartiallyCoveredLines().keySet());
             List<Integer> listOfCoveredLines = new ArrayList<>();
 
             int i = 0;
-            for (Integer a:fileNode.getLinesWithCoverage()
-            ) {
+            for (Integer a:fileNode.getLinesWithCoverage()) {
                 if (fileNode.getCoveredCounters()[i] > 0 && fileNode.getMissedCounters()[i] == 0) {
                     listOfCoveredLines.add(a);
                 }
@@ -57,7 +61,7 @@ public class LineCoverageViewModel {
      * @param type type of coverage pertaining to each line of code (COVERED, MISSED, or PARTIALLY_COVERED)
      */
     public static void getModifiedLineBlocks(final List<Integer> modifiedLines,
-            final ArrayList<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
+            final List<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
 
         if (modifiedLines.isEmpty()) {
             return;

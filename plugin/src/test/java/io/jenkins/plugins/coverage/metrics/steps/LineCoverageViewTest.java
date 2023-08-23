@@ -19,6 +19,21 @@ import static org.assertj.core.api.Assertions.*;
 class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
 
     @Test
+    void testOverriddenEqualsMethod() {
+        var fileOneLinesList = createListOfModifiedLines(LineCoverageType.COVERED, 15, 16, 21, 22);
+        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.MISSED, 35, 36));
+        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTRIALLY_COVERED, 20, 20));
+
+        var fileOne = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
+        var fileTwo = new FileWithModifiedLines("fileTwo", null);
+        var checkTrue = fileOne.equals(fileOne);
+        var checkFalse = fileOne.equals(fileTwo);
+
+        assertThat(checkTrue).isTrue();
+        assertThat(checkFalse).isFalse();
+    }
+
+    @Test
     void verifyCoverageForAllModifiedLines() {
         var node = createCoverageTree();
         var filesWithChangedLines = LineCoverageViewModel.getFilesWithModifiedLines(node);
@@ -28,11 +43,13 @@ class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
         fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTRIALLY_COVERED, 20, 20));
 
         var fileOne = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
+        var checkEqualsMethod = fileOne.equals(fileOne);
 
         assertThat(filesWithChangedLines).contains(fileOne);
+        assertThat(checkEqualsMethod).isTrue();
     }
 
-    private static List<ModifiedLinesBlock> createListOfModifiedLines(LineCoverageType type, Integer... lines) {
+    private static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type, final Integer... lines) {
         List<ModifiedLinesBlock> modifiedLinesBlocks = new ArrayList<>();
 
         for (int i = 0; i < (lines.length - 1); i++) {
