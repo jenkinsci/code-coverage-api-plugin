@@ -6,12 +6,13 @@ import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
 import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 
 import static org.assertj.core.api.Assertions.*;
-public class ModifiedLinesBlockTest {
+
+class ModifiedLinesBlockTest {
     @Test
     void testGetters() {
-        var linesBlockOne = new ModifiedLinesBlock(0,0, LineCoverageType.COVERED);
-        var linesBlockTwo = new ModifiedLinesBlock(0,0, LineCoverageType.MISSED);
-        var linesBlockThree = new ModifiedLinesBlock(0,0, LineCoverageType.PARTRIALLY_COVERED);
+        var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
+        var linesBlockTwo = new ModifiedLinesBlock(0, 0, LineCoverageType.MISSED);
+        var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.PARTRIALLY_COVERED);
 
         var startOne = linesBlockOne.getStartLine();
         var endOne = linesBlockOne.getEndLine();
@@ -30,9 +31,9 @@ public class ModifiedLinesBlockTest {
 
     @Test
     void testOverriddenEqualsMethod() {
-        var linesBlockOne = new ModifiedLinesBlock(0,0, LineCoverageType.COVERED);
-        var linesBlockTwo = new ModifiedLinesBlock(0,0, LineCoverageType.COVERED);
-        var linesBlockThree = new ModifiedLinesBlock(0,0, LineCoverageType.MISSED);
+        var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
+        var linesBlockTwo = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
+        var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.MISSED);
 
         var checkTrue = linesBlockOne.equals(linesBlockTwo);
         var checkFalse = linesBlockOne.equals(linesBlockThree);

@@ -73,7 +73,8 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     private static final String INFO_MESSAGES_VIEW_URL = "info";
 
     private static final ElementFormatter FORMATTER = new ElementFormatter();
-    private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH, Metric.MUTATION);
+    private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH,
+            Metric.MUTATION);
     private static final String UNDEFINED = "-";
     private final Run<?, ?> owner;
     private final String optionalName;
@@ -169,12 +170,10 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
      *
      * @return the remote API
      */
-    //TODO: http request in browser shows 4 empty indexes in array. Why?
+    //TODO: rename method
     public Api getLinecoverage() {
         return new Api(new LineCoverageApi(LineCoverageViewModel.getFilesWithModifiedLines(node)));
     }
-
-
 
     /**
      * Gets a set of color IDs which can be used to dynamically load the defined Jenkins colors.
@@ -359,7 +358,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
         if (targetResult.isPresent()) {
             try {
                 Node fileNode = targetResult.get();
-                return readSourceCode((FileNode)fileNode, tableId);
+                return readSourceCode((FileNode) fileNode, tableId);
             }
             catch (IOException | InterruptedException exception) {
                 return ExceptionUtils.getStackTrace(exception);

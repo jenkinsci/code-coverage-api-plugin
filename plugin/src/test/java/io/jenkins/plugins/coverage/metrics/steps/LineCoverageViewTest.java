@@ -13,8 +13,8 @@ import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test to assert that all modified lines and their respective coverage types are correctly extracted from the
- * coverage tree created by the createCoverageTree() method, using the getFilesWithModifiedLines() method.
+ * Test to assert that all modified lines and their respective coverage types are correctly extracted from the coverage
+ * tree created by the createCoverageTree() method, using the calculateFilesWithModifiedLines() method in {@link LineCoverageViewModel}.
  */
 class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
 
@@ -49,12 +49,12 @@ class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
         assertThat(checkEqualsMethod).isTrue();
     }
 
-    private static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type, final Integer... lines) {
+    private static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,
+            final Integer... lines) {
         List<ModifiedLinesBlock> modifiedLinesBlocks = new ArrayList<>();
 
-        for (int i = 0; i < (lines.length - 1); i++) {
+        for (int i = 0; i < (lines.length - 1); i += 2) {
             modifiedLinesBlocks.add(new ModifiedLinesBlock(lines[i], lines[i + 1], type));
-            i++;
         }
 
         return modifiedLinesBlocks;

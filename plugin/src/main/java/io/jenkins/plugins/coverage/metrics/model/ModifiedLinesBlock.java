@@ -6,8 +6,9 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
- * Model class containing data pertained to consecutive lines of modified code. Each object possesses a starting and ending
- * line number and the type of coverage of the block. Each object is associated with a FileWithModifiedLines object.
+ * Model class containing data pertained to consecutive lines of modified code. Each object possesses a starting and
+ * ending line number and the type of coverage of the block. Each object is associated with a FileWithModifiedLines
+ * object.
  */
 @ExportedBean
 public class ModifiedLinesBlock {
@@ -17,9 +18,13 @@ public class ModifiedLinesBlock {
 
     /**
      * Constructor for the ModifiedLinesBlock class.
-     * @param startLine number of the first line of code associated with this block.
-     * @param endLine number of the last line of code associated with this block.
-     * @param type type of coverage.
+     *
+     * @param startLine
+     *         number of the first line of code associated with this block.
+     * @param endLine
+     *         number of the last line of code associated with this block.
+     * @param type
+     *         type of coverage.
      */
     public ModifiedLinesBlock(final int startLine, final int endLine, final LineCoverageType type) {
         this.startLine = startLine;
