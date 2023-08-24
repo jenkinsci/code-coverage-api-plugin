@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Test to assert that all modified lines and their respective coverage types are correctly extracted from the coverage
- * tree created by the createCoverageTree() method, using the calculateFilesWithModifiedLines() method in {@link LineCoverageViewModel}.
+ * tree created by the createCoverageTree() method, using the calculateFilesWithModifiedLines() method in {@link CoverageApiUtil}.
  */
-class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
+class CoverageApiUtilTest extends AbstractModifiedFilesCoverageTest {
 
     @Test
     void testOverriddenEqualsMethod() {
@@ -36,7 +36,7 @@ class LineCoverageViewTest extends AbstractModifiedFilesCoverageTest {
     @Test
     void verifyCoverageForAllModifiedLines() {
         var node = createCoverageTree();
-        var filesWithChangedLines = LineCoverageViewModel.getFilesWithModifiedLines(node);
+        var filesWithChangedLines = CoverageApiUtil.getFilesWithModifiedLines(node);
 
         var fileOneLinesList = createListOfModifiedLines(LineCoverageType.COVERED, 15, 16, 21, 22);
         fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.MISSED, 35, 36));

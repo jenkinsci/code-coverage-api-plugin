@@ -77,6 +77,8 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
     /**
      * Creates a coverage tree that consists of {@link FileNode}s with and without modified lines together with the
      * corresponding coverage information.
+     *
+     * @return tree returns a Node tree with modified and unmodified mock data.
      */
     protected Node createCoverageTree() {
         var fileChangesProcessor = createFileChangesProcessor();
@@ -90,6 +92,7 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
 
     /**
      * Gets the name of the test file with modified lines.
+     * @return TEST_FILE_MODIFIED returns the name of a file with modified code lines.
      */
     protected String getNameOfFileWithModifiedLines() {
         return TEST_FILE_MODIFIED;
@@ -97,6 +100,7 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
 
     /**
      * Gets the path of the test file with modified lines.
+     * @return TEST_FILE_MODIFIED_PATH returns the relative path of a modified test file.
      */
     protected String getPathOfFileWithModifiedLines() {
         return TEST_FILE_MODIFIED_PATH;
@@ -104,6 +108,7 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
 
     /**
      * Gets the name of the test file without modified lines.
+     * @return TEST_FILE_NOT_MODIFIED returns the name of a file with no modified code lines.
      */
     protected String getNameOfFileWithoutModifiedLines() {
         return TEST_FILE_NOT_MODIFIED;

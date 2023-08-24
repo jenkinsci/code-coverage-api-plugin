@@ -2,12 +2,16 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import org.junit.jupiter.api.Test;
 
+import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
 import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
 import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ModifiedLinesBlockTest {
+/**
+ * Tests the {@link ModifiedLinesBlock} class.
+ */
+class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
     @Test
     void testGetters() {
         var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);

@@ -609,6 +609,7 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
 
     @Override
     public CoverageViewModel getTarget() {
+
         return new CoverageViewModel(getOwner(), getUrlName(), name, getResult(),
                 getStatistics(), getQualityGateResult(), getReferenceBuildLink(), log, this::createChartModel);
     }

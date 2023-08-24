@@ -10,14 +10,12 @@ import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
 import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
 import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 
-//TODO: rename to util
-
 /**
  * Server side model that provides data for the details of line coverage results in modified lines.
  */
-public class LineCoverageViewModel {
+public class CoverageApiUtil {
 
-    private LineCoverageViewModel() {
+    private CoverageApiUtil() {
         //this is a utility class
     }
 
