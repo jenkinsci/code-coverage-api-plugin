@@ -1,7 +1,5 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
 
 import edu.hm.hafner.coverage.Coverage.CoverageBuilder;

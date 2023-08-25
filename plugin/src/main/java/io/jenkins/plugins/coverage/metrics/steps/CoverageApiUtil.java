@@ -45,9 +45,9 @@ public class CoverageApiUtil {
 
             var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
 
-            getModifiedLineBlocks(coveredLines, modifiedLinesBlocks, LineCoverageType.COVERED);
-            getModifiedLineBlocks(missedLines, modifiedLinesBlocks, LineCoverageType.MISSED);
-            getModifiedLineBlocks(partiallyCoveredLines, modifiedLinesBlocks, LineCoverageType.PARTRIALLY_COVERED);
+            calculateModifiedLineBlocks(coveredLines, modifiedLinesBlocks, LineCoverageType.COVERED);
+            calculateModifiedLineBlocks(missedLines, modifiedLinesBlocks, LineCoverageType.MISSED);
+            calculateModifiedLineBlocks(partiallyCoveredLines, modifiedLinesBlocks, LineCoverageType.PARTRIALLY_COVERED);
 
             FileWithModifiedLines changedFile = new FileWithModifiedLines(fileNode.getRelativePath(),
                     modifiedLinesBlocks);
@@ -67,7 +67,7 @@ public class CoverageApiUtil {
      * @param type
      *         type of coverage pertaining to each line of code (COVERED, MISSED, or PARTIALLY_COVERED)
      */
-    public static void getModifiedLineBlocks(final List<Integer> modifiedLines,
+    public static void calculateModifiedLineBlocks(final List<Integer> modifiedLines,
             final List<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
 
         if (modifiedLines.isEmpty()) {
