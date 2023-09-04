@@ -1,6 +1,8 @@
 package io.jenkins.plugins.coverage.metrics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -8,6 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
 
+import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
+import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 import io.jenkins.plugins.coverage.metrics.steps.FileChangesProcessor;
 import io.jenkins.plugins.forensics.delta.Change;
 import io.jenkins.plugins.forensics.delta.ChangeEditType;
@@ -91,7 +95,25 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
     }
 
     /**
+     * Creates a list of {@link ModifiedLinesBlock} object for testing purposes.
+     * @param type of line coverage: {@link LineCoverageType#COVERED}, {@link LineCoverageType#MISSED}, or {@link LineCoverageType#PARTIALLY_COVERED}
+     * @param lines of code that share the above {@link LineCoverageType}, must be consecutive.
+     * @return the list {@link ModifiedLinesBlock} objects, sharing a {@link LineCoverageType}.
+     */
+    protected static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,
+            final Integer... lines) {
+        var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
+
+        for (int i = 0; i < (lines.length - 1); i += 2) {
+            modifiedLinesBlocks.add(new ModifiedLinesBlock(lines[i], lines[i + 1], type));
+        }
+
+        return modifiedLinesBlocks;
+    }
+
+    /**
      * Gets the name of the test file with modified lines.
+     *
      * @return the name of a file with modified code lines.
      */
     protected String getNameOfFileWithModifiedLines() {
@@ -100,6 +122,7 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
 
     /**
      * Gets the path of the test file with modified lines.
+     *
      * @return the relative path of a modified test file.
      */
     protected String getPathOfFileWithModifiedLines() {
@@ -108,6 +131,7 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
 
     /**
      * Gets the name of the test file without modified lines.
+     *
      * @return the name of a file with no modified code lines.
      */
     protected String getNameOfFileWithoutModifiedLines() {
