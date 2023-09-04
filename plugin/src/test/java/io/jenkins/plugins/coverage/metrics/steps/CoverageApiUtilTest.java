@@ -13,26 +13,32 @@ import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test to assert that all modified lines and their respective coverage types are correctly extracted from the coverage
- * tree created by the createCoverageTree() method, using the calculateFilesWithModifiedLines() method in {@link CoverageApiUtil}.
+ * Tests the {@link CoverageApiUtil} class.
  */
 class CoverageApiUtilTest extends AbstractModifiedFilesCoverageTest {
 
+    /**
+     * Test to ensure the overridden {@link FileWithModifiedLines#equals(Object)} works as expected.
+     */
     @Test
     void testOverriddenEqualsMethod() {
         var fileOneLinesList = createListOfModifiedLines(LineCoverageType.COVERED, 15, 16, 21, 22);
         fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.MISSED, 35, 36));
-        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTRIALLY_COVERED, 20, 20));
+        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTIALLY_COVERED, 20, 20));
 
         var fileOne = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
         var fileTwo = new FileWithModifiedLines("fileTwo", null);
-        var checkTrue = fileOne.equals(fileOne);
-        var checkFalse = fileOne.equals(fileTwo);
+        var fileThree = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
 
-        assertThat(checkTrue).isTrue();
-        assertThat(checkFalse).isFalse();
+        assertThat(fileOne).isEqualTo(fileOne);
+        assertThat(fileOne).isNotEqualTo(fileTwo);
+        assertThat(fileOne).isEqualTo(fileThree);
     }
 
+    /**
+     * Test to assert that all modified lines and their respective coverage types are correctly extracted from the
+     * coverage tree created by the {@link #createCoverageTree()} method.
+     */
     @Test
     void verifyCoverageForAllModifiedLines() {
         var node = createCoverageTree();
@@ -40,13 +46,11 @@ class CoverageApiUtilTest extends AbstractModifiedFilesCoverageTest {
 
         var fileOneLinesList = createListOfModifiedLines(LineCoverageType.COVERED, 15, 16, 21, 22);
         fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.MISSED, 35, 36));
-        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTRIALLY_COVERED, 20, 20));
+        fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.PARTIALLY_COVERED, 20, 20));
 
         var fileOne = new FileWithModifiedLines("test/example/Test1.java", fileOneLinesList);
-        var checkEqualsMethod = fileOne.equals(fileOne);
 
         assertThat(filesWithChangedLines).contains(fileOne);
-        assertThat(checkEqualsMethod).isTrue();
     }
 
     private static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,

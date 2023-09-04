@@ -65,14 +65,17 @@ class DeltaComputationITest extends AbstractCoverageITest {
 
         // Create a build with two different actions
         setPipelineScript(job,
-                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations*.xml']], id: 'pit'\n"
-                + "recordCoverage tools: [[parser: '" + Parser.JACOCO.name() + "', pattern: '**/jacoco*xml']]\n");
+                "recordCoverage tools: [[parser: '" + Parser.PIT.name()
+                        + "', pattern: '**/mutations*.xml']], id: 'pit'\n"
+                        + "recordCoverage tools: [[parser: '" + Parser.JACOCO.name()
+                        + "', pattern: '**/jacoco*xml']]\n");
 
         Run<?, ?> firstBuild = buildSuccessfully(job);
 
         setPipelineScript(job,
-                "recordCoverage tools: [[parser: '" + Parser.PIT.name() + "', pattern: '**/mutations.xml']], id: 'pit'\n"
-                + "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
+                "recordCoverage tools: [[parser: '" + Parser.PIT.name()
+                        + "', pattern: '**/mutations.xml']], id: 'pit'\n"
+                        + "recordCoverage tools: [[parser: 'JACOCO', pattern: '" + JACOCO_CODING_STYLE_FILE + "']]");
 
         Run<?, ?> secondBuild = buildSuccessfully(job);
         var actions = secondBuild.getActions(CoverageBuildAction.class);

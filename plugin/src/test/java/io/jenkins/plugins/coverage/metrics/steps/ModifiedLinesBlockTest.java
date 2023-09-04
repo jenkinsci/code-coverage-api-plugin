@@ -16,21 +16,19 @@ class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
     void testGetters() {
         var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
         var linesBlockTwo = new ModifiedLinesBlock(0, 0, LineCoverageType.MISSED);
-        var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.PARTRIALLY_COVERED);
+        var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.PARTIALLY_COVERED);
 
         var startOne = linesBlockOne.getStartLine();
         var endOne = linesBlockOne.getEndLine();
         var typeOne = linesBlockOne.getType();
-
         var typeTwo = linesBlockTwo.getType();
-
         var typeThree = linesBlockThree.getType();
 
         assertThat(startOne).isEqualTo(0);
         assertThat(endOne).isEqualTo(0);
         assertThat(typeOne).isEqualTo(LineCoverageType.COVERED);
         assertThat(typeTwo).isEqualTo(LineCoverageType.MISSED);
-        assertThat(typeThree).isEqualTo(LineCoverageType.PARTRIALLY_COVERED);
+        assertThat(typeThree).isEqualTo(LineCoverageType.PARTIALLY_COVERED);
     }
 
     @Test
@@ -39,12 +37,9 @@ class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
         var linesBlockTwo = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
         var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.MISSED);
 
-        var checkTrue = linesBlockOne.equals(linesBlockTwo);
-        var checkFalse = linesBlockOne.equals(linesBlockThree);
-        var checkSameObject = linesBlockOne.equals(linesBlockOne);
+        assertThat(linesBlockOne).isEqualTo(linesBlockTwo);
+        assertThat(linesBlockOne).isNotEqualTo(linesBlockThree);
+        assertThat(linesBlockOne).isEqualTo(linesBlockOne);
 
-        assertThat(checkTrue).isTrue();
-        assertThat(checkFalse).isFalse();
-        assertThat(checkSameObject).isTrue();
     }
 }

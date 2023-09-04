@@ -7,8 +7,8 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
- * Model class containing data pertaining to files with modified lines of code.
- * Each object contains a relative file path and a list of ModifiedLinesBlock objects.
+ * Model class containing data pertaining to files with modified lines of code. Each object contains a relative file
+ * path and a list of {@link ModifiedLinesBlock} objects.
  */
 @ExportedBean
 public class FileWithModifiedLines {
@@ -17,8 +17,11 @@ public class FileWithModifiedLines {
 
     /**
      * Constructor for the FileWithModifiedLines class.
-     * @param relativePath the relative path of the file
-     * @param listOfModifiedLines all modified lines inside the file
+     *
+     * @param relativePath
+     *         the relative path of the file
+     * @param listOfModifiedLines
+     *         all modified lines inside the file
      */
     public FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
         this.relativePath = relativePath;
@@ -45,8 +48,7 @@ public class FileWithModifiedLines {
         }
         FileWithModifiedLines file = (FileWithModifiedLines) o;
         return Objects.equals(this.getRelativePath(), file.getRelativePath())
-                && this.getListOfModifiedLines().containsAll(file.getListOfModifiedLines())
-                && this.getListOfModifiedLines().size() == file.getListOfModifiedLines().size();
+                && Objects.equals(this.getListOfModifiedLines(), file.getListOfModifiedLines());
     }
 
     @Override
