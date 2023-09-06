@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.model;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.Objects;
 
@@ -16,17 +16,7 @@ public class ModifiedLinesBlock {
     private final int endLine;
     private final LineCoverageType type;
 
-    /**
-     * Constructor for this class.
-     *
-     * @param startLine
-     *         number of the first line of code associated with this block.
-     * @param endLine
-     *         number of the last line of code associated with this block.
-     * @param type
-     *         type of coverage.
-     */
-    public ModifiedLinesBlock(final int startLine, final int endLine, final LineCoverageType type) {
+    ModifiedLinesBlock(final int startLine, final int endLine, final LineCoverageType type) {
         this.startLine = startLine;
         this.endLine = endLine;
         this.type = type;
@@ -37,7 +27,7 @@ public class ModifiedLinesBlock {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ModifiedLinesBlock)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ModifiedLinesBlock that = (ModifiedLinesBlock) o;

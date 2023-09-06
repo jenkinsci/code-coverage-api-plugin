@@ -189,7 +189,7 @@ We provide a remote API to retrieve coverage data, using the following URL: `htt
 Example output:
 ```json
 {
-  "_class" : "io.jenkins.plugins.coverage.metrics.steps.CoverageApi",
+  "_class" : "io.jenkins.plugins.coverage.metrics.restapi.CoverageApi",
   "modifiedFilesDelta" : {
     "branch" : "+1.72%",
     "class" : "-3.54%",

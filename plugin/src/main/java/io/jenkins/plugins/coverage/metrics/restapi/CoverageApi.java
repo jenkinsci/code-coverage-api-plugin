@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.steps;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -30,7 +30,17 @@ public class CoverageApi {
     private final QualityGateResult qualityGateResult;
     private final String referenceBuild;
 
-    CoverageApi(final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
+    /**
+     * Creates a new instance of {@link CoverageApi}.
+     *
+     * @param statistics
+     *         the coverage statistics of the build.
+     * @param qualityGateResult
+     *         the quality gate result of the build.
+     * @param referenceBuild
+     *         the build referenced for comparison purposes.
+     */
+    public CoverageApi(final CoverageStatistics statistics, final QualityGateResult qualityGateResult,
             final String referenceBuild) {
         this.statistics = statistics;
         this.qualityGateResult = qualityGateResult;
@@ -136,10 +146,7 @@ public class CoverageApi {
 
         @Exported(inline = true)
         public Collection<QualityGateItemApi> getResultItems() {
-            return qualityGateResult.getResultItems()
-                    .stream()
-                    .map(QualityGateItemApi::new)
-                    .collect(Collectors.toList());
+            return qualityGateResult.getResultItems().stream().map(QualityGateItemApi::new).collect(Collectors.toList());
         }
     }
 

@@ -1,8 +1,6 @@
 package io.jenkins.plugins.coverage.metrics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -10,8 +8,6 @@ import org.junit.jupiter.api.BeforeAll;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
 
-import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
-import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 import io.jenkins.plugins.coverage.metrics.steps.FileChangesProcessor;
 import io.jenkins.plugins.forensics.delta.Change;
 import io.jenkins.plugins.forensics.delta.ChangeEditType;
@@ -92,23 +88,6 @@ public abstract class AbstractModifiedFilesCoverageTest extends AbstractCoverage
         fileChangesProcessor.attachFileCoverageDeltas(tree, reference, OLD_PATH_MAPPING);
         fileChangesProcessor.attachIndirectCoveragesChanges(tree, reference, CODE_CHANGES, OLD_PATH_MAPPING);
         return tree;
-    }
-
-    /**
-     * Creates a list of {@link ModifiedLinesBlock} object for testing purposes.
-     * @param type of line coverage: {@link LineCoverageType#COVERED}, {@link LineCoverageType#MISSED}, or {@link LineCoverageType#PARTIALLY_COVERED}
-     * @param lines of code that share the above {@link LineCoverageType}, must be consecutive.
-     * @return the list {@link ModifiedLinesBlock} objects, sharing a {@link LineCoverageType}.
-     */
-    protected static List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,
-            final Integer... lines) {
-        var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
-
-        for (int i = 0; i < (lines.length - 1); i += 2) {
-            modifiedLinesBlocks.add(new ModifiedLinesBlock(lines[i], lines[i + 1], type));
-        }
-
-        return modifiedLinesBlocks;
     }
 
     /**

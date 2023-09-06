@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.steps;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,28 +6,35 @@ import java.util.List;
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
 
-import io.jenkins.plugins.coverage.metrics.model.FileWithModifiedLines;
-import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
-import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
- * Server side model that provides data for the details of line coverage results of modified lines.
+ * Remote API to list the details of modified line coverage results.
  */
-public class CoverageApiUtil {
+@ExportedBean
+public class ModifiedLineCoverageApi {
+    private final List<FileWithModifiedLines> filesWithModifiedLines;
 
-    private CoverageApiUtil() {
-        //this is a utility class
+    /**
+     * Creates a new instance of {@link ModifiedLineCoverageApi}.
+     *
+     * @param node
+     *         File node from which modified lines of code are calculated.
+     */
+    public ModifiedLineCoverageApi(final Node node) {
+        this.filesWithModifiedLines = createListOfFilesWithModifiedLines(node);
     }
 
     /**
-     * Method to extract modified lines of code and their respective coverage status from passed {@link Node} object.
+     * Finds all files with modified lines of code in a passed {@link Node} object.
      *
      * @param node
-     *         the root of the tree from which modified lines are extracted.
+     *         containing the file tree.
      *
-     * @return returns a List of {@link FileWithModifiedLines} objects.
+     * @return a list of {@link FileWithModifiedLines} objects.
      */
-    public static List<FileWithModifiedLines> getFilesWithModifiedLines(final Node node) {
+    private static List<FileWithModifiedLines> createListOfFilesWithModifiedLines(final Node node) {
         var filesWithModifiedLines = new ArrayList<FileWithModifiedLines>();
 
         for (FileNode fileNode : node.filterByModifiedLines().getAllFileNodes()) {
@@ -87,4 +94,8 @@ public class CoverageApiUtil {
         }
     }
 
+    @Exported(inline = true)
+    public List<FileWithModifiedLines> createListOfFilesWithModifiedLines() {
+        return filesWithModifiedLines;
+    }
 }

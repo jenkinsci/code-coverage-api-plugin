@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.model;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,15 +15,7 @@ public class FileWithModifiedLines {
     private final String relativePath;
     private final List<ModifiedLinesBlock> listOfModifiedLines;
 
-    /**
-     * Constructor for the FileWithModifiedLines class.
-     *
-     * @param relativePath
-     *         the relative path of the file
-     * @param listOfModifiedLines
-     *         all modified lines inside the file
-     */
-    public FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
+    FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
         this.relativePath = relativePath;
         this.listOfModifiedLines = listOfModifiedLines;
     }
@@ -43,7 +35,7 @@ public class FileWithModifiedLines {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FileWithModifiedLines)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         FileWithModifiedLines file = (FileWithModifiedLines) o;

@@ -1,10 +1,10 @@
-package io.jenkins.plugins.coverage.metrics.steps;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import org.junit.jupiter.api.Test;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
-import io.jenkins.plugins.coverage.metrics.model.LineCoverageType;
-import io.jenkins.plugins.coverage.metrics.model.ModifiedLinesBlock;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -32,14 +32,7 @@ class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
     }
 
     @Test
-    void testOverriddenEqualsMethod() {
-        var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
-        var linesBlockTwo = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
-        var linesBlockThree = new ModifiedLinesBlock(0, 0, LineCoverageType.MISSED);
-
-        assertThat(linesBlockOne).isEqualTo(linesBlockTwo);
-        assertThat(linesBlockOne).isNotEqualTo(linesBlockThree);
-        assertThat(linesBlockOne).isEqualTo(linesBlockOne);
-
+    void shouldObeyEqualsContract() {
+        EqualsVerifier.forClass(ModifiedLinesBlock.class).usingGetClass().verify();
     }
 }

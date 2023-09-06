@@ -14,6 +14,7 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.restapi.CoverageApi;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 
