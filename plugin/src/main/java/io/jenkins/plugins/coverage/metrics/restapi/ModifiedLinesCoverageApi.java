@@ -98,4 +98,8 @@ public class ModifiedLinesCoverageApi {
     public List<FileWithModifiedLines> createListOfFilesWithModifiedLines() {
         return filesWithModifiedLines;
     }
+
+    public List<FileWithModifiedLines> getFilesWithModifiedLines() {
+        return filesWithModifiedLines;
+    }
 }
