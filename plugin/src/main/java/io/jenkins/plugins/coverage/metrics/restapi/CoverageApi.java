@@ -146,7 +146,10 @@ public class CoverageApi {
 
         @Exported(inline = true)
         public Collection<QualityGateItemApi> getResultItems() {
-            return qualityGateResult.getResultItems().stream().map(QualityGateItemApi::new).collect(Collectors.toList());
+            return qualityGateResult.getResultItems()
+                    .stream()
+                    .map(QualityGateItemApi::new)
+                    .collect(Collectors.toList());
         }
     }
 
