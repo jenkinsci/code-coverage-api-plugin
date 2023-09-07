@@ -11,6 +11,7 @@ skinparam component {
 [Source] <<..metrics.source>>
 [Charts] <<..metrics.charts>>
 [Model] <<..metrics.model>>
+[Restapi] <<..metrics.restapi>>
 
 [Steps] --> [Model]
 [Steps] --> [Color]

@@ -44,7 +44,7 @@ import io.jenkins.plugins.coverage.metrics.color.CoverageColorJenkinsId;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
 import io.jenkins.plugins.coverage.metrics.restapi.CoverageApi;
-import io.jenkins.plugins.coverage.metrics.restapi.ModifiedLineCoverageApiModel;
+import io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApiModel;
 import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 import io.jenkins.plugins.coverage.metrics.source.SourceViewModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.InlineRowRenderer;
@@ -453,7 +453,7 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @CheckForNull
     public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
         if (MODIFIED_LINES_API_URL.equals(link)) {
-            return new ModifiedLineCoverageApiModel(node);
+            return new ModifiedLinesCoverageApiModel(node);
         }
         if (INFO_MESSAGES_VIEW_URL.equals(link)) {
             return new MessagesViewModel(getOwner(), Messages.MessagesViewModel_Title(),

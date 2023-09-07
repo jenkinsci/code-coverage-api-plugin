@@ -10,16 +10,16 @@ import io.jenkins.plugins.coverage.metrics.source.Messages;
 /**
  * Server side model that provides the data for modified lines coverage results.
  */
-public class ModifiedLineCoverageApiModel implements ModelObject {
+public class ModifiedLinesCoverageApiModel implements ModelObject {
     private final Node node;
 
     /**
-     * Creates a new instance of {@link ModifiedLineCoverageApiModel}
+     * Creates a new instance of {@link ModifiedLinesCoverageApiModel}
      *
      * @param node
      *         {@link Node} object
      */
-    public ModifiedLineCoverageApiModel(final Node node) {
+    public ModifiedLinesCoverageApiModel(final Node node) {
         this.node = node;
     }
 
@@ -29,7 +29,7 @@ public class ModifiedLineCoverageApiModel implements ModelObject {
      * @return the remote API
      */
     public Api getApi() {
-        return new Api(new ModifiedLineCoverageApi(getNode()));
+        return new Api(new ModifiedLinesCoverageApi(getNode()));
     }
 
     public Node getNode() {

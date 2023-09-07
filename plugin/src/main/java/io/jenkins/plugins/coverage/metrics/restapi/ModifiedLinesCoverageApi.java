@@ -13,16 +13,16 @@ import org.kohsuke.stapler.export.ExportedBean;
  * Remote API to list the details of modified line coverage results.
  */
 @ExportedBean
-public class ModifiedLineCoverageApi {
+public class ModifiedLinesCoverageApi {
     private final List<FileWithModifiedLines> filesWithModifiedLines;
 
     /**
-     * Creates a new instance of {@link ModifiedLineCoverageApi}.
+     * Creates a new instance of {@link ModifiedLinesCoverageApi}.
      *
      * @param node
      *         File node from which modified lines of code are calculated.
      */
-    public ModifiedLineCoverageApi(final Node node) {
+    public ModifiedLinesCoverageApi(final Node node) {
         this.filesWithModifiedLines = createListOfFilesWithModifiedLines(node);
     }
 
