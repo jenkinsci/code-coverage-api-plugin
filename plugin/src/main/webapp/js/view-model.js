@@ -457,6 +457,16 @@ const CoverageChartGenerator = function ($) {
             redrawCharts();
         });
 
+        if (window.getThemeManagerProperty && window.isSystemRespectingTheme) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                redrawCharts();
+
+                viewProxy.getOverview(function (t) {
+                    createOverview(t.responseObject(), 'coverage-overview');
+                });
+            });
+        }
+
         $(document).ready(function () {
             initializeSourceCodeSelection('absolute-coverage');
             initializeSourceCodeSelection('change-coverage');
