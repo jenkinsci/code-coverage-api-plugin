@@ -14,8 +14,9 @@
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
-  <name>Code Coverage API Plugin</name>
-  <description>Code Coverage Plugin</description>
+  <name>Code Coverage Plugin</name>
+  <description>Collects reports of code coverage or mutation coverage tools and visualizes the results. It has support
+    for the following report formats: JaCoCo, Cobertura, and PIT.</description>
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
