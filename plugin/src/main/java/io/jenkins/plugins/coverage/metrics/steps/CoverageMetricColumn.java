@@ -8,20 +8,18 @@ import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.util.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.verb.POST;
 import org.jenkinsci.Symbol;
 import hudson.Extension;
 import hudson.Functions;
-import hudson.model.AbstractProject;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.ListBoxModel;
 import hudson.views.ListViewColumn;
 import hudson.views.ListViewColumnDescriptor;
+import jenkins.model.Jenkins;
 
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider.DisplayColors;
@@ -265,15 +263,12 @@ public class CoverageMetricColumn extends ListViewColumn {
         /**
          * Returns a model with all {@link Metric metrics} that can be used in quality gates.
          *
-         * @param project
-         *         the project that is configured
-         *
          * @return a model with all {@link Metric metrics}.
          */
         @POST
         @SuppressWarnings("unused") // used by Stapler view data binding
-        public ListBoxModel doFillMetricItems(@AncestorInPath final AbstractProject<?, ?> project) {
-            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
+        public ListBoxModel doFillMetricItems() {
+            if (jenkins.hasPermission(Jenkins.READ)) {
                 return FORMATTER.getMetricItems();
             }
             return new ListBoxModel();
@@ -282,15 +277,12 @@ public class CoverageMetricColumn extends ListViewColumn {
         /**
          * Returns a model with all {@link Metric metrics} that can be used in quality gates.
          *
-         * @param project
-         *         the project that is configured
-         *
          * @return a model with all {@link Metric metrics}.
          */
         @POST
         @SuppressWarnings("unused") // used by Stapler view data binding
-        public ListBoxModel doFillBaselineItems(@AncestorInPath final AbstractProject<?, ?> project) {
-            if (jenkins.hasPermission(Item.CONFIGURE, project)) {
+        public ListBoxModel doFillBaselineItems() {
+            if (jenkins.hasPermission(Jenkins.READ)) {
                 return FORMATTER.getBaselineItems();
             }
             return new ListBoxModel();
