@@ -11,7 +11,7 @@ import org.kohsuke.stapler.export.ExportedBean;
  * {@link FileWithModifiedLines} object.
  */
 @ExportedBean
-public class ModifiedLinesBlock {
+class ModifiedLinesBlock {
     private final int startLine;
     private final int endLine;
     private final LineCoverageType type;

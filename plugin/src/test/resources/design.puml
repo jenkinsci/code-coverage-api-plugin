@@ -12,10 +12,6 @@ skinparam component {
 [Charts] <<..metrics.charts>>
 [Model] <<..metrics.model>>
 [Restapi] <<..metrics.restapi>>
-[Gerrit] <<..metrics.gerrit>>
-
-[Gerrit] --> [Restapi]
-[Gerrit] --> [Steps]
 
 [Restapi] --> [Model]
 [Restapi] --> [Source]

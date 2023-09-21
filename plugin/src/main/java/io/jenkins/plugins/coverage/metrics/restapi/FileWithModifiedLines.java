@@ -11,7 +11,7 @@ import org.kohsuke.stapler.export.ExportedBean;
  * path and a list of {@link ModifiedLinesBlock} objects.
  */
 @ExportedBean
-public class FileWithModifiedLines {
+class FileWithModifiedLines {
     private final String relativePath;
     private final List<ModifiedLinesBlock> listOfModifiedLines;
 
