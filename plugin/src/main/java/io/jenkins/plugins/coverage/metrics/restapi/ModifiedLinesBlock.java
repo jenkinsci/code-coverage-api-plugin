@@ -11,7 +11,7 @@ import org.kohsuke.stapler.export.ExportedBean;
  * {@link FileWithModifiedLines} object.
  */
 @ExportedBean
-class ModifiedLinesBlock {
+class ModifiedLinesBlock implements Comparable<ModifiedLinesBlock> {
     private final int startLine;
     private final int endLine;
     private final LineCoverageType type;
@@ -55,4 +55,8 @@ class ModifiedLinesBlock {
         return type;
     }
 
+    @Override
+    public int compareTo(final ModifiedLinesBlock other) {
+        return this.startLine - other.startLine;
+    }
 }

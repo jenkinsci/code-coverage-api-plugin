@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.SortedSet;
 
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -13,9 +14,9 @@ import org.kohsuke.stapler.export.ExportedBean;
 @ExportedBean
 class FileWithModifiedLines {
     private final String relativePath;
-    private final List<ModifiedLinesBlock> listOfModifiedLines;
+    private final SortedSet<ModifiedLinesBlock> listOfModifiedLines;
 
-    FileWithModifiedLines(final String relativePath, final List<ModifiedLinesBlock> listOfModifiedLines) {
+    FileWithModifiedLines(final String relativePath, final SortedSet<ModifiedLinesBlock> listOfModifiedLines) {
         this.relativePath = relativePath;
         this.listOfModifiedLines = listOfModifiedLines;
     }
@@ -26,7 +27,7 @@ class FileWithModifiedLines {
     }
 
     @Exported(inline = true)
-    public List<ModifiedLinesBlock> getListOfModifiedLines() {
+    public SortedSet<ModifiedLinesBlock> getListOfModifiedLines() {
         return listOfModifiedLines;
     }
 

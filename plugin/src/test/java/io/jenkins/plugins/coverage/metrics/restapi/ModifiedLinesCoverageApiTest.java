@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage.metrics.restapi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -47,9 +47,9 @@ class ModifiedLinesCoverageApiTest extends AbstractModifiedFilesCoverageTest {
      *
      * @return the list {@link ModifiedLinesBlock} objects, sharing a {@link LineCoverageType}.
      */
-    private List<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,
+    private SortedSet<ModifiedLinesBlock> createListOfModifiedLines(final LineCoverageType type,
             final Integer... lines) {
-        var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
+        var modifiedLinesBlocks = new TreeSet<ModifiedLinesBlock>();
 
         for (int i = 0; i < (lines.length - 1); i += 2) {
             modifiedLinesBlocks.add(new ModifiedLinesBlock(lines[i], lines[i + 1], type));
