@@ -14,7 +14,7 @@ public class ModifiedLinesCoverageApiModel implements ModelObject {
     private final Node node;
 
     /**
-     * Creates a new instance of {@link ModifiedLinesCoverageApiModel}
+     * Creates a new instance of {@link ModifiedLinesCoverageApiModel}.
      *
      * @param node
      *         {@link Node} object

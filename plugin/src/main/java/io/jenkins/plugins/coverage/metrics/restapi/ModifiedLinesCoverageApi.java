@@ -2,6 +2,8 @@ package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.hm.hafner.coverage.FileNode;
 import edu.hm.hafner.coverage.Node;
@@ -42,22 +44,25 @@ class ModifiedLinesCoverageApi {
                 }
             }
 
-            var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
+            //var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
+
+            var modifiedLinesBlocks = new TreeSet<ModifiedLinesBlock>();
 
             calculateModifiedLineBlocks(coveredLines, modifiedLinesBlocks, LineCoverageType.COVERED);
             calculateModifiedLineBlocks(missedLines, modifiedLinesBlocks, LineCoverageType.MISSED);
             calculateModifiedLineBlocks(partiallyCoveredLines, modifiedLinesBlocks, LineCoverageType.PARTIALLY_COVERED);
 
-            FileWithModifiedLines changedFile = new FileWithModifiedLines(fileNode.getRelativePath(),
+            var changedFile = new FileWithModifiedLines(fileNode.getRelativePath(),
                     modifiedLinesBlocks);
             filesWithModifiedLines.add(changedFile);
         }
+
         return filesWithModifiedLines;
     }
 
     /**
      * This method parses over the modified lines of a file and combines consecutive line numbers with the same coverage
-     * type into a {@link ModifiedLinesBlock} object.
+     * type into a {@link ModifiedLinesBlock} object. Result is sorted by starting line number.
      *
      * @param modifiedLines
      *         list containing the integer numbers of modified lines.
@@ -68,7 +73,7 @@ class ModifiedLinesCoverageApi {
      *         {@link LineCoverageType#MISSED}, or {@link LineCoverageType#PARTIALLY_COVERED})
      */
     private static void calculateModifiedLineBlocks(final List<Integer> modifiedLines,
-            final List<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
+            final SortedSet<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
 
         if (modifiedLines.isEmpty()) {
             return;
