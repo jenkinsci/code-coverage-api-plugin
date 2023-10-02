@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>6.12.0</version>
+    <version>6.14.0</version>
     <relativePath />
   </parent>
 
@@ -180,7 +180,6 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>plugin-util-api</artifactId>
-      <version>3.4.0</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
