@@ -78,7 +78,7 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     }
 
     @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
-    @CsvSource({"SKIP, 0", "ALL_LINES, 18", "MODIFIED_LINES, 1"})
+    @CsvSource({"SKIP, 0", "ALL_LINES, 5", "MODIFIED_LINES, 1"})
     void shouldCreateChecksReportPit(final ChecksAnnotationScope scope, final int expectedAnnotations) {
         var result = readResult("mutations.xml", new PitestParser());
 
@@ -101,9 +101,9 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                         assertThat(annotation.getRawDetails()).contains("Survived mutations:\n"
                                 + "- Replaced integer addition with subtraction (org.pitest.mutationtest.engine.gregor.mutators.MathMutator)");
                         assertThat(annotation.getPath()).contains("edu/hm/hafner/coverage/parser/CoberturaParser.java");
-                        assertThat(annotation.getMessage()).contains("One mutation survived in line 251");
-                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(251);
-                        assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(251);
+                        assertThat(annotation.getMessage()).contains("One mutation survived in line 251 (MathMutator)");
+                        assertThat(annotation.getStartLine()).isPresent().contains(251);
+                        assertThat(annotation.getEndLine()).isPresent().contains(251);
                     });
         }
     }
@@ -111,14 +111,12 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
     private void assertThatTitleIs(final CoverageChecksPublisher publisher, final String expectedTitle) {
         var checkDetails = publisher.extractChecksDetails();
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
-            assertThat(output.getTitle()).isPresent()
-                    .get()
-                    .isEqualTo(expectedTitle);
+            assertThat(output.getTitle()).isPresent().contains(expectedTitle);
         });
     }
 
     @ParameterizedTest(name = "should create checks (scope = {0}, expected annotations = {1})")
-    @CsvSource({"SKIP, 0", "ALL_LINES, 36", "MODIFIED_LINES, 3"})
+    @CsvSource({"SKIP, 0", "ALL_LINES, 28", "MODIFIED_LINES, 2"})
     void shouldCreateChecksReportJaCoCo(final ChecksAnnotationScope scope, final int expectedAnnotations) {
         var result = readJacocoResult("jacoco-codingstyle.xml");
 
@@ -126,20 +124,17 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
 
         var checkDetails = publisher.extractChecksDetails();
 
-        assertThat(checkDetails.getName()).isPresent().get().isEqualTo(REPORT_NAME);
+        assertThat(checkDetails.getName()).isPresent().contains(REPORT_NAME);
         assertThat(checkDetails.getStatus()).isEqualTo(ChecksStatus.COMPLETED);
         assertThat(checkDetails.getConclusion()).isEqualTo(ChecksConclusion.SUCCESS);
         assertThat(checkDetails.getDetailsURL()).isPresent()
-                .get()
-                .isEqualTo("http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage");
+                .contains("http://127.0.0.1:8080/job/pipeline-coding-style/job/5/coverage");
         assertThatDetailsAreCorrect(checkDetails, expectedAnnotations);
     }
 
     private void assertThatDetailsAreCorrect(final ChecksDetails checkDetails, final int expectedAnnotations) {
         assertThat(checkDetails.getOutput()).isPresent().get().satisfies(output -> {
-            assertThat(output.getTitle()).isPresent()
-                    .get()
-                    .isEqualTo("Line Coverage: 50.00% (+50.00%)");
+            assertThat(output.getTitle()).isPresent().contains("Line Coverage: 50.00% (+50.00%)");
             var expectedDetails = toString("coverage-publisher-details.checks-expected-result");
             assertThat(output.getText()).isPresent().get().asString().isEqualToNormalizingWhitespace(expectedDetails);
             assertChecksAnnotations(output, expectedAnnotations);
@@ -160,25 +155,17 @@ class CoverageChecksPublisherTest extends AbstractCoverageTest {
                         assertThat(annotation.getTitle()).contains("Not covered line");
                         assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
                         assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
-                        assertThat(annotation.getMessage()).contains("Line 61 is not covered by tests");
-                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(61);
-                        assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(61);
-                    },
-                    annotation -> {
-                        assertThat(annotation.getTitle()).contains("Not covered line");
-                        assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
-                        assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
-                        assertThat(annotation.getMessage()).contains("Line 62 is not covered by tests");
-                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(62);
-                        assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(62);
+                        assertThat(annotation.getMessage()).contains("Lines 61-62 are not covered by tests");
+                        assertThat(annotation.getStartLine()).isPresent().contains(61);
+                        assertThat(annotation.getEndLine()).isPresent().contains(62);
                     },
                     annotation -> {
                         assertThat(annotation.getTitle()).contains("Partially covered line");
                         assertThat(annotation.getAnnotationLevel()).isEqualTo(ChecksAnnotationLevel.WARNING);
                         assertThat(annotation.getPath()).contains("edu/hm/hafner/util/TreeStringBuilder.java");
                         assertThat(annotation.getMessage()).contains("Line 113 is only partially covered, one branch is missing");
-                        assertThat(annotation.getStartLine()).isPresent().get().isEqualTo(113);
-                        assertThat(annotation.getEndLine()).isPresent().get().isEqualTo(113);
+                        assertThat(annotation.getStartLine()).isPresent().contains(113);
+                        assertThat(annotation.getEndLine()).isPresent().contains(113);
                     });
         }
         else {
