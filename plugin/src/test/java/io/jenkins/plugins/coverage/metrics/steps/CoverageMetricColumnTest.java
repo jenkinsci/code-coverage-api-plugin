@@ -21,12 +21,15 @@ import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.model.Job;
 import hudson.model.Run;
+import jenkins.model.Jenkins;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageTest;
 import io.jenkins.plugins.coverage.metrics.color.ColorProvider;
 import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.color.CoverageChangeTendency;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageMetricColumn.CoverageMetricColumnDescriptor;
+import io.jenkins.plugins.util.JenkinsFacade;
 import io.jenkins.plugins.util.QualityGateResult;
 
 import static org.assertj.core.api.Assertions.*;
@@ -43,6 +46,19 @@ class CoverageMetricColumnTest extends AbstractCoverageTest {
     private static final Metric COVERAGE_METRIC = Metric.BRANCH;
 
     private static final ColorProvider COLOR_PROVIDER = ColorProviderFactory.createDefaultColorProvider();
+
+    @Test
+    void shouldAllowEnums() {
+        var jenkins = mock(JenkinsFacade.class);
+        var descriptor = new CoverageMetricColumnDescriptor(jenkins);
+
+        assertThat(descriptor.doFillMetricItems()).isEmpty();
+        assertThat(descriptor.doFillBaselineItems()).isEmpty();
+
+        when(jenkins.hasPermission(Jenkins.READ)).thenReturn(true);
+        assertThat(descriptor.doFillMetricItems()).isNotEmpty();
+        assertThat(descriptor.doFillBaselineItems()).isNotEmpty();
+    }
 
     /**
      * Creates a stub for a {@link Job} that has the specified actions attached.

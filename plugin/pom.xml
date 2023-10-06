@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>analysis-pom</artifactId>
-    <version>6.10.0</version>
+    <version>6.14.0</version>
     <relativePath />
   </parent>
 
@@ -14,12 +14,13 @@
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
-  <name>Code Coverage API Plugin</name>
-  <description>Code Coverage Plugin</description>
+  <name>Code Coverage Plugin</name>
+  <description>Collects reports of code coverage or mutation coverage tools and visualizes the results. It has support
+    for the following report formats: JaCoCo, Cobertura, and PIT.</description>
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
-    <revision>4.8.0</revision>
+    <revision>4.9.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
 
@@ -29,12 +30,12 @@
 
     <xmlunit.version>2.9.1</xmlunit.version>
     <jsoup.version>1.16.1</jsoup.version>
-    <testcontainers.version>1.18.3</testcontainers.version>
+    <testcontainers.version>1.19.1</testcontainers.version>
     <job-dsl.version>1.84</job-dsl.version>
 
-    <coverage-model.version>0.24.0</coverage-model.version>
+    <coverage-model.version>0.25.0</coverage-model.version>
     <git-forensics.version>2.0.0</git-forensics.version>
-    <prism-api.version>1.29.0-7</prism-api.version>
+    <prism-api.version>1.29.0-8</prism-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
 
   </properties>

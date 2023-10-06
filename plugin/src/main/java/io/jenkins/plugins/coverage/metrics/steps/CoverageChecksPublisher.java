@@ -22,6 +22,7 @@ import edu.hm.hafner.coverage.Metric;
 import edu.hm.hafner.coverage.Mutation;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
+import edu.hm.hafner.util.LineRange;
 import edu.hm.hafner.util.VisibleForTesting;
 
 import hudson.model.TaskListener;
@@ -46,7 +47,7 @@ import io.jenkins.plugins.util.QualityGateStatus;
  *
  * @author Florian Orendi
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 class CoverageChecksPublisher {
     private static final ElementFormatter FORMATTER = new ElementFormatter();
     private static final int TITLE_HEADER_LEVEL = 4;
@@ -245,10 +246,16 @@ class CoverageChecksPublisher {
         }
 
         var annotations = new ArrayList<ChecksAnnotation>();
-        for (var fileNode : filterAnnotations().getAllFileNodes()) {
-            annotations.addAll(getMissingLines(fileNode));
-            annotations.addAll(getPartiallyCoveredLines(fileNode));
-            annotations.addAll(getSurvivedMutations(fileNode));
+        var filteredByScope = filterAnnotations();
+        var hasMutationCoverage = filteredByScope.getValue(Metric.MUTATION).isPresent();
+        for (var fileNode : filteredByScope.getAllFileNodes()) {
+            if (hasMutationCoverage) {
+                annotations.addAll(getSurvivedMutations(fileNode));
+            }
+            else {
+                annotations.addAll(getMissingLines(fileNode));
+                annotations.addAll(getPartiallyCoveredLines(fileNode));
+            }
         }
         return annotations;
     }
@@ -263,20 +270,32 @@ class CoverageChecksPublisher {
     }
 
     private Collection<? extends ChecksAnnotation> getMissingLines(final FileNode fileNode) {
-        var builder = createAnnotationBuilder(fileNode).withTitle("Not covered line");
-
-        return fileNode.getMissedLines().stream()
-                .map(line -> builder.withMessage("Line " + line + " is not covered by tests")
-                        .withStartLine(line)
-                        .withEndLine(line)
-                        .build())
+        var builder = createAnnotationBuilder(fileNode);
+        return fileNode.getMissedLineRanges().stream()
+                .map(range -> rangeToAnnotation(range, builder))
                 .collect(Collectors.toList());
+    }
+
+    private ChecksAnnotation rangeToAnnotation(final LineRange range, final ChecksAnnotationBuilder builder) {
+        if (range.getStart() == range.getEnd()) {
+            builder.withTitle("Not covered line")
+                    .withMessage(String.format("Line %d is not covered by tests", range.getStart()));
+        }
+        else {
+            builder.withTitle("Not covered lines").withMessage(
+                    String.format("Lines %d-%d are not covered by tests", range.getStart(), range.getEnd()));
+        }
+        return builder
+                .withStartLine(range.getStart())
+                .withEndLine(range.getEnd())
+                .build();
     }
 
     private Collection<? extends ChecksAnnotation> getSurvivedMutations(final FileNode fileNode) {
         var builder = createAnnotationBuilder(fileNode).withTitle("Mutation survived");
 
         return fileNode.getSurvivedMutationsPerLine().entrySet().stream()
+                .filter(entry -> fileNode.getCoveredOfLine(entry.getKey()) > 0)
                 .map(entry -> builder.withMessage(createMutationMessage(entry.getKey(), entry.getValue()))
                         .withStartLine(entry.getKey())
                         .withEndLine(entry.getKey())
@@ -293,9 +312,13 @@ class CoverageChecksPublisher {
 
     private String createMutationMessage(final int line, final List<Mutation> survived) {
         if (survived.size() == 1) {
-            return "One mutation survived in line " + line;
+            return String.format("One mutation survived in line %d (%s)", line, formatMutator(survived));
         }
         return String.format("%d mutations survived in line %d", survived.size(), line);
+    }
+
+    private String formatMutator(final List<Mutation> survived) {
+        return survived.get(0).getMutator().replaceAll(".*\\.", "");
     }
 
     private Collection<? extends ChecksAnnotation> getPartiallyCoveredLines(final FileNode fileNode) {
