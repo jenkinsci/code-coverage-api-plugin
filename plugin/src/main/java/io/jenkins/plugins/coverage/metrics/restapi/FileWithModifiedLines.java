@@ -7,27 +7,28 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
- * Model class containing data pertaining to files with modified lines of code. Each object contains a relative file
- * path and a list of {@link ModifiedLinesBlock} objects.
+ * Model class that describes the {@link LineCoverageType coverage} for modified code lines of a file. The file is
+ * described by its fully qualified name.
  */
 @ExportedBean
 class FileWithModifiedLines {
-    private final String relativePath;
-    private final SortedSet<ModifiedLinesBlock> listOfModifiedLines;
+    private final String fullyQualifiedFileName;
+    private final SortedSet<ModifiedLinesBlock> modifiedLinesBlocks;
 
-    FileWithModifiedLines(final String relativePath, final SortedSet<ModifiedLinesBlock> listOfModifiedLines) {
-        this.relativePath = relativePath;
-        this.listOfModifiedLines = listOfModifiedLines;
+    FileWithModifiedLines(final String fullyQualifiedFileName,
+            final SortedSet<ModifiedLinesBlock> modifiedLinesBlocks) {
+        this.fullyQualifiedFileName = fullyQualifiedFileName;
+        this.modifiedLinesBlocks = modifiedLinesBlocks;
     }
 
     @Exported(inline = true)
-    public String getRelativePath() {
-        return relativePath;
+    public String getFullyQualifiedFileName() {
+        return fullyQualifiedFileName;
     }
 
     @Exported(inline = true)
-    public SortedSet<ModifiedLinesBlock> getListOfModifiedLines() {
-        return listOfModifiedLines;
+    public SortedSet<ModifiedLinesBlock> getModifiedLinesBlocks() {
+        return modifiedLinesBlocks;
     }
 
     @Override
@@ -39,12 +40,12 @@ class FileWithModifiedLines {
             return false;
         }
         FileWithModifiedLines file = (FileWithModifiedLines) o;
-        return Objects.equals(this.getRelativePath(), file.getRelativePath())
-                && Objects.equals(this.getListOfModifiedLines(), file.getListOfModifiedLines());
+        return Objects.equals(this.getFullyQualifiedFileName(), file.getFullyQualifiedFileName())
+                && Objects.equals(this.getModifiedLinesBlocks(), file.getModifiedLinesBlocks());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRelativePath(), getListOfModifiedLines());
+        return Objects.hash(getFullyQualifiedFileName(), getModifiedLinesBlocks());
     }
 }

@@ -7,7 +7,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
 
 /**
- * Tests the {@link FileWithModifiedLines} class.
+ * Tests {@link FileWithModifiedLines}.
  */
 class FileWithModifiedLinesTest extends AbstractModifiedFilesCoverageTest {
     @Test

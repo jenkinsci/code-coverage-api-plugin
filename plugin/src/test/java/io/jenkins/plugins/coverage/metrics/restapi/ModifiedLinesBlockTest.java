@@ -9,7 +9,7 @@ import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Tests the {@link ModifiedLinesBlock} class.
+ * Tests {@link ModifiedLinesBlock}.
  */
 class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
     @Test

@@ -10,7 +10,7 @@ import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Tests the {@link ModifiedLinesCoverageApi} class.
+ * Tests {@link ModifiedLinesCoverageApi}.
  */
 
 class ModifiedLinesCoverageApiTest extends AbstractModifiedFilesCoverageTest {
@@ -24,7 +24,7 @@ class ModifiedLinesCoverageApiTest extends AbstractModifiedFilesCoverageTest {
     void verifyCoverageForAllModifiedLines() {
         var node = createCoverageTree();
         var modifiedLineCoverageApi = new ModifiedLinesCoverageApi(node);
-        var filesWithChangedLines = modifiedLineCoverageApi.createListOfFilesWithModifiedLines();
+        var filesWithChangedLines = modifiedLineCoverageApi.getFilesWithModifiedLines();
 
         var fileOneLinesList = createListOfModifiedLines(LineCoverageType.COVERED, 15, 16, 21, 22);
         fileOneLinesList.addAll(createListOfModifiedLines(LineCoverageType.MISSED, 35, 36));

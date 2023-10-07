@@ -1,7 +1,7 @@
 package io.jenkins.plugins.coverage.metrics.restapi;
 
 /**
- * Defines the type of line coverage assigned to any {@link ModifiedLinesBlock} object.
+ * Defines the type of line coverage.
  */
 enum LineCoverageType {
     COVERED,

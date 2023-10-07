@@ -44,16 +44,13 @@ class ModifiedLinesCoverageApi {
                 }
             }
 
-            //var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
-
             var modifiedLinesBlocks = new TreeSet<ModifiedLinesBlock>();
 
             calculateModifiedLineBlocks(coveredLines, modifiedLinesBlocks, LineCoverageType.COVERED);
             calculateModifiedLineBlocks(missedLines, modifiedLinesBlocks, LineCoverageType.MISSED);
             calculateModifiedLineBlocks(partiallyCoveredLines, modifiedLinesBlocks, LineCoverageType.PARTIALLY_COVERED);
 
-            var changedFile = new FileWithModifiedLines(fileNode.getRelativePath(),
-                    modifiedLinesBlocks);
+            var changedFile = new FileWithModifiedLines(fileNode.getRelativePath(), modifiedLinesBlocks);
             filesWithModifiedLines.add(changedFile);
         }
 
@@ -94,10 +91,6 @@ class ModifiedLinesCoverageApi {
     }
 
     @Exported(inline = true, name = "files")
-    public List<FileWithModifiedLines> createListOfFilesWithModifiedLines() {
-        return filesWithModifiedLines;
-    }
-
     public List<FileWithModifiedLines> getFilesWithModifiedLines() {
         return filesWithModifiedLines;
     }
