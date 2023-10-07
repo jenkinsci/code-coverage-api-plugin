@@ -231,7 +231,24 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyModifiedLinesCoverageApi(final Run<?, ?> build) {
         var json = callJsonRemoteApi(build.getUrl() + "coverage/modified/api/json").getJSONObject();
-        assertThat(json.toString()).isEqualTo("");
+        assertThatJson(json).node("files").isEqualTo("["
+                + "{"
+                + "\"fullyQualifiedFileName\":\"io/jenkins/plugins/forensics/util/CommitDecoratorFactory.java\","
+                + "\"modifiedLinesBlocks\":["
+                + "{"
+                + "\"endLine\":68,"
+                + "\"startLine\":68,"
+                + "\"type\":\"MISSED\"}"
+                + "]},"
+                + "{"
+                + "\"fullyQualifiedFileName\":\"io/jenkins/plugins/forensics/miner/MinerFactory.java\","
+                + "\"modifiedLinesBlocks\":["
+                + "{"
+                + "\"endLine\":80,"
+                + "\"startLine\":80,"
+                + "\"type\":\"COVERED\""
+                + "}]"
+                + "}]");
     }
 
     /**
