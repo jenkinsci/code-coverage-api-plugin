@@ -231,10 +231,7 @@ class GitForensicsITest extends AbstractCoverageITest {
      */
     private void verifyModifiedLinesCoverageApi(final Run<?, ?> build) {
         var json = callJsonRemoteApi(build.getUrl() + "coverage/modified/api/json").getJSONObject();
-        System.out.println("READ ME::");
-        System.out.println(json.toString());
-        assertThatJson(json).node("coverage").isArray().isNotEmpty()
-                .isEqualTo("[]");
+        assertThat(json.toString()).isEqualTo("");
     }
 
     /**
