@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.hm.hafner.coverage.CoverageParser.ProcessingMode;
 import edu.hm.hafner.coverage.ModuleNode;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.util.FilteredLog;
@@ -78,6 +79,7 @@ public class CoverageRecorder extends Recorder {
     private boolean skipPublishingChecks = false;
     private String checksName = StringUtils.EMPTY;
     private ChecksAnnotationScope checksAnnotationScope = ChecksAnnotationScope.MODIFIED_LINES;
+    private boolean ignoreParsingErrors = false;
     private boolean failOnError = false;
     private boolean enabledForFailure = false;
     private boolean skipSymbolicLinks = false;
@@ -149,7 +151,7 @@ public class CoverageRecorder extends Recorder {
     }
 
     /**
-     * Returns the actual ID of the results. If no user defined ID is given, then the default ID {@link #DEFAULT_ID} is
+     * Returns the actual ID of the results. If no user-defined ID is given, then the default ID {@link #DEFAULT_ID} is
      * returned.
      *
      * @return the ID
@@ -234,9 +236,23 @@ public class CoverageRecorder extends Recorder {
         this.skipSymbolicLinks = skipSymbolicLinks;
     }
 
-    @SuppressWarnings({"unused", "PMD.BooleanGetMethodName"}) // called by Stapler
     public boolean isSkipSymbolicLinks() {
         return skipSymbolicLinks;
+    }
+
+    /**
+     * Specify if parsing errors should be ignored and logged instead of throwing an exception.
+     *
+     * @param ignoreParsingErrors
+     *         if parsing errors should be ignored and logged instead of throwing an exception
+     */
+    @DataBoundSetter
+    public void setIgnoreParsingErrors(final boolean ignoreParsingErrors) {
+        this.ignoreParsingErrors = ignoreParsingErrors;
+    }
+
+    public boolean isIgnoreParsingErrors() {
+        return ignoreParsingErrors;
     }
 
     /**
@@ -400,7 +416,7 @@ public class CoverageRecorder extends Recorder {
 
             resolveAbsolutePaths(rootNode, workspace, sources, log);
             logHandler.log(log);
-            
+
             var action = reporter.publishAction(getActualId(), getName(), getIcon(), rootNode, run,
                     workspace, taskListener, getQualityGates(), getScm(),
                     getSourceCodeEncoding(), getSourceCodeRetention(), resultHandler);
@@ -459,7 +475,8 @@ public class CoverageRecorder extends Recorder {
 
             try {
                 FileVisitorResult<ModuleNode> result = workspace.act(
-                        new CoverageReportScanner(expandedPattern, "UTF-8", isSkipSymbolicLinks(), parser));
+                        new CoverageReportScanner(parser, expandedPattern, "UTF-8", isSkipSymbolicLinks(),
+                                ignoreErrors()));
                 log.merge(result.getLog());
 
                 var coverageResults = result.getResults();
@@ -482,6 +499,10 @@ public class CoverageRecorder extends Recorder {
             toolHandler.log(log);
         }
         return results;
+    }
+
+    private ProcessingMode ignoreErrors() {
+        return isIgnoreParsingErrors() ? ProcessingMode.IGNORE_ERRORS : ProcessingMode.FAIL_FAST;
     }
 
     private String expandPattern(final Run<?, ?> run, final String actualPattern) {
@@ -616,7 +637,7 @@ public class CoverageRecorder extends Recorder {
     /**
      * Defines the scope of SCM checks annotations.
      */
-    enum ChecksAnnotationScope {
+    public enum ChecksAnnotationScope {
         /** No annotations are created. */
         SKIP,
         /** Only changed lines are annotated. */

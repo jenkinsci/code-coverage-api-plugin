@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.hm.hafner.coverage.CoverageParser;
+import edu.hm.hafner.coverage.CoverageParser.ProcessingMode;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.registry.ParserRegistry;
 import edu.hm.hafner.util.VisibleForTesting;
@@ -235,10 +236,13 @@ public class CoverageTool extends AbstractDescribableImpl<CoverageTool> implemen
         /**
          * Creates a new parser to read the report XML files into a Java object model of {@link Node} instances.
          *
+         * @param processingMode
+         *         determines whether to ignore errors
+         *
          * @return the parser
          */
-        public CoverageParser createParser() {
-            return new ParserRegistry().getParser(name());
+        public CoverageParser createParser(final ProcessingMode processingMode) {
+            return new ParserRegistry().getParser(name(), processingMode);
         }
     }
 }

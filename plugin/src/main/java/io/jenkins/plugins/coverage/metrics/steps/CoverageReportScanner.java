@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import edu.hm.hafner.coverage.CoverageParser;
+import edu.hm.hafner.coverage.CoverageParser.ProcessingMode;
 import edu.hm.hafner.coverage.ModuleNode;
 import edu.hm.hafner.util.FilteredLog;
 import edu.hm.hafner.util.PathUtil;
@@ -26,31 +27,36 @@ public class CoverageReportScanner extends AgentFileVisitor<ModuleNode> {
     private static final long serialVersionUID = 6940864958150044554L;
 
     private static final PathUtil PATH_UTIL = new PathUtil();
+
     private final Parser parser;
+    private final ProcessingMode processingMode;
 
     /**
      * Creates a new instance of {@link CoverageReportScanner}.
      *
+     * @param parser
+     *         the parser to use
      * @param filePattern
      *         ant file-set pattern to scan for files to parse
      * @param encoding
      *         encoding of the files to parse
      * @param followSymbolicLinks
      *         if the scanner should traverse symbolic links
-     * @param parser
-     *         the parser to use
+     * @param processingMode
+     *         determines whether to ignore errors
      */
-    public CoverageReportScanner(final String filePattern, final String encoding,
-            final boolean followSymbolicLinks, final Parser parser) {
+    public CoverageReportScanner(final Parser parser, final String filePattern, final String encoding,
+            final boolean followSymbolicLinks, final ProcessingMode processingMode) {
         super(filePattern, encoding, followSymbolicLinks, true);
 
         this.parser = parser;
+        this.processingMode = processingMode;
     }
 
     @Override
     protected Optional<ModuleNode> processFile(final Path file, final Charset charset, final FilteredLog log) {
         try {
-            CoverageParser xmlParser = parser.createParser();
+            CoverageParser xmlParser = parser.createParser(processingMode);
             ModuleNode node = xmlParser.parse(Files.newBufferedReader(file, charset), log);
             log.logInfo("Successfully parsed file '%s'", PATH_UTIL.getAbsolutePath(file));
             node.aggregateValues().forEach(v -> log.logInfo("%s", v));
