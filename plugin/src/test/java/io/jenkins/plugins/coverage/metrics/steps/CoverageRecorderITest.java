@@ -1,6 +1,7 @@
 package io.jenkins.plugins.coverage.metrics.steps;
 
 import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -17,6 +18,33 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ullrich Hafner
  */
 class CoverageRecorderITest extends IntegrationTestWithJenkinsPerSuite {
+    @Test @Issue("785")
+    void shouldIgnoreErrors() {
+        WorkflowJob job = createPipeline();
+        copyFileToWorkspace(job, "cobertura-duplicate-methods.xml", "cobertura.xml");
+        job.setDefinition(new CpsFlowDefinition(
+                "node {\n"
+                        + "    recordCoverage tools: [[parser: 'COBERTURA']]\n"
+                        + " }\n", true));
+
+        Run<?, ?> failure = buildWithResult(job, Result.FAILURE);
+
+        assertThat(getConsoleLog(failure))
+                .contains("java.lang.IllegalArgumentException: There is already a child [METHOD] Enumerate()");
+
+        job.setDefinition(new CpsFlowDefinition(
+                "node {\n"
+                        + "    recordCoverage tools: [[parser: 'COBERTURA']], ignoreParsingErrors: true\n"
+                        + " }\n", true));
+
+        Run<?, ?> success = buildWithResult(job, Result.SUCCESS);
+
+        assertThat(getConsoleLog(success))
+                .doesNotContain("java.lang.IllegalArgumentException")
+                .contains("[-ERROR-] Skipping duplicate method 'VisualOn.Data.DataSourceProvider' for class 'Enumerate()'");
+
+    }
+
     @Test
     void shouldIgnoreEmptyListOfFiles() {
         WorkflowJob job = createPipeline();

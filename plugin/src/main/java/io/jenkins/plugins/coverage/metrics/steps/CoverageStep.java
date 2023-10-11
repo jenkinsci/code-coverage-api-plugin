@@ -62,6 +62,7 @@ public class CoverageStep extends Step implements Serializable {
     private boolean skipPublishingChecks = false;
     private String checksName =  StringUtils.EMPTY;
     private ChecksAnnotationScope checksAnnotationScope = ChecksAnnotationScope.MODIFIED_LINES;
+    private boolean ignoreParsingErrors = false;
     private boolean failOnError = false;
     private boolean enabledForFailure = false;
     private boolean skipSymbolicLinks = false;
@@ -215,6 +216,21 @@ public class CoverageStep extends Step implements Serializable {
     }
 
     /**
+     * Specify if parsing errors should be ignored and logged instead of throwing an exception.
+     *
+     * @param ignoreParsingErrors
+     *         if parsing errors should be ignored and logged instead of throwing an exception
+     */
+    @DataBoundSetter
+    public void setIgnoreParsingErrors(final boolean ignoreParsingErrors) {
+        this.ignoreParsingErrors = ignoreParsingErrors;
+    }
+
+    public boolean isIgnoreParsingErrors() {
+        return ignoreParsingErrors;
+    }
+
+    /**
      * Determines whether to fail the step on errors during the step of recording coverage reports.
      *
      * @param failOnError
@@ -337,6 +353,7 @@ public class CoverageStep extends Step implements Serializable {
             recorder.setSkipPublishingChecks(step.isSkipPublishingChecks());
             recorder.setChecksName(step.getChecksName());
             recorder.setChecksAnnotationScope(step.getChecksAnnotationScope());
+            recorder.setIgnoreParsingErrors(step.isIgnoreParsingErrors());
             recorder.setFailOnError(step.isFailOnError());
             recorder.setEnabledForFailure(step.isEnabledForFailure());
             recorder.setScm(step.getScm());
