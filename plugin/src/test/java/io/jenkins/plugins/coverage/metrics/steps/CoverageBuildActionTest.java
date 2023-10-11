@@ -30,6 +30,32 @@ import static org.mockito.Mockito.*;
  */
 @DefaultLocale("en")
 class CoverageBuildActionTest {
+    private CoverageBuildAction createCoverageBuildActionWithDelta(Metric metric) {
+        Node module = new ModuleNode("module");
+
+        var coverageBuilder = new CoverageBuilder();
+        var percent50 = coverageBuilder.setMetric(Metric.BRANCH).setCovered(1).setMissed(1).build();
+        var percent80 = coverageBuilder.setMetric(Metric.LINE).setCovered(8).setMissed(2).build();
+        var percent30 = coverageBuilder.setMetric(Metric.COMPLEXITY).setCovered(3).setMissed(7).build();
+
+        module.addValue(percent50);
+        module.addValue(percent80);
+
+        var deltas = new TreeMap<Metric, Fraction>();
+        var lineDelta = percent80.getCoveredPercentage().subtract(percent50.getCoveredPercentage());
+        deltas.put(Metric.LINE, lineDelta);
+        var branchDelta = percent50.getCoveredPercentage().subtract(percent80.getCoveredPercentage());
+        deltas.put(Metric.BRANCH, branchDelta);
+        var complexityDelta = percent30.getCoveredPercentage().subtract(percent30.getCoveredPercentage());
+        deltas.put(Metric.COMPLEXITY, complexityDelta);
+
+        var coverages = List.of(percent50, percent80, percent30);
+
+        return spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
+                StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(),
+                createLog(), "-", deltas, coverages, deltas, coverages, deltas, coverages, false));
+    }
+
     @Test
     void shouldNotLoadResultIfCoverageValuesArePersistedInAction() {
         Node module = new ModuleNode("module");
@@ -87,5 +113,33 @@ class CoverageBuildActionTest {
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isSameAs(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isSameAs(action.getOwner());
+    }
+
+    @Test
+    void shouldReturnPositiveTrendForLineMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.LINE);
+        int trend = action.getTrend(Baseline.PROJECT, Metric.LINE);
+        assertThat(trend).isEqualTo(1);
+    }
+
+    @Test
+    void shouldReturnNegativeTrendForBranchMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.BRANCH);
+        int trend = action.getTrend(Baseline.PROJECT, Metric.BRANCH);
+        assertThat(trend).isEqualTo(-1);
+    } 
+
+    @Test
+    void shouldReturnZeroForZeroDelta() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.COMPLEXITY);
+        int trend = action.getTrend(Baseline.PROJECT, Metric.COMPLEXITY);
+        assertThat(trend).isEqualTo(0);
+    } 
+
+    @Test
+    void shouldReturnZeroWhenDeltaIsNotPresent() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.METHOD);
+        int trend = action.getTrend(Baseline.PROJECT, Metric.METHOD);
+        assertThat(trend).isEqualTo(0);
     }
 }
