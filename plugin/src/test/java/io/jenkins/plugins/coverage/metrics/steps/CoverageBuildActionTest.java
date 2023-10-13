@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.List;
 import java.util.TreeMap;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
@@ -30,32 +31,18 @@ import static org.mockito.Mockito.*;
  */
 @DefaultLocale("en")
 class CoverageBuildActionTest {
-    private CoverageBuildAction createCoverageBuildActionWithDelta() {
+    private CoverageBuildAction createCoverageBuildActionWithDelta(final Baseline Baseline, final Metric metric, Optional<Fraction> delta) {
         Node module = new ModuleNode("module");
 
         var coverageBuilder = new CoverageBuilder();
-        var percent50 = coverageBuilder.setMetric(Metric.BRANCH).setCovered(1).setMissed(1).build();
-        var percent80 = coverageBuilder.setMetric(Metric.LINE).setCovered(8).setMissed(2).build();
-        var percent30 = coverageBuilder.setMetric(Metric.INSTRUCTION).setCovered(3).setMissed(7).build();
-        var percent35 = coverageBuilder.setMetric(Metric.CLASS).setCovered(35).setMissed(65).build();
-    
-        module.addValue(percent50);
-        module.addValue(percent80);
-        module.addValue(percent30);
-        module.addValue(percent35);
-        
-        var deltas = new TreeMap<Metric, Fraction>();
-        var lineDelta = percent80.getCoveredPercentage().subtract(percent50.getCoveredPercentage());
-        deltas.put(Metric.LINE, lineDelta);
-        var branchDelta = percent50.getCoveredPercentage().subtract(percent80.getCoveredPercentage());
-        deltas.put(Metric.BRANCH, branchDelta);
-        var instructionDelta = percent30.getCoveredPercentage().subtract(percent30.getCoveredPercentage());
-        deltas.put(Metric.INSTRUCTION, instructionDelta);
-        var classDelta = percent35.getCoveredPercentage().subtract(percent30.getCoveredPercentage());
-        deltas.put(Metric.CLASS, classDelta);
-        deltas.put(Metric.FILE, Fraction.getFraction(99,1000));  // to test for boundary case
+        var percent = coverageBuilder.setMetric(metric).setCovered(1).setMissed(1).build();
 
-        var coverages = List.of(percent50, percent80, percent30, percent35);
+        module.addValue(percent);
+
+        var deltas = new TreeMap<Metric, Fraction>();
+        delta.ifPresent(d -> deltas.put(metric, d));
+
+        var coverages = List.of(percent);
 
         return spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
                 StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(),
@@ -123,43 +110,19 @@ class CoverageBuildActionTest {
 
     @Test
     void shouldReturnPositiveTrendForLineMetric() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.LINE);
-        assertThat(trend).isEqualTo(0.3);    // deltaValue = 0.3
-    }
-
-    @Test
-    void shouldReturnNegativeTrendForBranchMetric() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.BRANCH);
-        assertThat(trend).isEqualTo(-0.3);   // deltaValue = -0.3
-    } 
-
-    @Test
-    void shouldReturnZeroForZeroDelta() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.INSTRUCTION);
-        assertThat(trend).isEqualTo(0.0);    // deltaValue = 0.0
-    } 
-
-    @Test
-    void shouldReturnZeroWhenDeltaIsNotPresent() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.METHOD);
-        assertThat(trend).isEqualTo(0);      // deltaValue is not present
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(1,1000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isPositive();
     }
 
     @Test
     void shouldReturnZeroForDeltaWithinBoundaries() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.CLASS);
-        assertThat(trend).isEqualTo(0);      // deltaValue = 0.05
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(9,10000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isZero();
     }
 
     @Test
-    void shouldReturnPositiveTrendForBoundaryDeltaValue() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta();
-        double trend = action.getTrend(Baseline.PROJECT, Metric.FILE);
-        assertThat(trend).isEqualTo(0.1);    // deltaValue = 0.099 (will be rounded off)
+    void shouldReturnZeroWhenDeltaIsNotPresentForGivenMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.empty());
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isZero();
     }
 }

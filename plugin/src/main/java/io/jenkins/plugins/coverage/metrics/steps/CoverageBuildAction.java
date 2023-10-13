@@ -544,22 +544,20 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param metric
      *         the metric to check
      *
-     * @return {@code roundedDeltaValue} if the trend is positive or negative, {@code 0} otherwise
+     * @return a positive value if the trend is positive, a negative value if the trend is negative, or {@code 0} if there is no significant change in the trend
      */
     @SuppressWarnings("unused") // Called by jelly view
     public double getTrend(final Baseline baseline, final Metric metric) {
         var delta = getDelta(baseline, metric);
         if (delta.isPresent()) {
             double deltaValue = delta.get().doubleValue();
-            // to apply rounding off for boundary delta values
-            double roundedDelta = Math.round(deltaValue * 100.0) / 100.0;
-            if (-0.1 < roundedDelta && roundedDelta < 0.1) {
+            if (-0.001 < deltaValue && deltaValue < 0.001) {
                 // for var(--text-color)
                 return 0;
             }
             else {
                 // for var(--red or --green)
-                return roundedDelta;
+                return deltaValue;
             }
         }
         return 0; // default to zero

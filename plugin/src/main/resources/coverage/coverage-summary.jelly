@@ -60,12 +60,12 @@
             <li>${formatter.formatValueWithMetric(value)}
               <j:if test="${it.hasDelta(baseline, value.metric)}">
                 <j:choose>
-                  <j:when test="${it.getTrend(baseline, value.metric) > 0}">
+                  <j:if test="${it.getTrend(baseline, value.metric) > 0}">
                     <j:set var="color" value="var(--green)"/>
-                  </j:when>
-                  <j:when test="${it.getTrend(baseline, value.metric) < 0}">
+                  </j:if>
+                  <j:if test="${it.getTrend(baseline, value.metric) < 0}">
                     <j:set var="color" value="var(--red)"/>
-                  </j:when>
+                  </j:if>
                   <j:otherwise>
                     <j:set var="color" value="var(--text-color)"/>
                   </j:otherwise>
