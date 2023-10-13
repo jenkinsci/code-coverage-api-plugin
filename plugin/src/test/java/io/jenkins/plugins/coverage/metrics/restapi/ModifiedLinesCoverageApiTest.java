@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.*;
  */
 
 class ModifiedLinesCoverageApiTest extends AbstractModifiedFilesCoverageTest {
-    //TODO: write shouldProvideRemoteApi() test
 
     /**
      * Test to assert that all modified lines and their respective coverage types are correctly extracted from the

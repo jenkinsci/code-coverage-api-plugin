@@ -2,7 +2,6 @@ package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.hm.hafner.coverage.FileNode;
@@ -30,7 +29,7 @@ class ModifiedLinesCoverageApi {
      *
      * @return a list of {@link FileWithModifiedLines} objects.
      */
-    private static List<FileWithModifiedLines> createListOfFilesWithModifiedLines(final Node node) {
+    private List<FileWithModifiedLines> createListOfFilesWithModifiedLines(final Node node) {
         var filesWithModifiedLines = new ArrayList<FileWithModifiedLines>();
 
         for (FileNode fileNode : node.filterByModifiedLines().getAllFileNodes()) {
@@ -46,9 +45,10 @@ class ModifiedLinesCoverageApi {
 
             var modifiedLinesBlocks = new TreeSet<ModifiedLinesBlock>();
 
-            calculateModifiedLineBlocks(coveredLines, modifiedLinesBlocks, LineCoverageType.COVERED);
-            calculateModifiedLineBlocks(missedLines, modifiedLinesBlocks, LineCoverageType.MISSED);
-            calculateModifiedLineBlocks(partiallyCoveredLines, modifiedLinesBlocks, LineCoverageType.PARTIALLY_COVERED);
+            modifiedLinesBlocks.addAll(calculateModifiedLineBlocks(coveredLines, LineCoverageType.COVERED));
+            modifiedLinesBlocks.addAll(calculateModifiedLineBlocks(missedLines, LineCoverageType.MISSED));
+            modifiedLinesBlocks.addAll(calculateModifiedLineBlocks(partiallyCoveredLines,
+                    LineCoverageType.PARTIALLY_COVERED));
 
             var changedFile = new FileWithModifiedLines(fileNode.getRelativePath(), modifiedLinesBlocks);
             filesWithModifiedLines.add(changedFile);
@@ -63,31 +63,33 @@ class ModifiedLinesCoverageApi {
      *
      * @param modifiedLines
      *         list containing the integer numbers of modified lines.
-     * @param modifiedLinesBlocks
-     *         list containing modifiedLinesBlock objects.
      * @param type
      *         type of coverage pertaining to each line of code ({@link LineCoverageType#COVERED},
      *         {@link LineCoverageType#MISSED}, or {@link LineCoverageType#PARTIALLY_COVERED})
      */
-    private static void calculateModifiedLineBlocks(final List<Integer> modifiedLines,
-            final SortedSet<ModifiedLinesBlock> modifiedLinesBlocks, final LineCoverageType type) {
-
+    private List<ModifiedLinesBlock> calculateModifiedLineBlocks(final List<Integer> modifiedLines,
+            final LineCoverageType type) {
+        var modifiedLinesBlocks = new ArrayList<ModifiedLinesBlock>();
         if (modifiedLines.isEmpty()) {
-            return;
+            return modifiedLinesBlocks;
         }
 
-        int currentLine = modifiedLines.get(0);
-        for (int i = 0; i < modifiedLines.size(); i++) {
-            if (i == modifiedLines.size() - 1 || !modifiedLines.get(i).equals(modifiedLines.get(i + 1) - 1)) {
-
-                var modifiedLinesBlock = new ModifiedLinesBlock(currentLine, modifiedLines.get(i), type);
-                modifiedLinesBlocks.add(modifiedLinesBlock);
-
-                if (i < modifiedLines.size() - 1) {
-                    currentLine = modifiedLines.get(i + 1);
+        int start = modifiedLines.get(0);
+        int last = start;
+        if (modifiedLines.size() > 1) {
+            for (int line : modifiedLines.subList(1, modifiedLines.size())) {
+                if (line > last + 1) {
+                    var modifiedLinesBlock = new ModifiedLinesBlock(start, last, type);
+                    modifiedLinesBlocks.add(modifiedLinesBlock);
+                    start = line;
                 }
+                last = line;
             }
         }
+        var modifiedLinesBlock = new ModifiedLinesBlock(start, last, type);
+        modifiedLinesBlocks.add(modifiedLinesBlock);
+
+        return modifiedLinesBlocks;
     }
 
     @Exported(inline = true, name = "files")

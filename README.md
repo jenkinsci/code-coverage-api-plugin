@@ -287,7 +287,7 @@ Example output:
   "_class": "io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApi",
   "files": [
     {
-      "fullyQualifiedFileName": "io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApi.java",
+      "fullyQualifiedFileName": "io/jenkins/plugins/coverage/metrics/restapi/ModifiedLinesCoverageApi.java",
       "modifiedLinesBlocks": [
         {
           "startLine": 30,
@@ -297,7 +297,7 @@ Example output:
       ]
     },
     {
-      "fullyQualifiedFileName": "io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesBlocks.java",
+      "fullyQualifiedFileName": "io/jenkins/plugins/coverage/metrics/restapi/ModifiedLinesBlocks.java",
       "modifiedLinesBlocks": [
         {
           "startLine": 80,
