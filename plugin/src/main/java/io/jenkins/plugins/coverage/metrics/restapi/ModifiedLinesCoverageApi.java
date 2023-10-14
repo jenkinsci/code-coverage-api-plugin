@@ -111,8 +111,8 @@ class ModifiedLinesCoverageApi {
         int last = start;
         if (modifiedLines.size() > 1) {
             for (int line : modifiedLines.subList(1, modifiedLines.size())) {
-                if (line > last + 1 &&
-                        hasAnyLinesWithCoverageBetween(last, line, modifiedLinesWithoutCoverage)) {
+                if (line > last + 1
+                        && hasAnyLinesWithCoverageBetween(last, line, modifiedLinesWithoutCoverage)) {
                     var modifiedLinesBlock = new ModifiedLinesBlock(start, last, type);
                     modifiedLinesBlocks.add(modifiedLinesBlock);
                     start = line;
