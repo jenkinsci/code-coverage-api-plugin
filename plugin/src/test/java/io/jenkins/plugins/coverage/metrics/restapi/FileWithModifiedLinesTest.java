@@ -4,12 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
-import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
-
 /**
  * Tests {@link FileWithModifiedLines}.
  */
-class FileWithModifiedLinesTest extends AbstractModifiedFilesCoverageTest {
+class FileWithModifiedLinesTest {
     @Test
     void shouldObeyEqualsContract() {
         EqualsVerifier.forClass(FileWithModifiedLines.class).usingGetClass().verify();

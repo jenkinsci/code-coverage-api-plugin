@@ -4,14 +4,12 @@ import org.junit.jupiter.api.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
-import io.jenkins.plugins.coverage.metrics.AbstractModifiedFilesCoverageTest;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests {@link ModifiedLinesBlock}.
  */
-class ModifiedLinesBlockTest extends AbstractModifiedFilesCoverageTest {
+class ModifiedLinesBlockTest {
     @Test
     void testGetters() {
         var linesBlockOne = new ModifiedLinesBlock(0, 0, LineCoverageType.COVERED);
