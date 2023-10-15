@@ -31,7 +31,8 @@ import static org.mockito.Mockito.*;
  */
 @DefaultLocale("en")
 class CoverageBuildActionTest {
-    private CoverageBuildAction createCoverageBuildActionWithDelta(final Baseline Baseline, final Metric metric, Optional<Fraction> delta) {
+    @SuppressWarnings("unused")
+    private CoverageBuildAction createCoverageBuildActionWithDelta(final Baseline baseline, final Metric metric, final Optional<Fraction> delta) {
         Node module = new ModuleNode("module");
 
         var coverageBuilder = new CoverageBuilder();
@@ -110,13 +111,19 @@ class CoverageBuildActionTest {
 
     @Test
     void shouldReturnPositiveTrendForLineMetric() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(1,1000)));
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(1, 1000)));
         assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isPositive();
     }
 
     @Test
+    void shouldReturnNegativeTrendForLineMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(-1, 1000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isNegative();
+    }
+
+    @Test
     void shouldReturnZeroForDeltaWithinBoundaries() {
-        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(9,10000)));
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Baseline.PROJECT, Metric.LINE, Optional.of(Fraction.getFraction(9, 10_000)));
         assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isZero();
     }
 
