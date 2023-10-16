@@ -2,6 +2,7 @@ package io.jenkins.plugins.coverage.metrics.steps;
 
 import java.util.List;
 import java.util.TreeMap;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
@@ -30,6 +31,24 @@ import static org.mockito.Mockito.*;
  */
 @DefaultLocale("en")
 class CoverageBuildActionTest {
+    private CoverageBuildAction createCoverageBuildActionWithDelta(final Metric metric, final Optional<Fraction> delta) {
+        Node module = new ModuleNode("module");
+
+        var coverageBuilder = new CoverageBuilder();
+        var percent = coverageBuilder.setMetric(metric).setCovered(1).setMissed(1).build();
+
+        module.addValue(percent);
+
+        var deltas = new TreeMap<Metric, Fraction>();
+        delta.ifPresent(d -> deltas.put(metric, d));
+
+        var coverages = List.of(percent);
+
+        return spy(new CoverageBuildAction(mock(FreeStyleBuild.class), CoverageRecorder.DEFAULT_ID,
+                StringUtils.EMPTY, StringUtils.EMPTY, module, new QualityGateResult(),
+                createLog(), "-", deltas, coverages, deltas, coverages, deltas, coverages, false));
+    }
+
     @Test
     void shouldNotLoadResultIfCoverageValuesArePersistedInAction() {
         Node module = new ModuleNode("module");
@@ -87,5 +106,29 @@ class CoverageBuildActionTest {
 
         assertThat(action.getTarget()).extracting(CoverageViewModel::getNode).isSameAs(root);
         assertThat(action.getTarget()).extracting(CoverageViewModel::getOwner).isSameAs(action.getOwner());
+    }
+
+    @Test
+    void shouldReturnPositiveTrendForLineMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.LINE, Optional.of(Fraction.getFraction(1, 1000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isPositive();
+    }
+
+    @Test
+    void shouldReturnNegativeTrendForLineMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.LINE, Optional.of(Fraction.getFraction(-1, 1000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isNegative();
+    }
+
+    @Test
+    void shouldReturnZeroForDeltaWithinBoundaries() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.LINE, Optional.of(Fraction.getFraction(9, 10_000)));
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isZero();
+    }
+
+    @Test
+    void shouldReturnZeroWhenDeltaIsNotPresentForGivenMetric() {
+        CoverageBuildAction action = createCoverageBuildActionWithDelta(Metric.LINE, Optional.empty());
+        assertThat(action.getTrend(Baseline.PROJECT, Metric.LINE)).isZero();
     }
 }

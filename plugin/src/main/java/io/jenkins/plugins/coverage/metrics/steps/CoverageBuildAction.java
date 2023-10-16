@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 
 import edu.hm.hafner.coverage.Metric;
-import edu.hm.hafner.coverage.Metric.MetricTendency;
 import edu.hm.hafner.coverage.Node;
 import edu.hm.hafner.coverage.Value;
 import edu.hm.hafner.echarts.ChartModelConfiguration;
@@ -544,18 +543,23 @@ public final class CoverageBuildAction extends BuildAction<Node> implements Stap
      * @param metric
      *         the metric to check
      *
-     * @return {@code true} if the trend is positive, {@code false} otherwise
+     * @return a positive value if the trend is positive, a negative value if the trend is negative, or {@code 0} if there is no significant change in the trend
      */
     @SuppressWarnings("unused") // Called by jelly view
-    public boolean isPositiveTrend(final Baseline baseline, final Metric metric) {
+    public double getTrend(final Baseline baseline, final Metric metric) {
         var delta = getDelta(baseline, metric);
         if (delta.isPresent()) {
-            if (delta.get().compareTo(Fraction.ZERO) > 0) {
-                return metric.getTendency() == MetricTendency.LARGER_IS_BETTER;
+            double deltaValue = delta.get().doubleValue();
+            if (-0.001 < deltaValue && deltaValue < 0.001) {
+                // for var(--text-color)
+                return 0;
             }
-            return metric.getTendency() == MetricTendency.SMALLER_IS_BETTER;
+            else {
+                // for var(--red or --green)
+                return deltaValue;
+            }
         }
-        return true;
+        return 0; // default to zero
     }
 
     /**
