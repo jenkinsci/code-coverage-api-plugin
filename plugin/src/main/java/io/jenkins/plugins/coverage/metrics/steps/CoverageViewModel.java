@@ -43,6 +43,8 @@ import io.jenkins.plugins.coverage.metrics.color.ColorProviderFactory;
 import io.jenkins.plugins.coverage.metrics.color.CoverageColorJenkinsId;
 import io.jenkins.plugins.coverage.metrics.model.CoverageStatistics;
 import io.jenkins.plugins.coverage.metrics.model.ElementFormatter;
+import io.jenkins.plugins.coverage.metrics.restapi.CoverageApi;
+import io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApiModel;
 import io.jenkins.plugins.coverage.metrics.source.SourceCodeFacade;
 import io.jenkins.plugins.coverage.metrics.source.SourceViewModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTableModel.InlineRowRenderer;
@@ -71,9 +73,11 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     static final String INDIRECT_COVERAGE_TABLE_ID = "indirect-coverage-table";
     private static final String INLINE_SUFFIX = "-inline";
     private static final String INFO_MESSAGES_VIEW_URL = "info";
+    private static final String MODIFIED_LINES_API_URL = "modified";
 
     private static final ElementFormatter FORMATTER = new ElementFormatter();
-    private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH, Metric.MUTATION);
+    private static final Set<Metric> TREE_METRICS = Set.of(Metric.LINE, Metric.INSTRUCTION, Metric.BRANCH,
+            Metric.MUTATION);
     private static final String UNDEFINED = "-";
     private final Run<?, ?> owner;
     private final String optionalName;
@@ -448,6 +452,9 @@ public class CoverageViewModel extends DefaultAsyncTableContentProvider implemen
     @SuppressWarnings("unused") // Called by jelly view
     @CheckForNull
     public Object getDynamic(final String link, final StaplerRequest request, final StaplerResponse response) {
+        if (MODIFIED_LINES_API_URL.equals(link)) {
+            return new ModifiedLinesCoverageApiModel(node);
+        }
         if (INFO_MESSAGES_VIEW_URL.equals(link)) {
             return new MessagesViewModel(getOwner(), Messages.MessagesViewModel_Title(),
                     log.getInfoMessages(), log.getErrorMessages());

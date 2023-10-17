@@ -184,12 +184,12 @@ Examples:
 
 ## Remote API
 
-We provide a remote API to retrieve coverage data, using the following URL: `https://[jenkins-url]/job/[job-name]/[build-number]/coverage/api/json?pretty=true`. 
+We provide a remote API to retrieve a coverage overview, using the following URL: `https://[jenkins-url]/job/[job-name]/[build-number]/coverage/api/json?pretty=true`. 
 
 Example output:
 ```json
 {
-  "_class" : "io.jenkins.plugins.coverage.metrics.steps.CoverageApi",
+  "_class" : "io.jenkins.plugins.coverage.metrics.restapi.CoverageApi",
   "modifiedFilesDelta" : {
     "branch" : "+1.72%",
     "class" : "-3.54%",
@@ -276,5 +276,36 @@ Example output:
     ]
   },
   "referenceBuild" : "<a href=\"http://localhost:8080/job/coverage-model-history/10/\" class=\"model-link inside\">coverage-model-history #10</a>"
+}
+```
+
+More concrete, the line coverage for modified code lines is provided per modified file, using the following URL: `https://[jenkins-url]/job/[job-name]/[build-number]/coverage/modified/api/json?pretty=true`.
+
+Example output:
+```json
+{
+  "_class": "io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApi",
+  "files": [
+    {
+      "fullyQualifiedFileName": "io/jenkins/plugins/coverage/metrics/restapi/ModifiedLinesCoverageApi.java",
+      "modifiedLinesBlocks": [
+        {
+          "startLine": 30,
+          "endLine": 35,
+          "type": "MISSED"
+        }
+      ]
+    },
+    {
+      "fullyQualifiedFileName": "io/jenkins/plugins/coverage/metrics/restapi/ModifiedLinesBlocks.java",
+      "modifiedLinesBlocks": [
+        {
+          "startLine": 80,
+          "endLine": 81,
+          "type": "COVERED"
+        }
+      ]
+    }
+  ]
 }
 ```

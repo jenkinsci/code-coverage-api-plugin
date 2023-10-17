@@ -28,10 +28,12 @@ import hudson.plugins.git.extensions.impl.RelativeTargetDirectory;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.restapi.ModifiedLinesCoverageApiModel;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.prism.SourceCodeRetention;
 
 import static edu.hm.hafner.coverage.Metric.*;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assumptions.*;
 
@@ -84,6 +86,8 @@ class GitForensicsITest extends AbstractCoverageITest {
         assertThat(getConsoleLog(build)).contains(
                 "[Coverage] -> 18 files contain changes",
                 "[Coverage] Painting " + expectedNumberOfFilesToBeStored + " source files on agent");
+
+        verifyModifiedLinesCoverageApi(build);
     }
 
     @Test
@@ -108,6 +112,8 @@ class GitForensicsITest extends AbstractCoverageITest {
         Run<?, ?> build = buildSuccessfully(project);
 
         verifyGitIntegration(build, referenceBuild);
+
+        verifyModifiedLinesCoverageApi(build);
     }
 
     /**
@@ -214,6 +220,35 @@ class GitForensicsITest extends AbstractCoverageITest {
                         "SimpleReferenceRecorder.java", "CommitDecoratorFactory.java");
         assertThat(modifiedFiles).flatExtracting(FileNode::getModifiedLines)
                 .containsExactlyInAnyOrder(15, 17, 63, 68, 80, 90, 130);
+    }
+
+    /**
+     * Verifies that the {@link ModifiedLinesCoverageApiModel#getApi() modified lines coverage api} provides the
+     * expected coverage data for the modified files and code lines.
+     *
+     * @param build
+     *         The build for that the coverage API should be called
+     */
+    private void verifyModifiedLinesCoverageApi(final Run<?, ?> build) {
+        var json = callJsonRemoteApi(build.getUrl() + "coverage/modified/api/json").getJSONObject();
+        assertThatJson(json).node("files").isEqualTo("["
+                + "{"
+                + "\"fullyQualifiedFileName\":\"io/jenkins/plugins/forensics/util/CommitDecoratorFactory.java\","
+                + "\"modifiedLinesBlocks\":["
+                + "{"
+                + "\"endLine\":68,"
+                + "\"startLine\":68,"
+                + "\"type\":\"MISSED\"}"
+                + "]},"
+                + "{"
+                + "\"fullyQualifiedFileName\":\"io/jenkins/plugins/forensics/miner/MinerFactory.java\","
+                + "\"modifiedLinesBlocks\":["
+                + "{"
+                + "\"endLine\":80,"
+                + "\"startLine\":80,"
+                + "\"type\":\"COVERED\""
+                + "}]"
+                + "}]");
     }
 
     /**

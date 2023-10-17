@@ -1,4 +1,4 @@
-package io.jenkins.plugins.coverage.metrics.steps;
+package io.jenkins.plugins.coverage.metrics.restapi;
 
 import java.util.List;
 
@@ -14,6 +14,8 @@ import hudson.model.Run;
 
 import io.jenkins.plugins.coverage.metrics.AbstractCoverageITest;
 import io.jenkins.plugins.coverage.metrics.model.Baseline;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageQualityGate;
+import io.jenkins.plugins.coverage.metrics.steps.CoverageRecorder;
 import io.jenkins.plugins.coverage.metrics.steps.CoverageTool.Parser;
 import io.jenkins.plugins.util.QualityGate.QualityGateCriticality;
 
@@ -54,8 +56,12 @@ class CoverageApiITest extends AbstractCoverageITest {
 
     @Test
     void shouldShowQualityGatesInRemoteApi() {
-        var qualityGates = List.of(new CoverageQualityGate(100, Metric.LINE, Baseline.PROJECT, QualityGateCriticality.UNSTABLE));
-        FreeStyleProject project = createFreestyleJob(Parser.JACOCO, r -> r.setQualityGates(qualityGates), JACOCO_ANALYSIS_MODEL_FILE);
+        var qualityGate = new CoverageQualityGate(100, Metric.LINE);
+        qualityGate.setBaseline(Baseline.PROJECT);
+        qualityGate.setCriticality(QualityGateCriticality.UNSTABLE);
+        var qualityGates = List.of(qualityGate);
+        FreeStyleProject project = createFreestyleJob(Parser.JACOCO, r -> r.setQualityGates(qualityGates),
+                JACOCO_ANALYSIS_MODEL_FILE);
 
         Run<?, ?> build = buildWithResult(project, Result.UNSTABLE);
 
