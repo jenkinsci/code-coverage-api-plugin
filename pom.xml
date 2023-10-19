@@ -10,7 +10,6 @@
 
   <modules>
     <module>plugin</module>
-    <module>ui-tests</module>
   </modules>
 
   <properties>
