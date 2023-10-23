@@ -1,6 +1,0 @@
-<?jelly escape-by-default='true'?>
-<div>
-    The Code Coverage API plug-in reached end-of-life. All functionality has been integrated
-    into the <a href="https://github.com/jenkinsci/coverage-plugin">Coverage Plugin</a>.
-    Please migrate your steps to the new <code>recordCoverage</code> step provided by the Coverage Plugin.
-</div>
