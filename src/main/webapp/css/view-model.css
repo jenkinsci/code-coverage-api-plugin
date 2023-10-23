@@ -1,0 +1,165 @@
+.no-selection-banner {
+    padding: 30px;
+    fill: var(--text-color);
+    height: 200px;
+    width: 200px;
+}
+
+.overview-chart {
+    width: 100%;
+    min-height: 40vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tree-chart {
+    width: 100%;
+    min-height: 40vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-tooltip-title {
+    font-weight: bold;
+}
+
+/* Bar graph in table */
+.bar-graph {
+    float: left;
+    color: transparent;
+}
+
+.missed {
+    background-color: #EF9A9A;
+}
+
+.missed:hover {
+    background-color: #FFCDD2;
+}
+
+.covered {
+    background-color: #A5D6A7;
+}
+
+.covered--hover:hover {
+    background-color: #C8E6C9;
+}
+
+/* View selection buttons */
+.btn {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn-outline-secondary {
+    color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+.btn-check:checked + .btn-outline-secondary, .btn-check:active + .btn-outline-secondary, .btn-outline-secondary:active,
+.btn-outline-secondary.active, .btn-outline-secondary.dropdown-toggle.show {
+    color: #fff;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+}
+
+/* Coverage map switch */
+.form-switch .form-check-input {
+    box-shadow: none;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: none;
+    background-color: #b4b4b4;
+    border-color: #b4b4b4;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+}
+
+.coverage-column-outer {
+    border: 1px solid var(--medium-grey);
+    border-radius: 10px;
+    width: 5em;
+}
+
+.coverage-column-inner {
+    padding: 1px 7px;
+    border-radius: 10px;
+    color:var(--text-color);
+}
+
+#coverage-table td {
+    vertical-align: middle;
+}
+
+table.source {
+    border-spacing: 0;
+    border-collapse: collapse;
+    border: 1px solid #bbb;
+    width: 100%;
+}
+
+table.source td {
+    border-spacing: 0;
+    border-collapse: collapse;
+    border: 0 solid #bbb;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    font-family: monospace;
+}
+
+table.source .text {
+    margin-top: -1px;
+}
+
+table.source td.line {
+    text-align: right;
+    border-width: 0 1px 0 0;
+}
+
+table.source td.hits {
+    text-align: right;
+    border-width: 0px 1px 0px 0px;
+}
+
+table.source th {
+    padding-left: 0.5em;
+    font-weight: bold;
+    font-family: serif;
+    background-color: #f0f0f0;
+    border-width: 1px 1px 1px 1px;
+    text-align: left;
+}
+
+table.source tr.coverFull {
+    background-color: var(--green);
+    color: var(--white);
+    font-weight: bold;
+}
+
+table.source tr.coverPart {
+    background-color: var(--orange);
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+table.source tr.coverPart td.hits, table.source tr.coverNone td.hits {
+    font-weight: bold;
+}
+
+table.source tr.coverNone {
+    background-color: var(--red);
+    color: var(--white);
+    font-weight: bold;
+}
+
+table.source tr.noCover {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+table.source tr.coverSkip {
+    background-color: #b4b4b4;
+}

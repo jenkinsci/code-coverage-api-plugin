@@ -1,0 +1,40 @@
+<coverage branch-rate="0.8337" branches-covered="396" branches-valid="475" complexity="0"
+  line-rate="0.9448" lines-covered="2514" lines-valid="2661" timestamp="1674553788337"
+  version="7.0.5">
+  <sources>
+    <source>
+      /home/user/dev/python/package
+    </source>
+  </sources>
+  <packages>
+    <package branch-rate="0.6759" complexity="0" line-rate="0.8305" name=".">
+      <classes>
+        <class branch-rate="1" complexity="0" filename="__init__.py" line-rate="1"
+          name="__init__.py">
+          <methods />
+          <lines>
+            <line hits="1" number="6" />
+            <line hits="1" number="8" />
+            <line hits="1" number="9" />
+            <line hits="1" number="10" />
+            <line hits="1" number="11" />
+            <line hits="1" number="13" />
+            <line hits="1" number="16" />
+            <line hits="1" number="25" />
+            <line branch="true" condition-coverage="100% (2/2)" hits="1" number="41" />
+            <line hits="1" number="42" />
+            <line hits="1" number="46" />
+            <line hits="1" number="48" />
+            <line branch="true" condition-coverage="100% (2/2)" hits="1" number="49" />
+            <line hits="1" number="50" />
+            <line hits="1" number="54" />
+            <line hits="1" number="55" />
+            <line hits="1" number="56" />
+            <line hits="1" number="57" />
+            <line hits="1" number="60" />
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>

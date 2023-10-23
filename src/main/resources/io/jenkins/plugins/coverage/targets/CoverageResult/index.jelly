@@ -1,0 +1,135 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <l:layout css="/plugin/code-coverage-api/css/style.css" norefresh="true">
+
+        <st:adjunct includes="io.jenkins.plugins.echarts"/>
+        <script src="${rootURL}/plugin/code-coverage-api/scripts/custom-chart.js"/>
+
+        <st:include it="${it.owner}" page="sidepanel.jelly"/>
+        <l:main-panel>
+            <h1>${%Code Coverage}</h1>
+            <j:set var="targetBranchBuild" value="${it.getReferenceBuildUrl()}" />
+            <j:if test="${targetBranchBuild != null}">
+                <div class="changeRequestInformation" style="width:800px;height:100%;">
+                    <j:set var="coverageDiff" value="${it.getLineCoverageDelta()}" />
+                    <j:choose>
+                        <j:when test="${coverageDiff gt 0}">
+                            <h3>
+                                Code coverage increased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: green"> +${coverageDiff}%</span>
+                            </h3>
+                        </j:when>
+                        <j:when test="${coverageDiff lt 0}">
+                            <h3>
+                                Code coverage decreased in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a>:
+                                <span style="color: red"> ${coverageDiff}%</span>
+                            </h3>
+                        </j:when>
+                        <j:otherwise>
+                            <h3>Code coverage hasn't changed in comparison with the <a href="${rootURL}/${targetBranchBuild}">target branch build</a></h3>
+                        </j:otherwise>
+                    </j:choose>
+                </div>
+            </j:if>
+            <!-- See https://issues.jenkins-ci.org/browse/JENKINS-60359 -->
+            <!--<j:forEach var="parent" items="${it.parents}">-->
+            <!--    <a href="${it.relativeUrl(parent)}">${parent.xmlTransform(parent.name)}</a>-->
+            <!--    &gt;-->
+            <!--</j:forEach>-->
+            <br/>
+            <br/>
+            <br/>
+            <j:if test="${it.previousResult != null}">
+                <div id="trendChart" style="width:800px;height:100%;">
+                </div>
+            </j:if>
+            <br/>
+            <j:choose>
+                <j:when test="${it.aggregatedLevel}">
+                    <script>
+                        var instance =<st:bind value="${it}"/>;
+                        var coverageChartGenerator = new CoverageChartGenerator();
+
+                        instance.getTrendResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateTrendChart(results, 'trendChart');
+                        });
+                    </script>
+                    <j:forEach var="child" items="${it.children}">
+                        <div id="${it.urlTransform(it.xmlTransform(child))}" data-filename="${it.xmlTransform(child)}" style="width:800px;height:100%;">
+                        </div>
+                        <script>
+                            <st:bind value="${it.getChild(child)}"/>.getResults(function(t) {
+                            var results = t.responseObject();
+                                coverageChartGenerator.generateSummaryChart(results, "${it.urlTransform(it.xmlTransform(child))}", document.querySelector("#${it.urlTransform(it.xmlTransform(child))}").getAttribute('data-filename'), true)
+                            });
+                        </script>
+                    </j:forEach>
+                </j:when>
+                <j:otherwise>
+                    <div id="summaryChart" style="width:800px;height:100%;" data-summary-chart-name="${it.xmlTransform(it.name)}">
+                    </div>
+                    <br/>
+                    <j:if test="${it.getChildren().size() != 0}">
+                        <div id="childSummaryChart" style="width:800px;height:100%;">
+                        </div>
+                    </j:if>
+                    <script>
+                        var instance =<st:bind value="${it}"/>;
+
+                        var coverageChartGenerator = new CoverageChartGenerator()
+                        var name = document.querySelector('#summaryChart').getAttribute("data-summary-chart-name")
+
+                        instance.getResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateSummaryChart(results, 'summaryChart', name)
+                        });
+
+                        var element = '${it.childElement.name}';
+                        instance.getChildResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateChildSummaryChart(results, 'childSummaryChart', element)
+                        });
+
+                        instance.getTrendResults(function(t) {
+                            var results = t.responseObject();
+                            coverageChartGenerator.generateTrendChart(results, 'trendChart');
+                        });
+
+
+                    </script>
+                </j:otherwise>
+            </j:choose>
+
+
+            <j:if test="${it.sourceCodeLevel}">
+                <h3>${%Source}</h3>
+                <j:choose>
+                    <j:when test="${it.sourceFileAvailable}">
+                        <div style="overflow-x:scroll;">
+                            <table class="source">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3">${it.relativeSourcePath}</th>
+                                    </tr>
+                                </thead>
+                                <j:out value="${it.sourceFileContent}"/>
+                            </table>
+                        </div>
+                    </j:when>
+                    <j:otherwise>
+                        <p>
+                            <i>${%Source code is unavailable.}</i>
+                            ${%Some possible reasons are:}
+                            <ul>
+                                <li>${%reason.1}</li>
+                                <li>${%reason.2}</li>
+                                <li>${%reason.3}</li>
+                            </ul>
+                        </p>
+                    </j:otherwise>
+                </j:choose>
+            </j:if>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

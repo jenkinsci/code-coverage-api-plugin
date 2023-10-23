@@ -1,0 +1,95 @@
+table.source {
+    border-spacing: 0;
+    border-collapse: collapse;
+    border: 1px solid #bbb;
+    width: 100%;
+}
+
+table.source td {
+    border-spacing: 0;
+    border-collapse: collapse;
+    border: 0 solid #bbb;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    font-family: monospace;
+}
+
+table.source .text {
+    margin-top: -1px;
+}
+
+table.source td.line {
+    text-align: right;
+    border-width: 0 1px 0 0;
+}
+
+table.source td.hits {
+    text-align: right;
+    border-width: 0px 1px 0px 0px;
+}
+
+table.source th {
+    padding-left: 0.5em;
+    font-weight: bold;
+    font-family: serif;
+    background-color: #f0f0f0;
+    border-width: 1px 1px 1px 1px;
+    text-align: left;
+}
+
+table.source tr.coverFull {
+    background-color: #dfd;
+}
+
+table.source tr.coverPart {
+    background-color: #ff9;
+}
+
+table.source tr.coverPart td.hits, table.source tr.coverNone td.hits {
+    font-weight: bold;
+}
+
+table.source tr.coverNone {
+    background-color: #fdd;
+}
+
+table.source tr.noCover {
+    background-color: #fff;
+}
+
+table.source tr.coverSkip {
+    background-color: #b4b4b4;
+}
+
+.center {
+    text-align: center;
+}
+
+/* Bar graph in table */
+.bar-graph {
+    float: left;
+    color: transparent;
+}
+
+.missed {
+    background-color: #FFCDD2;
+}
+
+.missed--hover:hover {
+    background-color: #EF9A9A;
+}
+
+.covered {
+    background-color: #C8E6C9;
+}
+
+.covered--hover:hover {
+    background-color: #A5D6A7;
+}
+
+/* Table Delta Badge */
+.badge-delta {
+    width: 50px !important;
+    vertical-align: text-top !important;
+}
+
