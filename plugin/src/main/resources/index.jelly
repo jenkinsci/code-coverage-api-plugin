@@ -1,4 +1,0 @@
-<?jelly escape-by-default='true'?>
-<div>
-    Collects code coverage results of different tools (JaCoCo, Cobertura, etc.) and visualizes the results.
-</div>
