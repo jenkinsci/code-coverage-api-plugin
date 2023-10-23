@@ -1,4 +1,0 @@
-<?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:c="/charts">
-  <c:trend-chart it="${from}" title="${%Code Coverage Trend}" enableLinks="true" configurationId="default"/>
-</j:jelly>
