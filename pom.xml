@@ -33,7 +33,7 @@
     <xmlunit.version>2.9.1</xmlunit.version>
     <jsoup.version>1.16.1</jsoup.version>
     <testcontainers.version>1.19.1</testcontainers.version>
-    <job-dsl.version>1.86</job-dsl.version>
+    <job-dsl.version>1.87</job-dsl.version>
 
     <git-forensics.version>2.0.0</git-forensics.version>
     <prism-api.version>1.29.0-8</prism-api.version>
