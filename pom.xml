@@ -20,6 +20,8 @@
   <url>https://github.com/jenkinsci/code-coverage-api-plugin</url>
 
   <properties>
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
     <revision>4.100.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/code-coverage-api-plugin</gitHubRepo>
@@ -36,7 +38,6 @@
     <git-forensics.version>2.0.0</git-forensics.version>
     <prism-api.version>1.29.0-8</prism-api.version>
     <pull-request-monitoring.version>1.7.8</pull-request-monitoring.version>
-
   </properties>
 
   <developers>
@@ -365,6 +366,14 @@
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
